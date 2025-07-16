@@ -1,0 +1,230 @@
+---
+title: "Legend (Image Service)"
+description: "The operation represents an image service legend."
+slug: "legend-image-service"
+url: "/legend-image-service"
+guid: "GUID-4124274D-1397-450D-B4C5-E537E75042CA"
+migratedTopicMetadata:
+  FTITLE: "Legend (Image Service)"
+  FDESCRIPTION: ""
+  FCHANGES: "edit description and add variable parameter"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9 - *"
+  CREATED-ON: "29/09/2020 13:40:14"
+  FAUTHOR: "jliedtke"
+  FSTATUS: "Released"
+  MODIFIED-ON: "05/02/2021 15:35:19"
+  VERSION: "6"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-32B6ABD6-FCE0-41D4-B59D-404946BEEDB5"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /legend
+  urlSegments:
+    - name: <imageservice-url>
+      url: /image-service
+    - name: /legend
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.2'
+  requiredCapability: Image
+---
+
+## Description
+
+The `legend` resource represents an image service's legend. The legend information includes the symbol images and labels for each symbol. Each symbol is generally an image of 20x20 pixels at 96 dpi. Symbol sizes may vary slightly for some renderer types (for example, Vector Field Renderer). Additional information in the legend response will include the service name, service type, label, and content type.
+
+The legend symbols include the base64 encoded `imageData`. The symbols returned in response to an image service legend request reflect the default or customized renderer of the image service, selected band IDs, and variable names.
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`bandIds` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Description: If there are multiple bands, you can specify a single band, or you can change the band combination (red, green, blue) by specifying the band ID. Band ID is 0 based. This is an optional parameter.
+
+Example
+
+```javascript
+bandIds=2,1,0
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`renderingRule` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the rendering rule for how the requested image should be rendered. This is an optional parameter.
+
+See [ Raster function JSON objects](/raster-function-objects) for the syntax and examples. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`variable` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+For an image service that has multidimensional information, this parameter can be used to request a legend for each variable. If not specified, it will return a legend for the default variable of the image service. Eligible variable names can be queried from [Multidimensional Info](/multidimensional-info) image service resource.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html`.
+
+Values: `html` \| `json` \| `pjson` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+Example 1: JSON response for an image service; default legend is returned.
+
+```json
+https://myserver:6080/arcgis/rest/services/onebandcolormap/ImageServer/legend?f=pjson
+```
+
+ 
+
+Example 2: JSON response for an image service; a different rendering rule is used. 
+
+```json
+https://myserver:6080/arcgis/rest/services/Legend_1/ImageServer/legend?f=pjson&renderingRule={"rasterFuncton":"MyHillshadeRFT"}
+```
+
+ 
+
+## JSON Response syntax
+
+```json
+{
+  "layers": [
+    {
+      "layerId": <layerId1>,
+      "layerName": "<layerName1>",
+      "layerType" : "<layerType1>",
+      "minScale": <minScale1>,
+      "maxScale": <maxScale1>,
+      "legendType": <legendType>, //e.g. RGB Composite, Stretched, Unique Values, Colormap, Classified, Vector Field Renderer
+      "legend": [
+        {
+          "label": "<label11>",
+          "url" : "<imageUrl11>",  
+          "imageData" : "<base64EncodedImageData11>", 
+          "contentType" : "<contentType11>",
+          "height": <height>,
+          "width": <width>,
+          "values": [<maximum value1>] //optional. array of variant type. In case of classBreaks renderer "values" will contain classMaxValue, In case of uniqueValue renderer "values" will contain ungrouped unique values. 
+        },
+        {
+          "label": "<label12>",
+          "url" : "<imageUrl12>",
+          "imageData" : "<base64EncodedImageData12>", 
+          "contentType" : "<contentType12>",
+          "height": <height>,
+          "width": <width>,
+          "values": [<maximum value2>]
+        }
+      ]
+    }
+  ]
+}
+```
+
+ 
+
+## JSON Response example
+
+```json
+{
+  "layers": [
+    {
+      "layerId": 0;,
+      "layerName": "NLCD",
+      "layerType": "Raster Layer",
+      "minScale": 0,
+      "maxScale": 0,
+      "legendType": "Unique Values",
+      "legend": [
+        {
+          "label": "WATER",
+          "url": "deb6a75248269275154096a102200343",
+          "imageData": "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAIAAAAC64paAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAHUlEQVQ4jWNkYDjBQC5gIlvnqOZRzaOaRzVTRTMAGxgA8IzR4/kAAAAASUVORK5CYII="
+          "contentType": "image/png",
+          "height": 20,
+          "width": 20,
+          "values": ["WATER"]
+        },
+        {
+          "label": "AGRICULTURE",
+          "url": "09b59498dceabd1da48e8ad3943cc0e3",
+          "imageData": "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAAAAAAAAAAHqZRakAAAAIklEQVQ4jWNsymL4z0BFwERNw0YNHDVw1MBRA0cNHEoGAgCjYgITjF/2XAAAAABJRU5ErkJggg==",
+          "contentType": "image/png",
+          "height": 20,
+          "width": 20,
+          "values": ["AGRICULTURE"]
+        },
+        {
+          "label": "GRASS",
+          "url": "1d768a27a62203e9b26c147d0969356e",
+          "imageData": "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAAAAAAAAAAHqZRakAAAAIklEQVQ4jWNk+L/qPwMVARM1DRs1cNTAUQNHDRw1cCgZCABNCwLQa4XoegAAAABJRU5ErkJggg==",
+          "contentType": "image/png",
+          "height": 20,
+          "width": 20,
+          "values": ["GRASS"]
+        }
+      ]
+    }
+  ]
+}
+```
+
+ 

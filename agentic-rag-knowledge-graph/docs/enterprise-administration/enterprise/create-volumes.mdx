@@ -1,0 +1,272 @@
+---
+title: "Create (Volumes)"
+description: "The create operation is used to create PersistentVolumeClaim (PVC) volumes."
+slug: "create-volumes"
+url: "/create-volumes"
+guid: "GUID-D335ADF3-A798-4B4E-ACBF-82ADEF00312E"
+migratedTopicMetadata:
+  FTITLE: "Create Volumes"
+  FDESCRIPTION: ""
+  FCHANGES: "New operation"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2-*"
+  CREATED-ON: "06/11/2023 17:10:15"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "15/11/2023 12:45:40"
+  VERSION: "1"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "10"
+  ED: "GUID-8CC86D47-29D1-46DA-81A9-C5B44F73E7D2"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /system/volumes/create
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /system/volumes/create
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '11.2'
+  requiredCapabilities:
+    - name: Access allowed with the "Security and infrastructure" privileges
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `create` operation is used to create PersistentVolumeClaim (PVC) volumes that can be used by GIS service deployments to provide additional resources to its pods, increasing performance. When creating these volumes, administrators will need to define the `name` of the volume and the properties in the `spec` JSON object. For more information on the configurable properties and their accepted values, see the [Spec properties](/create-volumes#spec-properties) section below.
+
+After a volume is created, it needs to be applied to a GIS service deployment to provide its pods with the additional resources. Administrators will need to update a GIS service's deployment to include the volume's ID (returned by the [Volumes](/volumes) resource). For more information, see the [Edit Deployment](/edit-deployment) documentation.
+
+### Local volumes
+
+At 11.2, the `create` operation can be used to create local PVC volumes. These PVC volumes bind to a local PersistentVolume (PV) that has been provisioned and is ready on a specific cluster, or on certain nodes in a cluster.
+
+<Note type={"tip"}>
+
+You can use node affinity to ensure that the PV is only created on specific nodes in the cluster. The following example demonstrates a sample PV that includes node affinity:
+
+<Note type={"note"}>
+
+For organizations that run ArcGIS Enterprise on Kubernetes from a cloud environment, node pool labels can be used instead of node names.
+
+</Note>
+
+```markdown
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: local-pv
+spec:
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadOnlyMany
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-storage
+  local:
+    path: /data/esridata
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - node 1
+          - node 2
+          - node 3
+
+```
+
+</Note>
+
+Local PVC volumes are persistent, existing even after a GIS service's pods are destroyed. These volumes are ideal for services like geocoding services, which can use local volumes to access the data they need for their locators.
+
+Local PVC volumes are not useful in cases where services, such as raster analytics, need to perform large analysis jobs that require data to be loaded to a temporary space for processing. For those cases, administrators should consider [creating PVC templates for ephemeral volumes](/create-volume-configurations).
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `volumeJson` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The JSON object that specifies the volume's configuration information. The `name` property and [`spec` JSON object](/create-volumes#spec-properties) will need to be updated. All other information should not be modified.
+
+      ```markdown label=Example
+      volumeJson={
+        "name": "volumes-test",
+        "type": "PVC",
+        "spec": {
+          "storageClassName": "arcgis-storage-default",
+          "resources": {"requests": {"storage": "16Gi"}},
+          "accessModes": ["ReadWriteOnce"],
+          "volumeMode": "Filesystem",
+          "volumeName": "example-name",
+          "labels": {
+            "label1": "value1",
+            "label2": "value2"
+          },
+          "revision": 1
+        }
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Spec properties
+
+<Note type={"note"}>
+
+The following table outlines some of the configurable properties that can be included in the `spec` JSON object, specifically those that apply to the PVC volumes ArcGIS Enterprise on Kubernetes supports. However, the `spec` JSON object is open to support other properties that are unspecified in this documentation. Prior to creating PVC volumes, reference the [Kubernetes documentation on volumes](https://kubernetes.io/docs/concepts/storage/volumes/) for more detailed information, additional spec properties, and any potential updates made to those areas.
+
+</Note>
+
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `accesModes` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies how the volume can be mounted. This property accepts the following values:
+
+      - `ReadWriteOnce`: The volume can be mounted as read-write to one node. The volume is accessible to all pods scheduled to, and running on, that node.
+      - `ReadOnlyMany`: The volume can be mounted as read-only to multiple nodes.
+      - `ReadWriteMany`: The volume can be mounted as read-write to many nodes.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `resources` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the amount of storage the pods can request from the volume.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `storageClassName` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Reflects the name of a defined `StorageClass` that the PVC volume is connection to.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `volumeMode` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the volume type. This property accepts the following values:
+
+      - `Filesystem`: The volume is mounted in the pod as a directory in the pod's file system.
+      - `Block`: The volume is inserted as a raw data block into the pod.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `volumeName` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the name of the associated PV that the PVC will refer and bind to.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `labels` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Lists labels that match with the associated PV's labels.
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `create` operation:
+
+```other
+POST /context/admin/system/volumes/create HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+volumeJson={
+  "name": "volumes-test",
+  "type": "PVC",
+  "spec": {
+    "storageClassName": "arcgis-storage-default",
+    "resources": {"requests": {"storage": "16Gi"}},
+    "accessModes": ["ReadWriteOnce"],
+    "volumeMode": "Filesystem",
+    "volumeName": "example-name",
+    "labels": {
+      "label1": "value1",
+      "label2": "value2"
+    }
+  },
+  "revision": 1
+}&f=pjson&token= WCLZFEEO_UQsdmhWDjgxnr_MDsWufTE27Ad_uqMYiFIiiLHpOFjep2gY5nRLb582nbBlzJ5epocEcSv9yniX-VZIO3y5OO7UeHBKgvByFpyuaTZCbL5UJK_RmQ7dfmP6XSXCGPPY3bPz3hID3xFfuUFW1wnspXLO-C_Zygb_hwN7Pt5nry0AKxXIG27xuHGWNgwYcU2eXpHgmc5LQrAInvf9Gh7zpqoNBg8mOKEDNCPX4edSHjdrDlD-9la7Oya4
+```
+
+## JSON Response example
+
+```other
+{"status": "success"}
+```

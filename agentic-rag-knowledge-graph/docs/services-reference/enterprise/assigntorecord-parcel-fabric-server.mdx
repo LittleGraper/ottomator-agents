@@ -1,0 +1,449 @@
+---
+title: "Assign features to record"
+uid: pfs-assign-to-record
+description: "The assignFeaturesToRecord operation assigns the specified parcel features to the specified record."
+slug: "assigntorecord-parcel-fabric-server"
+url: "/assigntorecord-parcel-fabric-server"
+guid: "GUID-636A70CE-D5ED-4930-9ABA-44DD98214CB8"
+migratedTopicMetadata:
+  FTITLE: "AssignToRecord-parcel-fabric-server"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "14/08/2023 10:00:17"
+  FAUTHOR: "cleslie"
+  FSTATUS: "Released"
+  MODIFIED-ON: "29/09/2023 11:46:15"
+  VERSION: "5"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-073650F3-8083-4725-B7DE-3BF712410104"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/ParcelFabricServer/assignFeaturesToRecord
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/ParcelFabricServer/assignFeaturesToRecord
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.8.1'
+  requiredCapability: ArcGIS Advanced Editing
+---
+
+## Description
+
+The `assignFeaturesToRecord` operation assigns the specified parcel features to the specified record. If parcel polygons are assigned, the record polygon will be updated to match the cumulative geometry of all the parcels associated with it. The `Created By Record` or `Retired By Record` attribute field of the parcel features is updated with the global ID of the assigned record.
+
+[Learn more about assigning parcel features to a record](https://pro.arcgis.com/en/pro-app/latest/help/data/parcel-editing/assignparcelrecords.htm)
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+
+			`gdbVersion` 
+
+			(Required)
+
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+
+			Introduced at 10.8.
+
+			The name of the geodatabase version (the default is the `DEFAULT` version).
+
+			Syntax
+
+			```javascript
+			gdbVersion=<version>
+			```
+
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+
+			`sessionId` 
+
+			(Required)
+
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+
+			Introduced at 10.8.
+
+			The token (GUID) used to lock the version. If the calling client is editing a named version, the `sessionId`  value is required. If the specified version is currently locked by another session, the request will fail if the `sessionId`  value is not provided or does not match the `sessionId`  value that holds the exclusive lock. If the client is editing the default version, the `sessionId`  value is not required.
+
+			Syntax
+
+			```javascript
+			sessionId=<guid>
+			```
+
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+
+			`parcelFeatures` 
+
+			(Required)
+
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+
+			Introduced at 10.8.
+
+			The parcel features that will be assigned to the specified record. Features can be parcels, parcel polygons, parcel points, and parcel lines.
+
+			Syntax
+
+			```javascript
+			parcelFeatures=[{"id":"<guid>","layerId":"<layerID>"},{...}]
+			```
+
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+
+			`record` 
+
+			(Required)
+
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+
+			Introduced at 10.8.
+
+			The unique identifier (GUID) of the record that will be assigned to the specified parcel features.
+
+			Syntax
+
+			```javascript
+			record=<guid>
+			```
+
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+
+			`writeAttribute` 
+
+			(Required)
+
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+
+			Introduced at 10.8.
+
+			The record field that will be updated on the parcel features. The `Created By Record`  or `Retired By Record`  field will be updated with the global ID of the assigned record.
+
+			Syntax
+
+			```javascript
+			writeAttribute=CreatedByRecord|RetiredByRecord
+			```
+
+			Values: `CreatedByRecord` | `RetiredByRecord`
+
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+
+			`async` 
+
+			(Optional)
+
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+
+			Introduced at 11.1.
+
+			Specifies whether the request will be processed as an asynchronous job and a URL will be returned that points to a location displaying the status of the job. See the topic regarding [asynchronous](HTTP://RESOURCES.ARCGIS.COM/EN/HELP/ARCGIS-REST-API/02R3/02R3000000RT000000.HTM) usage for more information. The default is `false` .
+
+			Values: `true` | `false`
+
+			Syntax
+
+			```javascript
+			async=true|false
+			```
+
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+
+			`f` 
+
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+
+			Specifies the output format of the response. The default response format is `html` .
+
+			Values: `html` | `json` 
+
+		</StyledTableCell>
+	</StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+This example shows the steps for assigning two tax parcels to the specified record using the `assignFeaturesToRecord` operation.
+
+<Note type={"note"}>
+
+	The `sessionID` parameter value must be the same for starting the edit session, performing the edit operation, and stopping the edit session.
+
+</Note>
+
+1.  [Start a service session](/start-reading) on the version.
+
+    Request URL and parameters
+
+    ```javascript
+    https://machine.domain.com/webadaptor/server/rest/services/CountyFabric/VersionManagementServer/versions/E4DAED9D-C859-489B-9053-767A45F1D97C/startReading
+    f=json
+    sessionId={b0c18555-6a2d-40fb-a8fe-55bb62450a7c}
+    ```
+     
+2.  [Start an edit session](/start-editing) on the version.
+
+    Request URL and parameters
+
+    ```javascript
+    https://machine.domain.com/webadaptor/server/rest/services/CountyFabric/VersionManagementServer/versions/E4DAED9D-C859-489B-9053-767A45F1D97C/startEditing
+    f=json
+    sessionId={b0c18555-6a2d-40fb-a8fe-55bb62450a7c}
+    ```
+     
+3.  Assign two tax parcels to the specified record. The parcels are not historic.
+
+    Request URL and parameters
+
+    ```javascript
+    https://machine.domain.com/webadaptor/server/rest/services/CountyFabric/ParcelFabricServer/assignFeaturesToRecord
+    f=json
+    gdbVersion=admin.Version1
+    sessionId={b0c18555-6a2d-40fb-a8fe-55bb62450a7c}
+    parcelFeatures=[{"id":"{B4133CD4-AF3B-4008-8594-59C1C650805D}","layerId":"10"},{"id":"{45CCBD56-0AC8-4D22-A2F3-AA42B77FDD3B}","layerId":"10"}]
+    record={78BEE123-4A76-4B6C-9B12-C30786E46B48}
+    writeAttribute=CreatedByRecord
+    async=false   
+	 ```
+     
+4.  If edits are complete, [stop the edit session](/stop-editing).
+
+5.  [Stop](/stop-reading) and release the service session. 
+
+## JSON Response syntax
+
+The following response is returned when `async` is `false`:
+
+```other
+{
+  "moment": <datetime>,
+		"exceededTransferLimit: <true | false>,
+ 	"serviceEdits": [
+    {               // only if transfer limit is not exceeded
+		    "id" <layerID>,
+      "editedFeatures": {
+				    "spatialReference": {<spatialreference>},
+						  "updates": [
+          {
+            "attributes": {...},
+            "geometry": {...}
+          },
+          {...}
+        ]
+						},
+					 {
+						  "id": <layerID>,
+							 "editedFeatures": {
+								  "spatialReference": {<spatialreference>},
+										"adds": [
+            {
+              "attributes": {...},
+              "geometry": {...}
+            },
+            {...}
+          ]
+        },
+        {...}
+      }
+    }
+  ]
+  "success": <true | false>,
+		"error": {  // only if success is false
+		  "extendedCode": <HRESULT>,
+				"message": <error message>,
+				"details": [<detail>
+  }
+}
+```
+
+The following response is returned when `async`  is `true` :
+
+```other
+{
+		"statusUrl": <url>
+}
+``` 
+
+## JSON Response example
+
+The following is a response example when `async` is `false`:
+
+```javascript
+{
+	"moment": 1570659946770,
+	"exceededTransferLimit": false,
+	"serviceEdits": [{
+		"id": 10,
+		"editedFeatures": {
+			"spatialReference": {
+				"wkid": 2913,
+				"latestWkid": 2913,
+				"xyTolerance": 0.0032808398950131233,
+				"zTolerance": 0.001,
+				"mTolerance": 0.001,
+				"falseX": -111333600,
+				"falseY": -98152500,
+				"xyUnits": 3048,
+				"falseZ": -100000,
+				"zUnits": 10000,
+				"falseM": -100000,
+				"mUnits": 10000
+			},
+			"updates": [
+				[{
+					"attributes": {
+						"OBJECTID": 14,
+						"Name": "133_(1)",
+						"ParcelSubtype": 1,
+						"CreatedByRecord": null,
+						"RetiredByRecord": null,
+						"StatedArea": 9848.0,
+						"StatedAreaUnit": null,
+						"CalculatedArea": null,
+						"MiscloseRatio": 100000.0,
+						"MiscloseDistance": 0.00077059,
+						"IsSeed": 0,
+						"created_user": "GIS",
+						"create_date": 1570125893000,
+						"last_edited_user": "GIS",
+						"last_edited_date": 1570125893000,
+						"GlobalID": "{B4133CD4-AF3B-4008-8594-59C1C650805D}",
+						"Shape__Area": 9841.81480272335466,
+						"Shape__Length": 401.283389427499685
+					},
+					"geometry": {
+						"hasZ": true,
+						"curveRings": [
+							[
+								[7501279.75853018463, 446279.163385823369, 0],
+								[7501276.041010499, 446167.400918632746, 0], {
+									"c": [
+										[7501265.72309711576, 446157.747703418136, 0],
+										[7501272.88087818027, 446160.437852208852]
+									]
+								},
+								[7501195.78379264474, 446160.078083992, 0],
+								[7501197.83169291914, 446281.89599737525, 0],
+								[7501279.75853018463, 446279.163385823369, 0]
+							]
+						]
+					}
+				}, {...},
+{
+		"id": 2,
+		"editedFeatures": {
+			"spatialReference": {
+				"wkid": 2913,
+				"latestWkid": 2913,
+				"xyTolerance": 0.0032808398950131233,
+				"zTolerance": 0.001,
+				"mTolerance": 0.001,
+				"falseX": -111333600,
+				"falseY": -98152500,
+				"xyUnits": 3048,
+				"falseZ": -100000,
+				"zUnits": 10000,
+				"falseM": -100000,
+				"mUnits": 10000
+			},
+			"adds": [{
+				"attributes": {
+					"ObjectID": 831,
+					"IsRetired": 1,
+					"GlobalID": "{E32EC5FC-A5C3-401C-8D6A-0AA1D8030CD2}",
+					"created_user": "admin",
+					"create_date": 1570659946000,
+					"last_edited_user": "admin",
+					"last_edited_date": 1570659946000,
+					"Shape__Area": 10431.25214602294,
+					"Shape__Length": 416.362204730510712
+				},
+				"geometry": {
+					"rings": [
+						[
+							[7501195.77066929638, 446157.72900262475],
+							[7501195.77066929638, 446281.909120738506],
+							[7501279.77165354788, 446281.909120738506],
+							[7501279.77165354788, 446157.72900262475],
+							[7501195.77066929638, 446157.72900262475]
+						]
+					]
+				}
+			}, {....}
+"updates": [
+				[{
+					"attributes": {
+						"OBJECTID": 45,
+						"CreatedByRecord": null,
+						"RetiredByRecord": null,
+						"ParentLineID": null,
+						"Direction": null,
+						"Distance": null,
+						"Radius": null,
+						"ArcLength": null,
+						"Radius2": null,
+						"COGOType": null,
+						"IsCOGOGround": null,
+						"COGOAccuracy": null,
+						"Rotation": null,
+						"Scale": null,
+						"created_user": "admin",
+						"create_date": 1570479614000,
+						"last_edited_user": "admin",
+						"last_edited_date": 1570479614000,
+						"GlobalID": "{07BA8BD0-5145-42CF-9073-A758E012D3C0}",
+						"Shape__Length": 120.576780984508773
+					},
+					"geometry": {
+						"hasZ": true,
+						"paths": [
+							[
+								[7501112.875, 446283.507217854261, 0],
+								[7501125.89238844812, 446163.635170608759, 0]
+							]
+						]
+					}
+				}, {...},
+...}]
+"success": true
+```
+
+ 

@@ -1,0 +1,231 @@
+---
+title: "Reconstruct from seeds"
+uid: pf-reconstruct-by-seeds
+description: "The reconstructFromSeeds operation reconstructs parcels from seeds enclosed by parcel lines in the specified extent."
+slug: "reconstructfromseeds-parcel-fabric-service"
+url: "/reconstructfromseeds-parcel-fabric-service"
+guid: "GUID-CB1ED109-18D8-41D2-8EEC-0976EB412FDD"
+migratedTopicMetadata:
+  FTITLE: "Reconstructfromseeds-parcel-fabric-service"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "14/08/2023 15:20:17"
+  FAUTHOR: "cleslie"
+  FSTATUS: "Released"
+  MODIFIED-ON: "29/09/2023 11:52:02"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-E6DD6A1F-0A4B-4933-8FD8-2805234D0594"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName/ParcelFabricServer/reconstructFromSeeds
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName/ParcelFabricServer/reconstructFromSeeds
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '11.0'
+  requiredCapability: ArcGIS Advanced Editing
+---
+
+## Description
+
+The `reconstructFromSeeds` operation reconstructs parcels from seeds enclosed by parcel lines in the specified extent. Parcels are reconstructed regardless of the parcel lines' associations with records.
+
+[Learn more about reconstructing parcels from seeds](https://pro.arcgis.com/en/pro-app/latest/help/data/parcel-editing/reconstructfromseeds.htm)
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `gdbVersion` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.0.
+
+      The name of the geodatabase version (the default is the `DEFAULT` version).
+
+      Syntax
+
+      ```javascript
+      gdbVersion=<version>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sessionId` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.0.
+
+      The token (GUID) used to lock the version. If the calling client is editing a named version, the `sessionId` value is required. If the specified version is currently locked by another session, the request will fail if the `sessionId` value is not provided or does not match the `sessionId` value that holds the exclusive lock. If the client is editing the default version, the `sessionId` value is not required.
+
+      Syntax
+
+      ```javascript
+      sessionId=<guid>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `extent` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.0.
+
+      The envelope of the extent that will be used to reconstruct seeds. Seeds that lie within the specified extent will be reconstructed into parcels.
+
+      Syntax
+
+      ```javascript
+      {"xmin":<X min>,"ymin":<y min>, "xmax": <x max>, "ymax": <y max>, "spatialReference":
+      {<wkt of spatial reference>}}
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.1.
+      
+      Specifies whether the request will be processed as an asynchronous job and a URL that points to a location displaying the status of the job will be returned. See the topic regarding [asynchronous](HTTP://RESOURCES.ARCGIS.COM/EN/HELP/ARCGIS-REST-API/02R3/02R3000000RT000000.HTM) usage for more information. The default is `false`.
+
+      Values: `true` | `false` 
+
+      Syntax
+
+      ```javascript
+      async=true|false
+      ```
+
+     </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the output format of the response. The default response format is `html`.
+
+      Values: `html` | `json` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+This example shows the steps for reconstructing seeds in the specified extent using the `reconstructFromSeeds`  operation. 
+
+<Note type={"note"}>
+
+  The `sessionId` parameter value must be the same for starting the edit session, performing the edit operation, and stopping the edit session. The `sessionId` value must be a unique GUID that has not been used in a previous session. The GUID can be randomly generated. 
+
+</Note>
+
+1.  [Start a service session](/start-reading) on the version.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/VersionManagementServer/versions/07BEA5BF-89D7-474B-BE69-A7A0D7E951AB/startReading
+    f=json
+    sessionId={8a92a739-c331-48b6-8402-79555dd88e85}
+    ```
+     
+2.  [Start an edit session](/start-editing) on the version.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/VersionManagementServer/versions/07BEA5BF-89D7-474B-BE69-A7A0D7E951AB/startEditing
+    f=json
+    sessionId={8a92a739-c331-48b6-8402-79555dd88e85}
+    ```
+     
+3.  Reconstruct seeds in the specified extent.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/ParcelFabricServer/reconstructFromSeeds
+    f=json
+    gdbVersion=admin.Version1
+    sessionId={8a92a739-c331-48b6-8402-79555dd88e85}
+    extent={"xmin":3160900.60284135584,"ymin":13847241.0501159038,"xmax":3161405.76772921067,"ymax":13847610.5474399272,"spatialReference":
+    {"wkid":102740,"latestWkid":2278}}
+    async=false
+    ```
+     
+4.  If edits are complete, [stop the edit session](/stop-editing).
+
+5.  [Stop](/stop-reading) and release the service session. 
+
+## JSON Response syntax
+
+The following response is returned when `async` is `false`:
+
+```other
+{
+  "moment": <datetime>,
+		"reconstructedParcelCount": <integer>,
+  "exceededTransferLimit: <true | false>,
+  "error": {  // only if success is false
+    "extendedCode": <HRESULT>,
+    "message": <error message>,
+    "details": [<detail>]
+  },
+  "serviceEdits": [ ] // only if transfer limit is not exceeded
+  "success": <true | false>
+}
+```
+ 
+Response when `async` is `true`:
+
+```other
+{
+		"statusUrl": <url>
+}
+``` 
+ 

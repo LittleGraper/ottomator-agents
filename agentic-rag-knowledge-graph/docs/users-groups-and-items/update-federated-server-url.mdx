@@ -1,0 +1,227 @@
+---
+title: "/updateFederatedServerUrl: Update Federated Server URL"
+description: "The updateFederatedServerUrl operation updates the public-facing URL of a federated server."
+slug: "update-federated-server-url"
+url: "/update-federated-server-url"
+restInfoMetadata:
+  apiPath: /portals/[portalID]/urls/updateFederatedServerUrl
+  urlSegments:
+    - name: <root>
+      url: /root
+    - name: /portals/[portalID]/urls/updateFederatedServerUrl
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '11.4'
+---
+
+## Example usage
+
+The following is a sample ArcGIS Enterprise POST request for the `updateFederatedServerUrl` operation:
+
+```other
+POST /webadaptor/sharing/rest/portals/0123456789ABCDEF/urls/updatePortalUrl HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+serverId=PAf9Y5TdsDb1uQkm&newUrl=https://modifiedPublicURL.domain.com/server&async=true&f=html&token=<token>
+
+```
+
+
+## Description
+
+The `updateFederatedServerUrl` operation updates the public-facing URL of a federated server. This operation supports modifying the domain, subdomain, and context of the URL. When this operation is performed, the items on the federated server that [used the previous URL](/generate-url-report) are updated to use the new URL.
+
+To ensure that the organization's resources will remain accessible, the URLs for each federated server and [Enterprise portal](/update-portal-url) must be updated.
+
+<Note type="caution">
+
+It is recommended that you [create a backup of the organization](https://enterprise.arcgis.com/en/portal/latest/administer/windows/create-web-gis-backup.htm) before updating the public-facing URL.
+
+</Note>
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serverId`
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The ID of the federated server. This value is retrieved from the [Generate Organization URL Map](/generate-organization-url-map) operation.
+
+      ```other
+      serverId=PAf9Y5TdsDb1uQkm
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `newUrl`
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Sets the new public-facing URL for the federated server.
+
+      ```other
+      newUrl=https://modifiedPublicURL.domain.com/server
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      If `true`, the request is run as an asynchronous job. If set as `true`, the response will return job details.
+
+      <Note>
+
+      It is recommended that this operation is performed asynchronously. Only organizations with a small number of items, and few federated servers, should performed this operation synchronously.
+
+      </Note>
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## JSON Response examples
+
+The tabs below show the JSON responses returned for synchronous and asynchronous requests:
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Synchronous</TabTitle>
+  <TabTitle>Asynchronous</TabTitle>
+</TabNav>
+
+<Tab>
+
+The following response is returned when `async` is set to `false`:
+
+```other
+{
+  "reregisterUrlResults": {
+    "type": "reregisterFederatedServerUrl",
+    "id": "PAf9Y5TdsDb1uQkm",
+    "reregisterURL": "https://modifiedPublicURL.domain.com/server",
+    "reregisteredServerSecurityConfig": true,
+    "reregisteredPortalDatabase": true,
+    "reregisteredWebContextURL": true,
+    "itemUrls": {
+      "succeededCount": 58,
+      "failedCount": 0,
+      "failedItems": [],
+      "notProcessedCount": 0
+    },
+    "created": 1718121889216
+  }
+}
+
+```
+
+
+</Tab>
+
+<Tab>
+
+If the `async` parameter is set as `true`, the request will return a job ID and job URL. The returned URL can be used to access the job resource and periodically poll the jobs status.
+
+```other
+{
+  "jobId": "e8c9560278a94c6f88d8d4dbd82c863f",
+  "key": "5qVOT43M4lcK_tcNKfIcdho2FOCN0NbvUwRxH7FuxI4",
+  "jobUrl": "https://machine.domain.com/webadaptor/sharing/rest/portals/self/jobs/e8c9560278a94c6f88d8d4dbd82c863f"
+}
+
+```
+
+Once the job is completed, the following response is returned:
+
+```other
+{
+  "id": "5d60e2303a4d4358ad314d7ddb6807ce",
+  "definition": {
+    "type": "reregisterFederatedServerUrl",
+    "serverId": "PAf9Y5TdsDb1uQkm"
+  },
+  "status": "completed",
+  "created": 1718121889213,
+  "modified": 1718121940110,
+  "messages": [
+    "Started - Exporting items to package. Reregister URL :https://modifiedPublicURL.domain.com/server",
+    "Completed - Exporting items to package. Reregister URL :https://modifiedPublicURL.domain.com/server",
+    "Started - Updating server url of federated server with id:PAf9Y5TdsDb1uQkm 's security config to https://modifiedPublicURL.domain.com/server",
+    "Completed - updating server url of federated server with id:PAf9Y5TdsDb1uQkm 's security config to https://modifiedPublicURL.domain.com/server",
+    "Started - Updating Federated Server Urls in Portal Database to https://modifiedPublicURL.domain.com/server",
+    "Completed - Updating Federated Server Urls in Portal Database to https://modifiedPublicURL.domain.com/server",
+    "Started - Updating Federated Server's WebContextURL to https://modifiedPublicURL.domain.com/server",
+    "Completed - Updating Federated Server's WebContextURL to https://modifiedPublicURL.domain.com/server",
+    "Started - Reregistering applicable item URLs to the URL:https://modifiedPublicURL.domain.com/server",
+    "Completed - Reregistering applicable item URLs to the URL:https://modifiedPublicURL.domain.com/server",
+    "Started - Updating Account Settings &  Account Config Settings to https://modifiedPublicURL.domain.com/server",
+    "Completed - Updating Account Settings &  Account Config Settings to https://modifiedPublicURL.domain.com/server"
+  ],
+  "result": {
+    "details": "Completed - Processing reregister Federated Server URL for serverId:PAf9Y5TdsDb1uQkm, Url:https://modifiedPublicURL.domain.com/server",
+    "reregisterUrlResults": {
+      "type": "reregisterFederatedServerUrl",
+      "id": "PAf9Y5TdsDb1uQkm",
+      "reregisterURL": "https://modifiedPublicURL.domain.com/server",
+      "reregisteredServerSecurityConfig": true,
+      "reregisteredPortalDatabase": true,
+      "reregisteredWebContextURL": true,
+      "itemUrls": {
+        "succeededCount": 62,
+        "failedCount": 0,
+        "failedItems": [],
+        "notProcessedCount": 0
+      },
+      "created": 1718121889216
+    }
+  }
+}
+
+
+
+```
+
+</Tab>
+
+</Tabs>

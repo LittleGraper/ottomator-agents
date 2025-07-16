@@ -1,0 +1,251 @@
+---
+title: "Export Site"
+description: "The exportSite  operation exports a server site to a designated location."
+slug: "exportsite"
+url: "/exportsite"
+guid: "GUID-F47B0E8E-5902-4DF7-B0F8-5B5AA245FB4D"
+migratedTopicMetadata:
+  FTITLE: "exportSite"
+  FDESCRIPTION: ""
+  FCHANGES: "Adding new validate parameter"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1-*"
+  CREATED-ON: "20/01/2023 12:11:30"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "16/02/2023 21:38:50"
+  VERSION: "7"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "7"
+  ED: "GUID-E353B490-800B-4B8E-868E-3CAD041B685F"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /exportSite
+  urlSegments:
+    - name: <root>
+      url: /site
+    - name: /exportSite
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.2'
+  requiredCapabilities:
+    - name: Access allowed only with the default administrator role
+      url: /managing-access-to-the-server-administration-rest-api
+---
+
+## Description
+
+The `exportSite` operation exports the site configuration to a specified location. The exported file includes, and excludes, the following information:
+
+<StyledTable headers={"Information included in the backup,Information not included"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      - Service configurations and service properties
+      - Service webhooks
+      - Server object extensions (SOEs)
+      - Server object interceptors (SOIs)
+      - Registered data store item locations
+      - Registered relational data store types
+      - User and role information
+      - List of machines in the site
+      - Log settings
+      - Statistics reports
+      - Scene tile cache configuration files under `arcgiscache/Hosted`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      - Cache tiles and tiling schemes
+      - Data used by services (unless it was [copied to a folder on the server](https://enterprise.arcgis.com/en/server/latest/manage-data/windows/copying-data-to-the-server-automatically-when-publishing.htm) automatically at publish time)
+      - Dynamically generated map images and other temporary output
+      - Log messages (including geoprocessing job statuses and messages)
+      - Primary site administrator name and password
+      - Statistics data
+      - ArcGIS Web Adaptor configurations
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+<br />
+<Note type={"caution"}>
+
+Administrative site configurations cannot be made while a backup is in progress. Before performing the `exportSite`  operation, ensure that all desired site configurations have been made.
+
+</Note>
+
+## Protecting information not included in the backup
+
+As noted above, some information is not included in the backup of your site. It's recommended you manually back up this information at the same time you run the backup utility. When you restore the site, manually copy or move this information back to the site, for example:
+
+<Tabs>
+<TabNav>
+  <TabTitle>Tiles & tiling</TabTitle>
+  <TabTitle>Service data</TabTitle>
+  <TabTitle>Log messages</TabTitle>
+  <TabTitle>PSA information</TabTitle>
+  <TabTitle>Statistics data</TabTitle>
+  <TabTitle>Web adaptor configurations</TabTitle>
+</TabNav>
+
+    <Tab>
+
+      These directories will contain the cache tiles and the tiling scheme file conf.xml. The cache directories may also contain a file geodatabase status.gdb that contains information about which tiles have been built. When you restore the site, move or [copy](https://enterprise.arcgis.com/en/server/latest/publish-services/windows/copying-caches.htm) the information back to the original arcgiscache directory.
+
+    </Tab>
+
+    <Tab>
+
+      If the data used by your services was not [copied to a folder on the server](https://enterprise.arcgis.com/en/server/latest/manage-data/windows/copying-data-to-the-server-automatically-when-publishing.htm) when publishing, it will not be included in the backup. Manually back up your data directories, geodatabases, databases, source tables, and any other information used by your services. When you restore the site, verify ArcGIS Server has permissions to access your data locations. For more information, see [Making your data accessible to ArcGIS Server](https://enterprise.arcgis.com/en/server/latest/install/windows/making-your-data-accessible-to-arcgis-server.htm).
+
+    </Tab>
+
+    <Tab>
+
+      When the site is running, logs are created and distributed among all ArcGIS Server machines participating in your site. When you restore the site, move or copy the information back to the original logs directory.
+
+    </Tab>
+
+    <Tab>
+
+      After you restore a site, you continue using the primary site administrator name and password that was in place when performing the restore. This is true even if you restore a site whose primary site administrator had been disabled. It's recommended you record the user name and password and store it in a secure location before performing the restore.
+
+    </Tab>
+
+    <Tab>
+
+      When the site is running, various service statistics are recorded. When you restore the site, move or copy the information back to the original statistics directory.
+
+    </Tab>
+
+    <Tab>
+
+      If your site includes one or more ArcGIS Web Adaptors, you'll need to reconfigure them with your site after performing the restore. 
+
+    </Tab>
+  
+</Tabs>
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `location` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A folder path, accessible to ArcGIS Server, where the exported site configuration will be written. If the `location` parameter is not specified, the server writes the exported site configuration file to a directory owned by the server and returns a virtual path (HTTPS URL) to the directory. The exported site configuration can be downloaded from the directory by accessing the returned URL.
+
+      ```other label=Example
+      location=\\server\share\backup
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `validate` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at ArcGIS Enterprise 11.1. This parameter validates the folder path specified in the `location` parameter, ensuring that it is accessible before performing the `exportSite` operation. If set to `true`, the path will be validated, and the operation will return either a success response or an error message. The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usages
+
+The following is a sample POST request for the `exportSite` operation that demonstrates defining the `location` parameter and validating that it is accessible:
+
+```other
+POST /webadaptor/admin/exportSite HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+location=\\server\share\backup&validate=true&f=pjson
+```
+
+The following is a sample POST request for the `exportSite` operation that demonstrates leaving the `location` parameter undefined:
+
+```other
+POST /webadaptor/admin/exportSite HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+location=&validate=false&f=pjson
+```
+
+## JSON Response examples
+
+### Examples without validation
+
+The following is a sample response for a request that defined the `location` parameter:
+
+```javascript
+{
+  status: "success",
+  location: "\\server\share\backup\Jan-15-2023_11-50-33.agssite"
+}
+```
+
+The following is a sample response for a request that did not define the `location` parameter.
+
+```javascript
+{
+  status: "success",
+  location: "https://machine.domain.com/webadaptor/admin/uploads/i33d579b6-d8a8-4886-a1bc-671ae52e7a00"
+}
+```
+
+### Examples with validation
+
+The sample response below is for a request that defined the `location` parameter and set `validate` to `true`. This example demonstrates a success response, meaning that the path was accessible to ArcGIS Server:
+
+```javascript
+{
+  "status": "success"
+}
+```
+
+The sample response below is for a request that defined the `location` parameter and set `validate` to `true`. This example demonstrates a failure, meaning that the path was not accessible to ArcGIS Server:
+
+```javascript
+{
+  "status": "error",
+  "messages": ["Unable to write to \\server\share\backup. Verify the location is accessible and the service account running ArcGIS Server can write to it."],
+  "code": 500
+}
+```

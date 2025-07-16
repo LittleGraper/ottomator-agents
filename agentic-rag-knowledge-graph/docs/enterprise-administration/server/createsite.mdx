@@ -1,0 +1,250 @@
+---
+title: "Create Site"
+description: "The createNewSite operation creates the server site once ArcGIS Server has been installed."
+slug: "createsite"
+url: "/createsite"
+guid: "GUID-1B7CF8F0-B6A4-4DAA-85D1-163DA5710FDF"
+migratedTopicMetadata:
+  FTITLE: "createSite"
+  FDESCRIPTION: ""
+  FCHANGES: "Adding privilege requirement"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.8.1 -*"
+  CREATED-ON: "08/06/2020 18:03:02"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "08/06/2020 18:33:17"
+  VERSION: "11"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-89F5D95C-D3A7-43D1-B772-611E8C016CC2"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /createNewSite
+  urlSegments:
+    - name: <root>
+      url: /site
+    - name: /createNewSite
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.1'
+  requiredCapabilities:
+    - name: Access allowed only with the default administrator role
+      url: /managing-access-to-the-server-administration-rest-api
+---
+
+## Description
+
+The `createNewSite` operation is the first operation that you must invoke when you install ArcGIS Server for the first time. Creating a new site involves the following:
+
+- Allocating a store to save the site configuration
+- Configuring the server machine and registering it with the site
+- Configuring server directories
+- Deploying the services that are marked to automatically deploy
+
+Because of the number of tasks, it usually takes awhile for this operation to complete. Once a site has been created, you can publish GIS services and deploy them to your server machines.
+
+<Note type={"note"}>
+
+This operation is available only when a server machine is not participating in a site.
+
+</Note>
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Description"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `username` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The name of the administrative account to be used by the site. This can be changed later.
+
+      ```markdown label=Example
+      username=admin
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `password` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The credentials of the administrative account.
+
+      ```markdown label=Example
+      password=secret
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `configStoreConnection` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object representing the connection to the [ configuration store](/configstore). By default, the configuration store is maintained in the ArcGIS Server installation directory.
+
+      ```other label=Example
+      configStoreConnection={
+        "type"="FILESYSTEM",
+        "connectionString": "\\myshare\config-store",
+        "localRepositoryPath": "C:\\arcgisserver\\local"
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `directories` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object representing a collection of server directories to create. By default, the [ server directories](/directories) are created locally.
+
+      ```other label=Example
+      directories={
+        "directories": [
+          {
+            "name": "arcgiscache",
+            "physicalPath": "C:\\arcgisserver\\directories\\arcgiscache",
+            "directoryType": "CACHE",
+            "cleanupMode": "NONE",
+            "maxFileAge": 0,
+            "description": "Stores tile caches used by map, globe, and image services for rapid performance"
+          },
+          ...
+        ]
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `settings` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Optional [log settings](/logssettings).
+
+      ```markdown label=Example
+      settings={
+        "logLevel": "INFO",
+        "logDir": "C:\\arcgisserver\\logs\\",
+        "maxErrorReportsCount": 10,
+        "maxLogFileAge": 90
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `runAsync` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A flag that indicates if the operation needs to be run asynchronously.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `createSite` operation:
+
+```other
+POST /arcgis/admin/createNewSite HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+username=admin&password=secret&configStoreConnection={
+  "type"="FILESYSTEM",
+  "connectionString": "\\myshare\config-store",
+  "localRepositoryPath": "C:\\arcgisserver\\local"
+}&directories={
+  "directories": [
+    {
+      "name": "arcgiscache",
+      "physicalPath": "C:\\arcgisserver\\directories\\arcgiscache",
+      "directoryType": "CACHE",
+      "cleanupMode": "NONE",
+      "maxFileAge": 0,
+      "description": "Stores tile caches used by map, globe, and image services for rapid performance"
+    },
+    {
+      "name": "arcgisjobs",
+      "physicalPath": "C:\\arcgisserver\\directories\\arcgisjobs",
+      "directoryType": "JOBS",
+      "cleanupMode": "TIME_ELAPSED_SINCE_LAST_MODIFIED",
+      "maxFileAge": 360,
+      "description": "Stores results and other information from geoprocessing services"
+    },
+    {
+      "name": "arcgisoutput",
+      "physicalPath": "C:\\arcgisserver\\directories\\arcgisoutput",
+      "directoryType": "OUTPUT",
+      "cleanupMode": "TIME_ELAPSED_SINCE_LAST_MODIFIED",
+      "maxFileAge": 10,
+      "description": "Stores various information generated by services, such as map images"
+    },
+    {
+      "name": "arcgissystem",
+      "physicalPath": "C:\\arcgisserver\\directories\\arcgissystem",
+      "directoryType": "SYSTEM",
+      "cleanupMode": "NONE",
+      "maxFileAge": 0,
+      "description": "Stores directories and files used internally by ArcGIS Server"
+    }
+  ]
+}&settings={
+  "logLevel": "INFO",
+  "logDir": "C:\\arcgisserver\\logs\\",
+  "maxErrorReportsCount": 10,
+  "maxLogFileAge": 90
+}&runAsync=true&f=json
+```

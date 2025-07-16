@@ -1,0 +1,276 @@
+---
+title: "Multidimensional Info"
+description: "The multidimensionalInfo  resource returns multidimensional information for the service."
+slug: "multidimensional-info"
+url: "/multidimensional-info"
+guid: "GUID-7F4A2311-03B4-43C5-8E39-8C2BD709145A"
+migratedTopicMetadata:
+  FTITLE: "Multidimensional Info"
+  FDESCRIPTION: ""
+  FCHANGES: "Issue 6301 adding renderingRule"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9 - *"
+  CREATED-ON: "29/11/2022 10:34:46"
+  FAUTHOR: "jswain"
+  FSTATUS: "Released"
+  MODIFIED-ON: "24/01/2023 15:20:50"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "6"
+  ED: "GUID-7C531C7E-616B-4623-BFC1-5948ED001F13"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /multidimensionalInfo
+  urlSegments:
+    - name: <imageservice-url>
+      url: /image-service
+    - name: /multidimensionalInfo
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.3'
+  requiredCapability: Image
+---
+
+import GUID_D8E66666_C5F3_44F2_BE81_BE66C699D87D_GUID_B7AACF54_87A9_43B0_9359_2EAEF6D8A838 from "./snippets/GUID-D8E66666-C5F3-44F2-BE81-BE66C699D87D/_GUID-B7AACF54-87A9-43B0-9359-2EAEF6D8A838";
+import GUID_D8E66666_C5F3_44F2_BE81_BE66C699D87D_GUID_493E903F_586B_4887_BFEC_6473358D7622 from "./snippets/GUID-D8E66666-C5F3-44F2-BE81-BE66C699D87D/_GUID-493E903F-586B-4887-BFEC-6473358D7622";
+
+## Description
+
+The `multidimensionalInfo` resource returns multidimensional information for the service. This resource is supported if the `hasMultidimensions` property of the service is `true`.
+
+Common data sources for multidimensional image services are mosaic datasets created from netCDF, GRIB, and HDF data.
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnDimensionValues` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Returns the dimension values of an image service.
+
+Values: `always` \| `never` \| `ifIrregular` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`renderingRule` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Added at 10.9. This parameter specifies the rendering rule for how the requested image service will be processed. The response is the multidimensional information that reflects a custom processing as defined by the rendering rule.
+
+See [raster function JSON objects](/raster-function-objects) for the syntax and examples.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<GUID_D8E66666_C5F3_44F2_BE81_BE66C699D87D_GUID_B7AACF54_87A9_43B0_9359_2EAEF6D8A838 />
+
+<GUID_D8E66666_C5F3_44F2_BE81_BE66C699D87D_GUID_493E903F_586B_4887_BFEC_6473358D7622 />
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+The following is a sample request URL that demonstrates returning the multidimensional information for an image service:
+
+```json
+https://machine.domain.com/arcgis/rest/services/MyService/ImageServer/multidimensionalInfo?f=pjson
+```
+
+ 
+
+## JSON Response syntax
+
+The response contains dimensions for each variable in the service.
+
+```json
+{	
+  "multidimensionalInfo": {
+    "variables": [
+      {
+        "name": "<variable>", //string
+        "description": "<description>", //string
+        "unit": "<unit>",		//string
+        "dimensions": [
+          {
+            "name": "<name>", //string
+            "description": "<description>", //string
+            "unit": "<units>", //string
+            "field": "<field>", //string. The corresponding field/attribute name
+            "extent": [<extent_from>,<extent_to>], //the extent of dimension values, the element type depends on the dimension's field type, can be time, or double
+            "hasRanges":<true | false>, //bool, indicates whether one dimension value has both lower and upper bounds.
+            "values": [<value1>,...] //array of values. If hasRanges=false, each element is one single value; if hasRanges=true, each element is an array of lower/upper bounds
+            "hasRegularIntervals": true| false, //added at 10.3.1
+            "interval": <interval>, //double, added at 10.3.1
+            "intervalUnit": <unit>, //string, added at 10.3.1 (e.g. "Months", "Years", "Days", "Hours",)
+          },
+          ...   
+        ]
+      },
+      ...
+    ]
+  }
+}
+```
+
+ 
+
+## JSON Response examples
+
+### Example 1
+
+```json
+{	
+  "multidimensionalInfo": {
+	 	 "variables": [
+      {
+   			  "name": "salinity",
+   			  "description": "Salinity",
+   			  "unit": "psu",
+   			  "dimensions": [
+          {
+     				   "name": "StdTime",
+     				   "description": "Valid Time",
+     				   "unit": "ISO8601",
+     				   "field": "StdTime",
+     				   "extent": [1363651200000,1363910400000],
+            "hasRegularIntervals": true,
+            "interval": 3,
+            "intervalUnit": "Hours",
+     				   "hasRanges": false,
+     				   "values": [1363651200000,1363662000000,...1363910400000]
+          },
+          {				
+            "name": "StdZ",
+     				   "description": "Depth",
+     				   "unit": "esriMeters",
+     				   "field": "StdZ",
+     				   "extent": [-5000,0],
+            "hasRegularIntervals": true,
+            "interval": 3,
+            "intervalUnit": "Hours",
+     				   "hasRanges": false,
+     				   "values": [-5000,-4000,...0]
+          }
+        ]
+      },
+      {
+        "name": "water_temp",
+        "description": "Water Temperature",
+        "unit": "degC",
+        "dimensions": [
+          {
+     				   "name": "StdTime",
+     				   "description": "Valid Time",
+     				   "unit": "ISO8601",
+     				   "field": "StdTime",
+     				   "extent": [1363651200000,1363910400000],
+            "hasRegularIntervals": true,
+            "interval": 3,
+            "intervalUnit": "Hours",
+     				   "hasRanges": false,
+     				   "values": [1363651200000,1363662000000,...1363910400000]
+          },
+          {				
+            "name": "StdZ",
+     				   "description": "Depth",
+     				   "unit": "esriMeters",
+     				   "field": "StdZ",
+     				   "extent": [-5000,0],
+            "hasRegularIntervals": true,
+            "interval": 3,
+            "intervalUnit": "Hours",
+     				   "hasRanges": false,
+     				   "values": [-5000,-4000,...0]
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+ 
+
+### Example 2
+
+```json
+{	
+  "multidimensionalInfo": {
+	 	 "variables": [
+      {
+        "name": "cape@spdl",
+        "description": "Convective available potential energy [J\/kg] @ \"Level at specified pressure difference from ground to level\"",
+        "unit": "J\/kg",
+        "dimensions": [
+          {
+            "name": "StdPressure",
+            "description": "\"Level at specified pressure difference from ground to level\"",
+            "unit": "esriPascals",
+            "field": "StdPressure",
+            "extent": [
+              18000,
+              0
+            ],
+            "hasRegularIntervals": true,
+            "interval": 3,
+            "intervalUnit": "Hours",
+            "hasRanges": true,
+            "values": [[18000,0],[25500,0]]
+          },
+          {
+            "name": "StdTime",
+            "description": "time",
+            "unit": "ISO8601",
+            "field": "StdTime",
+            "extent": [1378879200000,1378879200000],
+            "hasRegularIntervals": true,
+            "interval": 3,
+            "intervalUnit": "Hours",
+            "hasRanges": false,
+            "values": [1378879200000]
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+ 

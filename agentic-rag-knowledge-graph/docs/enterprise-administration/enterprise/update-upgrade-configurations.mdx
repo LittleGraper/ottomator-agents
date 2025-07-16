@@ -1,0 +1,287 @@
+---
+title: "Update (Upgrades Configuration)"
+description: "The update operation allows administrators to set or modify the node affinity and tolerations for the pods used during upgrades or updates."
+slug: "update-upgrade-configurations"
+url: "/update-upgrade-configurations"
+guid: "GUID-1C87A779-4E5D-47FB-B0F0-27B5F05A787A"
+migratedTopicMetadata:
+  FTITLE: "Update Upgrade Configurations"
+  FDESCRIPTION: ""
+  FCHANGES: "New operation"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2-*"
+  CREATED-ON: "06/11/2023 15:51:57"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "15/11/2023 12:45:56"
+  VERSION: "1"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-5F42A8CF-C8EB-487C-91A5-9814BBE39E63"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /system/upgrades/config/update
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /system/upgrades/config/update
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '11.2'
+  requiredCapabilities:
+    - name: Access allowed with either "Security and infrastructure" or "Servers" privileges
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `update` operation allows administrators to set or modify the node affinity and tolerations for the pods used during upgrades or updates. Once a placement policy has been created, it will be applied whenever an upgrade job is created.
+
+Node affinity allows for pods to be scheduled to nodes that have matching label key-value pairs, whereas tolerations allow for pods to be scheduled on tainted nodes that would otherwise repel them if not for matching toleration and taint key-value pairs. For more information on configuring the `nodeAffinity` and `tolerations` properties, see the [Node affinity](/update-upgrade-configurations#node-affinity) and [Tolerations](/update-upgrade-configurations#tolerations) sections below.
+
+<Note type={"note"}>
+
+The following sections outline some of the configurable properties for the `nodeAffinity` and `tolerations` JSON objects. However, both `nodeAffinity` and `tolerations` are open to support other properties that are unspecified in this documentation. Prior to setting node affinity or tolerations for the upgrade job, reference the Kubernetes [Node affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity) or [Tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) documentation for more detailed information, additional properties or values, and any potential updates made to those areas.
+
+</Note>
+
+## Node affinity
+
+Before establishing node affinity, a label must be placed on the node. A label is comprised of key-value pairs (`key=value`) that are used to attract pods to be scheduled on that node. This is done by configuring the `nodeAffinity` for the pods used during an upgrade to use the same label key and values information as the node. Below is the general JSON syntax for `nodeAffinity`:
+
+```markdown
+"nodeAffinity": {
+  "<requiredDuringSchedulingIgnoredDuringExecution | preferredDuringSchedulingIgnoredDuringExecution>": {
+    "nodeSelectorTerms": [
+      {
+        "matchExpressions": [
+          {
+            "key": "<label key>",
+            "operator": "<In | NotIn | Exists | DoesNotExist>",
+            "values": [
+              "<label value>"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
+
+
+```
+
+They `key` and `values` information, along with an `operator` value that specifies the relationship between the `nodeAffinity` properties and the node's labels, are evaluated along with whether the matching values are required or preferred during scheduling to determine when the upgrade job's pods will be scheduled.
+
+For example, a node receives the following label:
+
+```markdown
+kubectl label nodes exampleNode sampleLabel=sampleValue
+```
+
+and an administrator wants to require that the key (`sampleLabel`) and value (`sampleValue`) information is applied to the the pods so they can be scheduled to the specific node. To achieve that outcome, the `nodeAffinity` property would need to be configured with the exact key and value information applied to the node, as well as setting the `requiredDuringSchedulingIgnoredDuringExecution` property:
+
+```markdown
+"nodeAffinity": {
+  "requiredDuringSchedulingIgnoredDuringExecution": {
+    "nodeSelectorTerms": [
+      {
+        "matchExpressions": [
+          {
+            "key": "sampleLabel",
+            "operator": "In",
+            "values": [
+              "sampleValue"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+<Note type={"note"}>
+
+When `requiredDuringSchedulingIgnoredDuringExecution` is specified, the scheduler will not schedule the pod if the `nodeAffinity` `key` and `values` properties do not match the node’s label key-value pairs. When `preferredDuringSchedulingIgnoredDuringExecution` is specified, the scheduler will attempt to schedule the pod to a matching node. However, if no node’s label matches the pod’s `nodeAffinity` `key` and `values` properties, the pod will still be scheduled to an available node (excluding tainted nodes that repel intolerant pods).
+
+</Note>
+
+Node affinity ensures that the scheduler will attempt to schedule pods with their matching nodes. However, it may not prevent other pods, that do not have matching key-value pairs, from being scheduled to label nodes. Node affinity will also not remove preexisting pods that have been scheduled to the node before the label was added. Administrators wanting to repel all pods that are not designated for the upgrade job may also want to taint the node.
+
+## Tolerations
+
+Similarly to node affinity, tainting a node requires a key-value pair, as well as an effect, to be applied to a node. Applying a taint to a node ensures that all pods that do not tolerate the node are repelled from it and are scheduled to other available nodes instead. For a pod to tolerate a tainted node, the `key`, `values`, and `effect` properties under `tolerations` must either match the tainted values exactly or have just the `key` value be present in the `tolerations` property. Below is the general JSON syntax for `tolerations`:
+
+```markdown
+"tolerations": [
+  {
+    "effect": "<NoExecute | NoSchedule | PreferNoSchedule>",
+    "key": "<taint key>",
+    "operator": "<Exists | Equal>",
+    "value": "<taint value>"
+  }
+]
+```
+
+The table below defines the different values that can be assigned to the `effect` and `operator` properties:
+
+<StyledTable headers={"Value,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `NoExecute` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Possible value for the `effect` property. If set, the scheduler will immediately remove intolerant pods from the node that may have been schedule to the node prior to its tainting.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `NoSchedule` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Possible value for the `effect` property. If set, the scheduler will not schedule any new pods to the node that do not tolerate the taint, but any pods currently present on the node (regardless of tolerations) will remain in the node.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `PreferNoSchedule` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Possible value for the `effect` property. The scheduler will attempt to place pods that do not tolerate the node to different nodes. However, non-tolerant pods may still be scheduled to the tainted node.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `Exists` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Possible value for the `operator` property. If set, the scheduler checks if just the `key` exists and matches the taint key. The `values` property is not required.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `Equal` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Possible value for the `operator` property. If set, the scheduler is checking if both the `key` and `values` properties match the taint key-value pair.
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+To demonstrate how taints and tolerations interact, consider an administrator that wants to taint a node so that only tolerant pods will be scheduled to the node, and that all preexisting pods on the node are expelled if they are not tolerant. To achieve this, a taint must first be applied to the node:
+
+```markdown
+kubectl label nodes exampleNode sampleKey=sampleValue:NoSchedule
+```
+
+The exact values of the `key` (`sampleKey`), `value` (`sampleValue`), and `effect` (`NoSchedule`) values used to taint the node would need to used to configure the `toleration` property:
+
+```markdown
+"tolerations": [
+  {
+    "effect": "NoSchedule",
+    "key": "sampleKey",
+    "operator": "Equal",
+    "value": "sampleValue"
+  }
+]
+```
+
+Tainting a node and assigning tolerations to the upgrade job's pods ensures that the node is reserved for the pods that need the node’s specialized resources, and that other pods that do not need certain requirements can run on standard nodes.
+
+
+## Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `upgradeConfig` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Returns the current `placementPolicy` JSON object. The `nodeAffinity` and `toelrations` properties can be modified to reflect the label or taint values that have been applied to a node or group of nodes.
+
+      ```markdown label=Example
+      upgradeConfig={
+        "podPlacementPolicy":{
+          "nodeAffinity": {},
+          "tolerations": [
+            {
+              "effect": "NoSchedule",
+              "key": "upgrader",
+              "operator": "Equal",
+              "value": "true"
+            }
+          ]
+        }
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `update` operation:
+
+```other
+POST /context/admin/system/upgrades/config/update HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+upgradeConfig={"podPlacementPolicy":{"nodeAffinity": {},"tolerations": [{"effect": "NoSchedule","key": "upgrader","operator": "Equal","value": "true"}]}}&f=pjson&token=aOjrLVEnRpuwfgK-G-PGdyWUQhpJDlGVAt70Z3vrHd1mihME8yx8E1EgRCoIpl3mLm2DSDVjFVbyFeQVD_Sp6DrXAIrwED7NYmMTF_GkLurVWAe-MBROTxqu5781_8qj5S_3tqoINj6OmjG8zfeztCKTUCbV-xrsNp5-50g2-UCX62H_qT0r1fIgqh_KFsFF9f3cC9kzWum47eRH9PmmZHdKGN3XjY3GghswTGCELNJbEQ_q84sz8zYE5q6jx8Cl
+
+```
+
+## JSON Response example
+
+```other
+{"status": "success"}
+```

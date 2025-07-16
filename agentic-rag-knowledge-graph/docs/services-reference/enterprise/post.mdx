@@ -1,0 +1,286 @@
+---
+title: "Post"
+description: "The post operation allows the client to post the changes in their branch to the default version."
+slug: "post"
+url: "/post"
+guid: "GUID-DF98EE49-1F99-4265-9002-4B7F44CEC257"
+migratedTopicMetadata:
+  FTITLE: "Post"
+  FDESCRIPTION: ""
+  FCHANGES: "Conref for ArcGIS Advanced Editing UTE - GDB #12228
+Adding a conref from the version resource topic about the read/edit session requirements."
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "04/08/2023 04:43:04"
+  FAUTHOR: "mjarman"
+  FSTATUS: "Released"
+  MODIFIED-ON: "28/08/2023 05:17:52"
+  VERSION: "6"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "6"
+  ED: "GUID-D4AB15DE-281F-4BEB-8F1C-7610F5D4C844"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/VersionManagementServer/versions/<versionGuid>/post
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/VersionManagementServer/versions/<versionGuid>/post
+  methods:
+    - post
+  requiredCapability: ArcGIS Advanced Editing user type extension license
+  versionIntroduced: '10.6'
+---
+
+## Description
+
+The `post` operation allows the client to post the changes in their version to the default version. The `reconcile` operation must be performed before the `post` operation. The `sessionId` value performing the `post` operation must match the `sessionId` value used for the `reconcile` operation. To post a subset of edits in the current version to the default version, define the `rows` parameter. 
+
+The `post` operation is supported both synchronously and asynchronously.
+
+Review the read and edit session requirements for [version resource operations](/version).
+
+<Note type={"note"}>
+
+Organization members must be assigned a license for the [ArcGIS Advanced Editing user type extension](https://enterprise.arcgis.com/en/portal/latest/administer/windows/license-user-type-extensions.htm#ESRI_SECTION1_B75DA80066744473AD5DD1312734654A) to use this operation for ArcGIS Enterprise 11.2 and later.
+
+</Note>
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the output format of the response. The default response format is `html`.
+
+Values: `html` | `json` | `pjson`
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sessionId`
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the client-generated session ID (GUID).
+
+Syntax : `sessionId = {3F2504E0-4F89-41D3-9A0C-0305E82C3301}` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`rows`
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the rows (features or objects) that will be used when posting a subset of edits in the current version to the default version. The object IDs provided must be edits in the current version, which can be obtained from the [`differences`](/differences) operation.
+
+When the `rows` parameter is used to post a subset of edits, the posted edits are no longer present in the version. All other features remain in the version. Another `reconcile` operation is required to see the posted features in the version.
+
+This parameter was introduced at ArcGIS Enterprise 10.9.
+
+<Note type={"note"}>
+
+The `rows` parameter only supports simple features, tables, and relationships. Additional support for utility network classes was introduced at ArcGIS Enterprise 11.3.
+
+</Note>
+
+Syntax:
+
+```javascript
+[
+ { 
+   "layerId" : <layerId>,
+   "objectIds" : [ <objectId> ] 
+ }
+]
+```
+
+Example:
+
+```javascript
+[
+  {
+     "layerId":0,
+     "objectIds":[1207,1208]
+  },
+  {
+     "layerId":1,
+     "objectIds":[809]
+  }
+]
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`async`
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether the request will be processed asynchronously. If `true` , the request will be processed as an asynchronous job, and a URL will be returned that a client can visit to review the status of the job. The default is `false` .
+
+Values: `true | false` 
+
+This parameter was introduced at ArcGIS Enterprise 10.9.1.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## JSON Response syntax
+
+JSON response (when async = false):
+
+```other
+{
+  "moment" : <datetime>,
+  "success" : <true | false>,
+  "error" : { // only if success is false
+    "extendedCode" : <HRESULT>,
+    "message" : <error message>,
+    "details" : [ <detail> ]
+  }
+}
+
+```
+
+ 
+
+JSON response (when async = true):
+
+```json
+{
+  "statusUrl" : <url>
+}
+
+```
+
+ 
+
+JSON response to the status URL (when pending or in progress):
+
+```json
+{
+  "status" : "<Pending | InProgress>",
+  "submissionTime" : <datetime>,
+  "lastUpdatedTime" : <datetime>
+ }
+
+```
+
+ 
+
+## Example usage
+
+Use the `post`  operation to post edits from a named version to the default version.
+
+### Example 1
+
+Use the `post`  operation to post all edits from a named version to the default version.
+
+Request URL and parameters:
+
+`https://myserver.esri.com/server/rest/services/LandUse/VersionManagementServer/versions/24417758-0DBD-4EC3-95B0-467CAA47FC43/post` 
+
+```javascript
+f=json
+sessionId={3E11BA55-9A50-4EDD-A694-D5C4F21CD40D}
+async=false
+
+```
+
+ 
+
+JSON response:
+
+```javascript
+{
+ "moment": 1602605793507,
+ "success": true
+}
+```
+
+ 
+
+### Example 2
+
+Use the `post`  operation to post a subset of edits from a named version to the default version using the `rows`  parameter. 
+
+The `objectIds`  values provided must be edits in the current version, which can be obtained from the `differences`  operation. In the example, the `objectIds`  values provided for the `rows`  parameter include a subset of edits with combinations of inserts, updates, and deletes. For layerId 0, objectIds 1207 and 1208 represent newly inserted features, and objectIds 12 and 14 are updated and deleted features. For layerId1, objectIds 809 represents an inserted feature.
+
+Request URL and parameters:
+
+`https://myserver.esri.com/server/rest/services/LandUse/VersionManagementServer/versions/24417758-0DBD-4EC3-95B0-467CAA47FC43/post` 
+
+```javascript
+f=json
+sessionId={3E11BA55-9A50-4EDD-A694-D5C4F21CD40D}
+rows=[
+  {
+     "layerId":0,
+     "objectIds":[1207,1208,12,14]
+  },
+  {
+     "layerId":1,
+     "objectIds":[809]
+  }
+]
+async=false
+
+```
+
+ 
+
+JSON response:
+
+```javascript
+{
+ "moment": 1602605793507,
+ "success": true
+}
+```
+
+ 

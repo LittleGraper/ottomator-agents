@@ -1,0 +1,113 @@
+---
+title: "Change Provider"
+description: "This operation updates the instance type (either shared or dedicated) for a service item."
+slug: "change-provider"
+url: "/change-provider"
+guid: "GUID-3BAB64AD-4F3B-42BF-ABFF-7D7D99FB9AA3"
+migratedTopicMetadata:
+  FTITLE: "Change Provider"
+  FDESCRIPTION: ""
+  FCHANGES: "Documenting the change provider operation for Endeavour"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9-*"
+  CREATED-ON: "17/11/2020 09:10:04"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "04/10/2021 10:30:55"
+  VERSION: "1"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "12"
+  ED: "GUID-40F689CB-5050-4E86-95C7-AFC191A74E6A"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /services/<ServiceName>.<ServiceType>/changeProvider
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /services/<ServiceName>.<ServiceType>/changeProvider
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed with either the "Update", "Delete", or "Security and infrastructure" privileges, or the Publisher role
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `changeProvider` operation updates an individual service to use either a dedicated or a shared instance type. When a qualified service is published, the service is automatically set to use shared instances. 
+
+When using this operation, services may populate other provider types as values for the provider parameter, such as `ArcObjects` and `SDS`. While these are valid provider types, this operation does not support changing the provider of such services to either `ArcObjects11` or `DMaps`. Services with `ArcObjects` or `SDS` as their provider cannot change their instance type.
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `provider` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the service instance as either a shared (`DMaps`) or dedicated (`ArcObjects11`) instance type. These values are case sensitive.
+
+      Values: `ArcObjects11` | `DMaps`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `changeProvider` operation:
+
+```other
+POST /context/admin/services/Hosted/TestMap.MapServer/changeProvider HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+provider=DMaps&f=pjson&token=IxAYQhLzYLltj1uu7l4eQ0bNjxb2O8uFD2EVSj35okQ-8SNpbJpZ3B6nfG8SU9FskJLWQNLkRrP6xJTZDoDz0n1MhLm7SCNo8VZWZR4RwBWmpQReLg9uMNv8gJB5cazHceuBjXu9kBbUnn6Laq36Z4TTQgfiPd3N2adEGcHKSDX9EwzSqyMg_YA1hjDhDJRn33o3VYiGMriW9i6duYcngjYdwTrVQLh2pOU6NgMmIj84CXeXrvlS0VmIK7e4KvxY
+
+```
+
+## JSON Response examples
+
+The following response indicates that the `changeProvider` operation was executed successfully:
+
+```other
+{"status": "success"}
+```
+
+The following error response occurs when a provider value that is incompatible with the service is set.
+
+```javascript
+{
+  "status": "error",
+  "messages": ["Changing the provider of the service 'TestMap.MapServer' to 'DMaps' is not permitted. "],
+  "code": 500
+}
+```

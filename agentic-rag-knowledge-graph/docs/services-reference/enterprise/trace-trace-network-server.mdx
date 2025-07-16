@@ -1,0 +1,789 @@
+---
+title: "Trace"
+description: "A trace refers to a preconfigured algorithm that systematically travels a network to return results."
+slug: "trace-trace-network-server"
+url: "/trace-trace-network-server"
+guid: "GUID-DA5B36B8-FF26-4F25-B1FB-BB2D18364919"
+migratedTopicMetadata:
+  FTITLE: "trace (Trace Network Server)"
+  FDESCRIPTION: ""
+  FCHANGES: "Removed Advanced Editing UTE license check in 11.2, see #10332"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "18/08/2023 12:52:57"
+  FAUTHOR: "jderose"
+  FSTATUS: "Released"
+  MODIFIED-ON: "28/08/2023 05:27:38"
+  VERSION: "7"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-A885FAAE-11B7-4EB3-9D8E-76B9756143BF"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/TraceNetworkServer/trace
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/TraceNetworkServer/trace
+  methods: 
+    - post
+  versionIntroduced: '10.9'
+---
+
+import GUID_000464AF_E658_4D8F_B158_BB44B44FA2D7_GUID_E5D7D08D_8267_47EC_953B_0094DB76F8DD from "./snippets/GUID-000464AF-E658-4D8F-B158-BB44B44FA2D7/_GUID-E5D7D08D-8267-47EC-953B-0094DB76F8DD";
+
+## Description
+
+A trace refers to a preconfigured algorithm that systematically travels a network to return results. Multiple parameters and properties are provided with the `trace` operation that support various analytic workflows. All traces use the network topology to read cached information about network features. This can improve performance of complex traces on large networks. Trace results may not accurately represent a trace network when dirty areas are present. The network topology must be validated to ensure that it reflects the most recent edits or updates made to the network.
+
+[Learn more about trace network trace types](https://pro.arcgis.com/en/pro-app/latest/help/data/trace-network/trace-network-trace-types.htm)
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The output format of the response. The default response format is `html`.
+
+```
+f=html | json | pjson
+``` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`gdbVersion`
+
+(Optional)   
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the name of the geodatabase version. The default is `sde.DEFAULT` .
+
+Syntax: `gdbVersion=<version>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sessionId`
+
+(Optional)   
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the token guid used to lock the version. If the calling client has previously started a service session (editing) and holds an exclusive lock on the specified version, the request will fail if the `sessionId` value is not provided. If the specified version is currently locked by any other session, the request will fail if the `sessionId` value is not provided or does not match the `sessionId` value that holds the exclusive lock.
+
+Syntax: `sessionId=<guid>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`moment` 
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the session moment. The default is the version current moment. This should only be provided by the client when they do not want to use the current moment.
+
+Syntax: `moment=<Epoch time in milliseconds>` 
+
+Example: `moment=1701505446` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`traceType` 
+
+(Required)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The `traceType` specifies the core algorithm that will be used to analyze the network. Trace types can be configured using the `traceConfiguration` properties.
+
+Values: `connected` | `upstream` | `downstream` | `shortestPath` 
+
+Syntax: `traceType=<traceType>` 
+
+Example: `traceType=shortestPath` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`traceLocations`
+
+(Required)   
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The locations for starting points and barriers. The trace location will be ignored by the trace if the `percentAlong` value is not provided for trace locations on edge features.
+
+Syntax: 
+
+```
+[
+ {
+  "traceLocationType" : "startingPoint" | "barrier", 
+  "globalId" : <guid>,
+  “percentAlong” : <double>, // optional
+ }
+]
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`traceConfiguration` 
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the collection of trace configuration properties. The required trace configuration properties are dependent on the trace type. To reference the collection of trace configuration properties, see the [traceConfiguration properties](/trace-trace-network-server#traceconfiguration-properties) section below.
+
+Syntax: `traceConfiguration=<traceConfiguration>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`traceConfigurationGlobalId` 
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+
+Specifies the global ID of a [named trace configuration](https://pro.arcgis.com/en/pro-app/latest/help/data/trace-network/about-trace-configurations.htm). When provided, this configuration is used instead of the `traceConfiguration` parameter. Additionally, trace configurations are persisted with their own trace type so the `traceType` parameter is ignored.
+
+
+Syntax: `traceConfigurationglobalId=<guid>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`resultTypes` 
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the types of results to return.  The `connectivity` type was introduced at ArcGIS Enterprise 10.9.1.
+
+
+Syntax :
+
+```json
+[
+  { 
+    "type" : `elements` | `aggregatedGeometry` | `connectivity`,
+    "includeGeometry" : true | false,
+    "includePropagatedValues": true | false,
+    "networkAttributeNames" :["attribute1Name","attribute2Name",...],
+    "diagramTemplateName": <value>, 
+    "resultTypeFields":[{"networkSourceId":<long>,"fieldname":<value>},...]
+  },...
+]
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## traceConfiguration properties
+
+The `traceConfiguration` parameter is a collection of trace configuration properties that includes basic properties for a trace and control trace settings for traversability, functions, and outputs.
+
+<StyledTable headers={"Property,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`includeBarriers` 
+
+(Optional) 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Property specifying whether barrier features that stop a trace will be included in the trace result. The default is `true`.
+
+```
+includeBarriers=true | false 
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`validateConsistency` 
+
+(Optional) 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Property specifying whether the consistency of the trace results will be validated. The default is `true`.
+
+```
+validateConsistency=true | false
+``` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`ignoreBarriersAtStartingPoints` 
+
+(Optional) 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Property specifying whether barriers will be ignored at starting points. The default is `false`.
+
+```
+ignoreBarriersAtStartingPoints=true | false
+``` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`shortestPathNetworkAttributeName` 
+
+(Optional) 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the name of the network attribute used for determining cost when calculating the shortest path.  This is a required property for a shortest path trace.
+
+Syntax: `shortestPathNetworkAttributeName=<string>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`allowIndeterminateFlow` 
+
+(Optional) 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Property specifying whether features with indeterminate flow will stop traversability and be included in the trace results. This property is only honored when running an upstream or downstream trace.
+
+```
+allowIndeterminateFlow=true | false
+``` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`traversabilityScope`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Property specifying which network element types the condition barriers or function barriers will apply to. The default is `junctionsAndEdges`.
+
+```
+traversabilityScope=junctions | edges | junctionsAndEdges
+``` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`conditionBarriers`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Property containing an array of objects that serve as barriers. Each condition in the array of `conditionBarriers` is a Boolean expression based on network attributes. If true, they indicate where a trace will stop (for example, stop at line features of a certain type such as 'Artificial Path'). The `conditionBarriers` property impacts traversability. The `type` value indicates whether the condition is based on a network attribute. If `isTypeSpecificValue` is `true`, the network attribute is compared to a specific value; otherwise, the network attribute is compared to another network attribute.  The default is null. 
+
+Syntax:
+
+```other
+[ 
+  { 
+  “name” : <string> 
+  “type” : “networkAttribute”      
+  “operator”: “equal” | “notEqual”  
+             | “greaterThan”     
+             | “greaterThanEqual |   
+             | “lessThan”  
+             | “lessThanEqual”  
+             | “includesTheValues” 
+             | “doesNotIncludeTheValues” 
+             | “includesAny” 
+             | “doesNotIncludeAny”   
+  “value” : <string> 
+  “combineUsingOr” : “true” | “false” 
+  “isTypeSpecificValue” : “true” | “false” 
+  } 
+]
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`functionBarriers` 
+
+(Optional)  
+
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+
+An array of Boolean expressions that are conditions based on function results. If true, they indicate where a trace will stop (for example, `‘add' Shape length 'greaterThan' 2000 'true’` indicates that the trace will stop after traversing a shape length of 2000 in any direction). `functionType` is the type of the function, `networkAttributeName` is the network attribute that will serve as the first operand of the expression, `operator` indicates which operator will be used in the function (`includesTheValues` , `doesNotIncludeTheValues` , `includesAny` , and `doesNotIncludeAny` are all bitwise operators), `value` is the second operand, and [`useLocalValues` ](https://pro.arcgis.com/en/pro-app/latest/help/data/trace-network/barriers.htm#ESRI_SECTION2_2973C831C3DC47D88F767B55B8A08DC0) indicates whether the trace will stop based on the function result at a particular network element (for example, local) or a global function result. 
+
+
+Syntax:
+
+```other
+[
+  {
+    "functionType" : "add" | "subtract" |
+                   "average" | "count" |
+                   "min" | "max",
+    "networkAttributeName" : <string>,
+    "operator" : "equal" | "notEqual"
+               | "greaterThan"
+               | "greaterThanEqual"
+               | "lessThan"
+               | "lessThanEqual"
+               | "includesTheValues"
+               | "doesNotIncludeTheValues"
+               | "includesAny"
+               | "doesNotIncludeAny",
+    "value" : <string>
+    "useLocalValues" : "true" | "false" 
+  }
+]
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`functions` 
+
+(Optional)  
+
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This is an array of objects representing functions. Each function can have an optional array of network attribute conditions.
+
+Syntax: 
+
+```json
+[
+  {
+    "functionType" : "add" | "subtract" 
+                   | "average" | "count" 
+                   | "min" | "max",
+    "networkAttributeName" : <string>, 
+    "conditions":
+    [
+      {
+        "name" : <string>,
+        "type" : "networkAttribute" | "category",
+        "operator" : "equal" | "notEqual" 
+               | "greaterThan"    
+               | "greaterThanEqual |  
+               | "lessThan" 
+               | "lessThanEqual" 
+               | "includesTheValues"
+               | "doesNotIncludeTheValues"
+               | "includesAny"
+               | "doesNotIncludeAny", 
+        "value" : <string>,
+        "combineUsingOr" : <true | false>,
+        "isSpecificValue" : <true | false>
+     }
+   ],
+   "summaryAttributeName" : <string> 
+ }
+]
+
+```
+
+ 
+
+<GUID_000464AF_E658_4D8F_B158_BB44B44FA2D7_GUID_E5D7D08D_8267_47EC_953B_0094DB76F8DD />
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outputConditions`
+
+(Optional)  
+
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Property specifying the type of features that will be returned based on a network attribute. 
+
+Each condition in the array of `outputConditions` is a Boolean expression based on network attributes. If true, they indicate which features will be returned with the trace. If this property is null, all features in the trace results will be returned. The `type` value indicates whether the condition is based on a network attribute. If `isSpecificValue` is true, the network attribute is compared to a specific value; otherwise, the network attribute is compared to another network attribute. 
+
+```javascript
+[
+ {
+  "name": "<string>",
+  "type": "networkAttribute",
+  "operator": "equal" | "notEqual"
+               | "greaterThan"
+               | "greaterThanEqual"
+               | "lessThan"
+               | "lessThanEqual"
+               | "includesTheValues"
+               | "doesNotIncludeTheValues"
+               | "includesAny"
+               | "doesNotIncludeAny",
+ 	"value": <string>,			
+  "combineUsingOr": <true | false>,
+  "isSpecificValue": <true | false>
+ }	
+] 
+```
+
+ 
+
+Example:
+
+```javascript
+[
+ {
+  "name": "Sinuosity Index",
+  "type": "networkAttribute",
+  "operator": "greaterThanEqual",
+  "value": 1,			
+  "combineUsingOr": false,
+  "isSpecificValue": true
+ }	
+]  
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## JSON Response syntax
+
+JSON response (when async = false):
+
+```other
+{
+  "traceResults" : {
+    "elements" : [
+      {
+        "networkSourceId" : <long>,
+        "globalId" : <guid>,
+        "objectId" : <oid>
+        "networkAttributes" : [           // optional
+          "<networkAttribute1>" : <long>, // optional
+          "<networkAttribute2>" : <long>  // optional
+        ],                                // optional
+        "positionFrom" : <double>,        // optional 
+        "positionTo" : <double>           // optional
+      }
+    ],
+    "aggregatedGeometry" : { 
+      "point" : <aggregated point geometry>, 
+      "line" : <aggregated line geometry>
+    }, 
+    "globalFunctionResults" : [
+      {
+        "functionType" : "add" | "average" | "count" | "max" | "min" | 
+                         "subtract",
+        "networkAttributeName" : <string>,
+        "result" : <double>
+      }
+    ],
+    "isConsistent" : <true | false>,
+    "startingPointsIgnored" : <true | false>,
+    "warnings" : [ <string> ]
+  }
+  "success" : <true | false>,
+  "error" : {                   // only if success is false
+    "extendedCode" : <HRESULT>,
+    "message" : <error message>,
+    "details" : [ <detail> ]
+  }
+}
+
+```
+
+ 
+
+JSON response (when async = true):
+
+```json
+{
+  "statusUrl" : <url>
+}
+
+```
+
+ 
+
+JSON response to the status URL (when pending or in progress):
+
+```json
+{
+  "status" : "<Pending | InProgress>",
+  "submissionTime" : <datetime>,
+  "lastUpdatedTime" : <datetime>
+ }
+
+```
+
+ 
+
+## Example usage
+
+Perform a downstream trace on a stream network to return a function result with the distance to the next artificial path. The `trace` operation request includes the `traceConfiguration` parameter.
+
+Request URL and parameters:
+
+`https://myserver.esri.com/server/rest/services/LandUse/traceNetworkServer/trace`
+
+ 
+
+```javascript
+f=json
+gdbVersion=SDE.DEFAULT
+sessionID={55DCF5E1-4DB9-478A-8B0C-65E5F37F5D16}
+moment=1554214441244
+traceType=downstream
+traceLocations=
+[
+ {
+  "traceLocationType": "startingPoint",
+  "globalId": "{BBF88249-6BAD-438F-9DBB-0E48DD89EECA}",
+  "percentAlong": 0.5805425412252266	
+ }
+]
+traceConfiguration=
+{
+ "includeBarriers": true,
+ "validateConsistency": true,
+ "ignoreBarriersAtStartingPoints": false,
+ "traversabilityScope": "junctionsAndEdges",
+ "conditionBarriers": [
+		{
+			"name": "FCode",
+			"type": "networkAttribute",
+			"operator": "equal",
+			"value": 55800,
+			"combineUsingOr": false,
+			"isSpecificValue": true
+		}
+ ],
+ "functionBarriers": [],
+ "functions": [
+		{
+			"functionType": "add",
+			"networkAttributeName": "Shape length",
+			"conditions": [],
+			"summaryAttributeName": ""
+		}
+	],
+ "outputConditions": []
+}
+async=false
+
+```
+
+ 
+
+JSON response:
+
+```javascript
+{
+	"traceResults": {
+		"elements": [
+			{
+				"networkSourceId": 2,
+				"globalId": "{88FAACB9-06F5-4DA1-B10A-C286CE522377}",
+				"objectId": 81943
+			},
+			{
+				"networkSourceId": 4,
+				"globalId": "{315E6006-C818-481C-AF2F-3A64C6715AAE}",
+				"objectId": 14305,
+				"positionFrom": 0,
+				"positionTo": 1
+			}
+		],
+		"sourceMapping": {
+			"1": "TN_5_Associations",
+			"2": "TN_5_SystemJunctions",
+			"3": "NHDPoint",
+			"4": "NHDFlowline"
+		},
+		"resultTypes": [
+			{
+				"type": "elements",
+				"includeGeometry": false,
+				"includePropagatedValues": false,
+				"includeDomainDescriptions": false,
+				"networkAttributeNames": [],
+				"diagramTemplateName": "",
+				"resultTypeFields": []
+			}
+		]
+	}
+},
+  "success": true
+}
+```
+
+ 

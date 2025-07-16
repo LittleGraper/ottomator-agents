@@ -1,0 +1,958 @@
+---
+title: "Distance Allocation"
+description: "The DistanceAllocation task calculates distance allocation for each cell to the provided sources based on straight-line distance, cost distance, true surface distance, as well as vertical and horizontal cost factors."
+slug: "distance-allocation"
+url: "/distance-allocation"
+guid: "GUID-F2761AA7-2D45-4C66-96CE-7A6E83F24E15"
+migratedTopicMetadata:
+  FTITLE: "Distance Allocation"
+  FDESCRIPTION: ""
+  FCHANGES: "remove quotes from fields"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1 - *"
+  CREATED-ON: "30/03/2023 14:41:27"
+  FAUTHOR: "egraham"
+  FSTATUS: "Released"
+  MODIFIED-ON: "03/04/2023 22:46:48"
+  VERSION: "5"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-5C807EED-E145-4C5F-9331-E23216EF1404"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/RasterAnalysisTools/GPServer/DistanceAllocation
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/RasterAnalysisTools/GPServer/DistanceAllocation
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: 10.8.1
+---
+
+import GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_3B03FCEA_6A0F_4AE2_A87F_517AED1D60BF from "./snippets/GUID-512E1710-163F-43F9-8ABC-FA35AE6DD5DF/_GUID-3B03FCEA-6A0F-4AE2-A87F-517AED1D60BF";
+import GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_3C3804F2_DF27_4AB4_8A26_39CB1316D7DD from "./snippets/GUID-512E1710-163F-43F9-8ABC-FA35AE6DD5DF/_GUID-3C3804F2-DF27-4AB4-8A26-39CB1316D7DD";
+import GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_F2432D7C_6B85_43BD_B98C_40AC9E9EBA22 from "./snippets/GUID-512E1710-163F-43F9-8ABC-FA35AE6DD5DF/_GUID-F2432D7C-6B85-43BD-B98C-40AC9E9EBA22";
+import GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_8F14A47B_448F_4A97_9AF3_539B5A3C476E from "./snippets/GUID-512E1710-163F-43F9-8ABC-FA35AE6DD5DF/_GUID-8F14A47B-448F-4A97-9AF3-539B5A3C476E";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_B6A25474_632C_4C8C_A3D0_7BFD099E83F9 from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-B6A25474-632C-4C8C-A3D0-7BFD099E83F9";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_21581ED5_8FA9_4E71_8351_888826C2C297 from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-21581ED5-8FA9-4E71-8351-888826C2C297";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_815F8859_2700_415A_BC42_E4F29F70F0E9 from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-815F8859-2700-415A-BC42-E4F29F70F0E9";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_CFD90B74_39D2_42E3_994D_3BEE143E2E03 from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-CFD90B74-39D2-42E3-994D-3BEE143E2E03";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_B0ACCB90_E6B7_4F66_A0DC_98FA889B2BC2 from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-B0ACCB90-E6B7-4F66-A0DC-98FA889B2BC2";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_E7DA044F_E4BB_4A7C_906E_CEB044B1B66E from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-E7DA044F-E4BB-4A7C-906E-CEB044B1B66E";
+import GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_59BC6D2B_4DDF_47B1_87EB_007154B11B73 from "./snippets/GUID-512E1710-163F-43F9-8ABC-FA35AE6DD5DF/_GUID-59BC6D2B-4DDF-47B1-87EB-007154B11B73";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_1F919D34_759B_4E6F_8D89_761EBB4D0C0A from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-1F919D34-759B-4E6F-8D89-761EBB4D0C0A";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_D261657B_2FD9_4153_BF7A_A755A033E36A from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-D261657B-2FD9-4153-BF7A-A755A033E36A";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_D72AC325_28AB_458F_A50D_0F49BB316731 from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-D72AC325-28AB-458F-A50D-0F49BB316731";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_F0288A96_5D37_4541_BF96_C49074270E38 from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-F0288A96-5D37-4541-BF96-C49074270E38";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_1ACC8430_38ED_43C6_B51D_1ED4614B4D09 from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-1ACC8430-38ED-43C6-B51D-1ED4614B4D09";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_5420936B_C45C_4FE8_A160_D7E38FE7B452 from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-5420936B-C45C-4FE8-A160-D7E38FE7B452";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_C29BFF77_700D_448B_8B99_333B10D7E802 from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-C29BFF77-700D-448B-8B99-333B10D7E802";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_F8FA22B9_FBAB_469D_885B_11E3EB5BFBEF from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-F8FA22B9-FBAB-469D-885B-11E3EB5BFBEF";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_47CF8A82_EA7E_41ED_B8E8_18A7F0ECBBCD from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-47CF8A82-EA7E-41ED-B8E8-18A7F0ECBBCD";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_8F939941_D24F_494D_9819_CCE876A9C1A5 from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-8F939941-D24F-494D-9819-CCE876A9C1A5";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_13512FA2_51CB_4EFF_95C5_B8BEA75F5516 from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-13512FA2-51CB-4EFF-95C5-B8BEA75F5516";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_56B279F3_2454_4DD0_9F92_D14284B011BA from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-56B279F3-2454-4DD0-9F92-D14284B011BA";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_83149872_8BFE_4D87_8F0C_2C6CB74EBAA4 from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-83149872-8BFE-4D87-8F0C-2C6CB74EBAA4";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_0F993342_BD52_472B_8BB8_BF5836EFE5E9 from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-0F993342-BD52-472B-8BB8-BF5836EFE5E9";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_542924AD_F720_4547_B854_61ADD5832A4E from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-542924AD-F720-4547-B854-61ADD5832A4E";
+import GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_7DAF83BA_8C7B_4344_A387_64FD74248BD1 from "./snippets/GUID-512E1710-163F-43F9-8ABC-FA35AE6DD5DF/_GUID-7DAF83BA-8C7B-4344-A387-64FD74248BD1";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_0D640251_D420_48D2_876B_354F6F33674D from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-0D640251-D420-48D2-876B-354F6F33674D";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_9F0E1ADC_9F7C_4B92_B562_E8A14A9B976B from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-9F0E1ADC-9F7C-4B92-B562-E8A14A9B976B";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_UL_2E584468774947BD8A78F86B4A0AD397 from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_UL_2E584468774947BD8A78F86B4A0AD397";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_C10E9BBF_4679_49DD_929F_2CAD04963D9A from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-C10E9BBF-4679-49DD-929F-2CAD04963D9A";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_UL_7534A9D2E8DB4D269BA099D40A4835FE from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_UL_7534A9D2E8DB4D269BA099D40A4835FE";
+import GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_E671F554_89D2_4CAD_B032_525E1CE90C18 from "./snippets/GUID-512E1710-163F-43F9-8ABC-FA35AE6DD5DF/_GUID-E671F554-89D2-4CAD-B032-525E1CE90C18";
+import GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_LI_1744B5CA044F44D8ABF2E27EF9BC9A27 from "./snippets/GUID-512E1710-163F-43F9-8ABC-FA35AE6DD5DF/_LI_1744B5CA044F44D8ABF2E27EF9BC9A27";
+import GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_LI_AD9814DB26DA439EA899971516D5E44D from "./snippets/GUID-512E1710-163F-43F9-8ABC-FA35AE6DD5DF/_LI_AD9814DB26DA439EA899971516D5E44D";
+import GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_LI_7566284934CF4B3BAFE1FBAA218408CB from "./snippets/GUID-512E1710-163F-43F9-8ABC-FA35AE6DD5DF/_LI_7566284934CF4B3BAFE1FBAA218408CB";
+import GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_LI_2DDA48A24C404781BB03BF05B81B3C19 from "./snippets/GUID-512E1710-163F-43F9-8ABC-FA35AE6DD5DF/_LI_2DDA48A24C404781BB03BF05B81B3C19";
+import GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_LI_E5BF6567427444E8B74C6B8212C56B99 from "./snippets/GUID-512E1710-163F-43F9-8ABC-FA35AE6DD5DF/_LI_E5BF6567427444E8B74C6B8212C56B99";
+import GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_9B5D5783_E386_45F7_8EA8_88843A1BB484 from "./snippets/GUID-512E1710-163F-43F9-8ABC-FA35AE6DD5DF/_GUID-9B5D5783-E386-45F7-8EA8-88843A1BB484";
+import GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_C771449E_6BA7_4CB4_9328_2C855A14B2B2 from "./snippets/GUID-512E1710-163F-43F9-8ABC-FA35AE6DD5DF/_GUID-C771449E-6BA7-4CB4-9328-2C855A14B2B2";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_556D285E_84C5_4783_B993_993E2F0C88AF from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-556D285E-84C5-4783-B993-993E2F0C88AF";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_2226FEA6_F5DC_4789_94CC_F93A000FF371 from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-2226FEA6-F5DC-4789-94CC-F93A000FF371";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_7EC4FE8D_68AE_4CBB_8618_504E37F3B018 from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-7EC4FE8D-68AE-4CBB-8618-504E37F3B018";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_7F5DC0A7_34E7_4457_B7FF_F0E475743020 from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-7F5DC0A7-34E7-4457-B7FF-F0E475743020";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_EB58ACA1_8E14_4A84_A273_44A6E3778D28 from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-EB58ACA1-8E14-4A84-A273-44A6E3778D28";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_1AFE303D_798A_4ECC_A09D_CC207D37B5C8 from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-1AFE303D-798A-4ECC-A09D-CC207D37B5C8";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_B750096E_3DDD_4F20_A258_C78C676D6188 from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-B750096E-3DDD-4F20-A258-C78C676D6188";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_BFFDC1FE_C60C_468A_8A3E_B612BDF78815 from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-BFFDC1FE-C60C-468A-8A3E-B612BDF78815";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_376065BA_D141_4680_AF02_BC9435A4B9BA from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-376065BA-D141-4680-AF02-BC9435A4B9BA";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_8A4135CF_E453_427D_B921_03A393C0E4B5 from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-8A4135CF-E453-427D-B921-03A393C0E4B5";
+import GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_7307E473_827B_42B4_A099_1813CA3AAF48 from "./snippets/GUID-C8AC828B-7267-4862-9377-BBCF20C720A8/_GUID-7307E473-827B-42B4-A099-1813CA3AAF48";
+import GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_1702083F_151C_4A0C_AF36_0D0DD9E2563A from "./snippets/GUID-512E1710-163F-43F9-8ABC-FA35AE6DD5DF/_GUID-1702083F-151C-4A0C-AF36-0D0DD9E2563A";
+import GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_4B398B66_01FD_40FB_9AEE_30371F0A8CD8 from "./snippets/GUID-512E1710-163F-43F9-8ABC-FA35AE6DD5DF/_GUID-4B398B66-01FD-40FB-9AEE-30371F0A8CD8";
+import GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_ED11CCC7_40D3_4ADD_A679_A3F6964834ED from "./snippets/GUID-512E1710-163F-43F9-8ABC-FA35AE6DD5DF/_GUID-ED11CCC7-40D3-4ADD-A679-A3F6964834ED";
+import GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_50D345C8_14F8_4A4A_AB1E_A6BBD19C49EF from "./snippets/GUID-512E1710-163F-43F9-8ABC-FA35AE6DD5DF/_GUID-50D345C8-14F8-4A4A-AB1E-A6BBD19C49EF";
+import GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_9370F058_5BA7_4BA3_8D9F_EFB8ADF723C0 from "./snippets/GUID-512E1710-163F-43F9-8ABC-FA35AE6DD5DF/_GUID-9370F058-5BA7-4BA3-8D9F-EFB8ADF723C0";
+
+## Description
+
+![Distance Allocation task diagram](./images/GUID-2843B88C-B69A-43FB-A93B-B8D7ABCF95EA-web.png)
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_3B03FCEA_6A0F_4AE2_A87F_517AED1D60BF />
+
+To properly handle the edge of the projection at a global extent when performing distance analysis at a global scale, ensure that either a cylindrical projection or a geographic output coordinate system is used in conjunction with the `Geodesic` option for the `Distance Method` parameter.
+
+Example applications include the following:
+
+-   Identifies the allocated areas that field workers are responsible for covering.
+-   Identifies areas that are allocated to habitat patches for bobcats.
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`inputSourceRasterOrFeatures` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A layer that identifies the locations from or to which the least accumulated cost distance for every output cell location is calculated.
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_3C3804F2_DF27_4AB4_8A26_39CB1316D7DD />
+
+Raster input examples:
+
+```javascript
+"inputSourceRasterOrFeatures":{"itemID": <portal item ID>}
+"inputSourceRasterOrFeature":{"url": <image service layer url>}
+```
+
+ 
+
+Feature input examples:
+
+```javascript
+//Feature layer URL
+"inputSourceRasterOrFeatures":{"url": <feature service layer url>}
+
+//Feature collection
+"inputSourceRasterOrFeatures":{"layerDefinition": {}, "featureSet": {}}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sourceField` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A field on the `inputSourceRasterOrFeatures`  layer that holds the values that define each source.
+
+Syntax: This can be an integer or a string field of the source dataset.
+
+Example:
+
+```javascript
+"sourceField": Boundary1
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outputDistanceAllocationRasterName` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The output allocation image service name that will be created.
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_F2432D7C_6B85_43BD_B98C_40AC9E9EBA22 />
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_8F14A47B_448F_4A97_9AF3_539B5A3C476E />
+
+Output name example:
+
+```javascript
+"outputDistanceAllocationRasterName":{"serviceProperties":{"name":"testrasteranalysis"}}
+```
+
+ 
+
+Output raster examples:
+
+```javascript
+//Output portal item
+"outputDistanceAllocationRasterName":{"itemId": <portal item Id>}
+
+//Output URL
+"outputDistanceAllocationRasterName":{"url": <image service URL>}
+
+//Output raster layer service
+"outputDistanceAllocationRasterName":{"serviceProperties":
+  {"name":"testrasteranalysis",
+    "serviceUrl":"https://<server name>/server/rest/services/Hosted/testrasteranalysis/ImageServer"},
+  "itemProperites":"{"itemId":"8cfbd3ec25584d0d8f4ed23b8ff7c43b","folderId":"sdfwerfbd3ec25584d0d8f4"}
+}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`inputBarrierRasterOrFeatures` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_B6A25474_632C_4C8C_A3D0_7BFD099E83F9 />
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_21581ED5_8FA9_4E71_8351_888826C2C297 />
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_815F8859_2700_415A_BC42_E4F29F70F0E9 />
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_3C3804F2_DF27_4AB4_8A26_39CB1316D7DD />
+
+Raster input examples:
+
+```javascript
+"inputBarrierRasterOrFeatures":{"itemID": <portal item ID>}
+"inputBarrierRasterOrFeatures":{"url": <image service layer url>}
+```
+
+ 
+
+Feature input examples:
+
+```javascript
+//Feature layer URL
+"inputBarrierRasterOrFeatures":{"url": <feature service layer url>}
+
+//Feature collection
+"inputBarrierRasterOrFeatures":{"layerDefinition": {}, "featureSet": {}}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`inputSurfaceRaster` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_CFD90B74_39D2_42E3_994D_3BEE143E2E03 />
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_B0ACCB90_E6B7_4F66_A0DC_98FA889B2BC2 />
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_E7DA044F_E4BB_4A7C_906E_CEB044B1B66E />
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_59BC6D2B_4DDF_47B1_87EB_007154B11B73 />
+
+Examples:
+
+```javascript
+//Portal item as input raster
+"inputSurfaceRaster": {"itemId": <portal item Id>}
+
+//URL as input raster
+"inputSurfaceRaster": {"url": <image service layer url>}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`inputCostRaster` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_1F919D34_759B_4E6F_8D89_761EBB4D0C0A />
+
+The values of the cost raster can be integer or floating point. Negative and zero are invalid values but will be treated as very small positive cost values.
+
+Cost raster values that are negative or zero are invalid but will be treated as small positive values. The accumulative cost algorithm is a multiplicative process, and it cannot calculate accumulative cost correctly if cost values are negative or zero.
+If your cost raster does contain those values, and those locations are to represent areas that should be excluded from the analysis, those cells should be turned into NoData before running the tool. 
+Note that NoData is treated as a barrier in this analysis, so any locations that are NoData in the input will be NoData in the result.
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_59BC6D2B_4DDF_47B1_87EB_007154B11B73 />
+
+Examples:
+
+```javascript
+//Portal item as input raster
+"inputCostRaster": {"itemId": <portal item id>}
+
+//URL as input raster
+"inputCostRaster": {"url": <image service layer url>}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`inputVerticalRaster` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_D261657B_2FD9_4153_BF7A_A755A033E36A />
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_59BC6D2B_4DDF_47B1_87EB_007154B11B73 />
+
+Examples:
+
+```javascript
+//Portal item as input raster
+"inputVerticalRaster": {"itemId": <portal item id>}
+
+//URL as input raster
+"inputVerticalRaster": {"url": <image service layer url>}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`verticalFactor` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_D72AC325_28AB_458F_A50D_0F49BB316731 />
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_F0288A96_5D37_4541_BF96_C49074270E38 />
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_1ACC8430_38ED_43C6_B51D_1ED4614B4D09 />
+
+Values: `BINARY`  \| `LINEAR`  \| `SYMMETRIC_LINEAR`  \| `INVERSE_LINEAR`  \| `SYMMETRIC_INVERSE_LINEAR`  \| `COS`  \| `SEC`  \| `COS_SEC`  \| `SEC_COS`  \|  `HIKING_TIME`  \|  `BIDIR_HIKING_TIME`  \| `TABLE` 
+
+Characteristics: Zero factor | Low cut angle | High Cut Angle | Slope
+
+Syntax: This parameter is a string.
+
+Examples:
+
+```javascript
+"verticalFactor": "BINARY 1 30"
+
+"verticalFactor": "LINEAR 1 -60 60 0.02"
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`inputHorizontalRaster` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_5420936B_C45C_4FE8_A160_D7E38FE7B452 />
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_59BC6D2B_4DDF_47B1_87EB_007154B11B73 />
+
+Examples:
+
+```javascript
+//Portal item as input raster
+"inputHorizontalRaster": {"itemId": <portal item Id>}
+
+//URL as input raster
+"inputHorizontalRaster": {"url": <image service layer url>}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`horizontalFactor` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_C29BFF77_700D_448B_8B99_333B10D7E802 />
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_F8FA22B9_FBAB_469D_885B_11E3EB5BFBEF />
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_47CF8A82_EA7E_41ED_B8E8_18A7F0ECBBCD />
+
+Values: `BINARY`  \| `FORWARD`  \| `LINEAR`  \| `INVERSE_LINEAR`  \| `TABLE` 
+
+Characteristics: Zero factor | Cut angle | Slope | Side value
+
+Syntax: The parameter is a string.
+
+Examples:
+
+```javascript
+"horizontalFactor": "BINARY 1 30"
+
+"horizontalFactor": "LINEAR 1 -60 60 0.02"
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outputDistanceAccumulationRasterName` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The output distance image service name that will be created.
+
+This calculates, for each cell, the accumulative distance to the closest source.
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_F2432D7C_6B85_43BD_B98C_40AC9E9EBA22 />
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_8F14A47B_448F_4A97_9AF3_539B5A3C476E />
+
+Output name example:
+
+```javascript
+"outputDistanceAccumulationRasterName":{"serviceProperties":{"name":"testrasteranalysis"}}
+```
+
+ 
+
+Output raster examples:
+
+```javascript
+//Output portal item
+"outputDistanceAccumulationRasterName":{"itemId": <portal item id>}
+
+//Output URL
+"outputDistanceAccumulationRasterName":{"url": <image service url>}
+
+//Output raster layer service
+"outputDistanceAccumulationRasterName":{"serviceProperties":
+  {"name":"testrasteranalysis",
+    "serviceUrl":"https://<server name>/server/rest/services/Hosted/testrasteranalysis/ImageServer"},
+  "itemProperties":{"itemId":"8cfbd3ec25584d0d8f4ed23b8ff7c43b","folderId":"sdfwerfbd3ec25584d0d8f4"}
+}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outputBackDirectionRasterName` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_8F939941_D24F_494D_9819_CCE876A9C1A5 />
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_13512FA2_51CB_4EFF_95C5_B8BEA75F5516 />
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_56B279F3_2454_4DD0_9F92_D14284B011BA />
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_F2432D7C_6B85_43BD_B98C_40AC9E9EBA22 />
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_8F14A47B_448F_4A97_9AF3_539B5A3C476E />
+
+Output name example:
+
+```javascript
+"outputBackDirectionRasterName":{"serviceProperties":{"name":"testrasteranalysis"}}
+```
+
+ 
+
+Output raster examples:
+
+```javascript
+//Output portal item
+"outputBackDirectionRasterName":{"itemId": <portal item id>}
+
+//Output URL
+"outputBackDirectionRasterName":{"url": <image service url>}
+
+//Output raster layer service
+"outputBackDirectionRasterName":{"serviceProperties":
+  {"name":"testrasteranalysis",
+    "serviceUrl":"https://<server name>/server/rest/services/Hosted/testrasteranalysis/ImageServer"},
+  "itemProperties":{"itemId":"8cfbd3ec25584d0d8f4ed23b8ff7c43b","folderId":"sdfwerfbd3ec25584d0d8f4"}
+}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outputSourceDirectionRasterName` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_83149872_8BFE_4D87_8F0C_2C6CB74EBAA4 />
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_0F993342_BD52_472B_8BB8_BF5836EFE5E9 />
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_F2432D7C_6B85_43BD_B98C_40AC9E9EBA22 />
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_8F14A47B_448F_4A97_9AF3_539B5A3C476E />
+
+Output name example:
+
+```javascript
+"outputSourceDirectionRasterName":{"serviceProperties":{"name":"testrasteranalysis"}}
+```
+
+ 
+
+Output raster examples:
+
+```javascript
+//Output portal item
+"outputSourceDirectionRasterName":{"itemId": <portal item id>}
+
+//Output URL
+"outputSourceDirectionRasterName":{"url": <image service url>}
+
+//Output raster layer service
+"outputSourceDirectionRasterName":{"serviceProperties":
+  {"name":"testrasteranalysis",
+    "serviceUrl":"https://<server name>/server/rest/services/Hosted/testrasteranalysis/ImageServer"},
+  "itemProperties":{"itemId":"8cfbd3ec25584d0d8f4ed23b8ff7c43b","folderId":"sdfwerfbd3ec25584d0d8f4"}
+}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outputSourceLocationRasterName` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_542924AD_F720_4547_B854_61ADD5832A4E />
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_F2432D7C_6B85_43BD_B98C_40AC9E9EBA22 />
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_8F14A47B_448F_4A97_9AF3_539B5A3C476E />
+
+Output name example:
+
+```javascript
+"outputSourceLocationRasterName":{"serviceProperties":{"name":"testrasteranalysis"}}
+```
+
+ 
+
+Output raster examples:
+
+```javascript
+//Output portal item
+"outputSourceLocationRasterName":{"itemId": <portal item id>}
+
+//Output URL
+"outputSourceLocationRasterName":{"url": <image service url>}
+
+//Output raster layer service
+"outputSourceLocationRasterName":{"serviceProperties":
+  {"name":"testrasteranalysis",
+    "serviceUrl":"https://<server name>/server/rest/services/Hosted/testrasteranalysis/ImageServer"},
+  "itemProperties":{"itemId":"8cfbd3ec25584d0d8f4ed23b8ff7c43b","folderId":"sdfwerfbd3ec25584d0d8f4"}
+}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sourceInitialAccumulation` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The starting cost from which to begin the cost calculations.
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_7DAF83BA_8C7B_4344_A387_64FD74248BD1 />
+
+Examples:
+
+```javascript
+//Double example
+"sourceInitialAccumulation": 2.7
+
+//Field example
+"sourceInitialAccumulation": startCost
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sourceMaximumAccumulation` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Defines the maximum accumulative cost of the traveler from a source.
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_7DAF83BA_8C7B_4344_A387_64FD74248BD1 />
+
+Examples:
+
+```javascript
+//Double example
+"sourceMaximumAccumulation": 100
+
+//Field example
+"sourceMaximumAccumulation": MaximumAccumCost
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sourceCostMultiplier` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Multiplier to apply to the cost values.
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_7DAF83BA_8C7B_4344_A387_64FD74248BD1 />
+
+Examples:
+
+```javascript
+//Double example
+"sourceCostMultiplier": 2
+
+//Field example
+"sourceCostMultiplier": sourceMult
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sourceDirection` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_0D640251_D420_48D2_876B_354F6F33674D />
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_9F0E1ADC_9F7C_4B92_B562_E8A14A9B976B />
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_UL_2E584468774947BD8A78F86B4A0AD397 />
+
+Example:
+
+```javascript
+"sourceDirection": "TO_SOURCE"
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`distanceMethod` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_C10E9BBF_4679_49DD_929F_2CAD04963D9A />
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_UL_7534A9D2E8DB4D269BA099D40A4835FE />
+
+Example:
+
+```javascript
+"distanceMethod": "GEODESIC"
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`context` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_E671F554_89D2_4CAD_B032_525E1CE90C18 />
+
+-   <GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_LI_1744B5CA044F44D8ABF2E27EF9BC9A27 />
+-   <GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_LI_AD9814DB26DA439EA899971516D5E44D />
+-   <GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_LI_7566284934CF4B3BAFE1FBAA218408CB />
+-   <GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_LI_2DDA48A24C404781BB03BF05B81B3C19 />
+-   <GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_LI_E5BF6567427444E8B74C6B8212C56B99 />
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_9B5D5783_E386_45F7_8EA8_88843A1BB484 />
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_C771449E_6BA7_4CB4_9328_2C855A14B2B2 />
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Horizontal factor additional information
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_556D285E_84C5_4783_B993_993E2F0C88AF />
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_2226FEA6_F5DC_4789_94CC_F93A000FF371 />
+
+### Horizontal factor keywords
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_7EC4FE8D_68AE_4CBB_8618_504E37F3B018 />
+
+### Horizontal factor keyword characteristics
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_7F5DC0A7_34E7_4457_B7FF_F0E475743020 />
+
+### Default values
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_EB58ACA1_8E14_4A84_A273_44A6E3778D28 />
+
+| Keywords |  Zero factor | Cut angle | Slope | Side value |
+| ------ | ------ | ------ | ------ | ------ |
+| Binary   | 1.0   | 45   | ~   | ~   |
+| Forward   | 0.5   | 45 (fixed)   | ~   | 1.0   |
+| Linear   | 0.5   | 181   | 1/90   | ~   |
+| Inverse linear   | 2.0   | 180   | -1/90   | ~   |
+
+## Vertical factor additional information
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_B750096E_3DDD_4F20_A258_C78C676D6188 />
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_BFFDC1FE_C60C_468A_8A3E_B612BDF78815 />
+
+### Vertical factor keywords
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_376065BA_D141_4680_AF02_BC9435A4B9BA />
+
+### Vertical factor keyword characteristics
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_8A4135CF_E453_427D_B921_03A393C0E4B5 />
+
+### Default values
+
+<GUID_C8AC828B_7267_4862_9377_BBCF20C720A8_GUID_7307E473_827B_42B4_A099_1813CA3AAF48 />
+| Keywords |  Zero factor | Low cut angle | High cut angle | Slope |  Power | Cos power | Sec power |
+| ------ | ------ | ------ | ------ | ------ | ------ | ------ | ------ |
+| Binary   | 1.0   | -30   | 30   | ~   | ~   | ~   | ~   |
+| Linear   | 1.0   | -90   | 90   | 1/90   | ~   | ~   | ~   |
+| Symmetric linear   | 1.0   | -90   | 90   | 1/90   | ~   | ~   | ~   |
+| Inverse linear   | 1.0   | -45   | 45   | -1/45   | ~   | ~   | ~   |
+| Symmetric inverse linear   | 1.0   | -45   | 45   | -1/45   | ~   | ~   | ~   |
+| Cos   | ~   | -90   | 90   | ~   | 1.0  | ~   | ~   |
+| Sec   | ~   | -90   | 90   | ~   | 1.0  | ~   | ~   |
+| Cos_sec   | ~   | -90   | 90   | ~   | ~   | 1.0   | 1.0   |
+| Sec_cos   | ~   | -90   | 90   | ~   | ~   | 1.0   | 1.0   |
+| Hiking time   | ~   | -70   | 70   | ~  | ~   | ~   | ~   |
+| Bidirectional hiking time   | ~   | -70   | 70   | ~   | ~   | ~   | ~   |
+
+## Response
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_1702083F_151C_4A0C_AF36_0D0DD9E2563A />
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_4B398B66_01FD_40FB_9AEE_30371F0A8CD8 />
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_ED11CCC7_40D3_4ADD_A679_A3F6964834ED />
+
+```javascript
+https://<raster analysis tools url>/DistanceAllocation/jobs/<jobId>
+```
+
+ 
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_50D345C8_14F8_4A4A_AB1E_A6BBD19C49EF />
+
+```javascript
+https://<raster analysis tools url>/DistanceAllocation/jobs/<jobId>/results/<output parameter>
+```
+
+ 
+
+## Example usage
+
+Below is a sample request URL for `DistanceAllocation` .
+
+```javascript
+https://services.myserver.com/arcgis/rest/services/System/RasterAnalysisTools/GPServer/DistanceAllocation/submitJob
+```
+
+ 
+
+## JSON Response syntax
+
+The response returns the `outputDistanceAllocationRaster` , `outputDistanceAccumulationRaster` , `outputBackDirectionRaster` , `outputSourceDirectionRaster` , and `outputSourceLocationRaster`  output parameters, which have properties for parameter name, data type, and value. The content of value is always the `itemId`  of the output raster dataset and the image service URL.
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_9370F058_5BA7_4BA3_8D9F_EFB8ADF723C0 />
+
+## JSON Response example
+
+```other
+{
+  "paramName": "outputDistanceAllocationRaster",
+  "dataType": "GPString",
+  "value": {
+    "itemId": "f121390b85ef419790479fc75b493efd",
+    "url": "https://<server name>/arcgis/rest/services/Hosted/<service name>/ImageServer"
+  }
+}
+```
+
+ 

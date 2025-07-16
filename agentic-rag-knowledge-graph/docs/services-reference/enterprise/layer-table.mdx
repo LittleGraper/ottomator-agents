@@ -1,0 +1,803 @@
+---
+title: "Layer / Table"
+description: "An individual layer/table resource represents a single layer/table in a map of a map service published by ArcGIS Server."
+slug: "layer-table"
+url: "/layer-table"
+guid: "GUID-76C894BD-4BDF-41AA-A13D-0DEED1A72781"
+migratedTopicMetadata:
+  FTITLE: "Layer-Table"
+  FDESCRIPTION: ""
+  FCHANGES: "Changes for 11.1"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1 - *"
+  CREATED-ON: "03/04/2023 16:50:28"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "18/04/2023 13:25:45"
+  VERSION: "16"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-88E67EC7-87FA-4F2B-850E-100B7A5A82CF"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<layerOrTableId>
+  urlSegments:
+    - name: <mapservice-url>
+      url: /map-service
+    - name: /<layerOrTableId>
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '9.3'
+  requiredCapability: Map
+---
+
+## Description
+
+An individual layer/table resource represents a single layer/table in a map of a map service published by ArcGIS Server. It provides basic information about the layer/table such as its name, type, and fields. For layers, it provides additional information about the layer such as its parent and sublayers, minimum and maximum scales, extent, and copyright text.
+
+If a layer is authored with display expression and not a display field, `displayField`  will be the first field used in the display expression.
+
+`supportsStatistics`  and `supportsAdvancedQueries`  are dependent on the layer data source.
+
+`supportsStatistics`  would return false in the following scenarios:
+
+-   The layer / table resides in a workspace other than an enterprise or file geodatabase.
+-   The layer / table has more than one join defined on it.
+-   The layer / table is joined with another layer / table from a different workspace.
+-   The layer / table has an outer join and where the workspace is earlier than 10.1, Geodatabase and application server connection is used.
+
+`supportsAdvancedQueries`  would return false in the following scenarios:
+
+-   The layer / table resides in a workspace other than an enterprise database or File Geodatabase.
+-   The layer / table is joined with another layer / table from a different workspace.
+
+## New at 11.4
+
+-   A new property, `uniqueIdInfo` was added that describes if a layer or a table, typically a query layer, supports non-integer based identifiers.
+    - `type` is `simple` when a single field is used to define unique identifiers for features or rows.
+    - `type` is `composite` when attributes from more than one fields are used to uniquely identify a feature or row in a layer or table.
+    - `fields` reports which field(s) are chosen by the author as identifier field(s).
+    - when `OIDFieldContainsHashValue` is `true`, clients should ignore or avoid using values from the objectid field. These values are randomly generated.
+-   A new property, `maxUniqueIDCount` reports the maximum number of unique-ids be returned in a query call.
+-   A new property, `maxSelectionCount` reports the maximum number of object-ids or unique-ids are allowed to pass in an `export` operation's `selectionDefinitions` parameter.
+- Values for `maxUniqueIDCount` and `maxSelectionCount` can be modified in a service definition.
+
+## New at 11.1
+
+-   A new property, `supportedSpatialRelationships` , was added that lists the supported spatial operators for the layer.
+-   A new property, `featureReduction` , was added to describe cluster renderers.
+-   The `orderBy`  property was added to report on the feature drawing order. When this property is included as part of the [export](/export-map) operation's `dynamicLayers`  parameter, the following rules are used to interpret the values:
+
+    -   When `orderBy`  is not present in the layer definition, or is null, the layer's default `orderBy`  is used (if the layer has a default for `orderBy` ).
+    -   If `orderBy`  is an empty array, `orderBy`  will be removed from the layer.
+
+## New in 10.9
+
+-   `preferredTimeReference`  is added as new property to allow the author recommend which time zone a client application should display all date-time values for this layer.
+
+    -   `dateFieldsTimeReference`  must be set to a time zone (i.e. cannot be null) when `preferredTimeReference`  is set.
+-   When a layer has features with date-time values from multiple time zones and you want to keep those date-time values as-is (not convert them to a single time zone), you need to set `datesInUnknownTimezone`  to `true` .
+
+    -   When `datesInUnknownTimezone`  is `true` , both `preferredTimeReference`  and `dateFieldsTimeReference`  must not be set.
+
+        -   When `datesInUnknownTimezone`  is `true` , date-time values, in a map service query results, are returned encoded numbers representing milliseconds since epoch (January 1, 1970) in each local time zone and don't get converted to UTC.
+
+            Client applications must not perform any time zone conversion with these data.
+        -   When `datesInUnknownTimezone`  is `false` , date-time values, in a map service query results, are returned encoded numbers representing milliseconds since epoch (January 1, 1970) in UTC.
+
+            Client applications can perform any time zone conversion with these data since they are all returned in UTC.
+-   The `SupportsLOD`  property indicates if the ability to do lod queries can be turned on for a feature service layer. Lod queries have been turned on and can be queried when the layer includes an `lodInfos`  property. This allows to get tessellation of regularly shaped polygons such as hexagons, rectangles, square etc. Attributes for each features represent aggregated results from the point features fall within them.
+
+    <Note type={"note"}>
+
+    This property is only true when the layer is enabled with Feature Binning capability in ArcGIS Pro.
+
+    </Note>
+-   Two new properties are added in `advancedQueryCapabilities`  section for map service published from ArcGIS Pro. 
+
+    -   `supportsTimeRelation`  allows client applications like ArcGIS Pro to have more control while working with time-aware layers using time sliders. You can decide whether to include or exclude start or end time.
+    -   `supportsSqlFormat`  allows client applications use SQL conforms to standardized queries specifications when `useStandardizedQueries`  is `false` .
+-   `supportsPercentileStatistics`  is `true`  for layers/tables off a File Geodatabase.
+-   Layers that have `hasAttachments`  and `supportsQueryAttachments`  both as `true`  now have the following features:
+
+    <Note type={"note"}>
+
+    These features apply to only to map services published from ArcGIS Pro.
+
+    </Note>
+
+    -   The `attachmentProperties`  object is included for ArcGIS Enterprise feature services. This was already a feature for ArcGIS Online hosted feature services. 
+    -   A new fieldname property that can be used with the `queryAttachments`  operation's `attachmentsDefinitionExpression`  parameter to limit results based on values in the attachment table.
+    -   Enterprise hosted feature services support both `keywords`  and `exifInfo`  (`isEnabled`  as `true` ). These columns are added automatically when publishing a new feature services with attachments, or enabling attachments on an existing layer. If upgrading from an earlier release, the `keywords`  and `exifInfo`  columns will not be available. However, they can be added using the [`updateDefinition` ](/update-definition-feature-layer) operation. Hosted feature services in ArcGIS Online already support attachment columns.
+    -   New attachment properties, `id`  and `globalid` , have been added for all feature service layers that support attachments, including ArcGIS Online hosted feature services.
+    -   A new `attachmentFields`  object lists information about the attachment fields, such as the type and length. The `attachmentFields` `name`  property can be matched to the `attachmentProperties` `fieldName`  property. This information can be used to properly format queries and understand limits in the field length response. Only fields that match properties with `isEnabled`  as `true`  will be listed in `attachmentFields` .
+    -   Field names are now returned in addition to the field properties in the `queryAttachments`  operation response. If the field name and property name match, including case, only one value is returned in the response to represent both field and property. As best practice, it is best to go by the fieldname rather than the property when consuming this in an application.
+
+## New in 10.8
+
+-   `referenceScale`  is added as a new property to represent the scale at which the size of a symbol and text for layer, if participates, is fixed.
+
+    This property is only available when `canScaleSymbols`  is `true` .
+
+## New in 10.7.1
+
+-   `supportedQueryFormats`  now includes `pbf`  (protocol buffer), a compact binary encoding for geographic data.
+
+## New in 10.6.1
+
+-   New property named `archivingInfo`  is added. 
+-   `supportsCountDistinct`  property added inside the `advancedQueryCapabilities`  element.
+-   New property named `hasMetadata`  is added. This value is true when the service is published using ArcGIS Pro 2.2 or later, false otherwise.
+-   If `hasMetadata`  is true, the layer / table supports `iteminfo` , `thumbnail` , and `metadata`  resources.
+
+## New in 10.6
+
+-   New property named `displayFieldExpressionInfo`  is added; it returns the tile of the expression and an Arcade expression. 
+
+    -   When a layer is authored with `displayExpression` , its resources still report `displayField` , which is a field picked from the Arcade expression or the default displayField, in case the expression does not have any field in it.
+
+## New in 10.5.1
+
+-   `returnDomainNames`  is a parameter on the layer resource in which domain information includes only the domain name. The domain names can be matched with the full domain information as returned by the [queryDomains](/query-domains-feature-service) operation. This approach is a more efficient way to work with domains, as it requires returning the full domain information only once instead of with each layer.
+
+## New in 10.5
+
+-   Layer reports its `sourceSpatialReference` , which can be different than what is in its `extent`  or its container map service's spatial reference.
+-   Added new flags:
+
+    -   `supportsDatumTransformation`  to indicate the layer supports datum transformation while query results get projected.
+    -   `supportsSqlExpression`  indicates that the layer/table supports sql expressions in query operation's `orderBy` , `groupByFieldsForStatistics`  and `outStatistics` .
+-   New properties are added to report ranges and parameterized filters:
+
+    -   `rangeInfos`  returns a list of available ranges including their names, current values, and full extent.
+    -   `parameterInfos`  returns a list of available parameterized filters. These are preauthored filters to limit what you want to query or display. This is like `layerDefs`  except that layerDefs requires you to pass in an entire sql where clause whereas for parameterized filters, you need to pass in the name-value pair.
+-   `returnUpdates`  response includes updated full spatial extent when the layer is from an enterprise geodatabase.
+
+## New in 10.3.1
+
+-   `supportsStatistics`  supports Query Layers, for example, such as layers / tables defined by a SQL query from a database, geodatabase archived layer, and so on.
+-   Layers from file geodatabases support pagination (`supportsPagination`  property). Other supported workspaces include Altibase, Hana, Oracle 12c (and later releases), PostgreSQL, SQLite, and SQL Server 2012 (and later releases). The following are not supported: DB2, Informix, Netezza, and Teradata.
+
+## New in 10.3
+
+-   All properties related to query are grouped inside `advancedQueryCapabilities` . See section below titled 'advancedQueryCapabilities' for more information.
+-   `supportsPagination`  indicates whether the layer supports pagination in a query result.
+-   `supportsTrueCurve`  indicates whether the service supports accepting and returning true curves as a segment of a polyline or polygon.
+-   `supportsAdvancedQueries`  is split into `supportsOrderBy`  and `supportsDistinct` .
+
+## New in 10.2
+
+-   A new property is reported to indicate whether the layer requires the use of standardized queries—`useStandardizedQueries` . A value of `true`  indicates the layer requires the use of standardized queries, a value of `false`  indicates otherwise. Learn more about [standardized queries](https://enterprise.arcgis.com/en/server/latest/administer/windows/about-standardized-queries.htm).
+-   Layer / table resources no longer report the existing definition expression set in the source map document.
+
+## New in 10.1 SP1
+
+-   If ownership-based access control is enabled on features, `ownershipBasedAccessControlForFeatures`  property of a layer will include an `allowOthersToQuery`  property.
+-   `supportsAdvancedQueries`  is true if the layer/table supports `returnDistinctValues`  parameter in a query operation.
+
+## New in 10.1
+
+-   Layer resource supports a new parameter (`returnUpdates` ) that accepts a Boolean value. Pass this parameter to retrieve updated `timeExtent`  for the layer.
+-   Layer now supports a new operation, [generateRenderer](/generate-renderer-map-service-layer). Use this to generate [class breaks](/renderer-objects/#class-breaks-renderer) or a [unique value](/renderer-objects/#unique-value-renderer) renderer. 
+-   A new property, `canModifyLayer`  was added. Use this property on the [ Layer / Table resource](/layer-table) to determine if a layer supports modifying its [renderer](/renderer-objects) and/or [data source](/data-source-object). 
+-   Layer resource contains `hasLabels`  to indicate whether the layer has labels defined on it, and `canScaleSymbols`  if the text and symbols on the layer will change as the map scale varies.
+-   Layer resource contains `hasLiveData`  that returns a Boolean value. This value is true if the layer's data gets updated frequently. This property is independent of `hasLiveData`  that is available on the map service resource. 
+-   Layer resource contains `maxRecordCount`  that represents the maximum number of records that can be returned by `query` , `find` , and `identify operations` .
+-   Layer resource contains `supportsStatistics`  that indicates whether the layer supports statistical functions in query operations and `supportsAdvancedQueries`  to indicate if the layer supports `orderByFields`  in a query operation. 
+-   Layer resource contains `supportedQueryFormats` . This value indicates the supported output formats for a query operation.
+-   Layer resource contains `hasZ`  and `hasM`  to indicate whether the layer geometry contains z- or m-values, respectively.
+-   Layer resource now returns `role, cardinality, keyField, composite, relationshipTableId` , and `keyFieldInRelationshipTable`  properties for `relationships` .
+-   Layer resource now returns two new properties: `effectiveMinScale`  and `effectiveMaxScale` . Effective minimum and maximum scale are calculated based on the `minScale`  and `maxScale`  values of the current layer and its ancestors. These represent the effective minimum and maximum scales at which the layer is visible.
+-   Layer resource includes `isDataVersioned`  if the layer is versioned.
+
+## New in 10.0
+
+-   The layer/table resource represents a single layer/table in a map of a map service published by ArcGIS Server. It provides basic information about the layer/table such as its name, type, and fields. For layers, it provides additional information about the layer such as its parent and sublayers, minimum and maximum scales, extent, and copyright text. In 10.0 and later, it also provides information regarding the relationship of this layer/table with other layers/tables in the map service. A property to indicate whether the layer/table has attachments was also added at 10.0.
+-   Support for time-aware layers/tables was added at 10.0. If a layer/table supports querying and exporting maps based on time, the response will include a `timeInfo`  property that includes information such as the start time field (or the time instance field), the end time field, the track ID field, the layer's time extent, and the suggested draw time interval.
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnUpdates` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If value is `true` , returns updated time extent. If the layer is not time-aware, returns an empty response.
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnDomainNames` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If the value is `true` , then domain information provided in the layer includes only the domain name. To get the full domain information, use the [queryDomains](/query-domains-map-service) operation in the service resource. This domain, included in the layer, can be used to link to the full domain information via the domain name. If the value is `false`  or not set, full domain information is included in the layer as it was in past releases.
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` .
+
+Values: `html`  \| `json` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## `advancedQueryCapablities` 
+
+-   `advancedQueryCapabilities`  capabilities are dependent on the support of these functionality by the layer/table's datasource. As a map service author, you do not have any control to turn them on or off except for `useStandardizedQueries` .
+
+    For example:
+
+    -   A layer referring to a shapefile will return false for `supportsStatistics` , `supportsOrderBy` , `supportsPagination` , and so on, and you will not be able to make use of `outStatistics` , `orderByFields` , or `resultOffset`  and `resultRecordCount` , respectively, in a `query`  operation request.
+    -   Whereas, a layer referring to a FeatureClass from an Enterprise Database will most likely return true for `supportsStatistics` , `supportsOrderBy` , `supportsPagination` , and so on.
+-   When `useStandardizedQueries`  is true, you must conform a `where`  clause and any expression you pass in `orderByFields` , `outStatistics` , and so on to ArcGIS Server standardizedQueries specifications. When it is false, you can pass in SQL expression that conforms to the source database. As an admin, you can disable StandardizedQueries for all services running on a server instance.
+-   `supportsStatistics`  indicates that you can pass values in a `query`  operation's `outStatistics`  parameter to get some statistical results for that layer/table.
+-   `supportsOrderBy`  indicates that you can get a query result sorted by ascending or descending order based on values from one or multiple fields or expression (when `supportsSqlExpression`  is true) by passing in values to `orderByFields` .
+-   `supportsDistinct`  indicates that you can make a query to retrieve unique values from a field or fields specified in the `outFields` .
+-   `supportsPagination`  indicates whether the layer supports paging through query result. When it is supported, you can use `resultOffset`  or `resultRecordCount`  to fetch, for example, the first 10 records and then make subsequent request to fetch next the 10 records. To support pagination, a supported workspace must be used: Altibase, Hana, Oracle 12c (and later releases), PostgreSQL, SQLite, and SQL Server 2012 (and later releases). The following are not supported: file geodatabase, DB2, Informix, Netezza, and Teradata.
+-   `supportsTrueCurve`  indicates whether the service supports accepting and returning true curves as a segment of a polyline or polygon.
+-   `supportsReturningQueryExtent`  indicates pass true to `returnExtentOnly`  to return an extent covering all features in a query result, instead of returning features.
+-   When `supportsQueryWithDistance`  is true, you can pass include a buffer `distance`  in a query request.
+-   `supportsSqlExpression`  indicates that the layer/table supports sql expressions in query operation's `orderBy` , `groupByFieldsForStatistics`  and `outStatistics` .
+
+## Example usage
+
+### Example one
+
+The following is a sample request URL used to access a specific layer (id 3) in the Census map service:
+
+[https://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer/3](https://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer/3/)
+
+### Example two
+
+The following is a sample request URL used to access an individual layer/table resource, which demonstrates using the `returnUpdates`  parameter to return updated temporal information:
+
+[https://sampleserver6.arcgisonline.com/arcgis/rest/services/Hurricanes/MapServer/0?returnUpdates=true&f=pjson](http://sampleserver6.arcgisonline.com/arcgis/rest/services/Hurricanes/MapServer/0?returnUpdates=true&f=pjson)
+
+## JSON Response syntax
+
+Below is an example of the JSON response syntax:
+
+```other
+{
+  "currentVersion": <currentVersion>,
+  "id": <layerOrTableId>,
+  "name": "<layerOrTableName>",
+  "type": "<layerOrTableType>", //for tables, the type will be "Table"
+  "description": "<description>",
+  "definitionExpression": "<definitionExpression>",
+  //properties specific to layers only
+  "geometryType": "<geometryType>",
+  "hasZ": <true|false>,
+  "hasM": <true|false>,
+  "copyrightText": "<copyrightText>",
+  "parentLayer": {
+    "id": <parentLayerId>,
+    "name": "<parentLayerName>"
+  },
+  "subLayers": [
+    {
+      "id": <subLayerId1>,
+      "name": "<subLayerName1>"
+    },
+    {
+      "id": <subLayerId2>,
+      "name": "<subLayerName2>"
+    }
+  ],
+  "minScale": <minScale>,
+  "maxScale": <maxScale>,
+  "effectiveMinScale": <effectiveMinScale>,
+  "effectiveMaxScale": <effectiveMaxScale>,
+  "defaultVisibility": <true | false>,
+  "extent": <envelope>,
+  //from 10 onward - if the layer / table supports querying and exporting maps based on time
+  "timeInfo": {
+    "startTimeField": "<startTimeFieldName>",
+    "endTimeField": "<endTimeFieldName>",
+    "trackIdField": "<trackIdFieldName>",
+    "timeExtent": [<startTime>, <endTime>],
+    "timeReference": {
+      "timeZone": "<timeZone>",
+      "respectsDaylightSaving": <true | false>
+    },
+    "timeInterval": <timeInterval>,
+    "timeIntervalUnits": "<timeIntervalUnits>",
+    //the default time-related export options for this layer
+    "exportOptions": {
+      //If true, use the time extent specified by the time parameter
+      "useTime": < true | false >,
+      //If true, draw all the features from the beginning of time for that data
+      "timeDataCumulative": < true | false >,
+      //Time offset for this layer so that it can be overlaid on the top of a previous or future time period
+      "timeOffset": <timeOffset1>,
+      "timeOffsetUnits": "<esriTimeUnitsCenturies | esriTimeUnitsDays | esriTimeUnitsDecades |
+                           esriTimeUnitsHours | esriTimeUnitsMilliseconds | esriTimeUnitsMinutes |
+                           esriTimeUnitsMonths | esriTimeUnitsSeconds | esriTimeUnitsWeeks | esriTimeUnitsYears |
+                           esriTimeUnitsUnknown>"
+    }
+    "hasLiveData": <true | false>,
+  },
+  //for feature layers only
+  "drawingInfo": {
+    "renderer": <renderer>,
+    "transparency": <transparency>,
+    "labelingInfo": <labelingInfo>
+  },
+  "orderBy": [ //Added at 11.1
+    {
+      "field":"<fieldName>",
+      "order": "<asc | desc>"
+    }
+  ],
+  "featureReduction": { //Added at 11.1
+    "type": "cluster",
+    "clusterRadius": double,
+    "clusterMinSize": double,
+    "clusterMaxSize": double,
+    "showLabels": <true | false>,
+    "drawingInfo": {
+      "labelingInfo": <labelingInfo>
+    },
+    "visibilityInfo": {
+      "type": "scale",
+      "maxScale": double
+    }
+  },
+  //indicates whether the layer / table has attachments or not
+  "hasAttachments": <true | false>,
+  //indicates whether the layer / table has htmlPopups
+  "htmlPopupType": "<esriServerHTMLPopupTypeNone | esriServerHTMLPopupTypeAsURL | esriServerHTMLPopupTypeAsHTMLText>",
+  //layer / table field information
+  "displayField": "<displayFieldName>",
+  //the typeIdField is new at 10.0
+  "typeIdField": "<typeIFieldName>",
+  //fields of type (String, Date, GlobalID, GUID and XML) have an additional length property
+  //the field domains are also included
+  "fields": [
+    {
+      "name": "<fieldName1>",
+      "type": "<fieldType1>",
+      "alias": "<fieldAlias1>",
+      "length": "<length1>",
+      "domain": <domain1>
+    },
+    {
+      "name": "<fieldName2>",
+      "type": "<fieldType2>",
+      "alias": "<fieldAlias2>",
+      "length": "<length2>",
+      "domain": <domain2>
+    }
+  ],
+  //if the layer has sub-types, they'll be included
+  "types": [
+    {
+      "id": <typeId1>,
+      "name": "<typeName1>",
+      "domains": {
+        "<domainField11>": <domain11>,
+        "<domainField12>": <domain12>
+      }
+    },
+    {
+      "id": <typeId2>,
+      "name": "<typeName2>",
+      "domains": {
+        "<domainField11>": <domain21>,
+        "<domainField12>": <domain22>
+      }
+    }
+  ],
+  //if the layer / table participates in relationships with other layers / tables
+  "relationships": [
+    {
+      "id": <relationshipId1>,
+      "name": "<relationshipName1>",
+      "relatedTableId": <relatedTableId1>,
+      "role": "<esriRelRoleOrigin>|<esriRelRoleDestination>";,//Added at 10.1
+      "cardinality": "<esriRelCardinalityOneToOne>|<esriRelCardinalityOneToMany>|<esriRelCardinalityManyToMany>";,//Added at 10.1
+      "keyField": "<keyFieldName2>",//Added at 10.1
+      "composite": <true>|<false>,//Added at 10.1
+      "relationshipTableId": <attributedRelationshipClassTableId>,  //Added in 10.1. Returned only for attributed relationships
+      "keyFieldInRelationshipTable": "<key field in AttributedRelationshipClass table that matches keyField>" //Added in 10.1. Returned only for attributed relationships
+    },
+    {
+      "id": <relationshipId2>,
+      "name": "<relationshipName2>",
+      "relatedTableId": <relatedTableId2>,
+      "role": "<esriRelRoleOrigin>|<esriRelRoleDestination>";,//Added at 10.1
+      "cardinality": "<esriRelCardinalityOneToOne>|<esriRelCardinalityOneToMany>|<esriRelCardinalityManyToMany>";,//Added at 10.1
+      "keyField": "<keyFieldName2>",//Added at 10.1
+      "composite": <true>|<false>,//Added at 10.1
+      "relationshipTableId": <attributedRelationshipClassTableId>,  //Added in 10.1. Returned only for attributed relationships
+      "keyFieldInRelationshipTable": "<key field in AttributedRelationshipClass table that matches keyField>" //Added in 10.1. Returned only for attributed relationships
+    }
+  ],
+  "maxRecordCount": <recordCount>,
+  //if the layer / table supports modifying its renderer, data source, or join information.
+  "canModifyLayer": <true | false>,
+  //if the layer / table supports statistical functions in query operation.
+  "supportsStatistics": <true | false>,
+  //if the layer / table supports orderBy parameter in query operation.
+  "supportsAdvancedQueries": <true | false>,
+  //if the layer has labels defined on it.
+  "hasLabels": <true | false>,
+  //if the layer renders its symbols based on scale.
+  "canScaleSymbols": <true | false>,
+  //comma separated list of supported capabilities - e.g. "Map,Query,Data"
+  "capabilities": "<capabilities>",
+  //comma separated list of supported query output formats - e.g. "JSON"
+  "supportedQueryFormats": "<supported query output formats>",
+  //true if the layer is versioned.
+  "isDataVersioned": <true | false>,
+  "ownershipBasedAccessControlForFeatures": {
+    "allowOthersToQuery": <true | false>
+  },
+  "supportedSpatialRelationships": [
+    "esriSpatialRelIntersects",
+    "esriSpatialRelContains",
+    "esriSpatialRelCrosses",
+    "esriSpatialRelEnvelopeIntersects",
+    "esriSpatialRelIndexIntersects",
+    "esriSpatialRelOverlaps",
+    "esriSpatialRelTouches",
+    "esriSpatialRelWithin",
+    "esriSpatialRelRelation"
+  ],
+  //container for below properties.
+  "advancedQueryCapabilities": {
+    "useStandardizedQueries": <true | false>,
+    "supportsStatistics": <true | false>,
+    "supportsOrderBy": true,
+    "supportsDistinct": true,
+    "supportsPagination": false,
+    "supportsTrueCurve": true
+  }
+}
+```
+
+ 
+
+## JSON Response syntax
+
+When `returnUpdates`  is `true` :
+
+```javascript
+{
+  "id": <layer id>,
+  "timeExtent": [
+    <start time>,
+    <end time>
+  ],
+  "fullExtent": {
+    "xmin": <xmin>,
+    "ymin": <ymin>,
+    "xmax": <xmax>,
+    "ymax": <ymax>,
+    "spatialReference": <spatialReference>
+  }
+}
+```
+
+ 
+
+## JSON Response example
+
+```other
+{
+  "currentVersion": 11.1,
+  "id": 0,
+  "name": "BuildingPermits",
+  "type": "Feature Layer",
+  "description": "",
+  "geometryType": "esriGeometryPoint",
+  "copyrightText": "",
+  "parentLayer": null,
+  "subLayers": [],
+  "minScale": 0,
+  "maxScale": 0,
+  "drawingInfo": {
+    "renderer": {
+      "type": "simple",
+      "symbol": {
+        "type": "esriSMS",
+        "style": "esriSMSCircle",
+        "color": [
+          135,
+          99,
+          0,
+          255
+        ],
+        "size": 4,
+        "angle": 0,
+        "xoffset": 0,
+        "yoffset": 0,
+        "outline": {
+          "color": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "width": 1
+        }
+      },
+      "label": "",
+      "description": ""
+    },
+    "transparency": 0,
+    "labelingInfo": null
+  },
+  "featureReduction": {
+    "type": "cluster",
+    "clusterRadius": double,
+    "clusterMinSize": double,
+    "clusterMaxSize": double,
+    "showLabels": true | false,
+    "drawingInfo": {
+      "labelingInfo": <labelingInfo>
+    },
+    "visibilityInfo": {
+      "type": "scale",
+      "maxScale": double
+    }
+  },
+  "defaultVisibility": true,
+  "extent": {
+    "xmin": -1.366377185708964E7,
+    "ymin": 5699225.41829418,
+    "xmax": -1.3663618388213603E7,
+    "ymax": 5699411.767458527,
+    "spatialReference": {
+      "wkid": 102100,
+      "latestWkid": 3857
+    }
+  },
+  "hasAttachments": false,
+  "htmlPopupType": "esriServerHTMLPopupTypeNone",
+  "displayField": "CITYNAME",
+  "typeIdField": null,
+  "fields": [
+    {
+      "name": "RECORD",
+      "type": "esriFieldTypeDouble",
+      "alias": "RECORD",
+      "domain": null
+    },
+    {
+      "name": "PERMITDATE",
+      "type": "esriFieldTypeDate",
+      "alias": "PERMITDATE",
+      "length": 36,
+      "domain": null
+    },
+    {
+      "name": "PERMIT_NO",
+      "type": "esriFieldTypeString",
+      "alias": "PERMIT_NO",
+      "length": 15,
+      "domain": null
+    },
+    {
+      "name": "CITYNAME",
+      "type": "esriFieldTypeString",
+      "alias": "CITYNAME",
+      "length": 17,
+      "domain": null
+    },
+    {
+      "name": "VALUE",
+      "type": "esriFieldTypeDouble",
+      "alias": "VALUE",
+      "domain": null
+    },
+    {
+      "name": "SQFT",
+      "type": "esriFieldTypeDouble",
+      "alias": "SQFT",
+      "domain": null
+    },
+    {
+      "name": "TLID",
+      "type": "esriFieldTypeString",
+      "alias": "TLID",
+      "length": 17,
+      "domain": null
+    },
+    {
+      "name": "SUBDIV",
+      "type": "esriFieldTypeString",
+      "alias": "SUBDIV",
+      "length": 63,
+      "domain": null
+    },
+    {
+      "name": "LOT",
+      "type": "esriFieldTypeString",
+      "alias": "LOT",
+      "length": 11,
+      "domain": null
+    },
+    {
+      "name": "BLOCK",
+      "type": "esriFieldTypeString",
+      "alias": "BLOCK",
+      "length": 7,
+      "domain": null
+    },
+    {
+      "name": "WORK_DESC",
+      "type": "esriFieldTypeString",
+      "alias": "WORK_DESC",
+      "length": 111,
+      "domain": null
+    },
+    {
+      "name": "CONST_TYPE",
+      "type": "esriFieldTypeString",
+      "alias": "CONST_TYPE",
+      "length": 13,
+      "domain": null
+    },
+    {
+      "name": "STRUCT_TYP",
+      "type": "esriFieldTypeString",
+      "alias": "STRUCT_TYP",
+      "length": 12,
+      "domain": null
+    },
+    {
+      "name": "NO_UNITS",
+      "type": "esriFieldTypeDouble",
+      "alias": "NO_UNITS",
+      "domain": null
+    },
+    {
+      "name": "ADDRESS",
+      "type": "esriFieldTypeString",
+      "alias": "ADDRESS",
+      "length": 37,
+      "domain": null
+    },
+    {
+      "name": "X_COORD",
+      "type": "esriFieldTypeDouble",
+      "alias": "X_COORD",
+      "domain": null
+    },
+    {
+      "name": "Y_COORD",
+      "type": "esriFieldTypeDouble",
+      "alias": "Y_COORD",
+      "domain": null
+    },
+    {
+      "name": "CODE",
+      "type": "esriFieldTypeString",
+      "alias": "CODE",
+      "length": 13,
+      "domain": null
+    },
+    {
+      "name": "RuleID",
+      "type": "esriFieldTypeInteger",
+      "alias": "RuleID",
+      "domain": null
+    },
+    {
+      "name": "OwnerName",
+      "type": "esriFieldTypeString",
+      "alias": "OwnerName",
+      "length": 50,
+      "domain": null
+    },
+    {
+      "name": "OBJECTID",
+      "type": "esriFieldTypeOID",
+      "alias": "OBJECTID",
+      "domain": null
+    },
+    {
+      "name": "Permit_Status",
+      "type": "esriFieldTypeString",
+      "alias": "Permit_Status",
+      "length": 10,
+      "domain": null
+    }
+  ],
+  "relationships": [
+    {
+      "id": 0,
+      "name": "for taslot",
+      "relatedTableId": 2,
+      "role": "esriRelRoleDestination",
+      "keyField": "TLID",
+      "cardinality": "esriRelCardinalityOneToMany",
+      "composite": false
+    },
+    {
+      "id": 1,
+      "name": "owns TaxLots",
+      "relatedTableId": 2,
+      "role": "esriRelRoleDestination",
+      "keyField": "OwnerName",
+      "cardinality": "esriRelCardinalityOneToMany",
+      "composite": false
+    }
+  ],
+  "canModifyLayer": false,
+  "canScaleSymbols": false,
+  "hasLabels": false,
+  "capabilities": "Map,Query,Data",
+  "maxRecordCount": 1000,
+  "supportsStatistics": true,
+  "supportsAdvancedQueries": true,
+  "supportedQueryFormats": "JSON, geoJSON, PBF",
+  "isDataVersioned": true,
+  "ownershipBasedAccessControlForFeatures": {"allowOthersToQuery": true},
+  "useStandardizedQueries": true,
+  "supportedSpatialRelationships": [
+    "esriSpatialRelIntersects",
+    "esriSpatialRelContains",
+    "esriSpatialRelCrosses",
+    "esriSpatialRelEnvelopeIntersects",
+    "esriSpatialRelIndexIntersects",
+    "esriSpatialRelOverlaps",
+    "esriSpatialRelTouches",
+    "esriSpatialRelWithin",
+    "esriSpatialRelRelation"
+  ],
+  "advancedQueryCapabilities": {
+    "useStandardizedQueries": true,
+    "supportsStatistics": true,
+    "supportsOrderBy": true,
+    "supportsDistinct": true,
+    "supportsPagination": false,
+    "supportsTrueCurve": true,
+    "supportsReturningQueryExtent": true,
+    "supportsQueryWithDistance": true
+  },
+  "dateFieldsTimeReference": null
+}
+```
+
+ 

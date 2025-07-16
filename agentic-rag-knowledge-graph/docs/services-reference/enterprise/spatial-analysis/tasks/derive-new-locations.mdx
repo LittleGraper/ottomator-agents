@@ -1,0 +1,430 @@
+---
+title: "Derive New Locations"
+description: "API reference for the Derive New Locations service available on ArcGIS Online."
+slug: "derive-new-locations"
+url: "/spatial-analysis/tasks/derive-new-locations"
+redirectFrom:
+  - /derive-new-locations
+guid: "GUID-9444EBA2-58D5-40CE-A732-A66C9BEF2114"
+migratedTopicMetadata:
+  FTITLE: "Derive New Locations"
+  FDESCRIPTION: ""
+  FCHANGES: "Added notes to spatial params"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "agol2023.R03-*:11.2-*"
+  CREATED-ON: "19/09/2023 21:28:14"
+  FAUTHOR: "aring"
+  FSTATUS: "Released"
+  MODIFIED-ON: "27/09/2023 04:55:21"
+  VERSION: "7"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-45000CED-F0A7-41D1-A26E-5A0054905398"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata: {}
+---
+
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_UL_91A5DAE053434F89B846CB8F05288542 from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_UL_91A5DAE053434F89B846CB8F05288542";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_D95DEC58_7F27_491A_AF3D_6E6A3C0A6F2D from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-D95DEC58-7F27-491A-AF3D-6E6A3C0A6F2D";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E836F966_C272_43B1_9BF9_55BA03755A13 from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-E836F966-C272-43B1-9BF9-55BA03755A13";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E671F554_89D2_4CAD_B032_525E1CE90C18 from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-E671F554-89D2-4CAD-B032-525E1CE90C18";
+
+![Derive New Locations](../../images/GUID-4A756008-8431-4AA5-BD42-7135296560DD-web.png)
+
+The Derive New Locations task creates new features from the input layers that meet a query you specify. A query is made up of one or more expressions. There are two types of expressions: attribute and spatial. An example of an attribute expression is that a parcel must be vacant, which is an attribute of the Parcels layer (`where STATUS = 'VACANT'`). An example of a spatial expression is that the parcel must also be within a certain distance of a river (`Parcels within a distance of 0.75 Miles from Rivers`).
+
+The Derive New Locations task is similar to the Find Existing Locations task. The main difference is that the result of **Derive New Locations** can contain partial features.
+
+-   In both tasks, the attribute expression `where` and the spatial relationships `within` and `contains` return the same result. This is because these relationships return entire features.
+-   When `intersects` or `withinDistance` is used, Derive New Locations creates new features in the result. For example, when intersecting a parcel feature and a flood zone area that partially overlap each other, Find Existing Locations will return the entire parcel whereas Derive New Locations will return only the portion of the parcel that is within the flood zone.
+
+## Request URL
+
+```javascript
+http://<analysis url>/DeriveNewLocations/submitJob
+```
+## Request Parameters
+<StyledTable headers={"Parameter,Description"}>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `inputLayers`
+
+         (Required)
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         A list of layers that will be used in the `expressions` parameter.
+
+         Each layer in the list can be:
+
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_UL_91A5DAE053434F89B846CB8F05288542 />
+
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_D95DEC58_7F27_491A_AF3D_6E6A3C0A6F2D />
+
+         _Example list of URLs:_
+         ```javascript
+         [
+             {"url": "http://someservices.arcgis.com/ees4FIJk4mpkX1ID/arcgis/rest/services/LAParkSitingData/FeatureServer/0"},
+             {"url": "http://someservices.arcgis.com/ees4FIJk4mpkX1ID/arcgis/rest/services/LAParkSitingData/FeatureServer/1"},
+             {"url": "http://someservices.arcgis.com/ees4FIJk4mpkX1ID/arcgis/rest/services/LAParkSitingData/FeatureServer/2"}
+         ]
+         ```
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `expressions`
+
+         (Required)
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         This is a list of expressions. There are two types of expressions, attribute and spatial.
+
+         _Example attribute expression:_
+         ```javascript
+         {
+             "operator": "and",
+             "layer": 0,
+             "where": "STATUS = 'VACANT'"
+         }
+         ```
+         Notes:
+         -   `operator` can be either `and` or `or`
+         -   `layer` is the index of the layer in the `inputLayers` parameter.
+         -   The `where` clause must be surrounded by double quotes.
+         -   When dealing with text fields, values must be single-quoted (`'VACANT'`).
+         -   Date fields support all queries except LIKE. Dates are strings in `YYYY:MM:DD hh:mm:ss` format. Here's an example using the date field `ObsDate`:
+         -   `"where": "ObsDate >=  '1998-04-30 13:30:00' "`
+         <StyledTable headers={"Operator,Description"}>
+           <StyledTableRow>
+              <StyledTableCell cellStyle="markdown">
+                 `=`
+              </StyledTableCell>
+              <StyledTableCell cellStyle="markdown">
+                 Equal
+              </StyledTableCell>
+           </StyledTableRow>
+           <StyledTableRow>
+              <StyledTableCell cellStyle="markdown">
+                 `>`
+              </StyledTableCell>
+              <StyledTableCell cellStyle="markdown">
+                 Greater than
+              </StyledTableCell>
+           </StyledTableRow>
+           <StyledTableRow>
+              <StyledTableCell cellStyle="markdown">
+                 `<`
+              </StyledTableCell>
+              <StyledTableCell cellStyle="markdown">
+                 Less than
+              </StyledTableCell>
+           </StyledTableRow>
+           <StyledTableRow>
+              <StyledTableCell cellStyle="markdown">
+                 `>=`
+              </StyledTableCell>
+              <StyledTableCell cellStyle="markdown">
+                 Greater than or equal to
+              </StyledTableCell>
+           </StyledTableRow>
+           <StyledTableRow>
+              <StyledTableCell cellStyle="markdown">
+                 `<=`
+              </StyledTableCell>
+              <StyledTableCell cellStyle="markdown">
+                 Less than or equal to
+              </StyledTableCell>
+           </StyledTableRow>
+           <StyledTableRow>
+              <StyledTableCell cellStyle="markdown">
+                 `<>`
+              </StyledTableCell>
+              <StyledTableCell cellStyle="markdown">
+                 Not equal
+              </StyledTableCell>
+           </StyledTableRow>
+           <StyledTableRow>
+              <StyledTableCell cellStyle="markdown">
+                 `LIKE '% <string>'`
+              </StyledTableCell>
+              <StyledTableCell cellStyle="markdown">
+                 A percent symbol (%) signifies a wildcard, meaning that anything is acceptable in its place—one character, a hundred characters, or no character. This expression would select Mississippi and Missouri among USA state names:
+
+                 `STATE_NAME LIKE 'Miss%'`
+              </StyledTableCell>
+           </StyledTableRow>
+           <StyledTableRow>
+              <StyledTableCell cellStyle="markdown">
+                 `BETWEEN <value1> AND <value2>`
+              </StyledTableCell>
+              <StyledTableCell cellStyle="markdown">
+                 Selects a record if it has a value greater than or equal to &lt;value1> and less than or equal to &lt;value2>. For example, this expression selects all records with an HHSIZE value greater than or equal to 3 and less than or equal to 10:
+
+                 `HHSIZE BETWEEN 3 AND 10`
+
+                 The above is equivalent to:
+
+                 `HHSIZE >= 3 AND HHSIZE <= 10`
+
+                 This operator applies to numeric or date fields. Here is an example of a date query on the field `ObsDate`:
+
+                 `ObsDate BETWEEN '1998-04-30 00:00:00' AND '1998-04-30 23:59:59'`
+
+                 Time is optional.
+              </StyledTableCell>
+           </StyledTableRow>
+           <StyledTableRow>
+              <StyledTableCell cellStyle="markdown">
+                 `NOT BETWEEN <value1> AND <value2>`
+              </StyledTableCell>
+              <StyledTableCell cellStyle="markdown">
+                 Selects a record if it has a value outside the range between &lt;value1> and &lt;value2>. For example, this expression selects all records whose HHSIZE value is less than 5 and greater than 7:
+
+                 `HHSIZE NOT BETWEEN 5 AND 7`
+
+                 The above is equivalent to:
+
+                 `HHSIZE < 5 OR HHSIZE > 7`
+
+                 This operator applies to numeric or date fields.
+              </StyledTableCell>
+           </StyledTableRow>
+        </StyledTable>
+
+         _Example spatial expression:_
+         ```javascript
+         {
+             "operator": "and",
+             "layer": 0,
+             "spatialRel": "withinDistance",
+             "selectingLayer": 1,
+             "distance": 10,
+             "units": "miles"
+         }
+         ```
+         -   The `operator` can be either `and` or `or`
+         -   The `layer` is the index of the layer in the `inputLayers` parameter. The result of the expression is features in this layer.
+         -   The `selectingLayer` is the index of the layer in the `inputLayers` parameter that is used to define the spatial relationship with features in the `layer`.
+         -   The `spatialRel` is the spatial relationship. There are nine spatial relationships.
+
+         <StyledTable headers={"spatialRel,Description"}>
+           <StyledTableRow>
+              <StyledTableCell cellStyle="markdown">
+                 `intersects`
+
+                 `notIntersects`
+              </StyledTableCell>
+              <StyledTableCell cellStyle="markdown">
+                 ![Intersects](../../images/GUID-8DF6DE51-5212-4D57-8323-DF6D77894F84-web.png)
+
+                 A feature in `layer` passes the intersect test if it overlaps any part of a feature in `selectingLayer`, including touches (where features share a common point).
+                 -   `intersects`—If a feature in `layer` intersects a feature in `selectingLayer`, the portion of the feature in `layer` that intersects the feature in `selectingLayer` is included in the output.
+                 -   `notIntersects`—If a feature in `layer` intersects a feature in `selectingLayer`, the portion of the feature in `layer` that intersects the feature in `selectingLayer` is excluded from the output.
+              </StyledTableCell>
+           </StyledTableRow>
+           <StyledTableRow>
+              <StyledTableCell cellStyle="markdown">
+                 `withinDistance`
+
+                 `notWithinDistance`
+              </StyledTableCell>
+              <StyledTableCell cellStyle="markdown">
+                 ![withinDistance](../../images/GUID-0D67A4D2-E0E8-46CB-86A2-5C8BB6DBD44B-web.png)
+
+                 The within a distance relationship uses the straight-line distance between features in `layer` to those in `selectingLayer`.
+                 -   `withinDistance`—The portion of the feature in `layer` that is within the specified distance of a feature in `selectingLayer` is included in the output.
+                 -   `notWithinDistance`—The portion of the feature in `layer` that is within the specified distance of a feature in `selectingLayer` is excluded from output. You can think of this relationship as "is farther away than".
+              </StyledTableCell>
+           </StyledTableRow>
+           <StyledTableRow>
+              <StyledTableCell cellStyle="markdown">
+                 `contains`
+
+                 `notContains`
+              </StyledTableCell>
+              <StyledTableCell cellStyle="markdown">
+                 ![contains](../../images/GUID-D790F35B-BBED-4896-8418-A4ACB2350575-web.png)
+
+                 A feature in `layer` passes this test if it completely surrounds a feature in `selectingLayer`. No portion of the contained feature can be outside the containing feature; however, the contained feature is allowed to touch the containing feature (that is, share a common point along its boundary).
+                 -   `contains`—If a feature in `layer` contains a feature in `selectingLayer`, the feature in `layer` is included in the output.
+                 -   `notContains`—If a feature in `layer` contains a feature in `selectingLayer`, the feature in the first layer is excluded from the output.
+
+                 <Note type={"note"}>
+                    You can use the contains relationship with points and lines. For example, you have a layer of street centerlines (lines) and a layer of manhole covers (points), and you want to find streets that contain a manhole cover. You can use `contains` to find streets that contain manhole covers, but, for a line to contain a point, the point must be exactly on the line (that is, in GIS terms, they are snapped to each other). If there is any doubt about this, use the `withinDistance` relationship with a suitable distance value.
+                 </Note>
+              </StyledTableCell>
+           </StyledTableRow>
+           <StyledTableRow>
+              <StyledTableCell cellStyle="markdown">
+                 `within`
+
+                 `notWithin`
+              </StyledTableCell>
+              <StyledTableCell cellStyle="markdown">
+                 ![within](../../images/GUID-41677020-219D-49FA-9C19-0C9A54D63EF1-web.png)
+                 A feature in `layer` passes this test if it is completely surrounded by a feature in `selectingLayer`. The entire feature in `layer` must be within the containing feature; however, the two features are allowed to touch (that is, share a common point along its boundary).
+                 -   `within`—If a feature in `layer` is completely within a feature in `selectingLayer`, the feature in `layer` is included in the output.
+                 -   `notWithin`—If a feature in `layer` is completely within a feature in `selectingLayer`, the feature in `layer` is excluded from the output.
+
+                 <Note type={"note"}>
+                    You can use the within relationship for points and lines, just as you can with the contains relationship. For example, the first layer contains points representing manhole covers and you want to find the manholes that are on street centerlines (as opposed to parking lots or other nonstreet features). You can use `within` to find manhole points within street centerlines, but. for a point to contain a line, the point must be exactly on the line (that is, in GIS terms, they are snapped to each other). If there is any doubt about this, use the `withinDistance` relationship with a suitable distance value.
+                 </Note>
+              </StyledTableCell>
+           </StyledTableRow>
+           <StyledTableRow>
+              <StyledTableCell cellStyle="markdown">
+                 `nearest`
+              </StyledTableCell>
+              <StyledTableCell cellStyle="markdown">
+                 ![Nearest to](../../images/GUID-0FB3EFB8-C36A-4580-99F7-88C88FC325AD-web.png)
+
+                 A feature in the first layer passes this test if it is nearest to a feature in the second layer.
+                 -   `nearest`—If a feature in the first layer is nearest to a feature in the second layer, the feature in the first layer is included in the output.
+              </StyledTableCell>
+           </StyledTableRow>
+        </StyledTable>
+        -   `distance` is the distance to use for the `withinDistance` and `notWithinDistance` spatial relationship.
+        -   `units` is the units for `distance`. Values: `Meters` \| `Kilometers` \| `Feet` \| `Yards` \| `Miles`
+
+        An expression may be a list, which denotes a group. The first operator in the group indicates how the group expression is added to the previous expression. Grouping expressions is only necessary when you need to create two or more distinct sets of features from the same layer. One way to think of grouping is that without grouping, you would have to run the `DeriveNewLocations` task multiple times and merge the results.
+
+        The following is an example where grouping is needed:
+        -   You have a layer representing places that contain toxic chemicals. Each feature has an attribute, `CHEMICAL`, containing the name of the toxic chemical known to exist at the site.
+        -   You want to find toxic sites containing Mercury or Selenium that are near a river (layer 0).
+        -   You also want to find toxic sites containing Benzene or Lead that are near a park (layer 1).
+
+         _Example of grouping using a list:_
+         ```javascript
+        [
+            {
+                "operator": "and",
+                "layer": 0,
+                "spatialRel": "withinDistance",
+                "selectingLayer": 1,
+                "distance": 0.5,
+                "units": "Miles"
+            },
+            [
+                {
+                    "operator": "and",
+                    "layer": 0,
+                    "where": "CHEMICAL = 'MERCURY'"
+                },
+                {
+                    "operator": "or",
+                    "layer": 0,
+                    "where": "CHEMICAL = 'SELENIUM'"
+                },
+            ],
+            [
+                {
+                    "operator": "or",
+                    "layer": 0,
+                    "spatialRel": "withinDistance",
+                    "selectingLayer": 2,
+                    "distance": 0.5,
+                    "units": "Miles"
+                },
+                [
+                    {
+                        "operator": "and",
+                        "layer": 0,
+                        "where": "CHEMICAL = 'BENZENE'"
+                    },
+                    {
+                        "operator": "or",
+                        "layer": 0,
+                        "where": "CHEMICAL = 'LEAD'"
+                    }
+                ]
+            ]
+        ]
+         ```
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `outputName`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E836F966_C272_43B1_9BF9_55BA03755A13 />
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `context`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E671F554_89D2_4CAD_B032_525E1CE90C18 />
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `f`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The response format. The default response format is `html`.
+
+         Values: `html` \| `json`
+      </StyledTableCell>
+   </StyledTableRow>
+</StyledTable>
+
+## Response
+When you submit a request, the service assigns a unique job ID for the transaction.
+
+Syntax:
+
+```javascript
+{
+"jobId": "<unique job identifier>",
+"jobStatus": "<job status>"
+}
+```
+After the initial request is submitted you can use the `jobId` to periodically check the status of the job and messages as described in the topic [Check job status](/checking-job-status-1). Once the job has successfully completed, you use the `jobId` to retrieve the results. To track the status, you can make a request of the following form:
+
+```javascript
+http://<analysis url>/DeriveNewLocations/jobs/<jobId>
+```
+## Accessing results
+When the status of the job request is `esriJobSucceeded`, you can access the results of the analysis by making a request of the following form:
+
+```javascript
+http://<analysis url>/DeriveNewLocations/jobs/<jobId>/results/<output parameter name>?token=<your token>&f=json
+```
+<StyledTable headers={"Parameter,Description"}>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `resultLayer`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         Request example:
+         ```javascript
+         {"url":"http://<analysis url>/DeriveNewLocations/jobs/<jobId>/results/resultLayer"}
+         ```
+         The result has properties for parameter name, data type, and value. The contents of value depends upon the `outputName` parameter provided in the initial request.
+         -   If `outputName` was provided, `value` contains the url to the feature service layer.
+         ```javascript
+         {
+        "paramName":"resultLayer",
+        "dataType":"GPString",
+        "value":{"url":"<hosted featureservice layer url>"}
+        }
+         ```
+         -   If `outputName` was not provided, `value` contains a feature collection.
+         ```javascript
+         {
+         "paramName":"resultLayer",
+         "dataType":"GPString",
+         "value":{"layerDefinition": {}, "featureSet": {}}
+         }
+         ```
+         See [Feature Output](/feature-output-1) for more information about how the result layer or collection is accessed.
+      </StyledTableCell>
+   </StyledTableRow>
+</StyledTable>

@@ -1,0 +1,221 @@
+---
+title: "/reassignItems: Reassign Items"
+description: "The reassignItems  operation reassigns items owned by one user to another user in the organization."
+slug: "reassign-items"
+url: "/reassign-items"
+guid: "GUID-9A6A8586-70DC-4D72-87CA-6FE9E11704F6"
+migratedTopicMetadata:
+  FTITLE: "Reassign Items"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0-*"
+  CREATED-ON: "07/06/2023 13:08:44"
+  FAUTHOR: "svennapoosa"
+  FSTATUS: "Released"
+  MODIFIED-ON: "27/09/2023 13:17:23"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-E9B96090-A1DC-49FA-B814-625A0F812BDC"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /content/users/[userName]/reassignItems
+  urlSegments:
+    - name: '[root]'
+      url: /root
+    - name: /content/users/[userName]/reassignItems
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: 'ArcGIS Enterprise 11.0'
+---
+
+## Example usage
+
+The following is a sample ArcGIS Enterprise POST request for the `reassignItems` operation:
+
+```markdown
+POST /webadaptor/sharing/rest/content/users/itemOwner/reassignItems HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+items=0000737d2de44ea0a275a7fceba4da73&targetUsername=newOwner&targetFoldername=cityPlanning
+```
+
+## Description
+
+The `reassignItems` operation [reassigns items](https://enterprise.arcgis.com/en/portal/latest/administer/windows/manage-items.htm#GUID-E901EEE3-9D45-449A-9608-3FE74BB58C9F) owned by one user to another user in the organization. Before performing this operation, it is recommended that you first [determine whether the user is eligible to receive content](/can-reassign-items). Users assigned the default administrator role, or a custom role with administrative privileges, can perform this operation. The item owner can also use this operation; if the item owner that performs this operation is not a default administrator, or assigned a custom role with administrative privileges, they must have the `portal:user:reassignItems` privilege assigned to them to transfer content to another user.
+
+<Note type={"note"}>
+
+If any of the items that are being reassigned have a `private` sharing level, the receiving member must have sharing access to all groups which those items are currently shared to.
+
+</Note>
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `items` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A comma-separated list of item IDs that will have their ownership transferred. The maximum number of items that can be transferred at one time is 100.
+
+      Example:
+
+      ```markdown
+      items=0000737d2de44ea0a275a7fceba4da73
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `targetUsername` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The username of the user the items will be reassigned to. For a user to be eligible to receive transferred content, they must meet the following requirements:
+
+      -   The user must be assigned the `portal:user:receiveItems` privilege to receive the transferred content.
+      -   The user must have a user type that allows them to own content. To learn more about user types, see the [User types, roles, and privileges](https://enterprise.arcgis.com/en/portal/latest/administer/windows/roles.htm) topic.
+      -   If the items being transferred to the user are shared with a group, the user receiving the items must be a member of the group. If the group is a view-only group, the user receiving the items must be the group owner or a group manager.
+
+      If the above requirements are not met, an error response will be returned.
+
+      Example:
+
+      ```markdown
+      targetUsername=newOwner
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `targetFoldername` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The folder name the transferred items will be sent to. By default, if no folder is specified, the transferred items will be sent to a folder with the following format in which `[username]` represents the name of the original item owner, and `yyyy_mm_dd` represents the date the transfer occurred:
+
+      ```other
+      [username]_yyyy_mm_dd
+      ``` 
+
+      If the folder specified does not exist, it will be created when item ownership is transferred.
+
+      Example:
+
+      ```markdown
+      targetFoldername=cityPlanning
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` \| `json` \| `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## JSON Response syntax
+
+The response syntax example below demonstrates an error response, returned when the user specified in the `targetUsername` parameter does not have the proper permissions to be reassigned an item:
+
+```other
+{
+  "error": {
+    "code": <error code>,
+    "messageCode": "<error message code>",
+    "message": "<error message>",
+    "details": [
+      {
+        "itemId": "<item id>",
+        "type": "<item type>",
+        "url": "<url>",
+        "reservedTypeKeywords": [
+          "<reserved type keyword1>"
+        ],
+        "owner": "<owner>"
+      }
+    ]
+  }
+}
+``` 
+
+The response syntax example below demonstrates a success response:
+
+```other
+{
+  "success": true | false,
+  "itemId": "<item id>"
+}
+```
+
+## JSON Response example
+
+The response example below demonstrates an error response, returned when the user specified in the `targetUsername` parameter does not have the proper permissions to be reassigned an item:
+
+```other
+{
+  "error": {
+    "code": 403,
+    "messageCode": "CONT_0291",
+    "message": "Unable to reassign item, Target user does not have right privileges.",
+    "details": [
+      {
+        "itemId": "07efda2ec8934d0cab3b68018758701a",
+        "type": "Feature Service",
+        "url": "https://machine.domain.com/webadaptor/rest/services/FS123/FeatureServer",
+        "reservedTypeKeywords": [
+          "Hosted Service"
+        ],
+        "owner": "FSowner"
+      }
+    ]
+  }
+}
+``` 
+
+The response example below demonstrates a success response:
+
+```other
+{
+  "success": true,
+  "itemId": "b512083cd1b64e2da1d3f66dbb135956"
+}
+```
+
+ 

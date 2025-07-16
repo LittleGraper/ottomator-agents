@@ -1,0 +1,206 @@
+---
+title: "Lengths"
+description: "This operation calculates the 2D Euclidean or geodesic length of each polyline specified in the input array."
+slug: "lengths"
+url: "/lengths"
+guid: "GUID-171A7083-262D-4CF2-9671-8C4009B565E5"
+migratedTopicMetadata:
+  FTITLE: "Lengths"
+  FDESCRIPTION: ""
+  FCHANGES: "Fixing broken links"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9.1- *"
+  CREATED-ON: "07/09/2021 12:58:20"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "04/10/2021 10:05:55"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-7D455254-F290-4F31-9348-503BC577F180"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /Utilities/Geometry/GeometryServer/lengths
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /Utilities/Geometry/GeometryServer/lengths
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '9.3'
+---
+
+## Description
+
+The `lengths` operation is performed on a [geometry service resource](/geometry-service). This operation calculates the 2D Euclidean or geodesic length of each polyline specified in the input array. You can provide arguments to the `lengths`  operation as query parameters defined in the following parameters table.
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+<StyledTableCell cellStyle="markdown">
+
+`polylines` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the array of polylines whose lengths are to be computed. The spatial reference of the polylines is specified by `sr`. The structure of each polyline in the array is the same as the structure of the [JSON polyline objects](/geometry-objects#polyline) returned by ArcGIS REST API. 
+
+Syntax
+
+```other
+[<polyline1>, <polyline2>, ..., <polylineN>]
+```
+
+Example
+
+```json
+[
+  {
+    "paths": [
+      [[-117,34],[-116,34],[-117,33]],
+      [[-115,44],[-114,43],[-115,43]]
+    ]
+  },
+  {
+    "paths": [
+      [[32.49,17.83],[31.96,17.59],[30.87,17.01],[30.11,16.86]]
+    ]
+  }
+]
+```
+
+For a large set of geometries, you can specify a URL to the input geometries stored in a JSON structure in a file on a public server. The expected format of the file's contents will be the same as that expected if the polylines were directly embedded in the request.
+
+URL-based syntax
+
+```other
+polylines={"url": "<URL to file>"}
+```
+
+URL-based example
+
+```other
+polylines={"url": "https://<myserver>/<mygeometries>/<afile.txt>"}
+```
+
+</StyledTableCell>
+</StyledTableRow>
+
+<StyledTableRow>
+<StyledTableCell cellStyle="markdown">
+
+`sr` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the well-known ID (WKID) of the spatial reference or a [spatial reference JSON object](/geometry-objects#spatial-reference) for the input `polylines`. For a list of valid WKID values, see [Using spatial references](/using-spatial-references). 
+
+</StyledTableCell>
+</StyledTableRow>
+
+<StyledTableRow>
+<StyledTableCell cellStyle="markdown">
+
+`lengthUnit` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the unit in which the lengths of the polylines are calculated. If `calculationType` is `planar`, `lengthUnit` can be an integer representing the well-known id (WKID) of any `esriSRUnitType` constant. If `calculationType` is `planar` and `lengthUnit` is not specified, the units are derived from `sr`. If `calculationType` is not `planar`, `lengthUnit` must be a WKID of a **linear** `esriSRUnitType` constant, such as `esriSRUnit_Kilometer` (9036) or `esriSRUnit_SurveyMile` (9035). It cannot be an angular unit. If `lengthUnit`  is not specified, the units are meters.
+
+For a list of valid units, see [esriSRUnitType Constants](https://resources.arcgis.com/en/help/arcobjects-cpp/componenthelp/index.html#/esriSRUnitType_Constants/000w00000042000000/) and [esriSRUnit2Type Constants](https://resources.arcgis.com/en/help/arcobjects-cpp/componenthelp/index.html#//000w00000041000000). 
+
+</StyledTableCell>
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geodesic` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<Note type={"note"}>
+
+Deprecated at 10.1. Use the `calculationType` parameter instead.
+
+</Note>
+
+If `polylines` are in a geographic coordinate system, `geodesic` must be set to `true` to calculate the ellipsoidal shortest-path distance between each pair of the vertices in the polylines. If `lengthUnit` is not specified, the output is returned in meters. 
+
+</StyledTableCell>
+</StyledTableRow>
+
+<StyledTableRow>
+<StyledTableCell cellStyle="markdown">
+
+`calculationType` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Defines the length calculation for the geometry. The type can be one of the following values:
+
+-   `planar` — Planar measurements use 2D Euclidean distance to calculate length. Use this type only if the length needs to be calculated in the given spatial reference. Otherwise, use `preserveShape`.
+-   `geodesic` — Use this type to calculate a length using only the vertices of the polygon and define the lines between the vertices as geodesic segments independent of the actual shape of the polyline. A geodesic segment is the shortest path between two points on an earth ellipsoid.
+-   `preserveShape` — This type calculates the length of the geometry on the surface of the earth ellipsoid. The shape of the geometry in its coordinate system is preserved. 
+
+</StyledTableCell>
+</StyledTableRow>
+
+<StyledTableRow>
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` .
+
+Values: `html`  \| `json`  \| `pjson` 
+
+</StyledTableCell>
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+The following is a decoded sample request URL (the actual URL must be encoded) for `lengths`. In this example, the lengths of two input polylines are calculated. The `preserveShape` calculation type is used. The result unit is kilometers.
+
+[`https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/Utilities/Geometry/GeometryServer/lengths?sr=4269&polylines=[{"paths":[[[-117,34],[-116,34],[-117,33]],[[-115,44],[-114,43],[-115,43]]]},{"paths":[[[32.49,17.83],[31.96,17.59],[30.87,17.01],[30.11,16.86]]]}]&lengthUnit=9036&calculationType=preserveShape`](https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer/lengths?sr=4269&polylines=%5B%7B%22paths%22%3A%5B%5B%5B-117%2C34%5D%2C%5B-116%2C34%5D%2C%5B-117%2C33%5D%5D%2C%5B%5B-115%2C44%5D%2C%5B-114%2C43%5D%2C%5B-115%2C43%5D%5D%5D%7D%2C%7B%22paths%22%3A%5B%5B%5B32.49%2C17.83%5D%2C%5B31.96%2C17.59%5D%2C%5B30.87%2C17.01%5D%2C%5B30.11%2C16.86%5D%5D%5D%7D%5D&lengthUnit=9036&calculationType=preserveShape&f=html)
+
+## JSON Response syntax
+
+```other
+{
+  "lengths": [<length1>, <length2>, ..., <lengthN>]
+}
+```
+
+## JSON Response example
+
+```json
+{"lengths": [
+ 456.0410175313725,
+ 277.29464412330174
+]}
+```

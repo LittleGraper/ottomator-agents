@@ -1,0 +1,203 @@
+---
+title: "Query Associated Schematic Features"
+description: "The queryAssociatedSchematicFeatures operation returns the schematic features in a diagram that are associated with a set of objects."
+slug: "query-associated-schematic-features"
+url: "/query-associated-schematic-features"
+guid: "GUID-73FAFFB9-7D7A-43B9-A4D3-F7F70434B91E"
+migratedTopicMetadata:
+  FTITLE: "Query Associated Schematic Features"
+  FDESCRIPTION: ""
+  FCHANGES: "Broken link"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.7 -*"
+  CREATED-ON: "20/03/2019 09:39:08"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "20/03/2019 12:44:52"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-FDD0E065-749D-447B-9632-4F091857FAE4"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/MapServer/exts/SchematicServer/templates/<tempID>/queryAssociatedSchematicFeatures
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/MapServer/exts/SchematicServer/templates/<tempID>/queryAssociatedSchematicFeatures
+  methods: 
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.1'
+---
+
+## Description
+
+The `queryAssociatedSchematicFeatures` operation returns the schematic features in a diagram that are associated with a set of objects. It is performed on a [Schematic Diagram Template](/schematic-diagram-template) resource. The result of this operation is a list of schematic features ID per schematic feature class ID. It is used to retrieve the schematic features contained in a diagram that are associated with a set of objects.
+
+The `associatedFeatures` object returned by the REST API gives the associated schematic features as a list of schematic features names per schematic feature class ID as follows:
+
+-   `featureClassID`: The schematic feature class ID (Long).
+-   `objectName`: An array of schematic feature names (String), each name corresponding to the SCHEMATICID field value for the schematic feature in the schematic feature class.
+
+You can provide arguments to the `queryAssociatedSchematicFeatures`  operation as query parameters defined in the parameters table below.
+
+##  Request Parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` .
+
+Values: `html`  \| `json` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`name` 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The diagram name.
+
+Syntax: `name=<diagramName>` 
+
+Example: `name=ESTANCIA` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`selection` 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The list of the GIS features/objects IDs per feature class/table name for which the operation has to retrieved the associated schematic features.
+
+Each GIS feature/object ID corresponds to a value of the OBJECTID field in the GIS feature class/table.
+
+Syntax:
+
+```javascript
+selection=[
+     {
+       "objectClassName" : "<objectClassName1>", 
+       "objectIDs" : [<objectClassName1_ID1>,..., <objectClassName1_IDN>]
+     },
+     ...,
+     {
+       "objectClassName" : "<objectClassNameN>", 
+       "objectIDs" : [<objectClassNameN_ID1>,..., <objectClassNameN_IDM>]
+     }
+]
+```
+
+ 
+
+Example: `selection = [{"objectClassName": "PipelinesDatabase.SDE.pug_PUG_gas_plants", "objectIDs": [3]}]` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+Example 1: `queryAssociatedSchematicFeatures`  on the MPS_Goldmine diagram, based on the template which ID is 2 under the S1_Schematics Schematics sample service, with `[{"objectClassName": "PrimaryLine", "objectIDs": [1554]}]`  for the selection parameter, returns the only schematic feature link associated with the PrimaryLine GIS feature which OBJECTID is '1554'.
+
+```javascript
+https:/myserver.esri.com/arcgis/rest/services/S1_Schematics/MapServer/exts/SchematicsServer/templates/2/queryAssociatedSchematicFeatures?name=MPS_Goldmine&selection=%5B%7B%22objectClassName%22%3A+%22PrimaryLine%22%2C+%22objectIDs%22%3A+%5B1554%5D%7D%5D&f=pjson
+```
+
+ 
+
+Example 2: `queryAssociatedSchematicFeatures`  on the Substation 08 diagram, based on the template which ID is 1, under the S1_Schematics Schematics sample service, with `[{"objectClassName": "Substation", "objectIDs": [1]}]`  for the selection parameter, returns all the schematic features associated with the Substation GIS feature which OBJECTID is '1'. This substation is associated with all the schematic features contained in the Substation 08 diagram.
+
+```javascript
+https://myserver.esri.com/arcgis/rest/services/S1_Schematics/MapServer/exts/SchematicsServer/templates/1/queryAssociatedSchematicFeatures?name=Substation+08&selection=%5B%7B%22objectClassName%22%3A+%22Substation%22%2C+%22objectIDs%22%3A+%5B1%5D%7D%5D&f=pjson
+```
+
+ 
+
+## JSON Response syntax
+
+```javascript
+{
+  "associatedFeatures" : [
+    {
+      "featureClassID" : <schFeatureClass1ID>,
+      "objectNames" : [
+        "<schFeatureName1>",
+        ...,
+        "<schFeatureNameN>";
+      ]
+    },
+    {
+      ...
+    },
+    {
+      "featureClassID" : <schFeatureClass2ID>,
+      "objectNames" : [
+        "<schFeatureName1>",
+        ...,
+        "<schFeatureNameM>"
+      ]
+    }
+  ]
+}
+          
+```
+
+ 
+
+## JSON Response example
+
+The following is an example for a given diagram with `selection = {"objectClassName" : "PipelinesDatabase.SDE.pug_PUG_gas_plants", "objectIDs" : [3] }` 
+
+```javascript
+{
+  "associatedFeatures" : [
+    {
+      "featureClassID" : 885,
+      "objectNames" : [
+        "859-3-0"
+      ]
+    }
+  ]
+}
+          
+```
+
+ 

@@ -1,0 +1,196 @@
+---
+title: "/updateItems: Update Items"
+description: "The Update Items operation allows to add or remove an item's content categories."
+slug: "update-items-with-content-categories"
+url: "/update-items-with-content-categories"
+guid: "GUID-0BBFA171-66A0-43DE-901F-7B876D3AA0F8"
+migratedTopicMetadata:
+  FTITLE: "Update Items with content categories"
+  FDESCRIPTION: "operation to categorize and uncategorize items for org"
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "6.2/10.7 - *"
+  CREATED-ON: "09/03/2022 13:26:33"
+  FAUTHOR: "svennapoosa"
+  FSTATUS: "Released"
+  MODIFIED-ON: "03/06/2022 22:57:18"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-4A290F43-297B-4B37-AFEF-9AAFB262F768"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /content/updateItems
+  urlSegments:
+    - name: '[root]'
+      url: /root
+    - name: /content/updateItems
+  methods: []
+  sslOnly: 'no'
+---
+
+## Example Usage
+
+The following is a sample ArcGIS Enterprise POST request for the `updateItems` operation:
+
+```other
+POST /sharing/rest/content/updateItems HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+items=[{"2678d3002eea4e4a825e3bdf10016e61": {"categories": ["/Categories/Geology", "/Categories/Elevation"]}},{"c3ad4ed8bcf04d619537cfe252a1760d": {"categories": ["/Categories/Geology", "/Categories/Land cover/Forest/Deciduous Forest"]}},{"9ced00fdce3e4b20bb4b05155acbe817":{"categories": []}}]
+```
+
+## Description
+
+The `updateItems` operation allows an item owner or organization administrator to update, in bulk, the item's content categories. A maximum of 100 items can be bulk updated per request.
+
+## Request Parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `items` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON array of item objects, where each item is specified by its item ID. 
+      
+      When updating the item's content categories, the item object should contain a `categories` array that lists all content categories to update on the item, each with full hierarchical path prefixed with `/`. In ArcGIS Online, content category limits are set based on the limits set by the organization. For ArcGIS Enterprise organizations, each item can be categorized to a maximum of 20 categories.
+
+      Example:
+
+      ```markdown
+      [{
+        "2678d3002eea4e4a825e3bdf10016e61": {
+          "categories": ["/Categories/Geology", "/Categories/Elevation"]
+        }
+      }, {
+        "c3ad4ed8bcf04d619537cfe252a1760d": {
+          "categories": ["/Categories/Geology", "/Categories/Land cover/Forest/Deciduous Forest"]
+        }
+      }, {
+        "9ced00fdce3e4b20bb4b05155acbe817": {
+          "categories": []
+        }
+      }]
+
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Response Properties
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `results` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      An array of JSON objects, one for each item requested. Each object is made up of the `itemId` and a `success` flag to indicate whether the item was successfully updated. If an error occurs during updating an item, an error object is also returned.
+
+      Example:
+
+      ```markdown
+      [
+        {
+          "itemId": "c3ad4ed8bcf04d619537cfe252a1760d",
+          "success": false,
+          "error": {
+            "code": 400,
+            "message": "Item does not exist or is inaccessible."
+          }
+        },
+        {
+          "itemId": "9ced00fdce3e4b20bb4b05155acbe817",
+          "success": true
+        },
+        {
+          "itemId": "2678d3002eea4e4a825e3bdf10016e61",
+          "success": true
+        }
+      ]
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## JSON Response Syntax
+
+```other
+{
+  "results": [
+    {
+      "itemId": "<itemId1>",
+      "success": true | false
+    },
+    {
+      "itemId": "<itemId2>",
+      "success": true | false,
+      "error": {
+        "code": <error code>,
+        "message": "<error message>"
+      }
+    },
+    {
+      "itemId": "<itemId3>",
+      "success": true | false
+    }
+  ]
+}
+``` 
+
+## JSON Response Example
+
+```other
+{
+  "results": [
+    {
+      "itemId": "9ced00fdce3e4b20bb4b05155acbe817",
+      "success": true
+    },
+    {
+      "itemId": "c3ad4ed8bcf04d619537cfe252a1760d",
+      "success": false,
+      "error": {
+        "code": 400,
+        "message": "Item exceeds max size of 20 categories."
+      }
+    },
+    {
+      "itemId": "2678d3002eea4e4a825e3bdf10016e61",
+      "success": true
+    }
+  ]
+}
+```
+
+ 

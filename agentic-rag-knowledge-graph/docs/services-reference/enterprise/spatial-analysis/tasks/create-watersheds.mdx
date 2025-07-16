@@ -1,0 +1,233 @@
+---
+title: "Create Watersheds"
+description: "API reference for the Watershed service available on ArcGIS Online."
+slug: "create-watersheds"
+url: "/spatial-analysis/tasks/create-watersheds"
+redirectFrom:
+  - /create-watersheds
+guid: "GUID-7217DB2F-322D-4A73-BA02-4FCE125DE3EC"
+migratedTopicMetadata:
+  FTITLE: "Create Watersheds"
+  FDESCRIPTION: "Create Watersheds"
+  FCHANGES: "Fixing a broken link"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "agol10.1-*:11.0-*"
+  CREATED-ON: "15/08/2022 08:15:17"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "15/08/2022 08:51:02"
+  VERSION: "8"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-2F9BE1DB-823C-4A28-B55A-C474C3FB01B1"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata: {}
+---
+
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E0E9FDE9_9A98_4EA4_9164_0E878BADF591 from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-E0E9FDE9-9A98-4EA4-9164-0E878BADF591";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_D95DEC58_7F27_491A_AF3D_6E6A3C0A6F2D from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-D95DEC58-7F27-491A-AF3D-6E6A3C0A6F2D";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E836F966_C272_43B1_9BF9_55BA03755A13 from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-E836F966-C272-43B1-9BF9-55BA03755A13";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E671F554_89D2_4CAD_B032_525E1CE90C18 from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-E671F554-89D2-4CAD-B032-525E1CE90C18";
+import GUID_67BBDC51_6E6A_4390_A6A8_411955E2C7F7_GUID_D4574F98_5D00_467C_BE89_524529F67768 from "../../snippets/GUID-67BBDC51-6E6A-4390-A6A8-411955E2C7F7/_GUID-D4574F98-5D00-467C-BE89-524529F67768";
+import GUID_67BBDC51_6E6A_4390_A6A8_411955E2C7F7_GUID_7481CF75_D411_4A63_BA85_01E8F0C58F67 from "../../snippets/GUID-67BBDC51-6E6A-4390-A6A8-411955E2C7F7/_GUID-7481CF75-D411-4A63-BA85-01E8F0C58F67";
+import GUID_67BBDC51_6E6A_4390_A6A8_411955E2C7F7_GUID_03071520_C169_41C0_8E51_866D82061408 from "../../snippets/GUID-67BBDC51-6E6A-4390-A6A8-411955E2C7F7/_GUID-03071520-C169-41C0-8E51-866D82061408";
+
+![Create Watersheds](../../images/GUID-4DE64CF6-2A02-46F6-8AE4-4D9227AAB71C-web.png)
+
+The Create Watersheds task determines the watershed, or upstream contributing area, for each point in your analysis layer. For example, suppose you have point features representing locations of waterborne contamination, and you want to find the likely sources of the contamination. Since the source of the contamination must be somewhere within the watershed upstream of the point, you would use this tool to define the watersheds containing the sources of the contaminant.
+
+This task is a wrapper around the [Watershed](http://developers.arcgis.com/rest/elevation/api-reference/watershed.htm) task found in [Elevation Analysis Services](http://developers.arcgis.com/rest/elevation/api-reference/get-started-with-elevation-services.htm).
+
+## Request URL
+
+```javascript
+http://<analysis url>/CreateWatersheds/submitJob
+```
+
+## Request Parameters
+<StyledTable headers={"Parameter,Description"}>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `inputLayer`
+         (Required)
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The point features used for calculating watersheds. These are referred to as pour points, because it is the location at which water pours out of the watershed.
+
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E0E9FDE9_9A98_4EA4_9164_0E878BADF591 />
+
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_D95DEC58_7F27_491A_AF3D_6E6A3C0A6F2D />
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `searchDistance`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The maximum distance to move the location of an input point.
+
+         Use `searchUnits` to set the units for `searchDistance`.
+
+         If your input points are located away from a drainage line, the resulting watersheds are likely to be very small and not of much use in determining the upstream source of contamination. In most cases, you want your input points to snap to the nearest drainage line in order to find the watersheds that flows to a point located on the drainage line. To find the closest drainage line, specify a search distance. If you do not specify a search distance, the tool will compute and use a conservative search distance.
+
+         To use the exact location of your input point, specify a search distance of zero.
+
+         For analysis purposes, drainage lines have been precomputed by Esri using standard hydrologic models. If there is no drainage line within the search distance, the location containing the highest flow accumulation within the search distance is used.
+         -   Type: Double
+         -   Default: Calculated as the resolution of the source data multiplied by 10
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `searchUnits`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The linear units specified for the search distance.
+         -   Type: String
+         -   Values: `Meters` \| `Kilometers` \| `Feet` \| `Yards` \| `Miles`
+         -   Default: `Meters`
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `sourceDatabase`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         Keyword indicating the data source resolution that will be used in the analysis.
+         -   Type: String
+         -   Values: The values for this parameter are:
+            -   `Finest` (Default): Finest resolution available at each location from all possible data sources.
+            -   `30m`: The hydrologic source was built from 1 arc second - approximately 30 meter resolution, elevation data.
+            -   `90m`: The hydrologic source was built from 3 arc second - approximately 90 meter resolution, elevation data.
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `generalize`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         Determines if the output watersheds will be smoothed into simpler shapes or conform to the cell edges of the original DEM.
+         -   Type: Boolean
+         -   Values:
+         -   `True`: The polygons will be smoothed into simpler shapes. This is the default.
+         -   `False`: The edge of the polygons will conform to the edges of the original DEM.
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `outputName`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E836F966_C272_43B1_9BF9_55BA03755A13 />
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `context`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E671F554_89D2_4CAD_B032_525E1CE90C18 />
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `f`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The response format. The default response format is `html`.
+
+         Values: `html` \| `json`
+      </StyledTableCell>
+   </StyledTableRow>
+</StyledTable>
+## Response
+<GUID_67BBDC51_6E6A_4390_A6A8_411955E2C7F7_GUID_D4574F98_5D00_467C_BE89_524529F67768 />
+
+<GUID_67BBDC51_6E6A_4390_A6A8_411955E2C7F7_GUID_7481CF75_D411_4A63_BA85_01E8F0C58F67 />
+After the initial request is submitted you can use the `jobId` to periodically check the status of the job and messages as described in the topic [Check job status](/checking-job-status-1). Once the job has successfully completed, use the `jobId` to retrieve the results. To track the status, you can make a request of the following form:
+```javascript
+http://<analysis url>/CreateWatersheds/jobs/<jobId>
+```
+## Accessing results
+<GUID_67BBDC51_6E6A_4390_A6A8_411955E2C7F7_GUID_03071520_C169_41C0_8E51_866D82061408 />
+```javascript
+http://<analysis url>/CreateWatersheds/jobs/<jobId>/results/watershedLayer?token=<your token>&f=json
+```
+<StyledTable headers={"Parameter,Description"}>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `snapPourPtsLayer`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         These are point features where the watershed is calculated. If a search distance of zero is used, the points will be at the same location as the input points.
+
+         The resultant points features have the attributes from the input points as well the following attribute:
+         -   `PourPtID`—The unique ID field from the input points feature
+
+         Request example:
+         ```javascript
+         {"url":"http://<analysis url>/CreateWatersheds/jobs/<jobId>/results/snapPourPtsLayer"}
+         ```
+         The result has properties for parameter name, data type, and value. The contents of value depend on the `outputName` parameter provided in the initial request.
+         -   If `outputName` was provided, `value` contains the URL to the feature service layer.
+         ```javascript
+         {
+         "paramName":"snapPourPtsLayer",
+         "dataType":"GPString",
+         "value":{"url":"<hosted featureservice layer url>"}
+         }
+         ```
+         -   If `outputName` was not provided, `value` contains a feature collection.
+         ```javascript
+         {
+         "paramName":"snapPourPtsLayer",
+         "dataType":"GPString",
+         "value":{"layerDefinition": {}, "featureSet": {}  }
+         }
+         ```
+         See [Feature Output](/feature-output-1) for more information about how the result layer or collection is accessed.
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `watershedLayer`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         These are polygon features where each polygon is the watershed.
+
+         The resultant polygon features have the attributes from the input points as well the following attributes:
+         -   `PourPtID`—The unique ID field from the input points feature
+         -   `Description`—Describes the source database used in the analysis. US30m-which is derived from the 30m NHDPlusV2.1 for the continental United States, and the 90m HydroSHEDS for the world between 60 degrees North and 56 degrees South, plus some areas in Canada and Alaska north of 60 degrees.
+         -   `DataResolution`—The data-source resolution that will be used in the analysis
+         -   `AnalysisArea`—The area of the polygon in the units specified in your [profile](https://enterprise.arcgis.com/en/portal/latest/use/profile.htm), which will either be square miles or square kilometers.
+
+         Request example:
+         ```javascript
+         {"url":"http://<analysis url>/CreateWatersheds/jobs/<jobId>/results/watershedLayer"}
+         ```
+         The result has properties for parameter name, data type, and value. The contents of value depend on the `outputName` parameter provided in the initial request.
+         -   If `outputName` was provided, `value` contains the URL to the feature service layer.
+         ```javascript
+         {
+         "paramName":"watershedLayer",
+         "dataType":"GPString",
+         "value":{"url":"<hosted featureservice layer url>"}
+         }
+         ```
+         -   If `outputName` was not provided, `value` contains a feature collection.
+         ```javascript
+         {
+         "paramName":"watershedLayer",
+         "dataType":"GPString",
+         "value":{"layerDefinition": {}, "featureSet": {} }
+         }
+         ```
+         See [Feature Output](/feature-output-1) for more information about how the result layer or collection is accessed.
+      </StyledTableCell>
+   </StyledTableRow>
+</StyledTable>

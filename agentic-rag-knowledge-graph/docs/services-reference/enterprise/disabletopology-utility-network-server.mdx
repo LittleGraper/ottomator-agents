@@ -1,0 +1,226 @@
+---
+title: "Disable Topology"
+description: "The disableTopology operation disables the network topology for a utility network. When the topology is disabled, feature and association edits do not generate dirty areas."
+slug: "disabletopology-utility-network-server"
+url: "/disabletopology-utility-network-server"
+guid: "GUID-617E21EF-ED30-4863-938A-541F03B0D28C"
+migratedTopicMetadata:
+  FTITLE: "disableTopology (Utility Network Server)"
+  FDESCRIPTION: ""
+  FCHANGES: "Introduce async capability, see: https://devtopia.esri.com/ArcGISPro/utility-network/issues/8274"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9.1 - *"
+  CREATED-ON: "31/08/2021 06:40:14"
+  FAUTHOR: "jderose"
+  FSTATUS: "Released"
+  MODIFIED-ON: "14/09/2021 11:46:25"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "8"
+  ED: "GUID-6B4CAF91-C82D-4103-8989-AA167F45A03E"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/UtilityNetworkServer/disableTopology
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/UtilityNetworkServer/disableTopology
+  methods: 
+    - post
+  versionIntroduced: '10.6'
+  requiredCapability: Requires the portal utility network owner and ArcGIS Advanced Editing user type extension license
+
+---
+
+import GUID_68FE7C20_B3BC_4175_A32D_778C3A29380D_LI_DA8E0C47228D49D5B412C454CFA4137A from "./snippets/GUID-68FE7C20-B3BC-4175-A32D-778C3A29380D/_LI_DA8E0C47228D49D5B412C454CFA4137A";
+import GUID_68FE7C20_B3BC_4175_A32D_778C3A29380D_GUID_6635EF88_7E6F_4290_8DF6_6A15ECEC0D11 from "./snippets/GUID-68FE7C20-B3BC-4175-A32D-778C3A29380D/_GUID-6635EF88-7E6F-4290-8DF6-6A15ECEC0D11";
+
+## Description
+
+The `disableTopology` operation disables the network topology for a utility network. When the topology is disabled, feature and association edits do not generate dirty areas. Analytics and diagram generation can't be performed if the topology is not present.
+
+When the topology is disabled, the following happens:
+
+-   All current rows in the topology tables are deleted.
+-   No dirty areas are generated from edits.
+-   Remaining errors and their associated dirty areas still exist and can be cleaned up.
+
+Disabling the topology is supported both synchronously and asynchronously. To perform certain network configuration tasks, the network topology must be disabled.
+
+-   <GUID_68FE7C20_B3BC_4175_A32D_778C3A29380D_LI_DA8E0C47228D49D5B412C454CFA4137A />
+-   The topology can be disabled in the default version or in a named version. If disabled in a named version, it may not be later enabled in the named version. The reconcile process should be used to inherit the topology state from the default branch version.
+
+<Note type={"note"}>
+
+<GUID_68FE7C20_B3BC_4175_A32D_778C3A29380D_GUID_6635EF88_7E6F_4290_8DF6_6A15ECEC0D11 />
+
+</Note>
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the output format of the response. The default response format is `html`.
+
+```
+f=html | json | pjson
+``` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`gdbVersion` 
+
+(Optional) 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the name of the geodatabase version.  The default is sde.DEFAULT.
+
+Syntax: `gdbVersion=<version>` 
+
+Example: `gdbVersion=sde.DEFAULT` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sessionId`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the token guid used to lock the version. If the calling client is editing a named version, the session ID must be provided; if the client is editing DEFAULT, the version may not be locked and the session ID should not be specified.
+
+Syntax: `sessionId=<guid>` 
+
+Example: `sessionId={29CC8FF6-D6C6-4157-A9A8-A9A9BCFE07D1}` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`async`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Introduced at ArcGIS Enterprise 10.9.1. If `true`, the request is processed as an asynchronous job, and a URL is returned that a client can visit to check the status of the job. The default is `false`.
+
+```
+async=true | false
+``` 
+
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## JSON Response syntax
+
+JSON response (when async = false):
+
+```other
+{
+  "moment" : <datetime>,
+  "success" : <true | false>,
+  "error" : {                   // only if success is false
+    "extendedCode" : <HRESULT>,
+    "message" : <error message>,
+    "details" : [ <detail> ]
+  }
+}
+
+```
+
+ 
+
+JSON response (when async = true):
+
+```json
+{
+  "statusUrl" : <url>
+}
+
+```
+
+ 
+
+JSON response to the status URL (when pending or in progress):
+
+```json
+{
+  "status" : "<Pending | InProgress>",
+  "submissionTime" : <datetime>,
+  "lastUpdatedTime" : <datetime>
+ }
+
+```
+
+ 
+
+## Example usage
+
+Disable the network topology for a utility network using the `disableTopology` operation.
+
+Request URL and parameters:
+
+`https://myserver.esri.com/server/rest/services/LandUse/UtilityNetworkServer/disableTopology` 
+
+```javascript
+f=json
+gdbVersion=SDE.DEFAULT
+sessionID={29CC8FF6-D6C6-4157-A9A8-A9A9BCFE07D1}
+async=false
+```
+
+ 
+
+JSON response:
+
+```javascript
+{
+ "moment": 1554393356246,
+ "success": true
+}
+```
+
+ 

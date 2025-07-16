@@ -1,0 +1,134 @@
+---
+title: "Change Provider"
+description: "The changeProvider operation allows you to modify the instance type of a service."
+slug: "change-provider"
+url: "/change-provider"
+guid: "GUID-F0619D27-1532-4A9A-BC20-ACB855746703"
+migratedTopicMetadata:
+  FTITLE: "Change Provider"
+  FDESCRIPTION: ""
+  FCHANGES: "Updating ArcMap support information"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0-*"
+  CREATED-ON: "20/04/2022 10:10:35"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "24/05/2022 09:34:35"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-ADF4C7A6-0977-47C2-9AC5-3992E9EA1259"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /services/<serviceName>.<serviceType>/changeProvider
+  urlSegments:
+    - name: <root>
+      url: /site
+    - name: /services/<serviceName>.<serviceType>/changeProvider
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.7'
+  requiredCapabilities:
+    - name: Access allowed with any authorized privilege
+      url: /managing-access-to-the-server-administration-rest-api
+---
+
+## Description
+
+The `changeProvider` operation updates an individual service to use either a dedicated or shared instance type.
+
+You can use either shared or dedicated instances for compatible services published to an ArcGIS Server site from ArcGIS Pro. At 10.8, qualifying services published to a newly created site will be automatically set to use shared instances, or the shared instance pool, by default.
+
+When using this operation, services may populate other provider types as values for the `provider` parameter, such as ArcObjects and SDS. For SDS provider types, this operation does not support changing the provider of these services to either ArcObjects11 or DMaps. Services with SDS as their provider cannot change their instance type. For more information about shared instances and which services qualify to be set as a shared instance, see [Configure service instance settings](https://enterprise.arcgis.com/en/server/latest/administer/windows/configure-service-instance-settings.htm).
+
+At 10.9, the `changeProvider` operation supports the migration of map, image, and geodata services from using the ArcMap service runtime to the newer ArcGIS Pro service runtime by changing the `provider` parameter from `ArcObjects` to `ArcObjects11`.
+
+Starting at ArcGIS Enterprise 11.0, the ArcMap service runtime has been removed and only ArcGIS Pro-based services are supported. When upgrading to 11.x, all map, image, and geodata services will migrate to using the ArcGIS Pro service runtime and the `ArcObjects11` provider. After upgrading to 11.x, any remaining geocode or geoprocessing services that were originally published from ArcMap cannot be started and must be republished from ArcGIS Pro. Using `changeProvider` to edit geocode and geoprocessing services is not supported. For more information, see [Migrating services to the ArcGIS Pro service runtime](https://enterprise.arcgis.com/en/server/latest/publish-services/windows/migrating-services-to-the-arcgis-pro-service-runtime.htm).
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `provider` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the service instance as either a shared (`DMaps`) or dedicated (`ArcObjects11`) instance type.
+
+      <Note type={"note"}>
+
+      These values are case sensitive.
+
+      </Note>
+
+      Values: `ArcObjects11` | `DMaps`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `changeProvider` operation, demonstrating changing a service from `ArcObjects11` (dedicated instance) to `DMaps` (shared instance):
+
+```markdown
+POST /webadaptor/admin/services/Maps/TestMap.MapServer/changeProvider HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+provider=DMaps&f=json
+```
+
+## JSON Response examples 
+
+### Success response example
+
+The following response indicates that the `changeProvider` operation was executed successfully:
+
+```other
+{"status": "success"}
+```
+
+### Error response example
+
+The following error response occurs when setting a provider value that is incompatible with the service. For example, if the original provider for TestMap.MapServer was `ArcObjects`, indicating that the service was published from ArcMap, an attempt to change the provider to `DMaps` will result in an error. Services published from ArcMap are not compatible with the `DMaps` provider.
+
+<Note type={"note"}>
+
+The scenario below is only possible in an ArcGIS Enterprise deployment using a version between 10.7 and 10.9.1. Starting at Enterprise 11.0, using the ArcMap service runtime is no longer supported, and the `ArcObjects` provider can no longer be used.
+
+</Note>
+
+```other
+{
+  "status": "error",
+  "messages": ["Changing the provider of the service 'TestMap.MapServer' to 'DMaps' is not permitted. "],
+  "code": 500
+}
+```

@@ -1,0 +1,309 @@
+---
+title: "Upload File"
+description: "The Upload File operation uploads a single file to your workspace directory (/arcgis/home)."
+slug: "upload-files"
+url: "/upload-files"
+guid: "GUID-7B7BEACA-BD3F-4783-AACC-82824DEE6597"
+migratedTopicMetadata:
+  FTITLE: "Upload Files"
+  FDESCRIPTION: ""
+  FCHANGES: "https://devtopia.esri.com/WebGIS/arcgis-enterprise-documentation/issues/3214"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9.1 - *"
+  CREATED-ON: "17/05/2021 10:17:31"
+  FAUTHOR: "bpolk"
+  FSTATUS: "Released"
+  MODIFIED-ON: "04/10/2021 10:08:24"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "6"
+  ED: "GUID-497514C8-A6F0-4D9A-889D-035966DD223B"
+  FUSERGROUP: "VUSERGROUPSERVERDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /dataaccess/notebookworkspace/uploadFile
+  urlSegments:
+    - name: <notebookserveradmin>
+      url: /notebook-server-administration-root
+    - name: /dataaccess/<workspacename>/notebookworkspace/uploadFile
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapability: 'Administrator or Create and Edit '
+---
+
+## Description
+
+The `uploadFile`  operation allows uploads a single file to your workspace directory (`/arcgis/home` ). By default, the file is uploaded to the root of the workspace directory. You can prefix a directory path to the file name to upload the file to a subdirectory. 
+
+The upload file size limit is 128 MB for a single file. Large files can also be uploaded in parts from a client that has the ability to split files into smaller parts. To initiate a multipart upload, the client passes in the `isMultipart=true`  parameter to the `uploadFile`  operation, along with the `fileName`  and `blockId` . After uploading all parts, the operation can be completed by passing in the `xmlField`  along with `fileName`  and `isMultipart=true` .
+
+<Note type>
+
+The `Transfer User Workspace` resource can also be accessed by the `/dataaccess/uploadFile` endpoint. 
+
+</Note>
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`fileName` 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Defines the name of the file to be uploaded. Optionally, the file can be uploaded to a subdirectory by prefixing a folder path to the file name.
+
+If you upload a file using a `fileName`  value that was used previously, the previously uploaded file is overwritten.
+
+Examples
+
+```javascript
+//Example 1: Upload a file to the root directory in the user's workspace
+fileName=mjwaterzip
+
+//Example 2: Upload a file to a subdirectory () in the user's workspace
+fileName=hydrology/mjwaterzip
+
+//Example 3: Upload a file to a nested subdirectory in the user's workspace
+fileName=hydrology/2020/mjwaterzip
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`uploadFile` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The file to be uploaded. This is required when uploading a single file or a file in multiple parts. This is not required when `xmlField`  is specified to complete the upload of files in parts.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`isMultiPart` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A Boolean that is set to `true`  if a large file is split into several parts and uploaded in smaller increments. The default value is `false` .
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`blockId` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Required when uploading files in multiple parts. `blockId`  can be either a number or an alphanumeric string. A `blockId`  value uniquely identifies a part and defines its position in the object being created. If you upload a file using a `blockId`  value that has been used previously, the previously uploaded part will be overwritten. 
+
+Examples
+
+```javascript
+blockId=0
+
+blockId=a0
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`xmlField` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Required to complete the upload of a large file in multiple parts. Once the individual parts have been uploaded, specify `xmlField` , `fileName` , and `isMultiPart=true` values to complete the upload. Otherwise, the files remain as individual parts.
+
+```javascript
+Example: A large file uploaded in five individual parts with  0 to 4<?xml version="1.0" encoding="utf-8"?>
+<BlockList>
+<Latest>0</Latest>
+<Latest>1</Latest>
+<Latest>2</Latest>
+<Latest>3</Latest>
+<Latest>4</Latest>
+</BlockList>
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`x-ms-blob-type` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Required when uploading a single file or a file in multiple parts. This parameter is not required when `xmlField`  is specified to complete the upload of files in parts.
+
+Value: `BlockBlob` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` .
+
+Values: `html`  \| `json`  \| `pjson` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+The following are example requests for `uploadFile` .
+
+### Example 1: Upload a single file to a folder
+
+```javascript
+https://notebookserver.domain.com/context/admin/dataaccess/notebookworkspace/uploadFile
+fileName = hydrology/mjwater.zip
+uploadFile = <file>
+x-ms-blob-type = BlockBlob
+f = json
+```
+
+ 
+
+### Example 2: Upload a file in parts
+
+The following example usage demonstrates using `uploadFile`  to upload a file in multiple parts.
+
+#### Request 1: Upload part 1
+
+```javascript
+https://notebookserver.domain.com/context/admin/dataaccess/notebookworkspace/uploadFile
+fileName = mjwater.zip
+uploadFile = <file>.part.001
+isMultiPart = true
+blockId = 0
+x-ms-blob-type = BlockBlob
+f = json
+```
+
+ 
+
+#### Request 2: Upload part 2
+
+```javascript
+https://notebookserver.domain.com/context/admin/dataaccess/notebookworkspace/uploadFile
+fileName = mjwater.zip
+uploadFile = <file>.part.002
+isMultiPart = true
+blockId = 1
+x-ms-blob-type = BlockBlob
+f = json
+```
+
+ 
+
+#### Request 3: Complete upload
+
+```javascript
+https://notebookserver.domain.com/context/admin/dataaccess/notebookworkspace/uploadFile
+fileName = mjwater.zip
+isMultiPart = true
+uploadFile = 
+xmlField = <?xml version="1.0" encoding="utf-8"?> <BlockList> <Latest>1</Latest> <Latest>2</Latest></BlockList>
+x-ms-blob-type = BlockBlob
+f = json
+```
+
+ 
+
+## JSON Response syntax
+
+```other
+{"status": "<success|failure>"}
+```
+
+ 
+
+## JSON Response example
+
+```other
+{"status": "success"}
+```
+
+ 

@@ -1,0 +1,4769 @@
+---
+title: "/Enrich"  
+description: "The Enrich method in ArcGIS GeoEnrichment provides the ability to get facts about a location or area."
+uid: "enrich"
+slug: "enrich"
+url: "/enrich"
+guid: "GUID-5CE47A7D-417F-44C7-9C6F-4257FCF17F5B"
+migratedTopicMetadata:
+  FTITLE: "Enrich"
+  FDESCRIPTION: ""
+  FCHANGES: "useData, optionalCountryHierarchy updates"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.3 - *"
+  CREATED-ON: "11/07/2024 06:40:44"
+  FAUTHOR: "cdistefano"
+  FSTATUS: "Draft"
+  MODIFIED-ON: "12/07/2024 13:34:58"
+  VERSION: "11"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-C958915A-9BC3-40E4-B85C-56ADDAD31415"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+---
+
+import ParamMetadata from "../../shared/components/param-metatdata"
+import SharedParams from "../../shared/content/_required-params"
+
+<!-- ```http
+POST https://geoenrich.arcgis.com/arcgis/rest/services/World/geoenrichmentserver/Geoenrichment/Enrich
+``` -->
+
+<CodeSwitcher>
+<CodeBlock language="curl" label="GET">{`GET https://geoenrich.arcgis.com/arcgis/rest/services/World/geoenrichmentserver/Geoenrichment/Enrich`}</CodeBlock>
+<CodeBlock language="curl" label="POST">{`POST https://geoenrich.arcgis.com/arcgis/rest/services/World/geoenrichmentserver/Geoenrichment/Enrich`}</CodeBlock>
+</CodeSwitcher>
+
+The `/Enrich` request provides the ability to get facts about a location or area. Using Enrich, you can get information about the people, places, and businesses in a specific area or within a certain distance or drive time from a location. 
+
+<MoreInfo>
+
+More specifically, by submitting a point or polygon to a GeoEnrichment service, you can retrieve the demographics and other relevant characteristics associated with the surrounding area. You can also use Enrich to obtain additional geographic context—for example, the ZIP Code of a location or the geometry for a drive-time service area.
+
+</MoreInfo>
+
+## Parameters
+
+<StyledTable headers="Name, Required, Type, Default, Description">
+<StyledTableRow>
+<StyledTableCell cellStyle="code">[f](#f)</StyledTableCell>
+<StyledTableCell cellStyle="check" checked></StyledTableCell>
+<StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+<StyledTableCell cellStyle="markdown">
+  `json`
+</StyledTableCell>
+<StyledTableCell cellStyle="markdown">
+The output response format, either `json`, `csv`, or `geojson`.
+</StyledTableCell>
+</StyledTableRow>
+  <StyledTableRow>
+  <StyledTableCell cellStyle="code">[token](#token)</StyledTableCell>
+  <StyledTableCell cellStyle="check" checked></StyledTableCell>
+  <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+  <StyledTableCell cellStyle="markdown">
+  </StyledTableCell>
+  <StyledTableCell cellStyle="markdown">
+
+  An access token with the [required privileges](#token).
+
+  </StyledTableCell>
+  </StyledTableRow>
+<StyledTableRow>
+  <StyledTableCell cellStyle="code">[studyAreas](#studyareas)</StyledTableCell>
+  <StyledTableCell cellStyle="check" checked></StyledTableCell>
+  <StyledTableCell cellStyle="code_italic">[object]</StyledTableCell>
+  <StyledTableCell cellStyle="markdown">
+  </StyledTableCell>
+  <StyledTableCell cellStyle="markdown">
+
+  The area that will be enriched, defined as input points, polygons, administrative boundaries, or addresses.
+
+  </StyledTableCell>
+</StyledTableRow>
+<StyledTableRow>
+<StyledTableCell cellStyle="code">[dataCollections](#datacollections)</StyledTableCell>
+<StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+<StyledTableCell cellStyle="code_italic">[string]</StyledTableCell>
+<StyledTableCell cellStyle="markdown">
+  `KeyGlobalFacts`
+</StyledTableCell>
+<StyledTableCell cellStyle="markdown">
+The data collection to be returned. 
+</StyledTableCell>
+</StyledTableRow>
+<StyledTableRow>
+<StyledTableCell cellStyle="code">[analysisVariables](#analysisvariables)</StyledTableCell>
+<StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+<StyledTableCell cellStyle="code_italic">[string]</StyledTableCell>
+<StyledTableCell cellStyle="markdown">
+  `empty`
+</StyledTableCell>
+<StyledTableCell cellStyle="markdown">
+A subset of variables to be returned from one or more data collections.
+</StyledTableCell>
+</StyledTableRow>
+<StyledTableRow>
+<StyledTableCell cellStyle="code">[addDerivativeVariables](#addderivativevariables)</StyledTableCell>
+<StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+<StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+<StyledTableCell cellStyle="markdown">
+  `empty`
+</StyledTableCell>
+<StyledTableCell cellStyle="markdown">
+Specifies an array of string values to describe what derivative variables to include in the output.
+</StyledTableCell>
+</StyledTableRow>
+<StyledTableRow>
+<StyledTableCell cellStyle="code">[studyAreasOptions](#studyareasoptions)</StyledTableCell>
+<StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+<StyledTableCell cellStyle="code_italic">object</StyledTableCell>
+<StyledTableCell cellStyle="markdown">
+  `null | empty`
+</StyledTableCell>
+<StyledTableCell cellStyle="markdown">
+The properties for the study area buffer.
+</StyledTableCell>
+</StyledTableRow>
+<StyledTableRow>
+<StyledTableCell cellStyle="code">[useData](#usedata)</StyledTableCell>
+<StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+<StyledTableCell cellStyle="code_italic">object</StyledTableCell>
+<StyledTableCell cellStyle="markdown">
+  `null | empty`
+</StyledTableCell>
+<StyledTableCell cellStyle="markdown">
+Specifies the country or dataset to query.
+</StyledTableCell>
+</StyledTableRow>
+<StyledTableRow>
+<StyledTableCell cellStyle="code">[intersectingGeographies](#intersectinggeographies)</StyledTableCell>
+<StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+<StyledTableCell cellStyle="code_italic">object</StyledTableCell>
+<StyledTableCell cellStyle="markdown">
+  `null | empty`
+</StyledTableCell>
+<StyledTableCell cellStyle="markdown">
+Defines the geographic layers used to provide geographic context during the enrichment process.
+</StyledTableCell>
+</StyledTableRow>
+<StyledTableRow>
+<StyledTableCell cellStyle="code">[returnGeometry](#returngeometry)</StyledTableCell>
+<StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+<StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+<StyledTableCell cellStyle="markdown">
+  `4326`
+</StyledTableCell>
+<StyledTableCell cellStyle="markdown">
+Defines the spatial reference system for the input geometries in the `studyAreas` parameter.
+</StyledTableCell>
+</StyledTableRow>
+<StyledTableRow>
+<StyledTableCell cellStyle="code">[inSR](#insr)</StyledTableCell>
+<StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+<StyledTableCell cellStyle="code_italic">number</StyledTableCell>
+<StyledTableCell cellStyle="markdown">
+  `4326`
+</StyledTableCell>
+<StyledTableCell cellStyle="markdown">
+Requests the input geometries in a specified spatial reference system.
+</StyledTableCell>
+</StyledTableRow>
+<StyledTableRow>
+<StyledTableCell cellStyle="code">[outSr](#outsr)</StyledTableCell>
+<StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+<StyledTableCell cellStyle="code_italic">number</StyledTableCell>
+<StyledTableCell cellStyle="markdown">
+  `4326`
+</StyledTableCell>
+<StyledTableCell cellStyle="markdown">
+Requests the output geometries in a specified spatial reference system.
+</StyledTableCell>
+</StyledTableRow>
+</StyledTable>
+
+## Required parameters
+
+<Box>
+
+### f
+
+<SharedParams f/>
+
+</Box>
+
+<Box>
+
+### token
+
+<SharedParams token alpPrivileges={"premium:user:geoenrichment"} agoPrivileges={"premium:user:geoenrichment"}/>
+
+</Box>
+
+<Box>
+
+### studyAreas
+
+<ParamMetadata types={[{name:"[object]"}]} required />
+
+Required parameter which defines the area on a map being analyzed. Study areas can be input XY point locations, street addresses, map areas described as polygons, and map areas described as named administrative boundaries—for example, postal codes, states, ZIP Codes. It is also possible to specify a buffer around the input location like a ring or network service area using this parameter. This parameter can also be used to request statistics the levels of geography that intersect the input study area, like zip code or county.
+
+#### Study areas around points 
+
+When points are specified as `studyAreas` , the service will analyze map areas surrounding or associated with the input point locations. Unless otherwise specified, the service will analyze a one mile ring around a point. This is also true for a line.
+
+One point described as map coordinates:
+
+`studyAreas=[{"geometry":{"x":-117.1956,"y":34.0572}}]` 
+
+Multiple points with attributes described as map coordinates:
+
+`studyareas=[{"geometry":{"x":-122.435,"y":37.785},"attributes":{"myID":"point1"}},{"geometry":{"x":-122.433,"y":37.734},"attributes":{"myID":"point2"}}]` 
+
+One point and intersecting U.S. state:
+
+`studyareas=[{"geometry":{"x":-117.1956,"y":34.0572}},{"geometry":{"x":-117.1956,"y":34.0572},"areaType":"StandardGeography","intersectingGeographies":[{"sourceCountry":"US","layer":"US.States"}]}]` 
+
+One point and include two comparison levels of geography:
+
+`studyareas=[{"geometry":{"x":-122.435,"y":37.785},"comparisonLevels":[{"layer":"Admin2"},{"layer":"Admin3"}]}]` 
+
+#### Points and polygons
+
+One-kilometer buffer around an input line feature:
+
+`studyareas=[{"areaType":"RingBuffer","bufferUnits":"esriKilometers","bufferRadii":[1],"returnGeometry":true,"geometry":{"paths":[[[-13048580,4036370],[-13046151,4036366]]],"spatialReference":{"wkid":102100}}}]` 
+
+Map areas described as polygons:
+
+`studyAreas=[{"geometry":{"rings":[[[-117.185412,34.063170],[-122.81,37.81],[-117.200570,34.057196],[-117.185412,34.063170]]],"spatialReference":{"wkid":4326}},"attributes":{"id":"1","name":"optional polygon area name"}}]` 
+
+Map areas described as named administrative boundaries—for example, U.S. state:
+
+` studyAreas=[{"sourceCountry":"US","layer":"US.States","ids":["06"]}]` 
+
+Separate map areas described as multiple named administrative boundaries—for example, U.S. ZIP Codes.
+
+` studyAreas=[{"sourceCountry":"US","layer":"US.ZIP5","ids":["92373","92129"]}]` 
+
+Combined map areas described as multiple named administrative boundaries and return enrichment data for the union of the combined features— for example, U.S. ZIP Codes:
+
+` studyAreas=[{"sourceCountry":"US","layer":"US.ZIP5","ids":["92373,92129"]}]` 
+
+Return a geography with generalization of the polygon to improve drawing performance:
+
+` studyAreas=[{"sourceCountry":"US","layer":"US.States","ids":["06"],"generalizationLevel":"2"}]` 
+
+#### Drive time service areas
+
+One hour driving time:
+
+` studyAreas=[{"geometry":{"x": -122.435, "y": 37.785},"areaType": "NetworkServiceArea","bufferUnits": "Hours","bufferRadii": [1],"travel_mode":"Driving"}]` 
+
+One mile driving distance from an address location:
+
+` studyAreas=[{"address":{"text":"380 New York St. Redlands, CA 92373"},"areaType": "NetworkServiceArea","bufferUnits": "Miles","bufferRadii": [1],"travel_mode":"Driving"}]` 
+
+Ten minute trucking time:
+
+` studyAreas=[{"geometry":{"x": -122.435, "y": 37.785},"areaType": "NetworkServiceArea","bufferUnits": "Minutes","bufferRadii": [10],"travel_mode":"Trucking"}]` 
+
+Five, Ten, and Fifteen kilometer trucking distances:
+
+` studyAreas=[{"geometry":{"x": -122.435, "y": 37.785},"areaType": "NetworkServiceArea","bufferUnits": "Kilometers","bufferRadii": [5,10,15],"travel_mode":"Trucking"}]` 
+
+Ten minute walking time:
+
+` studyAreas=[{"geometry":{"x": -122.435, "y": 37.785},"areaType": "NetworkServiceArea","bufferUnits": "Minutes","bufferRadii": [10],"travel_mode":"Walking"}]` 
+
+One mile walking distance from an address location:
+
+` StudyAreas=[{"address":{"text":"380 New York St. Redlands, CA 92373"}, "areaType": "NetworkServiceArea","bufferUnits": "Miles","bufferRadii": [1],"travel_mode":"Walking"}]` 
+
+#### Street addresses
+
+The Network Service Area Solver and the ArcGIS World Geocoding service support the GeoEnrichment service by analyzing the points submitted as `studyAreas`  and the areas around the points. A network service area and ring request sent to the GeoEnrichment service is bound by the supporting services and may not exceed 300 miles or 300 minutes (5 hours). Supported bufferUnits include **meters**, **kilometers**, **feet**, **yards**, **miles**, **nautical miles**, **seconds**, **minutes**, and **hours**, as well as the units that were supported in legacy area types for DriveTimeBuffer and DriveTimeBufferBands. These units include esriMeters, esriKilometers, esriMiles, esriYards, esriDriveTimeUnitsSeconds, esriDriveTimeUnitsMinutes, esriDriveTimeUnitsHours. When specifying addresses for `studyAreas` , only matched (successfully geocoded) addresses will be enriched.
+
+Point described as a single line address:
+
+` studyAreas=[{"address":{"text":"380 New York St. Redlands, CA 92373"}}]` 
+
+Point described as a multiple field input address:
+
+` studyAreas=[{"address":{"Address":"380 New York St.","City":"Redlands","Region":"CA","Postal":"92373","CountryCode":"USA"}}]` 
+
+<Note type={"note"}>
+
+Field input addresses are dependent on the geocoder used in the GeoEnrichment service. Changes in the [geocoding service](DEVSITE/rest/geocode/api-reference/overview-world-geocoding-service.htm) may require changes in the supported GeoEnrichment fields.
+
+</Note>
+
+Multiple points described as multiple single line input addresses:
+
+` studyAreas=[{"address":{"text":"12 Concorde Place Toronto ON M3C 3R8","sourceCountry":"Canada"}},{"address":{"text":"380 New York St Redlands CA 92373","sourceCountry":"US"}}]` 
+
+Multiple points described as multiple single line input addresses and change the ring buffer size for each point:
+
+` studyAreas=[{"address":{"text":"12 Concorde Place Toronto ON M3C 3R8","sourceCountry":"Canada"},"areaType":"RingBuffer","bufferUnits":"esriKilometers","bufferRadii":[3]},{"address":{"text":"380 New York St Redlands CA 92373","sourceCountry":"US"},"areaType":"RingBuffer","bufferUnits":"esriMiles","bufferRadii":[2]}]` 
+
+**Administrative areas**
+
+You can use the [Standard Geography Query](/standard-geography-query) lookup service to find the IDs for named statistical features.
+
+<MoreInfo>
+
+-   All input feature attributes, if provided, will be carried over into the output response. If the input attributes are unique to each input feature, this behavior can be leveraged to uniquely bind or associate the input features with the corresponding output features.
+-   If the input features are submitted without attributes, an "id" attribute will be appended to each feature in the output response. The "id" attribute values will represent the zero-based array index of the input features submitted with the **studyAreas** parameter.
+-    The request sent to the service cannot be greater than 10mb.
+-   Currently, a maximum of 100 features can be enriched with the service per request.
+
+</MoreInfo>
+
+</Box>
+
+## Optional parameters
+
+<Box>
+
+### dataCollections
+
+<ParamMetadata types={[{name:"[string]"}]} defaultValue='["KeyGlobalFacts"]'/>
+
+A Data Collection is a preassembled list of attributes that will be used to enrich the input features. Enrichment attributes can describe various types of information such as demographic characteristics and geographic context of the locations or areas submitted as input features in `studyAreas` .
+
+A standard list of enrichment attributes.
+
+#### Examples
+
+Example 1:
+
+`dataCollections=["KeyGlobalFacts"]` 
+
+Example 2:
+
+`dataCollections=["KeyUSFacts"]` 
+
+Example 3:
+
+`dataCollections=["KeyGlobalFacts","KeyUSFacts"]` 
+
+**Additional notes**
+
+-   A limited number of [Data Collections](/data-collections#TABLE_E925208AA8E74FD38C1A1169C9970B2A) are currently available
+
+</Box>
+
+<Box>
+
+### analysisVariables
+
+<ParamMetadata types={[{name:"[string]"}]} defaultValue="empty"/>
+
+Optional parameter to specify a subset of variables to be returned from one or more Data Collections.
+
+A Data Collection is a preassembled list of attributes that will be used to enrich the input features. With the `analysisVariables`  parameter you can return a subset of variables Enrichment attributes can describe various types of information such as demographic characteristics and geographic context of the locations or areas submitted as input features in `studyAreas` .
+
+**Examples**
+
+Example 1:
+
+` analysisVariables=["KeyGlobalFacts.TOTPOP"]` 
+
+Example 2:
+
+` analysisVariables=["KeyGlobalFacts.TOTPOP", "AGE.MALE0", "AGE.MALE5"]` 
+
+Example 3:
+
+` analysisVariables=["KeyGlobalFacts.TOTPOP", "AGE.* "]` 
+
+**Additional notes**
+
+-    The Data Collection for an analysis variable should be appended before an analysis variable.
+-   Usage and metering will only be based on the number of variables that are returned
+-   You can use an asterisk to return all variables for a given data collection—for example, `KeyGlobalFacts.*` .
+
+</Box>
+<Box>
+
+### addDerivativeVariables
+
+<ParamMetadata types={[{name:"string"}]} defaultValue="empty"/>
+
+Optional parameter to specify an array of string values that describe what derivative variables to include in the output.
+
+**Examples**
+
+Example 1 - Return a data collection with the additional variables and associated metadata for percent's, averages and index values:
+
+`addDerivativeVariables=all` 
+
+Example 2 - Return a data collection with the additional variables and associated metadata for index values:
+
+`addDerivativeVariables=index` 
+
+**Additional notes**
+
+-    The enumerated list of accepted values are as follows:
+
+    `addDerivativeVariables=percent,index,average,all,*` 
+-    Support the use of the derivative statistics can also be performed in the enrich operation through the `analysisVariables`  parameter.
+-   Example: 
+
+    <Box>
+
+    `https://geoenrich.arcgis.com/arcgis/rest/services/World/geoenrichmentserver/Geoenrichment/Enrich?studyareas=[{"geometry":{"rings":[[[-117.26,32.81],[-117.40,32.92],[-117.12,32.80],[-117.26,32.81]]],"spatialReference":{"wkid":4326}},"attributes":{"id":"Polygon 1","name":"Study Area 1"}}]&analysisvariables=["TravelCEX.X7003_X"]&addDerivativeVariables=index&f=pjson` 
+
+    </Box>
+
+    ```javascript
+    {
+      "results" : [ {
+        "paramName" : "GeoEnrichmentResult",
+        "dataType" : "GeoEnrichmentResult",
+        "value" : {
+          "version" : "2.0",
+          "FeatureSet" : [ {
+            "displayFieldName" : "",
+            "fieldAliases" : {
+              "ID_0" : "ID_0",
+              "OBJECTID" : "Object ID",
+              "sourceCountry" : "sourceCountry",
+              "name" : "name",
+              "id" : "id",
+              "aggregationMethod" : "aggregationMethod",
+              "populationToPolygonSizeRating" : "Population to polygon size rating for the country",
+              "apportionmentConfidence" : "Apportionment confidence for the country",
+              "HasData" : "HasData",
+              "X7003_X_I" : "Airline Fares: Index",
+              "X7003_X" : "Airline Fares"
+            },
+            "spatialReference" : {
+              "wkid" : 4326,
+              "latestWkid" : 4326
+            },
+            "fields" : [ {
+              "name" : "ID_0",
+              "type" : "esriFieldTypeString",
+              "alias" : "ID_0",
+              "length" : 256
+            }, {
+              "name" : "OBJECTID",
+              "type" : "esriFieldTypeOID",
+              "alias" : "Object ID"
+            }, {
+              "name" : "sourceCountry",
+              "type" : "esriFieldTypeString",
+              "alias" : "sourceCountry",
+              "length" : 256
+            }, {
+              "name" : "name",
+              "type" : "esriFieldTypeString",
+              "alias" : "name",
+              "length" : 256
+            }, {
+              "name" : "id",
+              "type" : "esriFieldTypeString",
+              "alias" : "id",
+              "length" : 256
+            }, {
+              "name" : "aggregationMethod",
+              "type" : "esriFieldTypeString",
+              "alias" : "aggregationMethod",
+              "length" : 256
+            }, {
+              "name" : "populationToPolygonSizeRating",
+              "type" : "esriFieldTypeDouble",
+              "alias" : "Population to polygon size rating for the country"
+            }, {
+              "name" : "apportionmentConfidence",
+              "type" : "esriFieldTypeDouble",
+              "alias" : "Apportionment confidence for the country"
+            }, {
+              "name" : "HasData",
+              "type" : "esriFieldTypeInteger",
+              "alias" : "HasData"
+            }, {
+              "name" : "X7003_X_I",
+              "type" : "esriFieldTypeInteger",
+              "alias" : "Airline Fares: Index",
+              "fullName" : "TravelCEX.X7003_X_I",
+              "component" : "demographics",
+              "decimals" : 0,
+              "units" : "count"
+            }, {
+              "name" : "X7003_X",
+              "type" : "esriFieldTypeDouble",
+              "alias" : "Airline Fares",
+              "fullName" : "TravelCEX.X7003_X",
+              "component" : "demographics",
+              "decimals" : 0,
+              "units" : "currency",
+              "currency" : "$"
+            } ],
+            "features" : [ {
+              "attributes" : {
+                "ID_0" : "0",
+                "OBJECTID" : 1,
+                "sourceCountry" : "US",
+                "name" : "Study Area 1",
+                "id" : "Polygon 1",
+                "aggregationMethod" : "BlockApportionment:US.BlockGroups;PointsLayer:US.BlockPoints",
+                "populationToPolygonSizeRating" : 2.191,
+                "apportionmentConfidence" : 2.576,
+                "HasData" : 1,
+                "X7003_X_I" : 162,
+                "X7003_X" : 29792383
+              }
+            } ]
+          } ]
+        }
+      } ],
+      "messages" : [ ]
+    }
+    ```
+
+</Box>
+
+<Box>
+
+### studyAreasOptions
+
+<ParamMetadata types={[{name:"object"}]} defaultValue="null | empty" />
+
+This parameter is only applicable to input study areas that are based on points. This parameter is not needed and ignored for input polygon study areas.
+
+{/* **Default value**
+
+`(null or empty)`  */}
+
+**Examples**
+
+Example 1 - Build three ring buffers around a point.
+
+` studyareasoptions={"areaType": "RingBuffer", "bufferUnits": "Miles", "bufferRadii": [1,3,5]}` 
+
+Example 2 - Build three ring buffer bands using kilometers.
+
+` studyareasoptions={"areaType": "RingBufferBands", "bufferUnits": "Kilometers", "bufferRadii": [1,3,5]}` 
+
+Example 3 - Build a single one mile buffer using driving as the travel mode.
+
+` studyareasoptions={"areaType": "NetworkServiceArea", "bufferUnits": "Miles", "bufferRadii": [1], "travel_mode": "Driving", "networkOptions": {"polygon_overlap_type": "Rings"}}` 
+
+<Note type={"tip"}>
+
+Travel restrictions defined explicitly.
+
+`studyareasoptions={"areaType": "DriveTimeBuffer", "bufferUnits": "esriMiles", "bufferRadii": [30], "travel_mode": "{\"attributeParameterValues\": [{\"parameterName\": \"Restriction Usage\", \"attributeName\": \"Avoid Unpaved Roads\", \"value\": \"AVOID_HIGH\"}, {\"parameterName\": \"Restriction Usage\", \"attributeName\": \"Avoid Private Roads\", \"value\": \"AVOID_MEDIUM\"}, {\"parameterName\": \"Restriction Usage\", \"attributeName\": \"Driving an Automobile\", \"value\": \"PROHIBITED\"}, {\"parameterName\": \"Restriction Usage\", \"attributeName\": \"Through Traffic Prohibited\", \"value\": \"AVOID_HIGH\"}, {\"parameterName\": \"Restriction Usage\", \"attributeName\": \"Roads Under Construction Prohibited\", \"value\": \"PROHIBITED\"}, {\"parameterName\": \"Restriction Usage\", \"attributeName\": \"Avoid Gates\", \"value\": \"AVOID_MEDIUM\"}, {\"parameterName\": \"Restriction Usage\", \"attributeName\": \"Avoid Express Lanes\", \"value\": \"PROHIBITED\"}, {\"parameterName\": \"Restriction Usage\", \"attributeName\": \"Avoid Carpool Roads\", \"value\": \"PROHIBITED\"}], \"description\": \"Models the movement of cars and other similar small automobiles, such as pickup trucks, and finds solutions that optimize travel time. Travel obeys one-way roads, avoids illegal turns, and follows other rules that are specific to cars. Dynamic travel speeds based on traffic are used where it is available when you specify a start time.\", \"impedanceAttributeName\": \"TravelTime\", \"simplificationToleranceUnits\": \"esriMeters\", \"uturnAtJunctions\": \"esriNFSBAtDeadEndsAndIntersections\", \"restrictionAttributeNames\": [\"Avoid Carpool Roads\", \"Avoid Express Lanes\", \"Avoid Gates\", \"Avoid Private Roads\", \"Avoid Unpaved Roads\", \"Driving an Automobile\", \"Roads Under Construction Prohibited\", \"Through Traffic Prohibited\"], \"useHierarchy\": true, \"simplificationTolerance\": 10, \"timeAttributeName\": \"TravelTime\", \"distanceAttributeName\": \"Miles\", \"type\": \"AUTOMOBILE\", \"id\": \"FEgifRtFndKNcJMJ\", \"name\": \"Driving Time\"}"}` 
+
+</Note>
+
+Example 4 - Build a single one mile buffer using driving as the travel mode and disks as the overlap type.
+
+` studyareasoptions={"areaType": "NetworkServiceArea", "bufferUnits": "Miles", "bufferRadii": [1], "travel_mode": "Driving", "networkOptions": {"polygon_overlap_type": "Disks"}}` 
+
+Example 5 - Build a 100 kilometer buffer and allow for multiple countries to be aggregated.
+
+`  studyareasoptions={"areaType": "RingBuffer", "bufferUnits": "Kilometers", "bufferRadii": [100], "aggregateMultipleCountries": "true"}` 
+
+Example 6 - Return ZIP Code data intersected by a point study area.
+
+` studyAreasOptions={"comparisonLevels":[{"layer":"US.ZIP5"}]}` 
+
+**Additional notes**
+
+-   The **studyAreasOptions** parameter should only be set for input points, street address and point-based feature service-based study areas.
+-   Miles and Kilometers are supported buffer units.
+-   Ring buffer bands represent the area between each ring with no overlap.
+-   Disks represent the area between each ring with no overlap.
+-   Setting the `aggregateMultipleCountries`  property to `true`  allows data from multiple countries to be included in the output.
+-   The supported comparison levels are: US.States, US.DMA, US.CD, US.CBSA, US.Counties, US.CSD, US.ZIP5, US.Places, US.Tracts, US.BlockGroups.
+
+</Box>
+
+<Box>
+
+### useData
+
+<ParamMetadata types={[{name:"object"}]} defaultValue="null | empty" />
+
+Optional parameter to specify the hierarchy to query in the case of multiple vintages being available. For example, the current year and previous year vintages of data are available for the US. This parameter can explicitly use the previous year instead of the default current year. In the US, the `esri2024`  hierarchy is the default, it is based on boundaries from the 2020 census and Esri's updated demographics for the current year. The `esri2023`  hierarchy is based on boundaries from the 2020 census and Esri's updated demographics for the year 2023.
+
+The `useData`  parameter can also provide an optional performance hint. By default, the service will automatically determine the country associated with each location submitted in the `studyAreas`  parameter, however, there is an associated computational cost that can lengthen the time it takes to return a response. To skip this intermediate step and potentially improve the speed and performance of the service, the caller can specify the country up front through this parameter.
+
+{/* **Default value**
+
+`(null or empty)`  */}
+
+If there are multiple vintages of data (US only), the default behavior is to query the most current year available.
+
+**Examples**
+
+Example 1 - Query the most current vintage of data for locations in the US (default behavior).
+
+`useData={"sourceCountry":"US","hierarchy":"esri2024"}` 
+
+Example 2 - Query the 2023 data for locations in the US.
+
+`
+                    useData={"sourceCountry":"US","hierarchy":"esri2023"}` 
+
+Example 3 - Provide a performance hint to the service by indicating that all of the input features in the **studyAreas** parameter describe locations or areas in the US.
+
+` useData={"sourceCountry":"US"}` 
+
+</Box>
+
+<Box>
+
+### intersectingGeographies
+
+<ParamMetadata types={[{name:"object"}]}/>
+
+Optional parameter to explicitly define the geographic layers used to provide geographic context during the enrichment process. For example, you can use this optional parameter to return the U.S. county and ZIP Code that each input study area intersects.
+
+You can intersect input features defined in the `studyAreas`  parameter with standard geography layers that are provided be the GeoEnrichment service for each country. You can also intersect features from a publicly available feature service.
+
+The `intersectingGeographies`  parameter should be constructed as a JSON array of an IntersectingGeographies object which consists of the following elements:
+
+<StyledTable headers={"Value,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+geographyType
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the type of intersection layer. Standard geography layers—provided by the GeoEnrichment service for each country or publicly available feature services.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+layer
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies which Standard Geography layer should be intersected—for example, U.S.Counties. These are an array of layers, so you can set one or many layers to intersect. These layers are defined in the [Coverage](/geoenrichment-coverage) section. At least one layer must be defined if geographyType is set to standard.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+URL
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Optional URL if you want to intersect features from an external feature service. This layer must be defined if geographyType is set to external.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+name
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Optional alias name of the output geography layer being intersected. For example, you can set the name of US.Counties to Counties in the GeoEnrichment output.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+geometryType
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies how input `studyAreas`  should intersect specified geography. If this is set to `esriGeometryPoint` , one intersecting feature is returned that intersects the centroid of each input polygon. If this is set to `esriGeometryPolygon` , all intersecting features are returned that intersect the input study area polygon. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+outFields
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+You can optionally define the list of output fields from the intersected layer that will be appended to the GeoEnrichment response as geocontext items.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+spatialRel
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The optional [spatial relationship](HTTP://RESOURCES.ARCGIS.COM/EN/HELP/SOAP/10.1/INDEX.HTML#//01VP00000116000000) to be applied on the intersecting layer. The supported spatial relationships include intersects, contains, envelope intersects, within, and so on. The default spatial relationship is intersects (`esriSpatialRelIntersects` ).
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+where
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+You can define an optional where clause.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+**Default value**
+
+`none` 
+
+No intersecting geographies will be included in the output response.
+
+</Box>
+
+<Box>
+
+### returnGeometry
+
+<ParamMetadata types={[{name:"boolean"}]} defaultValue="false" />
+
+Optional parameter to request the output geometries in the response.
+
+When this parameter is set to true, the output geometries associated with each feature will be included in the response. The output geometries will be in the spatial reference system defined by `outSR` .
+
+**Default value**
+
+`false` 
+
+The output geometries will not be returned with each feature in the response.
+
+**Examples**
+
+Example 1 - Request the output geometries in the response:
+
+`returnGeometry=true` 
+
+**Additional notes**
+
+-   Requesting output geometries can significantly increase the payload size of the output response which will increase the amount of time it takes to receive the response and negatively affect the speed and performance of any client applications consuming the service.
+
+</Box>
+
+<Box>
+
+### inSR
+
+<ParamMetadata types={[{name:"number"}]} defaultValue="4326" />
+
+Optional parameter to define the input geometries in the `studyAreas`  parameter in a specified spatial reference system.
+
+When input points are defined in the `studyAreas`  parameter, this optional parameter can be specified to explicitly indicate the spatial reference system of the point features. The parameter value can be specified as the well-known ID describing the projected coordinate system or geographic coordinate system.
+
+{/* **Default value**
+
+`4326`  */}
+
+The standard latitude and longitude-based geographic coordinate system based on the WGS 1984 datum will be used.
+
+**Examples**
+
+Example 1 - Specify the input geometry in the Web Mercator (Auxiliary Sphere) projected coordinate system based on the WGS 1984 datum:
+
+`inSR=3857` 
+
+Example 2 - Defining one point with non-default WKT:
+
+`studyareas =[{"geometry":{"x":-13629414,"y":4541375,"spatialReference":{"WKT":"PROJCS[\"WGS_1984_Web_Mercator_Auxiliary_Sphere\",GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],PROJECTION[\"Mercator_Auxiliary_Sphere\"],PARAMETER[\"False_Easting\",0.0],PARAMETER[\"False_Northing\",0.0],PARAMETER[\"Central_Meridian\",0.0],PARAMETER[\"Standard_Parallel_1\",0.0],PARAMETER[\"Auxiliary_Sphere_Type\",0.0],UNIT[\"Meter\",1.0]]"}}}]` 
+
+**Additional notes**
+
+-   For a list of valid WKID values, see [Projected coordinate systems](HTTP://RESOURCES.ARCGIS.COM/EN/HELP/REST/APIREF/?PCS.HTML) and [Geographic coordinate systems](HTTP://RESOURCES.ARCGIS.COM/EN/HELP/REST/APIREF/?GCS.HTML).
+
+</Box>
+
+<Box>
+
+### outSR
+
+<ParamMetadata types={[{name:"number"}]} defaultValue="4326" />
+
+Optional parameter to request the output geometries in a specified spatial reference system.
+
+When `returnGeometry`  is set to true, this optional parameter can be specified to explicitly indicate the spatial reference system of the output geometry. The parameter value can be specified as the well-known ID describing the projected coordinate system or geographic coordinate system.
+
+{/* **Default value**
+
+`4326`  */}
+
+The standard latitude and longitude-based geographic coordinate system based on the WGS 1984 datum will be used.
+
+**Examples**
+
+Example 1 - Specify the output geometry in the Web Mercator (Auxiliary Sphere) projected coordinate system based on the WGS 1984 datum:
+
+`outSR=3857` 
+
+**Additional notes**
+
+-   For a list of valid WKID values, see [Projected coordinate systems](HTTP://RESOURCES.ARCGIS.COM/EN/HELP/REST/APIREF/?PCS.HTML) and [Geographic coordinate systems](HTTP://RESOURCES.ARCGIS.COM/EN/HELP/REST/APIREF/?GCS.HTML).
+
+</Box>
+
+## Response status
+
+For a list of error codes and details, go to [Error codes](xref:///geoenrichment-error-codes/#enrich). 
+
+<!-- {/* <StyledTable headers="Status, Meaning, Description, Schema">
+  <StyledTableRow anchor="link-to-me">
+    <StyledTableCell cellStyle="code">200</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[OK](https://datatracker.ietf.org/doc/html/rfc7231#section-6.3.1)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     A successful response for an `/Enrich` request.
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     Inline
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow anchor="link-to-me">
+    <StyledTableCell cellStyle="code">400</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[Bad request](https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    Invalid query parameters
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     [Error](xref:///geoenrichment-types/#error)
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow anchor="link-to-me">
+    <StyledTableCell cellStyle="code">401</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[Unauthorized](https://datatracker.ietf.org/doc/html/rfc7235#section-3.1)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     Authentication error. An access token is missing, invalid, or expired.
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     [Error](xref:///geoenrichment-types/#error)
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow anchor="link-to-me">
+    <StyledTableCell cellStyle="code">403</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[Forbidden](https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.3)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     The required paramter `token` is valid but does not have permission to access the service.
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     [Error](xref:///geoenrichment-types/#error)
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow anchor="link-to-me">
+    <StyledTableCell cellStyle="code">5XX</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">Unknown</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     An unknown error occured on the server 
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     [Error](xref:///geoenrichment-types/#error)
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable> */} -->
+
+
+## Response details 
+
+<!-- Go to [Response types](xref:///geoenrichment-types/#enrichresults) for an example of the JSON response object.  -->
+
+<CodeSwitcher displayMode="tabs">
+  <CodeBlock language="json" group="Success" source="./code/enrich-response.json" />
+  <CodeBlock language="json" group="Error" source="./code/error-response.json"/>
+</CodeSwitcher>
+
+## Examples
+
+<Box>
+
+### Enrich a single area
+
+Enrich a single area defined by a polygon feature with attributes defined in a specified Data Collection and include the associated geometry in the response. Optionally, rename the polygon and include information about all of the boundary areas within the three default administrative levels that intersect any part of the input area. 
+
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Request</TabTitle>
+
+<TabTitle>Response</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```curl
+GET https://geoenrich.arcgis.com/arcgis/rest/services/World/geoenrichmentserver/GeoEnrichment/enrich?StudyAreas=[{"geometry":{"rings":[[[-117.217855,32.842137],[-117.219443,32.847293],[-117.216611,32.853999],[-117.23249,32.849312],[-117.234249,32.843399],[-117.229571,32.839108],[-117.217855,32.842137]]],"spatialReference":{"wkid":4326}},"attributes":{"id":"Polygon 1","name":"University City West"}}]&StudyAreasOptions={"GeometryType":"esriGeometryPolygon","SpatialRelationship":"esriSpatialRelIntersects"}&dataCollections=["KeyUSFacts"]&returngeometry=true&f=pjson&token=<ACCESS_TOKEN>
+```
+
+ 
+
+</Tab>
+
+<Tab>
+ 
+{/* 
+```javascript
+https%3A%2F%2Fgeoenrich.arcgis.com%2Farcgis%2Frest%2Fservices%2FWorld%2Fgeoenrichmentserver%2FGeoEnrichment%2Fenrich%3FStudyAreas%3D%5B%7B%22geometry%22%3A%7B%22rings%22%3A%5B%5B%5B-117.217855%2C32.842137%5D%2C%5B-117.219443%2C32.847293%5D%2C%5B-117.216611%2C32.853999%5D%2C%5B-117.23249%2C32.849312%5D%2C%5B-117.234249%2C32.843399%5D%2C%5B-117.229571%2C32.839108%5D%2C%5B-117.217855%2C32.842137%5D%5D%5D%2C%22spatialReference%22%3A%7B%22wkid%22%3A4326%7D%7D%2C%22attributes%22%3A%7B%22id%22%3A%22Polygon%201%22%2C%22name%22%3A%22University%20City%20West%22%7D%7D%5D%26amp%3BStudyAreasOptions%3D%7B%22GeometryType%22%3A%22esriGeometryPolygon%22%2C%22SpatialRelationship%22%3A%22esriSpatialRelIntersects%22%7D%26amp%3BdataCollections%3D%5B%22KeyUSFacts%22%5D%26amp%3Breturngeometry%3Dtrue%26amp%3Bf%3Dpjson
+```
+ */}
+
+```json
+{
+  "results": [
+    {
+      "paramName": "GeoEnrichmentResult",
+      "dataType": "GeoEnrichmentResult",
+      "value": {
+        "version": "2.0",
+        "FeatureSet": [
+          {
+            "displayFieldName": "",
+            "fieldAliases": {
+              "ID_0": "ID_0",
+              "OBJECTID": "Object ID",
+              "sourceCountry": "sourceCountry",
+              "name": "name",
+              "id": "id",
+              "aggregationMethod": "aggregationMethod",
+              "populationToPolygonSizeRating": "Population to polygon size rating for the country",
+              "apportionmentConfidence": "Apportionment confidence for the country",
+              "HasData": "HasData",
+              "TOTPOP00": "2000 Total Population",
+              "TOTPOP10": "2010 Total Population",
+              "TOTPOP_CY": "2018 Total Population",
+              "TOTPOP_FY": "2023 Total Population",
+              "GQPOP_CY": "2018 Population in Group Quarters",
+              "DIVINDX_CY": "2018 Diversity Index",
+              "TOTHH00": "2000 Total Households",
+              "TOTHH10": "2010 Total Households",
+              "TOTHH_CY": "2018 Total Households",
+              "TOTHH_FY": "2023 Total Households",
+              "AVGHHSZ_CY": "2018 Average Household Size",
+              "MEDHINC_CY": "2018 Median Household Income",
+              "MEDHINC_FY": "2023 Median Household Income",
+              "AVGHINC_CY": "2018 Average Household Income",
+              "AVGHINC_FY": "2023 Average Household Income",
+              "PCI_CY": "2018 Per Capita Income",
+              "PCI_FY": "2023 Per Capita Income",
+              "TOTHU00": "2000 Total Housing Units",
+              "TOTHU10": "2010 Total Housing Units",
+              "TOTHU_CY": "2018 Total Housing Units",
+              "TOTHU_FY": "2023 Total Housing Units",
+              "OWNER_CY": "2018 Owner Occupied HUs",
+              "OWNER_FY": "2023 Owner Occupied HUs",
+              "RENTER_CY": "2018 Renter Occupied HUs",
+              "RENTER_FY": "2023 Renter Occupied HUs",
+              "VACANT_CY": "2018 Vacant Housing Units",
+              "VACANT_FY": "2023 Vacant Housing Units",
+              "MEDVAL_CY": "2018 Median Home Value",
+              "MEDVAL_FY": "2023 Median Home Value",
+              "AVGVAL_CY": "2018 Average Home Value",
+              "AVGVAL_FY": "2023 Average Home Value",
+              "POPGRW10CY": "2010-2018 Growth Rate: Population",
+              "HHGRW10CY": "2010-2018 Growth Rate: Households",
+              "FAMGRW10CY": "2010-2018 Growth Rate: Families",
+              "POPGRWCYFY": "2018-2023 Growth/Yr: Population",
+              "HHGRWCYFY": "2018-2023 Growth/Yr: Households",
+              "FAMGRWCYFY": "2018-2023 Growth/Yr: Families",
+              "MHIGRWCYFY": "2018-2023 Growth/Yr: Median HH Inc",
+              "PCIGRWCYFY": "2018-2023 Growth/Yr: Per Capita Income",
+              "DPOP_CY": "2018 Total Daytime Population",
+              "DPOPWRK_CY": "2018 Daytime Pop: Workers",
+              "DPOPRES_CY": "2018 Daytime Pop: Residents"
+            },
+            "geometryType": "esriGeometryPolygon",
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            },
+            "fields": [
+              {
+                "name": "ID_0",
+                "type": "esriFieldTypeString",
+                "alias": "ID_0",
+                "length": 256
+              },
+              {
+                "name": "OBJECTID",
+                "type": "esriFieldTypeOID",
+                "alias": "Object ID"
+              },
+              {
+                "name": "sourceCountry",
+                "type": "esriFieldTypeString",
+                "alias": "sourceCountry",
+                "length": 256
+              },
+              {
+                "name": "name",
+                "type": "esriFieldTypeString",
+                "alias": "name",
+                "length": 256
+              },
+              {
+                "name": "id",
+                "type": "esriFieldTypeString",
+                "alias": "id",
+                "length": 256
+              },
+              {
+                "name": "aggregationMethod",
+                "type": "esriFieldTypeString",
+                "alias": "aggregationMethod",
+                "length": 256
+              },
+              {
+                "name": "populationToPolygonSizeRating",
+                "type": "esriFieldTypeDouble",
+                "alias": "Population to polygon size rating for the country"
+              },
+              {
+                "name": "apportionmentConfidence",
+                "type": "esriFieldTypeDouble",
+                "alias": "Apportionment confidence for the country"
+              },
+              {
+                "name": "HasData",
+                "type": "esriFieldTypeInteger",
+                "alias": "HasData"
+              },
+              {
+                "name": "TOTPOP00",
+                "type": "esriFieldTypeDouble",
+                "alias": "2000 Total Population",
+                "fullName": "KeyUSFacts.TOTPOP00",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "count"
+              },
+              {
+                "name": "TOTPOP10",
+                "type": "esriFieldTypeDouble",
+                "alias": "2010 Total Population",
+                "fullName": "KeyUSFacts.TOTPOP10",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "count"
+              },
+              {
+                "name": "TOTPOP_CY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2018 Total Population",
+                "fullName": "KeyUSFacts.TOTPOP_CY",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "count"
+              },
+              {
+                "name": "TOTPOP_FY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2023 Total Population",
+                "fullName": "KeyUSFacts.TOTPOP_FY",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "count"
+              },
+              {
+                "name": "GQPOP_CY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2018 Population in Group Quarters",
+                "fullName": "KeyUSFacts.GQPOP_CY",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "count"
+              },
+              {
+                "name": "DIVINDX_CY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2018 Diversity Index",
+                "fullName": "KeyUSFacts.DIVINDX_CY",
+                "component": "demographics",
+                "decimals": 1,
+                "units": "count"
+              },
+              {
+                "name": "TOTHH00",
+                "type": "esriFieldTypeDouble",
+                "alias": "2000 Total Households",
+                "fullName": "KeyUSFacts.TOTHH00",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "count"
+              },
+              {
+                "name": "TOTHH10",
+                "type": "esriFieldTypeDouble",
+                "alias": "2010 Total Households",
+                "fullName": "KeyUSFacts.TOTHH10",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "count"
+              },
+              {
+                "name": "TOTHH_CY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2018 Total Households",
+                "fullName": "KeyUSFacts.TOTHH_CY",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "count"
+              },
+              {
+                "name": "TOTHH_FY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2023 Total Households",
+                "fullName": "KeyUSFacts.TOTHH_FY",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "count"
+              },
+              {
+                "name": "AVGHHSZ_CY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2018 Average Household Size",
+                "fullName": "KeyUSFacts.AVGHHSZ_CY",
+                "component": "demographics",
+                "decimals": 2,
+                "units": "count"
+              },
+              {
+                "name": "MEDHINC_CY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2018 Median Household Income",
+                "fullName": "KeyUSFacts.MEDHINC_CY",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "currency",
+                "currency": "$"
+              },
+              {
+                "name": "MEDHINC_FY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2023 Median Household Income",
+                "fullName": "KeyUSFacts.MEDHINC_FY",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "currency",
+                "currency": "$"
+              },
+              {
+                "name": "AVGHINC_CY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2018 Average Household Income",
+                "fullName": "KeyUSFacts.AVGHINC_CY",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "currency",
+                "currency": "$"
+              },
+              {
+                "name": "AVGHINC_FY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2023 Average Household Income",
+                "fullName": "KeyUSFacts.AVGHINC_FY",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "currency",
+                "currency": "$"
+              },
+              {
+                "name": "PCI_CY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2018 Per Capita Income",
+                "fullName": "KeyUSFacts.PCI_CY",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "currency",
+                "currency": "$"
+              },
+              {
+                "name": "PCI_FY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2023 Per Capita Income",
+                "fullName": "KeyUSFacts.PCI_FY",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "currency",
+                "currency": "$"
+              },
+              {
+                "name": "TOTHU00",
+                "type": "esriFieldTypeDouble",
+                "alias": "2000 Total Housing Units",
+                "fullName": "KeyUSFacts.TOTHU00",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "count"
+              },
+              {
+                "name": "TOTHU10",
+                "type": "esriFieldTypeDouble",
+                "alias": "2010 Total Housing Units",
+                "fullName": "KeyUSFacts.TOTHU10",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "count"
+              },
+              {
+                "name": "TOTHU_CY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2018 Total Housing Units",
+                "fullName": "KeyUSFacts.TOTHU_CY",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "count"
+              },
+              {
+                "name": "TOTHU_FY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2023 Total Housing Units",
+                "fullName": "KeyUSFacts.TOTHU_FY",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "count"
+              },
+              {
+                "name": "OWNER_CY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2018 Owner Occupied HUs",
+                "fullName": "KeyUSFacts.OWNER_CY",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "count"
+              },
+              {
+                "name": "OWNER_FY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2023 Owner Occupied HUs",
+                "fullName": "KeyUSFacts.OWNER_FY",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "count"
+              },
+              {
+                "name": "RENTER_CY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2018 Renter Occupied HUs",
+                "fullName": "KeyUSFacts.RENTER_CY",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "count"
+              },
+              {
+                "name": "RENTER_FY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2023 Renter Occupied HUs",
+                "fullName": "KeyUSFacts.RENTER_FY",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "count"
+              },
+              {
+                "name": "VACANT_CY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2018 Vacant Housing Units",
+                "fullName": "KeyUSFacts.VACANT_CY",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "count"
+              },
+              {
+                "name": "VACANT_FY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2023 Vacant Housing Units",
+                "fullName": "KeyUSFacts.VACANT_FY",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "count"
+              },
+              {
+                "name": "MEDVAL_CY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2018 Median Home Value",
+                "fullName": "KeyUSFacts.MEDVAL_CY",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "currency",
+                "currency": "$"
+              },
+              {
+                "name": "MEDVAL_FY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2023 Median Home Value",
+                "fullName": "KeyUSFacts.MEDVAL_FY",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "currency",
+                "currency": "$"
+              },
+              {
+                "name": "AVGVAL_CY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2018 Average Home Value",
+                "fullName": "KeyUSFacts.AVGVAL_CY",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "currency",
+                "currency": "$"
+              },
+              {
+                "name": "AVGVAL_FY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2023 Average Home Value",
+                "fullName": "KeyUSFacts.AVGVAL_FY",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "currency",
+                "currency": "$"
+              },
+              {
+                "name": "POPGRW10CY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2010-2018 Growth Rate: Population",
+                "fullName": "KeyUSFacts.POPGRW10CY",
+                "component": "demographics",
+                "decimals": 2,
+                "units": "pct"
+              },
+              {
+                "name": "HHGRW10CY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2010-2018 Growth Rate: Households",
+                "fullName": "KeyUSFacts.HHGRW10CY",
+                "component": "demographics",
+                "decimals": 2,
+                "units": "pct"
+              },
+              {
+                "name": "FAMGRW10CY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2010-2018 Growth Rate: Families",
+                "fullName": "KeyUSFacts.FAMGRW10CY",
+                "component": "demographics",
+                "decimals": 2,
+                "units": "pct"
+              },
+              {
+                "name": "POPGRWCYFY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2018-2023 Growth/Yr: Population",
+                "fullName": "KeyUSFacts.POPGRWCYFY",
+                "component": "demographics",
+                "decimals": 2,
+                "units": "pct"
+              },
+              {
+                "name": "HHGRWCYFY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2018-2023 Growth/Yr: Households",
+                "fullName": "KeyUSFacts.HHGRWCYFY",
+                "component": "demographics",
+                "decimals": 2,
+                "units": "pct"
+              },
+              {
+                "name": "FAMGRWCYFY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2018-2023 Growth/Yr: Families",
+                "fullName": "KeyUSFacts.FAMGRWCYFY",
+                "component": "demographics",
+                "decimals": 2,
+                "units": "pct"
+              },
+              {
+                "name": "MHIGRWCYFY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2018-2023 Growth/Yr: Median HH Inc",
+                "fullName": "KeyUSFacts.MHIGRWCYFY",
+                "component": "demographics",
+                "decimals": 2,
+                "units": "pct"
+              },
+              {
+                "name": "PCIGRWCYFY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2018-2023 Growth/Yr: Per Capita Income",
+                "fullName": "KeyUSFacts.PCIGRWCYFY",
+                "component": "demographics",
+                "decimals": 2,
+                "units": "pct"
+              },
+              {
+                "name": "DPOP_CY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2018 Total Daytime Population",
+                "fullName": "KeyUSFacts.DPOP_CY",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "count"
+              },
+              {
+                "name": "DPOPWRK_CY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2018 Daytime Pop: Workers",
+                "fullName": "KeyUSFacts.DPOPWRK_CY",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "count"
+              },
+              {
+                "name": "DPOPRES_CY",
+                "type": "esriFieldTypeDouble",
+                "alias": "2018 Daytime Pop: Residents",
+                "fullName": "KeyUSFacts.DPOPRES_CY",
+                "component": "demographics",
+                "decimals": 0,
+                "units": "count"
+              }
+            ],
+            "features": [
+              {
+                "attributes": {
+                  "ID_0": "0",
+                  "OBJECTID": 1,
+                  "sourceCountry": "US",
+                  "name": "University City West",
+                  "id": "Polygon 1",
+                  "aggregationMethod": "BlockApportionment:US.BlockGroups;PointsLayer:US.BlockPoints",
+                  "populationToPolygonSizeRating": 2.191,
+                  "apportionmentConfidence": 2.576,
+                  "HasData": 1,
+                  "TOTPOP00": 2969,
+                  "TOTPOP10": 2880,
+                  "TOTPOP_CY": 2987,
+                  "TOTPOP_FY": 3073,
+                  "GQPOP_CY": 0,
+                  "DIVINDX_CY": 40.3,
+                  "TOTHH00": 1135,
+                  "TOTHH10": 1122,
+                  "TOTHH_CY": 1162,
+                  "TOTHH_FY": 1191,
+                  "AVGHHSZ_CY": 2.57,
+                  "MEDHINC_CY": 115588,
+                  "MEDHINC_FY": 134338,
+                  "AVGHINC_CY": 157932,
+                  "AVGHINC_FY": 184667,
+                  "PCI_CY": 61787,
+                  "PCI_FY": 71977,
+                  "TOTHU00": 1146,
+                  "TOTHU10": 1152,
+                  "TOTHU_CY": 1193,
+                  "TOTHU_FY": 1222,
+                  "OWNER_CY": 1019,
+                  "OWNER_FY": 1065,
+                  "RENTER_CY": 143,
+                  "RENTER_FY": 125,
+                  "VACANT_CY": 31,
+                  "VACANT_FY": 31,
+                  "MEDVAL_CY": 836957,
+                  "MEDVAL_FY": 855196,
+                  "AVGVAL_CY": 853168,
+                  "AVGVAL_FY": 872233,
+                  "POPGRW10CY": 0.44,
+                  "HHGRW10CY": 0.43,
+                  "FAMGRW10CY": 0.44,
+                  "POPGRWCYFY": 0.57,
+                  "HHGRWCYFY": 0.49,
+                  "FAMGRWCYFY": 0.52,
+                  "MHIGRWCYFY": 3.05,
+                  "PCIGRWCYFY": 3.1,
+                  "DPOP_CY": 1838,
+                  "DPOPWRK_CY": 291,
+                  "DPOPRES_CY": 1547
+                },
+                "geometry": {
+                  "rings": [
+                    [
+                      [
+                        -117.217855,
+                        32.842136999999994
+                      ],
+                      [
+                        -117.22957100000002,
+                        32.839108
+                      ],
+                      [
+                        -117.23424900000002,
+                        32.84339899999999
+                      ],
+                      [
+                        -117.23249000000001,
+                        32.84931199999999
+                      ],
+                      [
+                        -117.21661099999999,
+                        32.853999
+                      ],
+                      [
+                        -117.219443,
+                        32.84729299999999
+                      ],
+                      [
+                        -117.217855,
+                        32.842136999999994
+                      ]
+                    ]
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "messages": []
+}
+```
+
+</Tab>
+
+</Tabs>
+
+<MoreInfo>
+
+-   A list of attributes describing the area's demographic characteristics and geographic context, as defined in the default Data Collection, is returned in the response.
+-   User defined attributes are submitted with the input feature and will be carried over into the response. This can be useful in associating the input feature with the output.
+
+JSON response rendered with ArcGIS for Desktop. 
+
+![User-defined polygon](./images/GUID-C1665347-E801-4987-AF13-442303338A88-web.png)
+
+-   Transparency and fill properties have been adjusted for illustrative purposes. 
+
+</MoreInfo>
+
+</Box>
+
+<Box>
+
+### Enrich a single area (polygon)
+
+Enrich a single area defined by a polygon feature with attributes defined in a specified Data Collection and include information about all of the boundary areas within the three default administrative levels that intersect any part of the input area.
+
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Request</TabTitle>
+
+<TabTitle>Response</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```curl
+GET https://geoenrich.arcgis.com/arcgis/rest/services/World/geoenrichmentserver/GeoEnrichment/enrich?StudyAreas=[{"geometry":{"rings":[[[-117.26,32.81],[-117.40,32.92],[-117.12,32.80],[-117.26,32.81]]],"spatialReference":{"wkid":4326}},"attributes":{"id":"Polygon 1","name":"Optional Name 1"}}]&StudyAreasOptions={"GeometryType":"esriGeometryPolygon","SpatialRelationship":"esriSpatialRelIntersects"}&dataCollections=["KeyUSFacts"]&f=pjson&token=<ACCESS_TOKEN>
+```
+
+ 
+
+</Tab>
+
+<Tab>
+
+{/* 
+```javascript
+https%3A%2F%2Fgeoenrich.arcgis.com%2Farcgis%2Frest%2Fservices%2FWorld%2Fgeoenrichmentserver%2FGeoEnrichment%2Fenrich%3FStudyAreas%3D%5B%7B%22geometry%22%3A%7B%22rings%22%3A%5B%5B%5B-117.26%2C32.81%5D%2C%5B-117.40%2C32.92%5D%2C%5B-117.12%2C32.80%5D%2C%5B-117.26%2C32.81%5D%5D%5D%2C%22spatialReference%22%3A%7B%22wkid%22%3A4326%7D%7D%2C%22attributes%22%3A%7B%22id%22%3A%22Polygon%201%22%2C%22name%22%3A%22Optional%20Name%201%22%7D%7D%5D%26amp%3BStudyAreasOptions%3D%7B%22GeometryType%22%3A%22esriGeometryPolygon%22%2C%22SpatialRelationship%22%3A%22esriSpatialRelIntersects%22%7D%26amp%3BdataCollections%3D%5B%22KeyUSFacts%22%5D%26amp%3Bf%3Dpjson
+```
+ */}
+
+ ```json
+{
+  "results" : [ {
+    "paramName" : "GeoEnrichmentResult",
+    "dataType" : "GeoEnrichmentResult",
+    "value" : {
+      "version" : "2.0",
+      "FeatureSet" : [ {
+        "displayFieldName" : "",
+        "fieldAliases" : {
+          "ID_0" : "ID_0",
+          "OBJECTID" : "Object ID",
+          "sourceCountry" : "sourceCountry",
+          "name" : "name",
+          "id" : "id",
+          "aggregationMethod" : "aggregationMethod",
+          "HasData" : "HasData",
+          "TOTPOP00" : "2000 Total Population",
+          "TOTPOP10" : "2010 Total Population",
+
+           ...
+
+           "DPOPRES_CY" : "2018 Daytime Pop: Residents"
+        },
+        "spatialReference" : {
+          "wkid" : 4326,
+          "latestWkid" : 4326
+        },
+        "fields" : [ {
+          "name" : "ID_0",
+          "type" : "esriFieldTypeString",
+          "alias" : "ID_0",
+          "length" : 256
+        }, {
+          "name" : "OBJECTID",
+          "type" : "esriFieldTypeOID",
+          "alias" : "Object ID"
+        }, {
+          "name" : "sourceCountry",
+          "type" : "esriFieldTypeString",
+          "alias" : "sourceCountry",
+          "length" : 256
+        }, {
+          "name" : "name",
+          "type" : "esriFieldTypeString",
+          "alias" : "name",
+          "length" : 256
+        }, {
+          "name" : "id",
+          "type" : "esriFieldTypeString",
+          "alias" : "id",
+          "length" : 256
+        }, {
+          "name" : "aggregationMethod",
+          "type" : "esriFieldTypeString",
+          "alias" : "aggregationMethod",
+          "length" : 256
+        }, {
+          "name" : "HasData",
+          "type" : "esriFieldTypeInteger",
+          "alias" : "HasData"
+        }, {
+          "name" : "TOTPOP00",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2000 Total Population",
+          "fullName" : "KeyUSFacts.TOTPOP00",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTPOP10",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2010 Total Population",
+          "fullName" : "KeyUSFacts.TOTPOP10",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        },
+
+           ...
+
+           {
+          "name" : "DPOPRES_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Daytime Pop: Residents",
+          "fullName" : "KeyUSFacts.DPOPRES_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        } ],
+        "features" : [ {
+          "attributes" : {
+            "ID_0" : "0",
+            "OBJECTID" : 1,
+            "sourceCountry" : "US",
+            "name" : "Optional Name 1",
+            "id" : "Polygon 1",
+            "aggregationMethod" : "BlockApportionment:US.BlockGroups;PointsLayer:US.BlockPoints",
+            "HasData" : 1,
+            "TOTPOP00" : 80786,
+            "TOTPOP10" : 80256,
+
+           ...
+
+           "DPOPRES_CY" : 42936
+        }
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "messages": []
+}
+```
+
+</Tab>
+
+</Tabs>
+
+ 
+<MoreInfo>
+
+-   The response has been abbreviated in the example where "..." is noted. 
+-   A list of attributes describing the area's demographic characteristics and geographic context, as defined in the KeyUSFacts Data Collection, is returned in the response.
+-   User defined attributes are submitted with the input feature and will be carried over into the response. This can be useful in associating the input feature with the output.
+-   The default geographic context that is returned in all responses includes the descriptions of three levels of administrative areas: the country level, the first level major administrative boundary level such as state or province, and the ZIP (U.S.) or postal code level. In `studyAreasOptions` , an intersection relationship has been specified and will result in the inclusion of the descriptions of all of the boundary areas from the three default administrative levels that intersect any part of the input area to be included in the response.
+
+</MoreInfo>
+
+</Box>
+
+<Box>
+
+### Enrich a single location 
+
+Enrich a single location defined by a single-line address with a 15 minute walk time buffer. Attributes are defined in a specified Data Collection and geometry is returned.
+
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Request</TabTitle>
+
+<TabTitle>Response</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```http
+GET https://geoenrich.arcgis.com/arcgis/rest/services/World/geoenrichmentserver/GeoEnrichment/enrich?studyareas=[{"address":{"text":" 102 Aqua Ct New Smyrna Beach FL 32168"}}]&studyareasoptions={"areaType": "NetworkServiceArea","bufferUnits": "Minutes","bufferRadii": [15],"travel_mode":"Walking"}&dataCollections=["KeyGlobalFacts"]&returngeometry=true&f=pjson&token=<ACCESS_TOKEN>
+```
+
+ 
+
+</Tab>
+
+<Tab>
+
+{/* ```javascript
+https%3A%2F%2Fgeoenrich.arcgis.com%2Farcgis%2Frest%2Fservices%2FWorld%2Fgeoenrichmentserver%2FGeoEnrichment%2Fenrich%3Fstudyareas%3D%5B%7B%22address%22%3A%7B%22text%22%3A%22%20102%20Aqua%20Ct%20New%20Smyrna%20Beach%20FL%2032168%22%7D%7D%5D%26amp%3Bstudyareasoptions%3D%7B%22areaType%22%3A%20%22NetworkServiceArea%22%2C%22bufferUnits%22%3A%20%22Minutes%22%2C%22bufferRadii%22%3A%20%5B15%5D%2C%22travel_mode%22%3A%22Walking%22%7D%26amp%3BdataCollections%3D%5B%22KeyGlobalFacts%22%5D%26amp%3Breturngeometry%3Dtrue%26amp%3Bf%3Dpjson
+```
+ */}
+
+```json
+{
+ "results": [
+  {
+   "paramName": "GeoEnrichmentResult",
+   "dataType": "GeoEnrichmentResult",
+   "value": {
+    "version": "2.0",
+    "FeatureSet": [
+     {
+      "displayFieldName": "",
+      "fieldAliases": {
+       "ID": "ID",
+       "OBJECTID": "Object ID",
+       "sourceCountry": "sourceCountry",
+       "X": "X",
+       "Y": "Y",
+       "areaType": "areaType",
+       "bufferUnits": "bufferUnits",
+       "bufferUnitsAlias": "bufferUnitsAlias",
+       "bufferRadii": "bufferRadii",
+       "aggregationMethod": "aggregationMethod",
+       "HasData": "HasData",
+       "TOTPOP": "Total Population",
+       "TOTHH": "Total Households",
+       "AVGHHSZ": "Average Household Size",
+       "TOTMALES": "Male Population",
+       "TOTFEMALES": "Female Population"
+      },
+      "spatialReference": {
+       "wkid": 4326,
+       "latestWkid": 4326
+      },
+      "fields": [
+       {
+        "name": "ID",
+        "type": "esriFieldTypeString",
+        "alias": "ID",
+        "length": 256
+       },
+       {
+        "name": "OBJECTID",
+        "type": "esriFieldTypeOID",
+        "alias": "Object ID"
+       },
+       {
+        "name": "sourceCountry",
+        "type": "esriFieldTypeString",
+        "alias": "sourceCountry",
+        "length": 256
+       },
+       {
+        "name": "X",
+        "type": "esriFieldTypeDouble",
+        "alias": "X"
+       },
+       {
+        "name": "Y",
+        "type": "esriFieldTypeDouble",
+        "alias": "Y"
+       },
+       {
+        "name": "areaType",
+        "type": "esriFieldTypeString",
+        "alias": "areaType",
+        "length": 256
+       },
+       {
+        "name": "bufferUnits",
+        "type": "esriFieldTypeString",
+        "alias": "bufferUnits",
+        "length": 256
+       },
+       {
+        "name": "bufferUnitsAlias",
+        "type": "esriFieldTypeString",
+        "alias": "bufferUnitsAlias",
+        "length": 256
+       },
+       {
+        "name": "bufferRadii",
+        "type": "esriFieldTypeDouble",
+        "alias": "bufferRadii"
+       },
+       {
+        "name": "aggregationMethod",
+        "type": "esriFieldTypeString",
+        "alias": "aggregationMethod",
+        "length": 256
+       },
+       {
+        "name": "HasData",
+        "type": "esriFieldTypeInteger",
+        "alias": "HasData"
+       },
+       {
+        "name": "TOTPOP",
+        "type": "esriFieldTypeDouble",
+        "alias": "Total Population",
+        "fullName": "KeyGlobalFacts.TOTPOP",
+        "component": "demographics",
+        "decimals": 0,
+        "units": "count"
+       },
+       {
+        "name": "TOTHH",
+        "type": "esriFieldTypeDouble",
+        "alias": "Total Households",
+        "fullName": "KeyGlobalFacts.TOTHH",
+        "component": "demographics",
+        "decimals": 0,
+        "units": "count"
+       },
+       {
+        "name": "AVGHHSZ",
+        "type": "esriFieldTypeDouble",
+        "alias": "Average Household Size",
+        "fullName": "KeyGlobalFacts.AVGHHSZ",
+        "component": "scripts",
+        "decimals": 2,
+        "units": "count"
+       },
+       {
+        "name": "TOTMALES",
+        "type": "esriFieldTypeDouble",
+        "alias": "Male Population",
+        "fullName": "KeyGlobalFacts.TOTMALES",
+        "component": "demographics",
+        "decimals": 0,
+        "units": "count"
+       },
+       {
+        "name": "TOTFEMALES",
+        "type": "esriFieldTypeDouble",
+        "alias": "Female Population",
+        "fullName": "KeyGlobalFacts.TOTFEMALES",
+        "component": "demographics",
+        "decimals": 0,
+        "units": "count"
+       }
+      ],
+      "features": [
+       {
+        "attributes" : {
+            "ID" : "0",
+            "OBJECTID" : 1,
+            "sourceCountry" : "US",
+            "X" : -80.94857302553523,
+            "Y" : 29.03368152986305,
+            "areaType" : "NetworkServiceArea",
+            "bufferUnits" : "Minutes",
+            "bufferUnitsAlias" : "Walk Time Minutes",
+            "bufferRadii" : 15,
+            "aggregationMethod" : "BlockApportionment:US.BlockGroups;PointsLayer:US.BlockPoints",
+            "HasData" : 1,
+            "TOTPOP" : 198,
+            "TOTHH" : 122,
+            "AVGHHSZ" : 1.62,
+            "TOTMALES" : 92,
+            "TOTFEMALES" : 105
+        },
+      "geometry": {
+         "rings": [
+          [
+           [
+            -80.947303771999898,
+            29.038412094000094
+           ],
+           [
+            -80.947124480999904,
+            29.038187027000106
+           ],
+
+           ...
+
+           [
+            -80.947303771999898,
+            29.038412094000094
+           ]
+          ]
+         ]
+        },
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "messages": []
+}
+```
+
+
+</Tab>
+
+</Tabs>
+
+
+<MoreInfo>
+
+-   The response has been abbreviated in the example where "..." is noted. 
+-   A 15 minute walk time buffer area is generated around the input location.
+-   A list of attributes describing the location's demographic characteristics and geographic context, as defined in the default Data Collection and based on the generated area, is returned in the response.
+-   The service supports the geocoding parameters of the [ArcGIS World Geocoding service](DEVSITE/rest/geocode/api-reference/overview-world-geocoding-service.htm).
+
+JSON response rendered with ArcGIS for Desktop.
+
+![15 minute walk time](./images/GUID-5668A005-5F62-4E7B-9F9D-BB05C4A11A36-web.png)
+
+**Notes:**
+
+-   Transparency property have been adjusted for illustrative purposes.
+
+</MoreInfo>
+
+</Box>
+
+<Box>
+
+### Enrich a single location by latitude and longitude
+
+Enrich a single location defined by latitude and longitude coordinates and include the associated geometry in the response. Instead of the default 1-mile ring buffer, generate a drive time service area.
+
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Request</TabTitle>
+
+<TabTitle>Response</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```curl
+GET https://geoenrich.arcgis.com/arcgis/rest/services/World/geoenrichmentserver/GeoEnrichment/enrich?studyareas=[{"geometry":{"x": -122.435, "y": 37.785},"areaType": "NetworkServiceArea","bufferUnits": "Minutes","bufferRadii": [5],"travel_mode":"Driving"}]&returngeometry=true&f=pjson&token=<ACCESS_TOKEN>
+```
+
+ 
+
+</Tab>
+
+<Tab>
+
+{/* ```javascript
+https%3A%2F%2Fgeoenrich.arcgis.com%2Farcgis%2Frest%2Fservices%2FWorld%2Fgeoenrichmentserver%2FGeoEnrichment%2Fenrich%3Fstudyareas%3D%5B%7B%22geometry%22%3A%7B%22x%22%3A%20-122.435%2C%20%22y%22%3A%2037.785%7D%2C%22areaType%22%3A%20%22NetworkServiceArea%22%2C%22bufferUnits%22%3A%20%22Minutes%22%2C%22bufferRadii%22%3A%20%5B5%5D%2C%22travel_mode%22%3A%22Driving%22%7D%5D%26amp%3Breturngeometry%3Dtrue%26amp%3Bf%3Dpjson
+``` */}
+
+```json
+{
+  "results" : [ {
+    "paramName" : "GeoEnrichmentResult",
+    "dataType" : "GeoEnrichmentResult",
+    "value" : {
+      "version" : "2.0",
+      "FeatureSet" : [ {
+        "displayFieldName" : "",
+        "fieldAliases" : {
+          "ID" : "ID",
+          "OBJECTID" : "Object ID",
+          "sourceCountry" : "sourceCountry",
+          "areaType" : "areaType",
+          "bufferUnits" : "bufferUnits",
+          "bufferUnitsAlias" : "bufferUnitsAlias",
+          "bufferRadii" : "bufferRadii",
+          "aggregationMethod" : "aggregationMethod",
+          "HasData" : "HasData",
+          "TOTPOP" : "Total Population",
+          "TOTHH" : "Total Households",
+          "AVGHHSZ" : "Average Household Size",
+          "TOTMALES" : "Male Population",
+          "TOTFEMALES" : "Female Population"
+        },
+        "geometryType" : "esriGeometryPolygon",
+        "spatialReference" : {
+          "wkid" : 4326,
+          "latestWkid" : 4326
+        },
+        "fields" : [ {
+          "name" : "ID",
+          "type" : "esriFieldTypeString",
+          "alias" : "ID",
+          "length" : 256
+        }, {
+          "name" : "OBJECTID",
+          "type" : "esriFieldTypeOID",
+          "alias" : "Object ID"
+        }, {
+          "name" : "sourceCountry",
+          "type" : "esriFieldTypeString",
+          "alias" : "sourceCountry",
+          "length" : 256
+        }, {
+          "name" : "areaType",
+          "type" : "esriFieldTypeString",
+          "alias" : "areaType",
+          "length" : 256
+        }, {
+          "name" : "bufferUnits",
+          "type" : "esriFieldTypeString",
+          "alias" : "bufferUnits",
+          "length" : 256
+        }, {
+          "name" : "bufferUnitsAlias",
+          "type" : "esriFieldTypeString",
+          "alias" : "bufferUnitsAlias",
+          "length" : 256
+        }, {
+          "name" : "bufferRadii",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "bufferRadii"
+        }, {
+          "name" : "aggregationMethod",
+          "type" : "esriFieldTypeString",
+          "alias" : "aggregationMethod",
+          "length" : 256
+        }, {
+          "name" : "HasData",
+          "type" : "esriFieldTypeInteger",
+          "alias" : "HasData"
+        }, {
+          "name" : "TOTPOP",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "Total Population",
+          "fullName" : "KeyGlobalFacts.TOTPOP",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTHH",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "Total Households",
+          "fullName" : "KeyGlobalFacts.TOTHH",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "AVGHHSZ",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "Average Household Size",
+          "fullName" : "KeyGlobalFacts.AVGHHSZ",
+          "component" : "scripts",
+          "decimals" : 2,
+          "units" : "count"
+        }, {
+          "name" : "TOTMALES",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "Male Population",
+          "fullName" : "KeyGlobalFacts.TOTMALES",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTFEMALES",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "Female Population",
+          "fullName" : "KeyGlobalFacts.TOTFEMALES",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+       }
+      ],
+      "features": [
+       {
+        "attributes" : {
+            "ID" : "0",
+            "OBJECTID" : 1,
+            "sourceCountry" : "US",
+            "areaType" : "NetworkServiceArea",
+            "bufferUnits" : "Minutes",
+            "bufferUnitsAlias" : "Drive Time Minutes",
+            "bufferRadii" : 5,
+            "aggregationMethod" : "BlockApportionment:US.BlockGroups;PointsLayer:US.BlockPoints",
+            "HasData" : 1,
+            "TOTPOP" : 73984,
+            "TOTHH" : 39700,
+            "AVGHHSZ" : 1.81,
+            "TOTMALES" : 35798,
+            "TOTFEMALES" : 38186
+        },
+      "geometry": {
+         "rings": [
+          [
+           [
+            -122.43630027799989,
+            37.796720505000096
+           ],
+           [
+            -122.43540191700001,
+            37.795373917000205
+           ],
+
+           ...
+
+           [
+            -122.43630027799989,
+            37.796720505000096
+           ]
+          ]
+         ]
+        }
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "messages": []
+}
+```
+
+ 
+
+</Tab>
+
+</Tabs>
+
+<MoreInfo>
+
+-   The response has been abbreviated in the example where "..." is noted. 
+-   A 5 minute drive time service area is generated as specified in the bufferUnits, bufferRadii and travel_mode parameters.
+-   The default data collection of Key Global Facts is used.
+
+JSON response rendered with ArcGIS for Desktop. 
+
+![5 minute drive time service area](./images/GUID-59359962-052A-41BD-B1C2-90C45CC8A386-web.png)
+
+-   Transparency and fill properties have been adjusted for illustrative purposes. 
+
+</MoreInfo>
+
+</Box>
+
+<Box>
+
+### Enrich multiple locations by latitude and longitude
+
+Simultaneously enrich locations in multiple countries or datasets defined by latitude and longitude coordinates with attributes defined from the default statistical data collection (KeyGlobalFacts).
+
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Request</TabTitle>
+
+<TabTitle>Response</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```http
+GET https://geoenrich.arcgis.com/arcgis/rest/services/World/geoenrichmentserver/GeoEnrichment/enrich?studyareas=[{"geometry":{"x":-122.435,"y":37.785}},{"geometry":{"x":-122.433,"y":37.734}},{"geometry":{"x":-79.345,"y":43.69}}]&f=pjson&token=<ACCESS_TOKEN>
+```
+
+ 
+
+</Tab>
+
+<Tab>
+
+{/* ```javascript
+https%3A%2F%2Fgeoenrich.arcgis.com%2Farcgis%2Frest%2Fservices%2FWorld%2Fgeoenrichmentserver%2FGeoEnrichment%2Fenrich%3Fstudyareas%3D%5B%7B%22geometry%22%3A%7B%22x%22%3A-122.435%2C%22y%22%3A37.785%7D%7D%2C%7B%22geometry%22%3A%7B%22x%22%3A-122.433%2C%22y%22%3A37.734%7D%7D%2C%7B%22geometry%22%3A%7B%22x%22%3A-79.345%2C%22y%22%3A43.69%7D%7D%5D%26amp%3Bf%3Dpjson
+``` */}
+
+```json
+{
+  "results" : [ {
+    "paramName" : "GeoEnrichmentResult",
+    "dataType" : "GeoEnrichmentResult",
+    "value" : {
+      "version" : "2.0",
+      "FeatureSet" : [ {
+        "displayFieldName" : "",
+        "fieldAliases" : {
+          "ID" : "ID",
+          "OBJECTID" : "Object ID",
+          "sourceCountry" : "sourceCountry",
+          "areaType" : "areaType",
+          "bufferUnits" : "bufferUnits",
+          "bufferUnitsAlias" : "bufferUnitsAlias",
+          "bufferRadii" : "bufferRadii",
+          "aggregationMethod" : "aggregationMethod",
+          "HasData" : "HasData",
+          "TOTPOP" : "Total Population",
+          "TOTHH" : "Total Households",
+          "AVGHHSZ" : "Average Household Size",
+          "TOTMALES" : "Male Population",
+          "TOTFEMALES" : "Female Population"
+        },
+        "spatialReference" : {
+          "wkid" : 4326,
+          "latestWkid" : 4326
+        },
+        "fields" : [ {
+          "name" : "ID",
+          "type" : "esriFieldTypeString",
+          "alias" : "ID",
+          "length" : 256
+        }, {
+          "name" : "OBJECTID",
+          "type" : "esriFieldTypeOID",
+          "alias" : "Object ID"
+        }, {
+          "name" : "sourceCountry",
+          "type" : "esriFieldTypeString",
+          "alias" : "sourceCountry",
+          "length" : 256
+        }, {
+          "name" : "areaType",
+          "type" : "esriFieldTypeString",
+          "alias" : "areaType",
+          "length" : 256
+        }, {
+          "name" : "bufferUnits",
+          "type" : "esriFieldTypeString",
+          "alias" : "bufferUnits",
+          "length" : 256
+        }, {
+          "name" : "bufferUnitsAlias",
+          "type" : "esriFieldTypeString",
+          "alias" : "bufferUnitsAlias",
+          "length" : 256
+        }, {
+          "name" : "bufferRadii",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "bufferRadii"
+        }, {
+          "name" : "aggregationMethod",
+          "type" : "esriFieldTypeString",
+          "alias" : "aggregationMethod",
+          "length" : 256
+        }, {
+          "name" : "HasData",
+          "type" : "esriFieldTypeInteger",
+          "alias" : "HasData"
+        }, {
+          "name" : "TOTPOP",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "Total Population",
+          "fullName" : "KeyGlobalFacts.TOTPOP",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTHH",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "Total Households",
+          "fullName" : "KeyGlobalFacts.TOTHH",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "AVGHHSZ",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "Average Household Size",
+          "fullName" : "KeyGlobalFacts.AVGHHSZ",
+          "component" : "scripts",
+          "decimals" : 2,
+          "units" : "count"
+        }, {
+          "name" : "TOTMALES",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "Male Population",
+          "fullName" : "KeyGlobalFacts.TOTMALES",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTFEMALES",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "Female Population",
+          "fullName" : "KeyGlobalFacts.TOTFEMALES",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        } ],
+        "features" : [ {
+          "attributes" : {
+            "ID" : "0",
+            "OBJECTID" : 1,
+            "sourceCountry" : "US",
+            "areaType" : "RingBuffer",
+            "bufferUnits" : "esriMiles",
+            "bufferUnitsAlias" : "Miles",
+            "bufferRadii" : 1,
+            "aggregationMethod" : "BlockApportionment:US.BlockGroups;PointsLayer:US.BlockPoints",
+            "HasData" : 1,
+            "TOTPOP" : 106589,
+            "TOTHH" : 57469,
+            "AVGHHSZ" : 1.8,
+            "TOTMALES" : 52633,
+            "TOTFEMALES" : 53956
+          }
+        }, {
+          "attributes" : {
+            "ID" : "1",
+            "OBJECTID" : 2,
+            "sourceCountry" : "US",
+            "areaType" : "RingBuffer",
+            "bufferUnits" : "esriMiles",
+            "bufferUnitsAlias" : "Miles",
+            "bufferRadii" : 1,
+            "aggregationMethod" : "BlockApportionment:US.BlockGroups;PointsLayer:US.BlockPoints",
+            "HasData" : 1,
+            "TOTPOP" : 67201,
+            "TOTHH" : 24043,
+            "AVGHHSZ" : 2.77,
+            "TOTMALES" : 33528,
+            "TOTFEMALES" : 33673
+          }
+        }, {
+          "attributes" : {
+            "ID" : "2",
+            "OBJECTID" : 3,
+            "sourceCountry" : "CA",
+            "areaType" : "RingBuffer",
+            "bufferUnits" : "esriMiles",
+            "bufferUnitsAlias" : "Miles",
+            "bufferRadii" : 1,
+            "aggregationMethod" : "BlockApportionment:CAN.DA;PointsLayer:CAN.BlockPoints",
+            "HasData" : 1,
+            "TOTPOP" : 61981,
+            "TOTHH" : 15716,
+            "AVGHHSZ" : 2.41,
+            "TOTMALES" : 30271,
+            "TOTFEMALES" : 31711
+        }
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "messages": []
+}
+```
+</Tab>
+
+</Tabs>
+
+<MoreInfo>
+
+**Notes:**
+
+-   A 1-mile ring buffer area is generated around each input location and the associated geometry is returned in the response.
+-   A list of attributes describing each location's demographic characteristics and geographic context, as defined in the KeyGlobalFacts statistical data collection and based on the generated areas, is returned in the response.
+
+</MoreInfo>
+
+</Box>
+
+<Box>
+
+### Enrich multiple locations in a single country
+
+Simultaneously enrich multiple locations in a single country defined by latitude and longitude coordinates with attributes defined in a specified statistical data collection and include the associated geometry in the response. Additionally, specify the country or dataset through the `useData`  parameter to provide the service with a performance hint.
+
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Request</TabTitle>
+
+<TabTitle>Response</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```http
+GET https://geoenrich.arcgis.com/arcgis/rest/services/World/geoenrichmentserver/GeoEnrichment/enrich?studyareas=[{"geometry":{"x":-122.435,"y":37.785}},{"geometry":{"x":-122.433,"y":37.734}}]&dataCollections=["KeyUSFacts"]&useData={"sourceCountry":"US"}&returngeometry=true&f=pjson&token=<ACCESS_TOKEN>
+```
+
+</Tab>
+
+<Tab>
+
+{/* ```javascript
+https%3A%2F%2Fgeoenrich.arcgis.com%2Farcgis%2Frest%2Fservices%2FWorld%2Fgeoenrichmentserver%2FGeoEnrichment%2Fenrich%3Fstudyareas%3D%5B%7B%22geometry%22%3A%7B%22x%22%3A-122.435%2C%22y%22%3A37.785%7D%7D%2C%7B%22geometry%22%3A%7B%22x%22%3A-122.433%2C%22y%22%3A37.734%7D%7D%5D%26amp%3BdataCollections%3D%5B%22KeyUSFacts%22%5D%26amp%3BuseData%3D%7B%22sourceCountry%22%3A%22US%22%7D%26amp%3Breturngeometry%3Dtrue%26amp%3Bf%3Dpjson
+``` */}
+
+```json
+{
+  "results" : [ {
+    "paramName" : "GeoEnrichmentResult",
+    "dataType" : "GeoEnrichmentResult",
+    "value" : {
+      "version" : "2.0",
+      "FeatureSet" : [ {
+        "displayFieldName" : "",
+        "fieldAliases" : {
+          "ID" : "ID",
+          "OBJECTID" : "Object ID",
+          "sourceCountry" : "sourceCountry",
+          "areaType" : "areaType",
+          "bufferUnits" : "bufferUnits",
+          "bufferUnitsAlias" : "bufferUnitsAlias",
+          "bufferRadii" : "bufferRadii",
+          "aggregationMethod" : "aggregationMethod",
+          "HasData" : "HasData",
+          "TOTPOP00" : "2000 Total Population",
+          "TOTPOP10" : "2010 Total Population",
+          "TOTPOP_CY" : "2018 Total Population",
+          "TOTPOP_FY" : "2023 Total Population",
+          "GQPOP_CY" : "2018 Population in Group Quarters",
+          "DIVINDX_CY" : "2018 Diversity Index",
+          "TOTHH00" : "2000 Total Households",
+          "TOTHH10" : "2010 Total Households",
+          "TOTHH_CY" : "2018 Total Households",
+          "TOTHH_FY" : "2023 Total Households",
+          "AVGHHSZ_CY" : "2018 Average Household Size",
+          "MEDHINC_CY" : "2018 Median Household Income",
+          "MEDHINC_FY" : "2023 Median Household Income",
+          "AVGHINC_CY" : "2018 Average Household Income",
+          "AVGHINC_FY" : "2023 Average Household Income",
+          "PCI_CY" : "2018 Per Capita Income",
+          "PCI_FY" : "2023 Per Capita Income",
+          "TOTHU00" : "2000 Total Housing Units",
+          "TOTHU10" : "2010 Total Housing Units",
+          "TOTHU_CY" : "2018 Total Housing Units",
+          "TOTHU_FY" : "2023 Total Housing Units",
+          "OWNER_CY" : "2018 Owner Occupied HUs",
+          "OWNER_FY" : "2023 Owner Occupied HUs",
+          "RENTER_CY" : "2018 Renter Occupied HUs",
+          "RENTER_FY" : "2023 Renter Occupied HUs",
+          "VACANT_CY" : "2018 Vacant Housing Units",
+          "VACANT_FY" : "2023 Vacant Housing Units",
+          "MEDVAL_CY" : "2018 Median Home Value",
+          "MEDVAL_FY" : "2023 Median Home Value",
+          "AVGVAL_CY" : "2018 Average Home Value",
+          "AVGVAL_FY" : "2023 Average Home Value",
+          "POPGRW10CY" : "2010-2018 Growth Rate: Population",
+          "HHGRW10CY" : "2010-2018 Growth Rate: Households",
+          "FAMGRW10CY" : "2010-2018 Growth Rate: Families",
+          "POPGRWCYFY" : "2018-2023 Growth/Yr: Population",
+          "HHGRWCYFY" : "2018-2023 Growth/Yr: Households",
+          "FAMGRWCYFY" : "2018-2023 Growth/Yr: Families",
+          "MHIGRWCYFY" : "2018-2023 Growth/Yr: Median HH Inc",
+          "PCIGRWCYFY" : "2018-2023 Growth/Yr: Per Capita Income",
+          "DPOP_CY" : "2018 Total Daytime Population",
+          "DPOPWRK_CY" : "2018 Daytime Pop: Workers",
+          "DPOPRES_CY" : "2018 Daytime Pop: Residents"
+      },
+      "geometryType": "esriGeometryPolygon",
+      "spatialReference": {
+       "wkid": 4326,
+       "latestWkid": 4326
+      },
+      "fields" : [ {
+          "name" : "ID",
+          "type" : "esriFieldTypeString",
+          "alias" : "ID",
+          "length" : 256
+        }, {
+          "name" : "OBJECTID",
+          "type" : "esriFieldTypeOID",
+          "alias" : "Object ID"
+        }, {
+          "name" : "sourceCountry",
+          "type" : "esriFieldTypeString",
+          "alias" : "sourceCountry",
+          "length" : 256
+        }, {
+          "name" : "areaType",
+          "type" : "esriFieldTypeString",
+          "alias" : "areaType",
+          "length" : 256
+        }, {
+          "name" : "bufferUnits",
+          "type" : "esriFieldTypeString",
+          "alias" : "bufferUnits",
+          "length" : 256
+        }, {
+          "name" : "bufferUnitsAlias",
+          "type" : "esriFieldTypeString",
+          "alias" : "bufferUnitsAlias",
+          "length" : 256
+        }, {
+          "name" : "bufferRadii",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "bufferRadii"
+        }, {
+          "name" : "aggregationMethod",
+          "type" : "esriFieldTypeString",
+          "alias" : "aggregationMethod",
+          "length" : 256
+        }, {
+          "name" : "HasData",
+          "type" : "esriFieldTypeInteger",
+          "alias" : "HasData"
+        }, {
+          "name" : "TOTPOP00",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2000 Total Population",
+          "fullName" : "KeyUSFacts.TOTPOP00",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTPOP10",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2010 Total Population",
+          "fullName" : "KeyUSFacts.TOTPOP10",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTPOP_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Total Population",
+          "fullName" : "KeyUSFacts.TOTPOP_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTPOP_FY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2023 Total Population",
+          "fullName" : "KeyUSFacts.TOTPOP_FY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "GQPOP_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Population in Group Quarters",
+          "fullName" : "KeyUSFacts.GQPOP_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "DIVINDX_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Diversity Index",
+          "fullName" : "KeyUSFacts.DIVINDX_CY",
+          "component" : "demographics",
+          "decimals" : 1,
+          "units" : "count"
+        }, {
+          "name" : "TOTHH00",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2000 Total Households",
+          "fullName" : "KeyUSFacts.TOTHH00",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTHH10",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2010 Total Households",
+          "fullName" : "KeyUSFacts.TOTHH10",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTHH_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Total Households",
+          "fullName" : "KeyUSFacts.TOTHH_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTHH_FY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2023 Total Households",
+          "fullName" : "KeyUSFacts.TOTHH_FY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "AVGHHSZ_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Average Household Size",
+          "fullName" : "KeyUSFacts.AVGHHSZ_CY",
+          "component" : "demographics",
+          "decimals" : 2,
+          "units" : "count"
+        }, {
+          "name" : "MEDHINC_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Median Household Income",
+          "fullName" : "KeyUSFacts.MEDHINC_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "currency",
+          "currency" : "$"
+        }, {
+          "name" : "MEDHINC_FY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2023 Median Household Income",
+          "fullName" : "KeyUSFacts.MEDHINC_FY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "currency",
+          "currency" : "$"
+        }, {
+          "name" : "AVGHINC_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Average Household Income",
+          "fullName" : "KeyUSFacts.AVGHINC_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "currency",
+          "currency" : "$"
+        }, {
+          "name" : "AVGHINC_FY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2023 Average Household Income",
+          "fullName" : "KeyUSFacts.AVGHINC_FY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "currency",
+          "currency" : "$"
+        }, {
+          "name" : "PCI_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Per Capita Income",
+          "fullName" : "KeyUSFacts.PCI_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "currency",
+          "currency" : "$"
+        }, {
+          "name" : "PCI_FY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2023 Per Capita Income",
+          "fullName" : "KeyUSFacts.PCI_FY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "currency",
+          "currency" : "$"
+        }, {
+          "name" : "TOTHU00",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2000 Total Housing Units",
+          "fullName" : "KeyUSFacts.TOTHU00",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTHU10",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2010 Total Housing Units",
+          "fullName" : "KeyUSFacts.TOTHU10",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTHU_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Total Housing Units",
+          "fullName" : "KeyUSFacts.TOTHU_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTHU_FY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2023 Total Housing Units",
+          "fullName" : "KeyUSFacts.TOTHU_FY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "OWNER_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Owner Occupied HUs",
+          "fullName" : "KeyUSFacts.OWNER_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "OWNER_FY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2023 Owner Occupied HUs",
+          "fullName" : "KeyUSFacts.OWNER_FY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "RENTER_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Renter Occupied HUs",
+          "fullName" : "KeyUSFacts.RENTER_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "RENTER_FY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2023 Renter Occupied HUs",
+          "fullName" : "KeyUSFacts.RENTER_FY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "VACANT_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Vacant Housing Units",
+          "fullName" : "KeyUSFacts.VACANT_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "VACANT_FY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2023 Vacant Housing Units",
+          "fullName" : "KeyUSFacts.VACANT_FY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "MEDVAL_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Median Home Value",
+          "fullName" : "KeyUSFacts.MEDVAL_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "currency",
+          "currency" : "$"
+        }, {
+          "name" : "MEDVAL_FY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2023 Median Home Value",
+          "fullName" : "KeyUSFacts.MEDVAL_FY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "currency",
+          "currency" : "$"
+        }, {
+          "name" : "AVGVAL_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Average Home Value",
+          "fullName" : "KeyUSFacts.AVGVAL_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "currency",
+          "currency" : "$"
+        }, {
+          "name" : "AVGVAL_FY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2023 Average Home Value",
+          "fullName" : "KeyUSFacts.AVGVAL_FY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "currency",
+          "currency" : "$"
+        }, {
+          "name" : "POPGRW10CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2010-2018 Growth Rate: Population",
+          "fullName" : "KeyUSFacts.POPGRW10CY",
+          "component" : "demographics",
+          "decimals" : 2,
+          "units" : "pct"
+        }, {
+          "name" : "HHGRW10CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2010-2018 Growth Rate: Households",
+          "fullName" : "KeyUSFacts.HHGRW10CY",
+          "component" : "demographics",
+          "decimals" : 2,
+          "units" : "pct"
+        }, {
+          "name" : "FAMGRW10CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2010-2018 Growth Rate: Families",
+          "fullName" : "KeyUSFacts.FAMGRW10CY",
+          "component" : "demographics",
+          "decimals" : 2,
+          "units" : "pct"
+        }, {
+          "name" : "POPGRWCYFY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018-2023 Growth/Yr: Population",
+          "fullName" : "KeyUSFacts.POPGRWCYFY",
+          "component" : "demographics",
+          "decimals" : 2,
+          "units" : "pct"
+        }, {
+          "name" : "HHGRWCYFY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018-2023 Growth/Yr: Households",
+          "fullName" : "KeyUSFacts.HHGRWCYFY",
+          "component" : "demographics",
+          "decimals" : 2,
+          "units" : "pct"
+        }, {
+          "name" : "FAMGRWCYFY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018-2023 Growth/Yr: Families",
+          "fullName" : "KeyUSFacts.FAMGRWCYFY",
+          "component" : "demographics",
+          "decimals" : 2,
+          "units" : "pct"
+        }, {
+          "name" : "MHIGRWCYFY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018-2023 Growth/Yr: Median HH Inc",
+          "fullName" : "KeyUSFacts.MHIGRWCYFY",
+          "component" : "demographics",
+          "decimals" : 2,
+          "units" : "pct"
+        }, {
+          "name" : "PCIGRWCYFY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018-2023 Growth/Yr: Per Capita Income",
+          "fullName" : "KeyUSFacts.PCIGRWCYFY",
+          "component" : "demographics",
+          "decimals" : 2,
+          "units" : "pct"
+        }, {
+          "name" : "DPOP_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Total Daytime Population",
+          "fullName" : "KeyUSFacts.DPOP_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "DPOPWRK_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Daytime Pop: Workers",
+          "fullName" : "KeyUSFacts.DPOPWRK_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "DPOPRES_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Daytime Pop: Residents",
+          "fullName" : "KeyUSFacts.DPOPRES_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        } ],
+        "features" : [ {
+          "attributes" : {
+            "ID" : "0",
+            "OBJECTID" : 1,
+            "sourceCountry" : "us",
+            "areaType" : "RingBuffer",
+            "bufferUnits" : "esriMiles",
+            "bufferUnitsAlias" : "Miles",
+            "bufferRadii" : 1,
+            "aggregationMethod" : "BlockApportionment:US.BlockGroups;PointsLayer:US.BlockPoints",
+            "HasData" : 1,
+            "TOTPOP00" : 97301,
+            "TOTPOP10" : 98177,
+            "TOTPOP_CY" : 106589,
+            "TOTPOP_FY" : 111962,
+            "GQPOP_CY" : 2962,
+            "DIVINDX_CY" : 64.7,
+            "TOTHH00" : 52642,
+            "TOTHH10" : 53219,
+            "TOTHH_CY" : 57469,
+            "TOTHH_FY" : 60175,
+            "AVGHHSZ_CY" : 1.8,
+            "MEDHINC_CY" : 85512,
+            "MEDHINC_FY" : 106099,
+            "AVGHINC_CY" : 132642,
+            "AVGHINC_FY" : 159496,
+            "PCI_CY" : 72651,
+            "PCI_FY" : 86823,
+            "TOTHU00" : 55550,
+            "TOTHU10" : 58211,
+            "TOTHU_CY" : 61456,
+            "TOTHU_FY" : 63977,
+            "OWNER_CY" : 13451,
+            "OWNER_FY" : 15829,
+            "RENTER_CY" : 44019,
+            "RENTER_FY" : 44346,
+            "VACANT_CY" : 3987,
+            "VACANT_FY" : 3802,
+            "MEDVAL_CY" : 1151331,
+            "MEDVAL_FY" : 1177601,
+            "AVGVAL_CY" : 1294807,
+            "AVGVAL_FY" : 1323287,
+            "POPGRW10CY" : 1,
+            "HHGRW10CY" : 0.94,
+            "FAMGRW10CY" : 1.14,
+            "POPGRWCYFY" : 0.99,
+            "HHGRWCYFY" : 0.92,
+            "FAMGRWCYFY" : 1.1,
+            "MHIGRWCYFY" : 4.41,
+            "PCIGRWCYFY" : 3.63,
+            "DPOP_CY" : 116366,
+            "DPOPWRK_CY" : 77572,
+            "DPOPRES_CY" : 38794
+        },
+        "geometry": {
+         "rings": [
+          [
+           [
+            -122.43499999999999,
+            37.79949959688911
+           ],
+           [
+            -122.43373930598597,
+            37.799465041596754
+           ],
+
+           ...
+
+           [
+            -122.43499999999999,
+            37.79949959688911
+           ]
+          ]
+         ]
+        }
+       },
+       {
+        "attributes" : {
+            "ID" : "1",
+            "OBJECTID" : 2,
+            "sourceCountry" : "us",
+            "areaType" : "RingBuffer",
+            "bufferUnits" : "esriMiles",
+            "bufferUnitsAlias" : "Miles",
+            "bufferRadii" : 1,
+            "aggregationMethod" : "BlockApportionment:US.BlockGroups;PointsLayer:US.BlockPoints",
+            "HasData" : 1,
+            "TOTPOP00" : 64273,
+            "TOTPOP10" : 64372,
+            "TOTPOP_CY" : 67201,
+            "TOTPOP_FY" : 69283,
+            "GQPOP_CY" : 657,
+            "DIVINDX_CY" : 80.3,
+            "TOTHH00" : 23067,
+            "TOTHH10" : 23247,
+            "TOTHH_CY" : 24043,
+            "TOTHH_FY" : 24655,
+            "AVGHHSZ_CY" : 2.77,
+            "MEDHINC_CY" : 101310,
+            "MEDHINC_FY" : 115650,
+            "AVGHINC_CY" : 141719,
+            "AVGHINC_FY" : 166662,
+            "PCI_CY" : 50968,
+            "PCI_FY" : 59521,
+            "TOTHU00" : 23722,
+            "TOTHU10" : 24507,
+            "TOTHU_CY" : 25306,
+            "TOTHU_FY" : 25951,
+            "OWNER_CY" : 14972,
+            "OWNER_FY" : 16249,
+            "RENTER_CY" : 9070,
+            "RENTER_FY" : 8407,
+            "VACANT_CY" : 1263,
+            "VACANT_FY" : 1296,
+            "MEDVAL_CY" : 880604,
+            "MEDVAL_FY" : 901923,
+            "AVGVAL_CY" : 1012503,
+            "AVGVAL_FY" : 1039972,
+            "POPGRW10CY" : 0.52,
+            "HHGRW10CY" : 0.41,
+            "FAMGRW10CY" : 0.55,
+            "POPGRWCYFY" : 0.61,
+            "HHGRWCYFY" : 0.5,
+            "FAMGRWCYFY" : 0.61,
+            "MHIGRWCYFY" : 2.68,
+            "PCIGRWCYFY" : 3.15,
+            "DPOP_CY" : 37044,
+            "DPOPWRK_CY" : 8704,
+            "DPOPRES_CY" : 28340
+        },
+        "geometry": {
+         "rings": [
+          [
+           [
+            -122.43299999999999,
+            37.74849972269633
+           ],
+           [
+            -122.43174017166517,
+            37.748465167116514
+           ],
+
+           ...
+
+           [
+            -122.43299999999999,
+            37.74849972269633
+           ]
+          ]
+         ]
+        }
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "messages": []
+}
+```
+
+</Tab>
+
+</Tabs>
+
+<MoreInfo>
+  
+**Notes:**
+
+-   The response has been abbreviated in the example where "..." is noted. 
+-   Further information about the significant benefits of explicitly specifying the country or dataset in advance can be found in the **useData** parameter description.
+-   A 1-mile ring buffer area is generated around each input location.
+-   A list of attributes describing each location's demographic characteristics and geographic context, as defined in the KeyUSFacts statistical data collection and based on the generated areas, is returned in the response.
+
+JSON response rendered with ArcGIS for Desktop.
+
+![Two 1 mile rings](./images/GUID-81B44F92-74A1-4170-A412-828C1CED4897-web.png)
+
+**Notes:**
+
+-    Transparency and fill properties have been adjusted for illustrative purposes.
+
+
+</MoreInfo>
+
+</Box>
+
+<Box>
+
+### Enrich an area within the same administrative boundary
+
+Enrich an area consisting of the union of multiple areas within the same administrative boundary data layer with attributes defined in the Data Collection.
+
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Request</TabTitle>
+
+<TabTitle>Response</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```http
+GET https://geoenrich.arcgis.com/arcgis/rest/services/World/geoenrichmentserver/GeoEnrichment/enrich?StudyAreas=[{"sourceCountry":"US","layer":"US.ZIP5","ids":["95123,92123"]}]&dataCollections=["KeyGlobalFacts"]&f=pjson&token=<ACCESS_TOKEN>
+```
+
+</Tab>
+
+<Tab>
+
+{/* ```javascript
+https%3A%2F%2Fgeoenrich.arcgis.com%2Farcgis%2Frest%2Fservices%2FWorld%2Fgeoenrichmentserver%2FGeoEnrichment%2Fenrich%3FStudyAreas%3D%5B%7B%22sourceCountry%22%3A%22US%22%2C%22layer%22%3A%22US.ZIP5%22%2C%22ids%22%3A%5B%2295123%2C92123%22%5D%7D%5D%26amp%3BdataCollections%3D%5B%22KeyGlobalFacts%22%5D%26amp%3Bf%3Dpjson
+``` */}
+
+```json
+{
+  "results" : [ {
+    "paramName" : "GeoEnrichmentResult",
+    "dataType" : "GeoEnrichmentResult",
+    "value" : {
+      "version" : "2.0",
+      "FeatureSet" : [ {
+        "displayFieldName" : "",
+        "fieldAliases" : {
+          "ID" : "ID",
+          "OBJECTID" : "Object ID",
+          "StdGeographyLevel" : "StdGeographyLevel",
+          "StdGeographyName" : "StdGeographyName",
+          "StdGeographyID" : "StdGeographyID",
+          "sourceCountry" : "sourceCountry",
+          "aggregationMethod" : "aggregationMethod",
+          "HasData" : "HasData",
+          "TOTPOP" : "Total Population",
+          "TOTHH" : "Total Households",
+          "AVGHHSZ" : "Average Household Size",
+          "TOTMALES" : "Male Population",
+          "TOTFEMALES" : "Female Population"
+        },
+        "spatialReference" : {
+          "wkid" : 4326,
+          "latestWkid" : 4326
+        },
+        "fields" : [ {
+          "name" : "ID",
+          "type" : "esriFieldTypeString",
+          "alias" : "ID",
+          "length" : 256
+        }, {
+          "name" : "OBJECTID",
+          "type" : "esriFieldTypeOID",
+          "alias" : "Object ID"
+        }, {
+          "name" : "StdGeographyLevel",
+          "type" : "esriFieldTypeString",
+          "alias" : "StdGeographyLevel",
+          "length" : 256
+        }, {
+          "name" : "StdGeographyName",
+          "type" : "esriFieldTypeString",
+          "alias" : "StdGeographyName",
+          "length" : 256
+        }, {
+          "name" : "StdGeographyID",
+          "type" : "esriFieldTypeString",
+          "alias" : "StdGeographyID",
+          "length" : 256
+        }, {
+          "name" : "sourceCountry",
+          "type" : "esriFieldTypeString",
+          "alias" : "sourceCountry",
+          "length" : 256
+        }, {
+          "name" : "aggregationMethod",
+          "type" : "esriFieldTypeString",
+          "alias" : "aggregationMethod",
+          "length" : 256
+        }, {
+          "name" : "HasData",
+          "type" : "esriFieldTypeInteger",
+          "alias" : "HasData"
+        }, {
+          "name" : "TOTPOP",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "Total Population",
+          "fullName" : "KeyGlobalFacts.TOTPOP",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTHH",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "Total Households",
+          "fullName" : "KeyGlobalFacts.TOTHH",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "AVGHHSZ",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "Average Household Size",
+          "fullName" : "KeyGlobalFacts.AVGHHSZ",
+          "component" : "scripts",
+          "decimals" : 2,
+          "units" : "count"
+        }, {
+          "name" : "TOTMALES",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "Male Population",
+          "fullName" : "KeyGlobalFacts.TOTMALES",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTFEMALES",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "Female Population",
+          "fullName" : "KeyGlobalFacts.TOTFEMALES",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        } ],
+        "features" : [ {
+          "attributes" : {
+            "ID" : "0",
+            "OBJECTID" : 1,
+            "StdGeographyLevel" : "US.ZIP5",
+            "StdGeographyName" : "San Jose,San Diego",
+            "StdGeographyID" : "95123,92123",
+            "sourceCountry" : "US",
+            "aggregationMethod" : "Query:US.ZIP5",
+            "HasData" : 1,
+            "TOTPOP" : 99014,
+            "TOTHH" : 34307,
+            "AVGHHSZ" : 2.85,
+            "TOTMALES" : 48787,
+            "TOTFEMALES" : 50227
+        }
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "messages": []
+}
+```
+
+ 
+</Tab>
+
+</Tabs>
+
+<MoreInfo>
+
+**Notes:**
+
+-   Rather than specifying the polygon feature, identifiers are used to specify two U.S. ZIP Codes in the example. Named administrative boundary areas can be looked up with administrative boundary lookup or utility services.
+-   A list of attributes describing the area's demographic characteristics and geographic context, as defined in the default Data Collection, is returned in the response.
+-   The union function can be specified on administrative boundary areas by specifying the comma-delimited area IDs within the same string (rather than in separate strings) in the ids array.
+
+</MoreInfo>
+</Box>
+
+<Box>
+
+### Enrich multiple locations (from a statistical data collection)
+
+Simultaneously enrich multiple locations in a single country defined by latitude and longitude coordinates with attributes defined in a specified statistical data collection. Instead of generating the default 1-mile ring buffer areas for all locations, you will generate and use varying ring buffer areas around each location.
+
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Request</TabTitle>
+
+<TabTitle>Response</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```http
+GET https://geoenrich.arcgis.com/arcgis/rest/services/World/geoenrichmentserver/GeoEnrichment/enrich?studyareas=[{"geometry":{"x":-73.270588,"y":45.599518},"areaType":"RingBuffer","bufferUnits":"esriMiles","bufferRadii":[1]},{"geometry":{"x":-75.320576,"y":40.048835},"areaType":"RingBuffer","bufferUnits":"esriMiles","bufferRadii":[5]}]&dataCollections=["KeyUSFacts"]&f=pjson&token=<ACCESS_TOKEN>
+```
+
+</Tab>
+
+<Tab>
+
+{/* ```javascript
+https%3A%2F%2Fgeoenrich.arcgis.com%2Farcgis%2Frest%2Fservices%2FWorld%2Fgeoenrichmentserver%2FGeoEnrichment%2Fenrich%3Fstudyareas%3D%5B%7B%22geometry%22%3A%7B%22x%22%3A-73.270588%2C%22y%22%3A45.599518%7D%2C%22areaType%22%3A%22RingBuffer%22%2C%22bufferUnits%22%3A%22esriMiles%22%2C%22bufferRadii%22%3A%5B1%5D%7D%2C%7B%22geometry%22%3A%7B%22x%22%3A-75.320576%2C%22y%22%3A40.048835%7D%2C%22areaType%22%3A%22RingBuffer%22%2C%22bufferUnits%22%3A%22esriMiles%22%2C%22bufferRadii%22%3A%5B5%5D%7D%5D%26amp%3BdataCollections%3D%5B%22KeyUSFacts%22%5D%26amp%3Bf%3Dpjson
+``` */}
+```json
+{
+  "results" : [ {
+    "paramName" : "GeoEnrichmentResult",
+    "dataType" : "GeoEnrichmentResult",
+    "value" : {
+      "version" : "2.0",
+      "FeatureSet" : [ {
+        "displayFieldName" : "",
+        "fieldAliases" : {
+          "ID" : "ID",
+          "OBJECTID" : "Object ID",
+          "sourceCountry" : "sourceCountry",
+          "areaType" : "areaType",
+          "bufferUnits" : "bufferUnits",
+          "bufferUnitsAlias" : "bufferUnitsAlias",
+          "bufferRadii" : "bufferRadii",
+          "aggregationMethod" : "aggregationMethod",
+          "HasData" : "HasData",
+          "TOTPOP00" : "2000 Total Population",
+          "TOTPOP10" : "2010 Total Population",
+          "TOTPOP_CY" : "2018 Total Population",
+          "TOTPOP_FY" : "2023 Total Population",
+          "GQPOP_CY" : "2018 Population in Group Quarters",
+          "DIVINDX_CY" : "2018 Diversity Index",
+          "TOTHH00" : "2000 Total Households",
+          "TOTHH10" : "2010 Total Households",
+          "TOTHH_CY" : "2018 Total Households",
+          "TOTHH_FY" : "2023 Total Households",
+          "AVGHHSZ_CY" : "2018 Average Household Size",
+          "MEDHINC_CY" : "2018 Median Household Income",
+          "MEDHINC_FY" : "2023 Median Household Income",
+          "AVGHINC_CY" : "2018 Average Household Income",
+          "AVGHINC_FY" : "2023 Average Household Income",
+          "PCI_CY" : "2018 Per Capita Income",
+          "PCI_FY" : "2023 Per Capita Income",
+          "TOTHU00" : "2000 Total Housing Units",
+          "TOTHU10" : "2010 Total Housing Units",
+          "TOTHU_CY" : "2018 Total Housing Units",
+          "TOTHU_FY" : "2023 Total Housing Units",
+          "OWNER_CY" : "2018 Owner Occupied HUs",
+          "OWNER_FY" : "2023 Owner Occupied HUs",
+          "RENTER_CY" : "2018 Renter Occupied HUs",
+          "RENTER_FY" : "2023 Renter Occupied HUs",
+          "VACANT_CY" : "2018 Vacant Housing Units",
+          "VACANT_FY" : "2023 Vacant Housing Units",
+          "MEDVAL_CY" : "2018 Median Home Value",
+          "MEDVAL_FY" : "2023 Median Home Value",
+          "AVGVAL_CY" : "2018 Average Home Value",
+          "AVGVAL_FY" : "2023 Average Home Value",
+          "POPGRW10CY" : "2010-2018 Growth Rate: Population",
+          "HHGRW10CY" : "2010-2018 Growth Rate: Households",
+          "FAMGRW10CY" : "2010-2018 Growth Rate: Families",
+          "POPGRWCYFY" : "2018-2023 Growth/Yr: Population",
+          "HHGRWCYFY" : "2018-2023 Growth/Yr: Households",
+          "FAMGRWCYFY" : "2018-2023 Growth/Yr: Families",
+          "MHIGRWCYFY" : "2018-2023 Growth/Yr: Median HH Inc",
+          "PCIGRWCYFY" : "2018-2023 Growth/Yr: Per Capita Income",
+          "DPOP_CY" : "2018 Total Daytime Population",
+          "DPOPWRK_CY" : "2018 Daytime Pop: Workers",
+          "DPOPRES_CY" : "2018 Daytime Pop: Residents"
+        },
+        "spatialReference" : {
+          "wkid" : 4326,
+          "latestWkid" : 4326
+        },
+        "fields" : [ {
+          "name" : "ID",
+          "type" : "esriFieldTypeString",
+          "alias" : "ID",
+          "length" : 256
+        }, {
+          "name" : "OBJECTID",
+          "type" : "esriFieldTypeOID",
+          "alias" : "Object ID"
+        }, {
+          "name" : "sourceCountry",
+          "type" : "esriFieldTypeString",
+          "alias" : "sourceCountry",
+          "length" : 256
+        }, {
+          "name" : "areaType",
+          "type" : "esriFieldTypeString",
+          "alias" : "areaType",
+          "length" : 256
+        }, {
+          "name" : "bufferUnits",
+          "type" : "esriFieldTypeString",
+          "alias" : "bufferUnits",
+          "length" : 256
+        }, {
+          "name" : "bufferUnitsAlias",
+          "type" : "esriFieldTypeString",
+          "alias" : "bufferUnitsAlias",
+          "length" : 256
+        }, {
+          "name" : "bufferRadii",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "bufferRadii"
+        }, {
+          "name" : "aggregationMethod",
+          "type" : "esriFieldTypeString",
+          "alias" : "aggregationMethod",
+          "length" : 256
+        }, {
+          "name" : "HasData",
+          "type" : "esriFieldTypeInteger",
+          "alias" : "HasData"
+        }, {
+          "name" : "TOTPOP00",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2000 Total Population",
+          "fullName" : "KeyUSFacts.TOTPOP00",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTPOP10",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2010 Total Population",
+          "fullName" : "KeyUSFacts.TOTPOP10",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTPOP_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Total Population",
+          "fullName" : "KeyUSFacts.TOTPOP_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTPOP_FY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2023 Total Population",
+          "fullName" : "KeyUSFacts.TOTPOP_FY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "GQPOP_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Population in Group Quarters",
+          "fullName" : "KeyUSFacts.GQPOP_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "DIVINDX_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Diversity Index",
+          "fullName" : "KeyUSFacts.DIVINDX_CY",
+          "component" : "demographics",
+          "decimals" : 1,
+          "units" : "count"
+        }, {
+          "name" : "TOTHH00",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2000 Total Households",
+          "fullName" : "KeyUSFacts.TOTHH00",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTHH10",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2010 Total Households",
+          "fullName" : "KeyUSFacts.TOTHH10",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTHH_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Total Households",
+          "fullName" : "KeyUSFacts.TOTHH_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTHH_FY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2023 Total Households",
+          "fullName" : "KeyUSFacts.TOTHH_FY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "AVGHHSZ_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Average Household Size",
+          "fullName" : "KeyUSFacts.AVGHHSZ_CY",
+          "component" : "demographics",
+          "decimals" : 2,
+          "units" : "count"
+        }, {
+          "name" : "MEDHINC_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Median Household Income",
+          "fullName" : "KeyUSFacts.MEDHINC_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "currency",
+          "currency" : "$"
+        }, {
+          "name" : "MEDHINC_FY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2023 Median Household Income",
+          "fullName" : "KeyUSFacts.MEDHINC_FY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "currency",
+          "currency" : "$"
+        }, {
+          "name" : "AVGHINC_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Average Household Income",
+          "fullName" : "KeyUSFacts.AVGHINC_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "currency",
+          "currency" : "$"
+        }, {
+          "name" : "AVGHINC_FY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2023 Average Household Income",
+          "fullName" : "KeyUSFacts.AVGHINC_FY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "currency",
+          "currency" : "$"
+        }, {
+          "name" : "PCI_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Per Capita Income",
+          "fullName" : "KeyUSFacts.PCI_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "currency",
+          "currency" : "$"
+        }, {
+          "name" : "PCI_FY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2023 Per Capita Income",
+          "fullName" : "KeyUSFacts.PCI_FY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "currency",
+          "currency" : "$"
+        }, {
+          "name" : "TOTHU00",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2000 Total Housing Units",
+          "fullName" : "KeyUSFacts.TOTHU00",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTHU10",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2010 Total Housing Units",
+          "fullName" : "KeyUSFacts.TOTHU10",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTHU_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Total Housing Units",
+          "fullName" : "KeyUSFacts.TOTHU_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTHU_FY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2023 Total Housing Units",
+          "fullName" : "KeyUSFacts.TOTHU_FY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "OWNER_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Owner Occupied HUs",
+          "fullName" : "KeyUSFacts.OWNER_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "OWNER_FY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2023 Owner Occupied HUs",
+          "fullName" : "KeyUSFacts.OWNER_FY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "RENTER_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Renter Occupied HUs",
+          "fullName" : "KeyUSFacts.RENTER_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "RENTER_FY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2023 Renter Occupied HUs",
+          "fullName" : "KeyUSFacts.RENTER_FY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "VACANT_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Vacant Housing Units",
+          "fullName" : "KeyUSFacts.VACANT_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "VACANT_FY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2023 Vacant Housing Units",
+          "fullName" : "KeyUSFacts.VACANT_FY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "MEDVAL_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Median Home Value",
+          "fullName" : "KeyUSFacts.MEDVAL_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "currency",
+          "currency" : "$"
+        }, {
+          "name" : "MEDVAL_FY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2023 Median Home Value",
+          "fullName" : "KeyUSFacts.MEDVAL_FY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "currency",
+          "currency" : "$"
+        }, {
+          "name" : "AVGVAL_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Average Home Value",
+          "fullName" : "KeyUSFacts.AVGVAL_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "currency",
+          "currency" : "$"
+        }, {
+          "name" : "AVGVAL_FY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2023 Average Home Value",
+          "fullName" : "KeyUSFacts.AVGVAL_FY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "currency",
+          "currency" : "$"
+        }, {
+          "name" : "POPGRW10CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2010-2018 Growth Rate: Population",
+          "fullName" : "KeyUSFacts.POPGRW10CY",
+          "component" : "demographics",
+          "decimals" : 2,
+          "units" : "pct"
+        }, {
+          "name" : "HHGRW10CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2010-2018 Growth Rate: Households",
+          "fullName" : "KeyUSFacts.HHGRW10CY",
+          "component" : "demographics",
+          "decimals" : 2,
+          "units" : "pct"
+        }, {
+          "name" : "FAMGRW10CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2010-2018 Growth Rate: Families",
+          "fullName" : "KeyUSFacts.FAMGRW10CY",
+          "component" : "demographics",
+          "decimals" : 2,
+          "units" : "pct"
+        }, {
+          "name" : "POPGRWCYFY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018-2023 Growth/Yr: Population",
+          "fullName" : "KeyUSFacts.POPGRWCYFY",
+          "component" : "demographics",
+          "decimals" : 2,
+          "units" : "pct"
+        }, {
+          "name" : "HHGRWCYFY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018-2023 Growth/Yr: Households",
+          "fullName" : "KeyUSFacts.HHGRWCYFY",
+          "component" : "demographics",
+          "decimals" : 2,
+          "units" : "pct"
+        }, {
+          "name" : "FAMGRWCYFY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018-2023 Growth/Yr: Families",
+          "fullName" : "KeyUSFacts.FAMGRWCYFY",
+          "component" : "demographics",
+          "decimals" : 2,
+          "units" : "pct"
+        }, {
+          "name" : "MHIGRWCYFY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018-2023 Growth/Yr: Median HH Inc",
+          "fullName" : "KeyUSFacts.MHIGRWCYFY",
+          "component" : "demographics",
+          "decimals" : 2,
+          "units" : "pct"
+        }, {
+          "name" : "PCIGRWCYFY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018-2023 Growth/Yr: Per Capita Income",
+          "fullName" : "KeyUSFacts.PCIGRWCYFY",
+          "component" : "demographics",
+          "decimals" : 2,
+          "units" : "pct"
+        }, {
+          "name" : "DPOP_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Total Daytime Population",
+          "fullName" : "KeyUSFacts.DPOP_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "DPOPWRK_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Daytime Pop: Workers",
+          "fullName" : "KeyUSFacts.DPOPWRK_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "DPOPRES_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Daytime Pop: Residents",
+          "fullName" : "KeyUSFacts.DPOPRES_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        } ],
+        "features" : [ {
+          "attributes" : {
+            "ID" : "1",
+            "OBJECTID" : 1,
+            "sourceCountry" : "US",
+            "areaType" : "RingBuffer",
+            "bufferUnits" : "esriMiles",
+            "bufferUnitsAlias" : "Miles",
+            "bufferRadii" : 5,
+            "aggregationMethod" : "BlockApportionment:US.BlockGroups;PointsLayer:US.BlockPoints",
+            "HasData" : 1,
+            "TOTPOP00" : 204729,
+            "TOTPOP10" : 207593,
+            "TOTPOP_CY" : 215930,
+            "TOTPOP_FY" : 221351,
+            "GQPOP_CY" : 12096,
+            "DIVINDX_CY" : 43,
+            "TOTHH00" : 79727,
+            "TOTHH10" : 80615,
+            "TOTHH_CY" : 83597,
+            "TOTHH_FY" : 85632,
+            "AVGHHSZ_CY" : 2.44,
+            "MEDHINC_CY" : 96943,
+            "MEDHINC_FY" : 104674,
+            "AVGHINC_CY" : 141051,
+            "AVGHINC_FY" : 152436,
+            "PCI_CY" : 55865,
+            "PCI_FY" : 60190,
+            "TOTHU00" : 82914,
+            "TOTHU10" : 86564,
+            "TOTHU_CY" : 90245,
+            "TOTHU_FY" : 92555,
+            "OWNER_CY" : 53938,
+            "OWNER_FY" : 55042,
+            "RENTER_CY" : 29659,
+            "RENTER_FY" : 30590,
+            "VACANT_CY" : 6648,
+            "VACANT_FY" : 6923,
+            "MEDVAL_CY" : 386073,
+            "MEDVAL_FY" : 407191,
+            "AVGVAL_CY" : 538950,
+            "AVGVAL_FY" : 570717,
+            "POPGRW10CY" : 0.48,
+            "HHGRW10CY" : 0.44,
+            "FAMGRW10CY" : 0.23,
+            "POPGRWCYFY" : 0.5,
+            "HHGRWCYFY" : 0.48,
+            "FAMGRWCYFY" : 0.35,
+            "MHIGRWCYFY" : 1.55,
+            "PCIGRWCYFY" : 1.5,
+            "DPOP_CY" : 251481,
+            "DPOPWRK_CY" : 147471,
+            "DPOPRES_CY" : 104010
+        }
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+}
+```
+</Tab>
+
+</Tabs>
+
+<MoreInfo>
+
+**Notes:**
+
+-   A 1-mile ring buffer area is generated around the first input location and a 5-mile ring buffer area is generated around the second input location.
+-   A list of attributes describing each location's demographic characteristics and geographic context, as defined in the KeyUSFacts statistical data collection and based on the generated areas, is returned in the response.
+
+</MoreInfo>
+</Box>
+
+<Box>
+
+
+### Generalize geometry 
+
+Return the state of California study area in the most generalized geometry.
+
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Request</TabTitle>
+
+<TabTitle>Response</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```http
+GET https://geoenrich.arcgis.com/arcgis/rest/services/World/geoenrichmentserver/GeoEnrichment/enrich?dataCollections=["KeyGlobalFacts"]&studyAreas=[{"sourceCountry":"US","layer":"US.States","ids":["06"],"generalizationLevel":"2"}]&returnGeometry=true&f=pjson&token=<ACCESS_TOKEN>
+```
+
+ 
+
+</Tab>
+
+<Tab>
+
+{/* 
+```javascript
+https%3A%2F%2Fgeoenrich.arcgis.com%2Farcgis%2Frest%2Fservices%2FWorld%2Fgeoenrichmentserver%2FGeoEnrichment%2Fenrich%3FdataCollections%3D%5B%22KeyGlobalFacts%22%5D%26amp%3BstudyAreas%3D%5B%7B%22sourceCountry%22%3A%22US%22%2C%22layer%22%3A%22US.States%22%2C%22ids%22%3A%5B%2206%22%5D%2C%22generalizationLevel%22%3A%222%22%7D%5D%26amp%3BreturnGeometry%3Dtrue%26amp%3Bf%3Dpjson
+``` */}
+```json
+{
+ "results": [
+  {
+   "paramName": "GeoEnrichmentResult",
+   "dataType": "GeoEnrichmentResult",
+   "value": {
+    "version": "2.0",
+    "FeatureSet": [
+     {
+      "displayFieldName": "",
+      "fieldAliases": {
+       "ID": "ID",
+       "OBJECTID": "Object ID",
+       "StdGeographyLevel": "StdGeographyLevel",
+       "StdGeographyName": "StdGeographyName",
+       "StdGeographyID": "StdGeographyID",
+       "sourceCountry": "sourceCountry",
+       "aggregationMethod": "aggregationMethod",
+       "HasData": "HasData",
+       "TOTPOP": "Total Population",
+       "TOTHH": "Total Households",
+       "AVGHHSZ": "Average Household Size",
+       "TOTMALES": "Male Population",
+       "TOTFEMALES": "Female Population"
+      },
+      "geometryType": "esriGeometryPolygon",
+      "spatialReference": {
+       "wkid": 4326,
+       "latestWkid": 4326
+      },
+      "fields": [
+       {
+        "name": "ID",
+        "type": "esriFieldTypeString",
+        "alias": "ID",
+        "length": 256
+       },
+       {
+        "name": "OBJECTID",
+        "type": "esriFieldTypeOID",
+        "alias": "Object ID"
+       },
+       {
+        "name": "StdGeographyLevel",
+        "type": "esriFieldTypeString",
+        "alias": "StdGeographyLevel",
+        "length": 256
+       },
+       {
+        "name": "StdGeographyName",
+        "type": "esriFieldTypeString",
+        "alias": "StdGeographyName",
+        "length": 256
+       },
+       {
+        "name": "StdGeographyID",
+        "type": "esriFieldTypeString",
+        "alias": "StdGeographyID",
+        "length": 256
+       },
+       {
+        "name": "sourceCountry",
+        "type": "esriFieldTypeString",
+        "alias": "sourceCountry",
+        "length": 256
+       },
+       {
+        "name": "aggregationMethod",
+        "type": "esriFieldTypeString",
+        "alias": "aggregationMethod",
+        "length": 256
+       },
+       {
+        "name": "HasData",
+        "type": "esriFieldTypeInteger",
+        "alias": "HasData"
+       },
+       {
+        "name": "TOTPOP",
+        "type": "esriFieldTypeDouble",
+        "alias": "Total Population",
+        "fullName": "KeyGlobalFacts.TOTPOP",
+        "component": "demographics",
+        "decimals": 0,
+        "units": "count"
+       },
+       {
+        "name": "TOTHH",
+        "type": "esriFieldTypeDouble",
+        "alias": "Total Households",
+        "fullName": "KeyGlobalFacts.TOTHH",
+        "component": "demographics",
+        "decimals": 0,
+        "units": "count"
+       },
+       {
+        "name": "AVGHHSZ",
+        "type": "esriFieldTypeDouble",
+        "alias": "Average Household Size",
+        "fullName": "KeyGlobalFacts.AVGHHSZ",
+        "component": "scripts",
+        "decimals": 2,
+        "units": "count"
+       },
+       {
+        "name": "TOTMALES",
+        "type": "esriFieldTypeDouble",
+        "alias": "Male Population",
+        "fullName": "KeyGlobalFacts.TOTMALES",
+        "component": "demographics",
+        "decimals": 0,
+        "units": "count"
+       },
+       {
+        "name": "TOTFEMALES",
+        "type": "esriFieldTypeDouble",
+        "alias": "Female Population",
+        "fullName": "KeyGlobalFacts.TOTFEMALES",
+        "component": "demographics",
+        "decimals": 0,
+        "units": "count"
+       }
+      ],
+      "features": [
+       {
+        "attributes": {
+         "ID": "0",
+         "OBJECTID": 1,
+         "StdGeographyLevel": "US.States",
+         "StdGeographyName": "California",
+         "StdGeographyID": "06",
+         "sourceCountry": "US",
+         "aggregationMethod": "Query:US.States",
+         "HasData": 1,
+         "TOTPOP": 38986171,
+         "TOTHH": 13029292,
+         "AVGHHSZ": 2.93,
+         "TOTMALES": 19393908,
+         "TOTFEMALES": 19592263
+        },
+        "geometry": {
+         "rings": [
+          [
+           [
+            -117.03805999881229,
+            32.54170000146816
+           ],
+           [
+            -117.10276999973645,
+            32.56319999996718
+           ],
+
+           ...
+
+           [
+            -122.03229999955798,
+            38.2291700003321
+           ]
+          ]
+         ]
+        }
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "messages": []
+}
+```
+
+</Tab>
+
+</Tabs>
+<MoreInfo>
+
+**Notes:**
+
+-   The response has been abbreviated in the example where "..." is noted. 
+-    You only need to specify `generalizationLevel`  if **returnGeometry** is set to true.
+-    Generalization levels are from 0 through 2 with 0 being the most detailed and 2 being the most generalized.
+
+    ![Most generalized (left) ](./images/GUID-8E480DDB-1B49-4E33-B214-0325C4239A3B-web.png)
+-    You can't return more than one feature in a detailed geometry.
+
+</MoreInfo>
+</Box>
+
+<Box>
+
+### Enrich ring buffers 
+
+Encapsulating a returned FeatureSet into the `studyAreas`  parameter to create rings around each point and enriching each of the ring buffers.
+
+Using the feature service you can query and return the following FeatureSet which will be encapsulated into the `studyAreas`  parameter.
+
+```json
+{
+    "objectIdFieldName": "OBJECTID",
+    "globalIdFieldName": "",
+    "geometryType": "esriGeometryPoint",
+    "spatialReference": {
+        "wkid": 102100,
+        "latestWkid": 3857
+    },
+    "fields": [
+        {
+            "name": "OBJECTID",
+            "type": "esriFieldTypeOID",
+            "alias": "OBJECTID",
+            "sqlType": "sqlTypeInteger",
+            "domain": null,
+            "defaultValue": null
+        },
+        {
+            "name": "Station_ID",
+            "type": "esriFieldTypeString",
+            "alias": "Station_ID",
+            "sqlType": "sqlTypeNVarchar",
+            "length": 255,
+            "domain": null,           
+            "defaultValue": null
+        },
+        {
+            "name": "FirstOfAddress",
+            "type": "esriFieldTypeString",
+            "alias": "FirstOfAddress",
+            "sqlType": "sqlTypeNVarchar",
+            "length": 255,
+            "domain": null,
+            "defaultValue": null
+        },
+        {
+            "name": "Price",
+            "type": "esriFieldTypeDouble",
+            "alias": "Price",
+            "sqlType": "sqlTypeDecimal",
+            "domain": null,
+            "defaultValue": null
+        },
+        {
+            "name": "UniqueID",
+            "type": "esriFieldTypeInteger",
+            "alias": "UniqueID",
+            "sqlType": "sqlTypeInteger",
+            "domain": null,
+            "defaultValue": null
+        }
+    ],
+    "features": [
+        {
+            "attributes": {
+                "OBJECTID": 1,
+                "Station_ID": "202382",
+                "FirstOfAddress": "12030 ROSECRANS AVE",
+                "Price": 2.95716667,
+                "UniqueID": 512
+            },
+            "geometry": {
+                "x": -13144272.4606,
+                "y": 4015682.7760000005
+            }
+        },
+        {
+            "attributes": {
+                "OBJECTID": 2,
+                "Station_ID": "517080",
+                "FirstOfAddress": "2402 E ANAHEIM ST",
+                "Price": 2.95233333,
+                "UniqueID": 1256
+            },
+            "geometry": {
+                "x": -13161572.144000001,
+                "y": 3999537.5165000036
+            }
+        },
+        {
+            "attributes": {
+                "OBJECTID": 3,
+                "Station_ID": "521883",
+                "FirstOfAddress": "1660 W 25TH ST",
+                "Price": 2.919,
+                "UniqueID": 1306
+            },
+            "geometry": {
+                "x": -13170715.4594,
+                "y": 3991785.8429000005
+            }
+        }
+    ]
+}
+```
+
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Request</TabTitle>
+
+<TabTitle>Response</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```http
+GET https://geoenrich.arcgis.com/arcgis/rest/services/World/geoenrichmentserver/GeoEnrichment/Enrich?studyareas=[{"FeatureSet":{"objectIdFieldName":"OBJECTID","globalIdFieldName":"","geometryType":"esriGeometryPoint","spatialReference":{"wkid":102100,"latestWkid":3857},"fields":[{"name":"OBJECTID","type":"esriFieldTypeOID","alias":"OBJECTID","sqlType":"sqlTypeInteger","domain":null,"defaultValue":null},{"name":"Station_ID","type":"esriFieldTypeString","alias":"Station_ID","sqlType":"sqlTypeNVarchar","length":255,"domain":null,"defaultValue":null},{"name":"FirstOfAddress","type":"esriFieldTypeString","alias":"FirstOfAddress","sqlType":"sqlTypeNVarchar","length":255,"domain":null,"defaultValue":null},{"name":"Price","type":"esriFieldTypeDouble","alias":"Price","sqlType":"sqlTypeDecimal","domain":null,"defaultValue":null},{"name":"UniqueID","type":"esriFieldTypeInteger","alias":"UniqueID","sqlType":"sqlTypeInteger","domain":null,"defaultValue":null}],"features":[{"attributes":{"OBJECTID":1,"Station_ID":"202382","FirstOfAddress":"12030ROSECRANSAVE","Price":2.95716667,"UniqueID":512},"geometry":{"x":-13144272.4606,"y":4015682.7760000005}},{"attributes":{"OBJECTID":2,"Station_ID":"517080","FirstOfAddress":"2402EANAHEIMST","Price":2.95233333,"UniqueID":1256},"geometry":{"x":-13161572.144000001,"y":3999537.5165000036}},{"attributes":{"OBJECTID":3,"Station_ID":"521883","FirstOfAddress":"1660W25THST","Price":2.919,"UniqueID":1306},"geometry":{"x":-13170715.4594,"y":3991785.8429000005}}]}}]&datacollections=&analysisvariables=&studyareasoptions={"areaType":"RingBuffer","BufferRadii":[11]}&usedata=&f=pjson&token=<ACCESS_TOKEN>
+```
+
+ 
+
+</Tab>
+
+<Tab>
+
+{/* ```javascript
+https%3A%2F%2Fgeoenrich.arcgis.com%2Farcgis%2Frest%2Fservices%2FWorld%2Fgeoenrichmentserver%2FGeoEnrichment%2FEnrich%3Fstudyareas%3D%5B%7B%22FeatureSet%22%3A%7B%22objectIdFieldName%22%3A%22OBJECTID%22%2C%22globalIdFieldName%22%3A%22%22%2C%22geometryType%22%3A%22esriGeometryPoint%22%2C%22spatialReference%22%3A%7B%22wkid%22%3A102100%2C%22latestWkid%22%3A3857%7D%2C%22fields%22%3A%5B%7B%22name%22%3A%22OBJECTID%22%2C%22type%22%3A%22esriFieldTypeOID%22%2C%22alias%22%3A%22OBJECTID%22%2C%22sqlType%22%3A%22sqlTypeInteger%22%2C%22domain%22%3Anull%2C%22defaultValue%22%3Anull%7D%2C%7B%22name%22%3A%22Station_ID%22%2C%22type%22%3A%22esriFieldTypeString%22%2C%22alias%22%3A%22Station_ID%22%2C%22sqlType%22%3A%22sqlTypeNVarchar%22%2C%22length%22%3A255%2C%22domain%22%3Anull%2C%22defaultValue%22%3Anull%7D%2C%7B%22name%22%3A%22FirstOfAddress%22%2C%22type%22%3A%22esriFieldTypeString%22%2C%22alias%22%3A%22FirstOfAddress%22%2C%22sqlType%22%3A%22sqlTypeNVarchar%22%2C%22length%22%3A255%2C%22domain%22%3Anull%2C%22defaultValue%22%3Anull%7D%2C%7B%22name%22%3A%22Price%22%2C%22type%22%3A%22esriFieldTypeDouble%22%2C%22alias%22%3A%22Price%22%2C%22sqlType%22%3A%22sqlTypeDecimal%22%2C%22domain%22%3Anull%2C%22defaultValue%22%3Anull%7D%2C%7B%22name%22%3A%22UniqueID%22%2C%22type%22%3A%22esriFieldTypeInteger%22%2C%22alias%22%3A%22UniqueID%22%2C%22sqlType%22%3A%22sqlTypeInteger%22%2C%22domain%22%3Anull%2C%22defaultValue%22%3Anull%7D%5D%2C%22features%22%3A%5B%7B%22attributes%22%3A%7B%22OBJECTID%22%3A1%2C%22Station_ID%22%3A%22202382%22%2C%22FirstOfAddress%22%3A%2212030ROSECRANSAVE%22%2C%22Price%22%3A2.95716667%2C%22UniqueID%22%3A512%7D%2C%22geometry%22%3A%7B%22x%22%3A-13144272.4606%2C%22y%22%3A4015682.7760000005%7D%7D%2C%7B%22attributes%22%3A%7B%22OBJECTID%22%3A2%2C%22Station_ID%22%3A%22517080%22%2C%22FirstOfAddress%22%3A%222402EANAHEIMST%22%2C%22Price%22%3A2.95233333%2C%22UniqueID%22%3A1256%7D%2C%22geometry%22%3A%7B%22x%22%3A-13161572.144000001%2C%22y%22%3A3999537.5165000036%7D%7D%2C%7B%22attributes%22%3A%7B%22OBJECTID%22%3A3%2C%22Station_ID%22%3A%22521883%22%2C%22FirstOfAddress%22%3A%221660W25THST%22%2C%22Price%22%3A2.919%2C%22UniqueID%22%3A1306%7D%2C%22geometry%22%3A%7B%22x%22%3A-13170715.4594%2C%22y%22%3A3991785.8429000005%7D%7D%5D%7D%7D%5D%26amp%3Bdatacollections%3D%26amp%3Banalysisvariables%3D%26amp%3Bstudyareasoptions%3D%7B%22areaType%22%3A%22RingBuffer%22%2C%22BufferRadii%22%3A%5B11%5D%7D%26amp%3Busedata%3D%26amp%3Bf%3Dpjson
+``` */}
+```json
+{
+  "results" : [ {
+    "paramName" : "GeoEnrichmentResult",
+    "dataType" : "GeoEnrichmentResult",
+    "value" : {
+      "version" : "2.0",
+      "FeatureSet" : [ {
+        "displayFieldName" : "",
+        "fieldAliases" : {
+          "ID" : "ID",
+          "OBJECTID_0" : "Object ID",
+          "sourceCountry" : "sourceCountry",
+          "OBJECTID" : "OBJECTID",
+          "UniqueID" : "UniqueID",
+          "FirstOfAddress" : "FirstOfAddress",
+          "Price" : "Price",
+          "Station_ID" : "Station_ID",
+          "areaType" : "areaType",
+          "bufferUnits" : "bufferUnits",
+          "bufferUnitsAlias" : "bufferUnitsAlias",
+          "bufferRadii" : "bufferRadii",
+          "aggregationMethod" : "aggregationMethod",
+          "HasData" : "HasData",
+          "TOTPOP" : "Total Population",
+          "TOTHH" : "Total Households",
+          "AVGHHSZ" : "Average Household Size",
+          "TOTMALES" : "Male Population",
+          "TOTFEMALES" : "Female Population"
+        },
+        "spatialReference" : {
+          "wkid" : 4326,
+          "latestWkid" : 4326
+        },
+        "fields" : [ {
+          "name" : "ID",
+          "type" : "esriFieldTypeString",
+          "alias" : "ID",
+          "length" : 256
+        }, {
+          "name" : "OBJECTID_0",
+          "type" : "esriFieldTypeOID",
+          "alias" : "Object ID"
+        }, {
+          "name" : "sourceCountry",
+          "type" : "esriFieldTypeString",
+          "alias" : "sourceCountry",
+          "length" : 256
+        }, {
+          "name" : "OBJECTID",
+          "type" : "esriFieldTypeInteger",
+          "alias" : "OBJECTID"
+        }, {
+          "name" : "UniqueID",
+          "type" : "esriFieldTypeInteger",
+          "alias" : "UniqueID"
+        }, {
+          "name" : "FirstOfAddress",
+          "type" : "esriFieldTypeString",
+          "alias" : "FirstOfAddress",
+          "length" : 256
+        }, {
+          "name" : "Price",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "Price"
+        }, {
+          "name" : "Station_ID",
+          "type" : "esriFieldTypeString",
+          "alias" : "Station_ID",
+          "length" : 256
+        }, {
+          "name" : "areaType",
+          "type" : "esriFieldTypeString",
+          "alias" : "areaType",
+          "length" : 256
+        }, {
+          "name" : "bufferUnits",
+          "type" : "esriFieldTypeString",
+          "alias" : "bufferUnits",
+          "length" : 256
+        }, {
+          "name" : "bufferUnitsAlias",
+          "type" : "esriFieldTypeString",
+          "alias" : "bufferUnitsAlias",
+          "length" : 256
+        }, {
+          "name" : "bufferRadii",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "bufferRadii"
+        }, {
+          "name" : "aggregationMethod",
+          "type" : "esriFieldTypeString",
+          "alias" : "aggregationMethod",
+          "length" : 256
+        }, {
+          "name" : "HasData",
+          "type" : "esriFieldTypeInteger",
+          "alias" : "HasData"
+        }, {
+          "name" : "TOTPOP",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "Total Population",
+          "fullName" : "KeyGlobalFacts.TOTPOP",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTHH",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "Total Households",
+          "fullName" : "KeyGlobalFacts.TOTHH",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "AVGHHSZ",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "Average Household Size",
+          "fullName" : "KeyGlobalFacts.AVGHHSZ",
+          "component" : "scripts",
+          "decimals" : 2,
+          "units" : "count"
+        }, {
+          "name" : "TOTMALES",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "Male Population",
+          "fullName" : "KeyGlobalFacts.TOTMALES",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTFEMALES",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "Female Population",
+          "fullName" : "KeyGlobalFacts.TOTFEMALES",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        } ],
+        "features" : [ {
+          "attributes" : {
+            "ID" : "0",
+            "OBJECTID_0" : 1,
+            "sourceCountry" : "US",
+            "OBJECTID" : 1,
+            "UniqueID" : 512,
+            "FirstOfAddress" : "12030ROSECRANSAVE",
+            "Price" : 2.95716667,
+            "Station_ID" : "202382",
+            "areaType" : "RingBuffer",
+            "bufferUnits" : "esriMiles",
+            "bufferUnitsAlias" : "Miles",
+            "bufferRadii" : 11,
+            "aggregationMethod" : "BlockApportionment:US.BlockGroups;PointsLayer:US.BlockPoints",
+            "HasData" : 1,
+            "TOTPOP" : 3127682,
+            "TOTHH" : 899704,
+            "AVGHHSZ" : 3.44,
+            "TOTMALES" : 1534612,
+            "TOTFEMALES" : 1593070
+          }
+        }, {
+          "attributes" : {
+            "ID" : "1",
+            "OBJECTID_0" : 2,
+            "sourceCountry" : "US",
+            "OBJECTID" : 2,
+            "UniqueID" : 1256,
+            "FirstOfAddress" : "2402EANAHEIMST",
+            "Price" : 2.95233333,
+            "Station_ID" : "517080",
+            "areaType" : "RingBuffer",
+            "bufferUnits" : "esriMiles",
+            "bufferUnitsAlias" : "Miles",
+            "bufferRadii" : 11,
+            "aggregationMethod" : "BlockApportionment:US.BlockGroups;PointsLayer:US.BlockPoints",
+            "HasData" : 1,
+            "TOTPOP" : 1966953,
+            "TOTHH" : 637033,
+            "AVGHHSZ" : 3.05,
+            "TOTMALES" : 961474,
+            "TOTFEMALES" : 1005479
+          }
+        }, {
+          "attributes" : {
+            "ID" : "2",
+            "OBJECTID_0" : 3,
+            "sourceCountry" : "US",
+            "OBJECTID" : 3,
+            "UniqueID" : 1306,
+            "FirstOfAddress" : "1660W25THST",
+            "Price" : 2.919,
+            "Station_ID" : "521883",
+            "areaType" : "RingBuffer",
+            "bufferUnits" : "esriMiles",
+            "bufferUnitsAlias" : "Miles",
+            "bufferRadii" : 11,
+            "aggregationMethod" : "BlockApportionment:US.BlockGroups;PointsLayer:US.BlockPoints",
+            "HasData" : 1,
+            "TOTPOP" : 939421,
+            "TOTHH" : 333902,
+            "AVGHHSZ" : 2.77,
+            "TOTMALES" : 462851,
+            "TOTFEMALES" : 476570
+        }
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "messages": []
+}
+```
+
+</Tab>
+
+</Tabs>
+
+</Box>
+<Box>
+
+### Set a drive time buffer 
+
+Set a drive time buffer from a defined point and return total households and median household income for the current year with the associated geometry in the response.
+
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Request</TabTitle>
+
+<TabTitle>Response</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```http
+GET https://geoenrich.arcgis.com/arcgis/rest/services/World/geoenrichmentserver/Geoenrichment/Enrich?studyAreas=[{"geometry":{"x":-117.2459,"y":32.8307}}]&studyAreasOptions={"areaType":"DriveTimeBuffer","bufferUnits":"esriDriveTimeUnitsMinutes","bufferRadii":[5]}& analysisVariables=["KeyUSFacts.TOTHH_CY","KeyUsFacts.MEDHINC_CY"]&returngeometry=true&f=pjson&token=<ACCESS_TOKEN>
+```
+
+ 
+
+</Tab>
+
+<Tab>
+
+{/* ```javascript
+https%3A%2F%2Fgeoenrich.arcgis.com%2Farcgis%2Frest%2Fservices%2FWorld%2Fgeoenrichmentserver%2FGeoenrichment%2FEnrich%3FstudyAreas%3D%5B%7B%22geometry%22%3A%7B%22x%22%3A-117.2459%2C%22y%22%3A32.8307%7D%7D%5D%26amp%3BstudyAreasOptions%3D%7B%22areaType%22%3A%22DriveTimeBuffer%22%2C%22bufferUnits%22%3A%22esriDriveTimeUnitsMinutes%22%2C%22bufferRadii%22%3A%5B5%5D%7D%26amp%3B%20analysisVariables%3D%5B%22KeyUSFacts.TOTHH_CY%22%2C%22KeyUsFacts.MEDHINC_CY%22%5D%26amp%3Breturngeometry%3Dtrue%26amp%3Bf%3Dpjson
+``` */}
+```json
+{
+  "results" : [ {
+    "paramName" : "GeoEnrichmentResult",
+    "dataType" : "GeoEnrichmentResult",
+    "value" : {
+      "version" : "2.0",
+      "FeatureSet" : [ {
+        "displayFieldName" : "",
+        "fieldAliases" : {
+          "ID" : "ID",
+          "OBJECTID" : "Object ID",
+          "sourceCountry" : "sourceCountry",
+          "areaType" : "areaType",
+          "bufferUnits" : "bufferUnits",
+          "bufferUnitsAlias" : "bufferUnitsAlias",
+          "bufferRadii" : "bufferRadii",
+          "aggregationMethod" : "aggregationMethod",
+          "HasData" : "HasData",
+          "TOTHH_CY" : "2018 Total Households",
+          "MEDHINC_CY" : "2018 Median Household Income"
+        },
+        "geometryType" : "esriGeometryPolygon",
+        "spatialReference" : {
+          "wkid" : 4326,
+          "latestWkid" : 4326
+        },
+        "fields" : [ {
+          "name" : "ID",
+          "type" : "esriFieldTypeString",
+          "alias" : "ID",
+          "length" : 256
+        }, {
+          "name" : "OBJECTID",
+          "type" : "esriFieldTypeOID",
+          "alias" : "Object ID"
+        }, {
+          "name" : "sourceCountry",
+          "type" : "esriFieldTypeString",
+          "alias" : "sourceCountry",
+          "length" : 256
+        }, {
+          "name" : "areaType",
+          "type" : "esriFieldTypeString",
+          "alias" : "areaType",
+          "length" : 256
+        }, {
+          "name" : "bufferUnits",
+          "type" : "esriFieldTypeString",
+          "alias" : "bufferUnits",
+          "length" : 256
+        }, {
+          "name" : "bufferUnitsAlias",
+          "type" : "esriFieldTypeString",
+          "alias" : "bufferUnitsAlias",
+          "length" : 256
+        }, {
+          "name" : "bufferRadii",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "bufferRadii"
+        }, {
+          "name" : "aggregationMethod",
+          "type" : "esriFieldTypeString",
+          "alias" : "aggregationMethod",
+          "length" : 256
+        }, {
+          "name" : "HasData",
+          "type" : "esriFieldTypeInteger",
+          "alias" : "HasData"
+        }, {
+          "name" : "TOTHH_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Total Households",
+          "fullName" : "KeyUSFacts.TOTHH_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "MEDHINC_CY",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "2018 Median Household Income",
+          "fullName" : "KeyUSFacts.MEDHINC_CY",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "currency",
+          "currency" : "$"
+        } ],
+        "features" : [ {
+          "attributes" : {
+            "ID" : "0",
+            "OBJECTID" : 1,
+            "sourceCountry" : "US",
+            "areaType" : "DriveTimeBuffer",
+            "bufferUnits" : "esriDriveTimeUnitsMinutes",
+            "bufferUnitsAlias" : "Minutes",
+            "bufferRadii" : 5,
+            "aggregationMethod" : "BlockApportionment:US.BlockGroups;PointsLayer:US.BlockPoints",
+            "HasData" : 1,
+            "TOTHH_CY" : 2493,
+            "MEDHINC_CY" : 161704
+                    },
+        "geometry": {
+         "rings": [
+          [
+           [
+            -117.24810409471134,
+            32.846578598251185
+           ],
+           [
+            -117.24787902810513,
+            32.845453261718916
+           ],
+
+           ...
+
+           [
+            -117.24810409471134,
+            32.846578598251185
+           ]
+          ]
+         ]
+        }
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "messages": []
+}
+```
+
+</Tab>
+
+</Tabs>
+
+<MoreInfo>
+
+**Notes:**
+
+-   The response has been abbreviated in the example where "..." is noted. 
+-   A 5-minute drivetime buffer area is generated around the input location.
+
+JSON response rendered with ArcGIS for Desktop.
+
+![5 minute drive time](./images/GUID-2ABC49BE-818F-43AF-8357-2D46D366CF2B-web.png)
+
+**Notes:**
+
+-    Transparency and fill properties have been adjusted for illustrative purposes.
+
+</MoreInfo>
+</Box>
+<Box>
+
+### Return a statistical data collection 
+
+Return a statistical data collection with the additional variables and associated metadata for index values.
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Request</TabTitle>
+
+<TabTitle>Response</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```http
+GET https://geoenrich.arcgis.com/arcgis/rest/services/World/geoenrichmentserver/Geoenrichment/Enrich?studyareas=[{"geometry":{"x":-117.1042,"y":32.7671}}]&analysisvariables=["TravelCEX.X7003_X"]&addDerivativeVariables=index&f=pjson&token=<ACCESS_TOKEN>
+```
+
+ 
+
+</Tab>
+
+<Tab>
+{/* 
+```javascript
+https%3A%2F%2Fgeoenrich.arcgis.com%2Farcgis%2Frest%2Fservices%2FWorld%2Fgeoenrichmentserver%2FGeoenrichment%2FEnrich%3Fstudyareas%3D%5B%7B%22geometry%22%3A%7B%22x%22%3A-117.1042%2C%22y%22%3A32.7671%7D%7D%5D%26amp%3Banalysisvariables%3D%5B%22TravelCEX.X7003_X%22%5D%26amp%3BaddDerivativeVariables%3Dindex%26amp%3Bf%3Dpjson
+``` */}
+```json
+{
+  "results" : [ {
+    "paramName" : "GeoEnrichmentResult",
+    "dataType" : "GeoEnrichmentResult",
+    "value" : {
+      "version" : "2.0",
+      "FeatureSet" : [ {
+        "displayFieldName" : "",
+        "fieldAliases" : {
+          "ID" : "ID",
+          "OBJECTID" : "Object ID",
+          "sourceCountry" : "sourceCountry",
+          "areaType" : "areaType",
+          "bufferUnits" : "bufferUnits",
+          "bufferUnitsAlias" : "bufferUnitsAlias",
+          "bufferRadii" : "bufferRadii",
+          "aggregationMethod" : "aggregationMethod",
+          "HasData" : "HasData",
+          "X7003_X_I" : "Airline Fares: Index",
+          "X7003_X" : "Airline Fares"
+        },
+        "spatialReference" : {
+          "wkid" : 4326,
+          "latestWkid" : 4326
+        },
+        "fields" : [ {
+          "name" : "ID",
+          "type" : "esriFieldTypeString",
+          "alias" : "ID",
+          "length" : 256
+        }, {
+          "name" : "OBJECTID",
+          "type" : "esriFieldTypeOID",
+          "alias" : "Object ID"
+        }, {
+          "name" : "sourceCountry",
+          "type" : "esriFieldTypeString",
+          "alias" : "sourceCountry",
+          "length" : 256
+        }, {
+          "name" : "areaType",
+          "type" : "esriFieldTypeString",
+          "alias" : "areaType",
+          "length" : 256
+        }, {
+          "name" : "bufferUnits",
+          "type" : "esriFieldTypeString",
+          "alias" : "bufferUnits",
+          "length" : 256
+        }, {
+          "name" : "bufferUnitsAlias",
+          "type" : "esriFieldTypeString",
+          "alias" : "bufferUnitsAlias",
+          "length" : 256
+        }, {
+          "name" : "bufferRadii",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "bufferRadii"
+        }, {
+          "name" : "aggregationMethod",
+          "type" : "esriFieldTypeString",
+          "alias" : "aggregationMethod",
+          "length" : 256
+        }, {
+          "name" : "HasData",
+          "type" : "esriFieldTypeInteger",
+          "alias" : "HasData"
+        }, {
+          "name" : "X7003_X_I",
+          "type" : "esriFieldTypeInteger",
+          "alias" : "Airline Fares: Index",
+          "fullName" : "TravelCEX.X7003_X_I",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "X7003_X",
+          "type" : "esriFieldTypeDouble",
+          "alias" : "Airline Fares",
+          "fullName" : "TravelCEX.X7003_X",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "currency",
+          "currency" : "$"
+        } ],
+        "features" : [ {
+          "attributes" : {
+            "ID" : "0",
+            "OBJECTID" : 1,
+            "sourceCountry" : "US",
+            "areaType" : "RingBuffer",
+            "bufferUnits" : "esriMiles",
+            "bufferUnitsAlias" : "Miles",
+            "bufferRadii" : 1,
+            "aggregationMethod" : "BlockApportionment:US.BlockGroups;PointsLayer:US.BlockPoints",
+            "HasData" : 1,
+            "X7003_X_I" : 111,
+            "X7003_X" : 5954428
+        }
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "messages": []
+}
+```
+</Tab>
+
+</Tabs>
+</Box>
+
+
+

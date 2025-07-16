@@ -1,0 +1,486 @@
+---
+title: "Security Configuration"
+description: "The config  resource returns the current security configuration set up for a server site."
+slug: "securityconfig"
+url: "/securityconfig"
+guid: "GUID-3ED3A10C-54D6-4123-8C11-56F7EEE7FE3D"
+migratedTopicMetadata:
+  FTITLE: "securityConfig"
+  FDESCRIPTION: ""
+  FCHANGES: "Updating information for BUG-000151344"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1-*"
+  CREATED-ON: "06/01/2023 11:54:20"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "16/02/2023 21:43:13"
+  VERSION: "11"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-D460C2B1-FB0F-4B8E-BFFF-EC78EB2B4125"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /security/config
+  urlSegments:
+    - name: <root>
+      url: /site
+    - name: /security/config
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '10.1'
+  requiredCapabilities:
+    - name: Access allowed with any authorized privilege
+      url: /managing-access-to-the-server-administration-rest-api
+---
+
+## Description
+
+The `config` resource returns the currently active security configuration. A security configuration involves the following pieces of information, outlined in the Security configuration properties table.
+
+<Note type={"note"}>
+
+The user and role store can be updated by using the [Update Identity Store](/updateidentitystore) operation. The remaining security configuration can be updated by using the [Update Security Configuration](/updatesecurityconfig) operation. The security configuration can be represented in JSON format as described in the [JSON Response](/securityconfig#json-response-example) sections.
+
+</Note>
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Security configuration properties
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `allowedAdminAccessIPs` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A comma separated list of client machine IP addresses that are allowed access to ArcGIS Server. This can be used as an additional security measure to prevent unauthorized access to the site.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `allowDirectAccess`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean that indicates whether a user with administrator privileges can access the server through port 6080. If `true`, all users with administrative access can access the Administrator Directory and ArcGIS Server Manager through port 6080. If `false`, users in the identity store cannot access the server through port 6080; users must access the site through ArcGIS Web Adaptor. The default value is `true`.
+
+      Before disabling administrative access on port 6080, ArcGIS Server must be configured to use web tier authentication (`WEB_ADAPTOR`) and at least one user in the identity store must have administrator privileges to the site. The primary site administrator account can administer the site through port 6080.
+
+      To fully disable access on port 6080, you can optionally disable the primary site administrator account. If ArcGIS Server Manager becomes unavailable or the web server cannot authenticate users who have administrator privileges, you cannot administer the site. To recover this site, re-enable the primary site administrator account and connect to the site through port 6080 with this account.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `authenticationMode` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the authentication mode used by ArcGIS Server. When ArcGIS Server is federated with Portal for ArcGIS, this property can be included and set to `ARCGIS_PORTAL_TOKEN`. The default value is `ARCGIS_TOKEN`.
+
+      Values: `ARCGIS_TOKEN` | `ARCGIS_PORTAL_TOKEN` | `WEB_ADAPTOR_AUTHENTICATION`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `authenticationTier` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the tier at which requests to access GIS services will be authenticated. It is recommended that you do not modify these values using the Administrator Directory. Instead, use ArcGIS Server Manager to configure web tier authentication or use the Portal for ArcGIS website to federate ArcGIS Server with your portal.
+
+      Values: `WEB_ADAPTOR` | `GIS_SERVER` | `ARCGIS_PORTAL`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `allowInternetCORSAccess` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.9.1. A Boolean that controls the value of the Access-Control-Allow-Private-Network response header in a CORS preflight request to a REST service URL. This property supports the Private Network Access web specification (previously CORS-RFC1918), which aims to restrict websites accessed over a private network from making internal cross-origin requests.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `HSTSEnabled` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean that indicates whether HTTP Strict Transport Security (HSTS) is being used by the site. To enable this property, the `Protocol` property must be set to `HTTPS`.
+
+      Values: `true` | `false` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `httpEnabled`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean that indicates whether the site is accessible over HTTP.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `Protocol`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the HTTP protocol to be used for communication to and from the ArcGIS Server site. If set to `HTTP`, all communication to and from the site will be over HTTP, with HTTPS communication will be unavailable. If set to `HTTP_AND_HTTPS`, users and clients can use either HTTP or HTTPS to connect to the site. If set to `HTTPS`, all communication to and from the site will be over HTTPS. Calls made using HTTP will be redirected to use HTTPS.
+
+      When an ArcGIS Server site is created, all communication to and from the site is sent over HTTP, which is not secure. This means that your credentials sent over an internal network or the Internet are not encrypted and can be intercepted. To prevent the interception of communication, it's recommended that you configure ArcGIS Server and ArcGIS Server Manager (if installed) to enforce Secure Sockets Layer (SSL). When you create a site, a warning-level message in the logs recommends that you update the communication protocol of the site to use SSL.
+
+      Values: `HTTP` | `HTTP_AND_HTTPS` | `HTTPS`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `roleStoreConfig` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Connection information about the currently active role store.
+
+      ```markdown label=Example
+      "roleStoreConfig": {
+        "type": "PORTAL",
+        "properties": {}
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `securityEnabled` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean that indicates whether security is enabled for a GIS service. The default value is `true`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sslEnabled` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean that indicates whether the site is accessible over HTTPS (SSL). The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `userStoreConfig` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Connection information about the currently active user store.
+
+      ```markdown label=Example
+      "userStoreConfig": {
+        "type": "PORTAL",
+        "properties": {}
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `virtualDirsSecurityEnabled` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean that indicates whether the server's virtual directories are secure and require authentication. When this property is set to `true`, accessing the content of secured services in the arcgisoutput, arcgisjobs, and arcgisinput directories over HTTP will require user authentication. These same permissions are applied to the server directories associated with the service. If the service is publicly available, the directories are also publicly available. The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `portalProperties` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The properties used when federating ArcGIS Server with Portal for ArcGIS. See [Portal properties](/securityconfig#portal-properties) for more information.
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+### Portal properties
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `portalMode`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The portal mode. This must be `ARCGIS_PORTAL_FEDERATION`.
+
+      ```other label=Example
+      "portalMode": "ARCGIS_PORTAL_FEDERATION"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `portalSecretKey`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The key obtained after federating ArcGIS Server with Portal for ArcGIS.
+
+      ```markdown label=Example
+      "portalSecretKey": "12a34b56c78d90ef09e87d65c43b21a"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `portalURL`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The URL of Portal for ArcGIS in the following format:
+
+      ```markdown label=Example
+      "portalUrl": "https://machine.domain.com/webadaptor"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+    <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `privateHostingServerUrl`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The private URL of the portal's hosting server.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `privatePortalUrl`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The internal URL of Portal for ArcGIS is in the following format:
+
+      ```markdown label=Example
+      "privatePortalUrl": "https://machine.domain.com:7443/arcgis"
+      ```
+
+      <Note>
+
+      For highly available envrionments, the URL would point to an internal load balancer, rather than to an individual machine:
+
+      ```markdown label=Example
+      "privatePortalUrl": "https://lbprivate.domain.com:7443/arcgis"
+      ```
+
+      </Note>
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serverId`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The ID of the server federated with the portal.
+
+      ```markdown label=Example
+      "serverId": "pn04lWxDPEh1vLR6"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serverURL`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The external URL of the server federated with the portal in the following format:
+
+      ```markdown label=Example
+      "serverUrl": "https://machine.domain.com/webadaptor"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample request URL used to access the `config` resource:
+
+```markdown
+https://machine.domain.com/webadaptor/admin/security/config?f=pjson
+```
+
+## JSON Response syntax
+
+```javascript
+{
+  "securityEnabled": <true|false>,
+  "authenticationMode": "<Authentication Mode>",
+  "authenticationTier": "<Authentication Tier>",
+  "userStoreConfig": <UserStore>,
+  "roleStoreConfig": <RoleStore>,
+  "sslEnabled": <true|false>,
+  "HSTSEnabled": <true|false>,
+  "httpsProtocols": "<HTTPS protocols>",
+  "cipherSuites": "<cipher suite list>",
+  "httpEnabled": <true|false>,
+  "virtualDirsSecurityEnabled": <true|false>,
+  "allowInternetCORSAccess": <true|false>,
+    "portalProperties": {
+    "portalUrl": "<Portal URL>",
+    "portalSecretKey": "<Portal Secret Key>",
+    "portalMode": "ARCGIS_PORTAL_FEDERATION",
+    "serverId": <ServerID>,
+    "serverUrl": <ServerURL>,
+    "token": <token>,
+    "referer": <referer>
+  },
+  "allowDirectAccess": <true|false>,
+  "Protocol": "<HTTP>|<HTTP_AND_HTTPS>|<HTTPS>",
+  "allowedAdminAccessIPs": "<Comma separated list of allowed IP addresses>",
+  "serverRole": "<Assigned server role>",
+  "serverFunction": "<Server functions>"
+}
+```
+
+## JSON Response example
+
+```javascript
+{
+  "securityEnabled": true,
+  "authenticationMode": "ARCGIS_PORTAL_TOKEN",
+  "authenticationTier": "ARCGIS_PORTAL",
+  "userStoreConfig": {
+    "type": "PORTAL",
+    "properties": {}
+  },
+  "roleStoreConfig": {
+    "type": "PORTAL",
+    "properties": {}
+  },
+  "sslEnabled": true,
+  "HSTSEnabled": false,
+  "httpsProtocols": "TLSv1.2,TLSv1.3",
+  "cipherSuites": "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384, TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA, TLS_RSA_WITH_AES_256_GCM_SHA384, TLS_RSA_WITH_AES_256_CBC_SHA256, TLS_RSA_WITH_AES_256_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_128_GCM_SHA256, TLS_RSA_WITH_AES_128_CBC_SHA256, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_AES_256_GCM_SHA384, TLS_AES_128_GCM_SHA256, TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384, TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA, TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
+  "httpEnabled": false,
+  "virtualDirsSecurityEnabled": false,
+  "allowInternetCORSAccess": true,
+  "portalProperties": {
+    "portalUrl": "https://machine.domain.com/webadaptor",
+    "privatePortalUrl": "https://MACHINE.DOMAIN.COM:7443/arcgis",
+    "portalSecretKey": "ab11b803c57b4ef983d910d5dcfe9fb1",
+    "portalMode": "ARCGIS_PORTAL_FEDERATION",
+    "serverId": "llllrc3XWJS40Gto",
+    "serverUrl": "https://machine.domain.com/webadaptor",
+    "webgisServerTrustKey": "e4gOXn7Ah1+mx9I5nDpP1497x7EWvLhRqfLzUMY9Vq4=",
+    "privateHostingServerUrl": "https://machine.domain.com:6443/arcgis"
+  },
+  "allowDirectAccess": true,
+  "serverRole": "HOSTING_SERVER",
+  "serverFunction": "WorkflowManager"
+}
+```

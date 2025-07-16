@@ -1,0 +1,88 @@
+---
+title: "Export Logs"
+description: "The export operation exports and downloads either standard logs or audit logs."
+slug: "export-logs"
+url: "/export-logs"
+restInfoMetadata:
+  apiPath: /logs/export
+  urlSegments:
+    - name: <root>
+      url: /portal-administration-root
+    - name: /logs/export
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '11.4'
+---
+
+## Description
+
+The `export` operation exports and downloads either [standard logs](/query-logs) or audit logs as a .zip file. Audit logs are detailed event logs that are used to monitor changes to the system. Audit logs are a useful resource when troubleshooting any critical or breaking changes that have occured, as they can help track what organization member made a change, the effect it has on the system, and what time those events occurred. Notably, audit logs can be processed by Security Information and Event Management (SIEM) tools to generate an audit trail, track trends in user activity, as well as monitor and address any security threats or vulnerabilities.
+
+Audit logs captures information for the following events:
+
+* Accessing the organization portal site
+* Creating, deleting, updating, and disabling member accounts
+* Creating and updating user roles
+* Adding and configuring groups
+* Adding and removing members from a group
+* Sharing items
+* Changing item ownership
+* Adding, updating, moving, and deleting items
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `logType`
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the types of logs being exported. When set as `Application`, standard logs will be exported. When set as `Audit`, audit logs are exported.
+
+      Values: `Audit` | `Application`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+The following is a sample request for the `export` operation:
+
+```markdown
+https://machine.domain.com/webadaptor/portaladmin/logs/export?logType=Audit
+
+```
+
+### Audit log syntax
+
+Each event included in the audit logs will use the following JSON syntax:
+
+```other
+{
+  "version": "<The version of the audit record schema>",
+  "timestamp": <UTC timestamp when the event occurred>,
+  "eventId": "<Unique identifier for the audit record>",
+  "event": "<Event name>",
+  "eventLevel": "<Event level. Level 1 events are always recorded>",
+  "status": "<Success | Fail | Error>",
+  "statusCode": "<Status code (e.g. 200 for success, 403 for Invalid Authentication, etc.)>",
+  "actor": "<Username of the member who performed the logged event>",
+  "actorId": "<Unique identifier for the member who performed the logged event>",
+  "actorRole": "<The member's role>",
+  "sourceIp": "<Client application's IP address",
+  "destinationIp": "<Request target's IP address>",
+  "destinationHost": "<Target's hostname>",
+  "resource": "<The API endpoint used to make the request>",
+  "data":{<Additional, relevant information for the event>},
+  "userAgent": <User agent information from the client application>,
+  "message": "<High-level description of the event>"
+}
+
+```

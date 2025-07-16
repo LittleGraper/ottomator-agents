@@ -1,0 +1,185 @@
+---
+title: "Validate Data Item"
+description: "The validateDataItem operation validates that the path (for file shares) or connection string (for databases) for a specific data item is accessible to every server node in the site by checking against the JSON representing the data item."
+slug: "validate-data-item"
+url: "/validate-data-item"
+guid: "GUID-3535D6E9-C74D-4BDD-AA04-7C2EBFD30605"
+migratedTopicMetadata:
+  FTITLE: "Validate Data Item"
+  FDESCRIPTION: ""
+  FCHANGES: "Adding the options parameter"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0-*"
+  CREATED-ON: "18/07/2022 15:23:04"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "07/08/2022 21:20:44"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "8"
+  ED: "GUID-37916298-37C8-468D-AF63-FCE1A0DAC61D"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /data/validateDataItem
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /data/validateDataItem
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed with the "Update" privilege, or the Publisher role
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `validateDataItem` operation validates that the path (for file shares) or connection string (for databases) for a specific data item is accessible to every server node in the site by checking against the JSON representing the data item, ensuring that the data item can be registered and used successfully in the server's data store.
+
+Validating a data item does not automatically register it. You must explicitly register a data item by invoking the [Register](/register-data-store-item) operation.
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `item` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The JSON representing the data item.
+
+      ```other label=Example
+      item={
+        "path": "/fileShares/folder_shared",
+        "type": "folder",
+        "id": null,
+        "clientPath": null,
+        "info": {
+          "path": "\\\\server\\share_data\\map_data",
+          "dataStoreConnectionType": "shared"
+        }
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `options` 
+
+      (Optional; required for new file share locations)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.0. A JSON array of additional properties used during validation. Currently, only the `allowServicesRestart` property is supported. Adding a new file share location requires the pods for all system and utility services to restart, as well as restarting the shared pods for map and tile services. Affected services will be unavailable during this time and may take some time before they are once again available. By setting `allowServicesRestart` to `true`, administrators are acknowledging that registering a new file share location will disrupt their organization. Not providing `allowServicesRestart`, or setting it to `false`, will cause the validation of the new file share location to fail.
+
+      <Note type={"note"}>
+
+      This parameter is not required for paths that were previously registered with the organization:
+
+      ```markdown label=Examples
+      //Example one: a new path. Requires allowServicesRestart to be set to true and services will restart
+      /myshare/folder1
+
+      //Example two: an extension to the path (above) that was previously registered.
+      Does not require allowServicesRestart to be set to true, and services will not restart 
+      /myshare/folder1/subfolder2/subfolder3
+
+      ```
+
+      </Note>
+
+      ```markdown label=Example
+      options={"allowServicesRestart": true}
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.0. This parameter specifies whether the operation will run synchronously or asynchronously. If `false`, the operation is run synchronously. If `true`, the operation is run asynchronously and the response returns a JSON object containing job information that can be used to track the job's status. The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `validateDataItem` operation, formatted for readability:
+
+```other
+POST /context/admin/data/validateDataItem HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+item={
+  "path": "/fileShares/folder_shared",
+  "type": "folder",
+  "id": null,
+  "clientPath": null,
+  "info": {
+    "path": "\\\\server\\share_data\\map_data",
+    "dataStoreConnectionType": "shared"
+  }
+}&options={"allowServicesRestart": true}&async=false&f=json&token=Mb0ORrkLObNO2Q8FZoUCHHzSMzZi0CbhLHNRYMqqa6URG_ojQJF3rNsJAfRB23MyCrLwSmuaHPUo4AEIrUuoH1-4Ot5xh4565FtlQahXAhK2C7Sy0oydZhBwD8KdFSnVlnLr-e9uI5ovSWZ2lGNn9SwoV2MPMzeAh_5r-q-wgwF8DTT_nhuCXJGkMRy-48jjGS2aN5FI18STHZ8RAuKxGasH90SI3C7njZzlGCUrY5m6BDhCMsdpZA14GwNX8Cis
+
+```
+
+## JSON Response examples
+
+If `async` is `false`, the following response is returned:
+
+```other
+{"status": "success"}
+```
+
+If `async` is `true`, the following response is returned. The value returned for `jobsUrl` can be used to access the job resource to track a job's status after it's been submitted. For more information, see the [Job](/job) resource documentation.
+
+```other
+{
+  "jobsUrl": "https://organization.domain.com/context/admin/jobs/ja2ca1a35-881c-400c-a49a-b26883002d6c",
+  "jobID": "ja2ca1a35-881c-400c-a49a-b26883002d6c",
+  "jobStatus": "SUBMITTED"
+}
+```

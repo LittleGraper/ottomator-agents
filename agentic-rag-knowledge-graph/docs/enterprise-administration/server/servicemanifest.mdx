@@ -1,0 +1,180 @@
+---
+title: "Service Manifest"
+description: "The manifest resource provides access to the data and resource information behind a specific service."
+slug: "servicemanifest"
+url: "/servicemanifest"
+guid: "GUID-5ED27F28-8148-49AA-BD0A-6B5DD2E9F733"
+migratedTopicMetadata:
+  FTITLE: "serviceManifest"
+  FDESCRIPTION: ""
+  FCHANGES: "Removing ArcMap"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0 -*"
+  CREATED-ON: "11/04/2022 12:20:34"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "24/05/2022 09:30:53"
+  VERSION: "5"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-23D4BFEC-0225-4727-93A3-F159A1F85119"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /services/<serviceName>.<serviceType>/iteminfo/manifest/manifest.json
+  urlSegments:
+    - name: <root>
+      url: /site
+    - name: /services/<serviceName>.<serviceType>/iteminfo/manifest/manifest.json
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: 10.1.1
+---
+
+## Description
+
+The service manifest resource documents the data and other resources that define the service origins and power the service. This resource will tell you underlying databases and their location along with other supplementary files that make up the service.
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Description"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The only supported format is `json`.
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+##  Response properties
+
+<StyledTable headers={"Properties,Description"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `databases` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The `database` property contains the following information:
+
+      - `byReference`—Indicates whether the service data is referenced from a registered folder or database (`true`) or if it was copied to the server at the time the service was published (`false`).
+      - `onPremiseConnectionString`—Path to publisher data location.
+      - `onServerConnectionString`—Path to data location after publishing completes.
+
+      When both the server machine and the publisher machine are using the same folder or database, `byReference` is `true` and the `onPremiseConnectionString` and `onServerConnectionString` properties have the same value.
+
+      When the server machine and the publisher machine are using different folders or databases, `byReference` is `true` and the `onPremiseConnectionString` and `onServerConnectionString` properties have different values.
+
+      When the data is copied to the server automatically at publish time, `byReference` is `false`.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `resources` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The `resources` property contains the following information:
+
+      - `clientName`—Machine where ArcGIS Pro was used to publish the service.
+      - `onPremisePath`—Path, relative to the `clientName` machine, where the source resource (.mxd, .3dd, .tbx files, geodatabases, and so on) originated.
+      - `serverPath`—Path to the document after publishing completes.
+
+      <Note type={"note"}>
+
+      `OnPremisePath` is not valid for geoprocessing services because the geoprocessing publishing framework creates an in-memory toolbox in the user's profile and that path is what is saved. You cannot use this path to return to a meaningful .tbx file. At the same time, you are able to publish geoprocessing services from the aggregation of multiple results, and the multiple sources for the service are not saved.
+
+      </Note>
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample request URL used to access the `manifest` resource:
+
+```markdown
+https://machine.domain.com/webadaptor/admin/services/Maps/California.MapServer/iteminfo/manifest/manifest.json
+```
+
+## JSON Response example
+
+```other
+{
+  "databases": [
+    {
+      "byReference": true,
+      "onServerWorkspaceFactoryProgID": "esriDataSourcesGDB.FileGDBWorkspaceFactory.1",
+      "onServerConnectionString": "DATABASE=\\\\server\\sharedb\\California.gdb",
+      "onPremiseConnectionString": "DATABASE=C:\\data\\California\\California.gdb",
+      "onServerName": "California.gdb",
+      "onPremisePath": "",
+      "datasets": [
+        {
+          "onServerName": "Airports"
+        },
+        {
+          "onServerName": "Cities"
+        },
+        {
+          "onServerName": "EarthquakeHistory"
+        },
+        {
+          "onServerName": "GolfCourses"
+        },
+        {
+          "onServerName": "Places"
+        },
+        {
+          "onServerName": "Volcanos"
+        },
+        {
+          "onServerName": "Highways"
+        },
+        {
+          "onServerName": "Rivers"
+        },
+        {
+          "onServerName": "Counties"
+        },
+        {
+          "onServerName": "Lakes"
+        },
+        {
+          "onServerName": "StateBND"
+        },
+        {
+          "onServerName": "UrbanAreas"
+        }
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "onPremisePath": "C:\\data\\California\\California.mxd",
+      "clientName": "client",
+      "serverPath": "C:\\arcgisserver\\directories\\arcgissystem\\arcgisinput\\California1.MapServer\\extracted\\v101\\California.msd"
+    }
+  ]
+}
+```

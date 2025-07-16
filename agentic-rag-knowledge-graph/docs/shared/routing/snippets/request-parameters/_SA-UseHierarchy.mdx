@@ -1,0 +1,54 @@
+{/*Shared snippet for useHierarchy OR useHierarchy */} 
+
+import ParamMetadata from "../../../components/param-metatdata" 
+
+<ParamMetadata types={[{name:"boolean"}]} defaultValue="false" />
+
+{/* <p class="space-x-2"><span class="font-sm text-color-3">type:bool</span><span class="font-bold text-[#6d29cc]">default:`false`</span></p> */}
+
+Specify whether hierarchy will be used when generating service areas.
+
+<If c="requestType == 'job'">
+<Note type={"attention"}>
+The value of this parameter, regardless of whether you rely on the default or explicitly set a value, is overridden when `travel_mode`  is set to any other value than `Custom` . The default value for `travel_mode`  is `Driving` , so unless you set `travel_mode`  to a different value, this parameter value will be overridden.
+</Note>
+</If>
+
+<If c="requestType == 'direct'">
+<Note type={"attention"}>
+The value of this parameter, regardless of whether you use the default or explicitly set a value, is overridden when you pass in `travelMode`.
+</Note>
+</If>
+
+-   `true`—The service will use hierarchy. When generating hierarchical service areas, the service prefers higher-order streets, such as freeways, to lower-order streets, such as local roads. This means that if a facility is located on a local road (the lowest level in a hierarchy), the service spans out on the local roads in that area, but it tries to step up the hierarchy to secondary and primary roads. Once on secondary and primary roads, the service ignores local roads throughout the rest of the service area. Mainly because of this hierarchical approach, hierarchical service areas are generated much faster compared to nonhierarchical service areas, as the service has to generate service areas from a relatively smaller subset of streets. Hierarchical service areas can be used to simulate the driver preference of traveling on freeways instead of local roads even if that means a longer trip. However, the areas can overlap some lower-order roads that can't be reached within the given travel distance or travel time. Consequently, hierarchical service areas can be less accurate.
+-   `false`—The service will not use hierarchy. This results in service areas that are measured along all the streets, regardless of hierarchy level, and tend to be higher quality compared to their hierarchical counterparts. 
+
+
+<If c="publication == 'rest/online' && requestType == 'direct'">
+<Note type={"caution"}>
+The service automatically reverts to using hierarchy, even if you have chosen not to use it, when the largest value specified in the `defaultBreaks` parameter equates to a time or distance that is greater than 60 minutes or 60 miles.
+</Note>
+</If>
+
+<If c="publication == 'rest/online' && requestType == 'job'">
+<Note type={"caution"}>
+The service automatically reverts to using hierarchy, even if you have chosen not to use it, when the largest value specified in the `break_values` parameter equates to a time or distance that is greater than 240 minutes or 240 miles (386.24 kilometers). If the `detailed_polygons` parameter is set to `true`, the service reverts to using hierarchy if the largest break value is greater than 15 minutes or 15 miles.
+</Note>
+</If>
+
+<If c="requestType == 'job'">
+Some service parameters are not applicable when generating hierarchical service areas.
+
+-   The `polygon_trim_distance` parameter is ignored and, if specified, results in a warning message in the service response.
+-   Generating detailed service areas, specified using a value of `true` for the `detailed_polygons` parameter, is not supported and results in a failed request. 
+-   The `polygon_trim_distance` parameter is ignored and, if specified, results in a warning message in the service response.
+-   Generating detailed service areas, specified using a value of `true` for the `detailed_polygons` parameter, is not supported and results in a failed request. 
+</If>
+
+<If c="requestType == 'direct'">
+Some service parameters are not applicable when generating hierarchical service areas.
+
+-   The `trimOuterPolygons`, `trimPolygonDistance`, and `trimPolygonDistanceUnits` parameters are ignored and, if specified, result in a warning message in the service response.
+-   Generating detailed service areas, specified using a value of `esriNAOutputPolygonDetailed` for the `outputPolygons` parameter, is not supported and results in a failed request. 
+-   Generating service area lines, specified using `esriNAOutputLineTrueShape` or `esriNAOutputLineTrueShapeWithMeasure` for the `outputLines` parameter value, is not supported and results in a failed request.
+</If>

@@ -1,0 +1,190 @@
+---
+title: "Run Python Script"
+description: "API reference for the RunPythonScript task available in ArcGIS GeoAnalytics Server."
+slug: "run-python-script"
+url: "/geoanalytics/tasks/run-python-script"
+redirectFrom:
+  - /run-python-script/
+guid: "GUID-D89AF758-D031-4757-AC12-637BBE9854AA"
+migratedTopicMetadata:
+  FTITLE: "Run Python Script"
+  FDESCRIPTION: "Template conversion"
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1- *"
+  CREATED-ON: "26/01/2023 18:59:25"
+  FAUTHOR: "nslocum"
+  FSTATUS: "Released"
+  MODIFIED-ON: "02/10/2023 07:59:54"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "6"
+  ED: "GUID-E68C8861-989B-42AF-A8B8-0E7B46F23736"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /RunPythonScript
+  urlSegments:
+    - name: <geoanalytics-url>
+      url: /geoanalytics-tasks
+    - name: /RunPythonScript
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.7'
+---
+
+import GUID_53340951_6261_4C65_BAA3_4AF9D206C6D2_UL_0C30F4A91AF54AFCA13764B42F982CF1 from "../../snippets/GUID-53340951-6261-4C65-BAA3-4AF9D206C6D2/_UL_0C30F4A91AF54AFCA13764B42F982CF1";
+import GUID_53340951_6261_4C65_BAA3_4AF9D206C6D2_GUID_9B5D5783_E386_45F7_8EA8_88843A1BB484 from "../../snippets/GUID-53340951-6261-4C65-BAA3-4AF9D206C6D2/_GUID-9B5D5783-E386-45F7-8EA8-88843A1BB484";
+import GUID_53340951_6261_4C65_BAA3_4AF9D206C6D2_GUID_C771449E_6BA7_4CB4_9328_2C855A14B2B2 from "../../snippets/GUID-53340951-6261-4C65-BAA3-4AF9D206C6D2/_GUID-C771449E-6BA7-4CB4-9328-2C855A14B2B2";
+import GUID_53340951_6261_4C65_BAA3_4AF9D206C6D2_GUID_9562E716_BEF8_4A70_A787_C7231BB32C3E from "../../snippets/GUID-53340951-6261-4C65-BAA3-4AF9D206C6D2/_GUID-9562E716-BEF8-4A70-A787-C7231BB32C3E";
+import GUID_53340951_6261_4C65_BAA3_4AF9D206C6D2_GUID_CBCE73F1_60C0_4D53_BDE3_B2C3ACEBD24A from "../../snippets/GUID-53340951-6261-4C65-BAA3-4AF9D206C6D2/_GUID-CBCE73F1-60C0-4D53-BDE3-B2C3ACEBD24A";
+import GUID_53340951_6261_4C65_BAA3_4AF9D206C6D2_GUID_EE2D677C_9158_4D61_A164_2444C6476C92 from "../../snippets/GUID-53340951-6261-4C65-BAA3-4AF9D206C6D2/_GUID-EE2D677C-9158-4D61-A164-2444C6476C92";
+import GAX_DEPRECATION_NOTICE from "../../snippets/GUID-53340951-6261-4C65-BAA3-4AF9D206C6D2/_gax-general-deprecation-notice.mdx";
+
+## Description
+
+<GAX_DEPRECATION_NOTICE />
+
+The `RunPythonScript` operation runs a Python script on an ArcGIS GeoAnalytics Server site. In the script, you can create an analysis pipeline by chaining together multiple GeoAnalytics Tools without writing intermediate results to a data store. You can also use other Python functionality in the script that can be distributed across the GeoAnalytics Server.
+For example, suppose that each week you receive a new dataset of vehicle locations containing billions of point features. Each time you receive a new dataset, you must perform the same workflow involving multiple GeoAnalytics Tools to create an information product that you share within your organization. This workflow creates several large intermediate layers that take up a large amount of space in your data store. By scripting this workflow in Python and running the code in the `RunPythonScript` operation, you can avoid creating these unnecessary intermediate layers, while simplifying the steps to create the information product.
+
+When you use `RunPythonScript`, the Python code is run on the GeoAnalytics Server. The script runs with the Python 3.9 environment that is installed with GeoAnalytics Server, and all console output is returned as job messages. Some Python modules can be used in the script to use code across multiple cores of one or more machines in the GeoAnalytics Server using Apache Spark 3.3.0 (the compute platform that distributes analysis for GeoAnalytics Tools).
+A `geoanalytics` module is available and allows you to run GeoAnalytics Tools in the script. This package is imported automatically when you use `RunPythonScript`. To learn more, see [Using GeoAnalytics Tools in Run Python Script](/using-geoanalytics-tools-in-pyspark).
+
+<Note type={"note"}>
+  Some analysis tool optimizations are not available in the `RunPythonScript` operation.
+</Note>
+
+<Note type={"note"}>
+  Date only and time only fields are not supported by the `RunPythonScript` operation.
+</Note>
+
+To interact directly with Spark in the `RunPythonScript` operation, use the `pyspark` module, which is imported automatically when you run the task. The `pyspark` module is the Python API for Spark and provides a collection of distributed analysis tools for data management, clustering, regression, and more that can be called in `RunPythonScript` and run across GeoAnalytics Server.
+For examples demonstrating how to use the `geoanalytics` and `pyspark` packages, see [Examples: Scripting custom analysis with the Run Python Script task](/run-python-script-examples).
+
+When using the `geoanalytics` and `pyspark` packages, most functions return analysis results in memory as Spark DataFrames. Spark Data Frames can be written to a data store or used in the script. This allows the chaining together of multiple `geoanalytics` and `pyspark` tools, while only writing out the final result to a data store, eliminating the need to create intermediate result layers. To learn more, see [Reading and writing layers in pyspark](/using-webgis-layers-in-pyspark).
+For advanced users, an instance of SparkContext is instantiated automatically as `sc` and can be used in the script to interact with Spark. This allows custom distributed analysis across GeoAnalytics Server.
+It is recommended that you use an integrated development environment (IDE) to write the Python script, and copy the script text into the `RunPythonScript` tool. This way, you can identify syntax and typographical errors before running the script. It is also recommended that you run the script using a small subset of the input data first to verify that there are no logic errors or expectations. You can use the [`DescribeDataset` ](/describe-dataset) task to create a sample layer for this purpose.
+
+<Note type={"note"}>
+  To run the `RunPythonScript` operation, you must have the administrative privilege to publish web tools.
+</Note>
+
+When ArcGIS GeoAnalytics Server is installed on Linux, additional configuration steps are required before using the `RunPythonScript` operation. These steps are not required in Windows environments. To use `RunPythonScript` on Linux, install and configure Python 3.7+ for Linux on each machine in the GeoAnalytics Server site, ensuring that Python is installed in the same directory on each machine. Then, update the ArcGIS Server Properties on the GeoAnalytics Server site with the `pysparkPython` property. The value of this property should be the path to the Python executable on the GeoAnalytics Server machines, for example, `{"pysparkPython":"/usr/bin/python"}`.
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      `pythonScript`
+      (Required)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The Python script that will run on GeoAnalytics Server. This must be the full script as a string. The layer provided in `inputLayer` can be accessed in the script using the `layers` object. To learn more, see [Reading and writing layers in pyspark](/using-webgis-layers-in-pyspark). GeoAnalytics Tools can be accessed with the `geoanalytics` object, which is instantiated in the script environment automatically. To learn more, see [Using GeoAnalytics Tools in Run Python Script](/using-geoanalytics-tools-in-pyspark). For a collection of example scripts, see [Examples: Scripting custom analysis with the Run Python Script task](/run-python-script-examples).
+
+      REST examples
+      ```javascript
+      //REST web example
+      print("Hello world!"}
+
+      //REST scripting example
+      "pythonScript":"print('Hello world!')"
+      ```
+  </StyledTableCell>
+</StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      `inputLayers`
+      (Required)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      A list of input layers that will be used in the Python script. Each input layer follows the same formatting as described in the [Feature input](/geoanalytics-feature-input) topic. This can be one of the following:
+
+      <GUID_53340951_6261_4C65_BAA3_4AF9D206C6D2_UL_0C30F4A91AF54AFCA13764B42F982CF1 />
+
+      In the REST web example for `inputLayers` shown below, two layers are used in the analysis. The layers provided can be accessed in the script using the layers object. The layer at index 0 will be filtered to only use features when `OID` is greater than `2`.
+
+      REST examples
+      ```javascript
+      //REST web example
+      [
+        { "url":"https://myportal.domain.com/server/rest/services/Hosted/hurricaneTrack/FeatureServer/0", "filter":"OID > 2"}
+        { "url":"https://myportal.domain.com/server/rest/services/Hosted/weatherPoints/FeatureServer/0"}
+      ]
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      `userParameters`
+      (Optional)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      A JSON object that will be automatically loaded into the script environment as a local variable named `user_variables`.
+
+      REST example
+      ```javascript
+      //REST web example
+      {"param1": "example", "param2": 1, "val1": 2.0, "more_params": [false, false, null], "status": true}
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      `context`
+      (Optional)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      <Note type={"note"}>
+        This parameter is not used by the `RunPythonScript`  tool.
+      </Note>
+      To control the output data store, use [the `dataStore` option when writing SparkDataFrames](/using-webgis-layers-in-pyspark). To set the processing or output spatial reference, use [the `project` tool in the `geoanalytics` package](/using-geoanalytics-tools-in-pyspark). To filter a layer when converting it to a Spark DataFrame, use [the `where` or `fields` option when loading the layer's URL](/using-webgis-layers-in-pyspark). To limit the extent of a layer when converting it to a Spark DataFrame, use [the `extent` option when loading the layer's URL](/using-webgis-layers-in-pyspark).
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      `f`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      <GUID_53340951_6261_4C65_BAA3_4AF9D206C6D2_GUID_9B5D5783_E386_45F7_8EA8_88843A1BB484 />
+
+      <GUID_53340951_6261_4C65_BAA3_4AF9D206C6D2_GUID_C771449E_6BA7_4CB4_9328_2C855A14B2B2 />
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+The following is a sample request URL for `RunPythonScript` :
+```other
+https://hostname.domain.com/webadaptor/rest/services/System/GeoAnalyticsTools/GPServer/RunPythonScript/submitJob?pythonScript=print("Hello world!"}&inputLayer={"url":"https://myportal.domain.com/server/rest/services/Hosted/hurricaneTrack/FeatureServer/0", "filter":"Month = 'September'"}
+```
+
+## Response
+
+<GUID_53340951_6261_4C65_BAA3_4AF9D206C6D2_GUID_9562E716_BEF8_4A70_A787_C7231BB32C3E />
+
+<GUID_53340951_6261_4C65_BAA3_4AF9D206C6D2_GUID_CBCE73F1_60C0_4D53_BDE3_B2C3ACEBD24A />
+
+<GUID_53340951_6261_4C65_BAA3_4AF9D206C6D2_GUID_EE2D677C_9158_4D61_A164_2444C6476C92 />
+
+```other
+https://<analysis url>/RunPythonScript/jobs/<jobId>
+```
+
+Any Python console output will be returned as an informative job message. In the following example,  "Hello World!" is printed to the console using `pythonScript` and a job message containing the print statement is returned as shown:
+```javascript
+{
+   "type": "esriJobMessageTypeInformative",
+   "description": "{\"messageCode\":\"BD_101138\",\"message\":\"[Python] Hello World!\",\"params\":{\"text\":\"Hello World!\"}}"
+}
+```
+
+### Access results
+
+All results written to ArcGIS Enterprise are available in your portal contents.

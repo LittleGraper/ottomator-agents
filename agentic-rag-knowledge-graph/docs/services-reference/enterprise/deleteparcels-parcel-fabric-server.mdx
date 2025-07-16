@@ -1,0 +1,254 @@
+---
+title: "Delete parcels"
+description: "The deleteParcels operation deletes parcels and updates the associated record polygon."
+slug: "deleteparcels-parcel-fabric-server"
+url: "/deleteparcels-parcel-fabric-server"
+guid: "GUID-983EA6DC-EBD6-49F1-A0A0-7278E2FDBF5E"
+migratedTopicMetadata:
+  FTITLE: "DeleteParcels-parcel-fabric-server"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "14/08/2023 13:03:55"
+  FAUTHOR: "cleslie"
+  FSTATUS: "Released"
+  MODIFIED-ON: "29/09/2023 11:51:59"
+  VERSION: "6"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-9BB35F5A-52D6-4DB8-AE24-6C6684B760C5"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName/ParcelFabricServer/deleteParcels
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName/ParcelFabricServer/deleteParcels
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.8'
+  requiredCapability: ArcGIS Advanced Editing
+---
+
+## Description
+
+The `deleteParcels` operation deletes parcels and updates the associated record polygon. Parcel polygons as well as the parcel lines and points will be deleted if they are not associated with any other parcels.
+
+[Learn more about deleting parcels](https://pro.arcgis.com/en/pro-app/latest/help/data/parcel-editing/deleteparcels.htm)
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `gdbVersion` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The name of the geodatabase version (the default is the DEFAULT version).
+
+      Syntax
+
+      ```javascript
+      gdbVersion=<version>
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sessionId` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The token (GUID) used to lock the version. If the calling client is editing a named version, the `sessionId` value is required. If the specified version is currently locked by another session, the request will fail if the `sessionId` value is not provided or does not match the `sessionId` value that holds the exclusive lock. If the client is editing the default version, the `sessionId` value is not required.
+
+      Syntax
+
+      ```javascript
+      sessionId=<guid>
+      ```
+ 
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `parcels` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The parcels that will be deleted.
+
+      Syntax
+
+      ```javascript
+      parcels=[{"id":"<parcelguid>","layerId":"<layerID>"},{...}]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.1.
+      
+      Specifies whether the request will be processed as an asynchronous job and a URL that points to a location displaying the status of the job will be returned. See the topic regarding [asynchronous](HTTP://RESOURCES.ARCGIS.COM/EN/HELP/ARCGIS-REST-API/02R3/02R3000000RT000000.HTM) usage for more information. The default is `false`.
+
+      Values: `true` | `false` 
+
+      Syntax  
+
+      ```javascript
+      async=true|false
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the output format of the response. The default response format is `html`.
+
+      Values: `html` | `json` 
+
+    </StyledTableCell>  
+  </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+This example shows the steps for deleting a parcel using the `deleteParcels` operation.
+
+<Note type={"note"}>
+
+  The `sessionId` parameter value must be the same for starting the edit session, performing the edit operation, and stopping the edit session.
+
+</Note>
+
+1.  [Start a service session](/start-reading) on the version.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/VersionManagementServer/versions/E4DAED9D-C859-489B-9053-767A45F1D97C/startReading
+    f=json
+    sessionId={bba242fc-e671-4aa2-83d4-1c013347fa4f}
+    ```
+     
+2.  [Start an edit session](/start-editing) on the version.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/VersionManagementServer/versions/E4DAED9D-C859-489B-9053-767A45F1D97C/startEditing
+    f=json
+    sessionId={bba242fc-e671-4aa2-83d4-1c013347fa4f}
+    ```
+     
+3.  Delete a single parcel.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/ParcelFabricServer/deleteParcels
+    f=json
+    gdbVersion=admin.Version1
+    sessionId={bba242fc-e671-4aa2-83d4-1c013347fa4f}
+    parcels=[{"id":"{BECEBF25-9DFA-4FA3-9A8C-F6738E55DFC3}","layerId":"10"}]
+    async=false
+    ```
+     
+4.  If edits are complete, [stop the edit session](/stop-editing).
+
+5.  [Stop](/stop-reading) and release the service session. 
+
+## JSON Response syntax
+
+The following response is returned when `async`  is `false`:
+
+```other
+{
+  "moment": <datetime>,
+  "exceededTransferLimit": <true | false>,
+  "serviceEdits": [  // only if transfer limit is not exceeded
+    {
+      "id": <layerID>,
+      "editedFeatures": {
+        "spatialReference": {<spatialreference>},
+        "adds": [
+          {
+            "attributes": {...},
+            "geometry": {...}
+          }
+        ]
+      },
+      {
+        "id": <layerID>,
+        "editedFeatures": {
+          "spatialReference": {<spatialreference>},
+          "deletes": [
+            {
+              "attributes": {...},
+              "geometry": {...}
+            }
+          ]
+        }
+      }
+    ]
+    "success": <true | false>,
+    "error": {  // only if success is false
+      "extendedCode": <HRESULT>,
+      "message": <error message>,
+      "details": [<detail>
+    }
+  ]
+}
+``` 
+
+The following response is returned when `async`  is `true` :
+
+```other
+{
+		"statusUrl": <url>
+}
+```
+
+
+ 

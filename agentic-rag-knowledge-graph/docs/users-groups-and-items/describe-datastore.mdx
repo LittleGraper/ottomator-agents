@@ -1,0 +1,284 @@
+---
+title: "/describe: Describe Data Store"
+description: "The describe operaiton lists a data store's content"
+slug: "describe-datastore"
+url: "/describe-datastore"
+guid: "GUID-65CD3826-D742-43D6-929F-1ECC04263433"
+migratedTopicMetadata:
+  FTITLE: "Describe Datastore"
+  FDESCRIPTION: ""
+  FCHANGES: "Title, URL, and example usage changes"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9-*"
+  CREATED-ON: "01/03/2021 11:44:57"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "25/08/2021 10:53:28"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-D3690E0B-48CC-4A5C-9D6E-820E7CBAC3C4"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /portals/[portalID]/datastores/describe
+  urlSegments:
+    - name: '[root]'
+      url: /root
+    - name: /portals/[portalID]/datastores/describe
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: 10.8.1
+---
+
+## Example usage
+
+The following is a sample ArcGIS Enterprise POST request for the `describe` operation:
+
+```markdown
+POST /webadaptor/sharing/rest/portals/0123456789ABCDEF/datastores/describe HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+datastoreId=6c33e34f8fd242469bb013edf58ca8d2&serverId=74mNHqfQrdVCL3k7&path=/&type=datastore&f=pjson
+```
+
+## Description
+
+The `describe` operation lists a data store's content. Performed asynchronously, it's status and result information can be checked via the job resource page. 
+
+When the job is successful, a list of the data store's content is returned. This operation can be performed multiple times to incrementally discover the content of a data store. For example, the first run of the operation can be used to discover any content or folders immediately accessible off of the root folder in the data store. The information gained from the first job can be used to modify the operation request to determine the content of a specific folder. For an example of this workflow, see [sample workflow](/#sample-workflow) section below.
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `datastoreId` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      ID of the data store registered with your organization. The ID value can be retrieved from the data store's item resource page.
+
+      Example
+
+      ```markdown
+      datastoreId=6c33e34f8fd242469bb013edf58ca8d2
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serverId` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The ID of a server the data store is registered with. A data store can be registered to more than one federated server. To see a list of servers the data store is registered to, and to retrieve their server IDs, use the [Get Servers](/get-servers-for-data-store) operation.
+
+      Example
+
+      ```markdown
+      serverId=74mNHqfQrdVCL3k7
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `path` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Either the data store's root (`/`) folder or the path for a folder inside the root. The folder path can be retrieved by first performing this operation and seeing which folders are inside the root and copying the path for a specific folder.
+
+      Example
+
+      ```markdown
+      //Root
+      path=/
+
+      //Folder path
+      path=/all_data/
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `type` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The object type used to either define the root resource (`datastore`) or a folder inside the root (`folder`).
+
+      Values: `datastore` | `folder`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Sample workflow
+
+This section demonstrates a workflow to describe the content of the data store's root folder.
+
+Before calling the describe operation, you'll need to locate both the data store item ID and the server ID of a server the data store is registered with. Data store IDs can be retrieved by navigating to the **User Content** section of the Sharing API and clicking on the desired data store item (a sample URL for that workflow is demonstrated below):
+
+```markdown
+https://machine.domain.com/webadaptor/sharing/rest/content/users/<username>/items/6c33e34f8fd242469bb013edf58ca8d2
+```
+
+Once the data store ID has been retrieved, the `getServers` operation can be called to retrieve the list of servers (and their corresponding server IDs) that the data store is registered with. An example of the `getServers` operation is demonstrated below:
+
+```markdown
+POST /webadaptor/sharing/rest/portals/0123456789ABCDEF/datastores/getServers HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+datastoreId=6c33e34f8fd242469bb013edf58ca8d2&f=pjson
+
+```
+
+Once the values for the `datastoreId` and `serverId` parameters have been retrieved, the `describe` operation can be called. The following example is formatted to probe the root folder of the data store to see an initial list of the contents and folders that can be accessed:
+
+```markdown
+POST /webadaptor/sharing/rest/portals/0123456789ABCDEF/datastores/describe HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+datastoreId=6c33e34f8fd242469bb013edf58ca8d2&serverId=74mNHqfQrdVCL3k7&path=/&type=datastore&f=pjson
+
+```
+
+This operation is asynchronous and returns a JSON object containing the `jobId` and `key`. These values can be used to access the job resource page to poll the job status and retrieve the job results:
+
+```markdown
+{
+  "jobId": "c4af98eb983f4839b21c70c86744d8d8",
+  "key": "cazB+XfCPRnyOpid2aM2MT9rBWXomhzT+DJiz8McyaQ=",
+  "success": true
+}
+```
+
+Using the job ID from the above response, navigate to the job page in the sharing API. Below is a sample URL that demonstrates how to access the job resource using the job ID:
+
+```markdown
+https://machine.domain.com/webadaptor/sharing/rest/portals/0123456789ABCDEF/jobs/c4af98eb983f4839b21c70c86744d8d8
+```
+
+For non-administrative users, the key value will also need to be passed in the URL in order to access the job resource page:
+
+```markdown
+https://machine.domain.com/webadaptor/sharing/rest/portals/0123456789ABCDEF/jobs/c4af98eb983f4839b21c70c86744d8d8?key=cazB+XfCPRnyOpid2aM2MT9rBWXomhzT+DJiz8McyaQ=
+```
+
+The job resource returns information on the operation that was performed such as the operation name and input parameters as well as the job response, which includes the data store's name, ID, and a JSON object representation of it's content. For an example of the job resource response, see the [JSON Response example](/describe-datastore#json-response-example) section below.
+
+After performing the initial request, additional `describe` requests can be performed to probe more into folders and their content by modifying the values for the `path` and `type` parameters, demonstrated below:
+
+```markdown
+POST /webadaptor/sharing/rest/portals/0123456789ABCDEF/datastores/describe HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+datastoreId=6c33e34f8fd242469bb013edf58ca8d2&serverId=74mNHqfQrdVCL3k7&path=/all_types&type=folder&f=pjson
+
+```
+
+## JSON Response example
+
+Below is a sample JSON response that's returned via the job resource page. This specific example shows the result from a describe request that explores content and folders available off of the root.
+
+```other
+{
+  "id": "c4af98eb983f4839b21c70c86744d8d8",
+  "definition": {
+    "operation": "describe",
+    "datastoreId": "6c33e34f8fd242469bb013edf58ca8d2",
+    "serverId": "74mNHqfQrdVCL3k7",
+    "path": "/",
+    "type": "datastore"
+  }
+  "status": "succeeded",
+  "created": 1591907847663,
+  "modified": 1591907857843,
+  "messages": [],
+  "result": {
+    "datastore": {
+      "name": "local_ds_kwunosxnjrpe8jho",
+      "type": "datastore",
+      "path": "/",
+      "datastoreId": "6c33e34f8fd242469bb013edf58ca8d2",
+      "children": [
+        {
+          "name": "3dObjects_Building_colors_jan.eslpk",
+          "type": "extractedScenePackage",
+          "path": "/3dObjects_Building_colors_jan.eslpk",
+          "lastModified": 132346021940000000
+        },
+        {
+          "name": "eslpk",
+          "type": "folder",
+          "path": "/eslpk",
+          "lastModified": 132367999080000000
+        },
+        {
+          "name": "IntegratedMeshSL_Rancho.eslpk",
+          "type": "extractedScenePackage",
+          "path": "/IntegratedMeshSL_Rancho.eslpk",
+          "lastModified": 132315677190000000
+        },
+        {
+          "name": "SanFrancisco.slpk",
+          "type": "scenePackage",
+          "path": "SanFrancisco.slpk",
+          "lastModified": 131408150180000000,
+          "fileSize": 19941548
+        }
+      ]
+    }
+  }
+}
+```

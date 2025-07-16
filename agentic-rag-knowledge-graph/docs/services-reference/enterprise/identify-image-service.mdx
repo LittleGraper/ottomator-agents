@@ -1,0 +1,705 @@
+---
+title: "Identify (Image Service)"
+description: "Identify the content of an image service for a given location, mosaic rule, or rendering rule."
+slug: "identify-image-service"
+url: "/identify-image-service"
+guid: "GUID-0F725D5E-8AAC-4310-BF6B-6C37FFB4CD44"
+migratedTopicMetadata:
+  FTITLE: "Identify (Image Service)"
+  FDESCRIPTION: ""
+  FCHANGES: "Added doc for support for Envelopes and Multipoints"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9.1 - *"
+  CREATED-ON: "20/04/2022 06:12:17"
+  FAUTHOR: "jswain"
+  FSTATUS: "Released"
+  MODIFIED-ON: "03/06/2022 23:04:37"
+  VERSION: "9"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "10"
+  ED: "GUID-A6CE9C9E-0465-4A08-B004-27E3E008ECB0"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /identify
+  urlSegments:
+    - name: <imageservice-url>
+      url: /image-service
+    - name: /identify
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.0'
+  requiredCapability: Image
+---
+
+import GUID_D8E66666_C5F3_44F2_BE81_BE66C699D87D_GUID_B7AACF54_87A9_43B0_9359_2EAEF6D8A838 from "./snippets/GUID-D8E66666-C5F3-44F2-BE81-BE66C699D87D/_GUID-B7AACF54-87A9-43B0-9359-2EAEF6D8A838";
+import GUID_D8E66666_C5F3_44F2_BE81_BE66C699D87D_GUID_493E903F_586B_4887_BFEC_6473358D7622 from "./snippets/GUID-D8E66666-C5F3-44F2-BE81-BE66C699D87D/_GUID-493E903F-586B-4887-BFEC-6473358D7622";
+
+## Description
+
+<Note type={"note"}>
+
+As of 10.5, you must license your ArcGIS Server as an ArcGIS Image Server to use this resource with a mosaic dataset.
+
+</Note>
+
+The `identify` operation is performed on an [image service resource](/image-service). It identifies the content of an image service for a given location, mosaic rule, and rendering rule or rules. The location can be a point or a polygon. At ArcGIS Enterprise 10.9.1, the location can be an envelope. Support for multipoint features was added at Enterprise 11.0.
+
+The `identify` operation is supported by both mosaic dataset and raster dataset image services.
+
+The result of this operation includes the processed pixel values of the mosaic for a given mosaic rule, a given rendering rule or rules, a resolution (pixel size), and a set of catalog items that overlap the given geometry. The single pixel value is that of the mosaic at the centroid of the specified location. If there are multiple rasters overlapping the location, the visibility of a raster is determined by the order of the rasters defined in the mosaic rule. It also contains a set of catalog items that overlap the given geometry. The catalog items are ordered based on the mosaic rule. A list of catalog item visibilities gives the percentage contribution of the item to overall mosaic. 
+
+You can provide arguments to the `identify` operation as query parameters defined in the parameters table below.
+
+At 10.7, the number of catalog items and corresponding processed pixel values that are returned is determined by the `maxidentifycount` image service property. By default, it will have the same value as the `maxrecordcount` image service property. This property is controlled on the server side and will work together with the `maxItemCount` parameter value set by the client to determine the number of items being returned—whichever is smaller will take effect.
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geometry` 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A geometry that defines the location to be identified. The location can be a point or polygon. The structure of the geometry is the same as the structure of the [JSON geometry objects](/geometry-objects) returned by ArcGIS REST API. In addition to the JSON structures, for points, you can specify the geometry with a simple comma-separated syntax.
+
+This is a required parameter. The default geometry type is a point. By default, the geometry is assumed to be in the spatial reference of the image service. You can specify a different spatial reference using the JSON structure syntax for geometries. 
+
+Syntax
+
+```json
+//JSON structure
+geometryType=<geometryType>&geometry={geometry}
+
+//Point simple syntax
+geometryType=esriGeometryPoint&geometry=<x>,<y>
+
+```
+
+ 
+
+Examples
+
+```json
+geometryType=esriGeometryPoint&geometry={x: -104, y: 35.6}
+
+geometryType=esriGeometryPoint&geometry=-104,35.6
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geometryType` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The type of geometry specified by the `geometry`  parameter. The geometry type can be a point, a multipoint, a polygon, or an envelope.
+
+Values: `esriGeometryPoint` \| `esriGeometryMultipoint` \| `esriGeometryPolygon` \| `esriGeometryEnvelope` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`mosaicRule` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the [mosaic rule](/mosaic-rules) when defining how individual images will be mosaicked. When a mosaic rule is not specified, the default mosaic rule of the image service will be used (as specified in the root resource: `defaultMosaicMethod, mosaicOperator, sortField, sortValue`). See [Mosaic rule objects](/mosaic-rules) for the syntax and examples.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`renderingRule` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the rendering rule for how the requested image will be rendered. See [Raster function objects](/raster-function-objects) for the syntax and examples.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`renderingRules` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies an array of rendering rules. Use this parameter to get multiple processed values from different raster functions in a single request. See [Raster function objects](/raster-function-objects) for the syntax and examples of how to use raster functions.
+
+Syntax
+
+```javascript
+renderingRules=[{renderingRule1},{renderingRule2},{renderingRule3},{renderingRule4}]
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`pixelSize` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The pixel level being identified (or the resolution being looked at). If pixel size is not specified, `pixelSize` will default to the base resolution of the dataset. The raster at the specified pixel size in the mosaic dataset will be used. 
+
+The structure of the `pixelSize` parameter is the same as the structure of the [point object](/geometry-objects) returned by ArcGIS REST API. In addition to the JSON structure, you can specify the pixel size with a simple comma-separated syntax.
+
+Syntax
+
+```json
+//JSON structure
+pixelSize={point}
+
+//Point simple syntax
+pixelSize=<x>,<y>
+
+```
+
+ 
+
+Example
+
+```json
+//JSON example
+pixelSize={x: 0.18, y: 0.18}
+
+//Point example
+pixelSize=0.18,0.18
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`time` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The time instant or time extent of the raster to be identified. This parameter is only valid if the image service supports time. 
+
+Syntax
+
+```json
+//Time instant
+time=<timeInstant>
+
+//Time extent
+time=<startTime>, <endTime>
+
+```
+
+ 
+
+<Note type={"note"}>
+
+A null value specified for start time or end time will represent infinity for start or end time, respectively.
+
+</Note>
+
+Examples
+
+```json
+//Time instant (1 Jan 2008 00:00:00 GMT)
+time=1199145600000
+
+//Time extent (1 Jan 2008 00:00:00 GMT to 1 Jan 2009 00:00:00 GMT)
+time=1199145600000, 1230768000000
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnGeometry` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Indicates whether the raster catalog item's footprint will be returned. Use `false` when the catalog item's footprint is not needed to improve the `identify` operation response time.
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnCatalogItems` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Indicates whether raster catalog items will be returned. Use `false` when catalog items are not needed to improve the `identify` operation performance. When set to `false`, neither the geometry nor attributes of catalog items will be returned.
+
+Values: `true` \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnPixelValues` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Added at 10.6.1. Indicates whether the pixel values of all mosaicked raster catalog items under the requested geometry will be returned. When `false` , only the pixel value of mosaicked output is needed for the requested geometry. The default value is `true` .
+
+Values: `true` \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`maxItemCount` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If the `returnCatalogItems` parameter is set to `true`, this parameter will take effect. The default behavior is to return all raster catalog items within the requested geometry. Otherwise, the number of items returned will be the value specified in the `maxItemCount` parameter or all eligible items, whichever is less.
+
+Syntax
+
+```json
+maxItemCount=<maxItemNumber>
+```
+
+ 
+
+Example
+
+```json
+maxItemCount=2
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sliceId` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Added at 10.9. The slice ID of the multidimensional raster. This parameter is available if the image service uses `ArcObjects11` or `ArcObjectsRasterRendering` as the service provider.
+
+Syntax
+
+```javascript
+sliceId=<slice ID>
+```
+
+ 
+
+Example
+
+```javascript
+sliceId=1
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`processAsMultidimensional` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Added at 10.9. Indicates whether the image service will be processed as a multidimensional dataset. This parameter is available if the image service uses `ArcObjects11` or `ArcObjectsRasterRendering` as the service provider. When set to `true`, pixel values from all slices, along with additional properties describing the slices, will be returned. When set to `false`, only the pixel values of the specified rendering rules and mosaic rule at the specified geometry will be returned. This is the default.
+
+Values: `true` \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<GUID_D8E66666_C5F3_44F2_BE81_BE66C699D87D_GUID_B7AACF54_87A9_43B0_9359_2EAEF6D8A838 />
+
+<GUID_D8E66666_C5F3_44F2_BE81_BE66C699D87D_GUID_493E903F_586B_4887_BFEC_6473358D7622 />
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+### Example one
+
+The following example demonstrates how to identify a single raster image service using a point geometry:
+
+```javascript
+https://sampleserver3.arcgisonline.com/ArcGIS/rest/services/Earthquakes/SanAndreasLidar/ImageServer/identify?geometry={"x":575505.5,"y":3733770}&geometryType=esriGeometryPoint&mosaicRule=&pixelSize=0.5,0.5&f=pjson
+```
+
+ 
+
+### Example two
+
+The following example demonstrates how to identify a mosaic dataset image service using a polygon geometry and specify a mosaic rule using the `esriMosaicAttribute` method:
+
+```javascript
+https://sampleserver3.arcgisonline.com/ArcGIS/rest/services/Portland/CascadeLandsat/ImageServer/identify?geometry={"rings": [[[-13555360.4191,5911556.581],[-13489311.5669, 5898227.932],[-13423477.4153,5884426.3329],[-13602646.9571, 5717848.4135], [-13587119.9125, 5781976.6214],[-13571360.1713, 5846543.2654],[-13555360.4191, 5911556.581]]]}&geometryType=esriGeometryPolygon&mosaicRule={"mosaicMethod" : "esriMosaicAttribute","where" : "Name NOT LIKE 'Ov%'","sortField" : "Name","mosaicOperation" : "MT_MAX"}&pixelSize={"x":14.25,"y":14.25}&f=pjson
+```
+
+ 
+
+### Example three
+
+The following example demonstrates how to identify a Landsat service to retrieve both NDVI and SAVI values:
+
+```javascript
+https://myserver:6443/arcgis/rest/services/demo/LandsatPortland/ImageServer/identify?geometry=-1.3545936034400001E7,5709816.374899999&geometryType=esriGeometryPoint&mosaicRule=&pixelSize=&time=&returnGeometry=false&returnCatalogItems=false&f=pjson&renderingRules=[{ "rasterFunction" : "BandArithmetic", "rasterFunctionArguments" : { "Method" : 1, "BandIndexes" : "4 3" } }, { "rasterFunction" : "BandArithmetic", "rasterFunctionArguments" : { "Method" : 2, "BandIndexes" : "4 3 0.33" } }]
+```
+
+ 
+
+## JSON Response syntax
+
+<Note type={"note"}>
+
+The `Values` property, under `properties`, contains an array of pixel values for individual rasters, arranged in the order of `catalogItems` :
+
+</Note>
+
+```javascript
+{
+  "objectId": <objectId>,
+  "name": "<name>",
+  "value": "<pixelValue>",
+  "location": <point>, //the identified location
+  "properties": { //the properties of the identified object. (returned only when the image service source is from a mosaic dataset)
+    "name1": <value1>,
+    "name2": <value2>
+  },
+  "catalogItems": {  //catalogItems are returned only when the image service source is a mosaic dataset.
+    "objectIdFieldName": "<objectIdFieldName>",
+    "spatialReference": <spatialReference>,
+    "geometryType": "<geometryType>",
+    "features": [ 
+      <feature1>,
+      <feature2>
+    ]
+  },
+  "catalogItemVisibilities": [ //catalogItemVisibilities are returned only when the image service source is a mosaic dataset.
+    <catalogItem1Visibility>,
+    <catalogItem2Visibility>
+  ]
+}
+```
+
+ 
+
+## JSON Response examples
+
+### Example one
+
+```json
+{
+  "objectId": 0, 
+  "name": "Pixel", 
+  "value": "-17.5575", 
+  "location": {
+    "x": 575505.5, 
+    "y": 3733770, 
+    "spatialReference": {
+      "wkid": 26911
+    }
+  }, "properties": null, 
+  "catalogItems": null, 
+  "catalogItemVisibilities": []
+}
+```
+
+ 
+
+### Example two
+
+```json
+{
+  "objectId": 0, 
+  "name": "Pixel", 
+  "value": "17, 22, 39, 45", 
+  "location": {
+    "x": -13527177.6374152, 
+    "y": 5837991.41167063, 
+    "spatialReference": {
+      "wkid": 54004
+    }
+  }, 
+  "properties": {
+    "Values": [
+      "10 18 34 43", //band values are space delimited
+      "17 22 39 45"
+    ]
+  }, 
+  "catalogItems": {
+    "objectIdFieldName": "OBJECTID", 
+    "spatialReference": {
+      "wkid": 54004
+    }, 
+    "geometryType": "esriGeometryPolygon", 
+    "features": [
+      {
+        "geometry": {
+          "rings": [
+            [
+              [-13460551.7089, 5854521.5319], 
+              [-13478287.1495, 5790460.0595], 
+              [-13495758.3317, 5726819.8268], 
+              [-13512973.0996, 5663593.4924], 
+              [-13529939.0436, 5600773.8464], 
+              [-13593636.8922, 5614581.7474], 
+              [-13657532.2448, 5627959.8481], 
+              [-13721616.7496, 5640902.1352], 
+              [-13785881.8549, 5653402.7833], 
+              [-13770610.5633, 5717098.1159], 
+              [-13755121.9097, 5781227.8467], 
+              [-13739408.9372, 5845800.1358], 
+              [-13723464.45, 5910823.3172], 
+              [-13657416.2669, 5897455.1875], 
+              [-13591575.2527, 5883610.99], 
+              [-13525950.7118, 5869297.4578], 
+              [-13460551.7089, 5854521.5319]
+            ]
+          ]
+        }, 
+        "attributes": {
+          "OBJECTID": 6, 
+          "Name": "p046r028_7t19990907.met;p046r028_7t19990907.met", 
+          "MinPS": 0, 
+          "MaxPS": 28.5, 
+          "LowPS": 14.25, 
+          "HighPS": 114, 
+          "Category": 1, 
+          "Tag": "Pansharpened", 
+          "GroupName": "p046r028_7t19990907", 
+          "ProductName": "Level1", 
+          "CenterX": -13624980.3112093, 
+          "CenterY": 5756154.02144619, 
+          "ZOrder": null, 
+          "SOrder": null, 
+          "StereoID": "", 
+          "SensorName": "Landsat-7-ETM+", 
+          "AcquisitionDate": 936662400000, 
+          "SunAzimuth": 150.8831799, 
+          "SunElevation": 46.5205819, 
+          "CloudCover": 0, 
+          "Shape_Length": 1058133.67231272, 
+          "Shape_Area": 69904833443.6272
+        }
+      }, 
+      {
+        "geometry": {
+          "rings": [
+            [
+              [-13292489.9099, 5855431.779], 
+              [-13310286.7337, 5791381.4753], 
+              [-13327810.7467, 5727748.1244], 
+              [-13345069.9061, 5664524.4905], 
+              [-13362071.9117, 5601703.4638], 
+              [-13425742.0169, 5615460.9307], 
+              [-13489617.0175, 5628791.9699], 
+              [-13553688.6321, 5641690.4875], 
+              [-13617948.3761, 5654150.574], 
+              [-13602646.9571, 5717848.4135], 
+              [-13587119.9125, 5781976.6214], 
+              [-13571360.1713, 5846543.2654], 
+              [-13555360.4191, 5911556.581], 
+              [-13489311.5669, 5898227.932], 
+              [-13423477.4153, 5884426.3329], 
+              [-13357867.1993, 5870158.6064], 
+              [-13292489.9099, 5855431.779]
+            ]
+          ]
+        }, 
+        "attributes": {
+          "OBJECTID": 2, 
+          "Name": "p045r028_7t19991002.met;p045r028_7t19991002.met", 
+          "MinPS": 0, 
+          "MaxPS": 28.5, 
+          "LowPS": 14.25, 
+          "HighPS": 114, 
+          "Category": 1, 
+          "Tag": "Pansharpened", 
+          "GroupName": "p045r028_7t19991002", 
+          "ProductName": "Level1", 
+          "CenterX": -13456998.9817332, 
+          "CenterY": 5756986.51347787, 
+          "ZOrder": null, 
+          "SOrder": null, 
+          "StereoID": "", 
+          "SensorName": "Landsat-7-ETM+", 
+          "AcquisitionDate" : 938822400000, 
+          "SunAzimuth": 157.6031865, 
+          "SunElevation": 37.975699, 
+          "CloudCover": 50, 
+          "Shape_Length": 1058012.72377166, 
+          "Shape_Area": 69884678121.7441
+        }
+      }
+    ]
+  }, 
+  "catalogItemVisibilities": [
+    0.671180049953907, 
+    0.328819950035319
+  ]
+}
+```
+
+ 
+
+### Example three
+
+```json
+{
+  "objectId": 0,
+  "name": "Pixel",
+  "value": "706.54",
+  "location": {
+    "x": 1446235.4901735431,
+    "y": 542459.48741523956,
+    "spatialReference": {
+      "wkid": 102719,
+      "latestWkid": 2264
+    }
+  },
+  "properties": null,
+  "catalogItems": null,
+  "catalogItemVisibilities": []
+}
+```
+
+ 
+
+### Example four
+
+```json
+{
+  "objectId": 0,
+  "name": "Pixel",
+  "value": "54, 39, 24, 112, 38, 18",
+  "location": {
+    "x": -13545936.034400001,
+    "y": 5709816.3748999992,
+    "spatialReference": {
+      "wkid": 102100,
+      "latestWkid": 3857
+    }
+  },
+  "properties": null,
+  "catalogItems": null,
+  "catalogItemVisibilities": [],
+  "processedValues": [
+    "0.647059",
+    "0.858505"
+  ]
+}
+```
+
+ 

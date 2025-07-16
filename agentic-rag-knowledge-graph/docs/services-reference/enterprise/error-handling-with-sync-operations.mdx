@@ -1,0 +1,967 @@
+---
+title: "Error handling with sync"
+description: "This topic discusses error cases when using the feature service's createReplica and synchronizeReplica operations."
+slug: "error-handling-with-sync-operations"
+url: "/error-handling-with-sync-operations"
+guid: "GUID-89950157-FB2A-4922-BF7B-225D8AEEE5F2"
+migratedTopicMetadata:
+  FTITLE: "Error Handling with Sync Operations"
+  FDESCRIPTION: ""
+  FCHANGES: "Fixing broken links"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0-*"
+  CREATED-ON: "14/08/2022 11:26:28"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "15/08/2022 08:51:37"
+  VERSION: "6"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-91028254-6AFC-4E86-8908-6BE188C470A8"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata: {}
+---
+
+## Overview
+
+This topic discusses error cases when using the feature service's [`createReplica` ](/create-replica) and [`synchronizeReplica` ](/synchronize-replica) operations. This includes errors and failures due to losing a network connection as well as errors to specific features when synchronizing edits. The `rollbackOnFailure`  value and sync model chosen by the client affects the errors that can occur. See the [RollbackOnFailure and Sync Models](/rollbackonfailure-and-sync-models) topic for more details.
+
+## Network connectivity
+
+When a client issues a REST request, it receives a response with an HTTP status. It's possible for a network connection to go down before the client receives the response. If the process is synchronous (for example, the feature service [`synchronizeReplica` ](/synchronize-replica) operation executed with `async=false` ), the request is lost and must be reissued. If the process is [asynchronous](/asynchronous-operations) (for example, the feature service [`synchronizeReplica` ](/synchronize-replica) operation executed with `async=true` ), the client can reissue a status check request once network connectivity is restored.
+
+<Note type={"note"}>
+
+When a [`synchronizeReplica` ](/synchronize-replica) operation or [`createReplica` ](/create-replica) operation completes, the result (for example, delta file, SQLite geodatabase) is placed in the server’s output directory. By default, files that have not been accessed by any process for more than 10 minutes are removed from the output directory. If you expect it will take more than 10 minutes for a client to start downloading the result after it completes, you can create another output directory with a longer [cleanup time](https://enterprise.arcgis.com/en/server/latest/administer/windows/about-server-directories.htm#ESRI_SECTION2_F268F51E5B5043C0827D3A8F8EA62ADC). Use this output directory specifically for your feature service. Alternatively, you can increase the cleanup time of the default output directory, but this affects all services using that output directory. 
+
+</Note>
+
+## HTTP status
+
+A REST request issued to ArcGIS Server returns an HTTP status. An HTTP status of 200 means that the request has been processed. Any other HTTP status indicates that there has been a problem. For example, an HTTP status of 500 indicates an internal server error (for example, the server has gone down). Once the issue has been resolved, the client can reissue the request. 
+
+The client gets the response once it receives an HTTP status of 200. The response includes the results of the operation as returned by a service. 
+
+## Synchronize Replica and Create Replica operation responses
+
+When the [`synchronizeReplica` ](/synchronize-replica) and [`createReplica` ](/create-replica) operations complete with an HTTP status of 200, clients need to check the response. If using synchronous processing, the operation is complete when a response is returned. If using asynchronous processing, the operation is complete when a status of `Completed`  or `Failed`  is returned. For the [`synchronizeReplica` ](/synchronize-replica) operation, you may additionally get a status of `CompletedWithErrors`  when the operation completes.
+
+In the completed response, the client needs to check for the presence of an error property. If there is an error in the response, the operation has failed. The error includes a REST error code and information on why the error occurred. For example, the following is returned if `synchronizeReplica`  has failed due to the replica having been unregistered on the server:
+
+```other
+{
+  "error": {
+    "code": 404,
+    "message": "Unable to complete operation.",
+    "details": [
+      "Replica with this GUID does not exist on the server"
+    ],
+    "infos": []
+  }
+}
+```
+
+ 
+
+Another example is when an error occurs when importing edits that cause the operation to be rolled back. This can happen when synchronizing where the `rollbackOnFailure`  parameter is set to `true` . In this case, the `infos`  array in the response includes information on the specific failed edit, including the edit result error code.
+
+```other
+{
+  "error": {
+    "code": 400,
+    "message": " Operation rolled back.",
+    "details": [],
+    "infos": [
+      {
+        "errorCode": 1001,
+        "description": "Field: <value> is not nullable. Cannot set null value.",
+        "layerId": 7,
+        "objectGUID": "{419d227b-2a61-43c4-8884-4b7b5bf3eabb}",
+        "objectType": 0
+      }
+    ]
+  }
+}
+```
+
+ 
+
+If there is no error property in the completed response, clients need to check the `responseType`  property. If the `responseType`  is `esriReplicaResponseTypeEdits` , the response includes edits and edit results returned from the service. The `serverGen(s)`  is included with the edits in the response (for example, within the delta SQLite geodatabase in the response).
+
+```other
+{
+  "transportType": "esriTransportTypeUrl",
+  "responseType": "esriReplicaResponseTypeEdits",
+  "replicaName": "NE_10141",
+  "resultUrl": "https://relic:6443/arcgis/rest/directories/arcgisoutput/sync_test5_bamb_ora_MapServer/_ags_data{B5330F8549CF43BABD49B73F22768AA4}.geodatabase",
+  "submissionTime": 1376157770000,
+  "lastUpdatedTime": 1376157776000,
+  "status": "Completed"
+}
+
+```
+
+ 
+
+If there is no error property and the `responseType`  is `esriReplicaResponseTypeNoEdits` , then there have been no edits on the services data since the last sync. This only applies when the `syncDirection`  is `download`  or `bidirectional`  and the `dataFormat`  is `sqlite` . The response includes new `serverGen`  numbers that clients need to persist and use on the next [`synchronizeReplica` ](/synchronize-replica) call. The following example shows a response for a replica with a `perReplica`  sync model:
+
+```other
+{
+  "transportType": "esriTransportTypeUrl",
+  "responseType": "esriReplicaResponseTypeNoEdits",
+  "replicaServerGen": 1374861421011,
+  "replicaName": "ags_gfs_3889",
+  "resultUrl": "",
+  "submissionTime": 1374861420000,
+  "lastUpdatedTime": 1374861422000,
+  "status": "Completed"
+}
+```
+
+ 
+
+## Edit results
+
+The synchronize replica operation will return edit results when the following occur:
+
+-   There were errors applying edits to the server during the [`synchronizeReplica` ](/synchronize-replica) operation. In these cases, the edit results describe the errors that occurred. 
+-   The operation is called with `returnIdsForAdds`  set to `true` . Here, the edit results include the IDs of features added to the server during the sync. 
+
+Edit results can be returned only when `syncDirection`  is `upload`  or `bidirectional` , since these sync directions involve applying edits to the server.
+
+The edit results include the following information about each error:
+
+<Note type={"note"}>
+
+When the `dataFormat`  is JSON, some values are inferred by the presence of the edit results and not explicitly provided. 
+
+</Note>
+
+<StyledTable headers={"Property,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`ID` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Unique error ID. (Not provided with `dataFormat`  is JSON)
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`ObjectID` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The objectID of the feature on the server in which the edit was attempted and failed.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`ObjectGuid` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The GlobalID of the feature in which the edit was attempted and failed.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`ObjectType` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0 = feature/row (Not provided with `dataFormat`  is JSON)
+
+1= attachment
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Success` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0 = false/failure
+
+1 = true/success
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Code` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The `editResults`  error code.
+
+1000 Series: for feature-level errors
+
+2000 Series: for layer-level errors 
+
+3000 Series: for replica-level errors 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Description` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Descriptive text about the error.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`ChangeType` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The type of edit.
+
+1 = insert (Not provided with `dataFormat`  is JSON)
+
+2 = update
+
+3 = delete
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`SyncedLayerId` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The ID of the layer involved. (Not provided with `dataFormat`  is JSON)
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+Each error has an edit results error code and a description where the value of the code indicates the error. Edit results include errors when applying individual edits, errors that cause all edits on a layer to fail, or errors that fail the whole `synchronizeReplica`  operation. 
+
+For example, an update attempted on a feature that violates the feature service's ownership-based access control rules is returned as follows:
+
+<StyledTable headers={"ID,ObjectID,ObjectGuid,ObjectType,Success,Code,Description,ChangeType,SyncedLayerId"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+100
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+{'{'}419d227b-2a61-43c4-8884-4b7b5bf3eabb{'}'}
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1007
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Edit denied due to ownership-based access control.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+If an insert is attempted that violates a field's nonnullable constraint, the following is returned:
+
+<StyledTable headers={"ID,ObjectID,ObjectGuid,ObjectType,Success,Code,Description,ChangeType,SyncedLayerId"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+156
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+{'{'}7C18638F-BA93-4D12-869F-E7087B5BD691{'}'}
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1001
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Field: Depth is not nullable. Cannot set null value.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+7
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+When the `returnIdsForAdds`  parameter is set to `true` , edit results include the `objectID`  on the server and the `globalID`  of any features that were inserted on the server during the sync. In this case, this is not an error, so the code and description are Null. For example:
+
+<StyledTable headers={"ID,ObjectID,ObjectGuid,ObjectType,Success,Code,Description,ChangeType,SyncLayerId"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+3
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+33
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+{'{'}7a0c2c24-5ca5-408f-8705-a23ef105f351{'}'}
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Null
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Null
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+4
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+If the [`synchronizeReplica` ](/synchronize-replica) operation is called with `dataFormat`  as `json` , edit results are embedded in the JSON result. If the `synchronizeReplica`  operation is called with `dataFormat`  as `SQLite` , the edit results are in the `GDB_DataChangesEditResults`  table in the delta SQLite geodatabase. 
+
+See the [Feature service error codes](/feature-service-error-codes) topic for a detailed list of the edit results error codes and descriptions (see the Working with errors section below for more details). The same error codes are used for errors returned during connected editing with the feature service.
+
+## Work with errors
+
+This section discusses cases where the operation has failed or has completed and returned edit results. 
+
+### Failed operation
+
+If an error property is included in the completed response, the operation has failed. For example, a failure will be returned if the replica no longer exists on the server. A failure may also be returned if `rollbackOnFailure`  is `true`  and a specific edit failed to apply on the server. In this case, the edit results error code describing the specific edit that failed is returned in the details of the error message. If possible, clients need to make corrections based on the error information and rerun the operation.
+
+Edits are not returned from the server if the [synchronizeReplica](/synchronize-replica) operation fails. For example, if a failure happens when running `synchronizeReplica`  with `syncDirection`  set to `bidirectional` , no edits will be returned. 
+
+### Operation completes and returns edit results
+
+Even when the error property is not in the completed response, edit results may be included if the `responseType`  is `esriReplicaResponseTypeEdits` . Clients need to check the JSON or SQLite geodatabase returned in the response for edit results.
+
+The edit results will include information about edits that failed to import during synchronization. Clients can choose not to acknowledge the imported edits. This means that the next synchronization will include all of the edits from the previous synchronization as well as any new edits for the layer or replica that were not acknowledged. The server is designed to handle cases where edits are resent. If the error features were not corrected, they will continue to be returned in the edit results. This approach ensures that the edits are sent but can lead to large delta file sizes.
+
+The following outlines the errors that can be returned in the edit results:
+
+-   An edit results error code of 2000 indicates that a general failure happened that prevented all edits for a specific layer from being applied. Clients may need to work with the service administrator to understand why the error occurred. The service administrator can access the server logs, which include more detailed information.
+-   An edit results error code of 2001 indicates that a layer on the client either no longer exists or has been renamed.
+-   All other edit results error codes describe errors when applying edits for specific features or rows.
+
+When a feature service is published, a number of settings can be made to define the types of edits that are allowed (described below). Properties in the feature services root resource and layer resources describe these settings. If you're using a SQLite geodatabase, this information is also provided in the `GDB_ServiceItems`  table for use offline when the feature service is not accessible. Clients should control the edits that are allowed based on these settings. For example, if a field is not nullable, a client should not allow editors to set the value to null. If a client attempts to synchronize edits that violate these settings, an error is returned in the edit results. The following subsections describe the errors:
+
+#### Read-only fields
+
+A feature service property can be set so that geometry updates are not valid. This prevents inspectors, for example, from mistakenly updating the geometry when they are allowed to only set attributes. The errors in the following table are returned if a client attempts to update read-only fields during synchronization:
+
+<StyledTable headers={"Error Code,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1004
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Geometry update not allowed.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1023
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Field: &lt;value> is not editable. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+How to address the errors: If the edits made by the clients are valid and need to be applied, the feature service can be set to allow edits to the read-only fields. Once adjusted, the clients can synchronize to resend the edits. Alternatively, clients can choose not to adjust the feature service and resend the edits including only the editable fields. If using a SQLite geodatabase and the runtime API, an option is provided on export of the deltas to include only writable fields.
+
+What the client should do: Client applications should check the feature service settings for read-only fields before allowing users to edit the data. If offline and using a SQLite geodatabase, the information is in the `GDB_ServiceItems`  table. When sending edits to the server, clients should only include edits to the writable fields.
+
+#### Ownership-based access control 
+
+Ownership-based access control can be turned on for a feature service. This allows rules to be added to prevent a user from editing or even reading another user's features. These rules extend to attachments for individual features. The errors in the following table are returned if an edit is attempted that violates these rules during synchronization:
+
+<StyledTable headers={"Error Code,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1007
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Edit denied due to ownership-based access control.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1013
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Object is missing or edit denied due to ownership-based access control. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+How to address the errors: If the edits made by the clients are valid and need to be applied, the service administrator can turn off ownership-based access control. Once this is done, clients can run synchronize to resend the edits.
+
+What the client should do: Client applications can check the feature service settings for ownership-based access control rules before allowing users to edit the data. If offline and using a SQLite geodatabase, the information is in the `GDB_ServiceItems`  table. The information needed includes the rules that have been set and the field identifying the data owners. Applications that synchronize using a specific user can allow edits to features owned by that user. Features owned by anonymous (returned as empty string or `ESRI_Anonymous` ) are editable by any user. The ownership-based access control rules dictate the edits that are allowed on other features. 
+
+#### Nulls and unique values
+
+Within the underlying geodatabase, a field property can be set so that null values are not allowed. Indexes can also be created where a field must contain a unique value per row. The errors in the following table are returned if either of these constraints is violated during synchronization:
+
+<StyledTable headers={"Error Code,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1001
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Field: &lt;value> is not nullable. Cannot set null value.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1022
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Field: &lt;value> must be unique. Unique constraint violated.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+How to address the errors: Features identified with error 1001 can be corrected by having the user set a value for the nonnullable field. Features identified with error 1022 can be corrected by having the user set a unique value for a field with a unique value constraint. Application logic may be needed to ensure the value is unique. 
+
+What the client should do: Clients can use the nullable and unique field properties in the feature service’s layer resource (or in SQLite geodatabases `GDB_ServiceItems`  table). These describe whether or not nulls are allowed and if there is a unique constraint on a field. Clients can use this information to prevent editors from making invalid edits. 
+
+#### M- and z-values
+
+Geometry fields in a geodatabase can be set to have m- and z-values. Clients can include m- and z-values when editing with a feature service. If m- and z-values are not supplied, the feature service may return an error. For features with m-values, geometry updates are not supported unless m-values are provided. For feature with z-values, geometry updates are not supported unless z-values are provided or the feature service's default z-value property is set. The errors in the following table are returned if an unsupported edit involving m- or z-values is attempted during synchronization.
+
+<Note type={"note"}>
+
+If the application uses SQLite exclusively (never JSON), m- and z-values are always included, and these errors will not occur. 
+
+</Note>
+
+<StyledTable headers={"Error Code,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1002
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Geometry does not have m-values.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1014
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Geometry does not have z-values.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+How to address the errors: Clients should resend the edits the with m- and z-values. For z-values, you can alternately have the feature service admin allow z defaults for the feature service. 
+
+What the client should do: The [`createReplica` ](/create-replica) and [`synchronizeReplica` ](/synchronize-replica) operations always include the m- and z-values when they're present. Ideally, the client application supports m- and z-values when editing. If this is not possible, make sure to understand how the [feature service](https://enterprise.arcgis.com/en/server/latest/publish-services/windows/author-feature-services.htm) works when edits are made and m- and z-values are not provided.
+
+#### HTML content
+
+The feature service has filters that prevent potentially malicious HTML content from being set in text fields during editing. If an attempt is made to apply unsupported HTML during synchronization, the error in the following table is returned. See [Entering HTML into text fields](https://enterprise.arcgis.com/en/server/latest/publish-services/windows/feature-services-and-client-applications.htm#ESRI_SECTION1_CE856452327D42ED95044D9EC32E4598) for more information.
+
+<StyledTable headers={"Error Code,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1006
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Invalid untrusted Html content detected in field: &lt;value>.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+How to address the error: The invalid HTML content should be removed from the features identified in the results and the edits should be resent. Alternatively, although not recommended, you can set the feature service so that it does not [filter web content ](https://enterprise.arcgis.com/en/server/latest/publish-services/windows/feature-services-and-client-applications.htm#ESRI_SECTION1_CE856452327D42ED95044D9EC32E4598), and resend the edits.
+
+What the client should do: Client applications can prevent users from entering this content to begin with to avoid this error when synchronizing.
+
+#### True curves
+
+Polygon and line features in a geodatabase can include true curves. The `createReplica`  operation densifies these features when sending data to the client. A client can synchronize local edits made to these densified geometries. The error in the following table will be returned if the feature service is set up so that it does not allow edits to true curves. 
+
+<StyledTable headers={"Error Code,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1005
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+True curve update not allowed.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+How to address the error: One option is to have the feature service admin allow updates of true curves and resend the edits. This will replace true curve features with the densified features. 
+
+What the client should do: Runtime and web clients do not support editing of true curve features. To account for this limitation, the sync API will densify features as needed. To allow densified features to be synced, the feature service must be set to allow edits to true curve features. If this is not acceptable, applications can be tailored to not allow edits to features that are known to have true curves. 
+
+#### Incorrect values
+
+It's possible for clients to provide incorrect values. Features with incorrect geometries, field values of the wrong type, and field values that are too large are examples. If any of these occur during synchronization, one of the following errors is returned:
+
+<StyledTable headers={"Error Code,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1015
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Geometry could not be set.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1016
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Setting of value for &lt;value> failed.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+How to address the errors: The invalid values should be removed or replaced for the features identified in the results and the edits should be resent. 
+
+What the client should do: Client applications can use the field properties in the feature service’s layer resource (or in SQLite geodatabases GDB_ServiceItems table) to ensure the correct values are set to begin with.
+
+#### Other errors
+
+The following errors may be returned if an unexpected error occurs during synchronization:
+
+<StyledTable headers={"Error Code,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1000
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Non-specific edit content error.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1003
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Operation rolled back.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1008
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Adding an attachment failed.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1009
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Updating an attachment failed.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1011
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Object is missing.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1018
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Internal error during object delete.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1019
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Internal error during object update.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1020
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Missing GlobalID.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1021
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Empty GlobalID.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+How to address the errors: These errors can be caused by something as simple as the server going offline. In this case, running the synchronize process again at a later time when the server is up is all that's needed. Under other circumstances, the errors can indicate a more complex problem. In these cases, a service administrator can get more information by checking the server logs.
+
+What the client should do: The sync API is designed to be fault tolerant, so attempting to resynchronize is usually a safe option. If the problems persist, you may need to work with the service administrator to diagnose the problem.

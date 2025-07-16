@@ -1,0 +1,315 @@
+---
+title: "User Store"
+description: ""
+slug: "userstore"
+url: "/userstore"
+guid: "GUID-5B5BC5DC-4B9B-4249-988C-683E67EFA100"
+migratedTopicMetadata:
+  FTITLE: "userStore"
+  FDESCRIPTION: ""
+  FCHANGES: "Implementing REST API style changes"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.8-*"
+  CREATED-ON: "02/08/2019 12:02:21"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "05/11/2019 21:34:56"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "7"
+  ED: "GUID-6DAB086B-B1D3-4821-938E-2CF69CB6BAFE"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata: {}
+---
+
+The user store or the identity store is a repository of user accounts and credentials. ArcGIS Server connects to the user store to authenticate a user requesting access to a resource.
+
+In addition to connecting to your enterprise user store such as Windows Domain or any other directory service that supports an LDAP interface, ArcGIS Server also ships with a built-in storage mechanism where you can create your user accounts.
+
+ArcGIS Server requires you to configure a user store while setting up [security](/security) on your site.
+
+## Response properties
+
+<StyledTable headers={"LDAP Properties,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`ldapURLForUsers` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The LDAP URL pointing to the user accounts.
+
+Example
+
+```javascript
+ldap://server:389/dc=mydomain,dc=com???(|(objectClass=userProxy)(objectClass=user))?
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`memberOfAttributeInUsers` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The attribute of the user entry that contains role information.
+
+Example
+
+```javascript
+memberOf
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`usernameAttribute` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The attribute of the user entry that is to be treated as the username.
+
+Example
+
+```javascript
+name
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`adminUser` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The administrative account to the LDAP that has at least read access.
+
+Example
+
+```javascript
+cn=admin,cn=users,dc=mydomain,dc=com
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`adminUserPassword` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The credentials for the administrative account.
+
+Example
+
+```javascript
+secret
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+<br />
+<StyledTable headers={"WINDOWS Properties,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`adminUser` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The administrative account to the LDAP that has at least read access.
+
+Example
+
+```javascript
+cn=admin,cn=users,dc=mydomain,dc=com
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`adminUserPassword` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The credentials for the administrative account.
+
+Example
+
+```javascript
+secret
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+<br />
+
+<StyledTable headers={"CUSTOM Properties,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`class` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The fully qualified name of the Java class that implements custom access to the user store.
+
+Example
+
+```javascript
+com.myorg.userstore.DBUserStore
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`...` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Any custom properties that are required by your class.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## JSON Response syntax
+
+```javascript
+{
+  "type": "<BUILTIN | WINDOWS | LDAP | CUSTOM>",
+  "properties": "<properties>"
+}
+```
+
+ 
+
+## JSON Response example
+
+The JSON representation of a connection to LDAP:
+
+```javascript
+{
+  "type": "LDAP",
+  "properties": {
+    "userPassword": "secret",
+    "isPasswordEncrypted": "false",
+    "user": "uid=admin,ou=system",
+    "userFullnameAttribute": "displayName",
+    "userGivenNameAttribute": "givenName",
+    "userSurnameAttribute": "sn",
+    "ldapURLForUsers": "ldap://ldapserver:10636/ou=users,ou=ags,dc=example,dc=com",
+    "userEmailAttribute": "mail",
+    "usernameAttribute": "uid",
+    "caseSensitive": "false",
+    "userSearchAttribute": "dn", 
+  }
+}
+```
+
+ 
+
+The JSON representation of a connection to Windows Domain users: 
+
+```javascript
+{
+  "type": "WINDOWS",
+  "properties": {
+    "userPassword": "secret",
+    "isPasswordEncrypted": "false",
+    "user": "mydomain\\winaccount",
+    "userFullnameAttribute": "displayName",
+    "userEmailAttribute": "mail",
+    "userGivenNameAttribute": "givenName",
+    "userSurnameAttribute": "sn",
+    "caseSensitive": "false"
+  }
+}
+```
+
+ 

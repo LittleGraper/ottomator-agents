@@ -1,0 +1,263 @@
+---
+title: "Download Rasters"
+description: "The download operation returns information (the file ID) that can be used to download the raw raster files that are associated with a specified set of rasters in the raster catalog."
+slug: "download-rasters"
+url: "/download-rasters"
+guid: "GUID-E5D9BEFB-FCE4-4BB0-A853-E0CDF4427723"
+migratedTopicMetadata:
+  FTITLE: "Download Rasters"
+  FDESCRIPTION: ""
+  FCHANGES: "add NITF as supported format"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "11/08/2023 07:23:18"
+  FAUTHOR: "jliedtke"
+  FSTATUS: "Released"
+  MODIFIED-ON: "02/10/2023 07:57:40"
+  VERSION: "5"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-7F960DAB-42A0-4EF6-901F-CD29B3DFF246"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /download
+  urlSegments:
+    - name: <imageservice-url>
+      url: /image-service
+    - name: /download
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.0'
+  requiredCapability: Catalog, Download
+---
+
+## Description
+
+<Note type={"note"}>
+
+You must license your ArcGIS Server as an ArcGIS Image Server in order to use this resource.
+
+</Note>
+
+The `download` operation is performed on an [image service resource](/image-service) and returns information (the file ID) that can be used to download the raw raster files that are associated with a specified set of rasters in the raster catalog. The file IDs returned by this operation can be used to download individual files using the [Raster File resource](/raster-file).
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`rasterIds` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A comma-separated list of raster IDs whose files are to be downloaded.
+
+Example
+
+```javascript
+rasterIds=37, 462
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geometry` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Description: The geometry to apply for clipping. If specified, the selected rasters will be clipped on the server. The structure of the geometry is the same as the structure of the [JSON geometry objects](/geometry-objects) returned by the ArcGIS REST API. In addition to the JSON structures, for envelopes, you can specify the geometry with a simple comma-separated syntax.
+
+By default, the geometry is assumed to be in the spatial reference of the image service. You can specify a different spatial reference by using the JSON structure syntax for geometries.
+
+Syntax
+
+```javascript
+//JSON structures
+geometryType=<geometryType>&geometry={geometry}
+
+//Envelope simple syntax
+geometryType=esriGeometryEnvelope&geometry=<xmin>,<ymin>,<xmax>,<ymax>
+
+```
+
+ 
+
+Examples
+
+```javascript
+geometryType=esriGeometryEnvelope&geometry={xmin: -104, ymin: 35.6, xmax: -94.32, ymax: 41}
+
+geometryType=esriGeometryEnvelope&geometry=-104,35.6,-94.32,41
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geometryType` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The type of geometry specified by the `geometry` parameter. The geometry type can be an envelope or polygon. The default geometry type is an envelope. 
+
+Values: `esriGeometryPolygon` \| `esriGeometryEnvelope` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`format` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The format of the rasters returned. If not specified, the rasters will be in their native format. The format applies when the clip `geometry`  is also specified, and the format will be honored only when the raster is clipped. To force the Download Rasters operation to convert source images to a different format, append `:Conversion` after the format string. 
+
+Valid formats include TIFF, Imagine Image, JPEG, NITF, BIL, BSQ, BIP, ENVI, JP2, GIF, BMP, and PNG.
+
+Examples
+
+```javascript
+format=TIFF
+
+format=JP2:Conversion
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default format is `html` .
+
+Values: `html` \| `json` \| `pjson` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+The following is a sample request URL for the download operation that demonstrates downloading rasters in the TIFF output format, clipped to a specified envelope:
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/ImageServiceName/ImageServer/download?rasterIds=5,6,10,11,12&geometry={"xmin":-1949594.8286481365,
+"ymin": 882737.0181116117,"xmax":-1946926.2791246006,"ymax":884828.2021675818,"spatialReference":{"wkid":102009}}&geometryType=esriGeometryEnvelope&format=TIFF&f=html
+```
+
+ 
+
+## JSON Response syntax
+
+```json
+{
+  "rasterFiles": [ //the list of files that make up the rasters to be downloaded
+    { //info pertaining to a single file
+      //use this ID to download the file using the Raster File resource
+      "id": "<fileId1>",
+      "size": <fileSize1>,
+      //an array of IDs of rasters that include this file
+      "rasterIds": [ <rasterId11>, <rasterId12> ]
+    },
+    {
+      "id": "<fileId2>",
+      "size": <fileSize2>,
+      "rasterIds": [ <rasterId21>, <rasterId22> ]
+    }
+  ]
+}
+```
+
+ 
+
+## JSON Response example
+
+```json
+{
+  "rasterFiles": [
+    {
+      "id": "https://servername/arcgisoutput/_ags_507978500/md/data/2w21w_5_s6c.tif", 
+      "size": 390431, 
+      "rasterIds": [
+        5
+      ]
+    }, 
+    {
+      "id": "https://servername/arcgisoutput/_ags_507978500/md/data/2w21w_5_s6c.tfw", 
+      "size": 90, 
+      "rasterIds": [
+        5
+      ]
+    }, 
+    {
+      "id": "https://servername/data/2w22w.jpg", 
+      "size": 1913965, 
+      "rasterIds": [
+        6
+      ]
+    }, 
+    {
+      "id": "https://servername/data/2w22w.aux", 
+      "size": 18049, 
+      "rasterIds": [
+        6
+      ]
+    }, 
+    {
+      "id": "https://servername/data/2w22w.rrd", 
+      "size": 2339130, 
+      "rasterIds": [
+        6
+      ]
+    }
+  ]
+}
+```
+
+ 

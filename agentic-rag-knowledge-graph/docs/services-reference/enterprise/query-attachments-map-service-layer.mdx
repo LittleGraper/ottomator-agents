@@ -1,0 +1,530 @@
+---
+title: "Query Attachments (Map Service/Layer)"
+description: "The Query Attachments operation is return attacments grouped by feature object id for a feature from feature layer within a map service."
+slug: "query-attachments-map-service-layer"
+url: "/query-attachments-map-service-layer"
+guid: "GUID-96CD5CCC-49C3-4709-B89F-EA2E90737FFA"
+migratedTopicMetadata:
+  FTITLE: "Query Attachments (Map Service-Layer)"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9 - *"
+  CREATED-ON: "05/02/2021 13:35:47"
+  FAUTHOR: "thoque"
+  FSTATUS: "Released"
+  MODIFIED-ON: "12/02/2021 14:55:59"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-A624DA0A-4165-445E-BD20-142E13D63AF8"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /queryAttachments
+  urlSegments:
+    - name: <mapLayer-url>
+      url: /layer-table
+    - name: /queryAttachments
+  methods: []
+  sslOnly: 'no'
+---
+
+## Description
+
+The Query Attachments operation is performed on a [map service layer resource](/layer-table). The result of this operation are attachments grouped by the source feature object Ids and global ids (if exist).
+
+Queries must include one of the following parameters: `objectIds` , `globalIds` , or `definitionExpression` . All other parameters are optional and are used to further refine the returned results.
+
+You can provide arguments to the Query Attachments operation as query parameters defined in the following parameters table:
+
+<Note type={"note"}>
+
+Query attachment is supported if `supportsQueryAttachments`  is `true`  in the feature layer. Support for this operation is added to map services in 10.8.1. Map services published from ArcMap do not support this operation.
+
+</Note>
+
+### New at 10.8.1
+
+-   Field names are now returned in addition to the field properties in the `queryAttachments`  operation response. If the field name and property name match, including case, only one value is returned in the response to represent both field and property. As a best practice, it is best to go by the fieldname rather than the property when consuming this in an application.
+-   When using the `attachmentsDefinitionExpression`  parameter, you can use the `fieldName`  property from the layer's `attachmentProperties`  object. This describes the names of the fields that can be used in the expression. The layer's `attachmentFields`  object lists more information about these fields, including type, which can be useful when building queries. This information is not provided in the layer resource at earlier releases, but the same field names can be used in those as well.
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`objectIds` 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The object IDs of this layer/table to be queried. This parameter is not designed to be used in conjunction with the `globalIds`  parameter. If you supply `globalIds` , any `objectIds`  you supply will be ignored.
+
+Syntax
+
+```javascript
+objectIds=<objectId1>,<objectId2>
+```
+
+ 
+
+Example
+
+```javascript
+objectIds=2
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`globalIds` 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The global IDs of this layer/table to be queried. This parameter is required if neither `objectIds`  or `definitionExpression`  have been defined.
+
+Syntax
+
+```javascript
+globalIds=<globalIds1>,<globalIds2>
+```
+
+ 
+
+Syntax: `globalIds=<globalIds1>,<globalIds2>` 
+
+Example
+
+```javascript
+globalIds=6s430c5a-kb75-4d52-a0db-b30bg060f0b9,35f0d027-8fc0-4905-a2f6-373c9600d017
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`definitionExpression` 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The definition expression to be applied to the layer. Only those records that conform to this expression will be returned. This parameter is required if neither `objectIds`  or `globalIds`  have been defined.
+
+Example
+
+```javascript
+definitionExpression=STATE_NAME = 'Alaska'
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`attachmentsDefinitionExpression` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The definition expression to be applied to the attachments table. Only those records that conform to this expression will be returned. You can get the attachments table field names to use in the expression by checking the layer's `attachmentProperties`  object.
+
+Examples
+
+```javascript
+//Returns any attachment named 'alaska.geodatabase'
+definitionExpression=ATT_NAME = 'alaska.geodatabase'
+
+//Returns any attachment that includes SingleStory in the keyword value. For example, results may include attachments with keyword values "SingleStory,Restaurant" or "SingleStory,Residence" etc.
+definitionExpression=keywords like ‘%SingleStory%’
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`attachmentTypes` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The attachment types to return. The following attachment types are supported for ArcGIS Online and ArcGIS Enterprise:
+
+Values: `7z`  \| `aif`  \| `avi`  \| `bmp`  \| `csv`  (added to ArcGIS Enterprise at 10.8.1) | `doc`  \| `docx`  \| `dot`  \| `ecw`  \| `emf`  \| `eps`  \| `geodatabase`  \| `geojson`  (added to ArcGIS Enterprise at 10.8.1) | `gif`  \| `gml`  \| `gtar`  \| `gz`  \| `img`  \| `j2k`  \| `jp2`  \| `jpc`  \| `jpe`  \| `jpeg`  \| `jpf`  \| `jpg`  \| `json`  \| `m4a`  \| `mdb`  \| `mid`  \| `mov`  \| `mp2`  \| `mp3`  \| `mp4`  (added to ArcGIS Enterprise at 10.8) | `mpa`  \| `mpe`  \| `mpeg`  \| `mpg`  \| `mpv2`  \| `pdf`  \| `png`  \| `ppt`  \| `pptx`  \| `ps`  \| `psd`  \| `qt`  \| `ra`  \| `ram`  \| `raw`  \| `rmi`  \| `sid`  \| `tar`  \| `tgz`  \| `tif`  \| `tiff`  \| `txt`  \| `vrml`  \| `wav`  \| `wma`  \| `wmf`  \| `wmv`  \| `wps`  \| `xls`  \| `xlsx`  \| `xlt`  \| `xml`  \| `zip` 
+
+At this time, the following attachment types are supported in ArcGIS Online only:
+
+Values: `gpkg`  \| `pbf`  \| `sd` 
+
+Example
+
+```javascript
+attachmentTypes=image/jpeg, image/tiff
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`size` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The file size of the attachment is specified in bytes. You can enter a file size range (1000,15000) to query for attachments with the specified range.
+
+Example
+
+```javascript
+//If definitionExpression=STATE_NAME = 'Alaska', the querying results will return all attachments within the specified file size range (1000-15000)
+size=1000,15000
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`resultOffset` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This parameter is designed to be used in conjunction with `resultRecordCount`  to page through a long list of attachments, one `queryAttachments`  request at a time. This option fetches query results by skipping a specified number of records. The query results start from the next record `(i.e., resultOffset + 1).`  The default value is 0. This parameter only applies when `supportPagination`  is `true` . You can use this option to fetch records that are beyond `maxRecordCount` .
+
+Example resultOffset setting
+
+```javascript
+resultOffset=1000
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`resultRecordCount` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This option fetches query results up to the `resultRecordCount`  specified. When `resultOffset`  is specified and this parameter is not, the feature service defaults to the `maxRecordCount`  The maximum value for this parameter is the value of the layer's `maxRecordCount`  property. This parameter only applies if `supportPagination`  is `true` .
+
+Example
+
+```javascript
+//Fetch up to 10 records
+resultRecordCount=10
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnUrl` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether to return the attachment URL. The default is `false` . This parameter is supported if the `supportsQueryAttachmentsWithReturnUrl`  property is `true`  on the [layer](/layer-feature-service). Applications can use this URL to download the attachment image.
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnMetadata` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , metadata stored in the `exifInfo`  column will be returned for attachments that have `exifInfo` . This option is supported only when `"name": "exifInfo"`  in the layer's `attachmentProperties`  includes `"isEnabled": true` . When set to `false` , or not set, `null`  is returned for `exifInfo` .
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`keywords` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Returns attachments that match the keywords provided. The value provided for this parameter must be an exact match to the attachment's keyword value. This parameter can be set when the layer's `attachmentProperties`  include `"name": "keywords"`  with `"isEnabled": true` . To query for partial matches, you can use the `attachmentsDefinitionExpression`  parameter instead. See `attachmentsDefinitionExpression`  for examples.
+
+Example
+
+```javascript
+keywords = 'motorcycle'
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` .
+
+Values: `html`  \| `json`  \| `pjson` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+### Example one
+
+The example below demonstrates how to query attachments using the parent `objectsIds` . The query results will return only the specified object ids.
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/light-inventory/MapServer/0/queryAttachments?objectIds=2,4&globalIds=&definitionExpression=&attachmentTypes=&resultOffset=&resultRecordCount=&f=pjson
+```
+
+ 
+
+### Example two
+
+The example below demonstrates how to query attachments using the parent `globalIds` . The query results will returns only the specified global ids.
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/light-inventory/MapServer/0/queryAttachments?objectIds=&globalIds=60e35c5a-6bc5-4d52-a6db-b39bf566f7b9,e1f9d927-8fc9-4995-a2f6-373c9600d017&definitionExpression=&attachmentTypes=&size=&resultOffset=&resultRecordCount=&f=pjson
+```
+
+ 
+
+### Example three
+
+The example below demonstrates how to query attachments using the `definitionExpression`  as `objectid>2`  and `attachmentTypes`  as `impage` /jpeg. The query results will return all image/jpeg attachment types where the object id is greater than 2.
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/light-inventory/MapServer/0/queryAttachments?objectIds=&globalIds=&definitionExpression=objectid>2&attachmentTypes=image/jpeg&size=&resultOffset=&resultRecordCount=&f=html
+```
+
+ 
+
+### Example four
+
+The example below demonstrates how to query attachments using the `definitionExpression` `STATE_NAME`  as `'alaska'` , `resultOffset`  as 5, and `resultRecordCount`  as 10. The query results will skip the first 5 records and return the next 10 attachments in Alaska.
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/light-inventory/MapServer/0/queryAttachments?objectIds=2&globalIds=&definitionExpression=STATE_NAME = 'alaska'&attachmentTypes=&size=&resultOffset=5&resultRecordCount=10&f=html
+```
+
+ 
+
+### Example five
+
+The example below demonstrates how to query attachments using the `attachmentsDefinitionExpression` `ATT_NAME`  as `'alaska_geodatabase'`  and `size`  as `900,7000` . The query results will return all attachments within the specified file size range with the attachment name `'alaska.geodatabase'` .
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/light-inventory/MapServer/0/queryAttachments?objectIds=2&globalIds=&definitionExpression=ATT_NAME = 'alaska.geodatabase'&attachmentTypes=&size=900,7000&resultOffset=&resultRecordCount=&f=html
+```
+
+ 
+
+### Example six
+
+The example below demonstrates how to query attachments using the `definitionExpression` `STATE_NAME`  as `'alaska'` , `size`  as `900,7000` , and `returnUrl`  as `true` . The query results will return all attachments, including URLs, within the specified file size range in Alaska.
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/light-inventory/MapServer/0/queryAttachments?objectIds=2&globalIds=&definitionExpression=STATE_NAME = 'alaska'&attachmentTypes=&size=900,7000&resultOffset=&resultRecordCount=&returnUrl=true&f=html
+```
+
+ 
+
+### Example seven
+
+The example below demonstrates how to query attachments using the definitionExpression as 1=1 and keywords as 'motorcycle'. The query results will return all attachment types that have a keywords value of motorcycle.
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/Hosted/volcano_roop/MapServer/0/queryAttachments?definitionExpression=1%3D1&keywords=motorcycle&f=json
+```
+
+ 
+
+## JSON Response syntax
+
+```other
+{
+  "fields": [
+    {
+      "name": "OBJECTID",
+      "type": "<esriFieldTypeInteger>",
+      "alias": "<OBJECTID>",
+      "sqlType": "<sqlTypeOther>",
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "<GlobalID>",
+      "type": "<esriFieldTypeGlobalID>",
+      "alias": "<GlobalID>",
+      "sqlType": "<sqlTypeOther>",
+      "length": 38,
+      "domain": null,
+      "defaultValue": null
+    }
+  ],
+  "attachmentGroups": [
+    {
+      "parentObjectId": "<OBJECTID>",
+      "parentGlobalId": "<esriFieldTypeGlobalID>",
+      "attachmentInfos": [
+        {
+          "id": "<OBJECTID>",
+          "globalId": "<esriFieldTypeGlobalID>",
+          "name": "<name>",
+          "contentType": "<attachmentTypes>",
+          "size": "<size>",
+          "url": "<returnUrl>"
+        }
+      ]
+    }
+  ]
+}
+
+```
+
+ 
+
+## JSON Response example
+
+```other
+{
+	 "fields": [
+    {
+			   "name": "objectid_1",
+			   "type": "esriFieldTypeOID",
+			   "alias": "OBJECTID_1",
+			   "domain": null,
+			   "defaultValue": null
+		  },
+		  {
+			   "name": "globalid",
+			   "type": "esriFieldTypeGlobalID",
+			   "alias": "globalid",
+			   "domain": null,
+			   "defaultValue": null
+		  }
+	 ],
+	 "attachmentGroups": [
+    {
+		    "parentObjectId": 2,
+		    "parentGlobalId": "{F62F4A99-FACB-459D-8E29-7A1044EE2065}",
+		    "attachmentInfos": [
+        {
+			       "id": 1204,
+			       "attachmentid": 1204,
+			       "globalId": "{058333D1-D96C-4C19-A787-553FF119FD53}",
+			       "globalid": "{058333D1-D96C-4C19-A787-553FF119FD53}",
+			       "name": "red.png",
+			       "att_name": "red.png",
+			       "contentType": "image/png",
+			       "content_type": "image/png",
+			       "size": 381,
+			       "data_size": 381
+		      }
+      ]
+	   }
+  ]
+}
+```
+
+ 

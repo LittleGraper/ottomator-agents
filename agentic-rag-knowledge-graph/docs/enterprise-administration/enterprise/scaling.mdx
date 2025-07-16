@@ -1,0 +1,170 @@
+---
+title: "Scaling"
+description: "The scaling resource returns the scaling and resource allocation for a specific GIS service microservice."
+slug: "scaling"
+url: "/scaling"
+guid: "GUID-6FAD99D3-DE33-44C9-BF02-B84693BA4B9C"
+migratedTopicMetadata:
+  FTITLE: "Scaling"
+  FDESCRIPTION: ""
+  FCHANGES: "New Product"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9-*"
+  CREATED-ON: "19/03/2021 13:40:28"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "07/08/2022 21:15:49"
+  VERSION: "1"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "15"
+  ED: "GUID-88FB292A-E580-48DC-92EC-BE1178CAB9A6"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /services/<ServiceName>.<ServiceType>/scaling
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /services/<ServiceName>.<ServiceType>/scaling
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed with either the "Update", "Delete", or "Security and infrastructure" privileges, or the Publisher role
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `scaling` resource returns the scaling and resource allocation for a specific GIS service microservice. Some of the properties can be updated using the [Edit](/edit-scaling) operation. All of the microservice's properties can be viewed through the [Deployment](/deployment) resource.
+
+
+## Request parameter
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Response properties
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `type` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The GIS service microservice type.
+
+      Values: `FeatureServer` | `GeometryServer` | `GPServer` | `GPSyncServer` | `MapServer` | `TileServer`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `deploymentId` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The microservice ID.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `replicas` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The number of replicas for the microservice. For manual scaling, the value for both `min` and `max` should be the same. Organizations using a version of ArcGIS Enterprise on Kubernetes at 10.9.1 or higher have the option to enable autoscaling. For more information on manual scaling and autoscaling, see the [Edit](/edit-scaling) operation.
+
+      ```other label=Example
+      "replicas": {
+        "min": 3,
+        "max": 3,
+        "scalingMode": "manual" //Added at 11.0
+      },
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `resources` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The minimum and maximum resource allocations for the microservice, including the minimum memory (`memoryMin`) and minimum CPU (`cpuMin`) resources required for the microservice to start. This property can be updated using the [Edit](/edit-scaling) operation.
+
+      ```markdown label=Example
+      "resources": {
+        "memoryMin": "500Mi",
+        "cpuMin": "0.125",
+        "memoryMax": "8Gi",
+        "cpuMax": "4"
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample request URL used to access the `scaling` resource:
+
+```markdown
+https://organization.domain.com/context/admin/services/MyService.MapServer/scaling?f=pjson
+```
+
+## JSON Response example
+
+```other
+{
+  "scalingSpec": [
+    {
+      "deploymentType": "MapServer",
+      "replicas": {
+        "min": 3,
+        "max": 3,
+        "scalingMode": "manual"
+      },
+      "deploymentId": "kui6zmtqzkjrsihh6tegq",
+      "resources": {
+        "memoryMin": "500Mi",
+        "memoryMax": "2Gi",
+        "cpuMin": "0.125",
+        "cpuMax": "2"
+      }
+    }
+  ]
+}
+```

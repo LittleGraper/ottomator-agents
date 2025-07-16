@@ -1,0 +1,249 @@
+---
+title: "Query (Graph)"
+description: "The query operation allows you to query the entities and relationships in a knowledge graph's graph resource using an openCypher query."
+slug: "kgs-graph-query"
+url: "/kgs-graph-query"
+guid: "GUID-21F7B761-18FA-4207-BE0B-71BEE64E55A6"
+migratedTopicMetadata:
+  FTITLE: "kgs graph query"
+  FDESCRIPTION: ""
+  FCHANGES: "remove invalid draft comments"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9.1 - *"
+  CREATED-ON: "20/05/2022 13:17:29"
+  FAUTHOR: "avienneau"
+  FSTATUS: "Released"
+  MODIFIED-ON: "03/06/2022 23:17:42"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-6DC2AE62-10D3-4A81-8B0D-11D965937C22"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /query
+  urlSegments:
+    - name: <knowledgegraphserver_graph-url>
+      url: /kgs-graph
+    - name: /query
+  methods: []
+  sslOnly: 'no'
+---
+
+import GUID_01CB5051_FA79_42A9_8275_EF008F2C3097_GUID_499B73EC_3D4E_46D2_863A_4534FAF79AA3 from "./snippets/GUID-01CB5051-FA79-42A9-8275-EF008F2C3097/_GUID-499B73EC-3D4E-46D2-863A-4534FAF79AA3";
+
+## Description
+
+<Note type={"note"}>
+
+<GUID_01CB5051_FA79_42A9_8275_EF008F2C3097_GUID_499B73EC_3D4E_46D2_863A_4534FAF79AA3 />
+
+</Note>
+
+The `query`  operation is performed on a [knowledge graph service's graph resource](/kgs-graph). The entities and relationships in the graph are queried by sending an openCypher query. [Learn more about openCypher queries](https://pro.arcgis.com/en/pro-app/latest/help/data/knowledge/query-the-contents-of-a-knowledge-graph.htm).
+
+##  Request parameters
+
+<Note type={"note"}>
+
+Additional parameters are available for queries defined and issued in the PBF format, as specified in the `QueryRequest.proto`  file.
+
+</Note>
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`openCypherQuery` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Allows you to return the entities and relationships in a graph, as well as the properties of those entities and relationships, by providing an openCypher query.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` .
+
+Values: `pbf`  \| `html` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+The following is an example request URL to query a knowledge graph service named `SchoolDistrict`  for information about the students enrolled at a specific school. If an openCypher query is specified such as the example below, the query will return the first `Student`  entity found with the `EnrolledAt`  relationship to a `School`  entity whose `name`  property is set to `Eastside Elementary` :
+
+```javascript
+MATCH (p:Student)-[e:EnrolledAt]->(s:School) WHERE s.name = 'Eastside Elementary' RETURN p,e,s.principal,s.numStaff LIMIT 1
+```
+
+ 
+
+A description of the `Student`  entity, its `EnrolledAt`  relationship, and the related `School`  entity will be provided along with the specified property values.
+
+Sample request URL
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/Hosted/SchoolDistrict/KnowledgeGraphServer/graph/query?openCypherQuery=MATCH+%28p%3AStudent%29-%5Be%3AEnrolledAt%5D-%3E%28s%3ASchool%29+WHERE+s.name+%3D+%27Eastside+Elementary%27+RETURN+p%2Ce%2Cs.principal%2Cs.numStaff+LIMIT+1&f=html
+```
+
+ 
+
+## HTML Response syntax
+
+When an openCypher query is specified on the HTML page for the knowledge graph server's query operation, an HTML response is displayed on the page. The values returned depend on the query that is issued.
+
+When a query returns entities, the value for an entity will include its label and properties. An entity's label identifies the `EntityType` . When a query returns relationships, the value for a relationship will include its type and properties. A relationship's type identifies the `RelationshipType` . For both entities and relationships, only properties with a value are included in the response.
+
+An openCypher query can also return individual property values or summary information about the graph's content. In these cases the query will return individual text strings representing the property values or a count of the number of instances of an entity that satisfy the query.
+
+The example below represents the syntax for the example query provided previously. Entities always have `globalid`  and `objectid`  properties. Relationships always have `globalid` , `objectid` , `originGlobalID` , and `destinationGlobalID`  properties. The `originGlobalID`  identifies the entity that is the origin of the relationship. The `destinationGlobalID`  identifies the entity that is the destination of the relationship. 
+
+```other
+header: 
+ dataModelTimestamp: <dataModelTimestamp>
+ fieldNames: [<returnValuesFromQuery>]
+results: 
+ exceededTransferLimit: <boolean>
+ rows: 
+   values: 
+     entityValue: 
+      label: <EntityType>
+      properties: 
+       globalid: {<GUID>}
+       objectid: <integer>
+       property1: <property1Value>
+       property2: <property2Value>
+       property3: <property3Value>
+
+     relationshipValue: 
+      type: <RelationshipType>
+      properties: 
+       globalid: {<GUID>}
+       originGlobalID: {<GUID>}
+       destinationGlobalID: {<GUID>}
+       objectid: <integer>
+       property1: <property1Value>
+
+    <returnedValue>
+    <returnedValue>
+
+```
+
+ 
+
+## HTML Response example one
+
+The following is an example request URL to query a knowledge graph service named `SchoolDistrict` . The query counts how many `Student`  entities have an `EnrolledAt`  relationship to a `School`  entity:
+
+```javascript
+MATCH (School)<-[EnrolledAt]-(p:Student) RETURN Count(p)
+```
+
+ 
+
+Sample request URL
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/Hosted/SchoolDistrict/KnowledgeGraphServer/graph/query?openCypherQuery=MATCH (s:School)<-[e:EnrolledAt]-(p:Student) RETURN +Count(p)&f=html
+```
+
+ 
+
+This example illustrates the response to the above query. The response includes one row of data. There is one value, `15` , in one field named `Count(p)` .
+
+```other
+header: 
+ dataModelTimestamp: 1628172329005
+ fieldNames: [Count(p)]
+results: 
+ exceededTransferLimit: false
+ rows: 
+   values: [15]
+
+```
+
+ 
+
+## HTML Response example two
+
+The following is an example request URL to query a knowledge graph service named `SchoolDistrict`  for information about the Student entities it contains. If an openCypher query is specified such as the example below, the query will return the first tuple found where a `Student`  entity (`p` ) has any relationship (`e` ) with a `School`  entity (`s` ) where the name of the school is `Eastside Elementary` :
+
+```javascript
+MATCH (p:Student)-[e]->(s:School) WHERE s.name = 'Eastside Elementary' RETURN p,e,s.principal,s.numStaff LIMIT 1
+```
+
+ 
+
+Sample request URL
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/Hosted/BeersOfTheWorld/KnowledgeGraphServer/graph/query?openCypherQuery=MATCH+%28b%3ABeer%29+RETURN+b+LIMIT+1&f=html
+```
+
+ 
+
+Full information describing the Student entity and their relationship to the school will be returned, along with individual property of the school identified in the query: the value of the `principal`  property and the value of the `numStaff`  property.
+
+```other
+header: 
+ dataModelTimestamp: 1628172329005
+ fieldNames: [p, e, s.principal, s.numStaff]
+results: 
+ exceededTransferLimit: false
+ rows: 
+   values: 
+     entityValue: 
+      label: Student
+      properties: 
+       name: John Smith
+       extracurriculars: theatre, band
+       globalid: {567EACFE-6779-4EBD-8773-F8E1486A6F79}
+       objectid: 11
+
+     relationshipValue: 
+      type: EnrolledAt
+      properties: 
+       globalid: {F4D89C49-E1C2-4482-9D3E-6919BA9F230F}
+       originGlobalID: {567EACFE-6779-4EBD-8773-F8E1486A6F79}
+       destinationGlobalID: {B5025C91-118C-4B28-91D2-3073401C0992}
+       objectid: 2
+       startDate: 1628272439016
+
+    Ms. Jane Principal
+    19
+
+```
+
+ 
+
+## PBF Request
+
+Create a PBF-formatted request to perform this operation based on the [`QueryRequest.proto`  file](https://links.esri.com/KGServer_queryRequestProto). 
+
+## PBF Response
+
+Create a PBF-formatted response to get feedback from the operation based on the [`QueryResponse.proto`  file](https://links.esri.com/KGServer_queryResponseProto).

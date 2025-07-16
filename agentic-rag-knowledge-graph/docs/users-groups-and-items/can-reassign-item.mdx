@@ -1,0 +1,218 @@
+---
+title: "/canReassign: Can Reassign Item"
+description: "The canReassign  operation checks if the items (or item relationships) owned by one user can be successfully reassigned to a specified user."
+slug: "can-reassign-item"
+url: "/can-reassign-item"
+guid: "GUID-0B9DA8A2-EE84-4183-B696-3A1D2181C4B6"
+migratedTopicMetadata:
+  FTITLE: "Can Reassign Item"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "R02-*"
+  CREATED-ON: "06/06/2023 14:04:44"
+  FAUTHOR: "svennapoosa"
+  FSTATUS: "Released"
+  MODIFIED-ON: "27/09/2023 10:18:56"
+  VERSION: "1"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "10"
+  ED: "GUID-51E391FE-B8DA-4B7F-8FD2-238C6800D6AF"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /content/users/[userName]/items/[itemID]/canReassign
+  urlSegments:
+    - name: '[root]'
+      url: /root
+    - name: /content/users/[userName]/items/[itemID]/canReassign
+  methods:
+    - post
+  sslOnly: 'no'
+---
+
+## Example usage
+
+The following is a sample ArcGIS Online POST request for the `canReassign` operation:
+
+```markdown
+POST /webadaptor/sharing/rest/content/users/itemowner/items/b512083cd1b64e2da1d3f66dbb135956/canReassign HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+item=b512083cd1b64e2da1d3f66dbb135956&targetUsername=newOwner&f=pjson
+``` 
+
+The following is a sample ArcGIS Enterprise POST request for the `canReassign` operation:
+
+```markdown
+POST /webadaptor/sharing/rest/content/users/itemowner/items/b512083cd1b64e2da1d3f66dbb135956/canReassign HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+item=b512083cd1b64e2da1d3f66dbb135956&targetUsername=newOwner&f=pjson
+``` 
+
+## Description
+
+The `canReassign` operation checks whether an item owned by one user can be successfully [reassigned to a specified user](/reassign-item) before performing the [reassignItem](/reassign-item) operation. Users assigned the default administrator role, or a custom role with administrative privileges, can perform this operation. The item owner can also use this operation; if the item owner that performs this operation is not a default administrator, or assigned a custom role with administrative privileges, they must have the `portal:user:reassignItems` privilege assigned to them to transfer content to another user.
+
+Some item relationships (for example, a view created from another view instead of a primary layer) may block item reassignment. The conflicting item is listed in the error response. 
+
+<Note type={"note"}>
+
+If any item that is being reassigned have a `private` sharing level, the receiving member must have sharing access to all groups which those items are currently shared to.
+
+</Note>
+
+## Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `[Common Parameters]` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      For a complete listing, see [Common parameters](/common-parameters). 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `targetUsername` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The username of the user the item will be reassigned to. For a user to be eligible to receive transferred content, they must meet the following requirements:
+
+      -   The user must be assigned the `portal:user:receiveItems` privilege to receive the transferred content.
+      -   The user must have a user type that allows them to own content. To learn more about user types, see the [User types, roles, and privileges](https://enterprise.arcgis.com/en/portal/latest/administer/windows/roles.htm) topic.
+      -   If the item being transferred to the user is shared with a group, the user receiving the item must be a member of the group. If the group is a view-only group, the user receiving the item must be the group owner or a group manager.
+
+      If the above requirements are not met, an error response will be returned.
+
+      Example:
+
+      ```markdown
+      targetUsername=newOwner
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Response properties
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `success` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Indicates if the operation was successful.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `itemId` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The ID of the reassigned item.
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## JSON Response syntax
+
+The response syntax example below demonstrates an error response, returned when the user specified in the `targetUsername` parameter does not have the proper permissions to be reassigned an item:
+
+```other
+{
+  "itemId": "<item id>",
+  "success": true | false,
+  "error": {
+    "code": <error code>,
+    "messageCode": "<error message code>",
+    "message": "<error message>",
+    "details": [
+      {
+        "itemId": "<item id>",
+        "type": "<item type>",
+        "url": "<url>",
+        "reservedTypeKeywords": [
+          "<reserved type keyword1>",
+          "<reserved type keyword2>"
+        ],
+        "owner": "<owner>"
+      }
+    ]
+  }
+}
+``` 
+
+The response syntax example below demonstrates a success response:
+
+```other
+{
+  "itemId": "<item id>",
+  "success": true | false
+}
+``` 
+
+## JSON Response example
+
+The response example below demonstrates an error response, returned when the user specified in the `targetUsername` parameter does not have the proper permissions to be reassigned an item:
+
+```other
+{
+  "itemId": "3fbb6f64dd3c41da8a5f9dd4be11a9fe",
+  "success": false,
+  "error": {
+    "code": 400,
+    "messageCode": "CONT_004821",
+    "message": "Unable to reassign item. This service item 'bb8e3d443ab44878ab8315b00b0612ca' has Views, that is related to other services",
+    "details": [
+      {
+        "itemId": "07efda2ec8934d0cab3b68018758701a",
+        "type": "Feature Service",
+        "url": "https://machine.domain.com/webadaptor/rest/services/FS123_View/FeatureServer",
+        "reservedTypeKeywords": [
+          "Hosted Service",
+          "View Service"
+        ],
+        "owner": "FSowner"
+      }
+    ]
+  }
+}
+```
+
+The response example below demonstrates a success response:
+
+```other
+{
+  "itemId": "<item id>",
+  "success": true | false
+}
+```
+
+ 

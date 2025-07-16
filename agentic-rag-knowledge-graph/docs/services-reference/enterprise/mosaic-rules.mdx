@@ -1,0 +1,344 @@
+---
+title: "Mosaic rule objects"
+description: "Learn about the JSON representation of mosaic rule objects."
+slug: "mosaic-rules"
+url: "/mosaic-rules"
+---
+
+## Overview
+
+<Note>
+
+You must license your ArcGIS Server as an ArcGIS Image Server in order to use this resource with a mosaic dataset.
+
+</Note>
+
+This topic discusses the JSON representation of mosaic rule objects. Image service uses a mosaic rule to mosaic multiple rasters on-the-fly. The mosaic rule parameter is used by many image service operations, for example, [Export Image](/export-image) and [Identify](/identify-image-service) operations.
+
+A mosaic rule is used to specify the following:
+
+* Selection of rasters to participate in the mosaic.
+* How selected rasters are ordered.
+* How overlapping pixels at the same location are resolved.
+
+The image service has a list of allowed mosaic methods:
+
+* `esriMosaicNone`
+* `esriMosaicCenter`
+* `esriMosaicNorthwest`
+* `esriMosaicNadir`
+* `esriMosaicViewpoint`
+* `esriMosaicAttribute`
+* `esriMosaicLockRaster`
+* `esriMosaicSeamline`
+
+### None
+
+Orders rasters based on the order (ObjectID) in the mosaic dataset attribute table. Mosaic results are view-independent.
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Syntax</TabTitle>
+  <TabTitle>Example</TabTitle>
+</TabNav>
+
+<Tab>
+
+  ```markdown
+  {
+    "mosaicMethod": "esriMosaicNone", //required
+    "where": "<where>", //optional
+    "ascending": <true | false>,//optional, default is true
+    "fids": [<fid1>, <fid2>],//optional
+    "mosaicOperation": "<MT_FIRST | MT_LAST | MT_MIN | MT_MAX | MT_MEAN | MT_BLEND | MT_SUM>" //default is MT_FIRST
+  }
+  ```
+</Tab>
+
+<Tab>
+
+  ```other
+  {
+    "mosaicMethod": "esriMosaicNone",
+    "ascending": true,
+    "fids": [1,2,3],
+    "mosaicOperation": "MT_FIRST"
+  }
+  ```
+</Tab>
+
+</Tabs>
+
+### Center
+
+Orders rasters based on the distance between their centers and the view center. Mosaic results are view-dependent.
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Syntax</TabTitle>
+  <TabTitle>Example</TabTitle>
+</TabNav>
+
+<Tab>
+
+  ```markdown
+  {
+    "mosaicMethod": "esriMosaicNone", //required
+    "where": "<where>", //optional
+    "ascending": <true | false>,//optional, default is true
+    "fids": [<fid1>, <fid2>],//optional
+    "mosaicOperation": "<MT_FIRST | MT_LAST | MT_MIN | MT_MAX | MT_MEAN | MT_BLEND | MT_SUM>" //default is MT_FIRST
+  }
+  ```
+</Tab>
+
+<Tab>
+
+  ```other
+  {
+    "mosaicMethod": "esriMosaicNone",
+    "ascending": true,
+    "fids": [1,2,3],
+    "mosaicOperation": "MT_FIRST"
+  }
+  ```
+</Tab>
+
+</Tabs>
+
+### NorthWest
+
+Orders rasters based on the distance between their centers and the northwest point of the service. Mosaic results are view-independent.
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Syntax</TabTitle>
+  <TabTitle>Example</TabTitle>
+</TabNav>
+
+<Tab>
+
+  ```markdown
+  {
+    "mosaicMethod": "esriMosaicNorthwest", //required
+    "where": "<where>", //optional
+    "ascending": <true | false>,//optional, default is true
+    "fids": [<fid1>, <fid2>],//optional
+    "mosaicOperation": "<MT_FIRST | MT_LAST | MT_MIN | MT_MAX | MT_MEAN | MT_BLEND | MT_SUM>" //default is MT_FIRST
+  }
+  ```
+</Tab>
+
+<Tab>
+
+  ```other
+  {
+    "mosaicMethod": "esriMosaicNorthwest",
+    "ascending": true,
+    "mosaicOperation": "MT_FIRST"
+  }
+  ```
+</Tab>
+
+</Tabs>
+
+### Nadir
+
+Orders rasters based on the distance between their nadir position and view center. Mosaic results are view-dependent.
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Syntax</TabTitle>
+  <TabTitle>Example</TabTitle>
+</TabNav>
+
+<Tab>
+
+  ```markdown
+  {
+    "mosaicMethod": "esriMosaicNadir", //required
+    "where": "<where>", //optional
+    "ascending": <true | false>,//optional, default is true
+    "fids": [<fid1>, <fid2>],//optional
+    "mosaicOperation": "<MT_FIRST | MT_LAST | MT_MIN | MT_MAX | MT_MEAN | MT_BLEND | MT_SUM>" //default is MT_FIRST
+  }
+  ```
+</Tab>
+
+<Tab>
+
+  ```other
+  {
+    "mosaicMethod": "esriMosaicNadir",
+    "ascending": true,
+    "mosaicOperation": "MT_FIRST"
+  }
+  ```
+</Tab>
+
+</Tabs>
+
+### Viewpoint
+
+Orders rasters based on the distance between their centers and a user defined view point. Mosaic results are view-independent.
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Syntax</TabTitle>
+  <TabTitle>Example</TabTitle>
+</TabNav>
+
+<Tab>
+
+  ```markdown
+  {
+    "mosaicMethod": "esriMosaicViewpoint", //required
+    "viewpoint": <point>,//required
+    "where": "<where>", //optional
+    "ascending": <true | false>,//optional, default is true
+    "fids": [<fid1>, <fid2>],//optional
+    "mosaicOperation": "<MT_FIRST | MT_LAST | MT_MIN | MT_MAX | MT_MEAN | MT_BLEND | MT_SUM>" //default is MT_FIRST
+  }
+  ```
+</Tab>
+
+<Tab>
+
+  ```other
+  {
+    "mosaicMethod": "esriMosaicViewpoint",
+    "ascending": true,
+    "viewpoint": {"x":100,"y":90,"spatialReference":{"wkid":4326}},
+    "mosaicOperation": "MT_FIRST"
+  }
+  ```
+</Tab>
+
+</Tabs>
+
+### ByAttribute
+
+Orders rasters based on the absolute distance between their values of an attribute and a base value. Only numeric or date fields are applicable. Mosaic results are view-independent.
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Syntax</TabTitle>
+  <TabTitle>Example</TabTitle>
+</TabNav>
+
+<Tab>
+
+  ```markdown
+  {
+    "mosaicMethod": "esriMosaicAttribute", //required
+    "sortField": "<sortFieldName>",//required, numeric or date fields only.
+    "sortValue": <sortValue>,//optional, default is null or 0. Use numeric values for numeric fields and use the following string format for date field:
+        yyyy/MM/dd HH:mm:ss.s
+        yyyy/MM/dd HH:mm:ss
+        yyyy/MM/dd HH:mm
+        yyyy/MM/dd HH
+        yyyy/MM/dd
+        yyyy/MM
+        yyyy					
+    "ascending": <true | false>,//optional, default is true
+    "where": "<where>", //optional  
+    "fids": [<fid1>, <fid2>],//optional
+    "mosaicOperation": "<MT_FIRST | MT_BLEND | MT_SUM>" //default is MT_FIRST
+  }
+  ```
+</Tab>
+
+<Tab>
+
+  ```other
+  {
+    "mosaicMethod": "esriMosaicAttribute",
+    "sortField": "acquisitionDate",
+    "sortValue":"2010/12/31",
+    "ascending": true,
+    "mosaicOperation": "MT_FIRST"
+  }
+  ```
+</Tab>
+
+</Tabs>
+
+### LockRaster
+
+Displays only the selected rasters. Mosaic results are view-independent.
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Syntax</TabTitle>
+  <TabTitle>Example</TabTitle>
+</TabNav>
+
+<Tab>
+
+  ```markdown
+  {
+    "mosaicMethod": "esriMosaicLockRaster", //required
+    "lockRasterIds": [<rasterId1>, <rasterId2>],  //required
+    "where": "<where>", //optional
+    "ascending": <true | false>,//optional, default is true
+    "fids": [<fid1>, <fid2>],//optional
+    "mosaicOperation": "<MT_FIRST | MT_LAST | MT_MIN | MT_MAX | MT_MEAN | MT_BLEND | MT_SUM>" //default is MT_FIRST
+  }
+  ```
+</Tab>
+
+<Tab>
+
+  ```other
+  {
+    "mosaicMethod": "esriMosaicLockRaster",
+    "lockRasterIds": [1,2,3],
+    "ascending": true,
+    "mosaicOperation": "MT_FIRST"
+  }
+  ```
+</Tab>
+
+</Tabs>
+
+### Seamline
+
+Orders rasters based on the predefined seamline. The ascending property is defined by the seamline so is not applicable anymore. Only two mosaic operations are applicable as listed below. Mosaic results are view-independent.
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Syntax</TabTitle>
+  <TabTitle>Example</TabTitle>
+</TabNav>
+
+<Tab>
+
+  ```markdown
+  {
+    "mosaicMethod": "esriMosaicSeamline", //required
+    "where": "<where>", //optional  
+    "fids": [<fid1>, <fid2>],//optional
+    "mosaicOperation": "<MT_FIRST | MT_BLEND>" //default is MT_FIRST
+  }
+  ```
+</Tab>
+
+<Tab>
+
+  ```other
+  {
+    "mosaicMethod": "esriMosaicSeamline",
+    "mosaicOperation": "MT_BLEND"
+  }
+  ```
+</Tab>
+
+</Tabs>

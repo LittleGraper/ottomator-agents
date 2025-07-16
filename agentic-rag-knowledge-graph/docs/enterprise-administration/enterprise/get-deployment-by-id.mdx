@@ -1,0 +1,216 @@
+---
+title: "Get Deployments by ID"
+description: "This operation returns a list of microservices corresponding to the IDs included in the request."
+slug: "get-deployment-by-id"
+url: "/get-deployment-by-id"
+restInfoMetadata:
+  apiPath: /system/deployments/getDeploymentsById
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /system/deployments/getDeploymentsById
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '11.0'
+---
+
+## Description
+
+The `getDeploymentsById` operation returns a list of microservices corresponding to the IDs included in the request.
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `deploymentIDs`
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Filters deployments by their specific IDs. Deployment IDs can be gathered using the [Find Deployment IDs](/find-deployment-id) operation. If you are including multiple IDs, each ID must be separated by a comma.
+
+      ```other
+      deploymentIDs=klor1w3y00uqay7gkop17,kxfmz19qfoks0gk9xmjok
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+The following is a sample POST request for the `getDeploymentsById` operation:
+
+```other
+POST /context/admin/system/deployments/getDeploymentsById HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+deploymentIDs=klor1w3y00uqay7gkop17,kxfmz19qfoks0gk9xmjok&f=pjson&token=<token>
+```
+
+## JSON Response example
+
+```other expandable
+{
+  "deployments": [
+    {
+      "mode": "Shared",
+      "configuredState": "STARTED",
+      "provider": "DMaps",
+      "deploymentId": "klor1w3y00uqay7gkop17",
+      "name": "shared-mapserver",
+      "type": "MapServer",
+      "spec": {
+        "servicesFilter": {
+          "serviceType": "MapServer",
+          "providerType": "DMaps"
+        },
+        "replicas": {
+          "min": 2,
+          "max": 2,
+          "scalingMode": "manual"
+        },
+        "containers": [
+          {
+            "name": "main-container",
+            "resources": {
+              "memoryMin": "500Mi",
+              "memoryMax": "4Gi",
+              "cpuMin": "0.125",
+              "customResources": {},
+              "cpuMax": "2"
+            },
+            "containerImageUrl": "container.image.com/map-server:6243",
+            "containerImageKey": "MAP_SERVER"
+          },
+          {
+            "name": "fluent-bit",
+            "resources": {
+                "memoryMin": "32Mi",
+                "memoryMax": "150Mi",
+                "cpuMin": "0.05",
+                "customResources": {},
+                "cpuMax": "0.25"
+            },
+            "containerImageUrl": "container.image.com/arcgis-fluent-bit:6243",
+            "containerImageKey": "FLUENT_BIT"
+          }
+        ],
+        "initServices": {
+          "serviceNames": [
+            {
+              "serviceType": "MapServer",
+              "folderName": "System",
+              "serviceName": "SharedMapServiceHost",
+              "serviceId": "sk2t7le4zicjl7cp6edpb"
+            }
+          ]
+        },
+        "managedKubernetesResources": [
+          {
+            "purpose": "blue-deployment",
+            "kind": "Deployment",
+            "name": "arcgis-klor1w3y00uqay7gkop17-mapserver-qtuaj",
+            "selectorInstanceName": "blue"
+          },
+          {
+            "purpose": "service",
+            "kind": "Service",
+            "name": "arcgis-klor1w3y00uqay7gkop17-mapserver",
+            "selectorInstanceName": "blue"
+          }
+        ]
+      },
+      "labels": {},
+      "revision": 1729164716995
+    },
+    {
+      "mode": "Dedicated",
+      "configuredState": "STARTED",
+      "provider": "ArcObjects11",
+      "deploymentId": "kxfmz19qfoks0gk9xmjok",
+      "name": "sampleworldcities-mapserver",
+      "type": "MapServer",
+      "spec": {
+        "servicesFilter": {
+          "serviceType": "MapServer",
+          "folderName": "",
+          "serviceId": "sh1pqzlvaq0qzbj3shv7j",
+          "serviceName": "SampleWorldCities",
+          "providerType": "ArcObjects11"
+        },
+        "replicas": {
+          "min": 1,
+          "max": 1,
+          "scalingMode": "manual"
+        },
+        "containers": [
+          {
+            "name": "main-container",
+            "resources": {
+              "memoryMin": "500Mi",
+              "memoryMax": "2Gi",
+              "cpuMin": "0.125",
+              "customResources": {},
+              "cpuMax": "2"
+            },
+            "containerImageUrl": "container.image.com/map-server:6243",
+            "containerImageKey": "MAP_SERVER"
+          },
+          {
+            "name": "fluent-bit",
+            "resources": {
+              "memoryMin": "32Mi",
+              "memoryMax": "150Mi",
+              "cpuMin": "0.05",
+              "customResources": {},
+              "cpuMax": "0.25"
+            },
+            "containerImageUrl": "container.image.com/arcgis-fluent-bit:6243",
+            "containerImageKey": "FLUENT_BIT"
+          }
+        ],
+        "managedKubernetesResources": [
+          {
+            "purpose": "blue-deployment",
+            "kind": "Deployment",
+            "name": "arcgis-kxfmz19qfoks0gk9xmjok-mapserver-pzf2k",
+            "selectorInstanceName": "blue"
+          },
+          {
+            "purpose": "service",
+            "kind": "Service",
+            "name": "arcgis-kxfmz19qfoks0gk9xmjok-mapserver",
+            "selectorInstanceName": "blue"
+          }
+        ]
+      },
+      "labels": {},
+      "revision": 1729164717466
+    }
+  ]
+}
+
+```

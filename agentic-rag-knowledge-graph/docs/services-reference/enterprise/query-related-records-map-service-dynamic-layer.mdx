@@ -1,0 +1,562 @@
+---
+title: "Query Related Records (Map Service/Dynamic Layer)"
+description: "queryRelatedRecords operation returns one or more feature sets grouped by source layer / table object IDs."
+slug: "query-related-records-map-service-dynamic-layer"
+url: "/query-related-records-map-service-dynamic-layer"
+guid: "GUID-64D1C92F-9E6A-4F41-B417-229D5BC2959C"
+migratedTopicMetadata:
+  FTITLE: "Query Related Records (Map Service-Dynamic Layer)"
+  FDESCRIPTION: ""
+  FCHANGES: "Fixing broken links"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9.1 - *"
+  CREATED-ON: "07/09/2021 09:10:10"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "05/10/2021 08:23:05"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-D3F04B1C-7A3D-4B8D-91BB-9228E5FA5007"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /queryRelatedRecords
+  urlSegments:
+    - name: <dynamic-layer-url>
+      url: /dynamic-layer-table
+    - name: /queryRelatedRecords
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.1'
+  requiredCapability: Data
+---
+
+## Description
+
+The query-related records operation is performed on a [ dynamic layer / table resource](/dynamic-layer-table), of type `mapLayer` . The result of this operation is one or more feature sets grouped by source layer / table object IDs. Each feature set contains [feature objects](/feature-object) including the values for the fields requested by the user. For related layers, if you request geometry information, the geometry of each feature is also returned in the feature set. For related tables, the feature set does not include geometries.
+
+You can provide arguments to the query-related records operation as query parameters defined in the parameters table below.
+
+<Note type={"note"}>
+
+All parameters related to geometry will be ignored when querying related tables.
+
+</Note>
+
+## New at 10.5
+
+-   Supports datum transformation.
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`layer` 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Defines a dynamic layer. Only dynamic map layers are supported. When using this parameter, keep the following in mind:
+
+-   The `id`  and `definitionExpression`  properties are optional. 
+-   Use `gdbVersion`  on a dynamic map layer definition to specify an alternate geodatabase version.
+
+```javascript
+{
+  "id": <layerOrTableId>, // optional
+  "source": <layer source>, // only dynamic map layers are supported
+  "definitionExpression": "<definitionExpression>" // optional
+}
+```
+
+ 
+
+Example
+
+```javascript
+{
+  "id": 101,
+  "source": {
+    "type": "mapLayer",
+    "mapLayerId": 0,
+    "gdbVersion": "SDE.DynamicLayers"
+  },
+  "definitionExpression": "LotSize > 5000"
+}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`objectIds` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The object IDs of this layer or table to be queried. Records related to these object IDs will be queried.
+
+Syntax
+
+```javascript
+objectIds=<objectId1>, <objectId2>
+```
+
+ 
+
+Example
+
+```javascript
+objectIds=37, 462
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`relationshipId` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The ID of the relationship to be queried. The `relationships`  that this layer/table participates in are included in the [ Layer / Table Resource response](/layer-table). Records in tablesor layers corresponding to the related table or layer of the relationship are queried.
+
+Example
+
+```javascript
+relationshipsId=4
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outFields` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The list of fields from the related table or layer to be included in the returned feature set. This list is a comma-delimited list of field names. If you specify the shape field in the list of return fields, it is ignored. To request geometry, set `returnGeometry`  to `true` . You can also specify the wildcard "`*` " as the value of this parameter. In this case, the results will include all the field values.
+
+Example
+
+```javascript
+outFields=AREANAME,ST,POP2000
+
+//Wildcard usage
+outFields=*
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`definitionExpression` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The definition expression to be applied to the related table or layer. From the list of records that are related to the specified `objectIds` , only those records that conform to this expression will be returned.
+
+Example
+
+```javascript
+definitionExpression=POP2000 > 100000
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnGeometry` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , the feature set includes the geometry associated with each feature. The default is `true` .
+
+<Note type={"note"}>
+
+This parameter only applies to related layers. It will be ignored for related tables.
+
+Values: `true`  \| `false` 
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`maxAllowableOffset` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Added at 10.0. Specifies the `maxAllowableOffset`  to be used for generalizing geometries returned by the `queryRelatedRecords`  operation. The `maxAllowableOffset`  is in the units of the `outSR` . If `outSR`  is not specified, `maxAllowableOffset`  is assumed to be in the unit of the spatial reference of the map.
+
+Example
+
+```javascript
+maxAllowableOffset=2
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geometryPrecision` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the number of decimal places in the response geometries by the `queryRelatedRecords`  operation. This applies to x- and y-values only (not m- or z-values).
+
+Example
+
+```javascript
+geometryPrecision=3
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outSR` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the spatial reference of the returned geometry. The spatial reference can be specified as a well-known ID or as a [spatial reference json object](/geometry-objects). If `outSR`  is not specified, the geometry is returned in the spatial reference of the map.
+
+<Note type={"note"}>
+
+This parameter only applies to related layers. It will be ignored for related tables.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnZ` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , z-values will be included in the results if the features have z-values. Otherwise, z-values are not returned. The default is `false` .
+
+<Note type={"note"}>
+
+This parameter only applies if `returnGeometry`  is `true` .
+
+</Note>
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnM` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , m-values will be included in the results if the features have m-values. Otherwise, m-values are not returned. The default is `false` .
+
+<Note type={"note"}>
+
+This parameter only applies if `returnGeometry`  is `true` .
+
+</Note>
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`datumTransformation` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Added at 10.5. Applies a datum transformation while projecting geometries in the results when `outSR`  is different than the layer's spatial reference.
+
+<Note type={"note"}>
+
+When specifying a transformation, you need to think about which datum transformation is best applicable to project the layer (not the map service) to the `outSR` . The `sourceSpatialReference`  property in the layer resource reports which spatial reference features are stored in the source dataset.
+
+</Note>
+
+For a list of valid datum transformation ID values and well-known text strings, see [Using spatial references](/using-spatial-references). For more information on datum transformation, see the `transformation`  parameter in the [Project](/project) operation.
+
+Syntax
+
+```javascript
+datumTransformation=wkid1
+
+datumTransformation={<dt1>}
+
+```
+
+ 
+
+Examples
+
+```javascript
+//To apply a transformation
+datumTransformation=1623
+
+//To apply a composite transformation
+datumTransformation={"geoTransforms":[{"wkid":108889,"transformForward":true},{"wkid":1622,"transformForward":false}]}
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` .
+
+Values: `html`  \| `json`  \| `pjson` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+The following is a sample request URL for the `queryRelatedRecords`  operation:
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/Petroleum/KSPetro/MapServer/dynamicLayer/queryRelatedRecords?layer={"id":101,"definitionExpression":"\"sub_region\" like 'Pacific'","source":{"type":"mapLayer","mapLayerId":3}}&objectIds=3,4,5&relationshipId=2&returnGeometry=true&outFields=*&f=html
+```
+
+ 
+
+## JSON Response syntax
+
+```other
+{
+  "geometryType": "<geometryType>", //if records include geometry
+  "spatialReference": <spatialReference>, //if records include geometry
+  "hasZ": <true|false>, //added in 10.1
+  "hasM": <true|false>, //added in 10.1
+  "fields": [
+    {
+      "name": "<fieldName1>",
+      "type": "<fieldType1>",
+      "alias": "<fieldAlias1>",
+      "length": "<length1>"
+    },
+    {
+      "name": "<fieldName2>",
+      "type": "<fieldType2>",
+      "alias": "<fieldAlias2>",
+      "length": "<length2>"
+    }
+  ],
+  "relatedRecordGroups": [
+    {
+      "objectId": <objectId1>,
+      "relatedRecords": [ //features may include geometry for related layers only
+        <relatedFeature11>,
+        <relatedFeature12>
+      ]
+    },
+    {
+      "objectId": <objectId2>,
+      "relatedRecords": [
+        <relatedFeature21>,
+        <relatedFeature22>
+      ]
+    }
+  ]
+}
+```
+
+ 
+
+## JSON Response example
+
+When viewing the JSON response for your request, keep the following in mind:
+
+-   The `domains`  member is not included in field information objects returned with the response.
+-   The JSON response contains an optional property `exceededTransferLimit` . This property will be true only if the number of records exceeds the maximum number configured by an administrator.
+
+```other
+{
+  "geometryType": "esriGeometryPolygon",
+  "spatialReference": {
+    "wkid": 4267
+  },
+  "fields": [
+    {
+      "name": "OBJECTID", 
+      "type": "esriFieldTypeOID", 
+      "alias": "OBJECTID"
+    }, 
+    {
+      "name": "FIELD_KID", 
+      "type": "esriFieldTypeString", 
+      "alias": "FIELD_KID", 
+      "length": 25
+    }, 
+    {
+      "name": "APPROXACRE", 
+      "type": "esriFieldTypeDouble", 
+      "alias": "APPROXACRE"
+    }, 
+    {
+      "name": "FIELD_NAME", 
+      "type": "esriFieldTypeString", 
+      "alias": "FIELD_NAME", 
+      "length": 150
+    } 
+  ],
+  "relatedRecordGroups": [
+    {
+      "objectId": 3,
+      "relatedRecords": [
+        {
+          "attributes": {
+            "OBJECTID": 5540,
+            "FIELD_KID": "1000147595",
+            "APPROXACRE": 95929,
+            "FIELD_NAME": "LOST SPRINGS",
+          },
+          "geometry": {
+            "rings": [
+              [
+                [
+                  -96.929599633999942,
+                  38.52426809800005
+                ],
+                [
+                  -96.929602437999961,
+                  38.522448437000037
+                ],
+                [
+                  -96.92959118999994,
+                  38.529723252000053
+                ],
+                [
+                  -96.929594022999936,
+                  38.527905578000059
+                ],
+                [
+                  -96.929596839999988,
+                  38.526087119000067
+                ],
+                [
+                  -96.929599633999942,
+                  38.52426809800005
+                ]
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+ 

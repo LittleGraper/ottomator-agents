@@ -1,0 +1,307 @@
+---
+title: "Elevation analysis service"
+description: "The Elevation analysis services allows you to easily perform surface analysis without having to maintain the data yourself."
+slug: "index"
+url: "/"
+guid: "GUID-E008D421-8D67-45CF-B73A-703905224236"
+migratedTopicMetadata:
+  FTITLE: "Get started with Elevation services"
+  FDESCRIPTION: ""
+  FCHANGES: "Remove 'API' from 'Mapping APIs and location services' in the tip, and update the 2 urls from the tip"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "AGOL24R02 - * 11.4 - *"
+  CREATED-ON: "20/06/2024 14:00:30"
+  FAUTHOR: "schatterjee"
+  FSTATUS: "Released"
+  MODIFIED-ON: "24/06/2024 11:45:41"
+  VERSION: "11"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-3C1D073C-C145-41CF-B487-6EBA053E963E"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+---
+
+The elevation analysis service performs analyses on the elevation in Terrain data from the ArcGIS Living Atlas of the World in order to derive surface information, such as calculating visible areas, returning profile features, and summarizing elevation values for the input feature data. The elevation data used by these analyses is available at different spatial extents and resolutions. See the [data coverage](/source-data-for-elevation-analysis-tasks) section for more information.
+
+## Key features
+
+-   Create [viewsheds](/viewshed) to identify visible areas based on input observer locations
+-   Find elevation values along input lines and return a [profile](/profile) feature
+-   Calculate [summary statistics](/summarize-elevation) for elevation values in areas covered by the input features 
+
+## Access the services
+
+To access the spatial analysis service, you need the following:
+
+-   An [ArcGIS Developer](https://developers.arcgis.com/sign-up/) account or an [ArcGIS Online](https://www.esri.com/en-us/arcgis/products/arcgis-online/trial) account. 
+-   An [access token](https://developers.arcgis.com/documentation/glossary/access-token/) (API key or OAuth 2.0).
+
+<Note type={"tip"}>
+
+To learn more about API keys and OAuth 2.0, go to [Security and authentication](https://developers.arcgis.com/documentation/security-and-authentication/) in the [Mapping and location services](https://developers.arcgis.com/documentation/mapping-and-location-services/) guide.
+
+</Note>
+
+## Example
+
+This example shows how to calculate viewshed using the [viewshed](/viewshed) request.
+
+1\. Send a job request to calculate viewshed.
+
+<Tabs>
+<TabNav>
+  <TabTitle>Request</TabTitle>
+  <TabTitle>Response</TabTitle>
+</TabNav>
+
+    <Tab>
+
+    ```json
+    POST https://elevation.arcgis.com/arcgis/rest/services/Tools/Elevation/GPServer/Viewshed/submitJob HTTP/1.1
+    content-type: application/x-www-form-urlencoded
+
+    f=json
+    &token=<ACCESS_TOKEN>
+    &InputPoints={"url":"https://sampleserver6.arcgisonline.com/arcgis/rest/services/Military/FeatureServer/2"}
+    &MaximumDistance=15
+    &MaximumDistanceUnits=Kilometers
+    &DEMResolution=90m
+    &ObserverHeight=2
+    &ObserverHeightUnits=Meters
+    &SurfaceOffset=0
+    &SurfaceOffsetUnits=Meters
+    &GeneralizeViewshedPolygons=true
+    &context={
+      "extent":{
+        "xmin":-13346035.5147852,
+        "ymin":4158841.0975389,
+        "xmax":-13313204.4419169,
+        "ymax":4174735.07010641,
+        "spatialReference":{
+        "wkid":102100,
+        "latestWkid":3857
+        }
+      }
+    }
+
+    ```
+    </Tab>
+
+    <Tab>
+
+    ```json
+    {
+      "jobId":"j4cb1689cb97b4de6a0f8047ce249900e",
+      "jobStatus":"esriJobSubmitted"
+    }
+         
+    ```
+    </Tab>
+
+</Tabs>
+
+2\. Check the job status using the provided jobID until the job has succeeded or failed. Learn more about submitting [GP Jobs](https://developers.arcgis.com/rest/services-reference/enterprise/gp-job/).
+
+<Tabs>
+<TabNav>
+  <TabTitle>Request</TabTitle>
+  <TabTitle>Response</TabTitle>
+</TabNav>
+
+    <Tab>
+
+    ```json
+    POST https://elevation.arcgis.com/arcgis/rest/services/Tools/Elevation/GPServer/Viewshed/jobs/<jobID> HTTP/1.1
+    content-type: application/x-www-form-urlencoded
+
+    f=json
+    &token=<ACCESS_TOKEN>
+
+    ```
+    </Tab>
+  
+    <Tab>
+
+    ```json
+    {
+     "jobId": "j4cb1689cb97b4de6a0f8047ce249900e",
+     "jobStatus": "esriJobSucceeded",
+     "results": {
+      "OutputViewshed": {
+       "paramUrl": "results/OutputViewshed"
+      }
+     },
+     "inputs": {
+      "InputPoints": {
+       "paramUrl": "inputs/InputPoints"
+      },
+      "MaximumDistance": {
+       "paramUrl": "inputs/MaximumDistance"
+      },
+      "MaximumDistanceUnits": {
+       "paramUrl": "inputs/MaximumDistanceUnits"
+      },
+      "DEMResolution": {
+       "paramUrl": "inputs/DEMResolution"
+      },
+      "ObserverHeight": {
+       "paramUrl": "inputs/ObserverHeight"
+      },
+      "ObserverHeightUnits": {
+       "paramUrl": "inputs/ObserverHeightUnits"
+      },
+      "SurfaceOffset": {
+       "paramUrl": "inputs/SurfaceOffset"
+      },
+      "SurfaceOffsetUnits": {
+       "paramUrl": "inputs/SurfaceOffsetUnits"
+      },
+      "GeneralizeViewshedPolygons": {
+       "paramUrl": "inputs/GeneralizeViewshedPolygons"
+      }
+    },
+     "messages": [
+
+     ]
+    }
+         
+    ```
+
+    </Tab>
+</Tabs>
+
+3\. Once the job has succeeded, get the results.
+
+<Tabs>
+<TabNav>
+  <TabTitle>Request</TabTitle>
+  <TabTitle>Response</TabTitle>
+</TabNav>
+    <Tab>
+
+    ```json
+    POST https://elevation.arcgis.com/arcgis/rest/services/Tools/Elevation/GPServer/Viewshed/jobs/<jobID>/results/OutputViewshed HTTP/1.1
+    content-type: application/x-www-form-urlencoded
+
+    f=json
+    &token=<ACCESS_TOKEN>
+    &returnType="data"
+
+    ```
+
+    </Tab>
+
+    <Tab>
+
+    ```json
+    {
+     "paramName": "OutputViewshed",
+     "dataType": "GPFeatureRecordSetLayer",
+     "value": {
+      "displayFieldName": "",
+      "geometryType": "esriGeometryPolygon",
+      "spatialReference": {
+       "wkid": 102100,
+       "latestWkid": 3857
+      },
+      "fields": [
+       {
+        "name": "OBJECTID",
+        "type": "esriFieldTypeOID",
+        "alias": "OBJECTID"
+       },
+       {
+        "name": "Frequency",
+        "type": "esriFieldTypeInteger",
+        "alias": "Frequency"
+       },
+       {
+        "name": "DEMResolution",
+        "type": "esriFieldTypeString",
+        "alias": "DEM Resolution",
+        "length": 50
+       },
+       {
+        "name": "ProductName",
+        "type": "esriFieldTypeString",
+        "alias": "Product Name",
+        "length": 50
+       },
+       {
+        "name": "Source",
+        "type": "esriFieldTypeString",
+        "alias": "Source",
+        "length": 50
+       },
+       {
+        "name": "Source_URL",
+        "type": "esriFieldTypeString",
+        "alias": "Source URL",
+        "length": 84
+       },
+       {
+        "name": "PerimeterKm",
+        "type": "esriFieldTypeDouble",
+        "alias": "Perimeter Kilometers"
+       },
+       {
+        "name": "AreaSqKm",
+        "type": "esriFieldTypeDouble",
+        "alias": "Area Square Kilometers"
+       },
+       {
+        "name": "Shape_Length",
+        "type": "esriFieldTypeDouble",
+        "alias": "Shape_Length"
+       },
+       {
+        "name": "Shape_Area",
+        "type": "esriFieldTypeDouble",
+        "alias": "Shape_Area"
+       }
+      ],
+      "features": [
+       {
+        "attributes": {
+         "OBJECTID": 1,
+         "Frequency": 1,
+         "DEMResolution": "90m",
+         "ProductName": "SRTM",
+         "Source": "USGS, NASA, CGIAR",
+         "Source_URL": "http://www.cgiar-csi.org/",
+         "PerimeterKm": 354.15308489745701,
+         "AreaSqKm": 148.66910107457102,
+         "Shape_Length": 433100.7349169582,
+         "Shape_Area": 222586699.99871624
+        },
+        "geometry": {
+         "rings": [
+          [
+           [
+            -13337373.645,
+            4148794.8844999969
+           ],
+           [
+            -13337837.476199999,
+            4148794.8844999969
+           ],
+           ....
+           .... additional vertices in the geometry 
+           ....
+          ]
+         ]
+        }
+       ],
+     "exceededTransferLimit": false
+     }
+    }
+
+    ```
+    </Tab>
+
+</Tabs>

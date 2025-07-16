@@ -1,0 +1,143 @@
+---
+title: "Join Site"
+description: "The joinSite operation joins a server to an existing site."
+slug: "joinsite"
+url: "/joinsite"
+guid: "GUID-2B645601-5548-49EC-AD5F-AC4230F1879D"
+migratedTopicMetadata:
+  FTITLE: "joinSite"
+  FDESCRIPTION: ""
+  FCHANGES: "Updating ArcMap support information"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0 -*"
+  CREATED-ON: "20/04/2022 11:17:14"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "24/05/2022 09:34:36"
+  VERSION: "7"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "7"
+  ED: "GUID-E7095671-F190-4F3C-9670-04514810097A"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /joinSite
+  urlSegments:
+    - name: <root>
+      url: /site
+    - name: /joinSite
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.1'
+  requiredCapabilities:
+    - name: Access allowed only with the default administrator role
+      url: /managing-access-to-the-server-administration-rest-api
+---
+
+## Description
+
+<Note type={"note"}>
+
+The `joinSite` operation is available only when a server machine is not already participating in any site.
+
+</Note>
+
+The `joinSite` operation connects a server machine to an existing site. This is considered a push mechanism, in which a server machine pushes its configuration to the site. For the operation to be successful, you must provide an account with administrative privileges to the site.
+
+When an attempt is made to join a site, the site validates the administrative credentials, and returns connection information about its [configuration store](/configstore) back to the server machine. The server machine then uses the connection information to work with the configuration store. If this is the first server machine in your site, use the [`Create Site`](/createsite) operation instead.
+
+If your site has registered [Relational Data Store Types](/relational-data-store-types), you must completely restart ArcGIS Server on the newly joined machines. To do this, restart the Windows Service or use the `stopserver`/`startserver` scripts on Linux.
+
+<Note type={"note"}>
+
+At 10.9.1, when installing ArcGIS Server you had the option to disable the ArcMap service runtime. Attempting to join a server machine to an existing site that had a conflicting ArcMap runtime status would result in an error. Starting at ArcGIS Enterprise 11.0, the optional ArcMap Runtime Support feature is removed, and an existing site and joining server machines no longer have the potential to be in conflict.
+
+</Note>
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Description"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `adminURL` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The site URL of the currently live site. This is typically the Administrator Directory URL of one of the server machines of a site.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `username` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The name of the administrative account for the site.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `password` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The password of the administrative account.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## JSON Response syntax
+
+<Note type={"note"}>
+
+The `pollAfter` property in the response indicates the number of seconds you must wait after making this call before making more calls in to the server.
+
+</Note>
+
+```other
+{
+	 "status": "success|failure",
+	 "pollAfter": <seconds>
+}
+```
+
+## JSON Response example
+
+The following is a sample success response for the `joinSite` operation, indicating that the server machine joined the site successfully:
+
+```javascript
+{
+  "status": "success",
+  "pollAfter": 10
+}
+```

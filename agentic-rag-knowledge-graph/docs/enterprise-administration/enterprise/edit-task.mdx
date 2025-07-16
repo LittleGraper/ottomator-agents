@@ -1,0 +1,689 @@
+---
+title: "Update (Task)"
+description: "This operation allows you to edit and update the properties of a preexisting task."
+slug: "edit-task"
+url: "/edit-task"
+guid: "GUID-82638004-9A6A-4ADC-9527-5495820C7B27"
+migratedTopicMetadata:
+  FTITLE: "Edit Task"
+  FDESCRIPTION: ""
+  FCHANGES: "Changes for 10.9.1"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9.1-*"
+  CREATED-ON: "27/10/2021 13:53:05"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "16/11/2021 11:21:02"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "13"
+  ED: "GUID-B409C3F8-3066-40BC-A3B1-15F9F54BFDFF"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /system/tasks/<taskID>/update
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /system/tasks/<taskID>/update
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed only with the default administrator role
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `update` operation allows you to edit and update the properties of a preexisting task (`CleanGPJobs`, `BackupRetentionCleaner` at 10.9.1, and `CreateBackup` at 10.9.1). Updates that have been made to a task will go into effect during its next scheduled execution.
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `title` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The task's title.
+
+      ```markdown label=Example
+      title=gpCleanerTask
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `type` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The type of task. At 10.9, the only task supported was the `CleanGPJobs` task type. At 10.9.1, the `CreateBackup` and `BackupRetentionCleaner` tasks were added.
+
+      Values: `CleanGPJobs` | `CreateBackup` | `BackupRetentionCleaner`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `parameters` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+A JSON object of additional parameters that will be added to the task run request.
+
+      For `CreateBackup`, `parameters` must include the `name` of the backup, the `storeName` of the backup store in which the backup will reside, and the `passcode` that will be used to encrypt and restore the backup (the `passcode` must be at least eight characters). This operation can be used to change the `passcode` for a backup by passing in a new, plaintext value that will be reencrypted once the edit operation is complete. The backup `description` is optional.
+
+      ```markdown label=Example
+      parameters={}
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `itemId` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The task item ID the scheduled task will be run against. This parameter is not required for `CreateBackup`.
+
+      ```markdown label=Example
+      itemId=d68b96a1-4c39-4914-8d97-d82842a71bed
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `startDate` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The date, defined in Epoch milliseconds (Unix), of when the scheduled task will begin running.
+
+      ```markdown label=Example
+      startDate=1589428800000
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `endDate` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The date, defined in Epoch milliseconds (Unix), of when the scheduled task will stop running.
+
+      ```markdown label=Example
+      endDate=1589428800000
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `minute` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A valid CRON expression (`,` `-` `*` `/`) that specifies the minute value for the task's schedule. [For examples of sample schedules, see the CRON expressions section below.](/edit-task#cron-expressions)
+
+      ```markdown label=Example
+      minute=0
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `hour` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A valid CRON expression (`,` `-` `*` `/`) that specifies the hour value for the task's schedule. [For examples of sample schedules, see the CRON expressions section below.](/edit-task#cron-expressions)
+
+      ```markdown label=Example
+      hour=*
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `dayOfMonth` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A valid CRON expression (`,` `-` `*` `?` `/` `L` `W` `LW`) that specifies the day of the month for the task's schedule. [For examples of sample schedules, see the CRON expressions section below.](/edit-task#cron-expressions)
+
+      ```markdown label=Example
+      dayOfMonth=*
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `month` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A valid CRON expression (`,` `-` `*` `/`) that specifies the month for the task's schedule. [For examples of sample schedules, see the CRON expressions section below.](/edit-task#cron-expressions)
+
+      ```markdown label=Example
+      month=*
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `dayOfWeek` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A valid CRON expression (`,` `-` `*` `?` `/` `L` `#`) that specifies the day of the week for the task's schedule. [For examples of sample schedules, see the CRON expressions section below.](/edit-task#cron-expressions)
+
+      ```markdown label=Example
+      dayOfWeek=?
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `maxOccurences` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum number of occurrences this task should execute.
+
+      ```markdown label=Example
+      maxOccurences=-1
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## CRON expressions
+
+Special characters and wildcards can be used to customize your scheduled jobs. The following table lists the supported characters:
+
+<StyledTable headers={"Character,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `*` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies all values.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `?` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      No specific value for `dayOfMonth` and `dayOfWeek` expressions.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `-` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A range.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `,` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      List of additional values.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `/` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies increments.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `#` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The nth day name of the month.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `L` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Last day of the week or month.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `W` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The weekday (Monday-Friday) nearest the given day (applies only to `dayOfMonth`).
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `LW` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Last weekday of the month.
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+The following table demonstrates sample schedules and how they translate to CRON values for the `minute`, `hour`, `dayOfMonth`, `month`, and `dayOfWeek` parameters:
+
+
+<StyledTable headers={"Schedule,minute,hour,dayOfMonth,month,dayOfWeek"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Hourly at 15 minutes past the hour
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      15
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      \*
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      \*
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      \*
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      ?
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Every four hours during weekdays
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      0
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      \*/4
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      ?
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      \*
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      1-5
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Weekly on Sundays at 12 p.m.
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      0
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      12
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      ?
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      \*
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      7
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Twice a month on the 1st and 15th at 12 a.m.
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      0
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      0
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      1,15
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      \*
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      ?
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Last Friday of every month at 10 p.m.
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      0
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      22
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      ?
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      \*
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      6L
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Last day of the month at 10 p.m.
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      0
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      22
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      L
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      \*
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      ?
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Last weekday of the month at 6 p.m.
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      0
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      18
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      LW
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      \*
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      ?
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Closest weekday to the 15th of each month at midnight
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      0
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      0
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      15W
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      \*
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      ?
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+The following is a sample POST request for the `update` operation:
+
+```other
+POST /context/admin/system/tasks/87b8a97828e647e8af5d634774b2b8a7/update HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+title=gpCleanerTask&type=CleanGPJobs&parameters=&itemId=d68b96a1-4c39-4914-8d97-d82842a71bed&startDate=1589428800000&endDate=1589428800000&minute=0&hour=*&dayOfMonth=*&month=*&dayOfWeek=?&maxOccurences=30&f=pjson&token=m7zGSezM7znt6ZuIwr827imJxOTSDsjYujVdd7SiAQLYG1HmesG8EbSnTwCbiekEh0QwRdmeyp1hP63M60TPrdZQ2NzIg5G7qFaQh40MdiOCfh60-6oPKC2MNoqwdVDZ3srzreVZb66QofWXws8GMrKWkgP45A-2an5crKvReUo-pwvkzm68W87Q0yPJFA2Kww39UnMYNw-5qd2-Bt04VmkrqKI-lCbA-jFZY_UGzeGzNqnBGrjKuVB_q17HogMw
+```
+
+The following sample POST request demonstrates using the update operation on a `CreateBackup` task that changes the `passcode` value:
+
+```other
+POST /context/admin/system/tasks/5f0cdc50cf36460990bb6edfe9b60e08/update HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+title=backups&type=CreateBackup&parameters={"storeName": "backups","passcode": "myNewPasscode","description": "Automated Backups from Task Scheduler","name": "schedule1"}&startDate=1589428800000&endDate=1589428800000&minute=0&hour=0&dayOfMonth=?&month=*&dayOfWeek=7&maxOccurrences=1&f=pjson&token=HRozb6bnTL6gfA-SJO-IxhfLgJrioK1KJdMLWmCE5HjHWz9U3fOiFv3-HkgPZqsLljTkk2WDENGt5fjho5s39e_mZL5At60UvJPoNnC5O2sv2HTlumG7TsYfbtnokpWmS6-lf8XoQpSKusZwmxIkEMP-yE0Wxrj8o9sWKi29J-pxzkoCDhoUfdLt6NnBWxhESpegh8BzNcEruqxuDQD-JRmaTsbRDaBHTQTePMzQePhXl7KcEG9Cfkw2sa7P1W1e
+```
+
+## JSON Response example
+
+```other
+{
+  "generation": 5,
+  "created": "Apr 21, 2021, 10:42:17 PM",
+  "active": true,
+  "ownerId": "c076e404cec9497488f008fc5b83e6fa",
+  "type": "GP_JOBS_CLEANER_TASK_TYPE",
+  "orgId": "0123456789ABCDEF",
+  "cronSchedule": {
+    "dayOfWeek": "?",
+    "hour": "*",
+    "month": "*",
+    "dayOfMonth": "*",
+    "minute": "0"
+  },
+  "cronExpression": "0 0 * * * ?",
+  "itemId": "0a78247d-0d0d-4b69-a658-03104e15bd66",
+  "runIntervalSeconds": 3600,
+  "taskType": "CleanGPJobs",
+  "taskState": "active",
+  "taskTitle": "gpCleanerTask",
+  "maxOccurrences": -1,
+  "id": "2a1ba86743414f929c0c1f38b32f1c9c",
+  "lastStart": "Apr 22, 2021, 3:00:00 AM",
+  "updated": "Apr 21, 2021, 10:42:17 PM",
+  "taskId": "2a1ba86743414f929c0c1f38b32f1c9c"
+}
+```

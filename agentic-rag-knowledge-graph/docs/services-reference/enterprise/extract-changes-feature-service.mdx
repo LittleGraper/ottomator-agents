@@ -1,0 +1,1223 @@
+---
+title: "Extract Changes (Feature Service)"
+description: "The extractChanges operation can be used to retrieve changes made to a service with the ChangeTracking capability enabled."
+slug: "extract-changes-feature-service"
+url: "/extract-changes-feature-service"
+guid: "GUID-4204F200-FE68-485A-8D6D-02FF7A2D7D65"
+migratedTopicMetadata:
+  FTITLE: "Extract Changes (Feature Service)"
+  FDESCRIPTION: ""
+  FCHANGES: "Changes for 11.2"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2- *"
+  CREATED-ON: "24/09/2023 17:39:50"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "28/09/2023 12:29:40"
+  VERSION: "9"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-9B47A22B-00E7-4D11-AA8D-0B6BE699FE08"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/FeatureServer/extractChanges
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/FeatureServer/extractChanges
+  methods:
+    - post
+  sslOnly: 'no'
+---
+
+## Description
+
+The `extractChanges`  operation can be used to retrieve changes made to a service with the `ChangeTracking`  capability enabled. Feature service change tracking is an efficient change tracking mechanism for applications. Applications can use change tracking to query changes that have been made to the layers and tables in the service. For enterprise geodatabase-based feature services published from ArcGIS Pro 2.2 or later, the `ChangeTracking`  capability requires all layers and tables to be either archive enabled or branch versioned and have globalid columns. Change tracking can also be enabled for ArcGIS Online-hosted feature services. If all layers and tables in the service have the `ChangeTracking`  capability, the `extractChanges`  operation can be used to get changes.
+
+Check the subproperties of `extractChangesCapabilities`  on the service resource to see which `extractChanges`  options are supported. These include the following: 
+
+-   `supportsReturnIdsOnly` —Allows the use of the `returnIdsOnly`  parameter, which returns only the IDs of the features that were changed.
+-   `supportsReturnExtentOnly` —Allows the use of the `returnExtentOnly`  parameter to return the extent of the changed features.
+-   `supportsReturnAttachments` —Allows the use of the `returnAttachments`  parameter. This will return any attachments associated with the changed features.
+-   `supportsLayerQueries` —Allows the use of `layerQueries`  to limit the changed features returned using filters such as a where clause.
+-   `supportsGeometry` —Allows the use of the `geometry`  parameter, which will return changed features within a defined geometry. 
+-   `supportsReturnFeature` —Allows full rows to be returned for updates or inserts as opposed to IDs only.
+-   `supportsFieldsToCompare` —Introduced at ArcGIS Enterprise 11.0. Allows the use of the `fieldsToCompare`  parameter to further group feature updates based on which fields were changed.
+-   `supportsServerGens` -Introduced at ArcGIS Enterprise 11.0. Allows the use of the `serverGens`  parameter to provide a range of server generations for all layers. This can be used instead of `layerServerGens` , which sets `serverGens`  for each layer individually.
+
+<Note type={"note"}>
+
+All properties listed within the `extractChangesCapabilities`  can be `true`  or `false` .
+
+</Note>
+
+Enterprise geodatabase-based feature services published from ArcGIS Pro 2.2, `supportsReturnIdsOnly`  is the only subproperty set to true. This allows you to use the `extractChanges`  operation to retrieve the objectids of the inserts, updates, and deletes that have happened since a specific time period.
+
+### Enable and disable change tracking
+
+The feature service change tracking capability must be enabled to track layer changes. When change tracking is enabled, change tracking information is maintained for all rows in the layers and tables that are affected by any editing or sync operation.
+
+To enable or disable change tracking on an existing feature service, add or remove the `ChangeTracking`  capability to or from the feature service.
+
+```javascript
+{"capabilities": "Create,Delete,Query,Update,Editing,ChangeTracking"}
+```
+
+ 
+
+A feature service with change tracking enabled returns additional metadata, demonstrated in the example below. The `layerServerGens`  property in `changeTrackingInfo`  must be cached on the client. The client needs to pass change `layerServerGens`  to the server when requesting the latest changes from the server.
+
+```javascript
+"changeTrackingInfo": {"lastSyncDate": 1519247516232,"layerServerGens": [{"id": 0,"minServerGen": 1529667,"serverGen": 1534028}]},
+```
+
+ 
+
+<Note type={"note"}>
+
+Enterprise geodatabase-based feature services do not support enabling and disabling the `ChangeTracking`  capability. `ChangeTracking`  will automatically be enabled on the geodatabase-based feature service if the data is archive enabled or is branch versioned and has globalid columns.
+
+</Note>
+
+### Hosted feature service views
+
+The `ChangeTracking`  service capability can be enabled or disabled on a feature service view if its source feature service has `ChangeTracking`  enabled. `ChangeTracking`  capability cannot be disabled on a source feature service if any of its views have `ChangeTracking`  enabled.
+
+### `hasChangeTrackingEnabledViews`  service property
+
+Source feature services with views or map/tile service with change tracking enabled will return `hasChangeTrackingEnabledViews`  as `true`  in the metadata. This would allow the UX to block a user from disabling change tracking on a source feature service when its views also have change tracking enabled. This is a computed property and will be changed when the source feature service views change tracking is enabled or disabled or when views or map services are deleted.
+
+## New at 11.2
+
+Hosted feature services on a relational datastore now supports the `returnDeletedFeatures`  parameter, which allows you to specify whether the full information for a deleted feature is returned, or just the feature's identifier.
+
+## New at 11.1
+
+Starting at ArcGIS Enterprise 11.1, this operation includes support for the `returnDeletedFeatures`  parameter. This parameter allows you to specify whether the full information for a deleted feature is returned, or just the feature's identifier. This is supported for ArcGIS Enterprise non-hosted feature services and ArcGIS Online hosted feature services.
+
+## New at 11.0
+
+-   The `extractChanges`  operation has been expanded to support the following changes, support for which depend on properties under `extractChangesCapabilities`  on the service-level resource:
+
+    -    A new parameter, `fieldsToCompare` . Support for this is indicated when the `supportsFieldsToCompare`  property, under `extractChangesCapabilities` , is set as `true` .
+    -    The ability to return features rather than IDs only. Support for this is indicated when the `supportsFeatureReturn`  property, under `extractChangesCapabilities` , is set as `true` .
+    -    A new parameter, `serverGens` . Support for this is indicated when the `supportsServerGens`  property, under `extractChangesCapabilities` , is set as `true` .
+    -    The ability to return attachment differences. Support for this is indicated when the `supportsReturnAttachments`  property, under `extractChangesCapabilities` , is set as `true` .
+-   The `ChangeTracking`  capability can now be enabled on a feature service resource using the `updateDefinition`  operation. Adding `ChangeTracking`  exposes the `extractChanges`  operation and adds the `extractChangesCapabilities`  property to the feature service resource. This property describes the `extractChanges`  operation that are supported for that feature service.
+
+    <Note type={"note"}>
+
+    Hosted feature service cannot have both the `Sync`  and `ChangeTracking`  capabilities enabled at the same time.
+
+    </Note>
+
+## New at 10.9
+
+A new parameter, `returnHasGeometryUpdates` , has been added. When set to `true` , the response includes a `hasGeometryUpdates=true`  property for each layer with updates that have geometry changes.
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`layers` 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The list of layers and tables to include in the replica.
+
+Syntax
+
+```javascript
+layers=[<layer1>,<layer2>,<table1>]
+```
+
+ 
+
+Example
+
+```javascript
+layers=0,1,2
+
+layers=[0,1,2] //geodatabase-based features services only support this format
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`serverGens` 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Introduced at 11.0. This parameter sets the `serverGens`  to apply to all layers included in the layers parameter. Either a single generation, or a pair of generations, can be used as values for this parameter. If a single `serverGen`  value is provided, all changes that have happened since that generation are returned. If a pair of `serverGen`  values are provided, changes that have happened between the first generation (the minimum value) and up to and including the second generation (the maximum value) are returned. If providing two generations, the first value in the pair is expected to be the smaller of the two values.
+
+Support for this parameter is indicated when the service-level `supportServerGens`  property, under `extractChangesCapabilities` , is set as `true` . This operation requires either `serverGens`  or `layerServerGens`  be submitted with the request.
+
+Syntax
+
+```javascript
+//Single server generation
+"serverGens": <genNum>
+
+//Pair of server generations
+"serverGen": [<minGenNum>, <maxGenNum>]
+```
+
+ 
+
+Example
+
+```javascript
+//Single server generation
+"serverGens": 1653608093000
+
+//Pair of server generations
+"serverGen": [1653608093000, 1653608948000]
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`layerQueries` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+In addition to the layers and geometry parameters, the `layerQueries`  parameter can be used to further define what changes to return. This parameter allows you to set query properties on a per-layer or per-table basis. If a layer's ID is present in the `layers`  parameter and missing from `layerQueries` , its changed features that intersect with the filter geometry are returned.
+
+When the value is `none` , no features are returned based on where and filter geometry. If `includeRelated`  is `false` , no features are returned. If `includeRelated`  is `true` , features in this layer (that are related to the features in other layers in the replica) are returned. When the value is `useFilter` , features that satisfy filtering based on geometry and where are returned. The value of `includeRelated`  is ignored.
+
+The properties include the following:
+
+-   `where` —Defines an attribute query for a layer or table. The default is no `where`  clause.
+-   `useGeometry` —Determines whether to apply the geometry for the layer. The default is `true` . If set to `false` , features from the layer that intersect the geometry are not added.
+-   `includeRelated` —Determines whether to add related rows. The default is `true` . The value `true`  is honored only for `queryOption=none` . This is only applicable if your data has relationship classes. Relationships are only processed in a forward direction from origin to destination.
+-   `queryOption` —Defines whether or how filters will be applied to a layer. See [Compatibility notes](/sync-compatibility-notes) for more information.
+
+Values: `none`  \| `useFilter`  \| `all` 
+
+Syntax
+
+```javascript
+layerQueries={Layer_or_tableID1: {"where":"attribute query","useGeometry": <true | false>,"includeRelated": <true | false>},Layer_or_tableID2: {.}}
+```
+
+ 
+
+Examples
+
+```javascript
+//Replicate facilities in an area that needs inspection for a service with a facilities layer (0) and an inspection layers (1) that are related
+layerQueries={"0":{"queryOption":"useFilter","useGeometry": true,"where":"requires_inspection=yes"}}
+
+//Replicate facilities in an area that needs inspection
+layerQueries={"0":{"queryOption":"useFilter","useGeometry":true,"where":"requeires_instpection=yes"},{"1":{"queryOption":"none","includedRelated":true}}
+
+//Replicate all of a specific element in a layer
+layerQueries = {"2":{"queryOption": "all"}
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geometry` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The geometry to apply as the spatial filter for the changes. All the changed features in layers intersecting this geometry will be returned. The structure of the geometry is the same as the structure of the [JSON geometry objects](/geometry-objects) returned by the ArcGIS Online. In addition to the JSON structures, for envelopes and points, you can specify the geometry with a simpler comma-separated syntax.
+
+Syntax
+
+```javascript
+//JSON structures
+geometry={}
+
+//Envelope simple syntax
+geometry=<xmin>,<ymin>,<xmax>,<ymax>
+
+//Point simple syntax
+geometry=<x>,<y>
+
+```
+
+ 
+
+Example
+
+```javascript
+//JSON structures
+geometry={xmin:-104, ymin:35.6, xmax:-94.32, ymax: 41}
+
+//Envelope example
+geometry=-104, 35.6, -94.32, 41
+
+//Point example
+geometry=-104, 35.6
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geomtryType` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The type of geometry specified by the `geometry`  parameter. The geometry type can be an envelope, point, line, or polygon. The default geometry type is an envelope.
+
+Values: `esriGeometryPoint`  \| `esriGeometryMultipoint`  \| `esriGeometryPolyline`  \| `esriGeometryPolygon`  \| `esriGeometryEnvelope` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`inSR` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The spatial reference of the input `geometry` . The spatial reference can be specified as either a well-known ID or a spatial reference JSON object, which can be defined using either a well-known ID (`wkid` ) or a well-known text (`wkt` ). If the `inSR`  is not specified, the geometry is assumed to be in the special reference of the map.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outSR` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The output spatial reference of the returned changes. The spatial reference can be specified as either a well-known ID or a spatial reference JSON object, which can be defined using either a well-known ID (`wkid` ) or well-known text (`wkt` ). If the `outSR`  is not specified, the data changes will be returned in the spatial reference of the feature service.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnInserts` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , newly inserted features will be returned. The default is `true` .
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnUpdates` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , updated features will be returned. The default is `true` .
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnDeletes` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , deleted features will be returned. The default is `true` .
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`layerServerGens` 
+
+(Required) 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The `layerServerGen`  allows a client to specify the last layer generation numbers for the changes received from the server.
+
+-   `minServerGen` —It is the min generation of the server data changes. Clients with `layerServerGens`  that is less than `minServerGen`  cannot extract changes and would need to make a full server/layers query instead of extracting changes.
+-   `serverGen` —It is the current server generation number of the changes. Every changed feature has a version or a generation number that is changed every time the feature is updated.
+
+Syntax
+
+```javascript
+"layerServerGen": [
+  {
+    "id": <layerId1>,
+    "serverGen": <genNum1>
+  },
+  {
+    "id": <layerId2>,
+    "serverGen": <genNum2>
+  }
+]
+```
+
+ 
+
+Example
+
+```javascript
+"layerServerGen": [
+  {
+    "id": 0,
+    "serverGen": 10500
+  },
+  {
+    "id": 1,
+    "serverGen": 1100
+  },
+  {
+    "id": 2,
+    "serverGen": 1200
+  }
+]
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnIdsOnly` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , the response includes an array of object IDs only. The default is `false` .
+
+<Note type={"note"}>
+
+Synchronous responses are returned when set as `true` . Asynchronous responses are returned when set as `false` .
+
+</Note>
+
+Value: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnExtentOnly` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , only the extent of the changes will be returned. The default is `false` .
+
+Value: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnHasGeometryUpdates` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , the response includes a `hasGeometryUpdates`  property set as `true`  for each layer with updates that have geometry changes. The default is `false` .
+
+If a layer's edits include only inserts, deletes, or updates to fields other than geometry, `hasGeometryUpdates`  is not set or is returned as `false` . When a layer has multiple rows with updates, only one needs to include a geometry changes for `hasGeometryUpdates`  to be set as `true` . For an example of this, see the [JSON Response examples](/extract-changes-feature-service#json-response-examples) section below.
+
+Setting `returnHasGeometryUpdates`  to true also requires setting `returnUpdates`  to true. Otherwise, an error is returned.
+
+<Note type={"note"}>
+
+`returnHasGeometryUpdates`  is supported when the service's `extractChangesCapabilities`  includes the `supportsReturnHasGeometryUpdates`  property as `true` .
+
+</Note>
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnAttachments` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , attachment changes are returned in the response. Otherwise, attachments are not included. The default is `true` . This parameter is only applicable if the feature service has attachments.
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnAttachmentsDataByUrl` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , a reference to a URL will be provided for each attachment returned. Otherwise, attachments are embedded in the response. The default is `true` . This parameter is only applicable if the feature service has attachments and if `returnAttachments`  is `true`  and `f=json` .
+
+Value: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`dataFormat` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The format of the changes returned in the response. The default is `json` .
+
+Values: `sqllite`  \| `json` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`changesExtentGridCell` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+To optimize localizing changes extent, the value `medium`  is an 8x8 grid that bounds the changes extent. It is used only when `returnExtentOnly`  is `true` . The default is `none` .
+
+Values: `none`  \| `large`  \| `medium`  \| `small` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`fieldsToCompare` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Introduced at 11.0. This parameter allows you to determine if any array of fields has been updated. The accepted values for this parameter is a fields array that include the fields you want to evaluate. The response includes a `fieldUpdates`  array, which includes rows that contain any updates made to the specified fields. If no updates were made to any fields, the `fieldUpdates`  array is empty.
+
+Support for this parameter is indicated when the service-level `supportsFieldsToCompare`  property, under `extractChangesCapabilities` , is set as `true` . This parameter can only be included when `returnUpdates`  is `true` , as only updates are evaluated with this parameter.
+
+Syntax
+
+```javascript
+"fieldsToCompare": {"fields": [<field1>, <field2>…]}
+```
+
+ 
+
+Example
+
+```javascript
+"fieldsToCompare": {"fields": ["type","name"]}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnDeletedFeatures` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Introduced at ArcGIS Enterprise 11.1 for ArcGIS Enterprise non-hosted feature services. Supported for ArcGIS Online hosted feature services.
+
+Specifies whether the full information for a deleted feature is returned (`true` ) or if just the identifier (e.g. globalid) is returned (`false` ). If set to `true` , `returnDeletes`  must be set to `true`  and `returnIdsOnly`  must be `false` . The default value is `false` .
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default value is `html` .
+
+Values: `html`  \| `json` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example workflow
+
+Below is a sample workflow that can be used with the `extractChanges`  operation:
+
+1.  Enable the feature service change tracking if it is not enabled by navigating to the `updateDefiniton`  operation:
+
+    ```javascript
+    https://services.myserver.com/<tenant>/ArcGIS/rest/admin/services/USA/FeatureServer/updateDefinition
+    ```
+
+     and passing through the following updates (adding `ChangeTracking`  to the list of capabilities):
+
+    ```javascript
+    "capabilities" :
+    "Create,Delete,Query,Update,Editing,ChangeTracking,Sync"
+    ```
+
+     
+2.  Once complete, retrieve the updates service's metadata using the `returnUpdates`  parameter:
+
+    ```javascript
+    https://services.myserver.com/<tenant>/ArcGIS/rest/services/USA/FeatureServer/extractChanges?returnUpdates=true&f=pjson
+    ```
+
+     
+3.  Cache the following json object input for `layerServerGens`  in the client side:
+
+    ```javascript
+    {"layerServerGens":[{"id":0,"minServerGen":1529667,"serverGen":1534028}]}
+
+    ```
+
+     
+4.  Once cached, call this operation and pass the `layerServerGens`  parameter and any additional filtering criteria
+5.  Update the client cached `layerServerGens`  json object from the `extractChanges`  response.
+6.  Continue in steps 2-5.
+
+## Example usage
+
+### Example one
+
+The following is a sample POST request for the `extractChanges`  operation that can be used to return the inserts, updates, and deletions that have been made to a specific service:
+
+```javascript
+POST /webadaptor/Hosted/myFeatureService/FeatureServer/extractChanges HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+layers=0&serverGens=&layerQueries=&geometry=&geometryType=esriGeometryEnvelope&inSR=&outSR=&returnInserts=true&returnUpdates=true&returnDeletes=true&layerServerGens=[{"id":0,"minServerGen":1529667,"serverGen":1534028}]}&returnIdsOnly=false&returnHasGeometryUpdates=false&returnExtentOnly=false&returnAttachments=true&returnAttachmentsDataByUrl=true&transportType=esriTransportTypeUrl&dataFormat=json&fieldsToCompare=&f=pjson
+
+```
+
+ 
+
+The example below reflects the specific inputs for this request:
+
+```javascript
+layers=0
+returnInserts=true
+returnUpdates=true
+returnDeletes=true
+layerServerGens=[{"id":0,"minServerGen":1529667,"serverGen":1534028}]}
+dataFormat=json
+f=json
+
+```
+
+ 
+
+### Example two
+
+The following is a sample POST request for the `extractChanges`  operation that can be used to return the inserts, updates, and deletions that have been made to a specific service, including any updates made to a specific field:
+
+```javascript
+POST /webadaptor/Hosted/myFeatureService/FeatureServer/extractChanges HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+layers=0&serverGens=&layerQueries=&geometry=&geometryType=esriGeometryEnvelope&inSR=&outSR=&returnInserts=true&returnUpdates=true&returnDeletes=true&layerServerGens=[{"id": 0,"serverGen": 1653608093000}]&returnIdsOnly=true&returnHasGeometryUpdates=false&returnExtentOnly=false&returnAttachments=true&returnAttachmentsDataByUrl=true&transportType=esriTransportTypeUrl&dataFormat=json&fieldsToCompare={"fields": ["type"]}&f=pjson
+
+```
+
+ 
+
+The example below reflects the specific inputs for this request:
+
+```javascript
+layers: [0]
+layerServerGens: [{"id": 0,"serverGen": 1653608093000}]
+fieldsToCompare: {"fields": ["type"]}
+returnIdsOnly=true
+returnInserts=true
+returnUpdates=true
+returnDeletes=true
+
+```
+
+ 
+
+The sample request returns the following JSON response:
+
+```javascript
+{
+  "layerServerGens": [
+    {
+      "id": 0,
+      "serverGen": 1653614103746
+    }
+  ],
+  "edits": [
+    {
+      "id": 0,
+      "objectIds": {
+        "adds": [73143],
+        "updates": [65715],
+        "deletes": []
+      },
+      "fieldUpdates": [65715]
+    }
+  ]
+}
+```
+
+ 
+
+### Example three
+
+The following is a sample POST request for the extractChanges operation that can be used to receive an asynchronous response 
+
+```javascript
+POST /webadaptor/Hosted/myFeatureService/FeatureServer/extractChanges HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+layers=0&serverGens=&layerQueries=&geometry=&geometryType=esriGeometryEnvelope&inSR=&outSR=&returnInserts=true&returnUpdates=true&returnDeletes=true&layerServerGens=[{"id": 0,"serverGen": 1653608093000}]&returnIdsOnly=false&returnHasGeometryUpdates=false&returnExtentOnly=false&returnAttachments=true&returnAttachmentsDataByUrl=true&transportType=esriTransportTypeUrl&dataFormat=json&fieldsToCompare=&f=pjson
+
+```
+
+ 
+
+The example below reflects the specific inputs for this request:
+
+```javascript
+layers: [0]
+layerServerGens: [{"id": 0,"serverGen": 1653608093000}]
+returnIdsOnly=false
+returnInserts=true
+returnUpdates=true
+returnDeletes=true
+
+```
+
+ 
+
+The request above returns an asynchronous response:
+
+```javascript
+{
+  "statusUrl": "https://machine.domain.com/webadaptor/rest/services/testfs/FeatureServer/jobs/j05e8901c85d341a1b7eeb6b52d470b46"
+}
+
+```
+
+ 
+
+You can check the status of your request by polling the `statusURL`  address provided in the response above. The response below is returned when the `status`  is `Completed` :
+
+```javascript
+{
+  "responseType": "esriDataChangesResponseTypeEdits",
+  "resultUrl": "https://machine.domain.com/webadaptor/rest/directories/arcgisoutput/VRNVA_MapServer/_ags_fsf5ce58038ec84c3c948842e05fb80e20.json",
+  "submissionTime": 1653614927000,
+  "lastUpdatedTime": 1653614930000,
+  "status": "Completed"
+}
+```
+
+ 
+
+The contents of the json file from the `resultUrl`  contains the following information for this request:
+
+```javascript
+{
+  "layerServerGens": [
+    {
+      "id": 0,
+      "serverGen": 1653614103746
+    }
+  ],
+  "edits": [
+    {
+      "id": 0,
+      "objectIds": {
+        "adds": [73143],
+        "updates": [65715],
+        "deletes": []
+      },
+      "fieldUpdates": []
+    }
+  ]
+}
+```
+
+ 
+
+## JSON Response examples
+
+### Example one
+
+```javascript
+{
+  "layerServerGens": [  
+    {  
+      "id": 0,
+      "serverGen": 153025
+    }
+  ],
+  "transportType": "esriTransportTypeUrl",
+  "responseType": "esriDataChangesResponseTypeEdits",
+  "edits": [  
+    {  
+      "id": 0,
+      "features": {  
+        "adds": [  
+          {  
+            "geometry": {  
+              "rings": [  
+                [  
+                  [  
+                    1599093.38156825,
+                    4299494.38162189
+                  ],
+                  [  
+                    1621892.61012839,
+                    4282639.631925
+                  ],
+                  [  
+                    1616369.15773174,
+                    4273287.47109171
+                  ],
+                  [  
+                    1596005.6876463,
+                    4284510.52152801
+                  ],
+                  [  
+                    1599093.38156825,
+                    4299494.38162189
+                  ]
+                ]
+              ]
+            },
+            "attributes": {  
+              "FID": 250,
+              "GlobalID": "C8FCEBF0-51D1-4FFA-A5ED-FFD47F10014F",
+              "ObjectID": 125,
+              "FIPS_CNTRY": "MT",
+              "GMI_CNTRY": "MLT",
+              "ISO_2DIGIT": "MT",
+              "ISO_3DIGIT": "MLT",
+              "ISO_NUM": 470,
+              "CNTRY_NAME": "Malta",
+              "LONG_NAME": "Republic of Malta",
+              "ISOSHRTNAM": "Malta",
+              "UNSHRTNAM": "Malta",
+              "LOCSHRTNAM": "Malta",
+              "LOCLNGNAM": "Repubblika ta' Malta",
+              "STATUS": "UN Member State",
+              "POP2007": 401880,
+              "SQKM": 211.5,
+              "SQMI": 81.66,
+              "LAND_SQKM": 316,
+              "COLORMAP": 2
+            }
+          }
+        ],
+        "updates": [  
+          {  
+            "geometry": {  
+              "rings": [  
+                [  
+                  [  
+                    1599093.38156825,
+                    4299494.38162189
+                  ],
+                  [  
+                    1621892.61012839,
+                    4282639.631925
+                  ],
+                  [  
+                    1616369.15773174,
+                    4273287.47109171
+                  ],
+                  [  
+                    1596005.6876463,
+                    4284510.52152801
+                  ],
+                  [  
+                    1599093.38156825,
+                    4299494.38162189
+                  ]
+                ]
+              ]
+            },
+            "attributes": {  
+              "FID": 1,
+              "GlobalID": "CECC5D06-CFD4-40E7-943B-3793770411E1",
+              "ObjectID": 125,
+              "FIPS_CNTRY": "MT",
+              "GMI_CNTRY": "MLT",
+              "ISO_2DIGIT": "MT",
+              "ISO_3DIGIT": "MLT",
+              "ISO_NUM": 470,
+              "CNTRY_NAME": "Malta",
+              "LONG_NAME": "Republic of Malta",
+              "ISOSHRTNAM": "Malta",
+              "UNSHRTNAM": "Malta",
+              "LOCSHRTNAM": "Malta",
+              "LOCLNGNAM": "Repubblika ta' Malta",
+              "STATUS":" UN Member State",
+              "POP2007": 401880,
+              "SQKM": 211.5,
+              "SQMI": 81.66,
+              "LAND_SQKM": 316,
+              "COLORMAP": 2
+            }
+          }
+        ],
+        "deleteIds": [  
+          "0D8E1D93-29AE-4D16-AF61-E74FED983732"
+        ]
+      }
+    }
+  ]
+}
+```
+
+ 
+
+### Example two: return IDs, insertions, updates, and deletions
+
+The following example response has been generated from a request with `returnIdsOnly`  as `true` , `returnInserts`  as `true` , `returnUpdates`  as `true` , and `returnDeletes`  as `true` .
+
+```javascript
+{
+  "layerServerGens": [
+    {
+      "id": 0,
+      "serverGen": 1526588581400
+    },
+    {
+      "id": 1,
+      "serverGen": 1526588581553
+    }
+  ],
+  "edits": [
+    {
+      "id": 0,
+      "objectIds": {
+        "adds": [
+          2027,
+          2028,
+          2029
+        ],
+        "updates": [2026],
+        "deletes": []
+      }
+    },
+    {
+      "id": 1,
+      "objectIds": {
+        "adds": [
+          27971,
+          27972
+        ],
+        "updates": [],
+        "deletes": [
+          27189,
+          27970
+        ]
+      }
+    }
+  ]
+}
+```
+
+ 
+
+### Example three: return IDs, insertions, updates, deletions, and geometry updates
+
+The following example response has been generated from a request with `returnHasGeometryUpdates`  as `true`  as well as `returnIdsOnly`  as `true` , `returnInserts`  as `true` , `returnUpdates` as `true` , and `returnDeletes`  as `true` .
+
+```javascript
+{
+  "layerServerGens": [
+    {
+      "id": 0,
+      "serverGen": 1526588581400
+    },
+    {
+      "id": 1,
+      "serverGen": 1526588581553
+    },
+    {
+      "id": 2,
+      "serverGen": 1526588581553
+    },
+    {
+      "id": 3,
+      "serverGen": 1526588581553
+    }
+  ],
+  "edits": [
+    {
+      "id": 0,
+      "objectIds": {
+        "adds": [],
+        "updates": [2026, 2030],
+        "deletes": [] 
+      },
+      "hasGeometryUpdates": true //At least one geometry update was made
+    },
+    {
+      "id": 1,
+      "objectIds": {
+        "adds": [],
+        "updates": [27189, 27190],
+        "deletes": []
+      },
+      "hasGeometryUpdates": false //No geometry updates made
+    },
+    {
+      "id": 3,
+      "objectIds": {
+        "adds": [12],
+        "updates": [],
+        "deletes": [17] // No geometry updates were made, no hasGeometryUpdates property returned
+      }
+    }
+  ]
+}
+```
+
+ 
+
+### Example four: return full information for deleted feature
+
+The sample response below is returned when a request specifies `returnDeletedFeatures`  as `true` , `returnIdsOnly`  as `false` , and `returnDeletes`  as `true` , allowing for the full information for a deleted feature to be listed:
+
+```javascript
+{
+  "edits": [
+    {
+      "id": 0,
+      "features": {
+        "adds": [],
+        "updates": [],
+        "deletes": [
+          {
+            "geometry": {
+              "x": -141.97926397204083,
+              "y": 45.16245817367502
+            },
+            "attributes": {
+              "objectid": null,
+              "state": "CA",
+              "number": null,
+              "name": null,
+              "elevation": null,
+              "type": null,
+              "status": null,
+              "time_code": null,
+              "known_erup": null,
+              "max_vei": 3,
+              "globalid": "{F8A78D45-AECF-4BC7-A4E6-037B51F4CC77}",
+              "dt": null,
+              "xssfield": null,
+              "created_user": "admin",
+              "created_date": 1651509803000,
+              "last_edited_user": "admin",
+              "last_edited_date": 1670626687000,
+              "objectid_1": 72236
+            }
+          }
+        ]
+      },
+      "attachments": {
+        "adds": [],
+        "updates": [],
+        "deletes": []
+      }
+    }
+  ],
+  "layerServerGens": [
+    {
+      "id": 0,
+      "serverGen": 1675232887090
+    }
+  ],
+  "transportType": "esriTransportTypeUrl"
+}
+```
+
+ 
+
+### Example five: return ID of deleted feature
+
+The following response is returned when the request sets `returnDeletedFeatures`  as `false` , which returns just the ID of the deleted feature:
+
+```javascript
+{
+  "edits": [
+    {
+      "id": 0,
+      "features": {
+        "adds": [],
+        "updates": [],
+        "deleteIds": ["{F8A78D45-AECF-4BC7-A4E6-037B51F4CC77}"]
+      },
+      "attachments": {
+        "adds": [],
+        "updates": [],
+        "deleteIds": []
+      }
+    }
+  ],
+  "layerServerGens": [
+    {
+      "id": 0,
+      "serverGen": 1675232949666
+    }
+  ],
+  "transportType": "esriTransportTypeUrl"
+}
+```
+
+ 

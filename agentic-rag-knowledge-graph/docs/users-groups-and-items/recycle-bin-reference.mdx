@@ -1,0 +1,223 @@
+---
+title: "Recycle bin reference"
+description: "The recycle bin is a feature which allows deleted items to be retained for some days, before it is permanently deleted or restored."
+slug: "recycle-bin-reference"
+url: "/recycle-bin-reference"
+restInfoMetadata: {}
+---
+
+## Overview
+
+Introduced in the ArcGIS Online June 2024 update, **Recycle bin** is an organization feature that allows supported items to be retained and restored for at least 14 days (336 hours) after they have been deleted. The recycle bin is enabled by default in organizations created after the June 2024 update. Existing organizations have recycle bin turned off by default and will be prompted to make a choice to enable the feature or keep it disabled. Administrators will always be able to [enable or disable the recycle bin](https://doc.arcgis.com/en/arcgis-online/administer/configure-details.htm#ESRI_SECTION1_91D3B03954B54E97B68DEA91854AD2F8) for their organizations.
+
+<Note>
+
+The Recycle Bin feature is not supported in ArcGIS Enterprise organizations.
+
+</Note>
+
+## Determine recycle bin support for an organization
+
+The `recycleBinSupported` property, returned in the response for [Portal](/portal) or [Self](/portal-self), indicates whether the organization supports using the recycle bin:
+
+```markdown
+{
+"recycleBinSupported": true,
+}
+```
+
+Some organization types, such as trial organizations, do not support the recycle bin. For a list of unsupported subscription types, click [here](https://doc.arcgis.com/en/arcgis-online/reference/faq.htm#ESRI_QUESTIONANSWER_60A4B4E5F0994E8DB4A999818B19ED1D).
+
+
+## Enable the recycle bin for an organization
+
+For organizations that support recycle bin, an organization property, `recycleBinEnabled`, returned in [Portal](/portal) or [Self](/portal-self) response, indicates if the recycle bin was enabled or disabled for an organization.
+
+- The `recycleBinEnabled` property will **not be returned** in the [Portal](/portal) or [Self](/portal-self) response if an organization does not have the recycle bin enabled. Instead, the response will just include the `recycleBinSupported` property to indicate whether the organization supports the recycle bin.
+
+- The `recycleBinEnabled` property will be true for organizations that have enabled the recycle bin.
+
+```markdown
+{
+…
+"recycleBinSupported": true,
+"recycleBinEnabled": true,
+…
+}
+```
+
+- The `recycleBinEnabled` property will be false for all organizations that have the recycle bin disabled.
+
+```markdown
+{
+…
+"recycleBinSupported": true,
+"recycleBinEnabled": false,
+…
+}
+```
+
+## Recycling items
+
+The `canRecycle` operation indicates whether an item can be sent to the recycling bin.
+
+If the returned response from `canRecycle` is `true`, the item is supported by the recycle bin. The `false` response is returned if an item is either not supported by the recycle bin or if the item cannot be recycled due to dependencies. The error response will show a list of `offendingItems` that are dependent on the item that the user is trying to recycle. `canRecycle` will return `false` until all dependent items on the `offendingItems` list are recycled or permanently deleted.
+
+### JSON response examples
+
+Item is supported by the recycle bin:
+
+```markdown
+{
+  "itemId": "e03f626be86946f997c29d6dfc7a9666",
+  "success": true
+}
+```
+
+Item is not supported by the recycle bin:
+
+```markdown
+{
+  "itemId": "a34c2e6711494e62b3b8d7452d4d6235",
+  "success": false,
+  "error": {
+    "code": 400,
+    "messageCode": "CONT_0298",
+    "message": "Unable to recycle item a34c2e6711494e62b3b8d7452d4d6235. Item is part of an unsupported relationship type or item type.",
+    "offendingItems": [
+    ]
+  }
+}
+```
+
+Item cannot be recycled due to dependencies:
+
+```markdown
+{
+  "itemId": "a34c2e6711494e62b3b8d7452d4d6235",
+  "error": {
+    "code": 400,
+    "messageCode": "CONT_00481",
+    "message": "Unable to delete item. This service item has a related Service item",
+    "offendingItems": [
+        {
+            "itemId": "e03f626be86946f997c29d6dfc7a9666",
+            "title": "Countries_WFS",
+            "type": "WFS"
+        },
+        {
+            "itemId": "ea433f31f1bd4d6787cf6a82b0a8a7a5",
+            "title": "WorldMap_OGC",
+            "type": "OGCFeatureServer"
+        }
+    ]
+  },
+  "success": false
+}
+```
+
+## Sending items to the recycle bin
+
+Once the recycle bin is enabled for an organization, a user deleting an item (or batch of items) will have the option to either permanently delete or send the supported items to the recycle bin, where they will remain for 14 days. The user can set the `permanentDelete` parameter as either `true` or `false` while deleting an item. This parameter can be set for the [delete item](/delete-item) and [delete items](/delete-items) operations.
+
+<Note type={"note"}>
+
+Not all items are supported by the recycle bin. For a list of unsupported items, click [here](https://doc.arcgis.com/en/arcgis-online/reference/faq.htm#ESRI_QUESTIONANSWER_60A4B4E5F0994E8DB4A999818B19ED1D). All unsupported items are permanently deleted even when the `permanentDelete` parameter is set to `false`.
+
+Dependent items cannot be deleted before deleting the source item.
+
+</Note>
+
+## Querying recycle bin items
+
+A user can call and return an item or set of items from the recycle bin by using the `inRecycleBin` property.
+
+To determine if an item was sent to the recycle bin, use the following expression:
+
+```markdown
+https://org.arcgis.com/sharing/rest/content/users/[userName]/items/[itemID]?inRecycleBin=true
+```
+
+<Note type={"note"}>
+
+An error message `Item does not exist or is inaccessible` is returned if the `inRecycleBin` value is set to `true` and the item does not exist in the recycle bin, or if the value is set to `false` and the item exists in the recycle bin.
+
+</Note>
+
+To return all items in the recycle bin for a particular user, use the following expression: 
+
+```markdown
+https://org.arcgis.com/sharing/rest/content/users/[userName]?foldersContent=true&inRecycleBin=true
+```
+
+To return all items in the recycle bin for an organization (only available to default administrators and custom role with administrative privileges), use the following expression: 
+
+```markdown
+https://org.arcgis.com/sharing/rest/content/portals/[portalID]?foldersContent=true&inRecycleBin=true
+```
+
+To return items in the recycle bin for a user with item type filter, use the following expression:
+
+```markdown
+https://org.arcgis.com/sharing/rest/content/users/[userName]?foldersContent=true&types=Web Map,Feature Service&inRecycleBin=true
+```
+
+To return items in the recycle bin for a user with `ignoreTypes` filter (ignores the item types that are specified after `ignoreTypes=`), use the following expression:
+
+```markdown
+https://org.arcgis.com/sharing/rest/content/users/[userName]?foldersContent=true&ignoreTypes=Web Map,Feature Service&inRecycleBin=true
+```
+
+## Restoring items from the recycle bin
+
+Once deleted and sent to the recycle bin, an item can be restored to the user’s root folder or to a specified folder using the [restore](/restore) endpoint. 
+
+To restore an item to a specified folder, use the following expression:
+
+```markdown
+https://org.arcgis.com/sharing/rest/content/users/[userName]/items/[itemID]/restore?folder=[folderID]
+```
+
+If a `folder` was not specified or an invalid folder ID was entered, the item will be restored to the user's root folder.
+
+Before restoring an item, the user should check if an item can be restored or not by using [canRestore](/can-restore) endpoint. 
+
+```markdown
+https://org.arcgis.com/sharing/rest/content/users/[userName]/items/[itemID]/canRestore?f=json
+```
+
+If the returned response from `canRestore` is `true`, the item can be restored from the recycle bin. If `false`, the item is dependent on another item in the recycle bin which is preventing the restore. Items with dependencies cannot be restored until the source item is restored. For example, a user cannot a view layer without restoring the original layer.
+
+The error response will return the item, which is blocking the restore, as part of the `offending items` field. The `canRestore` endpoint will return `false` until the source item is restored.
+
+### JSON response examples
+
+Item can be restored from the recycle bin:
+
+```markdown
+{
+  "itemId": "e03f626be86946f997c29d6dfc7a9666",
+  "success": true
+}
+```
+
+Item cannot be restored from the recycle bin:
+
+```markdown
+{
+  "itemId": "a34c2e6711494e62b3b8d7452d4d6235",
+  "success": false,
+  "error": {
+    "code": 400,
+    "messageCode": "CONT_00486",
+    "message": "Unable to restore item. This service item has a required related Service item in recycle bin.",
+    "offendingItems": [
+    {
+        "itemId": "fb3ca29eaf28498dbdff2385b26d9c85",
+        "title": "feature service vehicle populattion",
+        "type": "Feature Service"
+    }
+    ]
+  }
+}
+```

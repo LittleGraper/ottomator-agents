@@ -1,0 +1,1199 @@
+---
+title: "Export Subnetwork"
+description: "The exportSubnetwork  operation is used to export information about a subnetwork to a JSON file."
+slug: "exportsubnetwork-utility-network-server"
+url: "/exportsubnetwork-utility-network-server"
+guid: "GUID-9394EF51-5368-4839-8FA8-19BDF2F2E7B2"
+migratedTopicMetadata:
+  FTITLE: "exportSubnetwork (Utility Network Server)"
+  FDESCRIPTION: ""
+  FCHANGES: "Address  typos, revert PBF response format, see #9259"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "21/08/2023 12:47:57"
+  FAUTHOR: "jderose"
+  FSTATUS: "Released"
+  MODIFIED-ON: "25/09/2023 05:28:00"
+  VERSION: "11"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-153C6718-5329-4223-B03C-A7BF96C6A32B"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/UtilityNetworkServer/exportSubnetwork
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/UtilityNetworkServer/exportSubnetwork
+  methods: 
+    - post
+  versionIntroduced: '10.6'
+  requiredCapability: Requires the ArcGIS Advanced Editing user type extension license
+---
+
+import GUID_68FE7C20_B3BC_4175_A32D_778C3A29380D_GUID_6635EF88_7E6F_4290_8DF6_6A15ECEC0D11 from "./snippets/GUID-68FE7C20-B3BC-4175-A32D-778C3A29380D/_GUID-6635EF88-7E6F-4290-8DF6-6A15ECEC0D11";
+
+## Description
+
+The `exportSubnetwork` operation is used to export information about a subnetwork to a JSON file. This information can then be used by external systems such as outage management and asset tracking. Exporting a subnetwork also allows you to delete corresponding rows in the [Subnetworks table](https://pro.arcgis.com/en/pro-app/latest/help/data/utility-network/view-subnetworks-table.htm) as long as the `IsDeleted` attribute is set to True. This indicates that a subnetwork controller has been removed. Exporting a subnetwork is supported both synchronously and asynchronously.
+
+<Note type={"note"}>
+
+<GUID_68FE7C20_B3BC_4175_A32D_778C3A29380D_GUID_6635EF88_7E6F_4290_8DF6_6A15ECEC0D11 />
+
+</Note>
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the output format of the response. The default response format is `html`.
+
+```
+f=html | json | pjson| pbf
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`gdbVersion` 
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the name of the geodatabase version. The default value is `sde.DEFAULT` .
+
+Syntax: `gdbVersion=<version>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sessionId`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the token (`guid`) used to lock the version. If the calling client is editing a named version, the session ID must be provided; if the client is editing `DEFAULT` , the version may not be locked and the session ID should not be specified.
+
+Syntax: `sessionId=<guid>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`moment` 
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the session moment. The default value is the version's current moment. This should only be specified by the client when they do not want to use the current moment.
+
+Syntax: `moment=<Epoch time in seconds>` 
+
+Example: `moment=1601505446` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`domainNetworkName` 
+
+(Required)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The name of the domain network of which the subnetwork is a part.
+
+Syntax: `domainNetworkName=<name>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`tierName` 
+
+(Required)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The name of the tier of which the subnetwork is a part.
+
+Syntax: `tierName=<name>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`subnetworkName`
+
+(Required)   
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Description: The name of the subnetwork to export.
+
+Syntax: `subnetworkName=<name>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`exportAcknowledgement` 
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether the export is acknowledged. The default is false. If true, the default version is required for `gdbVersion`.
+
+```
+exportAcknowledgement=true | false
+``` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`traceConfiguration` 
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the collection of trace configuration parameters. See the [traceConfiguration parameter](/trace-utility-network-server#traceconfiguration-properties) in the Trace topic.
+
+Syntax: `traceConfiguration=<trace configuration>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`resultTypes` 
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the types of results to return. The `associations` and `aggregatedGeometry` type were introduced with ArcGIS Enterprise 10.8.1. The `includeDomainDescriptions` option was introduced with ArcGIS Enterprise 10.9.1.
+
+
+
+Syntax:
+
+```json
+[
+  { 
+    "type" : "features" | "connectivity" | "associations" | "aggregated geometry",
+    "includeGeometry" : true | false,
+    "includePropagatedValues": true | false,
+    "includeDomainDescriptions": true | false,
+    "networkAttributeNames" :["attribute1Name","attribute2Name",...],
+    "diagramTemplateName": <value>, 
+    "resultTypeFields":[{"networkSourceId":<long>,"fieldname":<value>},...]
+  },...
+]
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`async` 
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Introduced at ArcGIS Enterprise 10.9.1.  Specifies whether the request will be processed asynchronously. If `true`, the request is processed as an asynchronous job, and a URL is returned that a client can visit to check the status of the job. The default is `false`.
+
+```
+async=true | false
+```
+
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outSR` 
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Introduced at ArcGIS Enterprise 11.1.  Specifies the output spatial reference of the exported subnetwork.
+
+Syntax: `outSR={wkid=<wkid>}` 
+
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## JSON Response syntax
+
+JSON response (when async = false):
+
+```json
+{
+  "moment" : <datetime>,
+  "subnetworkHasBeenDeleted" : <true | false>,
+  "url" : "<url>",              // url of created connectivity file
+  "success" : <true | false>,
+  "error" : {                   // only if success is false
+    "extendedCode" : <HRESULT>,
+    "message" : <error message>,
+    "details" : [ <detail> ]  
+  }
+}
+
+```
+
+ 
+
+JSON response (when async = true):
+
+```json
+{
+  "statusUrl" : <url>
+}
+
+```
+
+ 
+
+JSON response to the status URL (when pending or in progress):
+
+```json
+{
+  "status" : "<Pending | InProgress>",
+  "submissionTime" : <datetime>,
+  "lastUpdatedTime" : <datetime>
+ }
+
+```
+
+ 
+
+JSON response to the status URL (when completed):
+
+```json
+{
+  "moment" : <datetime>,
+  "subnetworkHasBeenDeleted" : <true | false>,
+  "url" : "<url>",              // url of created connectivity file 
+  "status" : "Completed",
+  "submissionTime" : <datetime>,
+  "lastUpdatedTime" : <datetime>,
+  "success" : <true | false>,
+  "error" : {                   // only if success is false
+    "extendedCode" : <HRESULT>,
+    "message" : <error message>,
+    "details" : [ <detail> ]
+  }
+}
+
+```
+
+ 
+
+Export JSON file format for 2.9 and later or 10.9.1 and later:
+
+```json
+{ 
+  "controllers": [
+    {
+      "networkSourceId": <long>,
+      "globalId": <guid>,
+      "objectId": <long>,
+      "terminalId": <long>,
+      "assetGroupCode": <long>,
+      "assetTypeCode": <long>,
+      "geometry": <geometry>,
+      "networkSourceName" : <string>,
+      "assetGroupName" : <string>,
+      "assetTypeName" : <string>,
+      "terminalName" : <string>    
+    }
+  ],
+  "featureElements": [
+    {
+      "networkSourceId": <long>,
+      "globalId": <guid>,
+      "objectId": <long>,
+      "assetGroupCode": <long>,
+      "assetTypeCode": <long>,
+      "positionFrom": <double>, // line features only
+      "positionTo": <double>, // line features only
+      "geometry": <geometry>,
+      "networkSourceName" : <string>,
+      "assetGroupName" : <string>,
+      "assetTypeName" : <string>,
+      "terminalName" : <string>,
+      "fieldValues" : [
+        {
+          "fieldName" : <value>,
+          "value" : <value>,
+          "description" : <string>
+        }
+       ],
+      "networkAttributeValues" : [],
+      "networkAttributeDescriptions" : [],
+    }
+  ],
+  "connectivity": [
+    {
+      "viaNetworkSourceId": <long>,
+      "viaGlobalId": <guid>,
+      "viaObjectId": <long>,
+      "viaPositionFrom": <double>,
+      "viaPositionTo": <double>,
+      "viaGeometry": <geometry>,
+      "fromNetworkSourceId": <long>,
+      "fromGlobalId": <guid>,
+      "fromObjectId": <long>,
+      "fromTerminalId": <long>,
+      "fromGeometry": <geometry>
+      "toNetworkSourceId": <long>,
+      "toGlobalId": <guid>,
+      "toObjectId": <long>,
+      "toTerminalId": <long>,
+      "toGeometry": <geometry>
+    },
+      "viaNetworkSourceName" : <string>,
+      "fromNetworkSourceName" : <string>,
+      "fromTerminalName" : <string>,
+      "toNetworkSourceName" : <string>,
+      "toTerminalName" : <string>
+
+  ],
+  "associations": [ 
+    { 
+      "associationType" : "containment" | "attachment",  
+      "fromNetworkSourceId": <long>, 
+      "fromGlobalId": <guid>, 
+      "fromTerminalId": <long>,     
+      "toNetworkSourceId": <long>, 
+      "toGlobalId": <guid>, 
+      "toTerminalId": <long>,
+      "fromNetworkSourceName" : <string>,
+      "fromTerminalName" : <string>,
+      "toNetworkSourceName" : <string>,
+      "toTerminalName" : <string>
+    }
+  ],
+  "sourceMapping":
+  {
+    "networkSourceId": "string",
+    ...
+  },  
+  "resultTypes": [
+    {
+      "type": "features" | "connectivity" | "controllers" | "associations",
+      "includeGeometry": true | false,
+	     "includePropagatedValues": true | false,
+      "networkAttributeNames": ["<networkAttributeName1>", ...],
+      "diagramTemplateName": "",
+      "resultTypeFields": [
+        {
+          "networkSourceId": <long>,
+          "fieldName": "<string>"
+        }
+      ]
+    }
+  ],
+  "spatialReference": <spatialReference>
+}
+
+```
+
+ 
+
+Export JSON file format for 2.8 or 10.8.1:
+
+-   If at least one item is specified in the `resultTypes` parameter, controllers are automatically included in the file by default.
+
+```json
+{ 
+  "controllers": [
+    {
+      "networkSourceId": <long>,
+      "globalId": <guid>,
+      "objectId": <long>,
+      "terminalId": <long>,
+      "assetGroupCode": <long>,
+      "assetTypeCode": <long>,
+      "geometry": <geometry>
+    }
+  ],
+  "featureElements": [
+    {
+      "networkSourceId": <long>,
+      "globalId": <guid>,
+      "objectId": <long>,
+      "assetGroupCode": <long>,
+      "assetTypeCode": <long>,
+      "positionFrom": <double>, // line features only
+      "positionTo": <double>, // line features only
+      "geometry": <geometry>,
+      "networkAttributesValues" : [{"<attributeName>" : <value>, ... }, ... ]
+      "fieldValues" : [
+        {
+          "fieldName" : <value>,
+          "value" : <value>
+        }, ...]	  
+    }
+  ],
+  "connectivity": [
+    {
+      "viaNetworkSourceId": <long>,
+      "viaGlobalId": <guid>,
+      "viaObjectId": <long>,
+      "viaPositionFrom": <double>,
+      "viaPositionTo": <double>,
+      "viaGeometry": <geometry>,
+      "fromNetworkSourceId": <long>,
+      "fromGlobalId": <guid>,
+      "fromObjectId": <long>,
+      "fromTerminalId": <long>,
+      "fromGeometry": <geometry>
+      "toNetworkSourceId": <long>,
+      "toGlobalId": <guid>,
+      "toObjectId": <long>,
+      "toTerminalId": <long>,
+      "toGeometry": <geometry>
+    },
+  ],
+  "associations": [ 
+    { 
+      "associationType" : "containment" | "attachment",  
+      "fromNetworkSourceId": <long>, 
+      "fromGlobalId": <guid>, 
+      "fromTerminalId": <long>,     
+      "toNetworkSourceId": <long>, 
+      "toGlobalId": <guid>, 
+      "toTerminalId": <long> 
+    }
+  ],
+  "sourceMapping":
+  {
+    "networkSourceId": "sourceName",
+    ...
+  },  
+  "resultTypes": [
+    {
+      "type": "features" | "connectivity" | "controllers" | "associations",
+      "includeGeometry": true | false,
+	     "includePropagatedValues": true | false,
+      "networkAttributeNames": ["<networkAttributeName1>", ...],
+      "diagramTemplateName": "",
+      "resultTypeFields": [
+        {
+          "networkSourceId": <long>,
+          "fieldName": "<name>"
+        }
+      ]
+    }
+  ],
+  "spatialReference": <spatialReference>
+}
+
+```
+
+ 
+ 
+
+## Example usage
+
+Export the RMT001 subnetwork from the Electric Distribution tier in the Electric domain network using the `exportSubnetwork` operation. The `resultTypes` parameter includes `features`, `connectivity`, and `associations` values.
+
+Request URL and parameters:
+
+`https://myserver.esri.com/server/rest/services/LandUse/UtilityNetworkServer/exportSubnetwork` 
+
+```json
+f=json
+gdbVersion=sde.default
+sessionId={A980FAE4-49F9-4BD1-A137-FE086F2933A5}
+moment=1585014910437
+domainNetworkName=Electric
+tierName=Electric Distribution
+subnetworkName=RMT001
+exportAcknowledgement=false
+traceConfiguration=
+{
+	"includeContainers": false,
+	"includeContent": false,
+	"includeStructures": false,
+	"includeBarriers": true,
+	"validateConsistency": true,
+	"includeIsolated": false,
+	"ignoreBarriersAtStartingPoints": false,
+	"domainNetworkName": "",
+	"tierName": "",
+	"targetTierName": "",
+	"subnetworkName": "",
+	"diagramTemplateName": "",
+	"shortestPathNetworkAttributeName": "",
+	"filterBitsetNetworkAttributeName": "",
+	"traversabilityScope": "junctionsAndEdges",
+	"maxPaths": -1,
+	"maxHops": -1,
+	"conditionBarriers": [],
+	"functionBarriers": [],
+	"arcadeExpressionBarrier": "",
+	"filterBarriers": [],
+	"filterFunctionBarriers": [],
+	"filterScope": "junctionsAndEdges",
+	"functions": [],
+	"nearestNeighbor": {
+		"count": -1,
+		"costNetworkAttributeName": "",
+		"nearestCategories": [],
+		"nearestAssets": []
+	},
+	"outputFilters": [],
+	"outputConditions": [],
+	"propagators": []
+}
+resultTypes=
+[
+  {
+    "type": "features",
+    "includeGeometry": false,
+    "includePropagatedValues": false,
+    "networkAttributeNames": [],
+    "diagramTemplateName": "",
+    "resultTypeFields": []
+  },
+  {
+    "type": "connectivity",
+    "includeGeometry": false,
+    "includePropagatedValues": false,
+    "networkAttributeNames": [],
+    "diagramTemplateName": "",
+    "resultTypeFields": []
+  },
+  {
+    "type": "associations",
+    "includeGeometry": false,
+    "includePropagatedValues": false,
+    "networkAttributeNames": [],
+    "diagramTemplateName": "",
+    "resultTypeFields": []
+  }
+]
+async=false
+```
+
+ 
+
+JSON response (async=false):
+
+```json
+{
+ "moment": 1585062452073,
+ "url": "https://myserver.esri.com/server/rest/directories/arcgisoutput/LandUse_MapServer/_aD8622EF3-25AD-4996-B304-EAE53BDAF8C7.json",
+ "subnetworkHasBeenDeleted": false,
+ "success": true
+}
+```
+
+ 
+
+```json
+{
+	"controllers": [
+		{
+			"networkSourceId": 6,
+			"globalId": "{05904716-F47D-47C9-A7A2-B5C29F5125C5}",
+			"objectId": 208,
+			"terminalId": 3,
+			"assetGroupCode": 1,
+			"assetTypeCode": 1
+		}
+	],
+	"featureElements": [
+		{
+			"networkSourceId": 5,
+			"globalId": "{4F4B31E8-7730-49D4-82EE-F2863B555400}",
+			"objectId": 12,
+			"terminalId": 1,
+			"assetGroupCode": 1,
+			"assetTypeCode": 1
+		},
+		{
+			"networkSourceId": 9,
+			"globalId": "{900D280C-90A5-459D-BD01-D8A693E94D8E}",
+			"objectId": 517,
+			"terminalId": 1,
+			"assetGroupCode": 1,
+			"assetTypeCode": 1
+		},
+		{
+			"networkSourceId": 6,
+			"globalId": "{05904716-F47D-47C9-A7A2-B5C29F5125C5}",
+			"objectId": 208,
+			"terminalId": 3,
+			"assetGroupCode": 1,
+			"assetTypeCode": 1
+		},
+		{
+			"networkSourceId": 9,
+			"globalId": "{A565A71F-5ACF-4434-B355-803CC447FABF}",
+			"objectId": 521,
+			"terminalId": 1,
+			"assetGroupCode": 1,
+			"assetTypeCode": 1
+		},
+		{
+			"networkSourceId": 9,
+			"globalId": "{BE462C5C-8A07-4EC7-BB74-42DBADC49638}",
+			"objectId": 518,
+			"terminalId": 1,
+			"assetGroupCode": 1,
+			"assetTypeCode": 1
+		},
+		{
+			"networkSourceId": 9,
+			"globalId": "{18442C7D-96E8-4B14-ACD3-BBC171CC08C0}",
+			"objectId": 519,
+			"terminalId": 1,
+			"assetGroupCode": 1,
+			"assetTypeCode": 1
+		},
+		{
+			"networkSourceId": 6,
+			"globalId": "{A70839CB-1EF1-49A2-9B58-FC5154FE0BCA}",
+			"objectId": 205,
+			"terminalId": 1,
+			"assetGroupCode": 4,
+			"assetTypeCode": 1
+		},
+		{
+			"networkSourceId": 6,
+			"globalId": "{DE2ADDB1-02A1-409C-94CF-85B84A00F2CD}",
+			"objectId": 204,
+			"terminalId": 8,
+			"assetGroupCode": 7,
+			"assetTypeCode": 1
+		},
+		{
+			"networkSourceId": 6,
+			"globalId": "{DE2ADDB1-02A1-409C-94CF-85B84A00F2CD}",
+			"objectId": 204,
+			"terminalId": 9,
+			"assetGroupCode": 7,
+			"assetTypeCode": 1
+		},
+		{
+			"networkSourceId": 6,
+			"globalId": "{64C0643C-44C8-4E57-B549-53EA2F64887D}",
+			"objectId": 203,
+			"terminalId": 1,
+			"assetGroupCode": 2,
+			"assetTypeCode": 1
+		},
+		{
+			"networkSourceId": 9,
+			"globalId": "{83851142-AEA3-45A4-A3DA-BECAF3B3E245}",
+			"objectId": 520,
+			"terminalId": 1,
+			"assetGroupCode": 1,
+			"assetTypeCode": 1
+		},
+		{
+			"networkSourceId": 6,
+			"globalId": "{0412F447-68ED-4482-9BC9-5EB52509F994}",
+			"objectId": 206,
+			"terminalId": 1,
+			"assetGroupCode": 4,
+			"assetTypeCode": 1
+		},
+		{
+			"networkSourceId": 6,
+			"globalId": "{C9D0CEF0-F984-40A2-A386-E449E071EE22}",
+			"objectId": 207,
+			"terminalId": 1,
+			"assetGroupCode": 4,
+			"assetTypeCode": 1
+		},
+		{
+			"networkSourceId": 3,
+			"globalId": "{86F70EE7-CA0B-4FD1-BA1C-6E7658676874}",
+			"objectId": 811,
+			"terminalId": 1,
+			"assetGroupCode": 4,
+			"assetTypeCode": 3
+		},
+		{
+			"networkSourceId": 6,
+			"globalId": "{DE2ADDB1-02A1-409C-94CF-85B84A00F2CD}",
+			"objectId": 204,
+			"assetGroupCode": 7,
+			"assetTypeCode": 1,
+			"positionFrom": 0,
+			"positionTo": 1
+		},
+		{
+			"networkSourceId": 1,
+			"globalId": "{5AEAE020-9D84-4CCC-8F8B-DDBBA0901ADC}",
+			"objectId": 74,
+			"assetGroupCode": 0,
+			"assetTypeCode": 0,
+			"positionFrom": 0,
+			"positionTo": 1
+		},
+		{
+			"networkSourceId": 1,
+			"globalId": "{43B48627-63B8-40F5-B6B9-E163E03C7581}",
+			"objectId": 45,
+			"assetGroupCode": 0,
+			"assetTypeCode": 0,
+			"positionFrom": 0,
+			"positionTo": 1
+		},
+		{
+			"networkSourceId": 1,
+			"globalId": "{31303F5D-9A3F-4001-A306-C53399BC5F56}",
+			"objectId": 100,
+			"assetGroupCode": 0,
+			"assetTypeCode": 0,
+			"positionFrom": 0,
+			"positionTo": 1
+		},
+		{
+			"networkSourceId": 1,
+			"globalId": "{090656D1-7A3A-4739-A276-2831D191B4CD}",
+			"objectId": 50,
+			"assetGroupCode": 0,
+			"assetTypeCode": 0,
+			"positionFrom": 0,
+			"positionTo": 1
+		},
+		{
+			"networkSourceId": 7,
+			"globalId": "{FF474008-1744-458A-A1DC-CAC4543DEA94}",
+			"objectId": 667,
+			"assetGroupCode": 3,
+			"assetTypeCode": 1,
+			"positionFrom": 0,
+			"positionTo": 1
+		},
+		{
+			"networkSourceId": 7,
+			"globalId": "{7848C0FA-137D-4502-BF33-F4BA3713E093}",
+			"objectId": 668,
+			"assetGroupCode": 3,
+			"assetTypeCode": 1,
+			"positionFrom": 0,
+			"positionTo": 1
+		},
+		{
+			"networkSourceId": 7,
+			"globalId": "{D83A9261-81B1-4AF7-A87E-2FFFCE44451B}",
+			"objectId": 669,
+			"assetGroupCode": 3,
+			"assetTypeCode": 1,
+			"positionFrom": 0,
+			"positionTo": 1
+		},
+		{
+			"networkSourceId": 7,
+			"globalId": "{C8E0D13C-6A79-499C-8B0C-01367AD37952}",
+			"objectId": 666,
+			"assetGroupCode": 4,
+			"assetTypeCode": 3,
+			"positionFrom": 0,
+			"positionTo": 1
+		},
+		{
+			"networkSourceId": 7,
+			"globalId": "{E8120006-C87C-4032-86B8-995C84C1A7FF}",
+			"objectId": 665,
+			"assetGroupCode": 4,
+			"assetTypeCode": 3,
+			"positionFrom": 0,
+			"positionTo": 1
+		},
+		{
+			"networkSourceId": 7,
+			"globalId": "{F84AAC25-2C91-4E45-8388-5B0F9CEA0B63}",
+			"objectId": 670,
+			"assetGroupCode": 4,
+			"assetTypeCode": 3,
+			"positionFrom": 0,
+			"positionTo": 1
+		}
+	],
+	"connectivity": [
+		{
+			"viaNetworkSourceId": 6,
+			"viaGlobalId": "{DE2ADDB1-02A1-409C-94CF-85B84A00F2CD}",
+			"viaObjectId": 204,
+			"viaPositionFrom": 0,
+			"viaPositionTo": 1,
+			"viaGeometry": {},
+			"fromNetworkSourceId": 6,
+			"fromGlobalId": "{DE2ADDB1-02A1-409C-94CF-85B84A00F2CD}",
+			"fromObjectId": 204,
+			"fromTerminalId": 8,
+			"fromGeometry": {},
+			"toNetworkSourceId": 6,
+			"toGlobalId": "{DE2ADDB1-02A1-409C-94CF-85B84A00F2CD}",
+			"toObjectId": 204,
+			"toTerminalId": 9,
+			"toGeometry": {}
+		},
+		{
+			"viaNetworkSourceId": 1,
+			"viaGlobalId": "{5AEAE020-9D84-4CCC-8F8B-DDBBA0901ADC}",
+			"viaObjectId": 74,
+			"viaPositionFrom": 0,
+			"viaPositionTo": 1,
+			"viaGeometry": {},
+			"fromNetworkSourceId": 6,
+			"fromGlobalId": "{64C0643C-44C8-4E57-B549-53EA2F64887D}",
+			"fromObjectId": 203,
+			"fromTerminalId": 1,
+			"fromGeometry": {},
+			"toNetworkSourceId": 9,
+			"toGlobalId": "{18442C7D-96E8-4B14-ACD3-BBC171CC08C0}",
+			"toObjectId": 519,
+			"toTerminalId": 1,
+			"toGeometry": {}
+		},
+		{
+			"viaNetworkSourceId": 1,
+			"viaGlobalId": "{43B48627-63B8-40F5-B6B9-E163E03C7581}",
+			"viaObjectId": 45,
+			"viaPositionFrom": 0,
+			"viaPositionTo": 1,
+			"viaGeometry": {},
+			"fromNetworkSourceId": 6,
+			"fromGlobalId": "{05904716-F47D-47C9-A7A2-B5C29F5125C5}",
+			"fromObjectId": 208,
+			"fromTerminalId": 3,
+			"fromGeometry": {},
+			"toNetworkSourceId": 9,
+			"toGlobalId": "{A565A71F-5ACF-4434-B355-803CC447FABF}",
+			"toObjectId": 521,
+			"toTerminalId": 1,
+			"toGeometry": {}
+		},
+		{
+			"viaNetworkSourceId": 1,
+			"viaGlobalId": "{31303F5D-9A3F-4001-A306-C53399BC5F56}",
+			"viaObjectId": 100,
+			"viaPositionFrom": 0,
+			"viaPositionTo": 1,
+			"viaGeometry": {},
+			"fromNetworkSourceId": 6,
+			"fromGlobalId": "{DE2ADDB1-02A1-409C-94CF-85B84A00F2CD}",
+			"fromObjectId": 204,
+			"fromTerminalId": 9,
+			"fromGeometry": {},
+			"toNetworkSourceId": 9,
+			"toGlobalId": "{83851142-AEA3-45A4-A3DA-BECAF3B3E245}",
+			"toObjectId": 520,
+			"toTerminalId": 1,
+			"toGeometry": {}
+		},
+		{
+			"viaNetworkSourceId": 1,
+			"viaGlobalId": "{090656D1-7A3A-4739-A276-2831D191B4CD}",
+			"viaObjectId": 50,
+			"viaPositionFrom": 0,
+			"viaPositionTo": 1,
+			"viaGeometry": {},
+			"fromNetworkSourceId": 6,
+			"fromGlobalId": "{64C0643C-44C8-4E57-B549-53EA2F64887D}",
+			"fromObjectId": 203,
+			"fromTerminalId": 1,
+			"fromGeometry": {},
+			"toNetworkSourceId": 6,
+			"toGlobalId": "{DE2ADDB1-02A1-409C-94CF-85B84A00F2CD}",
+			"toObjectId": 204,
+			"toTerminalId": 8,
+			"toGeometry": {}
+		},
+		{
+			"viaNetworkSourceId": 7,
+			"viaGlobalId": "{FF474008-1744-458A-A1DC-CAC4543DEA94}",
+			"viaObjectId": 667,
+			"viaPositionFrom": 0,
+			"viaPositionTo": 1,
+			"viaGeometry": {},
+			"fromNetworkSourceId": 9,
+			"fromGlobalId": "{83851142-AEA3-45A4-A3DA-BECAF3B3E245}",
+			"fromObjectId": 520,
+			"fromTerminalId": 1,
+			"fromGeometry": {},
+			"toNetworkSourceId": 6,
+			"toGlobalId": "{A70839CB-1EF1-49A2-9B58-FC5154FE0BCA}",
+			"toObjectId": 205,
+			"toTerminalId": 1,
+			"toGeometry": {}
+		},
+		{
+			"viaNetworkSourceId": 7,
+			"viaGlobalId": "{7848C0FA-137D-4502-BF33-F4BA3713E093}",
+			"viaObjectId": 668,
+			"viaPositionFrom": 0,
+			"viaPositionTo": 1,
+			"viaGeometry": {},
+			"fromNetworkSourceId": 9,
+			"fromGlobalId": "{83851142-AEA3-45A4-A3DA-BECAF3B3E245}",
+			"fromObjectId": 520,
+			"fromTerminalId": 1,
+			"fromGeometry": {},
+			"toNetworkSourceId": 6,
+			"toGlobalId": "{0412F447-68ED-4482-9BC9-5EB52509F994}",
+			"toObjectId": 206,
+			"toTerminalId": 1,
+			"toGeometry": {}
+		},
+		{
+			"viaNetworkSourceId": 7,
+			"viaGlobalId": "{D83A9261-81B1-4AF7-A87E-2FFFCE44451B}",
+			"viaObjectId": 669,
+			"viaPositionFrom": 0,
+			"viaPositionTo": 1,
+			"viaGeometry": {},
+			"fromNetworkSourceId": 9,
+			"fromGlobalId": "{83851142-AEA3-45A4-A3DA-BECAF3B3E245}",
+			"fromObjectId": 520,
+			"fromTerminalId": 1,
+			"fromGeometry": {},
+			"toNetworkSourceId": 6,
+			"toGlobalId": "{C9D0CEF0-F984-40A2-A386-E449E071EE22}",
+			"toObjectId": 207,
+			"toTerminalId": 1,
+			"toGeometry": {}
+		},
+		{
+			"viaNetworkSourceId": 7,
+			"viaGlobalId": "{C8E0D13C-6A79-499C-8B0C-01367AD37952}",
+			"viaObjectId": 666,
+			"viaPositionFrom": 0,
+			"viaPositionTo": 1,
+			"viaGeometry": {},
+			"fromNetworkSourceId": 9,
+			"fromGlobalId": "{900D280C-90A5-459D-BD01-D8A693E94D8E}",
+			"fromObjectId": 517,
+			"fromTerminalId": 1,
+			"fromGeometry": {},
+			"toNetworkSourceId": 9,
+			"toGlobalId": "{BE462C5C-8A07-4EC7-BB74-42DBADC49638}",
+			"toObjectId": 518,
+			"toTerminalId": 1,
+			"toGeometry": {}
+		},
+		{
+			"viaNetworkSourceId": 7,
+			"viaGlobalId": "{E8120006-C87C-4032-86B8-995C84C1A7FF}",
+			"viaObjectId": 665,
+			"viaPositionFrom": 0,
+			"viaPositionTo": 1,
+			"viaGeometry": {},
+			"fromNetworkSourceId": 9,
+			"fromGlobalId": "{BE462C5C-8A07-4EC7-BB74-42DBADC49638}",
+			"fromObjectId": 518,
+			"fromTerminalId": 1,
+			"fromGeometry": {},
+			"toNetworkSourceId": 9,
+			"toGlobalId": "{18442C7D-96E8-4B14-ACD3-BBC171CC08C0}",
+			"toObjectId": 519,
+			"toTerminalId": 1,
+			"toGeometry": {}
+		},
+		{
+			"viaNetworkSourceId": 7,
+			"viaGlobalId": "{F84AAC25-2C91-4E45-8388-5B0F9CEA0B63}",
+			"viaObjectId": 670,
+			"viaPositionFrom": 0,
+			"viaPositionTo": 1,
+			"viaGeometry": {},
+			"fromNetworkSourceId": 9,
+			"fromGlobalId": "{A565A71F-5ACF-4434-B355-803CC447FABF}",
+			"fromObjectId": 521,
+			"fromTerminalId": 1,
+			"fromGeometry": {},
+			"toNetworkSourceId": 9,
+			"toGlobalId": "{900D280C-90A5-459D-BD01-D8A693E94D8E}",
+			"toObjectId": 517,
+			"toTerminalId": 1,
+			"toGeometry": {}
+		}
+	],
+	"associations": [
+		{
+			"associationType": "containment",
+			"fromNetworkSourceId": 5,
+			"fromGlobalId": "{4F4B31E8-7730-49D4-82EE-F2863B555400}",
+			"fromTerminalId": 1,
+			"toNetworkSourceId": 6,
+			"toGlobalId": "{05904716-F47D-47C9-A7A2-B5C29F5125C5}",
+			"toTerminalId": 3
+		},
+		{
+			"associationType": "containment",
+			"fromNetworkSourceId": 5,
+			"fromGlobalId": "{4F4B31E8-7730-49D4-82EE-F2863B555400}",
+			"fromTerminalId": 1,
+			"toNetworkSourceId": 9,
+			"toGlobalId": "{A565A71F-5ACF-4434-B355-803CC447FABF}",
+			"toTerminalId": 1
+		},
+		{
+			"associationType": "attachment",
+			"fromNetworkSourceId": 3,
+			"fromGlobalId": "{86F70EE7-CA0B-4FD1-BA1C-6E7658676874}",
+			"fromTerminalId": 1,
+			"toNetworkSourceId": 6,
+			"toGlobalId": "{64C0643C-44C8-4E57-B549-53EA2F64887D}",
+			"toTerminalId": 1
+		}
+	],
+	"sourceMapping": {
+		"1": "UN_6_Associations",
+		"2": "UN_6_SystemJunctions",
+		"4": "StructureJunction",
+		"6": "StructureBoundary",
+		"7": "StructureJunctionObject",
+		"5": "StructureLine",
+		"8": "StructureEdgeObject",
+		"9": "ElectricDistributionDevice",
+		"11": "ElectricDistributionAssembly",
+		"12": "ElectricDistributionJunction",
+		"14": "ElectricDistributionJunctionObject",
+		"10": "ElectricDistributionLine",
+		"13": "ElectricDistributionSubnetLine",
+		"15": "ElectricDistributionEdgeObject"
+	},
+	"resultTypes": [
+		{
+			"type": "features",
+			"includeGeometry": false,
+			"includePropagatedValues": false,
+			"networkAttributeNames": [],
+			"diagramTemplateName": "",
+			"resultTypeFields": []
+		},
+		{
+			"type": "connectivity",
+			"includeGeometry": false,
+			"includePropagatedValues": false,
+			"networkAttributeNames": [],
+			"diagramTemplateName": "",
+			"resultTypeFields": []
+		},
+		{
+			"type": "associations",
+			"includeGeometry": false,
+			"includePropagatedValues": false,
+			"networkAttributeNames": [],
+			"diagramTemplateName": "",
+			"resultTypeFields": []
+		}
+	],
+	"spatialReference": {
+		"wkid": 3498,
+		"latestWkid": 3498
+	}
+}
+
+```
+
+ 

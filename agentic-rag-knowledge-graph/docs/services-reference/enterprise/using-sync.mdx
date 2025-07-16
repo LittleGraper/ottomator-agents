@@ -1,0 +1,143 @@
+---
+title: "Using sync"
+description: "Learn how to use sync to support common workflows."
+slug: "using-sync"
+url: "/using-sync"
+guid: "GUID-310BD4A0-99BE-4461-8B93-2445E3944384"
+migratedTopicMetadata:
+  FTITLE: "Using Sync"
+  FDESCRIPTION: ""
+  FCHANGES: "Updating link and info"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0- *"
+  CREATED-ON: "14/03/2022 15:34:25"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "24/05/2022 09:29:33"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "11"
+  ED: "GUID-D27B289B-9C5C-42F0-A671-796DC6314BE1"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata: {}
+---
+
+The following sections describe how to use sync to support common workflows:
+
+-   [Enabling sync](/using-sync)
+-   [Setting up sync](/using-sync#-setting-up-sync)
+-   [Syncing](/using-sync#syncing)
+-   [Unregistering a replica](/using-sync#unregistering-a-replica)
+-   [Sync permissions](/using-sync#sync-permissions)
+
+## Enabling sync
+
+The sync capability allows ArcGIS clients (such as a runtime or mobile device) to create and edit a local copy of a feature service's data and synchronize those changes with the feature service on ArcGIS Server. For this functionality, the `Sync`  capability [must be enabled](/sync-enabled-feature-services) on the feature service, which can be done by [editing the feature service's properties](/update-definition-feature-service). If you're building feature services for offline use, you'll need to [prepare your geodatabase in advance](https://pro.arcgis.com/en/pro-app/latest/help/data/geodatabases/overview/prepare-feature-layer-data-for-offline.htm#GUID-2535C7ED-AA6E-466F-B971-CC65C6593508).
+
+<Note type={"note"}>
+
+Feature services can be published to ArcGIS Enterprise and ArcGIS Online, as well as a stand-alone ArcGIS Server site.
+
+</Note>
+
+##  Setting up sync
+
+A client begins using sync against a service by defining and downloading a replica using the [createReplica](/create-replica) operation. This returns data that the client can hold in a local database. The [synchronizeReplica](/synchronize-replica) operation is used to synchronize subsequent changes made on the client with changes made on the server.
+
+When defining a replica, clients specify the layers and the replica geometry. Features from the layers that intersect the replica geometry are included by default. Clients can also override the defaults and apply other criteria on a per-layer basis using `layerQueries` . For example, any one of the following can be applied for a layer using `layerQueries` :
+
+-   All features
+-   No features (for upload only)
+-   Features returned from a where clause
+-   Features intersecting the replica geometry and returned from a where clause
+-   Related features only
+
+<Note type={"note"}>
+
+For nonspatial layers (tables), the default is to include related features only.
+
+</Note>
+
+Filters, such as the replica extent set when a client calls the `createReplica`  operation, are used during synchronization. Once set, only edits that satisfy the filters are kept in sync. If a client uploads an edit that does not meet filter requirements, the edit is still applied to the server. However, if another edit is made that is still outside the filters, the edit is not downloaded to the client during the next synchronization. In this case, the feature is out of sync on both the client and the server. There are also cases in which features edited outside the filters are removed from the client on download during synchronization. To ensure all features are kept in sync, clients should set filters that cover all intended edits.
+
+Clients can choose the data format of the results. Data formats can be in either JSON or SQLite. Runtime clients are designed to work where the data format is set to SQLite.
+
+If layers have [ attachments](/sync-and-attachments), clients choose whether to include the attachments in the replica. If attachments are not included, the [createReplica](/create-replica) and [synchronizeReplica](/synchronize-replica) operations will not transfer attachments. If attachments are included and the data format is SQLite, they will be provided in the SQLite geodatabase. If the data format is JSON, they can be referenced by URL in the result or embedded in the result. If referenced by URL, clients can subsequently download the attachments and store them locally.
+
+Clients also choose a [sync model](/rollbackonfailure-and-sync-models) when defining a replica. The `syncModel`  parameter defines how layers can be synced. 
+
+In some cases, clients already have a copy of the data they want to edit and keep in sync with the server. Replica options can be set so that the local data can be used when defining the replica. When replica options are set, the [createReplica](/create-replica) operation registers a replica on the server and returns metadata for the client to persist with the local data. [Example 3](/sync-workflow-examples#workflow-example-3-setting-up-sync-on-multiple-clients-by-a-sharing-a-replica) in workflow examples describes this process.
+
+The [createReplica](/create-replica) operation also allows clients to set a replica name. The replica name is not required but allows clients to apply a user-friendly name to the replica.
+
+Clients can set the replica spatial reference to define the spatial reference of the output features. By default, the spatial reference of the service is used.
+
+If the replica includes a lot of data, the client may want to run [ asynchronously](/asynchronous-operations) to avoid server time-outs. This can be done by setting the `async`  parameter provided in the `createReplica`  operation. If the data format is JSON, clients can also set the `transportType`  parameter to have the results returned embedded in the response or by a reference URL. If using a referenced URL, clients can download the results and store them locally. If the data format is SQLite, the response is always by a reference URL.
+
+If the data format is JSON, clients are required to store and maintain a local copy of the data. Clients can choose the manner in which data is maintained (for example, a local database) as long as it's consistent with the data from the feature service. For example, a layer's string field in the local copy must match the corresponding layer's string field in the feature service to maintain consistency on sync. To ensure consistency, clients can use the information provided by the feature service. Field lists and field types, for example, are described in the feature service's layer and table resources. 
+
+If the data format is JSON, clients are also required to store and maintain the replica metadata that's needed when the client runs sync. Replica metadata returned from the [createReplica](/create-replica) operation includes the following:
+
+-   `replicaID` —A value (GUID) that uniquely identifies the replica. It must be provided when running sync.
+-   `syncModel` —The sync model (`perReplica`  or `perLayer` ). 
+
+    -   If the `syncModel`  is `perReplica` , the replica metadata includes a `replicaServerGen` . The `replicaServerGen`  identifies the last time changes were received by the client.
+    -   If the `syncModel`  is `perLayer` , the replica metadata has `layerServerGens` . `layerServerGens`  includes a `serverGen`  for each layer in the replica. A `serverGen`  identifies the last time changes were received by the client for a specific layer.
+    -   The `replicaServerGen`  and `serverGen`  values are integers that can represent a time stamp or date. 
+
+Once the setup process is complete, clients are ready to start making local edits and begin syncing.
+
+## Syncing
+
+To sync, a client runs the [synchronizeReplica](/synchronize-replica) operation. The operation allows clients to apply local edits to the server and, in response, get any changes that have occurred on the server since the last sync. The sync is complete when the client incorporates the changes from the server into the local database and updates its replica metadata. The client can then make additional local edits that can be synchronized in the same way at a later time.
+
+When syncing, the client provides the `replicaID`  to identify the replica to be synced on the server. The server uses replica metadata to determine the changes to send back to the client. For example, if a replica is defined to include all features intersecting the replica geometry, `synchronizeReplica`  will only return changes to features intersecting the replica geometry. 
+
+The client also provides a `syncDirection`  that describes whether to upload, download, or both upload and download on sync. Read-only clients always set the `syncDirection`  to download. 
+
+Before setting the `syncDirection` , the client needs to check the replica's `syncModel` . 
+
+If the `syncModel`  is `perReplica` , the `syncDirection`  applies to all layers in the replica. A `perReplica`  sync model also requires the client to provide the `replicaServerGen`  on sync. The `replicaServerGen`  tells the server the point in time from which to send back changes. 
+
+If the `syncModel`  is `perLayer` , the client sets the `syncDirection`  on a layer-by-layer basis. For example, one layer can upload changes while another downloads during sync. A `perLayer` `syncModel`  also allows clients to limit the sync to only the layers specified. For each layer involved in the sync, the client must also provide a `serverGen` . The `serverGen`  tells the server the point in time from which to send back changes for a specific layer. 
+
+When sync involves an upload, clients provide the `edits`  to be uploaded. The edits include inserts, updates, and deletes and, if applicable, references to attachments. If the data format is JSON, clients can [pre-upload](/uploads) the attachments and reference them with the edits by URL. If the data format is SQLite, attachments are embedded in the delta SQLite.
+
+Edits must include globalID values. GlobalIDs are used to identify the features on the server to which the updates and deletes apply. For inserts, clients must also generate and provide globalIDs. When inserts are applied, the server preserves the globalID value provided by the client. Clients can ask the server to return the objectIDs of the inserts as applied on the server. This is needed if the client has to map the server's objectIDs to the client's objectIDs. 
+
+The service does checks on the edits provided by the client prior to applying them. Edits that do not pass the checks are not applied, and information about them is returned to the client. The client can correct the data and reapply on the next sync. The [rollbackOnFailure](/rollbackonfailure-and-sync-models) parameter can be used to determine how the feature service responds to an error during sync. 
+
+Edits are applied using a last-in-wins policy. Edits from the client overwrite the edits made on the server on sync. 
+
+When sync involves a download, edits are returned to the client. Clients are to apply the edits to the local database. Clients can set the data format of the edits to be either JSON or SQLite. 
+
+If the data format is SQLite, a client can have the edits returned embedded in the response or by reference URL. If reference URL, clients can download the edits from the location provided. If attachments are included, clients can also have the attachments embedded with the edits or referenced by a URL. If referenced by a URL, clients can download the attachments and apply them to the local database.
+
+If the data format is SQLite, responses are always returned by a URL with the attachments embedded in the response.
+
+The edits included in the download are determined based on the criteria defined when setting up the sync. For consistency, it is also recommended that clients upload edits based on the same criteria. The server, however, will apply edits provided by the client that are outside the criteria. 
+
+Clients can run sync with an [ asynchronous](/asynchronous-operations) process. When a process is run asynchronously, clients periodically check to determine whether the process is complete as it's running. When complete, clients can get the result. Running a process in this mode is recommended when server time-outs are a concern.
+
+Updates to the replica metadata are also returned during sync. Clients are required to persist the metadata updates locally. These updates ensure that the next sync operation returns the appropriate response. 
+
+If the sync fails and a response is not received, the client can call sync again, passing in the same parameter values. The server will include anything that was lost in the previous sync in the response.
+
+## Unregistering a replica
+
+The [unRegisterReplica](/unregister-replica-feature-service) operation is used to remove replica metadata from the server. Once the metadata is removed for a specific replica, the client will no longer be able to sync using the replica. Administrators can run this command to clean up older replicas. A client can also use this operation when it no longer needs to sync. The [Replicas resource](/replicas-feature-service) lists the replicas associated with the feature service.
+
+It's also possible for a client to specify that the replica be unregistered as part of the last sync. However, it's recommended that clients call the `unRegisterReplica`  operation separately instead of unregistering with the last sync. This allows a client to check that the last sync completed successfully before calling unregister. 
+
+## Sync permissions
+
+Users who have permissions to access a sync-enabled feature service can use the Sync API. The user who runs the `createReplica`  operation is assigned ownership in the replica metadata. This includes authenticated users and anonymous users. 
+
+[Replicas](/replicas-feature-service) owned by authenticated users can only be accessed by the owner or the admin user. Consequently, only owners and admin users can sync or unregister the replica. Replicas owned by anonymous users can be accessed by anyone who has access to the service. This includes the admin user, authenticated users, or others connecting as anonymous. Users do not need to have access to the reference replica specified when running `createReplica`  with the `replicaOptions`  parameter. 
+
+The data access rules enforced through ownership-based access control on the feature service apply to the Sync API as well. For example, if access control does not allow edits to features owned by others, a user will not be able to sync edits to features owned by others.

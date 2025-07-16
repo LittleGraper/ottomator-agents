@@ -1,0 +1,2515 @@
+---
+title: "Query Analytic (Map Service/Layer)"
+description: "This operation exposes the standard SQL windows functions that computes aggregate and ranking values based on a group of rows called window partitions."
+slug: "ms-query-analytic"
+url: "/ms-query-analytic"
+guid: "GUID-490AC0BE-19D4-45D2-9DAA-81DF4598C7C2"
+migratedTopicMetadata:
+  FTITLE: "MS Query Analytic"
+  FDESCRIPTION: ""
+  FCHANGES: "New for map service at 11.1"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1-*"
+  CREATED-ON: "12/04/2023 13:07:00"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "18/04/2023 13:25:52"
+  VERSION: "1"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-B8748412-966E-48BA-8BB2-43BE0CB18889"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /queryAnalytic
+  urlSegments:
+    - name: <layerID-url>
+      url: /layer-table
+    - name: /queryAnalytic
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '11.1'
+---
+
+## Description
+
+The `queryAnalytic`  operation exposes the standard SQL windows functions that computes aggregate and ranking values based on a group of rows called window partitions. The windows function is applied to rows after they have been partitioned and ordered. This operation defines a window or user-specified set of rows within a query result set that can be used to compute aggregated values such as moving averages, cumulative aggregates, or running totals.
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`where` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A WHERE clause for the query filter that defines the source rows. For more information on WHERE clauses, [see the Where and AnalyticWhere section below](/ms-query-analytic#where-and-analyticwhere-clauses).
+
+Example
+
+```javascript
+where=1=1
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`analyticWhere` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A WHERE clause for the query filter that applies to the result set of applying the source where clause and all other parameters. For more information on WHERE clauses, [see the Where and AnalyticWhere section below](/ms-query-analytic#where-and-analyticwhere-clauses).
+
+Example
+
+```javascript
+analyticWhere=(Row_Number = 1)
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geometry` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The geometry that will be applied as the spatial filter. The structure of the geometry is the same as the structure of the JSON geometry objects returned by the ArcGIS REST API. In addition to the JSON structures, you can specify the geometry of envelopes and points with a simple comma-separated syntax. For more information on the JSON structure of geometry objects, see the [Geometry objects](/geometry-objects) reference.
+
+Syntax examples
+
+```javascript
+//JSON structures
+geometryType=<geometryType>&geometry={geometry}
+
+//Envelope simple syntax
+geometryType=esriGeometryEnvelope&geometry=<xmin>,<ymin>,<xmax>,<ymax>
+
+//Point simple syntax
+geometryType=esriGeometryPoint&geometry=<x>,<y>
+
+```
+
+ 
+
+Examples
+
+```javascript
+//esriGeometryEnvelope
+geometryType=esriGeometryEnvelope&geometry={"xmin":-104,"ymin":35.6,"xmax":-94.32,"ymax":41}
+
+//esriGeometryPoint
+geometryType=esriGeometryPoint&geometry=-104,35.6
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geometryType` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The type of geometry specified by the geometry parameter. The geometry type can be an envelope, a point, a line, or a polygon. The default geometry type is an envelope.
+
+Values: `esriGeometryPoint`  \| `esriGeometryMultipoint`  \| `esriGeometryPolyline`  \| `esriGeometryPolygon`  \| `esriGeometryEnvelope` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`inSR` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The spatial reference of the input geometry. The spatial reference can be specified as either a well-known ID or as a spatial reference JSON object. If the `inSR`  is not specified, the geometry is assumed to be in the spatial reference of the map.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outSR` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The spatial reference of the returned geometry. The spatial reference can be specified as either a well-known ID or as a spatial reference JSON object. If `outSR`  is not specified, the geometry is returned in the spatial reference of the map.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`spatialRel` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The spatial relationship to be applied to the input geometry while performing the query. The supported spatial relationships include intersects, contains, envelop intersects, within, and so on. The default spatial relationship is intersects (`esriSpatialRelIntersects` ).
+
+Values: `esriSpatialRelIntersects`  \| `esriSpatialRelContains`  \| `esriSpatialRelCrosses`  \| `esriSpatialRelEnvelopIntersects`  \| `esriSpatialRelIndexIntersects`  \| `esriSpatialRelOverlaps`  \| `esriSpatialRelTouches`  \| `esriSpatialRelWithin` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outFields` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The list of fields to be included in the returned result set. This list is a comma delimited list of field names. You can also specify the wildcard "`*` " as the value of this parameter. In this case, the query results include all the field values.
+
+Example
+
+```javascript
+outFields=*
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnGeometry` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , the result includes the geometry associated with each feature returned. The default value is `true` .
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outAnalytics` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The definitions for one or more field-based or expression analytics to be computed. The syntax for this parameter is an array of analytic definitions. An analytic definition specifies the type of analytics, the field or expression on which it is to be computed, and the resulting output field name. For more information on the syntax properties for `outAnalytics` , [see the `outAnalytics`  overview section below](/ms-query-analytic#outanalytics-overview).
+
+Starting at 10.9.1, the `outAnalytics`  parameter also supports a syntax for computing the linear regression. The linear regression describes the best fit line when charting data values. To get the linear regression, the `outAnalytics`  parameter takes on `"analyticType": "LinReg2"` , and a list of two fields in the `onAnalyticField`  parameter. The first of the two fields represents values along the x-axis while the second field represents values along the y-axis. You can't combine `"analyticType": "LinRegR2"`  with other `analyticTypes`  in the same call.
+
+Unlike other `analyticTypes` , results from linear regression includes three values which describe how to plot the best fit line. These include:
+
+-   `slope` : Describes the slope of the line in terms of vertical to horizontal unites. A value of 0 is a horizontal line.
+-   `intercept` : Describes where the line crosses the y-axis
+-   `R2` : Describes the fit of the line. The closer the value is to 0 the poorer the fit while the closer the value is to 1 the better the fit.
+
+Since linear regression (`"analyticType": "LinRegR2"` ) always returns a result with three values, some parameters are not applicable, such as `outSR`  or `analyticWhere` .
+
+<Note type={"note"}>
+
+For services running on SAP HANA, the `windowFrame` `type`  property's `"RANGE"`  value is not supported.
+
+</Note>
+
+Syntax
+
+```javascript
+[
+  {
+    "analyticType": "<COUNT | SUM | MIN | MAX | AVG | STDDEV | VAR | FIRST_VALUE, LAST_VALUE, LAG, LEAD, PERCENTILE_CONT,PERCENTILE_DISC, PERCENT_RANK, RANK, NTILE, DENSE_RANK, EXPRESSION>",
+    "onAnalyticField": "Field1",
+    "outAnalyticFieldName": "Out_Field_Name1",
+    "analyticParameters”: {
+      "orderBy": "<orderBy expression",
+      "value": <double value>, // percentile value
+      "partitionBy": "<field name or expression>",
+      "offset": <integer>, // used by LAG/LEAD
+      "windowsFrame": {
+        "type": "ROWS" | "RANGE",
+        "extent": {
+          "extentType": "PRECEDING" | "BOUNDARY",
+          "PRECEDING": {
+            "type": <"UNBOUNDED"|"NUMERIC_CONSTANT"|"CURRENT_ROW">
+            "value": <numeric constant value>
+          },
+          "BOUNDARY": {
+            "start": "UNBOUNDED_PRECEDING", "NUMERIC_PRECEDING", "CURRENT_ROW",
+            "startValue": <numeric constant value>,
+            "end": <"UNBOUNDED_FOLLOWING"|"NUMERIC_FOLLOWING"|"CURRENT_ROW">,
+            "endValue": <numeric constant value>
+          }
+        }
+      }
+    }
+  }
+]
+
+```
+
+ 
+
+Example
+
+```javascript
+outAnalytics=[{"analyticType":"CUME_DIST","onAnalyticField":"POP1990","outAnalyticFieldName":"CumDistance",
+"analyticParameters":{"partitionBy":"state_name"}}]
+```
+
+ 
+
+Linear regression example
+
+```javascript
+outAnalytics=[{"analyticType": "LinRegR2","onAnalyticField": "price,sqfootage“}]
+```
+
+ 
+
+Linear regression attributes example
+
+```javascript
+[{"attributes": {"slope": 0.001498918,"intercept": 20.2756258894,"R2": 0.0105485996}}]
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`orderByFields` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+One or more field names on which the features/records need to be ordered. Use `ASC`  or `DESC`  for ascending or descending, respectively, following every field to control the ordering. `orderByFields`  defaults to `ASC`  (ascending order) if &lt;ORDER> is unspecified. `orderByFields`  is supported on only those layers/tables that indicate `supportsAdvancedQueries`  is `true` .
+
+<Note type={"note"}>
+
+If `supportsOrderByOnlyLayerFields`  is `true` , only fields from the layer's fields array can be used with the `orderByFields`  parameter. For example, the `outStatisticfieldName`  from `outStatistics`  can't be used if `supportsOrderByOnlyOnLayerFields`  is `true` .
+
+</Note>
+
+Syntax
+
+```javascript
+orderByFields=field1 <ORDER>, field2 <ORDER>, field3 <ORDER>
+```
+
+ 
+
+Example
+
+```javascript
+orderByFields=STATE_NAME ASC, RACE DESC, GENDER
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`resultType` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The `resultType`  parameter can be used to control the number of features returned by the query operation. The `title`  value is used when the client is using a virtual tiling scheme when querying features, which works similarly to tiles in a tiled map service layer. The `standard`  value is used with a nontiled query where the client will send only one query for the full extent. Support for this parameter is advertised on the layer metadata in the `supportsQueryWithResultType`  property. For additional information on the `resultType`  parameter and how it interacts with max record counts, see the Result type and max record count.
+
+Values: `none`  \| `standard`  \| `tile` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`cacheHint` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Indicates if the the query results should be cached. This parameter is only supported if the layer specifies `supportsQueryWithCacheHint`  as `true` . The default value for `cacheHint`  is `false` .
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`resultRecordCount` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This option can be used for fetching query results up to the `resultRecordCount`  specified. When `resultOffset`  is specified, but this parameter is not, the map service defaults to its `maxRecordCount` . The maximum value for this parameter is the value of the layer's `maxRecordCount`  property. The minimum value entered for this parameter cannot be below 1. This parameter only applies if `supportsPagination`  is `true` .
+
+```javascript
+resultRecordCount=10
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`quantizationParameters` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A JSON object used to project the geometry onto a virtual grid, likely representing pixels on the screen. The properties of the JSON object include `extent` , `mode` , `originPosition` , and `tolerance` . For more information, [see the quantizationParameters JSON properties section below](/ms-query-analytic#quantizationparameters-json-properties).
+
+<Note type={"note"}>
+
+This parameter is only supported if the layer has the `supportsCoordinatesQuantization`  property as `true` .
+
+</Note>
+
+```javascript
+//upperLeft origin position
+{"mode":"view","originPosition":"upperLeft","tolerance":1.0583354500042335,"extent":{"type":"extent","xmin":-18341377.47954369,"ymin":2979920.6113554947,"xmax":-7546517.393554582,"ymax":11203512.89298139,"spatialReference":{"wkid":102100,"latestWkid":3857}}}
+
+//lowerLeft origin position
+{"mode":"view","originPosition":"lowerLeft","tolerance":1.0583354500042335,"extent":{"type":"extent","xmin":-18341377.47954369,"ymin":2979920.6113554947,"xmax":-7546517.393554582,"ymax":11203512.89298139,"spatialReference":{"wkid":102100,"latestWkid":3857}}}
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sqlFormat` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The `sqlFormat`  parameter can be either `standard` , using the SQL-92 standard, or it can be specified as `native` , using the native SQL of the underlying data store.
+
+Values: `none`  \| `standard`  \| `native` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`dataFormat` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The format of the changes returned in the response.
+
+Values: `json`  \| `pbf` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`async` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether the operation will run synchronously (`false` ) or asynchronously (`true` ).
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` .
+
+Values: `html`  \| `json`  \| `pjson`  \| `pbf` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Where and analyticWhere clauses
+
+The source rows and output result can be controlled by using where and `analyticWhere`  clauses. Where clauses in the `queryAnalytic`  API are used to filter the source data used when computing the analytic type results. The `analyticWhere`  clause can be used to filter the returned results from `queryAnalytic` . Example use cases include filtering to remove duplicate data or to return top rows with `Row_Number` . Any fields including aliases in the output including `outputAnalyticField`  can be used in the `analyticWhere`  clause.
+
+## quantizationParameters JSON properties
+
+Listed below are the properties included in the quantizationParameters JSON object.
+
+<StyledTable headers={"Property,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`extent` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+An extent defining the quantization grid bounds. Its `spatialReference`  matches the input geometry spatial reference if one is specified for the query. Otherwise, the extent will be in the layer's spatial reference.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`mode` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The `view`  value specifies that geometry coordinates should be optimized for viewing and displaying data. The `edit`  value specifies that full-resolution geometries should be returned, which can support lossless editing.
+
+<Note type={"note"}>
+
+The edit value can only be used when the `supportsQuantizationEditMode`  layer property is `true` .
+
+</Note>
+
+Values: `view`  \| `edit` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`originPosition` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Integer coordinates will be returned relative to the origin position defined by this property value. The default value is `upperLeft` .
+
+Values: `upperLeft`  \| `lowerLeft` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`tolerance` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The `tolerance`  is the size of one pixel in the `outSpatialReference`  units. This number is used to convert the coordinates to integers by building a grid with the resolution matching the tolerance. Each coordinate is then snapped to one pixel on the grid. Consecutive coordinates snapped to the same pixel are removed to reduce the overall response size.
+
+The units of tolerance are defined by `outSpatialReference` . If the `outSpatialReference`  is not specified, tolerance is assumed to be in the unit of the spatial reference of the layer.
+
+If `mode`  is set to `edit` , the tolerance is always set to the full-resolution tolerance of the spatial reference.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## outAnalytics overview
+
+The `QueryAnalytic`  operation defines a window (a user-specified set of rows) within a query result set to compute aggregated values such as moving averages, cumulative aggregates, and running totals. The `outAnalytics`  parameter that's passed through when calling the operation provides the definitions for one or more field-based or expression analytics that will be computed. This information is passed through as an array of analytic definitions that specifies the type of analytics, the field or expression on which it is to be computed, and the resulting output field name. The following sections break down the syntax of `outAnalytics`  and provides examples of how it can be customized to gauge revenue growth, running totals, and filter out duplicate data.
+
+Syntax
+
+```javascript
+[
+  {
+    "analyticType": "<COUNT | SUM | MIN | MAX | AVG | STDDEV | VAR | FIRST_VALUE, LAST_VALUE, LAG, LEAD, PERCENTILE_CONT,PERCENTILE_DISC, PERCENT_RANK, RANK, NTILE, DENSE_RANK, EXPRESSION>",
+    "onAnalyticField": "Field1",
+    "outAnalyticFieldName": "Out_Field_Name1",
+    "analyticParameters”: {
+      "orderBy": "<orderBy expression",
+      "value": <double value>, // percentile value
+      "partitionBy": "<field name or expression>",
+      "offset": <integer>, // used by LAG/LEAD
+      "windowsFrame": {
+        "type": "ROWS" | "RANGE",
+        "extent": {
+          "extentType": "PRECEDING" | "BOUNDARY",
+          "PRECEDING": {
+            "type": <"UNBOUNDED"|"NUMERIC_CONSTANT"|"CURRENT_ROW">
+            "value": <numeric constant value>
+          },
+          "BOUNDARY": {
+            "start": "UNBOUNDED_PRECEDING", "NUMERIC_PRECEDING", "CURRENT_ROW",
+            "startValue": <numeric constant value>,
+            "end": <"UNBOUNDED_FOLLOWING"|"NUMERIC_FOLLOWING"|"CURRENT_ROW">,
+            "endValue": <numeric constant value>
+          }
+        }
+      }
+    }
+  }
+]
+
+```
+
+ 
+
+The following sections describe, in more detail, aspects of the `outAnalytics`  properties listed above:
+
+-   `analyticType` : [SQL windows functions](/query-analytic#sql-windows-function)
+-   `partitionBy` : [Partitioning](/query-analytic#partitioning-partitionby-)
+-   `windowsFrame` : [Understanding winodwsFrame](/query-analytic#understanding-windowsframe)
+-   `extent` : [windowsFrame extent](/query-analytic#windowsframe-extent)
+
+For example scenarios for `outAnalytics` , see the [`outAnalytics`  example section below](/query-analytic#outanalytic-examples).
+
+## SQL windows function
+
+A windows function performs a calculation across a set of rows (SQL partition or window) that are related to the current row. Unlike regular aggregate functions, use of a windows function does not return a single output row. The rows retain their separate identities with each calculation appended as a new field value. As well, the windows function can access more than just the current rows of the query result.
+
+`QueryAnalytic`  currently supports the following windows functions:
+
+-   Aggregate functions
+-   Analytic functions
+-   Ranking functions
+
+The values for these functions are passed through the `analyticType`  property for `outAnalytics` .
+
+### Aggregate functions
+
+Aggregate functions are deterministic and perform calculations on a set of values to returns a single value. Aggregate functions are used in the select list with an optional `HAVING`  clause, though a `GROUP BY`  clause can also be used to calculate the aggregation on categories of rows. Supported aggregate functions are:
+
+-   `MIN` 
+-   `MAX` 
+-   `SUM` 
+-   `COUNT` 
+-   `AVG` 
+-   `STDDEV` 
+-   `VAR` 
+
+Syntax
+
+```javascript
+[
+  {
+    "analyticType": "MAX",
+    "onAnalyticField": "POP1990",
+    "outAnalyticFieldName": "Max_Value",
+    "analyticParameters": {
+      "partitionBy": "state_name"
+    }
+  }
+]
+```
+
+ 
+
+Example
+
+```javascript
+https://services.arcgis.com/lidGgNLxw9LL0SbI/arcgis/rest/services/counties/MapServer/0/queryAnalytic?where=1=1&analyticWhere=&outAnalytics=[{"analyticType":"MAX","onAnalyticField":"POP1990","analyticParameters"{"partitionBy":"state_name"},"outAnalyticFieldName":"Max_Value"}]&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&returnGeometry=true&resultType=none&outSR=&outFields=*&orderByFields=&cacheHint=false&quantizationParameters=&resultOffset=&resultRecordCount=&async=false&sqlFormat=none&dataFormat=json&f=html&token=
+```
+
+ 
+
+### Analytic functions
+
+Analytic functions compute aggregate values based on a group of rows or window partitions. Unlike aggregate functions, analytic functions can return single or multiple rows for each group. Supported analytic functions are:
+
+-   `CUME_DIST` 
+-   `FIRST_VALUE` 
+-   `LAST_VALUE` 
+-   `LEAD` 
+-   `LAG` 
+-   `PERCENTILE_DISC` 
+-   `PERCENTILE_CONT` 
+-   `PERCENT_RANK` 
+
+#### CUME_DIST
+
+The `CUME_DIST`  function calculates the cumulative distribution of a value in a group of values (defined with `partitionBy`  clause). `CUME_DIST`  computes the relative position of a specified value in a group of values. For example, the cumulative distribution for a given row in group is equal to the number of rows with values lower than or equal to the value of `r` , divided by the total number of rows in groups. The range of values returned by `CUME_DIST`  is greater than 0 and less than or equal to 1.
+
+Syntax
+
+```javascript
+[
+  {
+    "analyticType": "CUME_DIST",
+    "onAnalyticField": "POP1990",
+    "outAnalyticFieldName": "CumDistance",
+    "analyticParameters": {
+      "partitionBy": "state_name"
+    }
+  }
+]
+```
+
+ 
+
+Example
+
+```javascript
+https://services.arcgis.com/lidGgNLxw9LL0SbI/arcgis/rest/services/counties/MapServer/0/queryAnalytic?where=1=1&analyticWhere=&outAnalytics=[{"analyticType":"CUME_DIST","onAnalyticField":"POP1990","outAnalyticFieldName":"CumDistance","analyticParameters":{"partitionBy":"state_name"}}]&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&returnGeometry=true&resultType=none&outSR=&outFields=*&orderByFields=&cacheHint=false&quantizationParameters=&resultOffset=&resultRecordCount=&async=false&sqlFormat=none&dataFormat=json
+```
+
+ 
+
+#### FIRST_VALUE
+
+`FIRST_VALUE`  function returns the first value in an ordered set of values.
+
+Syntax
+
+```javascript
+[
+  {
+    "analyticType": "FIRST_VALUE",
+    "onAnalyticField": "POP1990",
+    "outAnalyticFieldName": "FirstValue",
+    "analyticParameters": {
+      "orderBy": "POP1990",
+      "partitionBy": "state_name"
+    }
+  }
+]
+```
+
+ 
+
+Example
+
+```javascript
+https://services.arcgis.com/lidGgNLxw9LL0SbI/arcgis/rest/services/counties/MapServer/0/queryAnalytic?where=1=1&analyticWhere=&outAnalytics=[{"analyticType":"FIRST_VALUE","onAnalyticField":"POP1990","analyticParameters":{"orderBy":"POP1990","partitionBy":"state_name"},"outAnalyticFieldName":"FirstValue"}]&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&returnGeometry=true&resultType=none&outSR=&outFields=*&orderByFields=&cacheHint=false&quantizationParameters=&resultOffset=&resultRecordCount=&async=false&sqlFormat=none&dataFormat=json
+```
+
+ 
+
+#### LAST_VALUE
+
+The `LAST_VALUE`  function returns the last value in an ordered set of values defined by the `partitionBy`  clause.
+
+```javascript
+[
+  {
+    "analyticType": "LAST_VALUE",
+    "onAnalyticField": "POP1990",
+    "outAnalyticFieldName": "LastValue",
+    "analyticParameters": {
+      "orderBy": "POP1990",
+      "partitionBy": "state_name"
+    }
+  }
+]
+```
+
+ 
+
+Example
+
+```javascript
+https://services.arcgis.com/lidGgNLxw9LL0SbI/arcgis/rest/services/counties/MapServer/0/queryAnalytic?where=1=1&analyticWhere=&outAnalytics=[{"analyticType":"LAST_VALUE","onAnalyticField":"POP1990","analyticParameters":{"orderBy":"POP1990","paritionBy":"state_name"},"outAnalyticFieldName":"LastValue"}]&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&returnGeometry=true&resultType=none&outSR=&outFields=*&orderByFields=&cacheHint=false&quantizationParameters=&resultOffset=&resultRecordCount=&async=false&sqlFormat=none&dataFormat=json&f=html&token=
+```
+
+ 
+
+#### LEAD
+
+The `LEAD`  function accesses data from a subsequent row in the same result set without the use of a self-join. `LEAD`  provides access to a row at a given physical `offset`  that follows the current row. The offset value is defined in the `analyticParameters`  JSON object.
+
+Syntax
+
+```javascript
+[
+  {
+    "analyticType": "LEAD",
+    "onAnalyticField": "POP1990",
+    "outAnalyticFieldName": "Lead_Value",
+    "analyticParameters": {
+      "orderBy": "POP1990 desc",
+       "partitionBy": "state_name",
+       "offset": 2
+    }
+  }
+]
+```
+
+ 
+
+Example
+
+```javascript
+https://services.arcgis.com/lidGgNLxw9LL0SbI/arcgis/rest/services/counties/MapServer/0/queryAnalytic?where=1=1&analyticWhere=&outAnalytics=[{"analyticType":"LEAD","onAnalyticField":"POP1990","analyticParameters":{"orderBy":"POP1990","partitionBy":"state_name","offset":2},"outAnalyticFieldName":"LEAD_Value"}]&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&returnGeometry=true&resultType=none&outSR=&outFields=*&orderByFields=&cacheHint=false&quantizationParameters=&resultOffset=&resultRecordCount=&async=false&sqlFormat=none&dataFormat=json&f=html&token=
+```
+
+ 
+
+#### LAG
+
+The `LAG`  function accesses data from a previous row in the same result set without the use of a self-join. `LAG`  provides access to a row at a given physical `offset`  that comes before the current row. The offset value is defined in the `analyticParameters`  JSON object. Note the first row in each partition group returns null `LAG`  values for the first row in the group or for previous rows that are outside the range of the group.
+
+Syntax
+
+```javascript
+[
+  {
+    "analyticType": "LAG",
+    "onAnalyticField": "POP1990",
+    "outAnalyticFieldName": "Lag_Value",
+    "analyticParameters": {
+      "orderBy": "POP1990 desc",
+      "partitionBy": "state_name",
+      "offset": 2
+    }
+  }
+]
+```
+
+ 
+
+Example
+
+```javascript
+https://services.arcgis.com/lidGgNLxw9LL0SbI/arcgis/rest/services/counties/MapServer/0/queryAnalytic?where=1=1&analyticWhere=&outAnalytics=[{"analyticType":"LAG","onAnalyticField":"POP1990","analyticParameters":{"orderBy":"POP1990","partitionBy":"state_name","offset":2},"outAnalyticFieldName":"LAG_VALUE"}]&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&returnGeometry=true&resultType=none&outSR=&outFields=*&orderByFields=&cacheHint=false&quantizationParameters=&resultOffset=&resultRecordCount=&async=false&sqlFormat=none&dataFormat=json&f=html&token=
+```
+
+ 
+
+#### PERCENTILE_CONT
+
+The `PERCENTILE_CONT`  analytic function calculates a percentile based on a continuous distribution of the column value, similar to finding median with percentile value. If the number of elements is even, then `PERCENTILE_CONT`  will be calculated by adding both values from the middle and dividing by two. If the number of elements is odd, `PERCENTILE_CONT`  will be calculated by selecting the digits from the middle.
+
+<Note type={"note"}>
+
+If the value is not in the list, then the function interpolates to calculate the percentile based on the specified percentile value.
+
+</Note>
+
+Syntax
+
+```javascript
+[
+  {
+    "analyticType": "PERCENTILE_CONT",
+    "onAnalyticField": "POP1990",
+    "outAnalyticFieldName": "PERCENTILE_CVALUE",
+    "analyticParameters": {
+      "orderBy": "POP1990 desc",
+      "partitionBy": "state_name",
+      "value": 0.50
+    }
+  }
+]
+```
+
+ 
+
+Example
+
+```javascript
+https://services.arcgis.com/lidGgNLxw9LL0SbI/arcgis/rest/services/counties/MapServer/0/queryAnalytic?where=1=1&analyticWhere=&outAnalytics=[{"analyticType":"PERCENTILE_CONT","onAnalyticField":"POP1990","analyticParameters":{"orderBy":"POP1990","partitionBy":"state_name","value":0.5},"outAnalyticFieldName":"PERCENTILE_CVALUE"}]&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&returnGeometry=true&resultType=none&outSR=&outFields=*&orderByFields=&cacheHint=false&quantizationParameters=&resultOffset=&resultRecordCount=&async=false&sqlFormat=none&dataFormat=json&f=html&token=
+```
+
+ 
+
+#### PERCENTILE_DISC
+
+The `PERCENTILE_DISC`  analytic function computes a specific percentile for sorted values in an entire result or within distinct partitions defined by the partition by clause. For a given percentile value `P` , `PERCENTILE_DISC`  sorts the values of the expression in the `ORDER BY`  clause and returns the value with the smallest value that is greater than or equal to `P` .
+
+Syntax
+
+```javascript
+[
+  {
+    "analyticType": "PERCENTILE_DISC",
+    "onAnalyticField": "POP1990",
+    "outAnalyticFieldName": "PERCENTILE_DVALUE",
+    "analyticParameters": {
+      "orderBy": "POP1990",
+      "partitionBy": "state_name",
+      "value": 0.50
+    }
+  }
+]
+```
+
+ 
+
+Example
+
+```javascript
+https://services.arcgis.com/lidGgNLxw9LL0SbI/arcgis/rest/services/counties/MapServer/0/queryAnalytic?where=1=1&analyticWhere=&outAnalytics=[{"analyticType":"PERCENTILE_DISC","onAnalyticField":"POP1990","analyticParameters":{"orderBy":"POP1990","partitionBy":"POP1990","value":0.50},"outAnalyticFieldName":"PERCENTILE_DVALUE"}]&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&returnGeometry=true&resultType=none&outSR=&outFields=*&orderByFields=&cacheHint=false&quantizationParameters=&resultOffset=&resultRecordCount=&async=false&sqlFormat=none&dataFormat=json&f=html&token=
+```
+
+ 
+
+#### PERCENT_RANK
+
+The `PERCENT_RANK`  analytic function calculates the relative rank of a row within a group of rows defined by the partition by clause. Use `PERCENT_RANK`  to evaluate the relative standing of a value within a query result or partition.
+
+Syntax
+
+```javascript
+[
+  {
+    "analyticType": "PERCENT_RANK",
+    "onAnalyticField": "POP1990",
+    "outAnalyticFieldName": "Percent_Rank",
+    "analyticParameters": {
+      "orderBy": "POP1990",
+      "partitionBy": "state_name"
+    }
+  }
+]
+```
+
+ 
+
+Example
+
+```javascript
+https://services.arcgis.com/lidGgNLxw9LL0SbI/arcgis/rest/services/counties/MapServer/0/queryAnalytic?where=1=1&analyticWhere=&outAnalytics=[{"analyticType":"PERCENT_RANK","onAnalyticField":"POP1990","analyticParameters":{"orderBy":"POP1990","partitionBy":"state_name"},"outAnalyticFieldName":"Percent_Rank"}]&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&returnGeometry=true&resultType=none&outSR=&outFields=*&orderByFields=&cacheHint=false&quantizationParameters=&resultOffset=&resultRecordCount=&async=false&sqlFormat=none&dataFormat=json&f=html&token=
+```
+
+ 
+
+### Ranking functions
+
+Ranking functions return a ranking value for each row in a partition. Depending on the function that is used, some rows might receive the same value as other rows. The following shows the difference between different ranking functions (based on the value column) within a single partition:
+
+<StyledTable headers={"Id,Value,RANK,DENSE_RANK,Row_Number"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+2
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+3
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+3
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+4
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+5
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+4
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+3
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+4
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+5
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+8
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+5
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+4
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+5
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+Supported ranking functions are:
+
+-   `RANK` 
+-   `NTILE` 
+-   `DENSE_RANK` 
+-   `ROW_NUMBER` 
+
+#### RANK
+
+Returns the rank of each row within the partition of a result set. The rank of a row is one plus the number of ranks that come before the row in question. `RANK`  returns the ranking within the ordered partition. Ties are assigned the same rank, with the next ranking(s) skipped. For example, if there are 3 items at rank 2, the next rank listed would be ranked 5.
+
+Syntax
+
+```javascript
+[
+  {
+    "analyticType": "RANK",
+    "outAnalyticFieldName": "Rank_Value",
+    "analyticParameters": {
+      "orderBy": "POP1990",
+      "partitionBy": "state_name"
+    }
+  }
+]
+```
+
+ 
+
+Example
+
+```javascript
+https://services.arcgis.com/lidGgNLxw9LL0SbI/arcgis/rest/services/counties/MapServer/0/queryAnalytic?where=1=1&analyticWhere=&outAnalytics=[{"analyticType":"RANK","onAnalyticField":"POP1990","outAnalyticFieldName":"Rank_Value","analyticParameters": {"orderBy":"POP1990","partitionBy":"state_name"}}]&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&returnGeometry=true&resultType=none&outSR=&outFields=*&orderByFields=&cacheHint=false&quantizationParameters=&resultOffset=&resultRecordCount=&async=false&sqlFormat=none&dataFormat=json&f=html&token=
+```
+
+ 
+
+#### DENSE_RANK
+
+This function returns the rank of each row within a result set partition, with no gaps in the ranking values. The rank of a specific row is one plus the number of distinct rank values that come before that specific row. `DENSE_RANK`  returns the ranking within your ordered partition, but the ranks are consecutive. No ranks are skipped if there are ranks with multiple items.
+
+Syntax
+
+```javascript
+[
+  {
+    "analyticType": "DENSE_RANK",
+    "outAnalyticFieldName": "DenseRank_Value",
+    "analyticParameters": {
+      "orderBy": "POP1990",
+      "partitionBy": "state_name"
+    }
+  }
+]
+```
+
+ 
+
+Example
+
+```javascript
+https://services.arcgis.com/lidGgNLxw9LL0SbI/arcgis/rest/services/counties/MapServer/0/queryAnalytic?where=1=1&analyticWhere=&outAnalytics=[{"analyticType":"DENSE_RANK","onAnalyticField":"POP1990","analyticParameters":{"partitionBy":"state_name","orderBy":"POP1990"},"outAnalyticFieldName":"DenseRank_Value"}]&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&returnGeometry=true&resultType=none&outSR=&outFields=*&orderByFields=&cacheHint=false&quantizationParameters=&resultOffset=&resultRecordCount=&async=false&sqlFormat=none&dataFormat=json&f=html&token=
+```
+
+ 
+
+#### NTILE
+
+This function distributes the rows in an ordered partition into a specified number of groups. The groups are numbered, starting at one. For each row, `NTILE`  returns the number of the group to which the row belongs.
+
+Syntax
+
+```javascript
+[
+  {
+    "analyticType": "NTILE",
+    "outAnalyticFieldName": "DenseRank_Value",
+    "analyticParameters": {
+      "orderBy": "POP1990",
+      "partitionBy": "state_name",
+      "nTileExpression": 4
+    }
+  }
+]
+```
+
+ 
+
+Example
+
+```javascript
+https://services.arcgis.com/lidGgNLxw9LL0SbI/arcgis/rest/services/counties/MapServer/0/queryAnalytic?where=1=1&analyticWhere=&outAnalytics=[{"analyticType":"NTILE","analyticParameters":{"partitionBy":"state_name","orderBy":"POP1990","nTileExpression":4},"outAnalyticFieldName":"NTile_Value"}]&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&returnGeometry=true&resultType=none&outSR=&outFields=*&orderByFields=&cacheHint=false&quantizationParameters=&resultOffset=&resultRecordCount=&async=false&sqlFormat=none&dataFormat=json&f=html&token=
+```
+
+ 
+
+#### ROW_NUMBER
+
+The `ROW_NUMBER`  function is used to provide consecutive numbering of the rows in the `partitionBy`  clause. It will assign the value `1`  for the first row and increase the number of the subsequent rows. The rows are ordered based on the `orderBy`  parameter.
+
+Syntax
+
+```javascript
+[
+  {
+    "analyticType": "ROW_NUMBER",
+    "outAnalyticFieldName": "Row_Number",
+    "analyticParameters": {
+      "orderBy": "POP1990",
+      "partitionBy": "state_name"
+    }
+  }
+]
+```
+
+ 
+
+Example
+
+```javascript
+https://services.arcgis.com/lidGgNLxw9LL0SbI/ArcGIS/rest/services/counties/MapServer/0/queryAnalytic?where=1=1&analyticWhere=&outAnalytics=[{"analyticType":"ROW_NUMBER","outAnalyticFieldName":"Row_Number","analyticParameters":{"orderBy":"POP1990","partitionBy":"state_name"}}]&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&returnGeometry=true&resultType=none&outSR=&outFields=*&orderByFields=&cacheHint=false&quantizationParameters=&resultOffset=&resultRecordCount=&async=false&sqlFormat=none&dataFormat=json&f=html&token=
+```
+
+ 
+
+## Partitioning (`partitionBy` )
+
+Partitions are very powerful and have many potential uses, such as calculating the same metric over different groups of rows. You can also add `partitionBy`  clause to your window specification to look at different groups of rows individually. The `partitionBy`  clause divides the query result set into partitions and the SQL windows function is applied to each partition. The `partitionBy`  clause normally refers to the column by which the result is partitioned, and can also be a value expression (column expression or function) that references any of the selected columns (not aliases).
+
+## Understanding windowsFrame
+
+Every analytic type for `QueryAnalytic`  supports the `windowsFrame`  property. The `windowsFrame`  property defines the rows around the current row within a partition, over which the analytic function or type is evaluated. This type of window frame allows both physical (`ROWS` ) and logical (`RANGE` ) window frame types. 
+
+Syntax
+
+```javascript
+{
+  ...
+  "windowsFrame": {
+    "type": "ROWS" | "RANGE",
+    "extent": {
+      "extentType": "PRECEDING" | "BOUNDARY",
+      //If extentType is PRECEDING
+      "PRECEDING": { 
+        "type": < "UNBOUNDED"| "NUMERIC_CONSTANT"| "CURRENT_ROW">,
+        "value": <numeric constant value>
+      }
+      //If extentType is BOUNDARY
+      "BOUNDARY": {
+        "start": "UNBOUNDED_PRECEDING" | "NUMERIC_PRECEDING" | "CURRENT_ROW",
+        "startValue": <numeric constant value>,
+        "end": < "UNBOUNDED_FOLLOWING" | "NUMERIC_FOLLOWING" | "CURRENT_ROW",
+        "endValue": <numeric constant value>
+      }
+    }
+  }
+}
+```
+
+ 
+
+### Default windowsFrame
+
+If `windowsFrame`  is not defined within the `analyticParameter`  object, and if `orderBy`  is defined within the partition, then the default `windowsFrame`  is used. The default frame type is `RANGE`  (logical) and the window for each current row is defined by all preceding rows. The order in each window frame is defined by the `orderBy`  clause. The default `windowsFrame`  configuration is shown in the code example below.
+
+```javascript
+{
+  …
+  "windowsFrame": {
+    "type": "RANGE",
+    "extent": {
+      "extentType": "BOUNDARY",
+      "BOUNDARY": {
+        "start": "UNBOUNDED_PRECEDING",
+        "end": "CURRENT_ROW"
+      }
+    }
+  }
+  …
+}
+```
+
+ 
+
+### windowsFrame Types
+
+#### ROWS
+
+A `ROWS`  based `windowsFrame`  type computes the window frame based on physical offsets from the current row. For example, the window frame below defines a window frame of size three (at most) around the current window.
+
+```javascript
+{
+  …
+  "windowsFrame": {
+    "type": "ROWS",
+    "extent": {
+      "extentType": "BOUNDARY",
+      "BOUNDARY": {
+        "startValue": 3,
+        "endValue": 3
+      }
+    }
+  }
+  …
+}
+```
+
+ 
+
+#### RANGE
+
+<Note type={"note"}>
+
+For services running on SAP HANA, the `windowFrame` `type`  property's `"RANGE"`  value is not supported.
+
+</Note>
+
+A `RANGE`  based `windowsFrame`  type computes the window frame based on a logical range of rows around the current row based on the row's `orderBy`  key value. The provided range value is added to or subtracted from the key value to define a starting or ending range boundary for the window frame.
+
+## outAnalytic examples
+
+The SQL windows functions can be used for business analysis, such as revenue growth, running total, filter out duplicate data, or return top rows.
+
+### Revenue growth
+
+Revenue growth in a month `m1` , compared to the previous month (`m0` ) is calculated as:
+
+`100*(m1-m0)/m0`
+
+ 
+
+The `LAG`  SQL windows function can be used to return the previous month sales and return it as a new column in addition to the sales for each month. The expression above can be computed and returned as a new column.
+
+Example
+
+```javascript
+[
+  {
+    "analyticType": "LAG",
+    "onAnalyticField": "MonthlySales",
+    "outAnalyticFieldName": "PreviousMonthlySales",
+    "analyticParameters": {
+      "partitionBy": "ProductCatagory",
+	     "orderBy": "Month"
+    }
+  }
+]
+```
+
+ 
+
+### Running total
+
+SQL windows functions can calculate running totals over some period of time. This is the sum of the current element and all previous elements. For example, the following demonstrates how the running total monthly revenue would look in the dataset outlined in the table below.
+
+<StyledTable headers={"Id,CustomerID,Month,Revenue,Running_Total"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2018-01-01
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+100
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+100
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+2
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2018-02-01
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1200
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1300
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+3
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2018-03-01
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1700
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+3000
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+```javascript
+[
+  {
+    "analyticType": "SUM",
+    "onAnalyticField": "Revenue",
+    "outAnalyticFieldName": "Running_Total",
+    "analyticParameters": {
+	     "orderBy": "Month",
+      "partitionBy": "CustomerId",
+      "windowsFrame": {
+        "type": "RANGE",
+        "extent": {
+          "extentType": "BOUNDARY",   
+          "BOUNDARY": {
+            "start": "UNBOUNDED_PRECEDING", 
+            "end": "CURRENT_ROW"
+          }
+        }
+      }
+    }
+  }
+]
+
+```
+
+ 
+
+### Duplicate data or top rows
+
+Another common use is to filter out duplicate data or to discover duplicated data as defined by the `partitionBy`  clause.
+
+<Note type={"note"}>
+
+In the following example, there is no need to define the `onAnalyticFieldName`  property. The example below demonstrates how to specify `analyticWhere = (Row_Number = 1)`  or the top row that needs to be returned from the query.
+
+</Note>
+
+<StyledTable headers={"Id,CutomerId,Month,Revenue,Row_Number"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2018-01-01
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+100
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+2
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2018-02-01
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1200
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+3
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+B
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2018-03-01
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1700
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+```javascript
+[
+  {
+    "analyticType": "ROW_NUMBER",
+    "outAnalyticFieldName": "Row_Number",
+    "analyticParameters": {
+	     "orderBy": "Month",
+      "partitionBy": "CustomerId",
+      "windowsFrame": {
+        "type": "RANGE",
+        "extent": {
+          "extentType": "BOUNDARY",   
+          "BOUNDARY": {
+            "start": "UNBOUNDED_PRECEDING", 
+            "end": "CURRENT_ROW"
+          }
+        }
+      }
+    }
+  }
+]
++ analyticWhere = (Row_Number = 1)
+
+```
+
+ 
+
+### Top rows in groups (`TopFilterQuery`  API)
+
+SQL windows functions can also return top rows within a group as defined by the `partitionBy`  clause.
+
+<Note type={"note"}>
+
+In the following example, there is no need to define the `onAnalyticFieldName`  property. The example below demonstrates how to specify `analyticWhere = (Row_Number <= {topRowCount})`  or the top row that needs to be returned from the query.
+
+</Note>
+
+<StyledTable headers={"Id,CustomerId,Month,Revenue,Row_Number"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2018-01-01
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+100
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+2
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2018-02-01
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1200
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+3
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+B
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2018-03-01
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1700
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+```javascript
+[
+  {
+    "analyticType": "ROW_NUMBER",
+    "outAnalyticFieldName": "Row_Number",
+    "analyticParameters": {
+	     "orderBy": "Month",
+      "partitionBy": "CustomerId",
+      "windowsFrame": {
+        "type": "RANGE",
+        "extent": {
+          "extentType": "BOUNDARY",   
+          "BOUNDARY": {
+            "start": "UNBOUNDED_PRECEDING", 
+            "end": "CURRENT_ROW"
+          }
+        }
+      }
+    }
+  }
+]
++ analyticWhere = (Row_Number <= 2) // Top 2 rows for each customer
+
+```
+
+ 
+
+## Example usage
+
+The following is a sample request URL for the `queryAnaltic`  operation:
+
+```javascript
+https://orgServices.arcgis.com/ligGgNLxw9LL0SbI/ArcGIS/rest/services/counties/MapServer/0/queryAnalytic?where=1=1&analyticWhere=&outAnalytics=[{"analyticType": "FIRST_VALUE","onAnalyticField":"POP1990","analyticParameters":{"orderBy":"POP1990","partitionBy":"state_name"},"outAnalyticFieldName":"FirstValue"}]geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&returnGeometry=true&resultType=none&outSR=&outFields=*&orderByFields=&cacheHint=false&quantizationParameters=&resultOffset=&resultRecordCount=&async=false&sqlFormat=none&dataFormat=json
+
+```
+
+ 
+
+## JSON Response syntax
+
+```other
+{
+  "objectIdFieldName": "FID",
+  "uniqueIdField": {
+    "name": "FID",
+    "isSystemMaintained": true
+  },
+  "globalIdFieldName": "GlobalID",
+  "geometryProperties": {
+    "shapeAreaFieldName": "Shape__Area",
+    "shapeLengthFieldName": "Shape__Length",
+    "units": "esriMeters"
+  },
+  "geometryType": "esriGeometryPolygon",
+  "spatialReference": {
+    "wkid": 102100,
+    "latestWkid": 3857
+  },
+  "fields": [
+    {
+      "name": "FID",
+      "type": "esriFieldTypeOID",
+      "alias": "FID",
+      "sqlType": "sqlTypeInteger",
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "NAME",
+      "type": "esriFieldTypeString",
+      "alias": "NAME",
+      "sqlType": "sqlTypeNVarchar",
+      "length": 32,
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "STATE_NAME",
+      "type": "esriFieldTypeString",
+      "alias": "STATE_NAME",
+      "sqlType": "sqlTypeNVarchar",
+      "length": 25,
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "STATE_FIPS",
+      "type": "esriFieldTypeString",
+      "alias": "STATE_FIPS",
+      "sqlType": "sqlTypeNVarchar",
+      "length": 2,
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "CNTY_FIPS",
+      "type": "esriFieldTypeString",
+      "alias": "CNTY_FIPS",
+      "sqlType": "sqlTypeNVarchar",
+      "length": 3,
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "FIPS",
+      "type": "esriFieldTypeString",
+      "alias": "FIPS",
+      "sqlType": "sqlTypeNVarchar",
+      "length": 5,
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "AREA",
+      "type": "esriFieldTypeDouble",
+      "alias": "AREA",
+      "sqlType": "sqlTypeFloat",
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "POP1990",
+      "type": "esriFieldTypeInteger",
+      "alias": "POP1990",
+      "sqlType": "sqlTypeInteger",
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "POP1996",
+      "type": "esriFieldTypeInteger",
+      "alias": "POP1996",
+      "sqlType": "sqlTypeInteger",
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "jn_fips",
+      "type": "esriFieldTypeInteger",
+      "alias": "jn_fips",
+      "sqlType": "sqlTypeInteger",
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "two_words1",
+      "type": "esriFieldTypeSmallInteger",
+      "alias": "two_words1",
+      "sqlType": "sqlTypeSmallInt",
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "Shape__Area",
+      "type": "esriFieldTypeDouble",
+      "alias": "Shape__Area",
+      "sqlType": "sqlTypeFloat",
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "Shape__Length",
+      "type": "esriFieldTypeDouble",
+      "alias": "Shape__Length",
+      "sqlType": "sqlTypeFloat",
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "GlobalID",
+      "type": "esriFieldTypeGlobalID",
+      "alias": "GlobalID",
+      "sqlType": "sqlTypeOther",
+      "length": 38,
+      "domain": null
+    },
+    {
+      "name": "FirstValue",
+      "type": "esriFieldTypeDouble",
+      "alias": "FirstValue",
+      "sqlType": "sqlTypeFloat",
+      "domain": null,
+      "defaultValue": null
+    }
+  ],
+  "features": [
+    {
+      "attributes": {
+        "FID": 442,
+        "NAME": "Greene",
+        "STATE_NAME": "Alabama",
+        "STATE_FIPS": "01",
+        "CNTY_FIPS": "063",
+        "FIPS": "01063",
+        "AREA": 659.9269,
+        "POP1990": 10153,
+        "POP1996": 10092,
+        "jn_fips": 1063,
+        "two_words1": 0,
+        "Shape__Area": 2507773320.62891,
+        "Shape__Length": 340036.603117597,
+        "GlobalID": "a3ea8ef3-9905-4cd2-8b1d-75fecb31a2d9",
+        "FirstValue": 10153
+      },
+      "geometry": {
+        "rings": [
+          [
+            [-9764049.22989504, 3897523.70250823],
+            [-9763864.06631694, 3894438.48945744],
+            [-9766276.99053855, 3892428.71212731],
+            [-9767799.82407139, 3892396.3223483],
+            [-9767221.43802462, 3890754.83131371],
+            [-9768266.1043061,  3890229.99318935],
+            [-9767124.6168976,  3889423.78951268],
+            [-9767040.53634006, 3887429.02830046],
+            [-9768713.70506447, 3885769.01860212],
+            [-9770108.29965551, 3886035.64389694],
+            [-9769974.10797145, 3883436.99767052],
+            [-9772012.49143589, 3881722.93461246],
+            [-9773701.80090174, 3882477.52857487],
+            [-9775113.38033727, 3881778.07515039],
+            [-9775205.95550766, 3880029.35470343],
+            [-9777062.57857561, 3878190.90895415],
+            [-9777358.98876912, 3875178.50887073],
+            [-9776117.27113135, 3869847.64828906],
+            [-9778666.08329576, 3866515.14897504],
+            [-9781177.52566792, 3865291.91356823],
+            [-9781564.8129192,  3863972.3413004],
+            [-9779270.79412184, 3863209.33310761],
+            [-9776996.31380011, 3864797.97590721],
+            [-9776030.63472855, 3864479.3120523],
+            [-9774628.40329035, 3861380.03194152],
+            [-9776037.427146,   3860681.83064417],
+            [-9776580.14411079, 3857436.68163262],
+            [-9773900.5342823,  3857991.84481689],
+            [-9771429.85275421, 3850356.83939523],
+            [-9768208.37196789, 3850780.01261086],
+            [-9767134.82298093, 3849796.4388701],
+            [-9768565.08450671, 3847895.62214826],
+            [-9770061.59264512, 3848946.62228151],
+            [-9774326.04275803, 3847819.0114348],
+            [-9773041.86525493, 3845086.58230843],
+            [-9768682.28769288, 3844826.90519043],
+            [-9767047.33061801, 3841485.79143055],
+            [-9769523.96129528, 3838642.48001034],
+            [-9770639.12570542, 3840588.19457995],
+            [-9771973.41379732, 3840491.9447599],
+            [-9773099.61559469, 3835156.55646918],
+            [-9775207.63985946, 3832426.56865673],
+            [-9775999.21062473, 3835568.65225435],
+            [-9778906.44943175, 3835559.60664198],
+            [-9780211.8632698,  3833596.60388316],
+            [-9781700.72856744, 3835065.94780331],
+            [-9781768.67123516, 3838135.66264735],
+            [-9783704.27642361, 3841839.73913676],
+            [-9781375.42870597, 3843365.52773188],
+            [-9779962.15592591, 3840993.47048838],
+            [-9777946.70958588, 3841921.85422786],
+            [-9779835.60377046, 3844783.6286969],
+            [-9783536.95588581, 3844545.69536802],
+            [-9789748.90370197, 3846395.099872],
+            [-9791783.03863994, 3844320.40351661],
+            [-9797574.60437877, 3842185.09914856],
+            [-9802606.91925062, 3841961.3072789],
+            [-9804774.41679476, 3846870.14446497],
+            [-9802439.58605706, 3848942.27517538],
+            [-9802335.96116884, 3851771.43111383],
+            [-9800413.05390631, 3854513.46617654],
+            [-9801860.32498427, 3855077.59446579],
+            [-9806490.91885508, 3853761.17907],
+            [-9808839.3379389,  3854940.35400314],
+            [-9809124.71504293, 3856149.41807425],
+            [-9805269.56455638, 3858322.60682667],
+            [-9805853.05849125, 3859897.9947183],
+            [-9808208.27570117, 3860715.80886088],
+            [-9808189.62193144, 3866080.92444893],
+            [-9807754.76526926, 3866737.52793849],
+            [-9804972.32073288, 3865973.33764677],
+            [-9803714.47060567, 3868848.99967786],
+            [-9808445.30075647, 3869341.07519663],
+            [-9809851.83876014, 3872859.86341018],
+            [-9812775.26588512, 3872418.70597003],
+            [-9816165.84256448, 3873310.67680069],
+            [-9813393.61759618, 3875926.78916415],
+            [-9816394.36623128, 3878744.74230837],
+            [-9817536.78055787, 3884011.87141582],
+            [-9819112.31420268, 3884455.5100707],
+            [-9818042.16856902, 3887097.893599],
+            [-9815976.56562917, 3886828.19960253],
+            [-9816416.55667736, 3890216.59677064],
+            [-9813925.43177276, 3889880.02232767],
+            [-9814904.75995186, 3893820.1043432],
+            [-9814653.39071702, 3898650.83994008],
+            [-9812562.3193402,  3900072.06611394],
+            [-9811803.87014154, 3901935.74228992],
+            [-9805470.32365415, 3901662.1140983],
+            [-9804157.25985914, 3903879.70625472],
+            [-9800345.39685187, 3902068.87337528],
+            [-9799749.18772968, 3905143.43466553],
+            [-9792027.05160937, 3907682.98718314],
+            [-9787982.58180082, 3912517.90479856],
+            [-9777972.39153986, 3916342.29416258],
+            [-9777111.89298178, 3899452.36311752],
+            [-9764257.32422908, 3899401.65970443],
+            [-9764049.22989504, 3897523.70250823]
+          ]
+        ]
+      }
+    },
+    {
+      "attributes": {
+        "FID": 446,
+        "NAME": "Coosa",
+        "STATE_NAME": "Alabama",
+        "STATE_FIPS": "01",
+        "CNTY_FIPS": "037",
+        "FIPS": "01037",
+        "AREA": 666.3588,
+        "POP1990": 11063,
+        "POP1996": 11791,
+        "jn_fips": 1037,
+        "two_words1": 0,
+        "Shape__Area": 2520852185.77734,
+        "Shape__Length": 203686.263201499,
+        "GlobalID": "c533613f-2f98-43b2-871d-edf7cf74a08e",
+        "FirstValue": 10153
+      },
+      "geometry": {
+        "rings": [
+          [
+            [-9631532.18343972, 3899605.87647187],
+            [-9630150.38206438, 3908575.5154854],
+            [-9627906.48075554, 3910078.5564355],
+            [-9592768.29156714, 3909944.6938199],
+            [-9573916.71438689, 3909878.33623713],
+            [-9573813.93501112, 3907696.10241929],
+            [-9574080.26961663, 3862756.5105688],
+            [-9608634.22963641, 3862997.78466094],
+            [-9608494.10605832, 3865345.45156415],
+            [-9610924.01648295, 3865365.66172563],
+            [-9610569.83595776, 3863243.19162301],
+            [-9615247.90126861, 3863215.94152222],
+            [-9619335.70817791, 3866364.18779654],
+            [-9619762.07956094, 3868188.16489295],
+            [-9621939.74335928, 3868499.35281072],
+            [-9624811.32276536, 3871788.97800395],
+            [-9623870.30427517, 3876466.5498932],
+            [-9624436.81056764, 3877752.13721224],
+            [-9627716.90644057, 3879788.24217529],
+            [-9628756.50103403, 3883444.18854529],
+            [-9631314.68437103, 3887208.54146748],
+            [-9631021.70303554, 3892637.8854341],
+            [-9632177.65271742, 3896542.4126698],
+            [-9631532.18343972, 3899605.87647187]
+          ]
+        ]
+      }
+    },
+    ...
+  ],
+  "exceededTransferLimit": true
+} 
+```
+
+ 
+
+## JSON Response example
+
+```other
+{
+  "objectIdFieldName": "FID",
+  "uniqueIdField": {
+    "name": "FID",
+    "isSystemMaintained": true
+  },
+  "globalIdFieldName": "GlobalID",
+  "geometryProperties": {
+    "shapeAreaFieldName": "Shape__Area",
+    "shapeLengthFieldName": "Shape__Length",
+    "units": "esriMeters"
+  },
+  "geometryType": "esriGeometryPolygon",
+  "spatialReference": {
+    "wkid": 102100,
+    "latestWkid": 3857
+  },
+  "fields": [
+    {
+      "name": "FID",
+      "type": "esriFieldTypeOID",
+      "alias": "FID",
+      "sqlType": "sqlTypeInteger",
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "NAME",
+      "type": "esriFieldTypeString",
+      "alias": "NAME",
+      "sqlType": "sqlTypeNVarchar",
+      "length": 32,
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "STATE_NAME",
+      "type": "esriFieldTypeString",
+      "alias": "STATE_NAME",
+      "sqlType": "sqlTypeNVarchar",
+      "length": 25,
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "STATE_FIPS",
+      "type": "esriFieldTypeString",
+      "alias": "STATE_FIPS",
+      "sqlType": "sqlTypeNVarchar",
+      "length": 2,
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "CNTY_FIPS",
+      "type": "esriFieldTypeString",
+      "alias": "CNTY_FIPS",
+      "sqlType": "sqlTypeNVarchar",
+      "length": 3,
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "FIPS",
+      "type": "esriFieldTypeString",
+      "alias": "FIPS",
+      "sqlType": "sqlTypeNVarchar",
+      "length": 5,
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "AREA",
+      "type": "esriFieldTypeDouble",
+      "alias": "AREA",
+      "sqlType": "sqlTypeFloat",
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "POP1990",
+      "type": "esriFieldTypeInteger",
+      "alias": "POP1990",
+      "sqlType": "sqlTypeInteger",
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "POP1996",
+      "type": "esriFieldTypeInteger",
+      "alias": "POP1996",
+      "sqlType": "sqlTypeInteger",
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "jn_fips",
+      "type": "esriFieldTypeInteger",
+      "alias": "jn_fips",
+      "sqlType": "sqlTypeInteger",
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "two_words1",
+      "type": "esriFieldTypeSmallInteger",
+      "alias": "two_words1",
+      "sqlType": "sqlTypeSmallInt",
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "Shape__Area",
+      "type": "esriFieldTypeDouble",
+      "alias": "Shape__Area",
+      "sqlType": "sqlTypeFloat",
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "Shape__Length",
+      "type": "esriFieldTypeDouble",
+      "alias": "Shape__Length",
+      "sqlType": "sqlTypeFloat",
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "GlobalID",
+      "type": "esriFieldTypeGlobalID",
+      "alias": "GlobalID",
+      "sqlType": "sqlTypeOther",
+      "length": 38,
+      "domain": null
+    },
+    {
+      "name": "FirstValue",
+      "type": "esriFieldTypeDouble",
+      "alias": "FirstValue",
+      "sqlType": "sqlTypeFloat",
+      "domain": null,
+      "defaultValue": null
+    }
+  ],
+  "features": [
+    {
+      "attributes": {
+        "FID": 442,
+        "NAME": "Greene",
+        "STATE_NAME": "Alabama",
+        "STATE_FIPS": "01",
+        "CNTY_FIPS": "063",
+        "FIPS": "01063",
+        "AREA": 659.9269,
+        "POP1990": 10153,
+        "POP1996": 10092,
+        "jn_fips": 1063,
+        "two_words1": 0,
+        "Shape__Area": 2507773320.62891,
+        "Shape__Length": 340036.603117597,
+        "GlobalID": "a3ea8ef3-9905-4cd2-8b1d-75fecb31a2d9",
+        "FirstValue": 10153
+      },
+      "geometry": {
+        "rings": [
+          [
+            [-9764049.22989504, 3897523.70250823],
+            [-9763864.06631694, 3894438.48945744],
+            [-9766276.99053855, 3892428.71212731],
+            [-9767799.82407139, 3892396.3223483],
+            [-9767221.43802462, 3890754.83131371],
+            [-9768266.1043061,  3890229.99318935],
+            [-9767124.6168976,  3889423.78951268],
+            [-9767040.53634006, 3887429.02830046],
+            [-9768713.70506447, 3885769.01860212],
+            [-9770108.29965551, 3886035.64389694],
+            [-9769974.10797145, 3883436.99767052],
+            [-9772012.49143589, 3881722.93461246],
+            [-9773701.80090174, 3882477.52857487],
+            [-9775113.38033727, 3881778.07515039],
+            [-9775205.95550766, 3880029.35470343],
+            [-9777062.57857561, 3878190.90895415],
+            [-9777358.98876912, 3875178.50887073],
+            [-9776117.27113135, 3869847.64828906],
+            [-9778666.08329576, 3866515.14897504],
+            [-9781177.52566792, 3865291.91356823],
+            [-9781564.8129192,  3863972.3413004],
+            [-9779270.79412184, 3863209.33310761],
+            [-9776996.31380011, 3864797.97590721],
+            [-9776030.63472855, 3864479.3120523],
+            [-9774628.40329035, 3861380.03194152],
+            [-9776037.427146,   3860681.83064417],
+            [-9776580.14411079, 3857436.68163262],
+            [-9773900.5342823,  3857991.84481689],
+            [-9771429.85275421, 3850356.83939523],
+            [-9768208.37196789, 3850780.01261086],
+            [-9767134.82298093, 3849796.4388701],
+            [-9768565.08450671, 3847895.62214826],
+            [-9770061.59264512, 3848946.62228151],
+            [-9774326.04275803, 3847819.0114348],
+            [-9773041.86525493, 3845086.58230843],
+            [-9768682.28769288, 3844826.90519043],
+            [-9767047.33061801, 3841485.79143055],
+            [-9769523.96129528, 3838642.48001034],
+            [-9770639.12570542, 3840588.19457995],
+            [-9771973.41379732, 3840491.9447599],
+            [-9773099.61559469, 3835156.55646918],
+            [-9775207.63985946, 3832426.56865673],
+            [-9775999.21062473, 3835568.65225435],
+            [-9778906.44943175, 3835559.60664198],
+            [-9780211.8632698,  3833596.60388316],
+            [-9781700.72856744, 3835065.94780331],
+            [-9781768.67123516, 3838135.66264735],
+            [-9783704.27642361, 3841839.73913676],
+            [-9781375.42870597, 3843365.52773188],
+            [-9779962.15592591, 3840993.47048838],
+            [-9777946.70958588, 3841921.85422786],
+            [-9779835.60377046, 3844783.6286969],
+            [-9783536.95588581, 3844545.69536802],
+            [-9789748.90370197, 3846395.099872],
+            [-9791783.03863994, 3844320.40351661],
+            [-9797574.60437877, 3842185.09914856],
+            [-9802606.91925062, 3841961.3072789],
+            [-9804774.41679476, 3846870.14446497],
+            [-9802439.58605706, 3848942.27517538],
+            [-9802335.96116884, 3851771.43111383],
+            [-9800413.05390631, 3854513.46617654],
+            [-9801860.32498427, 3855077.59446579],
+            [-9806490.91885508, 3853761.17907],
+            [-9808839.3379389,  3854940.35400314],
+            [-9809124.71504293, 3856149.41807425],
+            [-9805269.56455638, 3858322.60682667],
+            [-9805853.05849125, 3859897.9947183],
+            [-9808208.27570117, 3860715.80886088],
+            [-9808189.62193144, 3866080.92444893],
+            [-9807754.76526926, 3866737.52793849],
+            [-9804972.32073288, 3865973.33764677],
+            [-9803714.47060567, 3868848.99967786],
+            [-9808445.30075647, 3869341.07519663],
+            [-9809851.83876014, 3872859.86341018],
+            [-9812775.26588512, 3872418.70597003],
+            [-9816165.84256448, 3873310.67680069],
+            [-9813393.61759618, 3875926.78916415],
+            [-9816394.36623128, 3878744.74230837],
+            [-9817536.78055787, 3884011.87141582],
+            [-9819112.31420268, 3884455.5100707],
+            [-9818042.16856902, 3887097.893599],
+            [-9815976.56562917, 3886828.19960253],
+            [-9816416.55667736, 3890216.59677064],
+            [-9813925.43177276, 3889880.02232767],
+            [-9814904.75995186, 3893820.1043432],
+            [-9814653.39071702, 3898650.83994008],
+            [-9812562.3193402,  3900072.06611394],
+            [-9811803.87014154, 3901935.74228992],
+            [-9805470.32365415, 3901662.1140983],
+            [-9804157.25985914, 3903879.70625472],
+            [-9800345.39685187, 3902068.87337528],
+            [-9799749.18772968, 3905143.43466553],
+            [-9792027.05160937, 3907682.98718314],
+            [-9787982.58180082, 3912517.90479856],
+            [-9777972.39153986, 3916342.29416258],
+            [-9777111.89298178, 3899452.36311752],
+            [-9764257.32422908, 3899401.65970443],
+            [-9764049.22989504, 3897523.70250823]
+          ]
+        ]
+      }
+    },
+    {
+      "attributes": {
+        "FID": 446,
+        "NAME": "Coosa",
+        "STATE_NAME": "Alabama",
+        "STATE_FIPS": "01",
+        "CNTY_FIPS": "037",
+        "FIPS": "01037",
+        "AREA": 666.3588,
+        "POP1990": 11063,
+        "POP1996": 11791,
+        "jn_fips": 1037,
+        "two_words1": 0,
+        "Shape__Area": 2520852185.77734,
+        "Shape__Length": 203686.263201499,
+        "GlobalID": "c533613f-2f98-43b2-871d-edf7cf74a08e",
+        "FirstValue": 10153
+      },
+      "geometry": {
+        "rings": [
+          [
+            [-9631532.18343972, 3899605.87647187],
+            [-9630150.38206438, 3908575.5154854],
+            [-9627906.48075554, 3910078.5564355],
+            [-9592768.29156714, 3909944.6938199],
+            [-9573916.71438689, 3909878.33623713],
+            [-9573813.93501112, 3907696.10241929],
+            [-9574080.26961663, 3862756.5105688],
+            [-9608634.22963641, 3862997.78466094],
+            [-9608494.10605832, 3865345.45156415],
+            [-9610924.01648295, 3865365.66172563],
+            [-9610569.83595776, 3863243.19162301],
+            [-9615247.90126861, 3863215.94152222],
+            [-9619335.70817791, 3866364.18779654],
+            [-9619762.07956094, 3868188.16489295],
+            [-9621939.74335928, 3868499.35281072],
+            [-9624811.32276536, 3871788.97800395],
+            [-9623870.30427517, 3876466.5498932],
+            [-9624436.81056764, 3877752.13721224],
+            [-9627716.90644057, 3879788.24217529],
+            [-9628756.50103403, 3883444.18854529],
+            [-9631314.68437103, 3887208.54146748],
+            [-9631021.70303554, 3892637.8854341],
+            [-9632177.65271742, 3896542.4126698],
+            [-9631532.18343972, 3899605.87647187]
+          ]
+        ]
+      }
+    },
+    ...
+  ],
+  "exceededTransferLimit": true
+} 
+```
+
+ 

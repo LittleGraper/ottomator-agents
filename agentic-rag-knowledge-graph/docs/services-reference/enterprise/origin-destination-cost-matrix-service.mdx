@@ -1,0 +1,5308 @@
+---
+title: "Job request"
+description: "A travel cost matrix is a table that contains the cost, such as the travel time or travel distance, from every origin to every destination."
+slug: "origin-destination-cost-matrix-service"
+url: "/origin-destination-cost-matrix-service"
+guid: "GUID-932E748F-E9E1-4BAF-913D-E140DE6C22D6"
+migratedTopicMetadata:
+  FTITLE: "Origin destination cost matrix service"
+  FDESCRIPTION: ""
+  FCHANGES: "Fixing Xrefs to direct links for migration to Gatsby"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.3- *"
+  CREATED-ON: "17/12/2023 12:42:55"
+  FAUTHOR: "pchopra"
+  FSTATUS: "Draft"
+  MODIFIED-ON: "17/12/2023 12:57:17"
+  VERSION: "6"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-C2D9FFE5-9F8F-4D4D-B37D-8A227B417E64"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/GPServer/GenerateOriginDestinationCostMatrix/submitJob
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/GPServer/GenerateOriginDestinationCostMatrix/submitJob
+  methods: 
+   - get
+   - post
+  sslOnly: 'no'
+---
+
+## Description
+
+Use the travel cost matrix service to create an origin-destination (OD) cost matrix from multiple origins to multiple destinations. A travel cost matrix is a table that contains the cost, such as the travel time or travel distance, from every origin to every destination. It also ranks the destinations that each origin connects to in ascending order based on the minimum cost required to travel from that origin to each destination. When generating a travel cost matrix, you can specify the maximum number of destinations to find for each origin and the maximum time or distance to travel when searching for destinations. 
+
+The results from the travel cost matrix service often become input for other spatial analyses when the cost to travel on the street network is more appropriate than straight-line cost. For example, predicting the movement of people in a city is better modeled with costs based on street networks, since people tend to travel on roads and pedestrian paths.
+
+The travel time, distance, or both for each origin-destination pair is stored in the output matrix (default) or as part of the attributes of the output lines, which can have no shapes or a straight-line shape. Even though the lines are straight, they always store the travel time and travel distance based on the street network, not based on Euclidean distance.
+
+<Note type={"tip"}>
+
+The closest facility and travel cost matrix services perform similar analyses; the main difference is in the output and the computation speed. The Travel cost matrix service generates results faster but cannot return lines that follow the underlying streets or driving directions. It is designed to quickly solve large M x N problems and, as a result, does not internally contain the information required to generate route shapes and driving directions. Alternatively, the Closest facility service can return routes that follow the underlying streets and directions but is slower to run than the Travel cost matrix service. If you need driving directions or true shapes of routes, use the Closest facility service; otherwise, use the Travel cost matrix service to reduce the computation time.
+
+</Note>
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[origins](/origin-destination-cost-matrix-service#origins) 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify locations that function as starting points in generating the paths to destinations.
+
+Syntax: 
+
+-   [As a collection of features](/origin-destination-cost-matrix-service#syntax-examples-for-origins)
+-   [As a feature service URL](/origin-destination-cost-matrix-service#syntax-examples-for-origins)
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[destinations](/origin-destination-cost-matrix-service#destinations) 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify locations that function as ending points in generating the paths from origins.
+
+Syntax: 
+
+-   [As a collection of feature](/origin-destination-cost-matrix-service#syntax-examples-for-destinations)
+-   [As a feature service URL](/origin-destination-cost-matrix-service#syntax-examples-for-destinations)
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[token](/origin-destination-cost-matrix-service#token) 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Provides the identity of a user who has the permissions to access the service.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[f](/origin-destination-cost-matrix-service#f) 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the response format. 
+
+The default value is `html` .
+
+Values: `html`  \| `json` \| `pjson` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[travel_mode](/origin-destination-cost-matrix-service#travel_mode) 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the mode of transportation for the analysis.
+
+Value: JSON object
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[time_units](/origin-destination-cost-matrix-service#time_units) 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the units that will be used to measure and report the total travel time between each origin-destination pair. 
+
+The default value is `Minutes` .
+
+Values: `Minutes`  \| `Seconds`  \| `Hours`  \| `Days` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[distance_units](/origin-destination-cost-matrix-service#distance_units) 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the units that will be used to measure and report the total travel distance between each origin-destination pair. 
+
+The default value is `Kilometers` .
+
+Values: `Kilometers`  \| `Meters`  \| `Feet`  \| `Yards`  \| `Miles`  \| `NauticalMiles` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[analysis_region](/origin-destination-cost-matrix-service#analysis_region) 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the region in which the analysis will be performed.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[number_of_destinations_to_find](/origin-destination-cost-matrix-service#number_of_destinations_to_find) 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the maximum number of destinations to find per origin. The default is to be undefined. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[cutoff](/origin-destination-cost-matrix-service#cutoff) 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the travel time or travel distance value at which to stop searching for destinations from a given origin. Any destination beyond the cutoff value will not be considered. The default is to be undefined. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[time_of_day](/origin-destination-cost-matrix-service#time_of_day) 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the time and date to depart from the origins. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[time_zone_for_time_of_day](/origin-destination-cost-matrix-service#time_zone_for_time_of_day) 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the time zone or zones of the `time_of_day`  parameter. 
+
+The default value is `Geographically Local` .
+
+Values: `Geographically Local`  \| `UTC` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[point_barriers](/origin-destination-cost-matrix-service#point_barriers) 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify one or more points that act as temporary restrictions or represent additional time or distance that may be required to travel on the underlying streets. To learn about the accepted values for this parameter, see the point_barriers section below.
+
+Syntax: 
+
+-   [As a collection of features](/origin-destination-cost-matrix-service#syntax-examples-for-point_barriers)
+-   [As a feature service URL](/origin-destination-cost-matrix-service#syntax-examples-for-point_barriers)
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[line_barriers](/origin-destination-cost-matrix-service#line_barriers) 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify one or more lines that prohibit travel anywhere the lines intersect the streets. To learn about the accepted values for this parameter, see the line_barriers section below.
+
+Syntax: 
+
+-   [As a collection of features](/origin-destination-cost-matrix-service#syntax-examples-for-line_barriers)
+-   [As a feature service URL](/origin-destination-cost-matrix-service#syntax-examples-for-line_barriers)
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[polygon_barriers](/origin-destination-cost-matrix-service#polygon_barriers) 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify polygons that either prohibit travel or proportionately scale the time or distance required to travel on the streets intersected by the polygons. To learn about the accepted values for this parameter, see the polygon_barriers section below.
+
+Syntax: 
+
+-   [As a collection of features](/origin-destination-cost-matrix-service#syntax-examples-for-polygon_barriers)
+-   [As a feature service URL](/origin-destination-cost-matrix-service#syntax-examples-for-polygon_barriers)
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[uturn_at_junctions](/origin-destination-cost-matrix-service#uturn_at_junctions) 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restrict or allow the analysis to make U-turns at junctions. 
+
+The default value is `Allowed only at Intersections and Dead Ends` .
+
+Values: `Allowed only at Intersections and Dead Ends`  \| `Allowed`  \| `Allowed only at Dead Ends`  \| `Not Allowed` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[use_hierarchy](/origin-destination-cost-matrix-service#use_hierarchy) 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify whether hierarchy will be used when finding the shortest paths. 
+
+The default value is `true` .
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[restrictions](/origin-destination-cost-matrix-service#restrictions) 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the restrictions that will be honored by the service. To learn about all the accepted values for this parameter, see the [restrictions](/origin-destination-cost-matrix-service#restrictions) section below.
+
+You can specify the value of this parameter as in the example below.
+
+```javascript
+restrictions=Avoid Carpool Roads, Avoid Express Lanes, Avoid Gates, Avoid Private Roads, Avoid Unpaved Roads, Driving a Truck, Use Preferred Truck Routes, Roads Under Construction Prohibited, Through Traffic Prohibited
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[attribute_parameter_values](/origin-destination-cost-matrix-service#attribute_parameter_values) 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify additional values required by an attribute or restriction, such as whether the restriction prohibits, avoids, or prefers travel on restricted roads. To learn about the accepted values for this parameter, see the [attribute_parameter_values](/origin-destination-cost-matrix-service#attribute_parameter_values) section below.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[impedance](/origin-destination-cost-matrix-service#impedance) 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the impedance.
+
+Values: `TravelTime`  \| `Minutes`  \| `TruckTravelTime`  \| `TruckMinutes`  \| `WalkTime`  \| `Miles`  \| `Kilometers` 
+
+<Note type={"note"}>
+
+These value are specific to the services published with the ArcGIS StreetMap Premium data. The values will be different if you are using other data for the analysis.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[origin_destination_line_shape](/origin-destination-cost-matrix-service#origin_destination_line_shape) 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the shape of the line feature connecting each origin-destination pair in the output matrix. 
+
+The default value is `None` .
+
+Values: `None`  \| `Straight Line` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`r` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify whether the service will save the analysis settings as a network analysis layer file. 
+
+The default value is `false` .
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[overrides](/origin-destination-cost-matrix-service#overrides) 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<Note type={"note"}>
+
+This parameter is for internal use only.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[time_impedance](/origin-destination-cost-matrix-service#time_impedance) 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the time-based impedance.
+
+The default value is `TravelTime` .
+
+Values: `TravelTime`  \| `Minutes`  \| `TruckTravelTime`  \| `TruckMinutes`  \| `WalkTime` 
+
+<Note type={"note"}>
+
+These value are specific to the services published with the ArcGIS StreetMap Premium data. The values will be different if you are using other data for the analysis.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[distance_impedance](/origin-destination-cost-matrix-service#distance_impedance) 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the distance-based impedance.
+
+The default value is `Kilometers` .
+
+Values:`Miles`  \| `Kilometers` 
+
+<Note type={"note"}>
+
+These value are specific to the services published with the ArcGIS StreetMap Premium data. The values will be different if you are using other data for the analysis.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[output_format](/origin-destination-cost-matrix-service#output_format) 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the format in which the output features will be created. 
+
+The default value is `Feature Set` .
+
+Values: `Feature Set`  \| `JSON File`  \| `GeoJSON File`  \| `CSV File` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[env:outSR](/origin-destination-cost-matrix-service#envoutsr) 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the spatial reference of the geometries, such as the output origins or the output destinations returned by the service.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[ignore_network_location_fields](/origin-destination-cost-matrix-service#ignore_network_location_fields) 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether the network location fields will be considered when locating inputs such as stops or facilities on the network.
+
+The default value is `false` .
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[ignore_invalid_locations](/origin-destination-cost-matrix-service#ignore_invalid_locations) 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify whether invalid input locations will be ignored. 
+
+The default value is `true` .
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[locate_settings](/origin-destination-cost-matrix-service#locate_settings) 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify settings that affect how inputs are located.
+
+Value: JSON object
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[accumulate_attributes](/origin-destination-cost-matrix-service#accumulate_attributes) 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A list of cost attributes to be accumulated during analysis. These accumulated attributes are for reference only; the solver only uses the cost attribute used by the designated travel mode when solving the analysis. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Required parameters
+
+The following parameters are required. 
+
+### origins
+
+Use this parameter to specify locations that function as starting points in generating the paths to destinations. 
+
+The `origins`  parameter can be specified using a JSON structure that represents a set of point features. The property is optional; however, the JSON structure must specify either the `url`  or `features`  property: 
+
+-   `url` —Specify a REST query request to any ArcGIS Server feature, map, or geoprocessing service that returns a JSON feature set. 
+-   `features` —Specify an array of features. 
+
+    Each feature in the `features`  array represents an origin and contains the following properties:
+
+    -   `geometry` —Specify the input point geometry containing `x`  and `y`  properties along with the `spatialReference`  property. If the `spatialReference`  property is defined for the entire JSON, you don't need to define this property for each geometry. Doing so reduces the size of the input JSON if the input has many features and improves performance. This property is not required if the coordinates are in the default spatial reference, WGS84. If the coordinates are in a different spatial reference, you must specify the spatial reference's well-known ID (WKID). See [Using spatial references](/using-spatial-references) to look up WKID values.
+
+        <Note type={"tip"}>
+
+        It is recommended that you explicitly specify the `spatialReference`  value, and specify it for the entire JSON rather than each individual geometry. 
+
+        </Note>
+    -   `attributes` —Specify each attribute as a key-value pair in which the key is the name of a given field, and the value is the attribute value for the corresponding field.
+
+#### Attributes for origins
+
+When specifying the origins, you can set properties for each—such as its name or the number of destinations to find from the origin— using the following attributes:
+
+-   `Name` 
+
+    The name of the origin. The name can be a unique identifier for the origin. The name is included in the output lines (as the `OriginName`  field) and in the output origins (as the `Name`  field) and can be used to join additional information from the tool outputs to the attributes of your origins.
+
+    If the name is not specified, a unique name prefixed with Location is automatically generated.
+-   `TargetDestinationCount` 
+
+    The maximum number of destinations to find for the origin.
+
+    If a value is not specified, the value from the **Number of Destinations to Find** parameter is used.
+
+    This field allows you to specify a different number of destinations to find for each origin. For example, using this field, you can find the three closest destinations from one origin and the two closest destinations from another origin. 
+-   `Cutoff` 
+
+    The impedance value at which to stop searching for destinations from a given origin. This attribute allows you to specify a different cutoff value for each destination. For example, using this attribute, you can specify to search for destinations within five minutes of travel time from one origin and to search for destinations within eight minutes of travel time from another origin.
+
+    The units of the cutoff are the same as the units of your impedance attribute. If a value is not specified, the value from the **Cutoff** parameter is used.
+-   `CurbApproach` 
+
+    Specify the direction a vehicle can depart from the origin. 
+
+    One of the integers listed in the Coded value column in the following table must be specified as a value of this attribute. The values in the Setting column are the descriptive names for `CurbApproach`  attribute values that you may have seen when using the ArcGIS Network Analyst extension software.
+
+    <StyledTable headers={"Setting,Coded value,Description"}>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Either side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    0
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    The vehicle can depart the origin in either direction, so a U-turn is allowed at the origin. This setting can be chosen if it is possible and practical for a vehicle to turn around at the origin. This decision may depend on the width of the road and the amount of traffic or whether the origin has a parking lot where vehicles can enter and turn around.
+
+    ![Either side of vehicle ](./images/GUID-35599FF5-3279-4662-9254-3872968A2FDB-web.png)
+
+    _All arrival and departure combinations are allowed with the Either side of vehicle curb approach._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Right side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    1
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle departs the origin, the origin must be on the right side of the vehicle. A U-turn is prohibited. This is typically used for vehicles such as buses that must depart from the bus stop on the right side.
+
+    ![Right side of vehicle ](./images/GUID-483527D1-724C-44D2-A55D-C1DB52624A91-web.png)
+
+    _The allowed arrival and departure combination for the Right side of vehicle curb approach is shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Left side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    2
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle departs the origin, the origin must be on the left side of the vehicle. A U-turn is prohibited. This is typically used for vehicles such as buses that must depart from the bus stop on the left side.
+
+    ![Left side of vehicle ](./images/GUID-CAC54FFE-9BA2-4892-A829-3803EF3CBA68-web.png)
+
+    _The allowed arrival and departure combination for the Left side of vehicle curb approach is shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    No U-Turn
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    3
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle departs the origin, the origin can be on either side of the vehicle; however, when it departs, the vehicle must continue in the same direction it arrived. A U-turn is prohibited.
+
+    ![No U-turns ](./images/GUID-135EFE4E-7AF1-48D6-8311-3DC8942B5DF2-web.png)
+
+    _The allowed arrival and departure combinations for the No U-Turn curb approach are shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    </StyledTable>
+
+    The `CurbApproach`  attribute is designed to work with both types of national driving standards: right-hand traffic (United States) and left-hand traffic (United Kingdom). First, consider an incident on the left side of a vehicle. It is always on the left side regardless of whether the vehicle travels on the left or right half of the road. What may change with national driving standards is your decision to approach an incident from one of two directions, that is, so it ends up on the right or left side of the vehicle. For example, if you want to arrive at an incident and not have a lane of traffic between the vehicle and the incident, choose 1 (Right side of vehicle) in the United States and 2 (Left side of vehicle) in the United Kingdom.
+
+    <ColumnLayout layout={2}>
+
+    <Column>
+
+    <Figure>
+
+    ![ Right side of vehicle with right-hand traffic](./images/GUID-483527D1-724C-44D2-A55D-C1DB52624A91-web.png)
+
+    <Caption>
+
+    _With right-hand traffic, the curb approach that leaves the vehicle closest to the origin is Right side of vehicle._
+
+    </Caption>
+
+    </Figure>
+
+    </Column>
+
+    <Column>
+
+    <Figure>
+
+    ![ Left side of vehicle with left-hand traffic ](./images/GUID-E345B7D0-D33C-4F64-A844-377F0C328A2A-web.png)
+
+    <Caption>
+
+    _With left-hand traffic, the curb approach that leaves the vehicle closest to the origin is Left side of vehicle._
+
+    </Caption>
+
+    </Figure>
+
+    </Column>
+
+    </ColumnLayout>
+-   `Bearing` 
+
+    The direction in which a point is moving. The units are degrees and are measured clockwise from true north. This field is used in conjunction with the `BearingTol`  field. 
+
+    Bearing data is usually sent automatically from a mobile device equipped with a GPS receiver. Try to include bearing data if you are loading an input location that is moving, such as a pedestrian or a vehicle. 
+
+    Using this field tends to prevent adding locations to the wrong edges, which can occur when a vehicle is near an intersection or an overpass, for example. Bearing also helps the tool determine on which side of the street the point is. 
+
+    [Learn more about bearing and bearing tolerance](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/bearing-and-bearing-tolerance.htm)
+-   `BearingTol` 
+
+    The bearing tolerance value creates a range of acceptable bearing values when locating moving points on an edge using the `Bearing`  field. If the `Bearing`  field value is within the range of acceptable values that are generated from the bearing tolerance on an edge, the point can be added as a network location there; otherwise, the closest point on the next-nearest edge is evaluated. 
+
+    The units are in degrees, and the default value is 30. Values must be greater than 0 and less than 180. A value of 30 means that when Network Analyst attempts to add a network location on an edge, a range of acceptable bearing values is generated 15 degrees to either side of the edge (left and right) and in both digitized directions of the edge. 
+
+    [Learn more about bearing and bearing tolerance](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/bearing-and-bearing-tolerance.htm)
+-   `NavLatency` 
+
+    This field is only used in the solve process if the `Bearing`  and `BearingTol`  fields also have values; however, entering a `NavLatency`  field value is optional, even when values are present in `Bearing`  and `BearingTol` . `NavLatency`  indicates how much cost is expected to elapse from the moment GPS information is sent from a moving vehicle to a server and the moment the processed route is received by the vehicle's navigation device. 
+
+    The units of `NavLatency`  are the same as the units of the impedance attribute.
+
+#### Syntax examples for origins
+
+Syntax for specifying origins using a JSON structure for features
+
+```other
+{
+  "spatialReference": {
+    "wkid": <wkid>,
+    "latestWkid": <wkid>
+  },
+  "features": [
+    {
+      "geometry": {
+        "x": <x1>,
+        "y": <y1>
+      },
+      "attributes": {
+        "<field1>": <value1_1>,
+        "<field2>": <value1_2>
+      }
+    },
+    {
+      "geometry": {
+        "x": <x2>,
+        "y": <y2>
+      },
+      "attributes": {
+        "<field1>": <value2_1>,
+        "<field2>": <value2_2>
+      }
+    }
+  ]
+}
+```
+
+ 
+
+Syntax for specifying origins using a URL returning a JSON response
+
+```other
+{
+  "url": "<url>"
+}
+```
+
+ 
+
+#### Examples for origins
+
+Example 1: Specify origins in the same spatial reference as the network dataset, WGS84, using a JSON structure. The example also shows how to specify some attributes for the origins. 
+
+```other
+{
+  "features": [
+    {
+      "geometry": {
+        "y": 51.5254,
+        "x": -0.1891
+      },
+      "attributes": {
+        "Name": "Origin 1",
+        "TargetDestinationCount": 50, 
+        "Cutoff": 120,
+        "CurbApproach": 0
+      }
+    },
+    {
+      "geometry": {
+        "y": 51.5353,
+        "x": -0.1744
+      },
+      "attributes": {
+        "Name": "Origin 2",
+        "TargetDestinationCount": 40,
+        "Cutoff": 90,
+        "CurbApproach": 0
+      }
+    }
+  ]
+}
+```
+
+ 
+
+Example 2: Specify origins in the Web Mercator spatial reference using a JSON structure
+
+```other
+{
+  "spatialReference": {
+    "wkid": 102100
+  },
+  "features": [
+    {
+      "geometry": {
+        "y": -5192521.476,
+        "x": -2698533.989
+      },
+      "attributes": {
+        "Name": "Origin 1"
+      }
+    },
+    {
+      "geometry": {
+        "y": -5191915.261,
+        "x": -2697821.094
+      },
+      "attributes": {
+        "Name": "Origin 2"
+      }
+    }
+  ]
+}
+```
+
+ 
+
+Example 3: Specify origins using a URL
+
+The URL makes a query for a few features from a map service. A URL querying features from a feature service can also be specified.
+
+```other
+{
+  "url": "https://machine.domain.com/webadaptor/rest/services/NetworkAnalysis/SanDiego/MapServer/21/query?where=1%3D1&outFields=Name&f=json"
+}
+```
+
+ 
+
+### destinations
+
+Use this parameter to specify locations that function as ending points in generating the paths from origins. 
+
+The `destinations`  parameter can be specified using a JSON structure that represents a set of point features. The property is optional; however, the JSON structure must specify either the `url`  or `features`  property: 
+
+-   `url` —Specify a REST query request to any ArcGIS Server feature, map, or geoprocessing service that returns a JSON feature set. 
+-   `features` —Specify an array of features. 
+
+    Each feature in the `features`  array represents a destination and contains the following properties:
+
+    -   `geometry` —Specify the input point geometry containing `x`  and `y`  properties along with the `spatialReference`  property. If the `spatialReference`  property is defined for the entire JSON, you don't need to define this property for each geometry. Doing so reduces the size of the input JSON if the input has many features and improves performance. This property is not required if the coordinates are in the default spatial reference, WGS84. If the coordinates are in a different spatial reference, you must specify the spatial reference's well-known ID (WKID). See [Using spatial references](/using-spatial-references) to look up WKID values.
+
+        <Note type={"tip"}>
+
+        It is recommended that you explicitly specify the `spatialReference`  value, and specify it for the entire JSON rather than each individual geometry. 
+
+        </Note>
+    -   `attributes` —Specify each attribute as a key-value pair in which the key is the name of a given field, and the value is the attribute value for the corresponding field.
+
+#### Attributes for destinations
+
+When specifying the destinations, you can set properties for each—such as its name—using the following attributes:
+
+-   `Name` 
+
+    The name of the destination. The name can be a unique identifier for the destination. The name is included in the output lines (as the `DestinationName`  field) and in the output destinations (as the `Name`  field) and can be used to join additional information from the tool outputs to the attributes of your destinations.
+
+    If the name is not specified, a unique name prefixed with Location is automatically generated.
+-   `CurbApproach` 
+
+    Specify the direction a vehicle can arrive at the destination. 
+
+    One of the integers listed in the Coded value column in the following table must be specified as a value of this attribute. The values in the Setting column are the descriptive names for `CurbApproach`  attribute values that you may have seen when using the ArcGIS Network Analyst extension software.
+
+    <StyledTable headers={"Setting,Coded value,Description"}>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Either side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    0
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    The vehicle can arrive at the destination from either direction. This setting can be chosen if it is possible and practical for the vehicle to turn around at the destination. This decision may depend on the width of the road and the amount of traffic or whether the destination has a parking lot where vehicles can enter and turn around. 
+
+    ![Either side of vehicle ](./images/GUID-35599FF5-3279-4662-9254-3872968A2FDB-web.png)
+
+    _All arrival and departure combinations are allowed with the Either side of vehicle curb approach._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Right side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    1
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle arrives at the destination, the destination must be on the right side of the vehicle. A U-turn is prohibited. This is typically used for vehicles such as buses that must arrive at the bus stop on the right side.
+
+    ![Right side of vehicle ](./images/GUID-483527D1-724C-44D2-A55D-C1DB52624A91-web.png)
+
+    _The allowed arrival and departure combination for the Right side of vehicle curb approach is shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Left side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    2
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle arrives at the destination, the destination must be on the left side of the vehicle. A U-turn is prohibited. This is typically used for vehicles such as buses that must arrive at the bus stop on the left side.
+
+    ![Left side of vehicle ](./images/GUID-CAC54FFE-9BA2-4892-A829-3803EF3CBA68-web.png)
+
+    _The allowed arrival and departure combination for the Left side of vehicle curb approach is shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    No U-Turn
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    3
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle arrives at the destination, the destination can be on either side of the vehicle; however, when it departs, the vehicle must continue in the same direction it arrived. A U-turn is prohibited.
+
+    ![No U-turns ](./images/GUID-135EFE4E-7AF1-48D6-8311-3DC8942B5DF2-web.png)
+
+    _The allowed arrival and departure combinations for the No U-Turn curb approach are shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    </StyledTable>
+
+    The `CurbApproach`  attribute is designed to work with both types of national driving standards: right-hand traffic (United States) and left-hand traffic (United Kingdom). First, consider an incident on the left side of a vehicle. It is always on the left side regardless of whether the vehicle travels on the left or right half of the road. What may change with national driving standards is your decision to approach an incident from one of two directions, that is, so it ends up on the right or left side of the vehicle. For example, if you want to arrive at an incident and not have a lane of traffic between the vehicle and the incident, choose 1 (Right side of vehicle) in the United States and 2 (Left side of vehicle) in the United Kingdom.
+
+    <ColumnLayout layout={2}>
+
+    <Column>
+
+    <Figure>
+
+    ![ Right side of vehicle with right-hand traffic](./images/GUID-483527D1-724C-44D2-A55D-C1DB52624A91-web.png)
+
+    <Caption>
+
+    _With right-hand traffic, the curb approach that leaves the vehicle closest to the destination is Right side of vehicle._
+
+    </Caption>
+
+    </Figure>
+
+    </Column>
+
+    <Column>
+
+    <Figure>
+
+    ![ Left side of vehicle with left-hand traffic ](./images/GUID-E345B7D0-D33C-4F64-A844-377F0C328A2A-web.png)
+
+    <Caption>
+
+    _With left-hand traffic, the curb approach that leaves the vehicle closest to the destination is Left side of vehicle._
+
+    </Caption>
+
+    </Figure>
+
+    </Column>
+
+    </ColumnLayout>
+-   `Bearing` 
+
+    The direction in which a point is moving. The units are degrees and are measured clockwise from true north. This field is used in conjunction with the `BearingTol`  field. 
+
+    Bearing data is usually sent automatically from a mobile device equipped with a GPS receiver. Try to include bearing data if you are loading an input location that is moving, such as a pedestrian or a vehicle. 
+
+    Using this field tends to prevent adding locations to the wrong edges, which can occur when a vehicle is near an intersection or an overpass, for example. Bearing also helps the tool determine on which side of the street the point is. 
+
+    [Learn more about bearing and bearing tolerance](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/bearing-and-bearing-tolerance.htm)
+-   `BearingTol` 
+
+    The bearing tolerance value creates a range of acceptable bearing values when locating moving points on an edge using the `Bearing`  field. If the `Bearing`  field value is within the range of acceptable values that are generated from the bearing tolerance on an edge, the point can be added as a network location there; otherwise, the closest point on the next-nearest edge is evaluated. 
+
+    The units are in degrees, and the default value is 30. Values must be greater than 0 and less than 180. A value of 30 means that when Network Analyst attempts to add a network location on an edge, a range of acceptable bearing values is generated 15 degrees to either side of the edge (left and right) and in both digitized directions of the edge. 
+
+    [Learn more about bearing and bearing tolerance](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/bearing-and-bearing-tolerance.htm)
+-   `NavLatency` 
+
+    This field is only used in the solve process if the `Bearing`  and `BearingTol`  fields also have values; however, entering a `NavLatency`  field value is optional, even when values are present in `Bearing`  and `BearingTol` . `NavLatency`  indicates how much cost is expected to elapse from the moment GPS information is sent from a moving vehicle to a server and the moment the processed route is received by the vehicle's navigation device. 
+
+    The units of `NavLatency`  are the same as the units of the impedance attribute.
+
+#### Syntax examples for destinations
+
+Syntax for specifying destinations using a JSON structure for features
+
+```other
+{
+  "spatialReference": {
+    "wkid": <wkid>,
+    "latestWkid": <wkid>
+  },
+  "features": [
+    {
+      "geometry": {
+        "x": <x1>,
+        "y": <y1>
+      },
+      "attributes": {
+        "<field1>": <value1_1>,
+        "<field2>": <value1_2>
+      }
+    },
+    {
+      "geometry": {
+        "x": <x2>,
+        "y": <y2>
+      },
+      "attributes": {
+        "<field1>": <value2_1>,
+        "<field2>": <value2_2>
+      }
+    }
+  ] 
+}
+```
+
+ 
+
+Syntax for specifying destinations using a URL returning a JSON response
+
+```other
+{
+  "url": "<url>"
+}
+```
+
+ 
+
+#### Examples for destinations
+
+Example 1: Specify destinations in the same spatial reference as the network dataset using a JSON structure. The example also shows how to specify some attributes for the destinations. 
+
+```other
+{
+  "features": [
+    {
+      "geometry": {
+        "y": 51.5354,
+        "x": -0.1991
+      },
+      "attributes": {
+        "Name": "Destination 1",
+        "CurbApproach": 0
+      }
+    },
+    {
+      "geometry": {
+        "y": 51.5458,
+        "x": -0.1844
+      },
+      "attributes": {
+        "Name": "Destination 2",
+        "CurbApproach": 0
+      }
+    }
+  ]
+}
+```
+
+ 
+
+Example 2: Specify destinations in the Web Mercator spatial reference using a JSON structure
+
+```other
+{
+  "spatialReference": {
+    "wkid": 102100
+  },
+  "features": [
+    {
+      "geometry": {
+        "y": -5182521.476,
+        "x": -2688533.989
+      },
+      "attributes": {
+        "Name": "Destination 1"
+      }
+    },
+    {
+      "geometry": {
+        "y": -5201915.261,
+        "x": -2717821.094
+      },
+      "attributes": {
+        "Name": "Destination 2"
+      }
+    }
+  ]
+}
+```
+
+ 
+
+Example 3: Specify origins using a URL
+
+The URL makes a query for a few features from a map service. A URL querying features from a feature service can also be specified.
+
+```other
+{
+  "url": "https://machine.domain.com/webadaptor/rest/services/NetworkAnalysis/SanDiego/MapServer/21/query?where=1%3D1&outFields=Name&f=json"
+}
+```
+
+ 
+
+### token
+
+Use this parameter to specify a token that provides the identity of a user that has the permissions to access the service. The [security and authentication](/generate-token) page provides more information about how an access token can be obtained.
+
+```javascript
+token=<yourToken>
+```
+
+ 
+
+### f
+
+Use this parameter to specify the response format. The parameter can have `html` , `json`  or `pjson`  as arguments, for example, `f=json` . The `pjson`  value is used for printing the JSON response in a prettified format. 
+
+## Optional parameters
+
+The following parameters are optional.
+
+### travel_mode
+
+Choose the mode of transportation for the analysis. 
+
+Travel modes are managed in ArcGIS Enterprise and can be configured by the administrator of your organization to better reflect the organization's workflows. 
+
+To learn more about travel modes, see [Configure travel modes](https://enterprise.arcgis.com/en/portal/latest/administer/windows/travel-modes.htm).
+
+You must specify the JSON object containing the settings for a travel mode supported by your organization. To get a list of supported travel modes, execute the `GetTravelModes`  tool from the Utilities service.
+
+The value for the `travel_mode`  parameter should be a JSON object representing travel mode settings. When you use the `GetTravelModes`  tool from the [Utilities service](/gettravelmodes-tool), you get a string representing the travel mode JSON. You need to convert this string to a valid JSON object using your API and then pass the JSON object as the value for the `travel_mode`  parameter.
+
+For example, below is a string representing the Walking Time travel mode as returned by the `GetTravelModes`  tool.
+
+```javascript
+"{\"attributeParameterValues\": [{\"parameterName\": \"Restriction Usage\", \"attributeName\": \"Walking\", \"value\": \"PROHIBITED\"}, {\"parameterName\": \"Restriction Usage\", \"attributeName\": \"Preferred for Pedestrians\", \"value\": \"PREFER_LOW\"}, {\"parameterName\": \"Walking Speed (km/h)\", \"attributeName\": \"WalkTime\", \"value\": 5}], \"description\": \"Follows paths and roads that allow pedestrian traffic and finds solutions that optimize travel time. The walking speed is set to 5 kilometers per hour.\", \"impedanceAttributeName\": \"WalkTime\", \"simplificationToleranceUnits\": \"esriMeters\", \"uturnAtJunctions\": \"esriNFSBAllowBacktrack\", \"restrictionAttributeNames\": [\"Preferred for Pedestrians\", \"Walking\"], \"useHierarchy\": false, \"simplificationTolerance\": 2, \"timeAttributeName\": \"WalkTime\", \"distanceAttributeName\": \"Miles\", \"type\": \"WALK\", \"id\": \"caFAgoThrvUpkFBW\", \"name\": \"Walking Time\"}"
+```
+
+ 
+
+The above value should be converted to a valid JSON object and passed as the value for the `travel_mode`  parameter.
+
+```javascript
+travel_mode={"attributeParameterValues":[{"parameterName":"Restriction Usage","attributeName":"Walking","value":"PROHIBITED"},{"parameterName":"Restriction Usage","attributeName":"Preferred for Pedestrians","value":"PREFER_LOW"},{"parameterName":"Walking Speed (km/h)","attributeName":"WalkTime","value":5}],"description":"Follows paths and roads that allow pedestrian traffic and finds solutions that optimize travel time. The walking speed is set to 5 kilometers per hour.","impedanceAttributeName":"WalkTime","simplificationToleranceUnits":"esriMeters","uturnAtJunctions":"esriNFSBAllowBacktrack","restrictionAttributeNames":["Preferred for Pedestrians","Walking"],"useHierarchy":false,"simplificationTolerance":2,"timeAttributeName":"WalkTime","distanceAttributeName":"Miles","type":"WALK","id":"caFAgoThrvUpkFBW","name":"Walking Time"}
+```
+
+ 
+
+The default value,`Custom` , allows you to configure your own travel mode. When you pass in `Custom` , you can set values for the following parameters: `impedance` , `time_impedance` , `distance_impedance` , `uturn_at_junctions` , `use_hierarchy` , `route_line_simplification_tolerance` , `restrictions` , and `attribute_parameter_values` . You can choose `Custom`  and set the custom travel mode parameters listed above, for example, to model a pedestrian with a fast walking speed or a truck with a given height, weight, and cargo of certain hazardous materials. You can try out different settings to get desired analysis results. Once you have identified the analysis settings, you should work with your organization's administrator and save these settings as part of new or existing travel mode so that everyone in your organization can rerun the analysis with the same settings. 
+
+The default values of the custom travel mode parameters model traveling by car. If you specify the travel mode as `Custom`  or do not provide a value for the `travel_mode`  parameter, the analysis will be similar to using the default `Driving Time`  travel mode.
+
+<Note type={"caution"}>
+
+When the `travel_mode`  parameter is not set to `Custom` , this means you are choosing a travel mode configured by your organization, and the service automatically overrides the values of other parameters with values that model the chosen travel mode. The following parameters are overridden: `impedance` , `time_impedance` , `distance_impedance` , `uturn_at_junctions` , `use_hierarchy` , `route_line_simplification_tolerance` , `restrictions` , and `attribute_parameter_values` . 
+
+</Note>
+
+### time_units
+
+Specify the units that should be used to measure and report the total travel time between each origin-destination pair.
+
+The choices are as follows:
+
+-   `Seconds` 
+-   `Minutes`  (default)
+-   `Hours` 
+-   `Days` 
+
+### distance_units
+
+Specify the units that should be used to measure and report the total travel distance between each origin-destination pair.
+
+The choices are as follows:
+
+-   `Meters` 
+-   `Kilometers`  (default)
+-   `Feet` 
+-   `Yards` 
+-   `Miles` 
+-   `NauticalMiles` 
+
+### analysis_region
+
+This parameter is ignored by the service and specifying a value does not have any effect on the analysis.
+
+### number_of_destinations_to_find
+
+Specify the maximum number of destinations to find per origin. If a value for this parameter is not specified (which is the default), the output matrix includes travel costs from each origin to every destination. Individual origins can have their own values (specified as the `TargetDestinationCount`  field) that override the `number_of_destinations_to_find`  parameter value.
+
+### cutoff
+
+Specify the travel time or travel distance value at which to stop searching for destinations from a given origin. Any destination beyond the cutoff value will not be considered. Individual origins can have their own values (specified as the `Cutoff`  field) that override the `cutoff`  parameter value.
+
+The value must be in the units specified by the `time_units`  parameter if the impedance attribute of your travel mode is time based or in the units specified by the `distance_units`  parameter if the impedance attribute of your travel mode is distance based. If a value is not specified (which is the default), the tool will not enforce any travel time or travel distance limit when searching for destinations.
+
+### time_of_day
+
+Specify the time and date to depart from the origins. 
+
+Specifying a time of day results in more accurate estimations of travel times because the travel times account for the traffic conditions that are applicable for that date and time. 
+
+To use traffic in the analysis, choose a time-based unit for `impedance`  and assign a value to `time_Of_day` . 
+
+The `time_Of_day`  value represents the time at which the travel begins from the input origins. The time is specified as Unix time (milliseconds since midnight, January 1, 1970). 
+
+If a time of day is not passed in, the service uses static road speeds based on average historical speeds or posted speed limits. It uses posted speeds in areas where historical traffic information isn't available.
+
+<Note type={"note"}>
+
+Traffic is supported only with the driving time impedance or travel mode. 
+
+</Note>
+
+When the service is using the ArcGIS StreetMap Premium data, it can support two kinds of traffic: live and typical. 
+
+If the `time_Of_day`  specified is within 4 hours of the current time, live traffic will be used where available. Live traffic retrieves speeds based on phone probe records, sensors, and other data sources and reflects the current travel speeds and predicts speeds for the near future. If the `time_Of_day`  specified is earlier than 4 hours or later than 4 hours from the current time, or the road does not have live traffic, typical traffic speeds will be used. Typical speeds are based on historical traffic patterns. The travel time data is aggregated in 15 minute intervals per day of week based on multiple years worth of data. So a road may have a different travel time at Monday at 8 am, Monday at 8:15 am, or Tuesday at 8 am. Since the variance is just at the day of week and time of day, the travel time is the same on a road for any Monday at 8 am, regardless of the month or year.
+
+If your goal is to model typical travel conditions and avoid large variances from the average due to live traffic, it is recommended to use a date from the past to ensure it doesn't coincide with the 4 hour window from the current time. As an extreme example, you can even use dates from 1990.
+
+The [Data Coverage page](http://links.esri.com/arcgis-online-data-coverage-map-for-directions-and-routes) shows the countries Esri currently provides traffic data for.
+
+#### Typical traffic
+
+To ensure the task uses typical traffic in locations where it is available, choose a time and day of the week; then convert the day of the week to one of the following dates from 1990:
+
+-   Monday—1/1/1990
+-   Tuesday—1/2/1990
+-   Wednesday—1/3/1990
+-   Thursday—1/4/1990
+-   Friday—1/5/1990
+-   Saturday—1/6/1990
+-   Sunday—1/7/1990
+
+Set the time and date as UNIX time in milliseconds. For example, to solve for 1:03 p.m. on Thursdays, set the time and date to 1:03 p.m., January 4, 1990, and convert to milliseconds (`631458180000` ). Although the dates representing days of the week are from 1990, typical traffic is calculated from recent traffic trends—usually over the last two years worth of data.
+
+#### Live traffic
+
+To use live traffic when and where it is available, choose a time and date and convert to Unix time.
+
+<Note type={"note"}>
+
+ You need to have a Live Traffic extension and configure your Street Map Premium network dataset to access live traffic.
+
+</Note>
+
+Esri saves live traffic data for 4 hours and references predictive data extending 4 hours into the future. If the time and date you specify for this parameter is outside the 8-hour time window, or the travel time in the analysis continues past the predictive data window, the task falls back to typical traffic speeds.
+
+#### Examples for time_of_day
+
+Example one: 13:03, January 4, 1990. Typical traffic on Thursdays at 1:03 p.m.
+
+```javascript
+"time_Of_day": 631458180000
+```
+
+ 
+
+Example two: 17:00, January 7, 1990. Typical traffic on Sundays at 5:00 p.m.
+
+```javascript
+"time_Of_day": 631731600000
+```
+
+ 
+
+Example four: 10:20, March 18, 2015. If the current time is between 6:20 a.m., March 18, 2015, and 2:20 p.m., March 18, 2015, live traffic speeds are referenced in the analysis; otherwise, typical traffic speeds are referenced.
+
+```javascript
+"time_Of_day": 1426674000000
+```
+
+ 
+
+### time_zone_for_time_of_Day
+
+Specify the time zone or zones of the `time_Of_day`  parameter. There are two options: `Geographically Local`  and `UTC` . 
+
+The default value is `Geographically Local` 
+
+#### `Geographically Local` 
+
+The `time_Of_day`  value refers to the time zone or zones in which the input points are located. This option causes the analysis to have rolling start times across time zones.
+
+Illustration of setting the value to `Geographically Local` —Setting `time_of_day`  to 9:00 a.m., January 4, 1990 (631443600000 milliseconds); `time_zone_for_time_Of_Day`  to `Geographically Local` ; and submitting a valid request causes the drive times for points in the eastern time zone to start at 9:00 a.m. eastern Time and 9:00 a.m. central time for points in the central time zone. (The start times are offset by an hour in real or UTC time.) 
+
+![Time zone for time of day parameter is set to geographically local](./images/GUID-8EF026DC-A990-48C4-B8D6-04A72F3EB907-web.png)
+
+_Input: `time_Of_day`  is 9:00 a.m., January 4, 1990 (631443600000 milliseconds), and `time_zone_for_time_Of_day`  is set to `Geographically Local` _
+
+#### `UTC` 
+
+The `time_Of_day`  value refers to coordinated universal time (UTC). The start times for all points are simultaneous, regardless of time zones.
+
+Illustration of setting the value to `time_Of_day` —Setting `time_Of_day`  to 9:00 a.m., January 4, 1990 (631443600000 milliseconds) and the value to `UTC` , the start times for points in the eastern time zone is 4:00 a.m. Eastern Time and 3:00 a.m. central time for those in the central time zone.
+
+![Time zone for time of day parameter is set to UTC](./images/GUID-069122DB-BBF5-4A00-A199-00C331CA81E4-web.png)
+
+_Input: `time_Of_day`  is 9:00 a.m., January 4, 1990 (631443600000 milliseconds), and `time_zone_for_time_Of_day`  is set to `UTC` _
+
+### point_barriers
+
+Use this parameter to specify one or more points that will act as temporary restrictions or represent additional time or distance that may be required to travel on the underlying streets. For example, a point barrier can be used to represent a fallen tree along a street or a time delay spent at a railroad crossing.
+
+You can specify barrier geometries as well as attributes using a more comprehensive JSON structure that references a set of features. The property is optional; however, the JSON structure must specify either the `url`  or `features`  property: 
+
+-   `url` —Specify a REST query request to any ArcGIS Server feature, map, or geoprocessing service that returns a JSON feature set. 
+-   `features` —Specify an array of features. 
+
+    Each feature in this array represents a point barrier and contains the following fields:
+
+    -   `geometry` —Specify the input point geometry containing `x`  and `y`  properties along with the `spatialReference`  property. If the `spatialReference`  property is defined for the entire JSON, you don't need to define this property for each geometry. Doing so reduces the size of the input JSON if the input has many features and improves performance. This property is not required if the coordinates are in the default spatial reference, WGS84. If the coordinates are in a different spatial reference, you must specify the spatial reference's well-known ID (WKID). See [Using spatial references](/using-spatial-references) to look up WKID values.
+
+        <Note type={"tip"}>
+
+        It is recommended that you explicitly specify the `spatialReference`  value, and specify it for the entire JSON rather than each individual geometry. 
+
+        </Note>
+    -   `attributes` —Specify each attribute as a key-value pair in which the key is the name of a given field, and the value is the attribute value for the corresponding field.
+
+#### Attributes for point_barriers
+
+When specifying point barriers, you can set properties for each, such as its name or barrier type, using the following attributes:
+
+`Name` 
+
+The name of the barrier.
+
+`BarrierType` 
+
+Specifies whether the point barrier restricts travel completely or adds time or distance when it is crossed. The value for this attribute is specified as one of the following integers (use the numeric code, not the name in parentheses):
+
+-   0 (Restriction)—Prohibits travel through the barrier. The barrier is referred to as a restriction point barrier since it acts as a restriction.
+
+    ![Two maps demonstrate how a restriction point barrier affects a route analysis.](./images/GUID-45B28627-4106-494B-8A66-10D921FDC28D-web.png)
+
+    _The first map shows the shortest path between two stops without any restriction point barriers. The second map has a road that is blocked by a fallen tree, so the shortest path between the same points is longer._
+-   2 (Added Cost)—Traveling through the barrier increases the travel time or distance by the amount specified in the `Additional_[Cost]`  attributes. This barrier type is referred to as an added cost point barrier.
+
+    ![Two maps demonstrate how added cost point barriers affect a route analysis.](./images/GUID-649406D1-73CE-4A38-A402-0CF5A1E23B23-web.png)
+
+    _The map on the left shows the shortest path between two stops without any added cost point barrier. For the map on the right, the travel time from stop one to stop two would be the same whether going around the north end of the block or the south end; however, since crossing railroad tracks incurs a time penalty (modeled with added cost point barriers), the route with only one railroad crossing is chosen. The cost of crossing the barrier is added to the accumulated travel time of the resulting route._
+
+`Additional_Time` 
+
+The added travel time when the barrier is traversed. This field is applicable only for added-cost barriers and when the `measurement_units`  parameter is time-based
+
+This field value must be greater than or equal to zero, and its units are the same as those specified in the `measurement_units`  parameter.
+
+`Additional_Distance` 
+
+The added distance when the barrier is traversed. This field is applicable only for added-cost barriers and when the `measurement_units`  parameter is distance-based
+
+The field value must be greater than or equal to zero, and its units are the same as those specified in the `measurement_units`  parameter.
+
+`AdditionalCost` 
+
+The added cost when the barrier is traversed. This field is applicable only for added-cost barriers when the impedance attribute is neither time-based nor distance-based.
+
+`FullEdge` 
+
+Specifies how the restriction point barriers are applied to the edge elements during the analysis. The field value is specified as one of the following integers (use the numeric code, not the name in parentheses): 
+
+-   0 (False)—Permits travel on the edge up to the barrier but not through it. This is the default value.
+-   1 (True)—Restricts travel anywhere on the associated edge.
+
+`CurbApproach` 
+
+Specifies the direction of traffic that is affected by the barrier. The field value is specified as one of the following integers (use the numeric code, not the name in parentheses): 
+
+-   0 (Either side of vehicle)—The barrier affects travel over the edge in both directions.
+-   1 (Right side of vehicle)—Vehicles are only affected if the barrier is on their right side during the approach. Vehicles that traverse the same edge but approach the barrier on their left side are not affected by the barrier. 
+-   2 (Left side of vehicle)—Vehicles are only affected if the barrier is on their left side during the approach. Vehicles that traverse the same edge but approach the barrier on their right side are not affected by the barrier. 
+
+Because junctions are points and don't have a side, barriers on junctions affect all vehicles regardless of the curb approach. 
+
+The `CurbApproach`  attribute works with both types of national driving standards: right-hand traffic (United States) and left-hand traffic (United Kingdom). First, consider a facility on the left side of a vehicle. It is always on the left side regardless of whether the vehicle travels on the left or right half of the road. What may change with national driving standards is your decision to approach a facility from one of two directions, that is, so it ends up on the right or left side of the vehicle. For example, to arrive at a facility and not have a lane of traffic between the vehicle and the facility, choose 1 (Right side of vehicle) in the United States and 2 (Left side of vehicle) in the United Kingdom.
+
+`Bearing` 
+
+The direction in which a point is moving. The units are degrees and are measured clockwise from true north. This field is used in conjunction with the `BearingTol`  field. 
+
+Bearing data is usually sent automatically from a mobile device equipped with a GPS receiver. Try to include bearing data if you are loading an input location that is moving, such as a pedestrian or a vehicle. 
+
+Using this field tends to prevent adding locations to the wrong edges, which can occur when a vehicle is near an intersection or an overpass, for example. Bearing also helps the tool determine on which side of the street the point is. 
+
+[Learn more about bearing and bearing tolerance](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/bearing-and-bearing-tolerance.htm)
+
+`BearingTol` 
+
+The bearing tolerance value creates a range of acceptable bearing values when locating moving points on an edge using the `Bearing`  field. If the `Bearing`  field value is within the range of acceptable values that are generated from the bearing tolerance on an edge, the point can be added as a network location there; otherwise, the closest point on the next-nearest edge is evaluated. 
+
+The units are in degrees, and the default value is 30. Values must be greater than 0 and less than 180. A value of 30 means that when Network Analyst attempts to add a network location on an edge, a range of acceptable bearing values is generated 15 degrees to either side of the edge (left and right) and in both digitized directions of the edge. 
+
+[Learn more about bearing and bearing tolerance](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/bearing-and-bearing-tolerance.htm)
+
+`NavLatency` 
+
+This field is only used in the solve process if the `Bearing`  and `BearingTol`  fields also have values; however, entering a `NavLatency`  field value is optional, even when values are present in `Bearing`  and `BearingTol` . `NavLatency`  indicates how much cost is expected to elapse from the moment GPS information is sent from a moving vehicle to a server and the moment the processed route is received by the vehicle's navigation device. 
+
+The units of `NavLatency`  are the same as the units of the impedance attribute.
+
+#### Syntax examples for point_barriers
+
+Syntax for specifying `point_barriers`  using a JSON structure for features 
+
+```other
+{
+  "spatialReference": {
+    "wkid": <wkid>,
+    "latestWkid": <wkid>
+  },
+  "features": [
+    {
+      "geometry": {
+        "x": <x1>,
+        "y": <y1>
+      },
+      "attributes": {
+        "<field1>": <value11>,
+        "<field2>": <value12>
+      }
+    },
+    {
+      "geometry": {
+        "x": <x2>,
+        "y": <y2>
+      },
+      "attributes": {
+        "<field1>": <value21>,
+        "<field2>": <value22>
+      }
+    }
+  ] 
+}
+```
+
+ 
+
+Syntax for specifying `point_barriers`  using a URL returning a JSON response
+
+```other
+{
+  "url": "<url>"
+}
+```
+
+ 
+
+#### Examples for point_barriers
+
+Example 1: Specifying an added-cost point barrier using JSON structure
+
+This example shows how to use an added-cost point barrier to model a five-minute delay at a railroad crossing. The `BarrierType`  attribute is used to specify the point barrier is added-cost, and the `Additional_Time`  attribute is used to specify the added delay in minutes. 
+
+```other
+{
+  "spatialReference": {
+    "wkid": 4326
+  },
+  "features": [
+    {
+      "geometry": {
+        "x": 37.541479,
+        "y": -122.053461
+      },
+      "attributes": {
+        "Name": "Haley St railroad crossing",
+        "BarrierType": 2,
+        "Additional_Time": 5
+      }
+    }
+  ]
+}
+```
+
+ 
+
+Example 2: Specifying restriction point barriers in the Web Mercator spatial reference using a JSON structure
+
+This example shows how to use a restriction point barrier to model a road that's blocked by a fallen tree. The barrier's geometry is in the Web Mercator spatial reference and not in the spatial reference of the network dataset.
+
+```other
+{
+  "spatialReference": {
+    "wkid": 102100
+  },
+  "features": [
+    {
+      "geometry": {
+        "y": -13635398.9398,
+        "x": 4544699.034400001
+      },
+      "attributes": {
+        "Name": "Fallen tree at 123 Main St", 
+        "BarrierType": 0
+      }
+    }
+  ]
+}
+```
+
+ 
+
+Example 3: Specifying point barriers using a URL
+
+The URL makes a query for a few features from a map service. A URL querying features from a feature service can also be specified.
+
+```other
+{
+  "url": "https://machine.domain.com/webadaptor/rest/services/NetworkAnalysis/SanDiego/MapServer/21/query?where=1%3D1&outFields=Name&f=json"
+}
+```
+
+ 
+
+### line_barriers
+
+Use this parameter to specify one or more lines that prohibit travel anywhere the lines intersect the streets. For example, a parade or protest that blocks traffic across several street segments can be modeled with a line barrier. A line barrier can also quickly fence off several roads from being traversed, thereby channeling possible routes away from undesirable parts of the street network.
+
+![Two maps demonstrate how a line barrier affects finding a route between two stops.](./images/GUID-5614E96B-1D48-453C-8D3F-A5448D06121D-web.png)
+
+_The first map displays the shortest path between two stops. The second map shows the shortest path when several streets are blocked by a polyline barrier._
+
+You can specify polyline barrier geometries as well as attributes using a JSON structure that references a set of features. The property is optional; however, the JSON structure must specify either the `url`  or `features`  property: 
+
+-   `url` —Specify a REST query request to any ArcGIS Server feature, map, or geoprocessing service that returns a JSON feature set. 
+-   `features` —Specify an array of features. 
+
+    Each feature in this array represents a polyline barrier and contains the following fields:
+
+    -   `geometry` —Specify the input point geometry containing `x`  and `y`  properties along with the `spatialReference`  property. If the `spatialReference`  property is defined for the entire JSON, you don't need to define this property for each geometry. Doing so reduces the size of the input JSON if the input has many features and improves performance. This property is not required if the coordinates are in the default spatial reference, WGS84. If the coordinates are in a different spatial reference, you must specify the spatial reference's well-known ID (WKID). See [Using spatial references](/using-spatial-references) to look up WKID values.
+
+        <Note type={"tip"}>
+
+        It is recommended that you explicitly specify the `spatialReference`  value, and specify it for the entire JSON rather than each individual geometry. 
+
+        </Note>
+    -   `attributes` —Specify each attribute as a key-value pair in which the key is the name of a given field, and the value is the attribute value for the corresponding field.
+
+#### Attributes for line_barriers
+
+When specifying the line barriers, you can set name and barrier type properties for each using the following attributes:
+
+-   `Name` 
+
+    The name of the barrier.
+
+#### Syntax examples for line_barriers
+
+Syntax for specifying line barriers using a JSON structure for features
+
+```other
+{
+  "spatialReference": {
+    "wkid": <wkid>,
+    "latestWkid": <wkid>, 
+  },
+  "features": [
+    {
+      "geometry": {
+        "paths": [
+          [
+            [<x11>,<y11>],
+            [<x12>,<y12>]
+          ],
+          [
+            [<x21>,<y21>],
+            [<x22>,<y22>]
+          ]
+        ]
+      },
+      "attributes": {
+        "<field1>": <value11>,
+        "<field2>": <value12>
+      }
+    },
+		  {
+      "geometry": {
+        "paths": [
+          [
+            [<x11>,<y11>],
+            [<x12>,<y12>]
+          ],
+          [
+            [<x21>,<y21>],
+            [<x22>,<y22>]
+        ]
+      },
+      "attributes": {
+        "<field1>": <value21>,
+        "<field2>": <value22>
+      }
+    }
+  ] 
+}
+```
+
+ 
+
+Syntax for specifying line barriers using a URL returning a JSON response
+
+```other
+{
+  "url": "<url>"
+}
+```
+
+ 
+
+#### Examples for line_barriers
+
+Example 1: Specifying line barriers using a JSON structure
+
+The example shows how to add two lines as line barriers to restrict travel on the streets intersected by the lines. Barrier 1 is a single-part line feature made up of two points. Barrier 2 is a two-part line feature whose first part is made up of three points and whose second part is made up of two points.
+
+```other
+{
+  "spatialReference": {
+    "wkid": 102100
+  },
+  "features": [
+    {
+      "geometry": {
+        "paths": [
+          [
+            [-10804823.397,3873688.372],
+            [-10804811.152,3873025.945]
+          ]
+        ]
+      },
+      "attributes": {
+        "Name": "Barrier 1"
+      }
+    },
+    {
+      "geometry": {
+        "paths": [
+          [
+            [-10804823.397,3873688.372],
+            [-10804807.813 3873290.911],
+            [-10804811.152,3873025.945]
+          ],
+          [
+            [-10805032.678,3863358.76],
+            [-10805001.508,3862829.281]
+          ]
+        ]
+      },
+      "attributes": {
+        "Name": "Barrier 2"
+      }
+    }
+  ]
+}
+```
+
+ 
+
+Example 2: Specifying line barriers using URL
+
+The URL makes a query for a few features from a map service. A URL querying features from a feature service can also be specified.
+
+```other
+{
+  "url": "https://machine.domain.com/webadaptor/rest/services/Network/USA/MapServer/6/query?where=1%3D1&returnGeometry=true&f=json"
+}
+```
+
+ 
+
+### polygon_barriers
+
+Use this parameter to specify polygons that either completely restrict travel or proportionately scale the time or distance required to travel on the streets intersected by the polygons.
+
+You can specify polygon barrier geometries as well as attributes using a JSON structure that references a set of features. The JSON structure can be specified as a `url`  or `features`  property:
+
+-   `url` —Specify a REST query request to any ArcGIS Server feature, map, or geoprocessing service that returns a JSON feature set. 
+-   `features` —Specify an array of features. 
+
+    Each feature in this array represents a polygon barrier and contains the following fields:
+
+    -   `geometry` —Specify the input point geometry containing `x`  and `y`  properties along with the `spatialReference`  property. If the `spatialReference`  property is defined for the entire JSON, you don't need to define this property for each geometry. Doing so reduces the size of the input JSON if the input has many features and improves performance. This property is not required if the coordinates are in the default spatial reference, WGS84. If the coordinates are in a different spatial reference, you must specify the spatial reference's well-known ID (WKID). See [Using spatial references](/using-spatial-references) to look up WKID values.
+
+        <Note type={"tip"}>
+
+        It is recommended that you explicitly specify the `spatialReference`  value, and specify it for the entire JSON rather than each individual geometry. 
+
+        </Note>
+    -   `attributes` —Specify each attribute as a key-value pair in which the key is the name of a given field, and the value is the attribute value for the corresponding field.
+
+#### Attributes for polygon_barriers
+
+When specifying the polygon barriers, you can set properties for each, such as its name or barrier type, using the following attributes:
+
+-   `Name` 
+
+    The name of the barrier.
+-   `BarrierType` 
+
+    Specifies whether the barrier restricts travel completely or scales the cost (such as time or distance) for traveling through it. The field value is specified as one of the following integers (use the numeric code, not the name in parentheses):
+
+    -   0 (Restriction)—Prohibits traveling through any part of the barrier. The barrier is referred to as a restriction polygon barrier since it prohibits traveling on streets intersected by the barrier. One use of this type of barrier is to model floods covering areas of the street that make traveling on those streets impossible.
+
+        This is the default value.
+
+        ![Two maps demonstrate how a restriction polygon barrier affects finding a route between two stops.](./images/GUID-35FA5882-2DFB-4E0D-976A-C24D55BE7259-web.png)
+
+        _The first map depicts the shortest path between two stops. The second map shows a polygon barrier blocking flooded streets, so the shortest path between the same two stops is different._
+    -   1 (Scaled Cost)—Scales the cost (such as travel time or distance) required to travel the underlying streets by a factor specified using the `ScaledTimeFactor`  or `ScaledDistanceFactor`  field. If the streets are partially covered by the barrier, the travel time or distance is apportioned and then scaled. For example, a factor of 0.25 means that travel on underlying streets is expected to be four times faster than normal. A factor of 3.0 means it is expected to take three times longer than normal to travel on underlying streets. This barrier type is referred to as a scaled-cost polygon barrier. It can be used to model storms that reduce travel speeds in specific regions, for example.
+
+        ![Two maps demonstrate how a scaled cost polygon barrier affects finding a route between two stops.](./images/GUID-B75CF59C-CCE5-463B-BF24-CBB41ECFE47D-web.png)
+
+        _The first map shows a route that goes through inclement weather without regard for the effect that poor road conditions have on travel time. The second map shows a scaled polygon barrier that doubles the travel time of the roads covered by the storm. The route still passes through the southern tip of the storm since it is quicker to spend more time driving slowly through a small part of the storm rather than driving completely around it. The service uses the modified travel time in calculating the best route, and the modified travel time is reported as the total travel time in the response._
+-   `ScaledTimeFactor` 
+
+    This is the factor by which the travel time of the streets intersected by the barrier is multiplied. The field value must be greater than zero. 
+
+    This field is applicable only for scaled-cost barriers and when the `measurement_units`  parameter is time-based.
+-   `ScaledDistanceFactor` 
+
+    This is the factor by which the distance of the streets intersected by the barrier is multiplied. The field value must be greater than zero.
+
+    This field is applicable only for scaled-cost barriers and when the `measurement_units`  parameter is distance-based.
+-   `ScaledCostFactor` 
+
+    This is the factor by which the cost of the streets intersected by the barrier is multiplied. The field value must be greater than zero. 
+
+    This field is applicable only for scaled-cost barriers when the impedance is neither time-based nor distance-based . 
+
+#### Syntax examples for polygon_barriers
+
+Syntax for specifying polygon barriers using a JSON structure for features
+
+```other
+{
+  "spatialReference": {
+    "wkid": <wkid>,
+    "latestWkid": <wkid>    
+  }
+  "features": [
+    {
+      "geometry": {
+        "rings": [
+          [
+            [<x11>,<y11>],
+            [<x12>,<y12>],
+            [<x11>,<y11>]
+          ],
+          [
+            [<x21>,<y21>],
+            [<x22>,<y22>]
+            [<x21>,<y21>]
+          ]
+        ]
+      },
+      "attributes": {
+        "<field1>": <value11>,
+        "<field2>": <value12>
+      }
+    },
+    {
+      "geometry": {
+        "rings": [
+          [
+            [<x11>,<y11>],
+            [<x12>,<y12>],
+            [<x11>,<y11>]
+          ],
+          [
+            [<x21>,<y21>],
+            [<x22>,<y22>],
+            [<x21>,<y21>]
+          ]
+        ]
+      },
+      "attributes": {
+        "<field1>": <value21>,
+        "<field2>": <value22>
+      }
+    }
+  ]
+}
+```
+
+ 
+
+Syntax for specifying polygon barriers using a URL returning a JSON response
+
+```other
+{
+  "url": "<url>"
+}
+```
+
+ 
+
+#### Examples for polygon_barriers
+
+Example 1: Specifying polygon barriers using a JSON structure.
+
+The example shows how to add two polygons as barriers. The first polygon named `Flood zone`  is a restriction polygon barrier that prohibits travel on the underlying streets. The polygon is a single-part polygon feature made up of four points. The second polygon named `Severe weather zone`  is a scaled-cost polygon barrier that increases the travel time on underlying streets to one third of the original value. The polygon is a two-part polygon feature. Both parts are made up of four points.
+
+```other
+{
+  "spatialReference": {
+    "wkid": 4326
+  },
+  "features": [
+    {
+      "geometry": {
+        "rings": [
+          [
+            [-97.0634,32.8442],
+            [-97.0554,32.84],
+            [-97.0558,32.8327],
+            [-97.0638,32.83],
+            [-97.0634,32.8442]
+          ]
+        ]
+      },
+      "attributes": {
+        "Name": "Flood zone",
+        "BarrierType": 0
+      }
+    },
+    {
+      "geometry": {
+        "rings": [
+          [
+            
+            [-97.0803,32.8235],
+            [-97.0776,32.8277],
+            [-97.074,32.8254],
+            [-97.0767,32.8227],
+            [-97.0803,32.8235]
+          ],
+          [
+            [-97.0871,32.8311],
+            [-97.0831,32.8292],
+            [-97.0853,32.8259],
+            [-97.0892,32.8279],
+            [-97.0871,32.8311]
+            
+          ]
+        ]
+      },
+      "attributes": {
+        "Name": "Severe weather zone",
+        "BarrierType": 1,
+        "ScaledTimeFactor": 3
+      }
+    }
+  ]
+}
+```
+
+ 
+
+Example 2: Specifying a polygon barrier using a URL
+
+The URL makes a query for a few features from a map service. A URL querying features from a feature service can also be specified.
+
+```other
+{
+  "url": "https://machine.domain.com/webadaptor/rest/services/Network/USA/MapServer/7/query?where=1%3D1&returnGeometry=true&f=json"
+}
+```
+
+ 
+
+### uturn_at_junctions
+
+Use this parameter to restrict or permit the route from making U-turns at junctions.
+
+<Note type={"note"}>
+
+The value of this parameter, regardless of whether you rely on the default or explicitly set a value, is overridden when `travel_mode`  is set to any other value than `Custom` . The default value for `travel_mode`  is `Driving` , so unless you set `travel_mode`  to a different value, this parameter value will be overridden.
+
+</Note>
+
+To understand the available parameter values, a junction is a point where only two streets intersect each other. If three or more streets intersect at a point, it is called as an intersection. A cul-de-sac is a dead-end. This parameter can have the following values:
+
+<StyledTable headers={"Parameter Value,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Allowed` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+U-turns are permitted everywhere. Permitting U-turns implies that the vehicle can turn around at a junction and double back on the same street. 
+
+![U-turns permitted](./images/GUID-51F9D82D-2F8A-4785-B868-ADAB1C756B7E-web.png)
+
+_U-turns are permitted at junctions with any number of adjacent streets._
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Allowed only at Intersections and Dead Ends` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+U-turns are prohibited at junctions where exactly two adjacent streets meet. 
+
+![U-turns permitted only at intersections and dead-ends](./images/GUID-FFFF22A0-1697-4719-9B3E-7F338C385312-web.png)
+
+_U-turns are permitted only at intersections or dead ends._
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Allowed only at Dead Ends` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+U-turns are prohibited at all junctions and intersections and are permitted only at dead ends. 
+
+![U-turns permitted only at dead-ends](./images/GUID-6F32DA2C-CDA1-4934-B059-7DE38A20AB9E-web.png)
+
+_U-turns are permitted only at dead ends._
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Not Allowed` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+U-turns are prohibited at all junctions, intersections, and dead-ends. Even when this parameter value is chosen, a route can still make U-turns at stops. To prohibit U-turns at a stop, you can set its `CurbApproach`  property to the appropriate value (3).
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+The default value for this parameter is `Allowed only at Intersections and Dead Ends` .
+
+### use_hierarchy
+
+Specify whether hierarchy will be used when finding the destinations.
+
+The default value for this parameter is `true` .
+
+<Note type={"caution"}>
+
+The value of this parameter, regardless of whether you rely on the default or explicitly set a value, is overridden when `travel_mode`  is set to any other value than `Custom` . The default value for `travel_mode`  is `Driving` , so unless you set `travel_mode`  to a different value, this parameter value will be overridden.
+
+</Note>
+
+-   `true` —Use hierarchy when travelling from origins to destinations. When hierarchy is used, the service prefers higher-order streets (such as freeways) to lower-order streets (such as local roads), and can be used to simulate the driver preference of traveling on freeways instead of local roads even if that means a longer trip. This is especially true when finding routes to faraway locations, because drivers on long-distance trips tend to prefer traveling on freeways where stops, intersections, and turns can be avoided. Using hierarchy is computationally faster, especially for long-distance routes, since the service can determine the best route from a relatively smaller subset of streets.
+-   `false` —Do not use hierarchy when travelling from origins to destinations. If hierarchy is not used, the service considers all the streets and doesn't prefer higher-order streets. This is often used when solving problems in a small area with a lot of destination but are specifying a cutoff based on a subset of them. 
+
+### restrictions
+
+Use this parameter to specify the restrictions that will be honored by the service. A restriction represents a driving preference or requirement. In most cases, restrictions cause roads or pathways to be prohibited, but they can also cause them to be avoided or preferred. For instance, using the `Avoid Toll  Roads`  restriction will result in a route that will include toll roads only when it is required to travel on toll roads to visit a stop. Use `Height Restriction`  to route around clearances that are lower than the height of the vehicle. If the vehicle is carrying corrosive materials, you can use the `Any Hazmat Prohibited`  restriction to prevent hauling the materials along roads where it is marked as illegal to do so.
+
+<Note type={"note"}>
+
+The value of this parameter, regardless of whether you rely on the default or explicitly set a value, is overridden when you pass in `travel_mode` . 
+
+</Note>
+
+This parameter value is specified as a comma-separated list of restriction names. A value of none indicates that no restrictions will be used when finding the shortest paths. 
+
+The service supports the following restriction names: 
+
+-   Any Hazmat Prohibited—The results will not include roads where transporting any kind of hazardous material is prohibited. 
+-   Avoid Carpool Roads—The results will avoid roads that are designated exclusively for car pool (high-occupancy) vehicles. 
+-   Avoid Express Lanes—The results will avoid roads designated as express lanes. 
+-   Avoid Ferries—The results will avoid ferries. 
+-   Avoid Gates—The results will avoid roads where there are gates, such as keyed access or guard-controlled entryways.
+-   Avoid Limited Access Roads—The results will avoid roads that are limited-access highways.
+-   Avoid Private Roads—The results will avoid roads that are not publicly owned and maintained.
+-   Avoid Roads Unsuitable for Pedestrians—The results will avoid roads that are unsuitable for pedestrians.
+-   Avoid Stairways—The results will avoid all stairways on a pedestrian-suitable route.
+-   Avoid Toll Roads—The results will avoid all toll roads for automobiles.
+-   Avoid Toll Roads for Trucks—The results will avoid all toll roads for trucks.
+-   Avoid Truck Restricted Roads—The results will avoid roads where trucks are not allowed, except when making deliveries.
+-   Avoid Unpaved Roads—The results will avoid roads that are not paved (for example, dirt, gravel, and so on). 
+-   Axle Count Restriction—The results will not include roads where trucks with the specified number of axles are prohibited. The number of axles can be specified using the Number of Axles restriction parameter.
+-   Driving a Bus—The results will not include roads where buses are prohibited. Using this restriction will also ensure that the results will honor one-way streets. 
+-   Driving a Taxi—The results will not include roads where taxis are prohibited. Using this restriction will also ensure that the results will honor one-way streets. 
+-   Driving a Truck—The results will not include roads where trucks are prohibited. Using this restriction will also ensure that the results will honor one-way streets. 
+-   Driving an Automobile—The results will not include roads where automobiles are prohibited. Using this restriction will also ensure that the results will honor one-way streets. 
+-   Driving an Emergency Vehicle—The results will not include roads where emergency vehicles are prohibited. Using this restriction will also ensure that the results will honor one-way streets.
+-   Height Restriction—The results will not include roads where the vehicle height exceeds the maximum allowed height for the road. The vehicle height can be specified using the Vehicle Height (meters) restriction parameter. 
+-   Kingpin to Rear Axle Length Restriction—The results will not include roads where the vehicle length exceeds the maximum allowed kingpin to rear axle for all trucks on the road. The length between the vehicle kingpin and the rear axle can be specified using the Vehicle Kingpin to Rear Axle Length (meters) restriction parameter. 
+-   Length Restriction—The results will not include roads where the vehicle length exceeds the maximum allowed length for the road. The vehicle length can be specified using the Vehicle Length (meters) restriction parameter. 
+-   Preferred for Pedestrians—The results will use preferred routes suitable for pedestrian navigation. 
+-   Riding a Motorcycle—The results will not include roads where motorcycles are prohibited. Using this restriction will also ensure that the results will honor one-way streets.
+-   Roads Under Construction Prohibited—The results will not include roads that are under construction.
+-   Semi or Tractor with One or More Trailers Prohibited—The results will not include roads where semis or tractors with one or more trailers are prohibited. 
+-   Single Axle Vehicles Prohibited—The results will not include roads where vehicles with single axles are prohibited.
+-   Tandem Axle Vehicles Prohibited—The results will not include roads where vehicles with tandem axles are prohibited.
+-   Through Traffic Prohibited—The results will not include roads where through traffic (nonlocal traffic) is prohibited.
+-   Truck with Trailers Restriction—The results will not include roads where trucks with the specified number of trailers on the truck are prohibited. The number of trailers on the truck can be specified using the Number of Trailers on Truck restriction parameter.
+-   Use Preferred Hazmat Routes—The results will prefer roads that are designated for transporting hazardous materials. 
+-   Use Preferred Truck Routes—The results will prefer roads that are designated as truck routes, such as roads that are part of the national network as specified by the National Surface Transportation Assistance Act in the United States, or roads that are designated as truck routes by the state or province, or roads that are preferred by truckers when driving in an area.
+-   Walking—The results will not include roads where pedestrians are prohibited.
+-   Weight Restriction—The results will not include roads where the vehicle weight exceeds the maximum allowed weight for the road. The vehicle weight can be specified using the Vehicle Weight (kilograms) restriction parameter.
+-   Weight per Axle Restriction—The results will not include roads where the vehicle weight per axle exceeds the maximum allowed weight per axle for the road. The vehicle weight per axle can be specified using the Vehicle Weight per Axle (kilograms) restriction parameter.
+-   Width Restriction—The results will not include roads where the vehicle width exceeds the maximum allowed width for the road. The vehicle width can be specified using the Vehicle Width (meters) restriction parameter.
+
+<Note type={"note"}>
+
+These value are specific to the services published with the ArcGIS StreetMap Premium data. The values will be different if you are using other data for the analysis.
+
+</Note>
+
+<Note type={"note"}>
+
+The `Driving a Delivery Vehicle`  restriction attribute is no longer available. The service will ignore this restriction since it is invalid. To achieve similar results, use the `Driving a Truck`  restriction attribute along with the `Avoid Truck Restricted Roads`  restriction attribute.
+
+</Note>
+
+The restrictions parameter value is specified as a list of restriction names. A value of `null`  indicates that no restrictions should be used when finding the best route, but only when `travel_mode`  is set to `Custom` . 
+
+#### Example for restrictions
+
+```javascript
+restrictions=[Driving a Truck, Height Restriction, Length Restriction]
+```
+
+ 
+
+### attribute_parameter_values
+
+Use this parameter to specify additional values required by an attribute or restriction, such as to specify whether the restriction prohibits, avoids, or prefers travel on restricted roads. If the restriction is meant to avoid or prefer roads, you can further specify the degree to which they are avoided or preferred using this parameter. For example, you can choose to never use toll roads, avoid them as much as possible, or prefer them.
+
+<Note type={"note"}>
+
+The value of this parameter, regardless of whether you rely on the default or explicitly set a value, is overridden when you pass in `travel_mode`  parameter. 
+
+</Note>
+
+You can specify `attribute_parameter_values`  parameter using JSON structure that represents a set of features. The JSON structure can include the following properties:
+
+-   `features` —Specify an array of features. 
+
+    -   `geometry` —Specify the input point geometry containing `x`  and `y`  properties along with the `spatialReference`  property. If the `spatialReference`  property is defined for the entire JSON, you don't need to define this property for each geometry. Doing so reduces the size of the input JSON if the input has many features and improves performance. This property is not required if the coordinates are in the default spatial reference, WGS84. If the coordinates are in a different spatial reference, you must specify the spatial reference's well-known ID (WKID). See [Using spatial references](/using-spatial-references) to look up WKID values.
+
+        <Note type={"tip"}>
+
+        It is recommended that you explicitly specify the `spatialReference`  value, and specify it for the entire JSON rather than each individual geometry. 
+
+        </Note>
+    -   `attributes` —Specify each attribute as a key-value pair in which the key is the name of a given field, and the value is the attribute value for the corresponding field.
+-   `url` —Specify a REST query request to any ArcGIS Server feature, map, or geoprocessing service that returns a JSON feature set. 
+
+Each feature in the features array represents an attribute parameter and contains the following fields:
+
+-   `attributes` —Specify each attribute as a key-value pair in which the key is the name of a given field, and the value is the attribute value for the corresponding field.
+
+<Note type={"note"}>
+
+The JSON structure for the `attribute_parameter_values`  parameter does not have a `geometry`  property. 
+
+</Note>
+
+#### Attributes for attribute_parameter_values
+
+The `attribute_parameter_values`  parameter can be specified with the following attributes:
+
+-   `AttributeName` —The name of the restriction. 
+-   `ParameterName` —The name of the parameter associated with the restriction. A restriction can have one or more `ParameterName`  values based on its intended use, which implies you may need multiple `attribute_parameter_values`  parameters for a single attribute name.
+-   `ParameterValue` —The value for the `ParameterName`  that is used by the service when evaluating the restriction.
+
+<Note type={"note"}>
+
+In most cases, the `attribute_parameter_values`  parameter is dependent on the `restrictions`  parameter. The `ParameterValue`  specified as part of `attribute_parameter_values`  is applicable only if the restriction name is specified as the value for the `restrictions`  parameter.
+
+</Note>
+
+When specifying the `attribute_parameter_values`  parameter, each restriction (listed as `AttributeName` ) has a `ParameterName`  value, `Restriction Usage` , that specifies whether the restriction prohibits, avoids, or prefers travel on the roads associated with the restriction and the degree to which the roads are avoided or preferred.
+
+The `Restriction Usage`  value for the 						`ParameterName`  attribute can be assigned any of the following string values or their equivalent numeric values listed in the parentheses:
+
+-   `Prohibited`  (`-1` )—Travel on the roads that have the restriction is prohibited.
+-   `Avoid_High`  (`5` )—It is very unlikely the service will include in the route the roads that are associated with the restriction.
+-   `Avoid_Medium`  (`2` )—It is unlikely the service will include in the route the roads that are associated with the restriction.
+-   `Avoid_Low`  (`1.3` )—It is somewhat unlikely the service will include in the route the roads that are associated with the restriction.
+-   `Prefer_Low`  (`0.8` )—It is somewhat likely the service will include in the route the roads that are associated with the restriction.
+-   `Prefer_Medium` (`0.5` )—It is likely the service will include in the route the roads that are associated with the restriction.
+-   `Prefer_High`  (`0.2` )—It is very likely the service will include in the route the roads that are associated with the restriction.
+
+The following table lists the restriction names and the default restriction parameter values for all the restrictions. The default value for the `attribute_parameter_values`  parameter is the JSON structure containing all the rows from the below table.
+
+<Note type={"note"}>
+
+If you want to use the default value for any restriction, `AttributeName` , `ParameterName` , and `ParameterValue`  do not have to be specified as part of the `attribute_parameter_values`  parameter.
+
+</Note>
+
+<StyledTable headers={"Restriction name,Restriction parameter name,Restriction parameter default value"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Any Hazmat Prohibited
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Carpool Roads
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Express Lanes
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Ferries
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_Medium
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Gates
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_Medium
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Limited Access Roads
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_Medium
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Private Roads
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_Medium
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Roads Unsuitable for Pedestrians
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_High
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Stairways
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_High
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Toll Roads
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_Medium
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Toll Roads for Trucks
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_Medium
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Truck Restricted Roads
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_High
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Unpaved Roads
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_High
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Axle Count Restriction
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Number of Axles
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Driving a Bus
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Driving a Taxi
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Driving a Truck
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Driving an Automobile
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Driving an Emergency Vehicle
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Height Restriction
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Vehicle Height (meters)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Kingpin to Rear Axle Length Restriction
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Vehicle Kingpin to Rear Axle Length (meters)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Length Restriction
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Vehicle Length (meters)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Preferred for Pedestrians
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prefer_Low
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Riding a Motorcycle
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Roads Under Construction Prohibited
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Semi or Tractor with One or More Trailers Prohibited
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Single Axle Vehicles Prohibited
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Tandem Axle Vehicles Prohibited
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Through Traffic Prohibited
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_High
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Truck with Trailers Restriction
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Number of Trailers on Truck
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Use Preferred Hazmat Routes
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prefer_Medium
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Use Preferred Truck Routes
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prefer_High
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Walking
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+WalkTime
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Walking Speed (km/h)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+5
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Weight Restriction
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Vehicle Weight (kilograms)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Weight per Axle Restriction
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Vehicle Weight per Axle (kilograms)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Width Restriction
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Vehicle Width (meters)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+<Note type={"note"}>
+
+These value are specific to the services published with the ArcGIS StreetMap Premium data. The values will be different if you are using other data for the analysis.
+
+</Note>
+
+#### Syntax example for attribute_parameter_values
+
+```other
+{
+    "features": [
+        {
+            "attributes": {
+                "<field1>": <value11>,
+                "<field2>": <value12>,
+                "<field3>": <value13>
+
+            }
+        },
+        {
+            "attributes": {
+                "<field1>": <value21>,
+                "<field2>": <value22>,
+                "<field3>": <value13>
+            }
+        }
+    ] 
+}
+```
+
+ 
+
+#### Example for attribute_parameter_values
+
+This example shows how to specify the height and weight of the vehicle for use with the height and weight restrictions respectively along with a high preference to include designated truck routes. This results in a route that does not include any roads where the clearance under overpasses or through tunnels is less than the vehicle height. The results will also not include any roads with load limited bridges or local roads that prohibit heavy vehicles if the vehicle weight exceeds the maximum permissible weight. However, the route will include as many roads as possible that are designated as preferred truck routes. 
+
+Note that the `Restriction Usage` `ParameterName`  for the `Height Restriction`  and the `Weight Restriction`  restrictions are not specified since we want to use the default value of `PROHIBITED`  for these restriction parameters. 
+
+```other
+attribute_parameter_values=
+{
+    "features": [
+        {
+            "attributes": {
+                "AttributeName": "Height Restriction",
+                "ParameterName": "Vehicle Height (meters)",
+                "ParameterValue": 4.12
+            }
+        },
+        {
+            "attributes": {
+                "AttributeName": "Weight Restriction",
+                "ParameterName": "Vehicle Weight (kilograms)",
+                "ParameterValue": 36287
+            }
+        },
+        {
+            "attributes": {
+                "AttributeName": "Use Preferred Truck Routes",
+                "ParameterName": "Restriction Usage",
+                "ParameterValue": "PREFER_HIGH"
+            }
+        }
+    ]
+}
+```
+
+ 
+
+### impedance
+
+Specify the impedance.
+
+<Note type={"note"}>
+
+The value of this parameter, regardless of whether you rely on the default or explicitly set a value, is overridden when you pass in `travel_mode` . 
+
+</Note>
+
+Impedance is a value that quantifies travel along the transportation network. Travel distance is an example of impedance; it quantifies the length of walkways and road segments. Similarly, drive time—the typical time it takes to drive a car along a road segment—is an example of impedance. Drive times may vary by type of vehicle—for instance, the time it takes for a truck to travel along a path tends to be longer than a car—so there can be many impedance values representing travel times for different vehicle types. Impedance values may also vary with time; live and typical traffic reference dynamic impedance values. Each walkway and road segment stores at least one impedance value. When performing a network analysis, the impedance values are used to calculate the best results, such as finding the shortest route—the route that minimizes impedance—between two points.
+
+The `impedance`  parameter can be specified using the following values:
+
+-   **TravelTime**—Historical and live traffic data is used. This option is good for modeling the time it takes automobiles to travel along roads at a specific time of day using live traffic speed data where available. When using **TravelTime**, you can optionally set the TravelTime::Vehicle Maximum Speed (km/h) attribute parameter to specify the physical limitation of the speed the vehicle is capable of traveling.
+-   **Minutes**—Live traffic data is not used, but historical average speeds for automobiles data is used.
+-   **TruckTravelTime**—Historical and live traffic data is used, but the speed is capped at the posted truck speed limit. This is good for modeling the time it takes for the trucks to travel along roads at a specific time. When using **TruckTravelTime**, you can optionally set the TruckTravelTime::Vehicle Maximum Speed (km/h) attribute parameter to specify the physical limitation of the speed the truck is capable of traveling.
+-   **TruckMinutes**—Live traffic data is not used, but the smaller of the historical average speeds for automobiles and the posted speed limits for trucks are used.
+-   **WalkTime**—The default is a speed of 5 km/hr on all roads and paths, but this can be configured through the WalkTime::Walking Speed (km/h) attribute parameter.
+-   **Miles**—Length measurements along roads are stored in miles and can be used for performing analysis based on shortest distance.
+-   **Kilometers**—Length measurements along roads are stored in kilometers and can be used for performing analysis based on shortest distance.
+
+<Note type={"note"}>
+
+These value are specific to the services published with the ArcGIS StreetMap Premium data. The values will be different if you are using other data for the analysis.
+
+</Note>
+
+If you choose a time-based impedance, such as `TravelTime` , `TruckTravelTime` , `Minutes` , `TruckMinutes` , or `WalkTime` , the `measurement_units`  parameter must be set to a time-based value; if you choose a distance-based impedance such as `Miles` , `Kilometers` , the `measurement_units`  must be distance-based.
+
+<Note type={"note"}>
+
+`Drive Time` , `Truck Time` , `Walk Time` , and `Travel Distance`  impedance values are no longer supported and will be removed in a future release. 
+
+</Note>
+
+### origin_destination_line_shape
+
+Specify the shape of the line feature connecting each origin-destination pair in the output matrix. The resulting lines of an origin-destination cost matrix can be represented with either straight-line geometry or no geometry at all. In both cases, the route is always computed along the street network by minimizing the travel time or the travel distance, never using the straight-line distance between origins and destinations. 
+
+The parameter accepts one of the following values:
+
+-   `Straight Line` —Straight lines connect origins and destinations. 
+-   `None` —Do not return any shapes for the lines that connect origins and destinations. This is useful when you have a large number of origins and destinations and are interested only in the origin-destination cost matrix table (and not the output line shapes). 
+
+The default value is `None` 
+
+### save_output_network_analysis_layer
+
+Use this parameter to specify if the service should save the analysis settings as a network analysis layer file. You cannot directly work with this file even when you open the file in an ArcGIS Desktop application like ArcGIS Pro. It is meant to be sent to [Esri Technical Support](https://support.esri.com/en/contact-tech-support) in order to diagnose the quality of results returned from the service. 
+
+-   `true` —Saves network analysis layer file. The file can be downloaded from the URL provided as part of the `output_network_analysis_layer`  parameter. 							
+-   `false` —Don't save network analysis layer file. 
+
+The default value is `false` .
+
+### overrides
+
+<Note type={"note"}>
+
+This parameter is for internal use only.
+
+</Note>
+
+### time_impedance
+
+The time-based impedance value represents the travel time along road segments or on other parts of the transportation network.
+
+-   `Minutes` 
+-   `TravelTime` 
+-   `WalkTime` 
+-   `TruckMinutes` 
+-   `TruckTravelTime` 
+
+<Note type={"note"}>
+
+If the impedance for the travel mode, as specified using the 
+
+`impedance`
+
+  parameter, is time based, the values for the 
+
+`time_impedance`
+
+  and 
+
+`impedance`
+
+  parameters must be identical. Otherwise, the service will return an error.
+
+</Note>
+
+<Note type={"note"}>
+
+This parameter is used for defining a custom travel mode. The value of this parameter is ignored if the `travel_mode`  parameter is not set to `Custom` .
+
+</Note>
+
+<Note type={"note"}>
+
+These value are specific to the services published with the ArcGIS StreetMap Premium data. The values will be different if you are using other data for the analysis.
+
+</Note>
+
+### distance_impedance
+
+The distance-based impedance value represents the travel distance along road segments or on other parts of the transportation network.
+
+-   `Miles` 
+-   `Kilometers` 
+
+<Note type={"note"}>
+
+If the impedance for the travel mode, as specified using the 
+
+`impedance`
+
+  parameter, is distance based, the values for the 
+
+`distance_impedance`
+
+  and 
+
+`impedance`
+
+  parameters must be identical. Otherwise, the service will return an error.
+
+</Note>
+
+<Note type={"note"}>
+
+This parameter is used for defining a custom travel mode. The value of this parameter is ignored if the `travel_mode`  parameter is not set to `Custom` .
+
+</Note>
+
+<Note type={"note"}>
+
+These value are specific to the services published with the ArcGIS StreetMap Premium data. The values will be different if you are using other data for the analysis.
+
+</Note>
+
+### output_format
+
+Specifies the format in which the output features will be returned. 
+
+Choose from the following formats:
+
+-   **Feature Set**—The output features will be returned as feature classes and tables. This is the default. 
+-   **JSON File**—The output features will be returned as a compressed file containing the JSON representation of the outputs. When this option is specified, the output is a single file (with a `.zip`  extension) that contains one or more JSON files (with a `.json`  extension) for each of the outputs created by the service. 
+-   **GeoJSON File**—The output features will be returned as a compressed file containing the GeoJSON representation of the outputs. When this option is specified, the output is a single file (with a `.zip`  extension) that contains one or more GeoJSON files (with a `.geojson`  extension) for each of the outputs created by the service.
+-   **CSV File**—The output features will be returned as a compressed file containing a comma-separated value (CSV) representation of the outputs. When this option is specified, the output is a single file (with a `.zip`  extension) that contains one or more CSV files (with a `.csv`  extension) for each of the outputs created by the service.
+
+<Note type={"note"}>
+
+Specifying file based output format, such as `JSON File` , is useful when you are calling the service using the REST endpoint of the service. In such cases, returning all the outputs as a single file allows you to download large results that can be generated by the service. For example, if you are working with `GenerateOriginDestinationCostMatrix`  service and you generate a travel matrix with 1,000,000 records, returning such a large output as a `Feature Set`  can cause the service to fail since the service will try to send the entire output in a single attempt. With a file based output, the service sends the output in multiple chunks reducing the possibility of timeouts when returning the outputs. 
+
+</Note>
+
+### env:outSR
+
+Use this parameter to specify the spatial reference of the geometries, such as line or point features, returned by the service.
+
+The parameter value can be specified as a well-known ID (WKID) for the spatial reference. See [Using spatial references](/using-spatial-references) to look up WKID values.
+
+Many of the basemaps provided by ArcGIS Online are in the Web Mercator spatial reference (WKID 102100). Specifying `env:outSR=102100`  returns the geometries in the Web Mercator spatial reference, which can be drawn on top of the basemaps. 
+
+### ignore_network_location_fields
+
+Specifies whether the network location fields will be considered when locating inputs such as stops or facilities on the network.
+
+-   `true` —Network location fields will not be considered when locating the inputs on the network. Instead, the inputs will always be located by performing a spatial search. 
+-   `false` —Network location fields will be considered when locating the inputs on the network.
+
+The default value is `false` .
+
+### ignore_invalid_locations
+
+Specifies whether invalid input locations will be ignored. 
+
+-   `true` —
+
+    Network locations that are unlocated will be ignored and the analysis will run using valid network locations only. The analysis will also continue if locations are on non-traversable elements or have other errors. This is useful if you know the network locations are not all correct, but you want to run the analysis with the network locations that are valid. This is the default.
+-   `false` —
+
+    Invalid locations will not be ignored. Do not run the analysis if there are invalid locations. Correct the invalid locations and rerun the analysis.
+
+### locate_settings
+
+Use this parameter to specify settings that affect how inputs are located, such as the maximum search distance to use when locating the inputs on the network or the network sources being used for locating. To restrict locating on a portion of the source, you can specify a where clause for a source.
+
+[Learn more about locating inputs](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/locating-analysis-inputs.htm)
+
+The parameter value is specified as a JSON object. The JSON object allows you to specify a locator JSON for all input feature in the analysis, or you can specify an override for a particular input. The override allows you to have different settings for each analysis input. For example, you can disallow stops to locate on highway ramps and allow point barriers to locate on highway ramps.
+
+<Note type={"note"}>
+
+The default value for this parameter can be obtained from the service resource JSON. Append `?token=<yourToken>&f=pjson`  to the service URL to access the service resource JSON.
+
+</Note>
+
+The locator JSON object has the following properties:
+
+-   `tolerance`  and `toleranceUnits` —Allows you to control the maximum search distance when locating inputs. If no valid network location is found within this distance, the input features will be considered unlocated. A small search tolerance decreases the likelihood of locating on the wrong street but increases the likelihood of not finding any valid network location. The `toleranceUnits`  parameter value can be specified as one of the following values:
+
+    -   `esriCentimeters` 
+    -   `esriDecimalDegrees` 
+    -   `esriDecimeters` 
+    -   `esriFeet` 
+    -   `esriInches` 
+    -   `esriIntFeet` 
+    -   `esriIntInches` 
+    -   `esriIntMiles` 
+    -   `esriIntNauticalMiles` 
+    -   `esriIntYards` 
+    -   `esriKilometers` 
+    -   `esriMeters` 
+    -   `esriMiles` 
+    -   `esriMillimeters` 
+    -   `esriNauticalMiles` 
+    -   `esriYards` 
+-   `sources` —Allows you to control which network source can be used for locating. For example, you can configure the analysis to locate inputs on streets but not on sidewalks. The list of possible sources on which to locate is specific to the network dataset this service references. Only the sources that are present in the sources array are used for locating. You can specify a `where`  clause on each source you specified in the sources array to further restrict locating on that source matching certain characteristics using an [SQL expression](https://pro.arcgis.com/en/pro-app/latest/help/mapping/navigation/sql-reference-for-elements-used-in-query-expressions.htm). For example, you can configure the analysis to locate inputs only on street features matching certain road classes such as avoiding highway ramps. Sources is specified as an array of objects, each having the following properties:
+
+    -   `name` —Name of the network source feature class that can be used for locating inputs.
+    -   `where` —An SQL expression on the network source feature class.
+-   `allowAutoRelocate` —Allows you to control whether inputs with existing network location fields can be automatically relocated when solving to ensure valid, routable location fields for the analysis. If the value is `true` , points located on restricted network elements and points affected by barriers will be relocated to the closest routable location. If the value is `false` , network location fields will be used as is even if the points are unreachable, and this may cause the solve to fail. Even if the value is `false` , inputs with no location fields or incomplete location fields will be located during the solve operation.
+
+#### Syntax for locate_settings
+
+Syntax for specifying `locate_settings`  using JSON structure.
+
+<Note type={"note"}>
+
+Line barriers and polygon barriers doesn't support the `tolerance`  and `toleranceUnits`  properties.
+
+</Note>
+
+```javascript
+{
+    "default": {
+        "tolerance": <value>,
+        "toleranceUnits": "<unit>",
+        "allowAutoRelocate": true | false,
+        "sources": [{
+            "name": "<sourceName>",
+            "where": "<whereClause>"
+        }]
+    },
+    "overrides": {
+        "origins": {
+            "tolerance": <value>,
+            "toleranceUnits": "<unit>",
+            "allowAutoRelocate": true | false,
+            "sources": [{
+                "name": "<sourceName>",
+                "where": "<whereClause>"
+            }]
+        },
+        "destinations": {
+            "tolerance": <value>,
+            "toleranceUnits": "<unit>",
+            "allowAutoRelocate": true | false,
+            "sources": [{
+                "name": "<sourceName>",
+                "where": "<whereClause>"
+            }]
+        },
+        "point_barriers": {
+            "tolerance": <value>,
+            "toleranceUnits": "<unit>",
+            "allowAutoRelocate": true | false,             
+            "sources": [{
+                "name": "<sourceName>",
+                "where": "<whereClause>"
+            }]
+        },
+        "line_barriers": {
+            "allowAutoRelocate": true | false,       
+            "sources": [{
+                "name": "<sourceName>",
+                "where": "<whereClause>"
+            }]
+        },
+        "polygon_barriers": {
+            "allowAutoRelocate": true | false,  
+            "sources": [{
+                "name": "<sourceName>",
+                "where": "<whereClause>"
+            }]
+        }
+    }
+}
+```
+
+ 
+
+#### Examples for locate_settings
+
+Example 1: Specify default locate settings using JSON structure
+
+This example shows how to specify locate settings so inputs are only located within 500 meters of the specified location. A small search tolerance like this can be valuable if you are solving using a walking travel mode and don't want inputs to be located farther than 500 meters from the original point location.
+
+```javascript
+{
+  "default": {
+    "tolerance": 500,
+    "toleranceUnits": "esriMeters",
+    "allowAutoRelocate": true,
+    "sources": [
+      {
+        "name": "Routing_Streets"
+      }
+    ]
+  }
+}
+```
+
+ 
+
+Example 2: Specify default locate settings and locate settings overrides for some inputs using JSON structure
+
+This example shows how to specify locate settings to prevent origins and destinations from locating on highway ramps. The default locate settings to allow locating on the Routing_Streets source. For origins and destinations, the `overrides`  option is used to specify a `where`  clause for the Routing_Streets source to prevent locating on highway ramps (a ROAD_CLASS field value of 3). With this `locate_settings`  json, origins and destinations cannot locate on highway ramps, but barriers can because they use the default locate settings, which do not include a `where`  clause.
+
+```javascript
+{
+    "default": {
+        "tolerance": 20,
+        "toleranceUnits": "esriKilometers",
+        "allowAutoRelocate": true,
+        "sources": [{
+            "name": "Routing_Streets"
+        }]
+    },
+    "overrides": {
+        "origins": {
+            "sources": [{
+                "name": "Routing_Streets",
+                "where": "ROAD_CLASS <> 3"
+            }]
+        },
+        "destinations": {
+            "sources": [{
+                "name": "Routing_Streets",
+                "where": "ROAD_CLASS <> 3"
+            }]
+        }
+    }
+}
+```
+
+ 
+
+Example three: Specify default locate settings and locate settings overrides using JSON structure so different inputs are located using different sources.
+
+This example shows how to specify default locate settings to locate inputs on Routing_Streets source feature class while allowing point barriers to only locate on the system junctions feature class (Routing_ND_Junctions).
+
+```javascript
+{
+    "default": {
+        "tolerance": 20,
+        "toleranceUnits": "esriKilometers",
+        "allowAutoRelocate": true,
+        "sources": [{
+            "name": "Routing_Streets"
+        }]
+    },
+    "overrides": {
+        "point_barriers": {
+            "sources": [{
+                "name": "Routing_ND_Junctions"
+            }]
+        }
+    }
+}
+```
+
+ 
+
+### accumulate_attributes
+
+A list of cost attributes to be accumulated during analysis. These accumulated attributes are for reference only; the solver only uses the cost attribute used by the designated travel mode when solving the analysis. 
+
+For each cost attribute that is accumulated, a `Total_[Cost Attribute Name]_[Units]`  field is populated in the outputs created from the tool.
+
+## Output parameters
+
+Upon successful execution, the service returns the lines connecting each origin-destination pair, the output origins, the output destinations, and the status indicating whether the analysis was successful. This information is output in the output parameters described below.
+
+### output_origin_destination_lines
+
+Access information about the resulting routes from the origins to the destinations. The routes include data about the total travel time and the travel distance between a given origin-destination pair. The line geometries connect an origin-destination pair using a straight line if the `origin_destination_line_shape`  parameter is specified as `Straight Line`  and are returned in the spatial reference specified as the `env:outSR`  parameter. 
+
+The following table provides descriptions of the fields that are returned for each route:
+
+<StyledTable headers={"Field,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`DestinationRank` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The rank of the destination among all destinations found for the associated origin. The destination that is closest to the origin has a rank of 1. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Total_Time` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The travel time along the street network between the associated origin and destination.
+
+The value is in the units specified by the `time_units`  parameter. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Total_Distance` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The travel distance along the street network between the associated origin and destination.
+
+The value is in the units specified by the `distance_units`  parameter. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Total_Other` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The travel cost in unknown units along the street network between the associated origin and destination.
+
+This field is included only when the travel mode used for the analysis has an impedance attribute that is neither time based nor distance based. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`OriginOID` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The `ObjectID`  value of the corresponding input origin feature. This can be used to join additional attributes between the input origins and the origin destination lines. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`OriginName` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The name of the corresponding input origin feature. This field is included only if the `Name`  field is specified on input origins and at least one of the origins has a valid name. If the name is not specified for some of the origins, an automatically generated name prefixed with `Location`  is created for those origins.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`DestinationOID` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The `ObjectID`  value of the corresponding input destination feature. This can be used to join additional attributes between the input destinations and the origin destination lines. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`DestinationName` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The name of the corresponding input destination feature. This field is included only if the `Name`  field is specified on input destinations and at least one of the destinations has a valid name. If the name is not specified for some of the destinations, an automatically generated name prefixed with `Location`  is created for those destinations.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+### output_origins
+
+Access the origins that participated in the analysis. Information is provided about origins that could not be included in the analysis as well as the total number of destinations that could be reached from a given origin. The origin geometries are returned in the spatial reference specified as the `env:outSR`  parameter.
+
+The following table describes the attributes of the output origins:
+
+<StyledTable headers={"Field,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Name` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The name of the origin. If the name of the origin was specified as part of the `Name`  field, this field has the same value. Otherwise, it includes an automatically generated value prefixed with `Location` . 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`TargetDestinationCount` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The value of the `TargetDestinationCount`  field in the corresponding input origins. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`SourceID` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The numeric identifier of the network dataset source feature class on which the input point is located. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`SourceOID` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The ObjectID of the feature in the source on which the input point is located.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`PosAlong` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The position along the digitized direction of the source line feature. This value is stored as a ratio. This field is null if the network location references a junction.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`SideOfEdge` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The side of the edge in relation to the digitized direction of the line feature. This field is limited to a domain of two values: Right Side (1) and Left Side (2).
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`CurbApproach` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The value of the `CurbApproach`  field in the corresponding input origins.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Status` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Indicates the status of the point with respect to its location on the network and the outcome of the analysis. The possible values are the following: 
+
+-   0 (OK)—The point was located on the network.
+-   1 (Not Located)—The point was not located on the network and consequently was not included in the analysis.
+-   2 (Network element not located)—The network element identified by the point's network location fields can't be found. This can occur when a network element where the point should be was deleted, and the network location was not recalculated.
+-   3 (Element not traversable)—The network element that the point is located on is not traversable. This can occur when the element is restricted by a restriction attribute.
+-   4 (Invalid Field Values)—Field values fall outside a range or coded-value domain. For example, a negative number exists where positive numbers are required.
+-   5 (Not Reached)—The point can't be reached by the solver. The point may be on a separate, disconnected area of the network from the other inputs, or barriers or restrictions prevent travel to or from the point.
+-   6 (Time window violation)—The point could not be reached within the designated time windows. This status only applies to network analysis types that support time windows.
+-   7 (Not located on closest)—The closest network location to the point is not traversable because of a restriction or barrier, so the point has been located on the closest traversable network feature instead.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`SnapX` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The x-coordinate of the position on the network dataset where the point was located, in the coordinate system of the network dataset.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`SnapY` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The y-coordinate of the position on the network dataset where the point was located, in the coordinate system of the network dataset.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`SnapZ` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The z-coordinate of the position on the network dataset where the point was located, in the coordinate system of the network dataset. The `SnapZ`  field is 0 if the network is two dimensional.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`DistanceToNetworkInMeters` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The distance in meters between the point's geographic location and the position where it was located on the network.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Cutoff` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The value of the `Cutoff`  field in the corresponding input origins.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`OriginOID` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The `ObjectID`  value of the corresponding input origin feature. This can be used to join additional attributes from the input origins.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`DestinationCount` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A count of destinations that were reached from the origin.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Bearing` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The values for this field are copied from the `Bearing`  field on the input facilities. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`BearingTol` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The values for this field are copied from the `BearingTol`  field on the input facilities. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`NavLatency` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The values for this field are copied from the `NavLatency`  field on the input facilities. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+### output_destinations
+
+Access the destinations that participated in the analysis. Information is provided about destinations that could not be included in the analysis as well as the total number of origins that reached a given destination. The destination geometries are returned in the spatial reference specified as the `env:outSR`  parameter.
+
+The following table describes the attributes of the output destinations:
+
+<StyledTable headers={"Field,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Name` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The name of the destination. If the name for the origin was specified as part of the `Name`  field, this field has the same value. Otherwise, it includes an automatically generated value prefixed with `Location` .
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`SourceID` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The numeric identifier of the network dataset source feature class on which the input point is located. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`SourceOID` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The ObjectID of the feature in the source on which the input point is located.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`PosAlong` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The position along the digitized direction of the source line feature. This value is stored as a ratio. This field is null if the network location references a junction.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`SideOfEdge` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The side of the edge in relation to the digitized direction of the line feature. This field is limited to a domain of two values: Right Side (1) and Left Side (2).
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`CurbApproach` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The value of the `CurbApproach`  field in the corresponding input destinations.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Status` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Indicates the status of the point with respect to its location on the network and the outcome of the analysis. The possible values are the following: 
+
+-   0 (OK)—The point was located on the network.
+-   1 (Not Located)—The point was not located on the network and consequently was not included in the analysis.
+-   2 (Network element not located)—The network element identified by the point's network location fields can't be found. This can occur when a network element where the point should be was deleted, and the network location was not recalculated.
+-   3 (Element not traversable)—The network element that the point is located on is not traversable. This can occur when the element is restricted by a restriction attribute.
+-   4 (Invalid Field Values)—Field values fall outside a range or coded-value domain. For example, a negative number exists where positive numbers are required.
+-   5 (Not Reached)—The point can't be reached by the solver. The point may be on a separate, disconnected area of the network from the other inputs, or barriers or restrictions prevent travel to or from the point.
+-   6 (Time window violation)—The point could not be reached within the designated time windows. This status only applies to network analysis types that support time windows.
+-   7 (Not located on closest)—The closest network location to the point is not traversable because of a restriction or barrier, so the point has been located on the closest traversable network feature instead.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`SnapX` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The x-coordinate of the position on the network dataset where the point was located, in the coordinate system of the network dataset.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`SnapY` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The y-coordinate of the position on the network dataset where the point was located, in the coordinate system of the network dataset.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`SnapZ` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The z-coordinate of the position on the network dataset where the point was located, in the coordinate system of the network dataset. The `SnapZ`  field is 0 if the network is two dimensional.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`DistanceToNetworkInMeters` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The distance in meters between the point's geographic location and the position where it was located on the network.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`DestinationOID` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The `ObjectID`  value of the corresponding input destination feature. This can be used to join additional attributes from the input destinations. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`OriginCount` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The number of origins that reached the destination. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Bearing` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The values for this field are copied from the `Bearing`  field on the input facilities. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`BearingTol` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The values for this field are copied from the `BearingTol`  field on the input facilities. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`NavLatency` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The values for this field are copied from the `NavLatency`  field on the input facilities. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+### solve_succeeded
+
+Specify whether the service successfully generated the origin-destination cost matrix. The error messages for a failure can be obtained by making a request to get the status of the job.
+
+The `solve_succeeded`  parameter is returned as a JSON feature set with the following syntax:
+
+```other
+{
+  "paramName": "solve_succeeded",
+  "dataType": "GPBoolean",
+  "value": <true | false>
+}
+```
+
+ 
+
+The following shows an example of the `solve_succeeded`  parameter:
+
+```other
+{
+  "paramName": "solve_succeeded",
+  "dataType": "GPBoolean",
+  "value": true
+}
+```
+
+ 
+
+## Example usage
+
+This service uses the asynchronous execution mode. The client must periodically check whether the service has completed execution and, once complete, get the result. While the service is executing, you can use the application for other things. 
+
+<Note type={"caution"}>
+
+The maximum time an application can use the Origin Destination Cost Matrix service is 1 hour (3,600 seconds). If your request does not complete within this time limit, it will time out and fail.
+
+</Note>
+
+You can make a request to the Origin Destination Cost Matrix service using the following form:
+
+```javascript
+https:///GenerateOriginDestinationCostMatrix/submitJob?parameters
+```
+
+ 
+
+In this example, you will generate an origin-destination cost matrix between two origins and two destinations. The resulting origin-destination cost matrix will have four features.
+
+The origins and destinations are in the same spatial reference as your network dataset, so the `spatialReference`  property is not required.
+
+### Generate a travel cost matrix
+
+The following generate a travel cost matrix.
+
+#### Request to submit a job
+
+The first request submits a job and returns the job ID.
+
+<StyledTable headers={""}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+```other
+https:///GenerateOriginDestinationCostMatrix/submitJob?origins={"features":[{"geometry":{"y":51.5254,"x":-0.1891},"attributes":{"Name":"Origin 1","TargetDestinationCount":2,"Cutoff":120,"CurbApproach":0}},{"geometry":{"y":51.5353,"x":-0.1744},"attributes":{"Name":"Origin 2","TargetDestinationCount":3,"Cutoff":90,"CurbApproach":0}}]}&destinations={"features":[{"geometry":{"y":51.5354,"x":-0.1991},"attributes":{"Name":"Destination 1","CurbApproach":0}},{"geometry":{"y":51.5458,"x":-0.1844},"attributes":{"Name":"Destination 2","CurbApproach":0}}]}&f=pjson&token=<yourToken>
+```
+
+ 
+
+```javascript
+https:///GenerateOriginDestinationCostMatrix/submitJob?origins=%7B%22features%22:%5B%7B%22geometry%22:%7B%22y%22:51.5254,%22x%22:-0.1891%7D,%22attributes%22:%7B%22Name%22:%22Origin%201%22,%22TargetDestinationCount%22:2,%22Cutoff%22:120,%22CurbApproach%22:0%7D%7D,%7B%22geometry%22:%7B%22y%22:51.5353,%22x%22:-0.1744%7D,%22attributes%22:%7B%22Name%22:%22Origin%202%22,%22TargetDestinationCount%22:3,%22Cutoff%22:90,%22CurbApproach%22:0%7D%7D%5D%7D&destinations=%7B%22features%22:%5B%7B%22geometry%22:%7B%22y%22:51.5354,%22x%22:-0.1991%7D,%22attributes%22:%7B%22Name%22:%22Destination%201%22,%22CurbApproach%22:0%7D%7D,%7B%22geometry%22:%7B%22y%22:51.5458,%22x%22:-0.1844%7D,%22attributes%22:%7B%22Name%22:%22Destination%202%22,%22CurbApproach%22:0%7D%7D%5D%7D&f=pjson&token=<yourToken>
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+#### JSON Response
+
+```other
+{
+  "jobId": "j5943d41e8b2c4de7a0aaca3283655a33",
+  "jobStatus": "esriJobSubmitted"
+}
+```
+
+ 
+
+### Query job status
+
+The job ID obtained from the response of the first request can be queried periodically to determine the status of the job.
+
+#### Request to query job status
+
+<StyledTable headers={""}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+```other
+https:///GenerateOriginDestinationCostMatrix/jobs/<jobID>?returnMessages=true&f=pjson&token=<yourToken>
+```
+
+ 
+
+```javascript
+https:///GenerateOriginDestinationCostMatrix/jobs/<jobID>?returnMessages=true&f=pjson&token=<yourToken>
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+#### JSON Response
+
+```other
+{
+  "jobId": "j5943d41e8b2c4de7a0aaca3283655a33",
+  "jobStatus": "esriJobSucceeded",
+  "results": {
+    "Solve_Succeeded": {
+      "paramUrl": "results/Solve_Succeeded"
+    },
+    "Output_Origin_Destination_Lines": {
+      "paramUrl": "results/Output_Origin_Destination_Lines"
+    },
+    "Output_Origins": {
+      "paramUrl": "results/Output_Origins"
+    },
+    "Output_Destinations": {
+      "paramUrl": "results/Output_Destinations"
+    }
+  },
+  "inputs": {
+    "Origins": {
+      "paramUrl": "inputs/Origins"
+    },
+    "Destinations": {
+      "paramUrl": "inputs/Destinations"
+    },
+    "Travel_Mode": {
+      "paramUrl": "inputs/Travel_Mode"
+    },
+    "Time_Units": {
+      "paramUrl": "inputs/Time_Units"
+    },
+    "Distance_Units": {
+      "paramUrl": "inputs/Distance_Units"
+    },
+    "Analysis_Region": {
+      "paramUrl": "inputs/Analysis_Region"
+    },
+    "Number_of_Destinations_to_Find": {
+      "paramUrl": "inputs/Number_of_Destinations_to_Find"
+    },
+    "Cutoff": {
+      "paramUrl": "inputs/Cutoff"
+    },
+    "Time_of_Day": {
+      "paramUrl": "inputs/Time_of_Day"
+    },
+    "Time_Zone_for_Time_of_Day": {
+      "paramUrl": "inputs/Time_Zone_for_Time_of_Day"
+    },
+    "Point_Barriers": {
+      "paramUrl": "inputs/Point_Barriers"
+    },
+    "Line_Barriers": {
+      "paramUrl": "inputs/Line_Barriers"
+    },
+    "Polygon_Barriers": {
+      "paramUrl": "inputs/Polygon_Barriers"
+    },
+    "UTurn_at_Junctions": {
+      "paramUrl": "inputs/UTurn_at_Junctions"
+    },
+    "Use_Hierarchy": {
+      "paramUrl": "inputs/Use_Hierarchy"
+    },
+    "Restrictions": {
+      "paramUrl": "inputs/Restrictions"
+    },
+    "Attribute_Parameter_Values": {
+      "paramUrl": "inputs/Attribute_Parameter_Values"
+    },
+    "Impedance": {
+      "paramUrl": "inputs/Impedance"
+    },
+    "Origin_Destination_Line_Shape": {
+      "paramUrl": "inputs/Origin_Destination_Line_Shape"
+    }
+  },
+  "messages": []
+}
+```
+
+ 
+
+### Return the output origin-destination lines
+
+Because the job succeeded, the travel time and travel distance between every origin-destination pair can be obtained using the `output_origin_destination_lines`  output parameter. Since you did not specify a value for the `origin_destination_line_shape`  parameter, the default value, `None` , was used by the service for this parameter. Consequently, the `features`  array in the output response does not have the `geometry`  property.
+
+#### Request to return origin-destination lines
+
+<StyledTable headers={""}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+```other
+https:///GenerateOriginDestinationCostMatrix/jobs/<jobID>/results/output_origin_destination_lines?f=pjson&token=<yourToken>
+```
+
+ 
+
+```javascript
+https:///GenerateOriginDestinationCostMatrix/jobs/<jobID>/results/output_origin_destination_lines?f=pjson&token=<yourToken>
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+#### JSON Response
+
+```other
+{
+  "paramName": "output_origin_destination_lines",
+  "dataType": "GPFeatureRecordSetLayer",
+  "value": {
+    "displayFieldName": "",
+    "geometryType": "esriGeometryPolyline",
+    "spatialReference": {
+      "wkid": 4326,
+      "latestWkid": 4326
+    },
+    "fields": [
+      {
+        "name": "OBJECTID",
+        "type": "esriFieldTypeOID",
+        "alias": "OBJECTID"
+      },
+      {
+        "name": "DestinationRank",
+        "type": "esriFieldTypeInteger",
+        "alias": "Destination Rank"
+      },
+      {
+        "name": "Total_Time",
+        "type": "esriFieldTypeDouble",
+        "alias": "Total Time (Minutes)"
+      },
+      { 
+        "name": "Total_Distance",
+        "type": "esriFieldTypeDouble",
+        "alias": "Total Distance (Kilometers)"
+      },
+      {
+        "name": "OriginName",
+        "type": "esriFieldTypeString",
+        "alias": "Origin Name",
+        "length": 128
+      },
+      {
+        "name": "OriginOID",
+        "type": "esriFieldTypeInteger",
+        "alias": "Origin OID"
+      },
+      {
+        "name": "DestinationName",
+        "type": "esriFieldTypeString",
+        "alias": "Destination Name",
+        "length": 128
+      },
+      {
+        "name": "DestinationOID",
+        "type": "esriFieldTypeInteger",
+        "alias": "Destination OID"
+      },
+      {
+        "name": "Shape_Length",
+        "type": "esriFieldTypeDouble",
+        "alias": "Shape_Length"
+      }
+    ],
+    "features": [
+      {
+        "attributes": {
+          "OBJECTID": 1,
+          "DestinationRank": 1,
+          "Total_Time": 6.2279130881726257,
+          "Total_Distance": 2.4774838708418678,
+          "OriginName": "Origin 1",
+          "OriginOID": 1,
+          "DestinationName": "Destination 1",
+          "DestinationOID": 1,
+          "Shape_Length": 0
+        }
+      },
+      {
+        "attributes": {
+          "OBJECTID": 2,
+          "DestinationRank": 2,
+          "Total_Time": 9.0778785641163715,
+          "Total_Distance": 3.723118842219868,
+          "OriginName": "Origin 1",
+          "OriginOID": 1,
+          "DestinationName": "Destination 2",
+          "DestinationOID": 2,
+          "Shape_Length": 0
+        }
+      },
+      {
+        "attributes": {
+          "OBJECTID": 3,
+          "DestinationRank": 1,
+          "Total_Time": 4.6095379183132064,
+          "Total_Distance": 1.9294457981067437,
+          "OriginName": "Origin 2",
+          "OriginOID": 2,
+          "DestinationName": "Destination 2",
+          "DestinationOID": 2,
+          "Shape_Length": 0
+        }
+      },
+      {
+        "attributes": {
+          "OBJECTID": 4,
+          "DestinationRank": 2,
+          "Total_Time": 6.0035312672863181,
+          "Total_Distance": 2.3148191217414382,
+          "OriginName": "Origin 2",
+          "OriginOID": 2,
+          "DestinationName": "Destination 1",
+          "DestinationOID": 1,
+          "Shape_Length": 0
+        }
+      }
+    ],
+    "exceededTransferLimit": false
+  }
+}
+```
+
+ 
+
+### Return the output origins
+
+The output origins can be obtained using the `output_origins`  output parameter. 
+
+#### Request to return output origins
+
+<StyledTable headers={""}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+```other
+https:///GenerateOriginDestinationCostMatrix/jobs/<jobID>/results/output_origins?f=pjson&token=<yourToken>
+
+```
+
+ 
+
+```javascript
+https:///GenerateOriginDestinationCostMatrix/jobs/<jobID>/results/output_origins?f=pjson&token=<yourToken>
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+#### JSON Response
+
+```other
+{
+  "paramName": "output_origins",
+  "dataType": "GPFeatureRecordSetLayer",
+  "value": {
+    "displayFieldName": "",
+    "geometryType": "esriGeometryPoint",
+    "spatialReference": {
+      "wkid": 4326,
+      "latestWkid": 4326
+    },
+    "fields": [
+      {
+        "name": "OBJECTID",
+        "type": "esriFieldTypeOID",
+        "alias": "OBJECTID"
+      },
+      {
+        "name": "Name",
+        "type": "esriFieldTypeString",
+        "alias": "Name",
+        "length": 128
+      },
+      {
+        "name": "TargetDestinationCount",
+        "type": "esriFieldTypeInteger",
+        "alias": "Target Destination Count"
+      },
+      {
+        "name": "CurbApproach",
+        "type": "esriFieldTypeInteger",
+        "alias": "Curb Approach"
+      },
+      {
+        "name": "Status",
+        "type": "esriFieldTypeInteger",
+        "alias": "Status"
+      },
+      {
+        "name": "Cutoff",
+        "type": "esriFieldTypeDouble",
+        "alias": "Cutoff"
+      },
+      {
+        "name": "OriginOID",
+        "type": "esriFieldTypeInteger",
+        "alias": "Origin OID"
+      },
+      {
+        "name": "DestinationCount",
+        "type": "esriFieldTypeInteger",
+        "alias": "Destination Count"
+      }
+    ],
+    "features": [
+      {
+        "attributes": {
+          "OBJECTID": 1,
+          "Name": "Origin 1",
+          "TargetDestinationCount": 2,
+          "CurbApproach": 0,
+          "Status": 0,
+          "Cutoff": 120,
+          "OriginOID": 1,
+          "DestinationCount": 2
+        },
+        "geometry": {
+          "x": -0.18909999999993943,
+          "y": 51.525400000000047
+        }
+      },
+      {
+        "attributes": {
+          "OBJECTID": 2,
+          "Name": "Origin 2",
+          "TargetDestinationCount": 2,
+          "CurbApproach": 0,
+          "Status": 0,
+          "Cutoff": 90,
+          "OriginOID": 2,
+          "DestinationCount": 2
+        },
+        "geometry": {
+          "x": -0.17439999999993461,
+          "y": 51.535300000000063
+        }
+      }
+    ],
+    "exceededTransferLimit": false
+  }
+}
+```
+
+ 
+
+### Return the output destinations
+
+The output destinations can be obtained using the `output_destinations`  output parameter.
+
+#### Request to return output destinations
+
+<StyledTable headers={""}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+```other
+https:///GenerateOriginDestinationCostMatrix/jobs/<jobID>/results/output_destinations?f=pjson&token=<yourToken>
+```
+
+ 
+
+```javascript
+https:///GenerateOriginDestinationCostMatrix/jobs/<jobID>/results/output_destinations?f=pjson&token=<yourToken>
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+#### JSON Response
+
+```other
+{
+  "paramName": "output_destinations",
+  "dataType": "GPFeatureRecordSetLayer",
+  "value": {
+    "displayFieldName": "",
+    "geometryType": "esriGeometryPoint",
+    "spatialReference": {
+      "wkid": 4326,
+      "latestWkid": 4326
+    },
+    "fields": [
+      {
+        "name": "OBJECTID",
+        "type": "esriFieldTypeOID",
+        "alias": "OBJECTID"
+      },
+      {
+        "name": "Name",
+        "type": "esriFieldTypeString",
+        "alias": "Name",
+        "length": 128
+      },
+      {
+        "name": "CurbApproach",
+        "type": "esriFieldTypeInteger",
+        "alias": "Curb Approach"
+      },
+      {
+        "name": "Status",
+        "type": "esriFieldTypeInteger",
+        "alias": "Status"
+      },
+      {
+        "name": "DestinationOID",
+        "type": "esriFieldTypeInteger",
+        "alias": "Destination OID"
+      },
+      {
+        "name": "OriginCount",
+        "type": "esriFieldTypeInteger",
+        "alias": "Origin Count"
+      }
+    ],
+    "features": [
+      {
+        "attributes": {
+          "OBJECTID": 1,
+          "Name": "Destination 1",
+          "CurbApproach": 0,
+          "Status": 0,
+          "DestinationOID": 1,
+          "OriginCount": 2
+        },
+        "geometry": {
+          "x": -0.19909999999993033,
+          "y": 51.535400000000038
+        }
+      },
+      {
+        "attributes": {
+          "OBJECTID": 2,
+          "Name": "Destination 2",
+          "CurbApproach": 0,
+          "Status": 0,
+          "DestinationOID": 2,
+          "OriginCount": 2
+        },
+        "geometry": {
+          "x": -0.18439999999992551,
+          "y": 51.545800000000042
+        }
+      }
+    ],
+    "exceededTransferLimit": false
+  }
+}
+```
+
+ 
+
+## JSON Response syntax
+
+When you submit a request, the service assigns a unique job ID to the transaction. The job ID and the status of the job are returned in the response.
+
+```other
+{
+  "jobId": <jobID>,
+  "jobStatus": <jobStatus>
+}
+```
+
+ 
+
+The `jobStatus`  property can have the following values:
+
+-   `esriJobSubmitted` 
+-   `esriJobWaiting` 
+-   `esriJobExecuting` 
+-   `esriJobSucceeded` 
+-   `esriJobFailed` 
+-   `esriJobTimedOut` 
+-   `esriJobCancelling` 
+-   `esriJobCancelled` 
+
+You can use the job ID to periodically check the status of the job and messages. Additionally, if the job has successfully completed, you can use the job ID to retrieve the results or the inputs. The job information and results remain available for 24 hours after the job is complete.
+
+### Job execution
+
+After the initial request is submitted, you can make a request of the following form to get the status of the job:
+
+```javascript
+https:///GenerateOriginDestinationCostMatrix/jobs/<yourJobID>/?token=<yourToken>&returnMessages=true&f=json
+```
+
+ 
+
+The example below demonstrates the JSON response syntax returned when using the request above:
+
+```other
+{
+  "jobId": "<jobId>",
+  "jobStatus": "<jobStatus>",
+  "messages": [
+    {
+      "type": "<type1>",
+      "description": "<description1>"
+    },
+    {
+      "type": "<type2>",
+      "description": "<description2>"
+    }
+  ]
+}
+```
+
+ 
+
+While a job is running, you can cancel it by making a request of the following form:
+
+```javascript
+https:///GenerateOriginDestinationCostMatrix/jobs/<jobID>/cancel?token=<yourToken>&f=json
+```
+
+ 
+
+<Note type={"note"}>
+
+When you submit your request, if the service is processing other requests, the job will remain in the queue. The job status will be reported as `esriJobSubmitted` . If you cannot wait for the entire duration while the job is in the queue, you can cancel the request and submit it at a later time. A canceled request will not incur service credits. However, if you do not cancel the request, it will eventually run and will incur service credits regardless of whether the application retrieved the results or ignored them. Therefore, it is recommended that you cancel the request if necessary. 
+
+</Note>
+
+### Job completion
+
+After the successful completion of the job, you can make a request of the following form to retrieve the outputs. Refer to the Output parameters section for more information on how to interpret the solution provided by the service.
+
+```javascript
+https:///GenerateOriginDestinationCostMatrix/jobs/<jobID>/results/<output_parameter_name>?token=<yourToken>&f=pjson
+```
+
+ 
+
+You can also retrieve the value for any input parameter by making a request of the following form:
+
+```javascript
+https:///GenerateOriginDestinationCostMatrix/jobs/<jobID>/inputs/<input_parameter_name>?token=<yourToken>f=pjson
+```
+
+ 
+
+## Usage limits
+
+The following table lists the limits that apply to this service: 
+
+<StyledTable headers={"Limit value,Limit description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+12.42 miles (20 kilometers)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Maximum snap tolerance
+
+If the distance between an input point and its nearest traversable street is greater than the distance specified here, the point is excluded from the analysis.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+4 hours
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Maximum time a client can use the asynchronous service
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+10,000,000
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Maximum number of features that can be returned by the asynchronous service
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+The limit for snap tolerance cannot be changed, however you can configure other limits by following the steps below:
+
+1.  Open Server Manager for the ArcGIS Server site that contains the NetworkAnalysis geoprocessing service and sign in. If you need help with this step, see [Log in to Manager](https://enterprise.arcgis.com/en/server/latest/administer/windows/log-in-to-manager.htm). 
+2.  Click **Services** > **Manage Services**.
+3.  In the **Manage Services** module, locate **NetworkAnalysis geoprocessing service** and click **Edit Service**![Edit](./images/GUID-6874E190-0A2C-46A8-854C-028EA88CF48D-web.png).
+
+    If you don't see the service under the **Routing** folder, it may be located within another folder under the **Site (root) >**.
+4.  Click the **Parameters** option and change the limit for the number of records returned by the service by editing the value in **Maximum Number of Records Returned by Server** text box.
+5.  Click the **Pooling** option and change the maximum time the service can be used by editing the value in the **The maximum time a client can use a service** text box.
+6.  Click **Save and Restart** to apply your edits and restart the service.

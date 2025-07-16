@@ -1,0 +1,298 @@
+---
+title: "Update parcel history"
+description: "The updateParcelHistory operation sets the specified parcel features to current or historic using the specified record."
+slug: "updateparcelhistory-parcel-fabric-server"
+url: "/updateparcelhistory-parcel-fabric-server"
+guid: "GUID-95BCFDCE-356A-4AFC-9C3B-C21E447499FE"
+migratedTopicMetadata:
+  FTITLE: "UpdateParcelHistory-parcel-fabric-server"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "14/08/2023 15:36:24"
+  FAUTHOR: "cleslie"
+  FSTATUS: "Released"
+  MODIFIED-ON: "29/09/2023 11:51:58"
+  VERSION: "5"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-EF8EB9B8-50AA-4CC4-BDF0-203A14D22D30"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/ParcelFabricServer/updateParcelHistory
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/ParcelFabricServer/updateParcelHistory
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.8'
+  requiredCapability: ArcGIS Advanced Editing  
+---
+
+## Description
+
+The `updateParcelHistory` operation sets the specified parcel features to current or historic using the specified record. When setting current parcels as historic, the `Retired By Record` field of the features is updated with the global ID of the specified record. When setting historic parcels as current, the `Created By Record` field of the features is updated with the global ID of the specified record.
+
+[Learn more about setting parcel history](https://pro.arcgis.com/en/pro-app/latest/help/data/parcel-editing/setcurrentorhistoric.htm)
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `gdbVersion` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The name of the geodatabase version (the default is the `DEFAULT` version).
+
+      Syntax
+
+      ```javascript
+      gdbVersion=<version>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sessionId` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The token (GUID) used to lock the version. If the calling client is editing a named version, the `sessionId` value is required. If the specified version is currently locked by another session, the request will fail if the `sessionId`  value is not provided or does not match the `sessionId` value that holds the exclusive lock. If the client is editing the default version, the `sessionId` value is not required.
+
+      Syntax
+
+      ```javascript
+      sessionId=<guid>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `parcelFeatures` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The parcel features that will be set as historic or current. The features can be parcels, parcel polygons, parcel points, and parcel lines.
+
+      Syntax
+
+      ```javascript
+      parcelFeatures=[{"id":"<guid>","layerId":"<layerID>"},{...}]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `setAsHistoric` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      Specifies whether the features will be set as historic (`true`) or current (`false`). 
+
+      Syntax
+
+      ```javascript
+      setAsHistoric=<Boolean>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `record` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+      
+      The unique identifier (GUID) of the record that will be assigned to the features set as current or historic.
+
+      Syntax
+
+      ```javascript
+      record=<guid>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies whether the request will be processed as an asynchronous job and a URL that points to a location displaying the status of the job will be returned. See the topic regarding [asynchronous](HTTP://RESOURCES.ARCGIS.COM/EN/HELP/ARCGIS-REST-API/02R3/02R3000000RT000000.HTM) usage for more information. The default is `false` .
+
+      Values: `true` | `false` 
+
+      Syntax
+
+      ```javascript
+      async=true|false
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the output format of the response. The default response format is `html`.
+
+      Values: `html` | `json` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+This example shows the steps for setting a parcel as historic using the `updateParcelHistory` operation.
+
+<Note type={"note"}>
+
+  The `sessionId` parameter value must be the same for starting the edit session, performing the edit operation, and stopping the edit session.
+
+</Note>
+
+1.  [Start a service session](/start-reading) on the version.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/VersionManagementServer/versions/E4DAED9D-C859-489B-9053-767A45F1D97C/startReading
+    f=json
+    sessionId={f24783f6-1e2a-47d6-9505-1b36898d632a}
+    ```
+     
+2.  [Start an edit session](/start-editing) on the version.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/VersionManagementServer/versions/E4DAED9D-C859-489B-9053-767A45F1D97C/startEditing
+    f=json
+    sessionId={f24783f6-1e2a-47d6-9505-1b36898d632a}
+    ```
+     
+3.  Set a parcel as historic using the specified record.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/ParcelFabricServer/updateParcelHistory
+    f=json
+    gdbVersion=admin.Version1
+    sessionId={f24783f6-1e2a-47d6-9505-1b36898d632a}
+    parcelFeatures=[{"id":"{E60840C7-8A91-45BD-85C8-9DDF00BF2C82}","layerId":"13"}]
+    setAsHistoric=true
+    record={C379E2BB-7F9E-4593-B760-D4E908F8445D}
+    async=false
+    ```
+     
+4.  If edits are complete, [stop the edit session](/stop-editing).
+
+5.  [Stop](/stop-reading) and release the service session. 
+
+## JSON Response syntax
+
+The following response is returned when `async` is `false`:
+
+```other
+{
+  "moment": <datetime>,
+  "exceededTransferLimit: <true | false>,
+  "serviceEdits": [  // only if transfer limit is not exceeded
+    {
+      "id": <layerID>,
+      "editedFeatures": {
+        "spatialReference": {<spatialreference>},
+        "adds": [
+          {
+            "attributes": {},
+            "geometry": {}
+          }
+        ]
+      }
+    },
+    {
+      "id": <layerID>,
+      "editedFeatures": {
+        "spatialReference": {<spatialreference>},
+        "updates": [
+          {
+            "attributes": {},
+            "geometry": {}
+          }
+        ]
+      }
+    }
+  ],
+  "success": <true | false>,
+  "error": {  // only if success is false
+    "extendedCode": <HRESULT>,
+    "message": <error message>,
+    "details": [<detail>]
+  }
+}
+```
+
+The following response is returned when `async` is `true`:
+
+```other
+{
+		"statusUrl": <url>
+}
+```
+
+
+ 

@@ -1,0 +1,877 @@
+---
+title: "GeoAnalytics Tools in Run Python Script"
+description: "Run GeoAnalytics Tools from the Run Python Script task in ArcGIS GeoAnalytics Server."
+slug: "using-geoanalytics-tools-in-pyspark"
+url: "/geoanalytics/task-concepts/using-geoanalytics-tools-in-pyspark"
+redirectFrom:
+  - /using-geoanalytics-tools-in-pyspark/
+guid: "GUID-26C7BD24-5F9E-4D0F-9125-6D0EFCCBAC1B"
+migratedTopicMetadata:
+  FTITLE: "Using GeoAnalytics Tools in pyspark"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9 - *"
+  CREATED-ON: "25/03/2021 12:26:16"
+  FAUTHOR: "nslocum"
+  FSTATUS: "Released"
+  MODIFIED-ON: "10/09/2021 13:00:11"
+  VERSION: "5"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "7"
+  ED: "GUID-672DB963-EACB-4F37-B029-6C212C586103"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata: {}
+---
+import GAX_DEPRECATION_NOTICE from "../../snippets/GUID-53340951-6261-4C65-BAA3-4AF9D206C6D2/_gax-general-deprecation-notice.mdx";
+
+<GAX_DEPRECATION_NOTICE />
+
+The [Run Python Script](/run-python-script) task allows you to programmatically execute most GeoAnalytics Tools with Python using an API that is available when you run the task. A `geoanalytics` object is instantiated automatically and gives you access to each tool using the syntax shown in the example and table below. Each tool accepts input layers as Spark DataFrames and will return results as a Spark DataFrame or collection of Spark DataFrames. To learn more, see [Reading and writing layers in pyspark](/using-webgis-layers-in-pyspark). DataFrames are held in memory and can be written to a data store at any time. This allows you to chain together multiple GeoAnalytics Tools without writing out intermediate results.
+
+<Note type={"note"}>
+The API described in this topic can only be used within the Run Python Script task and should not be confused with the ArcGIS API for Python, which uses a different syntax to execute stand-alone GeoAnalytics Tools and is intended for use outside of the Run Python Script task.
+</Note>
+
+In the example below, the Detect Incidents task and Find Hot Spots task are used together and only the final DataFrame is written to a data store as a feature service layer. The input layer (represented in the example below by `layers[0]`) is a big data file share dataset of city bus locations recorded at 1-minute intervals for 15 days. To learn more about using layers, see [Reading and writing layers in pyspark](/using-webgis-layers-in-pyspark).
+
+```python
+import time
+
+# Run Detect Incidents to find all bus locations where delay status has changed from False to True
+exp = "var dly = $track.field[\"dly\"].history(-2); return dly[0]==\"False\" && dly[1]==\"True\""
+delay_incidents = geoanalytics.detect_incidents(
+                                input_layer = layers[0],
+                                track_fields = ["vid"],
+                                start_condition_expression = exp,
+                                output_mode = "Incidents")
+
+# Use the resulting DataFrame as input to the Find Hot Spots task
+delay_hotspots = geoanalytics.find_hot_spots(
+                                point_layer = delay_incidents,
+                                bin_size = 0.1,
+                                bin_size_unit = "Miles",
+                                neighborhood_distance = 1,
+                                neighborhood_distance_unit = "Miles",
+                                time_step_interval = 1,
+                                time_step_interval_unit = "Days")
+
+# Write the Find Hot Spots result to the spatiotemporal big data store
+delay_hotspots.write.format("webgis").save("Bus_Delay_HS_{0}".format(time.time()))
+```
+
+For more examples, see [Examples: Scripting custom analysis with the Run Python Script task](/run-python-script-examples).
+
+The table below describes the method signature for GeoAnalytics Tools in Run Python Script. All tools can be called except for Copy To Data Store and Append Data. The parameter syntax is the same as that of the REST API except where noted. See the documentation for each tool for descriptions of parameter syntax and tool outputs.
+
+<Note type={"note"}>
+For all tool methods with `time_step_repeat` and `time_step_repeat_unit` arguments, these correspond to the `timeStepRepeatInterval` and `timeStepRepeatIntervalUnit` REST parameters, respectively.
+</Note>
+
+<StyledTable headers={"Tool,Syntax,Returns,Notes"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Aggregate Points](/aggregate-points)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      aggregate_points(
+        point_layer,
+        bin_type = None,
+        bin_size = None,
+        bin_size_unit = None,
+        polygon_layer = None,
+        time_step_interval = None,
+        time_step_interval_unit = None,
+        time_step_repeat = None,
+        time_step_repeat_unit = None,
+        time_step_reference = None,
+        summary_fields = None
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      DataFrame
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Build Multi-Variable Grid](/build-multi-variable-grid)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      build_multi_variable_grid(
+        bin_type = "Square",
+        bin_size = None,
+        bin_size_unit = None,
+        input_layers = None,
+        variable_calculations = None
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      DataFrame
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `input_layers` should be list of DataFrames.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Calculate Density](/calculate-density-geoanalytics)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      calculate_density(
+        input_layer,
+        fields = None,
+        weight = "Uniform",
+        bin_type = "Square",
+        bin_size = None,
+        bin_size_unit = None,
+        time_step_interval = None,
+        time_step_interval_unit = None,
+        time_step_repeat = None,
+        time_step_repeat_unit = None,
+        time_step_reference = None,
+        radius = None,
+        radius_unit = None,
+        area_units = "SquareKilometers"
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      DataFrame
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Calculate Field](/calculate-field)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      calculate_field(
+        input_layer,
+        field_name,
+        data_type,
+        expression,
+        track_aware = None,
+        track_fields = None,
+        time_boundary_split = None,
+        time_boundary_split_unit = None,
+        time_boundary_reference = None
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      DataFrame
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Calculate Motion Statistics](/calculate-motion-statistics)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      calculate_motion_statistics(
+        input_layer,
+        track_fields,
+        track_history_window = 3,
+        motion_statistics = ["All"],
+        idle_distance_tolerance = None,
+        idle_distance_tolerance_unit = None,
+        idle_time_tolerance = None,
+        idle_time_tolerance_unit = None,
+        time_boundary_split = None,
+        time_boundary_split_unit = None,
+        time_boundary_reference = None,
+        distance_method = "Geodesic",
+        distance_unit = "Meters",
+        duration_unit = "Seconds",
+        speed_unit = "MetersPerSecond",
+        acceleration_unit = "MetersPerSecondSquared",
+        elevation_unit = "Meters"
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      DataFrame
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Clip Layer](/clip-layer)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      clip_layer(
+        input_layer,
+        clip_layer
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      DataFrame
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Create Buffers](/create-buffers)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      create_buffers(
+        input_layer,
+        distance = None,
+        distance_unit = None,
+        field = None,
+        method = "Planar",
+        dissolve_option = None,
+        dissolve_fields = None,
+        summary_fields = None,
+        multipart = False
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      DataFrame
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Create Space Time Cube](/create-space-time-cube)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      create_space_time_cube(
+        point_layer,
+        bin_size,
+        bin_size_unit,
+        time_step_interval,
+        time_step_interval_unit,
+        time_step_alignment = None,
+        time_step_reference = None,
+        summary_fields = None,
+        output_name = None
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      String
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Returns the local path to the resulting space-time cube on a ArcGIS GeoAnalytics Server machine.
+
+      The cube is written to a temp directory and will be deleted if not copied to a different location.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Describe Dataset](/describe-dataset)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      describe_dataset(
+        input_layer,
+        sample_size = None,
+        extent_output = False
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Dictionary
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Example result:
+
+      ```python
+      {
+        "output":DataFrame,
+        "outputJSON":string,
+        "extentLayer":DataFrame,
+        "sampleLayer":DataFrame
+      }
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Detect Incidents](/detect-incidents)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      detect_incidents(
+        input_layer,
+        track_fields,
+        start_condition_expression,
+        end_condition_expression = None,
+        output_mode = "AllFeatures",
+        time_boundary_split = None,
+        time_boundary_split_unit = None,
+        time_boundary_reference = None
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      DataFrame
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Dissolve Boundaries](/dissolve-boundaries)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      dissolve_boundaries(
+        input_layer,
+        dissolve_fields = None,
+        summary_fields = None,
+        multipart = False
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      DataFrame
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Enrich From Multi-Variable Grid](/enrich-from-multi-variable-grid)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      enrich_from_multi_variable_grid(
+        input_features,
+        grid_layer,
+        enrich_attributes = None
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      DataFrame
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Find Dwell Locations](/find-dwell-locations)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      find_dwell_locations(
+        input_layer,
+        track_fields,
+        distance_method = "Planar",
+        distance_tolerance,
+        distance_tolerance_unit,
+        time_tolerance,
+        time_tolerance_unit,
+        summary_fields = None,
+        output_type = "DwellMeanCenters",
+        time_boundary_split = None,
+        time_boundary_split_unit = None,
+        time_boundary_reference = None
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      DataFrame
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Find Hot Spots](/find-hot-spots)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      find_hot_spots(
+        point_layer,
+        bin_size,
+        bin_size_unit,
+        neighborhood_distance,
+        neighborhood_distance_unit,
+        time_step_interval = None,
+        time_step_interval_unit = None,
+        time_step_alignment = None,
+        time_step_reference = None
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      DataFrame
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Find Point Clusters](/find-point-clusters)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      find_point_clusters(
+        input_layer,
+        cluster_method = "DBSCAN",
+        time_method = None,
+        search_duration  = None,
+        search_duration_unit = None,
+        min_features_cluster = None,
+        search_distance = None,
+        search_distance_unit = None
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      DataFrame
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Find Similar Locations](/find-similar-locations)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      find_similar_locations(
+        input_layer,
+        search_layer,
+        analysis_fields,
+        most_or_least_similar = "MostSimilar",
+        match_method = "AttributeValues",
+        number_of_results = 10,
+        append_fields = None
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Dictionary
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Example result:
+
+      ```python
+      {"output":DataFrame, "processInfo":string}
+      ```
+      </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Forest-based Classification And Regression](/forest-based-classification-and-regression)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      forest_based_classification_and_regression(
+        prediction_type = "Train",
+        in_features = None,
+        features_to_predict = None,
+        variable_predict = None,
+        explanatory_variables = None,
+        number_of_trees = 100,
+        minimum_leaf_size = None,
+        maximum_tree_depth = None,
+        sample_size = 100,
+        random_variables = None,
+        percentage_for_validation = 10,
+        create_variable_importance_table = False,
+        explanatory_variable_matching = None
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Dictionary
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Example result:
+
+      ```python
+      {
+        "outputTrained":DataFrame,
+        "variableOfImportance":DataFrame,
+        "outputPredicted":DataFrame,
+        "processInfo":string
+      }
+      ```
+      </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Generalized Linear Regression](/generalized-linear-regression)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      generalized_linear_regression(
+        input_layer,
+        features_to_predict = None,
+        dependent_variable = None,
+        explanatory_variables = None,
+        regression_family = "Continuous",
+        generate_coefficient_table = False,
+        explanatory_variable_matching = None,
+        dependent_mapping = None
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Dictionary
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Example result:
+
+      ```python
+      {
+        "output":DataFrame,
+        "coefficientTable":DataFrame,
+        "outputPredicted":DataFrame,
+        "processInfo":string
+      }
+      ```
+      </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Geocode Locations](/geocode-locations)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      geocode_locations(
+        input_layer,
+        geocode_service_url,
+        geocode_parameters,
+        source_country = None,
+        category = None,
+        include_attributes = None,
+        locator_parameters = None
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      DataFrame
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Geographically Weighted Regression](/geographically-weighed-regression)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      geographically_weighted_regression(
+        input_layer,
+        explanatory_variables,
+        dependent_variable,
+        model_type = "Continuous",
+        neighborhood_type = "NumberOfNeighbors",
+        neighborhood_selection_method = "UserDefined",
+        distance_band = None,
+        distance_band_unit = None,
+        number_of_neighbors = None,
+        local_weighting_scheme = "Bisquare"
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      DataFrame
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Group By Proximity](/group-by-proximity)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      group_by_proximity(
+        input_layer,
+        spatial_relationship,
+        spatial_near_distance = None,
+        spatial_near_distance_unit = None,
+        temporal_relationship = None,
+        temporal_near_distance = None,
+        temporal_near_distance_unit = None
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      DataFrame
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Join Features](/join-features)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      join_features(
+        target_layer,
+        join_layer,
+        join_operation = "JoinOneToOne",
+        keep_all_target_features = False,
+        join_fields = None,
+        summary_fields = None,
+        spatial_relationship = None,
+        spatial_near_distance = None,
+        spatial_near_distance_unit = None,
+        temporal_relationship = None,
+        temporal_near_distance = None,
+        temporal_near_distance_unit = None,
+        attribute_relationship = None,
+        join_condition = None
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      DataFrame
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Merge Layers](/merge-layers)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      merge_layers(
+        input_layer,
+        merge_layer,
+        merging_attributes = None
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      DataFrame
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Overlay Layers](/overlay-layers)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      overlay_layers(
+        input_layer,
+        overlay_layer,
+        overlay_type = "Intersect",
+        include_overlaps = True
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      DataFrame
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Reconstruct Tracks](/reconstruct-tracks)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      reconstruct_tracks(
+        input_layer,
+        track_fields,
+        method = "Planar",
+        buffer_field = None,
+        summary_fields = None,
+        time_split = None,
+        time_split_unit = None,
+        distance_split = None,
+        distance_split_unit = None,
+        time_boundary_split = None,
+        time_boundary_split_unit = None,
+        time_boundary_reference = None
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      DataFrame
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Summarize Attributes](/summarize-attributes)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      summarize_attributes(
+        input_layer,
+        fields,
+        summary_fields = None,
+        time_step_interval = None,
+        time_step_interval_unit = None,
+        time_step_repeat = None,
+        time_step_repeat_unit = None,
+        time_step_reference = None
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      DataFrame
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Summarize Center And Dispersion](/summarize-center-and-dispersion)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      summarize_center_and_dispersion(
+        input_layer,
+        summary_type,
+        ellipse_size = None,
+        weight_field = None,
+        group_fields = None
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Dictionary
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Example result:
+
+      ```python
+      {
+        "centralFeatureLayer":DataFrame,
+        "meanCenterLayer":DataFrame,
+        "medianCenterLayer":DataFrame,
+        "ellipseLayer":DataFrame
+      }
+      ```
+      </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Summarize Within](/summarize-within)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      summarize_within(
+        summary_polygons = None,
+        bin_type = None,
+        bin_size = None,
+        bin_size_unit = None,
+        summarized_layer = None,
+        standard_summary_fields = None,
+        weighted_summary_fields = None,
+        sum_shape = True,
+        shape_units = None,
+        group_by_field = None,
+        minority_majority = False,
+        percent_shape = False
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Dictionary
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Example result:
+
+      ```python
+      {
+        "output":DataFrame,
+        "groupBySummary":DataFrame
+      }
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      [Trace Proximity Events](/trace-proximity-events)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      trace_proximity_events(
+        input_points,
+        entity_id_field,
+        entities_of_interest_ids,
+        entities_of_interest_layer,
+        distance_method,
+        spatial_search_distance,
+        spatial_search_distance_unit,
+        temporal_search_distance,
+        temporal_search_distance_unit,
+        include_tracks_layer = false,
+        max_trace_depth = 2147483647,
+        attribute_match_criteria = None
+      )
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Dictionary
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Example result:
+
+      ```python
+      {
+        "output":DataFrame,
+        "tracksLayer":DataFrame
+      }
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+In addition to the tools listed above, a `project` tool is provided with the `geoanalytics` package that allows you to project the geometry of a DataFrame into the specified spatial reference.
+
+<StyledTable headers={"Tool,Syntax,Returns,Notes"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      Project
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      ```python
+      project(input_features, output_coord_system)
+      ```
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      DataFrame
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `input_features` is the DataFrame to project and `output_coord_system` is the WKT or WKID of the spatial reference to use.
+
+      Example:
+      ```python
+      geoanalytics.project(df, 2796)
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>

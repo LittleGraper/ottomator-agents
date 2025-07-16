@@ -1,0 +1,715 @@
+---
+title: "Item classification reference"
+description: "ArcGIS Enterprise administrators can use item classification to set the classification and dissemination information for organization items."
+slug: "classification-reference"
+url: "/classification-reference"
+restInfoMetadata: {}
+---
+
+## Overview
+
+Item classification is the process of assigning a series of labels to an item from a predefined list of labels. Specific industries or regions have data privacy laws and data compliance regulations that require items to be classified in order to protect, and control access to, sensitive information. Though the specifics of each data protection law, regulation, or standard may vary, all require that data is classified, and all will perform audits to ensure that organizations are in compliance.
+
+ArcGIS Enterprise administrators (either the default administrator, or an administrator assigned a custom role that includes the **Organization website** privilege) can define a set of labels that take into account the specific laws or regulations their item classifications need to include. This allows organization members to use those labels to set the level of sensitivity of the data an item has, specify who the information can be accessed by or shared with, and outline when information can be made publicly accessible.
+
+Administrators define these sets of labels through a classification schema. A classification schema is a JSON object that contains a hierarchy of classification and dissemination properties. The schema is provided as a JSON file and [assigned to the organization](/assign-classification-schema), after which all new items added to the organization, and any preexisting items, must be classified.
+
+While classification schemas can be complex, organizations may benefit from creating an initial schema that focuses on a core number of classification labels that cover broad restriction categories. As time goes on, the schema can be updated to include more classification labels to account for any changes to regulation requirements, for internal classification purposes, or to accommodate any new regulations the organization needs to follow.
+
+## Defining a classification schema
+
+A classification schema is made up of four sub-objects:
+
+1. Base properties: the schema's high-level properties.
+2. Classification Metadata: the primary classification label for organization items (e.g. Unclassified, In-confidence, Sensitive, etc.).
+3. Attributes: the various classification and dissemination information used to classify items.
+4. Layouts: the order in which the attributes are presented on the classification form.
+
+<Note>
+
+The classification form is how organization members will classify items through the organization's portal website. An example of the classification form is shown in the Attributes tab below. New and preexisting items can have a classifcation marking manually added to them through the [Add Item](/add-item) and [Update Item](/update-item) operations.
+
+</Note>
+
+Each area is defined in more detail below.
+
+<Tabs>
+<TabNav>
+  <TabTitle>Base Properties</TabTitle>
+  <TabTitle>Classification Metadata</TabTitle>
+  <TabTitle>Attributes</TabTitle>
+  <TabTitle>Layouts</TabTitle>
+</TabNav>
+
+<Tab>
+
+### Base properties
+
+A classification schema's base properties are the higher-level properties that define elements of the schema itself and how classification labels will be displayed during and after classification.
+
+The sample code below demonstrates how the base properties have been set up for a specific schema. This sample does not show the full classification schema; the other tabs have code samples that demonstrate more of the schema's syntax.
+
+<CodeBlock
+  source="./code/classification_schema.json"
+  language="json"
+  hideLines="8-169"
+/>
+
+There are two properties (`bannerExpression` and `selectionTextExpression`) that accept [Arcade expressions](DEVSITE/arcade) as an input. The code samples below provide a closer look at Arcade expression examples for each property.
+
+<Note>
+
+The code sample is expandable. Clicking **Expand** where it appears below will show more of the code sample than is currently being displayed.
+
+</Note>
+
+<CodeSwitcher>
+  <CodeBlock 
+    source="./code/banner_expression_arcade.js"
+    language="javascript"
+    group="bannerExpression Arcade Example"
+    lines="1-10"
+    expandable
+  />
+  <CodeBlock 
+    source="./code/selection_text_expression_arcade.js"
+    language="javascript"
+    group="selectionTextExpression Arcade Example"
+    lines="1-10"
+    expandable
+  />
+</CodeSwitcher>
+
+The table below outlines the required and optional base properties for the classification schema.
+
+<StyledTable headers={"Property,Required,Description"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">name</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Specifies the name of the classification schema.
+
+      ```json
+      "name": "academic-institution-classification-schema",
+
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">version</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Specifies the version number of the classification schema. The version can be updated each time the classification schema is modified, though the value that should be assigned to represent that update is up to the discretion of organization administrators.
+
+      ```json
+      "version": "2.0",
+
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">grammarVersion</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Specifies the grammar version the schema classification adheres to. This value must match the current grammar version, which is returned by the [Classification](/classification) resource.
+
+      ```json
+      "grammarVersion": "2.0",
+
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">helpTooltip</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Sets the help text that is returned whenever a user hovers over the **Information** button on the classification form.
+
+      ```json
+      "helpTooltip": "Help and usage instructions",
+
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">helpUrl</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Sets the URL of the schema help document that is opened when a user clicks on the **Information** button on the classification form. The help document will open up as a new tab. Help documentation is created, maintained, and hosted by the organization and is not provided by Esri.
+
+      ```json
+      "helpURL": "https://machine.domain.com/webadaptor/home/ClassificationToolHelp.pdf",
+
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">bannerExpression</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Generates the banner text for an item using [Arcade expressions](DEVISTE/arcade). After an item has been classified, the classification marking is stored as a JSON object on the item, which includes the banner text, and is returned as part of the [item's details](/item). Note that not every classification value needs to be part of an item's banner. Specified or assigned values that are not included as part of the banner text are still retained.
+      
+      If this property is not included in the schema, or its value is set to an empty string, generic encoding logic for the `uiElement`, `bannerOrder`, `bannerLabel`, `labelDelimiter`, `valueDelimiter`, and `attributeDelimiter` properties are used for the banner text.
+
+      <Note type="caution">
+
+      If the `bannerExpression` property is not included in the schema, or if its value is left empty, at least one attribute must include the `bannerOrder` property for generic encoding logic to take effect.
+
+      </Note>
+
+      ```json
+      "bannerExpression": "arcade expression()",
+
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">selectionTextExpression</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Generates the selection text using [Arcade expressions](DEVISTE/arcade). Selection text is displayed in the **Current Selections** portion of the classification form. If this property is not included in the schema, or its value is set to an empty string, generic encoding logic for the `uiElement`, `selectionDisplayOrder`, `selectionDisplayLabel`, `selectionDelimiter`, `labelDelimiter`, `valueDelimiter`, and `attributeDelimiter` properties are used for the selection text. Note that not every classification value displayed as the selection text will be a part of the item's banner. Specified or assigned values that are not included as part of an item's banner text are still retained.
+
+      <Note type="caution">
+
+      If the `selectionTextExpression` property is not included in the schema, or if its value is left empty, at least one attribute must include the `selectionDisplayOrder` property for generic encoding logic to take effect.
+
+      </Note>
+
+      ```json
+      "selectionTextExpression": "arcade expression()"
+
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">attributeCategories</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      An array of attribute categories. Attributes assigned one of these categories for their `attributeCategory` property will be listed under a tab of the same name on the classification form (e.g. an attribute labeled "Declassification Date" that has the value of `Must Include` for its `attributeCategory` will have its corresponding input field listed under the **Must Include** tab on the classification form).
+
+      <Note type="caution">
+
+      Do not use `Default` as the name for any attribute category as its reserved for attributes that do not have a value defined for the `attributeCategory` property.
+
+      </Note>
+
+      ```json
+      "attributeCategories": ["Must Include", "Optional"]
+
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+</Tab>
+
+<Tab>
+
+### Classification Metadata
+
+The schema's classification metadata defines the primary classification attribute for organization items, as well as defines the attribute's default value, lists all possible classification values, and how those values will appear when selected on the classification form. All properties described in this section are required.
+
+The sample code below demonstrates how the classification metadata properties have been set up for a specific schema. This sample does not show the full classification schema, just the base properties that immediately precedes `classificationMetadata`, though only `classificationMetadata` is shown by default.
+
+<Note>
+
+The code sample is expandable. Clicking **Expand** where it appears below will show more of the code sample than is currently being displayed.
+
+</Note>
+
+<CodeBlock
+  source="./code/classification_schema.json"
+  language="json"
+  lines="8-17"
+  hideLines="56-169"
+  expandable
+/>
+
+The table below outlines the properties for `classificationMetadata`.
+
+<StyledTable headers={"Property,Required,Description"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">primaryAttribute</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Specifies the attribute that will appear as the primary classification field on the classification form.
+
+      ```json
+      "primaryAttribute": "classification",
+
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">defaultValue</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Sets the default value for the for `primaryAttribute`. This is also the value that will be assigned to items by default if they have not yet been classified.
+
+      ```json
+      "defaultValue": "Unclassified",
+
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">classificationValueProperties</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      An array of objects that define properties for each value `primaryAttribute` classification option. The list below identifies the possible properties that can be included in each object, as well as specifies which properties are required:
+
+      * `value`: Required. Specifies the classification option's label.
+      * `acronym`: Optional. Sets an acronym for the classification option.
+      * `textColor`: Optional. Sets the color for the classification option's label. If the option is selected, the label will appear in this color under **Current Selections** on the classification form. This property accepts RGB and HEX values, as well as predefined color names (i.e. `Red`).
+      * `backgroundColor`: Optional. Sets the color that highlights the classification option's label. If the option is selected, the label will be highlighted in the specified color under **Current Selections** on the classification form. This property accepts RGB and HEX values, as well as predefined color names (i.e. `Red`).
+
+      ```json
+        "classificationValueProperties": [
+          {
+            "value": "Unclassified",
+            "acronym": "Unclassified",
+            "backgroundColor": "Grey",
+            "textColor": "Black"
+          },
+          {
+            "value": "In-confidence",
+            "acronym": "In-confidence",
+            "backgroundColor": "Black",
+            "textColor": "White"
+          },
+          ...
+        ]
+
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+</Tab>
+
+<Tab>
+
+### Attributes
+
+Attributes correspond to both the classification marking an item receives and the input fields that are displayed on the classification form. The `attributes` object is a map that associates a key (the attribute name) with a series of values (the components that make up an attribute).
+
+Each attribute has three required properties: a `label` that specifies the display text for the input field on the classification form, a `type` that determines what type of data the input field accepts, and a `uiElement` that the input field is displayed as on the classification form. Outside of these required properties are a number of optional properties that can set default values for an attribute or determine how an attribute and its selected values are stored on the item or displayed during classification.
+
+The sample code below demonstrates how the `attributes` object has been set up for a specific schema. This sample does not show the full classification schema, just the base properties and classification metadata that immediately precede `attributes`, though only `attributes` is shown by default. To the right of the sample code is an image that shows how attributes and their properties inform how they are displayed as input fields on the classification form.
+
+<Note>
+
+The code sample is expandable. Clicking **Expand** where it appears below will show more of the code sample than is currently being displayed.
+
+</Note>
+
+<ColumnLayout>
+<Column>
+
+<CodeBlock
+  source="./code/classification_schema.json"
+  language="json"
+  lines="56-68"
+  hideLines="154-169"
+  expandable
+/>
+
+</Column>
+<Column>
+
+![Input fields on the classification form](./images/classification_form.png)
+
+<Caption>Attributes being displayed as input fields on the classification form. The values for those input fields become the classification labels that are stored on the item as banner text, currently being displayed as selection text under **Current Selections**.</Caption>
+
+</Column>
+</ColumnLayout>
+
+The table below outlines the required and optional properties for `attributes`.
+
+<StyledTable headers={"Property,Required,Description"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">label</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Specifies the label of the attribute that will be used on the classification form.
+
+      ```json
+      "label": "Classification",
+
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">description</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Provides a description for the attribute. This value is used as placeholder text for `text` `uiElement` input fields on the classification form.
+
+      ```json
+      "description": "Classification",
+
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">type</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Identifies the attribute's data type. The supported data types are: `string`, `date`, `integer`, `float`, and `Boolean`.
+
+      ```json
+      "type": "string",
+
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">isRequired</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      A Boolean value that specifies if the attribute is required, meaning that it must be filled out on the classification form. If this property is included in the JSON object, it cannot be defined as an empty string. Accepted values are `true` (required) or `false` (optional).
+
+      ```json
+      "isRequired": "true",
+
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">uiElement</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Determines how the attribute's input fields are displayed on the classification form. There are seven potential UI elements an attribute can be set as:
+
+      * `checkbox`: A check box.
+      * `date`: A date picker that allows for a date to be selected from the calendar in a `MM/DD/YYYY` format.
+      * `multi-select`: A menu that allows for multiple options to be selected.
+      * `multi-grouped-select`: A drop-down menu that allows individual options from groups of related options to be selected. The top-level grouping itself cannot be selected.
+      * `multi-grouped-select-nested`: A drop-down menu that allows the top-level grouping of related item, or individual options within that grouping, to be selected.
+      * `single-select`: A menu that allows for only a single option to be selected.
+      * `text`: A single-line text box.
+      
+
+      ```json
+      "uiElement": "single-select",
+
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">defaultValue</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Sets a default value for the `uiElement` type. For example, the default value for `checkbox` would be a Boolean value (true or false). For `multi-select`, `multi-grouped-select`, `multi-grouped-select-nested`, and `single-select`, the default value would refelct an option or set of options from each menu.
+
+      ```json
+      "defaultValue": "Concealed",
+
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">defaultDateTimeline</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Sets a default value for attributes that have the `date` value set for `uiElement`. If this property is included, the `defaultDateTimelineUnits` property must also be set.
+
+      ```json
+      "defaultDateTimeline": 25,
+
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">defaultDateTimelineUnits</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Provides the units for the value set in the `defaultDateTimeline` property. The supported unit types are: `years`, `months`, and `days`. When combined with `defaultDateTimeline`, both properties set a default date for attributes that have the `date` value set for `uiElement`.
+
+      ```json
+      "defaultDateTimelineUnits": "years",
+
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">validValues</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      An array that provides a list of options for attributes with either `multi-select` or `single-select` as the value for `uiElement`. This property should either be excluded or left empty if the list of values will instead come from the `validValuesMap` or `valueExpression` properties.
+
+      ```json
+      "validValues": [
+        {
+          "label": "Unclassified",
+          "value": "Unclassified"
+        },
+        {
+          "label": "In-confidence",
+          "value": "In-confidence"
+        },
+        {
+          "label": "Sensitive",
+          "value": "Sensitive"
+        },
+        {
+          "label": "Restricted",
+          "value": "Restricted"
+        },
+        {
+          "label": "Confidential",
+          "value": "Confidential"
+        },
+        {
+          "label": "Secret",
+          "value": "Secret"
+        },
+        {
+          "label": "Top Secret",
+          "value": "Top Secret"
+        }
+      ],
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">validValuesMap</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      A map that defines the grouping of options for attributes with either `multi-grouped-select` or `multi-grouped-select-nested` as the value for `uiElement`. This property should either be excluded or left empty if the list of values will instead come from the `validValues` or `valueExpression` properties.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">valueExpression</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Defines a list of options for attributes using an [Arcade expression](DEVISTE/arcade). This property should be used if `validValues` or `validValuesMap` are not defined or are left empty.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">arcadeResultLookup</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      A map of keys and values that allows the [Arcade expression](DEVISTE/arcade) defined for `valueExpression` to generate a list of options.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">isAttributeEnabled</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Uses an [Arcade expression](DEVISTE/arcade) that evaluates to a Boolean value that determines whether the attribute should be shown or hidden on the classification form.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">attributeValidation</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Uses an [Arcade expression](DEVISTE/arcade) to either return an empty string  or an error message when a value is selected for an attribute on the classification form.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">attributeCategory</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Designates which of the `attributeCategories` the attribute will appear under on the classification form. If the `attributeCategory` property is included, the value must specify one of the categories listed in the `attributeCategories` property.
+
+      ```json
+      "attributeCategory": "Must Include",
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">selectionDisplayOrder</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Specifies the order in which selected attributes appear in the **Current Selections** text on the classification form. The value specified for `selectionDisplayOrder` does not need to match the value set for `bannerOrder`.
+
+      <Note type="caution">
+
+      At least one attribute must have a value set for `selectionDisplayOrder` if `selectionExpression` was not included (or was left empty) as one of the schema's base properties.
+
+      </Note>
+
+      ```json
+      "selectionDisplayOrder": 3,
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">selectionDisplayLabel</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Specifies the label for an attribute when it appears in the *Current Selections** text on the classification form.
+
+      ```json
+      "selectionDisplayLabel": "To be reviewed on",
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">bannerOrder</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Specifies the order in which attributes appear in the banner information stored on the item. The value specified for `bannerOrder` does not need to match the value set for `selectionDisplayOrder`.
+
+      <Note type="caution">
+
+      At least one attribute must have a value set for `bannerOrder` if `bannerExpression` was not included (or was left empty) as one of the schema's base properties.
+
+      </Note>
+
+      ```json
+      "bannerOrder": 6,
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">bannerLabel</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Specifies the label for the attribute when it appears in banner information stored on the item.
+
+      ```json
+      "bannerLabel": "To be reviewed on",
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">labelDelimiter</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Sets the delimiter between an attribute's label and value when it's displayed in the banner information and in the **Current Selections** text.
+
+      ```json
+      labelDelimiter": "-",
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">valueDelimiter</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Sets the delimiter between the multiple values for an attribute when it's displayed in the banner information and in the **Current Selections** text. This property applies to attributes that have either the `multi-select`, `multi-grouped-selected`, or `multi-grouped-select-nested` set as the value for `uiElement`.
+
+      ```json
+      "valueDelimiter": ",",
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">attributeDelimiter</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Sets the delimiter between each attribute listed in the banner information and in the **Current Selections** text.
+
+      ```json
+      "attributeDelimiter": "//"
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">labelTooltip</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Specifies the help text that is returned whenever a user hovers over the **Information** button next to an attribute on the classification form.
+
+      ```json
+      "labelTooltip": "Separete multiple entries by commas (,)."
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+</Tab>
+
+<Tab>
+
+### Layouts
+
+The `layouts` object specifies the order of how the attributes are organized and displayed on the classification form. The `layouts` object is a series of nested objects: 
+
+* `default`: An object that includes the details of a specific layout. This object contains the following sub-object:
+  * `layoutElements`: An object that maps each attribute to their placement on the classification form. This object contains a series of objects that each relate to the attributes defined in the schema:
+    * `attributeKey`: The `attributeKey` value should be replaced with the name of an attribute. For example, if the schema includes the attribute `declassifyDate`, `attributeKey` would be changed to `declassifyDate`. Each `attributeKey` object must contain the following property:
+      * `formDisplayOrder`: This property uses an integer value that specifies the numerlogical placement of the attribute on the classification form. For example, if an `attributeKey` object has its `declassifyDate` property set as `3`, that attribute would appear as the third UI element on the classification form.
+
+The sample code below demonstrates how the `layouts` object has been set up for a specific schema. Note that the `attributeKey` values have been replaced with the names of the attributes that have been defined in the schema. This code sample does include the full classification schema (base properties, classification metadata, attributes, and layouts), though only the `layouts` portion is shown by default.
+
+It is important to note that the `primaryAttribute` will always be the first attribute displayed on the classification form.
+
+<Note>
+
+The code sample is expandable. Clicking **Expand** where it appears below will show more of the code sample than is currently being displayed.
+
+</Note>
+
+<CodeBlock
+  source="./code/classification_schema.json"
+  language="json"
+  lines="155-170"
+  expandable
+/>
+
+</Tab>
+
+</Tabs>
+

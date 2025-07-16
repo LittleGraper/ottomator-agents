@@ -1,0 +1,386 @@
+---
+title: "Calculate (Feature Service/Layer)"
+description: "The calculate operation updates field values."
+slug: "calculate-feature-service-layer"
+url: "/calculate-feature-service-layer"
+guid: "GUID-1160C80C-67BE-43B6-93D7-DAB8DDABD59D"
+migratedTopicMetadata:
+  FTITLE: "Calculate [Feature Service - Layer]"
+  FDESCRIPTION: ""
+  FCHANGES: "Adding optional"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "05/10/2023 11:20:03"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "05/10/2023 12:58:34"
+  VERSION: "13"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-10F5D6CB-3E88-42FD-8F95-D32BD569F276"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/FeatureServer/<layerId>/calculate
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/FeatureServer/<layerId>/calculate
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.4'
+  requiredCapability: Update
+---
+
+import GUID_B11F5B4A_2241_4615_8A92_D9EFC9003B5B_GUID_73D9B0B6_1094_494B_96F8_70F7102229D3 from "./snippets/GUID-B11F5B4A-2241-4615-8A92-D9EFC9003B5B/_GUID-73D9B0B6-1094-494B-96F8-70F7102229D3";
+import GUID_B11F5B4A_2241_4615_8A92_D9EFC9003B5B_GUID_C6E915B3_E0DD_4F75_9C64_F6B19380C600 from "./snippets/GUID-B11F5B4A-2241-4615-8A92-D9EFC9003B5B/_GUID-C6E915B3-E0DD-4F75-9C64-F6B19380C600";
+
+## Description
+
+The `calculate`  operation is performed on a [feature service layer resource](/layer-feature-service). It updates the values of one or more fields in an existing feature service layer based on SQL expressions or scalar values.
+
+A layer is capable of supporting the `calculate`  operation if the `supportsCalculate`  property is `true` . If the property is `false` , or not present, the layer is not capable of supporting this operation. When the property is `true` , a client can use the `calculate`  operation as long as the `Update`  capability is set on the feature service, or if the user is logged in as the service owner, view owner, or organization administrator.
+
+If `supportsCalculate`  is `true`  and `isDataVersioned`  is also `true` , the `gdbVersion`  parameter is supported. If `supportsCalculate`  is `true`  and `isDataBranchVersioned`  is also `true` , the `sessionID`  and `returnEditMoment`  parameters are supported. 
+
+<Note type={"note"}>
+
+To support calculate with versioned data, the feature service must be published from ArcGIS Pro referencing a registered data source.
+
+</Note>
+
+Neither the `Shape`  field nor system fields can be updated using the `calculate`  operation. System fields include `ObjectId`  and `GlobalId` . 
+
+See [Calculate a field](HTTP://LINKS.ESRI.COM/WORKING-WITH-FIELDS) for more information on supported expressions.
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`where` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A where clause can be used to limit the updated records. Any legal SQL where clause operating on the fields in the layer is allowed. If this parameter is not included in the request, the operation will apply to all records.
+
+The `dateFieldsTimezoneID`  property of the feature service identifies the time zone all dates are stored in. If your where clause is referencing a date type field and you have `dateFieldsTimezoneID`  set to a specific time zone, make sure your where clause issues the time in that specific time zone.
+
+You can set the `dateFieldsTimezoneID`  property in the ArcGIS Server Manager. In Server Manager, navigate to the service you wish to edit and update the time zone information in the **Parameters** tab. In the Server Manager, navigate to service you wish to edit and click on the **Parameters** tab to update the time zone information. If you don't have `dateFieldsTimezoneID`  set, be sure your WHERE clause issues the time you are querying in UTC. The `dateFieldsTimezoneID`  property does not apply to fields that were time enabled through the **Configure Parameters** tab in the **Publish Map Service** pane in ArcGIS Pro at the time of publishing.
+
+Examples
+
+```javascript
+where=POP2000 > 350000
+
+where=CITY_NAME = 'Glendora'
+
+//Limit the records being updated to match 1 pm on February 9th, 2015 PST
+where=pacific_time_date_field = Date '2015-02-09 13:00:00'
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`calcExpression` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The array of field/value info objects that contain the field or fields to update and their scalar values or SQL expression. For more information on how to build expressions, see [Calculate a field](HTTP://LINKS.ESRI.COM/WORKING-WITH-FIELDS). If you are updating records in a date type field, be sure to issue the new date or time value in UTC. This is the case even if you have the `dateFieldsTimezoneID`  property set and issue local time in your where clause.
+
+<Note type={"note"}>
+
+As of 10.6.1, `calcExpression`  can take null values.
+
+Examples
+
+```javascript
+"calcExpression":[{"field": "Field_1", "sqlExpression": "Null"}]
+
+"calcExpression":[{"field": "Field_2", "value": Null}]
+```
+
+ 
+
+</Note>
+
+Syntax
+
+```javascript
+"calcExpression":[{"field": <fieldname>, "value" | "sqlExpression": <value> | "expression"},...]
+```
+
+ 
+
+<Note type={"note"}>
+
+The `sqlExpression`  property value is expected to be a string. Violation of this rule may result in the `calculate`  operation failing.
+
+</Note>
+
+Examples
+
+```javascript
+"calcExpression":[{"field": "Quality", "value": 3}]
+
+"calcExpression":[{"field": "A", "sqlExpression": "B*3"}]
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sqlFormat` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The SQL format for the `calcExpression` . The expression can take one of two formats. It can be either standard SQL92 (`standard` ), or it can use the native SQL of the underlying data store (`native` ). The default is `standard` . Values for date type fields must always be specified in UTC.
+
+The `supportedSqlFormatsInCalculate`  layer property (under `advancedEditingCapabilities` ) indicates which of these `sqlFormat`  values are supported. If only `standard`  is listed, `standard`  is the only value that can be used, even when `useStandardizedQuery`  is set to `false` .
+
+<Note type={"note"}>
+
+The SQL format `native`  is supported only for admin users and when `useStandardizedQuery=false` .
+
+</Note>
+
+Values: `standard`  \| `native` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`gdbVersion` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The geodatabase version to apply the edits. This parameter applies only if the `isDataVersioned`  property of the layer is `true` . This can be either a traditional version or a branch version. If the `gdbVersion`  parameter is not specified, edits are made to the published map's version.
+
+Syntax
+
+```javascript
+gdbVersion=<version>
+```
+
+ 
+
+Example
+
+```javascript
+gdbVersion=SDE.DEFAULT
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sessionID` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Set by a client during long transaction editing on a branch version. The `sessionID`  is a `GUID`  value that clients establish at the beginning and use throughout the edit session. The `sessonID`  ensures isolation during the edit session. This parameter applies only if the `isDataBranchVersioned`  property of the layer is `true` .
+
+Syntax
+
+```javascript
+sessionID=<sessionID>
+```
+
+ 
+
+```javascript
+sessionID={E81C2E2D-C6A7-40CB-BF61-FB499E53DD1D}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnEditMoment` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether the response will report the time edits were applied. If `returnEditMoment = true` , the server will return the time edits were applied in the response's `editMoment`  key. This parameter applies only if the `isDataBranchVersioned`  property of the layer is `true` .
+
+Values: `true`  \| `false` 
+
+```javascript
+returnEditMoment=true
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`async` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Indicates whether to process the calculate operation in synchronous or asynchronous mode. This parameter can only be set to `true`  if the `supportsAsyncCalculate`  property in the layer metadata is set to `true` . The default value is `false` .
+
+If possible, it's recommended that you set the `async`  parameter to `true`  for longer-running operations that would otherwise time out as synchronous operations. When `async`  is set to `true` , the operation will return a status URL that can be requests upon to get a status. When the operation is complete, the `status`  response property will return as `Completed` .
+
+<Note type={"note"}>
+
+When setting this parameter to `true` , the requests upon the status URL return `submissionTime`  and `lastUpdatedTime`  to indicate when and how long the operation has been running. For some services, these properties are not supported. In those cases, a `null`  value may be returned.
+
+</Note>
+
+Values: `true`  \| `false` 
+
+Example
+
+```javascript
+async=false
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<GUID_B11F5B4A_2241_4615_8A92_D9EFC9003B5B_GUID_73D9B0B6_1094_494B_96F8_70F7102229D3 />
+
+<GUID_B11F5B4A_2241_4615_8A92_D9EFC9003B5B_GUID_C6E915B3_E0DD_4F75_9C64_F6B19380C600 />
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## JSON Response syntax
+
+When `async`  is `false` :
+
+```other
+{
+  "success": <true|false>,
+  "updatedFeatureCount": <count>, 
+  "editMoment": <epochMilliseconds>
+}
+```
+
+ 
+
+When `async`  is `true` :
+
+```other
+{
+  "statusUrl": "<statusURL>"
+}
+```
+
+ 
+
+## JSON Response examples
+
+When `async`  is `false` :
+
+```other
+{
+   "success": true,
+   "updatedFeatureCount": 51
+}
+```
+
+ 
+
+When `async`  is `false` , data is branch versioned, and `returnEditMoment`  is `true` :
+
+```javascript
+{
+  "success":true,
+  "updatedFeatureCount":51, 
+  "editMoment": 1457994488000
+}
+```
+
+ 
+
+When `async`  is `true` :
+
+```javascript
+{
+  "status": "Completed",
+  "submissionTime": 1572816329000,
+  "lastUpdatedTime": 1572816344000,
+  "recordCount": 3140
+}
+```
+
+ 

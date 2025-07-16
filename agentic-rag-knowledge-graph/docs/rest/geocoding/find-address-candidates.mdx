@@ -1,0 +1,6009 @@
+---
+title: "/findAddressCandidates" 
+description: "Use the ArcGIS Geocoding service to geocode by typing all address information into a single string."
+slug: "find-address-candidates"
+url: "/find-address-candidates"
+guid: "GUID-7539494F-918D-400F-ADE6-170D056103E1"
+migratedTopicMetadata:
+  FTITLE: "geocoding-find-address-candidates"
+  FDESCRIPTION: ""
+  FCHANGES: "December 2024 geocoding update"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "agol 24.R02"
+  CREATED-ON: "10/09/2024 14:01:38"
+  FAUTHOR: "mchaffin"
+  FSTATUS: "Draft"
+  MODIFIED-ON: "18/09/2024 09:38:38"
+  VERSION: "35"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-B0C708CF-5BAE-4AE9-BD08-D04B11478849"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+uid: find-address-candidates
+--- 
+
+import ParamMetadata from "../../shared/components/param-metatdata"
+import SharedParams from "../../shared/content/_required-params"
+
+<div class="calcite-tabs-hide-borders">
+<Tabs>
+<TabNav slot="tab-nav">
+  <TabTitle is-active>Standard</TabTitle>
+  <TabTitle>Enhanced</TabTitle>
+</TabNav>
+
+<Tab is-active> 
+<div style={{height:"15px"}}></div>
+
+<CodeSwitcher>
+<CodeBlock language="curl" label="GET">{`GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates`}</CodeBlock>
+<CodeBlock language="curl" label="POST">{`POST https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates`}</CodeBlock>
+</CodeSwitcher> 
+
+</Tab>
+
+<Tab>
+<div style={{height:"15px"}}></div>
+
+<CodeSwitcher>
+<CodeBlock language="curl" label="GET">{`GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates`}</CodeBlock>
+<CodeBlock language="curl" label="POST">{`POST https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates`}</CodeBlock>
+</CodeSwitcher> 
+
+</Tab>
+</Tabs>
+</div>
+
+The `findAddressCandidates`  operation geocodes one location per request; the input address can be combined into a single input field or divided among multiple parameters. 
+
+<MoreInfo>
+
+![findAddressCandidates](./images/GUID-F2F78690-5FB5-4BF1-8633-26BF184C45A9-web.png)
+
+To successfully geocode addresses, at least one of the following must be included in the request:
+
+-   One or more administrative zones (smaller than country), such as a city name or postal code. 
+-   The [location](/find-address-candidates#proximity-searches)  parameter.
+
+In this context, an address refers to one of the following [match address types](/service-output#GUID-D8DE94E9-5E2E-480D-9DE3-2212B9D7350D): [Subaddress](/service-output#LI_1BD33C21E9424A54BBF06B772B5D1696), [PointAddress](/service-output#LI_4B3F17B4A93A4610AC69269B4E782C93), [StreetAddress](/service-output#LI_1CDF019CA8DB497986F991693CFE0760), [StreetInt](/service-output#LI_EE1154CBFB464E99A1E2EA05203DDD27), [DistanceMarker](/service-output#LI_5E8DA7A1BE0B4FCA80D4954571390B03), [StreetMidBlock](/service-output#LI_99C7E857383A44979A734578BD10DBEC), [StreetBetween](/service-output#LI_CF9B2569B8F648AE9DA8D1A6AA386524), or [StreetName](/service-output#LI_FC46C9F4015D4BDA95F262C324EE6DF1).
+
+There are several options for refining or restricting search results:
+
+-   Specify output fields to return in the geocoding response with the [outFields](/find-address-candidates#specify-output-fields)  parameter.
+-   Specify the spatial reference of candidates with the [outSR](/find-address-candidates#specify-the-output-spatial-reference)  parameter.
+-   Limit the number of candidates with the [maxLocations](/find-address-candidates#specify-the-maximum-number-of-candidates)  parameter.
+-   Confine the search results to a specified area with the [searchExtent](/find-address-candidates#search-within-an-extent)  parameter.
+-   Use the [location](/find-address-candidates#proximity-searches)  parameter to prefer local candidates, which will be returned higher in the candidates list.
+-   Filter search results using the [category](/find-address-candidates#category-filtering)  parameter.
+-   Specify the language of geosearch candidates with the [langCode](/find-address-candidates#langcode)  parameter.
+-   Specify rooftop or street location for PointAddress candidates with the [locationType](/find-address-candidates#locationtype)  parameter.
+-   Choose the type of city name or street name to be included in output fields with the [preferredLabelValues](/find-address-candidates#preferredlabelvalues)  parameter.
+
+The `findAddressCandidates`  operation supports searching for places and addresses in single-field format (the `SingleLine`  parameter) or in multifield format with the address components separated into multiple parameters. Single-field input is easier because the address parsing is done for you; however, multifield input may provide faster responses and more precise results.
+
+To provide a way to find addresses in many countries, which may use different addressing formats, the `findAddressCandidates`  operation uses standardized field names for submitting address components. In the parameters listed below, the `neighborhood` , `city` , `subregion` , and `region`  parameters represent typical administrative divisions within a country. They may have different contexts for different countries, and not all administrative divisions are used in all countries. For instance, with addresses in the United States, only the `city`  (city) and `region`  (state) parameters are used; for addresses in Mexico, the `neighborhood`  parameter is used for districts (colonias) within a city, `city`  for municipalities (municipios), and the `region`  parameter for states (estados); Spain uses all four administrative divisions.
+
+The service info page [ https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer?f=pjson](https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer?f=pjson) provides localized versions of the input field names in all locales supported by the service. See [Localized input field names](/localized-input-field-names) for more information.
+
+The service info page also provides the maximum length of strings supported for each address input field parameter. For the `SingleLine`  input parameter, refer to the `length`  attribute of the `singleLineAddressField`  object in the service info page. Currently, the maximum length is 200 characters. For the multifield address input parameters, such as `address` , `address2` , `address3` , `city` , `postal` , and so on, refer to the `addressFields`  object. 	Within this object, each multifield input parameter is described by a `name`  attribute as well as a corresponding `length`  attribute. The `name`  attribute value in the service info is the same as the parameter name. For example, information about the `address`  parameter can be found by searching for `name`  = `address`  within the `addressFields`  object.
+
+</MoreInfo>
+
+<Note type="deprecated">
+The `find`  operation has been deprecated. Discontinue using it in your application, and use the `findAddressCandidates`  operation instead.
+</Note> 
+
+## Parameters
+
+<StyledTable headers="Name, Required, Type, Default, Description">
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[f](#f)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The request response format, either `json` or `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[token](#token)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    An access token with the [required privileges](#token).
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[SingleLine](#singleline)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The place to be geocoded.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[address](#address)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The first line of a street address. 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[address2](#address2)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The second line of a street address.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[address3](#address3)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The third line of a street address.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[neighborhood](#neighborhood)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    A neighborhood; a subdivision of a city.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[city](#city)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    A city or municipality.
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[subregion](#subregion)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    A county.
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[region](#region)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    Typically a state or a province.
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[postal](#postal)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The standard postal code for an address.
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[postalExt](#postalext)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The postal code extension.
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[countryCode](#countrycode)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The value that represents a country.
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[magicKey](#magickey)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    The `magicKey` value returned from a `suggest` request.
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[searchExtent](#searchextent)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string | [envelope](DEVSITE/rest/services-reference/enterprise/geometry-objects/#envelope)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The set of bounding box coordinates that limits the search area. 
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[location](#location)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string | [point](DEVSITE/rest/services-reference/enterprise/geometry-objects/#point)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The origin point used to favor geocoding candidates based on their proximity to the location. 
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[category](#category)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The place or address type that can be used to filter results.
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[outSr](#outsr)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">number</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `4326`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The spatial reference of the `x` and `y` coordinates returned in a response.
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[outFields](#outfields)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string | *</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The list of fields to be returned within the `attributes` object of a response.
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[maxLocations](#maxlocations)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">number</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `50`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The maximum number of locations to be returned in a response.
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[forStorage](#forstorage)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Specifies whether the results of a request are stored. 
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[matchOutOfRange](#matchoutofrange)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    Returns a match when the input house number is outside the street's house number range.
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[locationType](#locationtype)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `rooftop`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    
+    Specifies whether output geometry of `PointAddress` and `Subaddress` matches should be the rooftop point or street entrance.
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[langCode](#langcode)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The language in which results are returned. 
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[sourceCountry](#sourcecountry)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    Limits the returned candidates to the specified country or countries.
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[preferredLabelValues](#preferredlabelvalues)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     Returns the specified street or city name in output fields.
+    </StyledTableCell>
+  </StyledTableRow> 
+
+</StyledTable>
+
+## Required parameters 
+
+<Box>
+
+### f
+
+<SharedParams f/>
+
+</Box>
+
+<Box>
+
+### token
+
+<SharedParams token alpPrivileges={"premium:user:geocode:temporary or premium:user:geocode:stored"} agoPrivileges={"premium:user:geocode or premium:user:geocode:stored"}/>
+
+</Box>
+
+## Optional parameters 
+
+<Box>
+
+### SingleLine
+
+<ParamMetadata types={[{name:"string"}]} />
+
+The `SingleLine`  parameter specifies the location to be geocoded. This can be a street address, place-name, postal code, or POI. The input address components need to be formatted as a single string. 
+
+Example
+
+```javascript
+SingleLine=380 New York St, Redlands, California 92373
+```
+
+</Box>
+ 
+
+{/* #### Address parameters
+
+The full street address of a place (excluding administrative divisions and postal codes) may consist of multiple components, such as building name, street, and subunit (apartment). Web forms and written correspondence typically use multiple fields or lines to designate these components. The `findAddressCandidates`  operation supports three address parameters that can be used to represent the different components of a street address: `address` , `address2` , and `address3` . If you want to geocode the address `Beetham Tower, 301 Deansgate, Suite 4208, Manchester, England`  using multiple input fields, you can set `address=Beetham Tower` , `address2=301 Deansgate` , and `address3=Suite 4208` .  */}
+
+<Box>
+
+### address
+
+<ParamMetadata types={[{name:"string"}]} />
+
+A string that represents the first line of a street address. In most cases, this field will be used for street name and house number input, but it can also be used to input building name or place-name. 
+
+Example of address field input in the United States
+
+```javascript
+address=380 New York Street
+```
+
+ Example of address field input in Mexico
+
+```javascript
+address=Avenida Revolucion 8208
+```
+</Box>
+
+<Box>
+
+### address2
+
+<ParamMetadata types={[{name:"string"}]} />
+
+A string that represents the second line of a street address. This can include street name/house number, building name, place-name, or subunit.
+
+Example address2 field input
+
+```javascript
+address2=Beetham Tower
+```
+</Box>
+
+<Box>
+
+### address3
+
+<ParamMetadata types={[{name:"string"}]} />
+
+A string that represents the third line of a street address. This can include street name/house number, building name, place-name, or subunit.
+
+Example address3 field input
+
+```javascript
+address3=Suite 4208
+```
+</Box>
+
+<Box>
+
+### neighborhood
+
+<ParamMetadata types={[{name:"string"}]} />
+
+The smallest administrative division associated with an address, typically, a neighborhood or a section of a larger populated place. A neighborhood is a subdivision of a city.
+
+<Note type={"note"}>
+
+The `neighborhood`  parameter is not used in all countries or regions.
+
+</Note>
+
+Example of a neighborhood in Mexico (colonia)
+
+```javascript
+neighborhood=Herrera
+```
+</Box>
+
+<Box>
+
+### city
+
+<ParamMetadata types={[{name:"string"}]} />
+
+The next largest administrative division associated with an address, typically, a city or municipality. A city is a subdivision of a subregion or a region.
+
+Example of a city in the U.S.
+
+```javascript
+city=Los Angeles
+```
+
+ Example of a city in Mexico
+
+```javascript
+city=Tijuana
+```
+</Box>
+
+<Box>
+
+### subregion
+
+<ParamMetadata types={[{name:"string"}]} />
+
+The next largest administrative division associated with an address. Depending on the country, a subregion can represent a county, state, or province. 
+
+Example of a subregion (department) in France
+
+```javascript
+subregion=Vienne
+```
+</Box>
+
+<Box>
+
+### region
+
+<ParamMetadata types={[{name:"string"}]} />
+
+The largest administrative division associated with an address, typically, a state or province.
+
+Example of a region in the U.S. (state)
+
+```javascript
+region=Florida
+```
+
+ Example of a region in Mexico (estado)
+
+```javascript
+region=Baja California
+```
+</Box>
+
+<Box>
+
+### postal
+
+<ParamMetadata types={[{name:"string"}]} />
+
+The standard postal code for an address, typically, a three– to six-digit alphanumeric code.
+
+Example
+
+```javascript
+postal=92373
+```
+
+</Box>
+
+<Box>
+
+### postalExt
+
+<ParamMetadata types={[{name:"string"}]} />
+
+A postal code extension, such as the United States Postal Service ZIP+4 code, provides finer resolution or higher accuracy when also passing `postal` . 
+
+Example
+
+```javascript
+postalExt=1112
+```
+</Box>
+
+<Box>
+
+### countryCode
+
+<ParamMetadata types={[{name:"string"}]} />
+
+A value representing the country. Providing this value increases geocoding speed. Acceptable values include the full country name in English or the official language of the country, the two-character country code, or the three-character country code. A list of supported countries and codes is available in the [Service data](/geocode-coverage) topic.
+
+<MoreInfo lableMore="sourceCountry vs. countryCode">
+
+The `sourceCountry`  and `countryCode`  parameters are similar but serve different purposes. The `countryCode`  parameter defines the country value for a multifield geocode request. The `sourceCountry`  parameter defines the country value for a request regardless of whether it is a single-field or multifield request. If both `countryCode`  and `sourceCountry`  are included in a `findAddressCandidates`  request, and the country values are different, the `countryCode`  value takes priority over `sourceCountry` . 
+
+</MoreInfo>
+
+Example
+
+```javascript
+countryCode=USA
+```
+
+</Box>
+
+<Box>
+
+### magicKey
+
+<ParamMetadata types={[{name:"string"}]} />
+
+The `findAddressCandidates`  operation retrieves results quicker when you pass in valid `SingleLine`  and `magicKey`  values than when you don't pass in `magicKey` . However, to get these advantages, you need to make a prior request to [`suggest` ](/suggest), which provides a `magicKey` . This may or may not be relevant to your workflow.
+
+The `suggest`  operation is often called on to improve the user experience of search boxes by analyzing partial text and providing complete names of places, addresses, points of interest, and so on. For instance, typing `Mbu`  into a search box produces **Mbuji-Mayi, Democratic Republic of the Congo** as a suggestion, so the user doesn't need to type the complete name. 
+
+Looking at the suggestion process from another perspective, as the user types, the `suggest`  operation performs a text search, which is a redundant part of the overall search that the `findAddressCandidates`  operation can also perform. The user chooses a place-name or type—narrowing the results to a specific record. The results from `suggest`  include `text`  and `magicKey`  values that contain the information the user chose; passing these values from `suggest`  into `findAddressCandidates`  results in faster and more accurate operations.
+
+In summary, using the `magicKey`  parameter in `findAddressCandidates`  is a two-step process:
+
+-   Make a request to [`suggest` ](/suggest). The response includes `text`  and `magicKey`  properties.
+-   Make a request to `findAddressCandidates`  and pass in the `text`  and `magicKey`  values returned from `suggest`  as the `SingleLine`  and `magicKey`  input parameters, respectively. The `magicKey`  parameter will not function correctly if passed alone. Both `magicKey`  and `SingleLine`  must be included in a `findAddressCandidates`  request so the output matches the selected suggestion.
+
+<Note type={"note"}>
+
+For best results, when the `searchExtent`  and `location`  parameters are included in a `suggest`  request, the same parameters should be included in the corresponding `findAddressCandidates`  request. 
+
+</Note>
+
+Example
+
+```javascript
+magicKey=JS91CYhQDS5vDPhvSMyGZby0YFbaUDoaM5bHMoFF
+
+```
+
+</Box>
+
+<Box>
+
+### searchExtent 
+
+<ParamMetadata types={[{name:"string"},{name:"envelope", link:"DEVSITE/rest/services-reference/enterprise/geometry-objects/#envelope"}]} />
+
+A set of bounding box coordinates that limit the search area to a specific region. This is especially useful for applications in which a user will search for places and addresses within the current map extent.
+
+You can specify the spatial reference of the `searchExtent`  coordinates, which is necessary if the map spatial reference is different than that of the ArcGIS Geocoding service; otherwise, the spatial reference of the coordinates is assumed to be the same as that of the ArcGIS Geocoding service. 
+
+The input can either be a comma-separated list of coordinates defining the bounding box or a [JSON envelope object](DEVSITE/rest/services-reference/enterprise/geometry-objects/#envelope). The spatial reference of the bounding box coordinates can be included if an envelope object is used.
+
+Refer to the [Search within an extent](/find-address-candidates#search-within-an-extent) section below for more details about using `searchExtent` .
+
+Example without a spatial reference
+
+```javascript
+searchExtent=-104,35.6,-94.32,41
+```
+
+ Example with a spatial reference
+
+```javascript
+searchExtent=
+{
+    "xmin": -13052769,
+    "ymin": 3951172,
+    "xmax": -13019630,
+    "ymax": 3978490,
+    "spatialReference": {
+        "wkid": 3395
+    }
+}
+```
+</Box>
+
+<Box>
+
+### location
+
+<ParamMetadata types={[{name:"string"},{name:"point", link:"DEVSITE/rest/services-reference/enterprise/geometry-objects/#point"}]} />
+
+The `location`  parameter defines an origin point that is used to prefer or boost geocoding candidates based on their proximity to the location. Candidates near the location are prioritized relative to those farther away. This is useful in mobile applications in which a user wants to search for places in the vicinity of their current GPS location, or in mapping applications in which users want to search for places near the center of the map.
+
+The location can be represented with a simple comma-separated syntax (x,y), or as a [JSON point object](DEVSITE/rest/services-reference/enterprise/geometry-objects/#point). If the comma-separated syntax is used, the spatial reference of the coordinates must be WGS84; otherwise, the spatial reference of the point coordinates can be defined in the JSON object.
+
+<Note type={"note"}>
+
+The `distance`parameter is deprecated and no longer recognized by the ArcGIS Geocoding service.
+
+</Note>
+
+Example using simple syntax (WGS84)
+
+```javascript
+location=-117.196,34.056
+```
+
+ JSON example with a spatial reference
+
+```javascript
+location=
+{
+    "x": -13046165.572,
+    "y": 4036389.847,
+    "spatialReference": {
+        "wkid": 102100
+    }
+}
+```
+
+</Box>
+
+<Box>
+
+### category
+
+<ParamMetadata types={[{name:"string"}]} />
+
+A place or address type that can be used to filter `findAddressCandidates`  results. The parameter supports input of single category values or multiple comma-separated values. The `category`  parameter can be passed in a request with the `SingleLine`  or `address`  parameters. It can also be passed in a request on its own without the `singleline`  or `address`  parameters. See [Category filtering](/category-filtering) for details about the `category`  parameter.
+
+<Note type={"note"}>
+
+If more than one value is specified for the parameter, the values must be separated by a comma, with no spaces after the comma.
+
+</Note>
+
+Example of category filtering with a single category
+
+```javascript
+category=Address
+```
+
+ Example of category filtering with multiple categories
+
+```javascript
+category=Address,Postal
+```
+
+</Box>
+
+<Box>
+
+### outSR
+
+<ParamMetadata types={[{name:"number"}]} defaultValue="4326"/>
+
+The spatial reference of the x,y coordinates returned by a geocode request. This is useful for applications using a map with a spatial reference different than that of the geocode service. 
+
+The spatial reference can be specified as either a well-known ID (WKID) or as a [JSON spatial reference object](DEVSITE/rest/services-reference/enterprise/geometry-objects/#spatial-reference). If `outSR`  is not specified, the spatial reference of the output locations is the same as that of the service. The ArcGIS Geocoding service spatial reference is WGS84 (WKID = 4326). 
+
+For a list of valid WKID values, see [Projected coordinate systems](https://links.esri.com/proj-coord-systems) and [Geographic coordinate systems](https://links.esri.com/geo-coord-systems).
+
+Example (102100 is the WKID for the Web Mercator projection)
+
+```javascript
+outSR=102100
+```
+
+</Box>
+
+<Box>
+
+### outFields
+
+<ParamMetadata types={[{name:"string"},{name:"*"}]} />
+
+The list of fields to be returned within the `attributes`  object of the response. Descriptions for each of these fields are available in the [Output fields](/service-output#output-fields) section of this document. 
+
+The `address` , `location`  (x,y coordinates of the match location), `score` , `extent` , and `spatialReference`  objects are returned in the response by default. If the `outFields`  parameter is excluded from the request, or if it is included but no fields are specified, the `attributes`  object in the corresponding response is blank. 
+
+<Note type={"note"}>
+
+The `outFields`  values included in a request should use the same casing as the `name`  values listed within the `candidateFields`  section of the service description page: [https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer?f=pjson](https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer?f=pjson). More information about output fields can be found in [Service output](/service-output).
+
+</Note>
+
+<Note type={"note"}>
+
+If more than one value is specified for the parameter, the values must be separated by a comma, with no spaces after the comma.
+
+</Note>
+
+Example that returns all output fields
+
+```javascript
+outFields=*
+```
+
+ Example that returns the specified fields only
+
+```javascript
+outFields=AddNum,StName,City
+```
+
+</Box>
+
+<Box>
+
+### maxLocations
+
+<ParamMetadata types={[{name:"number"}]} defaultValue={"50"} />
+
+The maximum number of locations to be returned by a search, up to the maximum number allowed by the service. If not specified, all matching candidates up to the service maximum are returned. 
+
+The ArcGIS Geocoding service allows up to 50 candidates to be returned for a single request.
+
+Example
+
+```javascript
+maxLocations=10
+```
+
+</Box>
+
+<Box>
+
+### forStorage
+
+<ParamMetadata types={[{name:"boolean"}]} defaultValue={"false"} />
+
+The `forStorage`  parameter specifies whether the results of the operation will be persisted. The default value is `false` , which indicates the results of the operation can't be stored, but they can be temporarily displayed on a map, for instance. If you store the results, in a database, for example, you need to set this parameter to `true` .
+
+Applications are contractually prohibited from storing the results of geocoding transactions unless they make the request by passing the `forStorage`  parameter with a value of `true`  and the `token`  parameter with a valid token. Instructions for composing a request with a valid token are provided in [Security and authentication](DEVSITE/documentation/mapping-apis-and-services/security/).
+
+To learn more about free and paid geocoding operations, see details about [stored versus not stored geocoding](DEVSITE/documentation/mapping-and-location-services/geocoding/geocode-addresses/#storage-parameter). 
+
+Example
+
+```javascript
+forStorage=true
+```
+
+</Box>
+
+<Box>
+
+### matchOutOfRange
+
+<ParamMetadata types={[{name:"boolean"}]} defaultValue={"true"}/>
+
+A Boolean that specifies whether StreetAddress matches should be returned even when the input house number is outside of the house number range defined for the input street. Out-of-range matches have `=StreetAddressExt` . The geometry of such matches is a point corresponding to the end of the street segment where the range value is closest to the input house number. If `matchOutOfRange`  is not specified in a request, its value is set to `true`  by default.
+
+With `matchOutOfRange` , better spatial accuracy is provided for inexact street address searches. Most street segments are assigned house number ranges. For example, Main Street may include house numbers from 2–100 on one side of the street and 1–99 on the other. A user may search for a house number that is not within this range, such as 109 Main Street. If `matchOutOfRange=false`  is passed in this request, the geocode service will return a StreetName-level match to Main Street, with geometry corresponding to the centroid of a street segment that most closely matches the input values. StreetName matches can be ambiguous because there may be multiple street segments with the same name that equally match the input. However, if `matchOutOfRange=true` , in this case, a more precise geometry is returned to the specific side of the segment of Main Street with house number range 1–99. 
+
+<Note type={"note"}>
+
+Input house numbers that exceed the range on a street segment by more than 100 will not result in StreetAddressExt matches. For streets with smaller house number ranges, the `maxOutOfRange` tolerance is less than 100.
+
+</Note>
+
+Example
+
+```javascript
+matchOutOfRange=false
+```
+
+</Box>
+
+<Box>
+
+### locationType
+
+<ParamMetadata types={[{name:"string"}]} values="rooftop, street"/>
+
+The `locationType`  parameter specifies whether the output geometry of PointAddress and Subaddress matches should be the rooftop point or street entrance location. Valid values are `rooftop`  and `street` . The default value is `rooftop` .
+
+Geocode results include one geometry object (the `location`  object) that defines the location of the address, as well as two sets of x,y coordinate values within the `attributes`  object: [X](/service-output#GUID-BFD661FB-1180-45D8-9ECE-9868D95B7D6E) /[Y](/service-output#GUID-F9505F9C-5550-47B5-8776-3997F12B88F8) , and [DisplayX](/service-output#GUID-458D2C0A-15FC-49FE-95E5-CEF1747156F1) /[DisplayY](/service-output#GUID-7FA7D401-4A50-462F-A5CD-0489405A5A07) . In most cases, for geocode results with `=PointAddress`  or `Subaddress` , the `X` /`Y`  attribute values describe the coordinates of the address along the street, while the `DisplayX` /`DisplayY`  values describe the rooftop, or building centroid, coordinates. By default, the geometry returned for geocode results represents the rooftop location of the address (if the rooftop location is available in the source data). This is useful for most spatial analysis and map display purposes. However, for routing scenarios, it may be desirable to use the street location because the rooftop location of some addresses may be offset from a street by a large distance. For these cases, the `locationType`  parameter can be used to specify that the street entrance geometry should be returned. 
+
+It is important to note that `locationType`  is limited by the address data sources used by the ArcGIS Geocoding service. Not all PointAddress and Subaddress features include rooftop and street location coordinates. For some addresses, only a rooftop location is available; for others, only a street location is provided by the data source. For cases such as this, the `locationType`  parameter may not function as expected. For example, if only rooftop location coordinates are available for an address, the rooftop geometry will be returned for the geocoded address even when `locationType=street`  is requested. 
+
+<Note type={"note"}>
+
+The `locationType`  parameter only affects the `location`  object in the geocode JSON response. It does not change the `X` /`Y`  or `DisplayX` /`DisplayY`  attribute values.
+
+</Note>
+
+Example
+
+```javascript
+locationType=street
+```
+
+</Box>
+
+<Box>
+
+### langCode
+
+<ParamMetadata types={[{name:"string"}]} />
+
+The `langCode`  parameter sets the language in which geocode results are returned. Addresses and places in many countries are available in more than one language; in these cases, the `langCode`  parameter can be used to specify which language should be used for results returned by the `findAddressCandidates`  operation. This is useful for ensuring that results are returned in the expected language. For example, a web application could be designed to get the browser language and pass it as the `langCode`  parameter value in a `findAddressCandidates`  request.
+
+See the [table of supported countries](/geocode-coverage#level-1) for valid language code values in each country. The Supported Language Codes column provides the valid input values for the `langCode`  parameter. Full language names cannot be used with the `langCode`  parameter. Only one language code value can be included for the `langCode`  parameter in a `findAddressCandidates`  request.
+
+If the `langCode`  parameter isn't included in a request, or if it is included but there are no matching features with the input language code, the resultant match is returned in the language code of the primary matched component from the input search string. Typically, this is either place-name or street name, depending on the search string.
+
+Similarly, when there are multiple supported languages for a country, it doesn't mean that every address in the country is available in each of the languages. It may be the case that addresses are available in multiple languages for only one region of the country, or that each language is exclusive to a different region and there is no overlap. The following are some examples:
+
+-   French, German, and Italian are listed as supported languages for Switzerland. However, there is no overlap between the languages for addresses in most regions of the country. For instance, in the city of Geneva, only French addresses are available, while German is the only language used for addresses in the city of Bern. 
+-   In Belgium, where three languages are supported (Dutch, French, and German), addresses are available in the city of Brussels in both Dutch and French. However, in the majority of the country, only a single language is used for addresses. 
+-   In Greece, there is complete address coverage in both Greek and transliterated Greek languages (Greek words represented with Latin characters).
+
+Due to variability of language coverage, the following logic is used to handle the different scenarios that may be encountered.
+
+<StyledTable headers={"Scenario,Result,Example"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Only one language is supported for an address, and no `langCode`  value is specified in the `findAddressCandidates`  request.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Candidate is returned in the supported language.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Input (address in Geneva, Switzerland):
+
+-   `Avenue Appia 20 1202 Geneva` 
+-   `langCode=` 
+
+Output: `Avenue Appia 20, 1202, Pregny-Chambésy, Genève` 
+
+<Note type={"note"}>
+
+The candidate is returned in French because it is the only language supported for addresses in Geneva, Switzerland.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Only one language is supported for an address, and an unsupported language is specified for the `langCode`  parameter in the `findAddressCandidates`  request.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Candidate is returned in the supported language.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Input (address in Geneva, Switzerland):
+
+-   `Avenue Appia 20 1202 Geneva` 
+-   `langCode=zh`  (Chinese)
+
+Output: `Avenue Appia 20, 1202, Pregny-Chambésy, Genève` 
+
+<Note type={"note"}>
+
+The candidate is returned in French because language `zh`  (Chinese) is not supported for addresses in Geneva. French is the only language supported for addresses in Geneva.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Multiple languages are supported for an address, and no `langCode`  value is specified in the `findAddressCandidates`  request. 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Candidate is returned in the language of the primary matched component from the input string (street name or place-name).
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Input (address in Brussels, Belgium):
+
+-   `Wetstraat 175 Brussel` 
+-   `langCode=` 
+
+Output: `Wetstraat 175, 1040, Brussel` 
+
+<Note type={"note"}>
+
+The candidate is returned in Dutch based on the matched street name Wetstraat, which is Dutch. Both Dutch and French languages are supported for addresses in Brussels, Belgium.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Multiple languages are supported for an address, and an unsupported language is specified for the `langCode`  parameter in the `findAddressCandidates`  request.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Candidate is returned in the language of the primary matched component from the input string (street name or place-name).
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Input (address in Athens, Greece):
+
+-   `Dionysiou Areopagitou 15, 11742, Athens` 
+-   `langCode=ru`  (Russian)
+
+Output: `Dionysiou Areopagitou 15, 117 42, Athens` 
+
+<Note type={"note"}>
+
+The candidate is returned in transliterated Greek based on the matched street name Dionysiou Areopagitou, because language `ru`  (Russian) is not supported for addresses in Greece. Only Greek and transliterated Greek are supported for addresses in Greece.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Multiple languages are supported for an address, and a supported language is specified for the `langCode`  parameter in the `findAddressCandidates`  request.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Candidate is returned in the requested language.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Input (address in Athens, Greece):
+
+-   `Dionysiou Areopagitou 15, 11742, Athens` 
+-   `langCode=el`  (Greek)
+
+Output: `Διονυσίου Αρεοπαγίτου 15, 117 42, Αθήνα` 
+
+<Note type={"note"}>
+
+The candidate is returned in Greek because language `el`  (Greek) is supported for addresses in Greece.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+Example
+
+```javascript
+langCode=fr
+```
+
+</Box>
+
+<Box>
+
+### sourceCountry
+
+<ParamMetadata types={[{name:"string"}]} />
+
+The `sourceCountry`  parameter limits the candidates returned by the `findAddressCandidates`  operation to the specified country or countries. For example, if `sourceCountry=USA`  is included in the request, it is assumed that the address is in the United States, so only matching addresses in the U.S. are returned. Using this parameter prevents potential unexpected results in other countries for ambiguous searches. 
+
+Acceptable values include the three-character country code. You can specify multiple country codes to limit results to more than one country.
+
+A list of supported countries and codes is available in [Service data](/geocode-coverage).
+
+<Note type={"note"}>
+
+The `sourceCountry`  and `countryCode`  parameters are similar but serve different purposes. The `countryCode`  parameter defines the country value for a multifield geocode request. The `sourceCountry`  parameter defines the country value for a request regardless of whether it is a single-field or multifield request. If both `countryCode`  and `sourceCountry`  are included in a `findAddressCandidates`  request, and the country values are different, the `countryCode`  value takes priority over `sourceCountry` . 
+
+</Note>
+
+<Note type={"note"}>
+
+If more than one value is specified for the parameter, the values must be separated by a comma, with no spaces after the comma.
+
+</Note>
+
+Example: Single country
+
+```javascript
+sourceCountry=USA
+```
+
+ Example: Multiple countries
+
+```javascript
+sourceCountry=FRA,DEU,ESP
+```
+
+</Box>
+
+<Box>
+
+### preferredLabelValues
+
+<ParamMetadata types={[{name:"string"}]} />
+
+The `preferredLabelValues`  parameter allows simple configuration of output fields returned in a response from the ArcGIS Geocoding service by specifying which address component values should be included in output fields. The parameter supports a single value or a comma-delimited collection of values as input. If the parameter is blank or excluded from a request, default address label formats will be used. 
+
+A particular address may have multiple city names associated with it. In the United States, for example, all addresses have a ZIP Code (postal code) assigned to them. Each ZIP Code has one or more associated locality names, which are known as postal cities. There is always one primary postal city value for each ZIP Code. ZIP Codes typically have no set boundaries, and the primary postal city name for the ZIP Code that is assigned to an address may be different than the name of the local city that the address is within. 
+
+<Note type={"note"}>
+
+ In the context of the `preferredLabelValues`  parameter, the name of the city whose boundary an address is within is referred to as the local city, as opposed to the postal city name assigned to the address's postal code.
+
+</Note>
+
+For addresses in the United States, the ArcGIS Geocoding service includes the primary postal city in response output fields by default. As an example, postal code 45420 in Ohio has the primary postal city value Dayton. Addresses in the city of Kettering are assigned this postal code. It means that the default output fields for all geocoded addresses with postal code 45420, even those within the city of Kettering, will include Dayton as the city. To illustrate, if a user searches for `2109 E Dorothy Ln, OH, 45420` , the default match label returned in the response is **2109 E Dorothy Ln, Dayton, Ohio, 45420**, even though the address is within the Kettering city limits. 
+
+Some organizations may prefer to include the local city name in the response instead of the postal city. The `preferredLabelValues`  parameter can be used for this purpose. For the previous example, if `preferredLabelValues=localCity`  is included in the request, the output match label in the response will be **2109 E Dorothy Ln, Kettering, Ohio, 45420**. 
+
+Similarly, streets may be known by multiple names. This is especially true with highways. For example, Pearblossom Hwy in California, which is the primary name, is also known as CA-138. The ArcGIS Geocoding service allows matching to addresses using either name as input, and by default will return the name that was matched to in the response. 
+
+Some organizations may prefer that the primary street name be returned in the response even if a user searches for an alternate street name, and they can use the `preferredLabelValues`  parameter to accomplish this. In other words, if a user searches for `CA-138, Pearblossom, CA` , and `preferredLabelValues=primaryStreet`  is included in the request, the match label returned in the response is **Pearblossom Hwy, Pearblossom, California, 93553**. 
+
+See the following table for supported parameter values.
+
+<StyledTable headers={"Parameter value,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+postalCity
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Include the primary postal city value in geocoding response output fields, even if it is different than the city name in the geocoding request. This is the primary name assigned to the postal code of the address. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+localCity
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Include the primary local city name in geocoding response output fields, even if it is different than the city name in the geocoding request. This is the name of the city that the address is within, and may be different than the postal city. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+matchedCity
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If the input city name in a geocoding request matches any of the local city or postal city names associated with an address, include the matched value in geocoding response output fields. If a city name is not included in the input, or is included but doesn't match to anything, default address formats will be used.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+primaryStreet
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Include the primary street name in geocoding response output fields, even if it is different than the street name in the geocoding request.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+matchedStreet
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If the input street name in a geocoding request matches any of the supported street names assigned to an address, include the matched value in geocoding response output fields.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+Here are additional details about the `preferredLabelValues`  parameter:
+
+-   The `preferredLabelValues`  parameter takes a comma-delimited collection of values as input.
+-   The parameter values correspond to two groups—a City group and a Street group, indicated by the suffix of the value name. The `postalCity` , `localCity` , and `matchedCity`  values are part of the City group. The `primaryStreet`  and `matchedStreet`  values are part of the Street group.
+-   A geocode request can include one City value and one Street value—for instance: `preferredLabelValues=primaryStreet,postalCity` .
+-   A request can only include one value per group. In other words, a request with `preferredLabelValues=matchedCity,postalCity`  is invalid.
+
+Example: Single label value
+
+```javascript
+preferredLabelValues=matchedCity
+```
+
+ Example: Multiple label values
+
+```javascript
+preferredLabelValues=matchedCity,primaryStreet
+```
+
+ 
+
+<Note type={"note"}>
+
+The functionality of the `preferredLabelValues`  parameter is limited by the data sources used to produce the ArcGIS Geocoding service. Not all addresses have postal city and local city values assigned to them. Likewise, only certain streets may include primary and alternate names. If the `preferredLabelValues`  parameter is used and the output labels don't correspond to expectations in some cases, it is likely because the expected values aren't included in the source data for the addresses. 
+
+</Note>
+
+</Box>
+
+
+## Response status
+
+<StyledTable headers="Status, Meaning, Description, Schema">
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">200</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[OK](https://datatracker.ietf.org/doc/html/rfc7231#section-6.3.1)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     A successful response for a `/findAddressCandidates` request.
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     Inline
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">400</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[Bad request](https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    Invalid query parameters. Learn more in [Service output](xref:///geocoding-service-output/#error-code-400).
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     [Error](#response-details)
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">403</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[Forbidden](https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.3)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     The required paramter `token` is valid but does not have permission to access the service. Learn more in [Service output](xref:///geocoding-service-output/#error-code-403).
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     [Error](#response-details)
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">5XX</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">Unknown</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     An error occured on the server. Learn more in [Service output](xref:///geocoding-service-output/#error-code-500).
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     [Error](#response-details)
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+Go to [Service output](xref:///geocoding-service-output/#error-codes) for extended codes.
+
+## Response details 
+
+<!-- Go to [Response types](xref:///geocoding-types) for an example of the JSON response object.  -->
+
+<CodeSwitcher displayMode="tabs">
+  <CodeBlock language="json" group="200 OK" source="./code/find-address-candidates-response.json" section="200" />
+  <CodeBlock language="json" group="No results" source="./code/find-address-candidates-response.json" section="noresponse" />
+  <CodeBlock language="json" group="Error" source="./code/error-response.json"/>
+</CodeSwitcher> 
+
+## Examples 
+
+<Box>
+
+### Input address examples 
+
+-   [Street addresses](/find-address-candidates#search-for-street-addresses)
+
+    -   `27488 Stanford Ave, Bowden, North Dakota` 
+    -   `380 New York St, Redlands, CA 92373` 
+-   [Street intersections](/find-address-candidates#search-for-intersections)
+
+    -   `New York St and W Redlands Blvd, Redlands, CA` 
+    -   `Jacques Veltmanstraat & Pieter Calandlaan, Amsterdam, NLD` 
+-   [Points of interest (POI)](/find-address-candidates#search-for-pois) by name and type
+
+    -   `Disneyland` 
+    -   `banks in Paris` 
+    -   `los angeles starbucks` 
+    -   `mount everest` 
+-   [Administrative place names](/find-address-candidates#search-for-administrative-place-names), such as city, county, state, province, or country names 
+
+    -   `Seattle, Washington` 
+    -   `State of Mahārāshtra` 
+    -   `Liechtenstein` 
+-   [Postal codes](/find-address-candidates#search-for-postal-codes)
+
+    -   `92591` 
+    -   `TW9 1DN` 
+-   [Coordinates](/find-address-candidates#search-for-coordinates)
+
+    -   `-117.155579,32.703761` 
+-   [Street blocks](/find-address-candidates#search-for-street-blocks)
+
+    -   `4400 Block of Perry St, Houston, Texas` 
+    -   `2400-3100 Block of San Bruno Ave, San Francisco` 
+-   [Streets between two cross streets](/find-address-candidates#search-for-a-street-between-two-cross-streets)
+
+    -   `Conway Dr between Sheridan Ave and E El Norte Pkwy, Escondido` 
+    -   `I-10 between exit 75 and exit 76, Redlands, CA`
+
+</Box>
+
+<Box>
+
+### Search for a street address
+
+{/* You can search for a street address, street name, or street intersection using the `findAddressCandidates`  operation. For best results, you should include as much location information as possible in the search in addition to the street address. See [Match accuracy](/service-output#match-accuracy) for more information about obtaining optimal results for address searches. */}
+
+You can pass the address components in a single parameter or separated into multiple parameters. Examples of each are shown. Note that in each case, the JSON response is the same for both the single- and multiple-parameter requests. See [Match accuracy](/service-output#match-accuracy) for more information about obtaining optimal results for address searches.
+
+#### Single field 
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?SingleLine=380 New York Street, Redlands, CA 92373&category=&outFields=*&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+
+```
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?SingleLine=380%20New%20York%20Street%2C%20Redlands%2C%20CA%2092373&category=&outFields=*&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+
+``` */}
+</Tab>
+<Tab>
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "380 New York St, Redlands, California, 92373",
+   "location": {
+    "x": -117.195426038092,
+    "y": 34.056097983409
+   },
+   "score": 100,
+   "attributes": {
+    "Loc_name": "World",
+    "Status": "M",
+    "Score": 100,
+    "Match_addr": "380 New York St, Redlands, California, 92373",
+    "LongLabel": "380 New York St, Redlands, CA, 92373, USA",
+    "ShortLabel": "380 New York St",
+    "Addr_type": "PointAddress",
+    "Type": "",
+    "PlaceName": "",
+    "Place_addr": "380 New York St, Redlands, California, 92373",
+    "Phone": "",
+    "URL": "",
+    "Rank": 20,
+    "AddBldg": "",
+    "AddNum": "380",
+    "AddNumFrom": "",
+    "AddNumTo": "",
+    "AddRange": "",
+    "Side": "",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "New York",
+    "StType": "St",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "380 New York St",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "Redlands",
+    "MetroArea": "",
+    "Subregion": "San Bernardino County",
+    "Region": "California",
+    "RegionAbbr": "CA",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "92373",
+    "PostalExt": "8118",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -117.195658887362,
+    "Y": 34.056466200415,
+    "DisplayX": -117.195426038092,
+    "DisplayY": 34.056097983409,
+    "Xmin": -117.196426038092,
+    "Xmax": -117.194426038092,
+    "Ymin": 34.055097983409,
+    "Ymax": 34.057097983409,
+    "ExInfo": "",
+    "StrucType": "Commercial",
+    "StrucDet": "Office"
+   },
+   "extent": {
+    "xmin": -117.196426038092,
+    "ymin": 34.055097983409,
+    "xmax": -117.194426038092,
+    "ymax": 34.057097983409
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+
+#### Multi-field
+
+<MoreInfo>
+
+In this example, the street address component (380 New York St) is passed as the value for the `address`  parameter; the city component (Redlands) as the value for the `city`  parameter; the state component (CA) as the `region`  parameter; and the ZIP Code (92373) as the value for the `postal`  parameter. Also in this example, all possible output fields are returned (`outFields=*` ), even if they don't contain a value.
+
+</MoreInfo>
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?Address=380 new york st&City=redlands&Region=CA&Postal=92373&outFields=*&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "380 New York St, Redlands, California, 92373",
+   "location": {
+    "x": -117.195426038092,
+    "y": 34.056097983409
+   },
+   "score": 100,
+   "attributes": {
+    "Loc_name": "World",
+    "Status": "M",
+    "Score": 100,
+    "Match_addr": "380 New York St, Redlands, California, 92373",
+    "LongLabel": "380 New York St, Redlands, CA, 92373, USA",
+    "ShortLabel": "380 New York St",
+    "Addr_type": "PointAddress",
+    "Type": "",
+    "PlaceName": "",
+    "Place_addr": "380 New York St, Redlands, California, 92373",
+    "Phone": "",
+    "URL": "",
+    "Rank": 20,
+    "AddBldg": "",
+    "AddNum": "380",
+    "AddNumFrom": "",
+    "AddNumTo": "",
+    "AddRange": "",
+    "Side": "",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "New York",
+    "StType": "St",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "380 New York St",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "Redlands",
+    "MetroArea": "",
+    "Subregion": "San Bernardino County",
+    "Region": "California",
+    "RegionAbbr": "CA",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "92373",
+    "PostalExt": "8118",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -117.195658887362,
+    "Y": 34.056466200415,
+    "DisplayX": -117.195426038092,
+    "DisplayY": 34.056097983409,
+    "Xmin": -117.196426038092,
+    "Xmax": -117.194426038092,
+    "Ymin": 34.055097983409,
+    "Ymax": 34.057097983409,
+    "ExInfo": "",
+    "StrucType": "Commercial",
+    "StrucDet": "Office"
+   },
+   "extent": {
+    "xmin": -117.196426038092,
+    "ymin": 34.055097983409,
+    "xmax": -117.194426038092,
+    "ymax": 34.057097983409
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+</Box>
+
+<Box>
+
+### Search for standard intersections 
+
+An intersection is where two streets cross each other. An intersection search consists of the intersecting street names plus the containing administrative division or postal code. For example, `redlands blvd and new york st 92373`  is a valid intersection search, as is `redlands blvd & new york st redlands ca` . For street intersection matches, `Addr_type=StreetInt` . 
+
+The valid intersection connectors can be found by looking up the `IntersectionConnectors`  property from the service info URL: [ https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer?f=pjson](https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer?f=pjson).
+
+
+#### Single-field
+
+<MoreInfo>
+
+There are several types of intersections that can found by the ArcGIS Geocoding service. A typical simple intersection is formed by two street segments crossing each other. An example of this is `W Park Ave and Tennessee St, Redlands, CA` .
+
+![Simple intersection example](./images/GUID-14E272E1-F6C9-4763-A413-709D3EAEBAD4-web.png)
+
+</MoreInfo>
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=pjson&outFields=Addr_type&forStorage=false&SingleLine=W Park Ave and Tennessee St, Redlands, CA&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=pjson&outFields=Addr_type&forStorage=false&SingleLine=W%20Park%20Ave%20and%20Tennessee%20St%2C%20Redlands%2C%20CA&token=<ACCESS_TOKEN>
+
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "W Park Ave & Tennessee St, Redlands, California, 92373",
+   "location": {
+    "x": -117.200080508925,
+    "y": 34.059249411365
+   },
+   "score": 100,
+   "attributes": {
+    "Addr_type": "StreetInt"
+   },
+   "extent": {
+    "xmin": -117.201080508925,
+    "ymin": 34.058249411365,
+    "xmax": -117.199080508925,
+    "ymax": 34.060249411365
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+
+#### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+ GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=pjson&outFields=Addr_type&forStorage=false&Address=W Park Ave and Tennessee St&City=Redlands&Region=CA&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=pjson&outFields=Addr_type&forStorage=false&Address=W%20Park%20Ave%20and%20Tennessee%20St&City=Redlands&Region=CA&token=<ACCESS_TOKEN>
+``` */}
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "W Park Ave & Tennessee St, Redlands, California, 92373",
+   "location": {
+    "x": -117.200080508925,
+    "y": 34.059249411365
+   },
+   "score": 100,
+   "attributes": {
+    "Addr_type": "StreetInt"
+   },
+   "extent": {
+    "xmin": -117.201080508925,
+    "ymin": 34.058249411365,
+    "xmax": -117.199080508925,
+    "ymax": 34.060249411365
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+</Box>
+
+<Box>
+
+### Search for overpass intersections
+
+{/* Find an intersection at a highway overpass (Pacific Hwy and W Washington St, San Diego, CA 92140) */}
+
+You can also find intersections between streets that aren't physically connected. This includes cases where streets are separated by elevation, such as a highway overpass crossing over another street. An example of this is `Pacific Hwy and W Washington St, San Diego, CA 92140` .
+
+<MoreInfo>
+
+![Highway overpass intersection example](./images/GUID-396C3E12-5936-45F9-971E-073EE2DC6D5A-web.png)
+
+
+</MoreInfo>
+
+#### Single-field 
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=pjson&outFields=Addr_type&forStorage=false&SingleLine=Pacific Hwy and W Washington St, San Diego, CA 92140&token=<ACCESS_TOKEN>
+
+```
+
+</Tab>
+
+<Tab>
+{/* 
+```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=pjson&outFields=Addr_type&forStorage=false&SingleLine=Pacific%20Hwy%20and%20W%20Washington%20St%2C%20San%20Diego%2C%20CA%2092140&token=<ACCESS_TOKEN>
+
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Pacific Hwy & W Washington St, San Diego, California, 92140",
+   "location": {
+    "x": -117.184382796839,
+    "y": 32.740451997491
+   },
+   "score": 100,
+   "attributes": {
+    "Addr_type": "StreetInt"
+   },
+   "extent": {
+    "xmin": -117.185382796839,
+    "ymin": 32.739451997491,
+    "xmax": -117.183382796839,
+    "ymax": 32.741451997491
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+
+#### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=pjson&outFields=Addr_type&forStorage=false&Address=Pacific Hwy and W Washington St&City=San Diego&Region=CA&Postal=92140&token=<ACCESS_TOKEN>
+
+```
+
+</Tab>
+
+<Tab>
+{/* 
+```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=pjson&outFields=Addr_type&forStorage=false&Address=Pacific%20Hwy%20and%20W%20Washington%20St&City=San%20Diego&Region=CA&Postal=92140&token=<ACCESS_TOKEN>
+
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Pacific Hwy & W Washington St, San Diego, California, 92140",
+   "location": {
+    "x": -117.184382796839,
+    "y": 32.740451997491
+   },
+   "score": 100,
+   "attributes": {
+    "Addr_type": "StreetInt"
+   },
+   "extent": {
+    "xmin": -117.185382796839,
+    "ymin": 32.739451997491,
+    "xmax": -117.183382796839,
+    "ymax": 32.741451997491
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+</Box>
+<Box>
+
+### Search for disconnected intersections 
+
+An intersection can also be formed by two disconnected streets when one street ends close to another, such as a cul-de-sac or a dead end. In cases such as this, if the streets are within a certain distance of each other, the ArcGIS Geocoding service returns a StreetInt match when they are searched for. This near-intersection tolerance is currently 60 meters. An example of this type of near-intersection is `Knowlton St and Turner Ct, Somerville, Massachusetts, USA` .
+
+<MoreInfo>
+
+{/* Find a near-intersection (Knowlton St and Turner Ct, Somerville, Massachusetts, USA) */}
+
+![Near-intersection example](./images/GUID-A39E0B78-5995-4BB5-BDEE-EDF244EE3487-web.png)
+
+</MoreInfo>
+
+#### Single-field
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=pjson&outFields=Addr_type&forStorage=false&SingleLine=Knowlton St and Turner Ct, Somerville, Massachusetts, USA&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+{/* 
+```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=pjson&outFields=Addr_type&forStorage=false&SingleLine=Knowlton%20St%20and%20Turner%20Ct%2C%20Somerville%2C%20Massachusetts%2C%20USA&token=<ACCESS_TOKEN>
+
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Knowlton St & Turner Ct, Somerville, Massachusetts, 02145",
+   "location": {
+    "x": -71.086933487601,
+    "y": 42.382329186603
+   },
+   "score": 100,
+   "attributes": {
+    "Addr_type": "StreetInt"
+   },
+   "extent": {
+    "xmin": -71.087933487601,
+    "ymin": 42.381329186603,
+    "xmax": -71.085933487601,
+    "ymax": 42.383329186603
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+
+#### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=pjson&outFields=Addr_type&forStorage=false&Address=Knowlton St and Turner Ct&City=Somerville&Region=Massachusetts&CountryCode=USA&token=<ACCESS_TOKEN>
+
+```
+
+</Tab>
+<Tab>
+{/* 
+```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=pjson&outFields=Addr_type&forStorage=false&Address=Knowlton%20St%20and%20Turner%20Ct&City=Somerville&Region=Massachusetts&CountryCode=USA&token=<ACCESS_TOKEN>
+
+``` */}
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Knowlton St & Turner Ct, Somerville, Massachusetts, 02145",
+   "location": {
+    "x": -71.086933487601,
+    "y": 42.382329186603
+   },
+   "score": 100,
+   "attributes": {
+    "Addr_type": "StreetInt"
+   },
+   "extent": {
+    "xmin": -71.087933487601,
+    "ymin": 42.381329186603,
+    "xmax": -71.085933487601,
+    "ymax": 42.383329186603
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+</Box>
+
+<Box>
+
+### Search for roundabout intersections 
+
+Another type of disconnected intersection supported by the ArcGIS Geocoding service occurs at roundabouts. A roundabout is formed when two or more streets connect to a circular roadway, which is often unnamed. The participating streets typically don't connect directly to each other, but when they are searched for and are within the near-intersection tolerance, the service returns a StreetInt match. An example of a roundabout intersection is `Rue Jean Laurent & Avenue Jean Mermoz, Le Vésinet, FRA` .
+
+<MoreInfo>
+
+{/* Find a roundabout intersection (Rue Jean Laurent & Avenue Jean Mermoz, Le Vésinet, FRA) */}
+
+![Roundabout intersection example](./images/GUID-5687E052-ADC0-4895-A15E-BCFC43F7F50F-web.png)
+
+</MoreInfo>
+
+#### Single-field
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=pjson&outFields=Addr_type&forStorage=false&SingleLine=Rue Jean Laurent and Avenue Jean Mermoz, Le Vésinet, FRA&token=<ACCESS_TOKEN>
+
+```
+
+</Tab>
+<Tab>
+{/* 
+```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=pjson&outFields=Addr_type&forStorage=false&SingleLine=Rue%20Jean%20Laurent%20and%20Avenue%20Jean%20Mermoz%2C%20Le%20V%C3%A9sinet%2C%20FRA&token=<ACCESS_TOKEN>
+
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Rue Jean Laurent & Avenue Jean Mermoz, 78110, Le Vésinet, Yvelines, Île-de-France",
+   "location": {
+    "x": 2.134517483476,
+    "y": 48.895231987767
+   },
+   "score": 100,
+   "attributes": {
+    "Addr_type": "StreetInt"
+   },
+   "extent": {
+    "xmin": 2.133517483476,
+    "ymin": 48.894231987767,
+    "xmax": 2.135517483476,
+    "ymax": 48.896231987767
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+
+#### Multifield 
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+
+<Tab>
+
+```http
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=pjson&outFields=Addr_type&forStorage=false&Address=Rue Jean Laurent & Avenue Jean Mermoz&City=Le Vésinet&CountryCode=FRA&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=pjson&outFields=Addr_type&forStorage=false&Address=Rue%20Jean%20Laurent%20%26%20Avenue%20Jean%20Mermoz&City=Le%20V%C3%A9sinet&CountryCode=FRA&token=<ACCESS_TOKEN>
+
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Rue Jean Laurent & Avenue Jean Mermoz, 78110, Le Vésinet, Yvelines, Île-de-France",
+   "location": {
+    "x": 2.134517483476,
+    "y": 48.895231987767
+   },
+   "score": 100,
+   "attributes": {
+    "Addr_type": "StreetInt"
+   },
+   "extent": {
+    "xmin": 2.133517483476,
+    "ymin": 48.894231987767,
+    "xmax": 2.135517483476,
+    "ymax": 48.896231987767
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+</Box>
+<Box>
+
+### Find an ambiguous intersection
+
+Sometimes there may be multiple possible matches for an intersection search. This typically occurs when divided roads cross each other. A divided road consists of two street segments separated by a median. In a scenario such as this, there could be up to four equivalent intersection matches consisting of the same street names at different locations. The ArcGIS Geocoding service uses an ambiguous intersection tolerance with such searches to remove redundant intersection candidates from the response. The ambiguous intersection tolerance is currently 30 meters. Specifically, if there are multiple intersection candidates with the same street names that are located in the same locality (meaning same neighborhood, city, postal code), and if they are within 30 meters of each other, the service returns only one of the candidates. 
+
+<MoreInfo>
+
+An example of an ambiguous intersection search is `Cambie St and W King Edward Ave, Vancouver, British Columbia` . Both Cambie St and W King Edward Ave are divided streets, so there are four potential intersection candidates with the same street names. However, there is a boundary between the neighborhoods of South Cambie and Riley Park which happens to follow the middle of Cambie St. Because of this, there are actually two sets of equivalent intersections—one within South Cambie (on left side of Cambie St) and the other within Riley Park (on the right side of Cambie St). The locations of the potential intersection candidates in each set are within the ambiguous intersection distance from each other, so two intersection candidates are returned in the response for this search—one in South Cambie, and the other in Riley Park.
+
+{/* Find an ambiguous intersection (Cambie St and W King Edward Ave, Vancouver, British Columbia) */}
+
+![Ambiguous intersection example](./images/GUID-8552D09B-BDD6-4153-8D4A-D38FE040FD93-web.png)
+
+</MoreInfo>
+
+#### Single-field
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=pjson&outFields=Addr_type,Nbrhd&forStorage=false&SingleLine=Cambie St and W King Edward Ave, Vancouver, British Columbia&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=pjson&outFields=Addr_type%2CNbrhd&forStorage=false&SingleLine=Cambie%20St%20and%20W%20King%20Edward%20Ave%2C%20Vancouver%2C%20British%20Columbia&token=<ACCESS_TOKEN>
+
+``` */}
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Cambie St & King Edward Ave W, Vancouver, British Columbia, V5Z",
+   "location": {
+    "x": -123.115292006692,
+    "y": 49.248915989533
+   },
+   "score": 99.96,
+   "attributes": {
+    "Addr_type": "StreetInt",
+    "Nbrhd": "Riley Park"
+   },
+   "extent": {
+    "xmin": -123.116292006692,
+    "ymin": 49.247915989533,
+    "xmax": -123.114292006692,
+    "ymax": 49.249915989533
+   }
+  },
+  {
+   "address": "Cambie St & King Edward Ave W, Vancouver, British Columbia, V5Z",
+   "location": {
+    "x": -123.115300891509,
+    "y": 49.249055967317
+   },
+   "score": 99.96,
+   "attributes": {
+    "Addr_type": "StreetInt",
+    "Nbrhd": "Riley Park"
+   },
+   "extent": {
+    "xmin": -123.116300891509,
+    "ymin": 49.248055967317,
+    "xmax": -123.114300891509,
+    "ymax": 49.250055967317
+   }
+  },
+  {
+   "address": "Cambie St & King Edward Ave W, Vancouver, British Columbia, V5Z",
+   "location": {
+    "x": -123.115498033872,
+    "y": 49.248924036161
+   },
+   "score": 99.96,
+   "attributes": {
+    "Addr_type": "StreetInt",
+    "Nbrhd": "South Cambie"
+   },
+   "extent": {
+    "xmin": -123.116498033872,
+    "ymin": 49.247924036161,
+    "xmax": -123.114498033872,
+    "ymax": 49.249924036161
+   }
+  },
+ ]
+}
+ 
+```
+</Tab>
+</Tabs>
+
+#### Multifield 
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=pjson&outFields=Addr_type,Nbrhd&forStorage=false&Address=Cambie St and W King Edward Ave&City=Vancouver&Region=British Columbia&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+{/* 
+```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=pjson&outFields=Addr_type%2CNbrhd&forStorage=false&Address=Cambie%20St%20and%20W%20King%20Edward%20Ave&City=Vancouver&Region=British%20Columbia&token=<ACCESS_TOKEN>
+
+``` */}
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Cambie St & King Edward Ave W, Vancouver, British Columbia, V5Z",
+   "location": {
+    "x": -123.115292006692,
+    "y": 49.248915989533
+   },
+   "score": 99.96,
+   "attributes": {
+    "Addr_type": "StreetInt",
+    "Nbrhd": "Riley Park"
+   },
+   "extent": {
+    "xmin": -123.116292006692,
+    "ymin": 49.247915989533,
+    "xmax": -123.114292006692,
+    "ymax": 49.249915989533
+   }
+  },
+  {
+   "address": "Cambie St & King Edward Ave W, Vancouver, British Columbia, V5Z",
+   "location": {
+    "x": -123.115300891509,
+    "y": 49.249055967317
+   },
+   "score": 99.96,
+   "attributes": {
+    "Addr_type": "StreetInt",
+    "Nbrhd": "Riley Park"
+   },
+   "extent": {
+    "xmin": -123.116300891509,
+    "ymin": 49.248055967317,
+    "xmax": -123.114300891509,
+    "ymax": 49.250055967317
+   }
+  },
+  {
+   "address": "Cambie St & King Edward Ave W, Vancouver, British Columbia, V5Z",
+   "location": {
+    "x": -123.115498033872,
+    "y": 49.248924036161
+   },
+   "score": 99.96,
+   "attributes": {
+    "Addr_type": "StreetInt",
+    "Nbrhd": "South Cambie"
+   },
+   "extent": {
+    "xmin": -123.116498033872,
+    "ymin": 49.247924036161,
+    "xmax": -123.114498033872,
+    "ymax": 49.249924036161
+   }
+  },
+ ]
+}
+ 
+```
+</Tab>
+</Tabs>
+</Box>
+
+<Box>
+
+### Search for POIs  
+
+A POI is a point location that can represent a cultural or geographic landmark, business, or administrative division. For example, you can find amusement parks, museums, schools, restaurants, hotels, gas stations, or other types of businesses or landmarks; geographic features, such as mountains, lakes, rivers, or deserts; or administrative places, such as neighborhoods, cities, states, counties, or countries. The `findAddressCandidates`  operation supports geocoding POIs by name or by type. The supported types are listed in this [table](/category-filtering#GUID-20D9858C-C27C-4C9C-BE4C-1EDB36E04D62).
+
+<MoreInfo>
+
+As with street addresses, you can search for POIs with `findAddressCandidates`  using the single-field or multifield approach.
+
+#### Single-field POI search
+
+To search for POIs with single-field search, use the `SingleLine`  parameter. In general, valid `SingleLine`  POI search strings can be formatted in variations of three basic structures:
+
+1.  &lt;name or type> &lt;optional connector> &lt;zone> 
+2.  &lt;zone> &lt;name or type>
+3.  &lt;name or type>&lt;address>&lt;zone>
+
+Where
+
+-   &lt;name or type> = A place-name, such as Disneyland, Starbucks, or Niagara Falls; or a type, such as amusement parks, waterfalls, or coffee shops. 
+-   &lt;zone> = A postal code or administrative boundary—such as neighborhood, city, subregion, region, country, or any combination thereof—that provides a spatial boundary to the search. It can be included in the search to limit matching candidates but is not required.
+-   &lt;optional connector> = `in`  or `at` ; this is not required for the search.
+-   &lt;address> = A street name, such as `Main St` , or a complete street address, such as `590 N Main St` .
+
+Examples of valid `SingleLine`  search strings include the following:
+
+Business name searches
+
+-   Starbucks San Diego
+-   Starbucks in San Diego
+-   San Diego Starbucks
+-   Starbucks 92101
+-   Starbucks 5th Ave San Diego
+-   Reuben H Fleet Science Center, 1875 El Prado, San Diego, CA, 92101, USA
+
+Type searches
+
+-   coffee shops San Diego
+-   coffee shops in San Diego CA
+-   San Diego coffee shops
+-   coffee shops 92101
+-   coffee shops 5th Ave San Diego
+
+#### Multifield POI search
+
+When searching for POIs using multifield input, the name or type of the POI must be passed as the value for the `address`  parameter. The zone information can be passed in the `postal` , `neighborhood` , `city` , `subregion` , `region` , and `countryCode`  parameters. If searching for POI + address, the address should be passed as the value for the `address2`  parameter.
+
+#### General information
+
+It is important to note that instead of providing a zone, you can limit searches to a specific area by using the [`searchExtent`  parameter](/find-address-candidates#search-within-an-extent). You can also influence the sorting of match candidates according to their proximity to a location with the [`location`  parameter](/find-address-candidates#proximity-searches).
+
+As with address searches, the quality of POI search results is dependent on the amount and quality of information in the search string. If you only search for `hotels`  without qualifying information, such as zone, search extent, or location, your results will not be meaningful. Adding supplemental information to the search string—the more specific, the better—will result in more accurate and relevant matches.
+
+
+There may be instances when searches yield unexpected results. For example, a search for `New York pizza` , in which the expected results are pizzerias in New York City, may instead return a match to a restaurant named New York Pizza in Sacramento, California. This is because exact place-name matches are given higher priority to increase performance. If this occurs, you can obtain the desired results by modifying the search string—in this case, a search for `pizza in NYC`  should yield the expected results.
+
+
+The address, phone number, and website URL of a POI can be returned by including `outFields=Place_addr,Phone,URL`  in the request. But not all POIs have address, phone, and URL values associated with them. See [Service output](/service-output) for more information about these output fields. 
+
+</MoreInfo>
+
+#### Find a business name 
+
+##### Single-field
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?SingleLine=starbucks sydney AUS&outFields=type,city,region&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+{/* 
+```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?SingleLine=starbucks%20sydney%20AUS&outFields=type%2Ccity%2Cregion&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+
+``` */}
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Starbucks",
+   "location": {
+    "x": 151.249914,
+    "y": -33.891673
+   },
+   "score": 100,
+   "attributes": {
+    "type": "Coffee Shop",
+    "city": "Sydney",
+    "region": "New South Wales"
+   },
+   "extent": {
+    "xmin": 151.244914,
+    "ymin": -33.896673,
+    "xmax": 151.254914,
+    "ymax": -33.886673
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+
+##### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?Address=starbucks&Neighborhood=&City=sydney&Subregion=&Region=&CountryCode=AUS&outFields=type,city,region&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+{/* 
+```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?Address=starbucks&Neighborhood=&City=sydney&Subregion=&Region=&CountryCode=AUS&outFields=type%2Ccity%2Cregion&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+
+``` */}
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Starbucks",
+   "location": {
+    "x": 151.249914,
+    "y": -33.891673
+   },
+   "score": 100,
+   "attributes": {
+    "type": "Coffee Shop",
+    "city": "Sydney",
+    "region": "New South Wales"
+   },
+   "extent": {
+    "xmin": 151.244914,
+    "ymin": -33.896673,
+    "xmax": 151.254914,
+    "ymax": -33.886673
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+
+#### Find a business type 
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?SingleLine=hotels orlando FL&outFields=type,city,region&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?SingleLine=hotels%20orlando%20FL&outFields=type%2Ccity%2Cregion&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Bay Lake Tower At Disney's Contemporary Resort",
+   "location": {
+    "x": -81.5736337,
+    "y": 28.4164133
+   },
+   "score": 100,
+   "attributes": {
+    "type": "Hotel",
+    "city": "Orlando",
+    "region": "Florida"
+   },
+   "extent": {
+    "xmin": -81.5786337,
+    "ymin": 28.4114133,
+    "xmax": -81.5686337,
+    "ymax": 28.4214133
+   }
+  },
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+
+#### Find a business on a specific street
+
+##### Single-field
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=starbucks 5th ave san diego&langCode=&outFields=Place_Name,Place_addr,Phone,Type,Addr_type&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+{/* 
+```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=starbucks%205th%20ave%20san%20diego&langCode=&outFields=Place_Name%2CPlace_addr%2CPhone%2CType%2CAddr_type&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Starbucks",
+   "location": {
+    "x": -117.160236,
+    "y": 32.747095
+   },
+   "score": 100,
+   "attributes": {
+    "Addr_type": "POI",
+    "Type": "Coffee Shop",
+    "Place_addr": "3801 5th Ave, San Diego, California, 92103",
+    "Phone": "(619) 295-9310"
+   },
+   "extent": {
+    "xmin": -117.161236,
+    "ymin": 32.746095,
+    "xmax": -117.159236,
+    "ymax": 32.748095
+   }
+  },
+  {
+   "address": "Starbucks",
+   "location": {
+    "x": -117.159905,
+    "y": 32.707766
+   },
+   "score": 100,
+   "attributes": {
+    "Addr_type": "POI",
+    "Type": "Coffee Shop",
+    "Place_addr": "209 5th Ave, San Diego, California, 92101",
+    "Phone": "(619) 234-0749"
+   },
+   "extent": {
+    "xmin": -117.160905,
+    "ymin": 32.706766,
+    "xmax": -117.158905,
+    "ymax": 32.708766
+   }
+  },
+  {
+   "address": "Starbucks",
+   "location": {
+    "x": -117.160486,
+    "y": 32.731103
+   },
+   "score": 100,
+   "attributes": {
+    "Addr_type": "POI",
+    "Type": "Coffee Shop",
+    "Place_addr": "2440 5th Ave, San Diego, California, 92101",
+    "Phone": "(619) 702-2113"
+   },
+   "extent": {
+    "xmin": -117.161486,
+    "ymin": 32.730103,
+    "xmax": -117.159486,
+    "ymax": 32.732103
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+
+##### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```javascript
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=starbucks&address2=5th ave&city=san diego&outFields=Place_Name,Place_addr,Phone,Type,Addr_type&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=starbucks&address2=5th%20ave&city=san%20diego&outFields=Place_Name%2CPlace_addr%2CPhone%2CType%2CAddr_type&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+
+``` */}
+
+ ```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Starbucks",
+   "location": {
+    "x": -117.160236,
+    "y": 32.747095
+   },
+   "score": 100,
+   "attributes": {
+    "Addr_type": "POI",
+    "Type": "Coffee Shop",
+    "Place_addr": "3801 5th Ave, San Diego, California, 92103",
+    "Phone": "(619) 295-9310"
+   },
+   "extent": {
+    "xmin": -117.161236,
+    "ymin": 32.746095,
+    "xmax": -117.159236,
+    "ymax": 32.748095
+   }
+  },
+  {
+   "address": "Starbucks",
+   "location": {
+    "x": -117.159905,
+    "y": 32.707766
+   },
+   "score": 100,
+   "attributes": {
+    "Addr_type": "POI",
+    "Type": "Coffee Shop",
+    "Place_addr": "209 5th Ave, San Diego, California, 92101",
+    "Phone": "(619) 234-0749"
+   },
+   "extent": {
+    "xmin": -117.160905,
+    "ymin": 32.706766,
+    "xmax": -117.158905,
+    "ymax": 32.708766
+   }
+  },
+  {
+   "address": "Starbucks",
+   "location": {
+    "x": -117.160486,
+    "y": 32.731103
+   },
+   "score": 100,
+   "attributes": {
+    "Addr_type": "POI",
+    "Type": "Coffee Shop",
+    "Place_addr": "2440 5th Ave, San Diego, California, 92101",
+    "Phone": "(619) 702-2113"
+   },
+   "extent": {
+    "xmin": -117.161486,
+    "ymin": 32.730103,
+    "xmax": -117.159486,
+    "ymax": 32.732103
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+</Box>
+
+<Box>
+
+### Search for administrative place names
+
+The `findAddressCandidates`  operation supports single-field and multifield searches for administrative place-names. This includes searches for neighborhoods, cities, counties, states, provinces, or countries. If a search for a city name results in multiple matches with the same name, the ArcGIS Geocoding service will sort the candidates in order of their relative importance to each other (as indicated by the value of the `Rank`  output field), with priority generally based on population and capital status. 
+
+<MoreInfo>
+
+For example, there are many cities in the world named San Francisco, so a search for San Francisco results in several equivalent matches; San Francisco, California, USA, will always be the top candidate since it has the greatest population.
+
+However, rank alone is not always enough to distinguish between administrative places. Also, you may not necessarily want to find the highest-ranked feature for a particular search. It may be necessary to remove ambiguity by refining searches with additional information. For example, a search for Oxford returns Oxford, UK, as the top candidate based on rank. If you instead want to find the town of Oxford, Ohio, it is necessary to add the state information to the search. 
+
+</MoreInfo>
+
+#### Find a city name
+
+##### Single-field
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?SingleLine=San Francisco&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?SingleLine=San%20Francisco&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "San Francisco, California",
+   "location": {
+    "x": -122.4201615,
+    "y": 37.7800771
+   },
+   "score": 100,
+   "attributes": {
+    
+   },
+   "extent": {
+    "xmin": -122.7151615,
+    "ymin": 37.4850771,
+    "xmax": -122.1251615,
+    "ymax": 38.0750771
+   }
+  },
+  {
+   "address": "San Francisco, Agusan Del Sur, Caraga",
+   "location": {
+    "x": 125.978219,
+    "y": 8.5025332
+   },
+   "score": 100,
+   "attributes": {
+    
+   },
+   "extent": {
+    "xmin": 125.856219,
+    "ymin": 8.3805332,
+    "xmax": 126.100219,
+    "ymax": 8.6245332
+   }
+  },
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+
+##### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=San Francisco&f=pjson&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=San%20Francisco&f=pjson&token=<ACCESS_TOKEN>
+
+``` */}
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "San Francisco, California",
+   "location": {
+    "x": -122.4201615,
+    "y": 37.7800771
+   },
+   "score": 100,
+   "attributes": {
+    
+   },
+   "extent": {
+    "xmin": -122.7151615,
+    "ymin": 37.4850771,
+    "xmax": -122.1251615,
+    "ymax": 38.0750771
+   }
+  },
+  {
+   "address": "San Francisco, Agusan Del Sur, Caraga",
+   "location": {
+    "x": 125.978219,
+    "y": 8.5025332
+   },
+   "score": 100,
+   "attributes": {
+    
+   },
+   "extent": {
+    "xmin": 125.856219,
+    "ymin": 8.3805332,
+    "xmax": 126.100219,
+    "ymax": 8.6245332
+   }
+  },
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+
+
+#### Search for a city in a state
+
+##### Single-field
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?SingleLine=oxford OH&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?SingleLine=oxford%20OH&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Oxford, Ohio",
+   "location": {
+    "x": -84.7456597,
+    "y": 39.5073941
+   },
+   "score": 100,
+   "attributes": {
+    
+   },
+   "extent": {
+    "xmin": -84.7976597,
+    "ymin": 39.4553941,
+    "xmax": -84.6936597,
+    "ymax": 39.5593941
+   }
+  },
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+
+##### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=Oxford&region=OH&f=pjson&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=Oxford&region=OH&f=pjson&token=<ACCESS_TOKEN>
+
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Oxford, Ohio",
+   "location": {
+    "x": -84.7456597,
+    "y": 39.5073941
+   },
+   "score": 100,
+   "attributes": {
+    
+   },
+   "extent": {
+    "xmin": -84.7976597,
+    "ymin": 39.4553941,
+    "xmax": -84.6936597,
+    "ymax": 39.5593941
+   }
+  },
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+</Box>
+<Box>
+
+### Search for postal codes 
+
+The `findAddressCandidates`  operation supports searches for postal codes and postal code extensions. When searching for postal codes, it is important to note that the same code can be valid in more than one country; for best results, it may be necessary to include additional information with the postal code, such as city or country.
+
+#### Find a postal code 
+
+##### Single-field
+
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Request</TabTitle>
+
+<TabTitle>Response</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?SingleLine=20002 USA&forStorage=false&outFields=addr_type&f=pjson&token=<ACCESS_TOKEN>
+
+```
+
+ 
+
+</Tab>
+
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?SingleLine=20002%20USA&forStorage=false&outFields=addr_type&f=pjson&token=<ACCESS_TOKEN>
+
+``` */}
+
+ 
+
+</Tab>
+
+</Tabs>
+
+##### Multifield
+
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Request</TabTitle>
+
+<TabTitle>Response</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?postal=20002&countryCode=USA&outFields=addr_type&f=pjson&token=<ACCESS_TOKEN>
+
+```
+
+ 
+
+</Tab>
+
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?postal=20002&countryCode=USA&outFields=addr_type&f=pjson&token=<ACCESS_TOKEN>
+
+``` */}
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "20002, Washington, District of Columbia",
+   "location": {
+    "x": -76.9927743,
+    "y": 38.9042588
+   },
+   "score": 100,
+   "attributes": {
+    "addr_type": "Postal"
+   },
+   "extent": {
+    "xmin": -77.0177743,
+    "ymin": 38.8792588,
+    "xmax": -76.9677743,
+    "ymax": 38.9292588
+   }
+  }
+ ]
+}
+
+``` 
+
+</Tab>
+
+</Tabs>
+
+</Box>
+<Box>
+
+### Search for coordinates
+
+
+The ArcGIS Geocoding service supports searches for coordinates. The output is a geometry point with a match address that is the same as the input coordinates. This is different than reverse geocoding, in which input x,y coordinates are resolved to a matching street address; see [reverseGeocode](/reverse-geocode)  for more information. The following types of coordinate search are supported: 
+
+-   x,y coordinates; x refers to longitude (east-west coordinates), and y refers to latitude (north-south coordinates)
+-   Military Grid Reference System (MGRS) coordinates
+-   United States National Grid (USNG) coordinates
+
+
+Coordinates must be passed as the value for the `SingleLine`  or `Address`  field in the request. If the coordinates are included in the `Address`  field, all other input fields, such as `Address2` , `City` , `Region` , and `Postal` , must be empty.
+
+<MoreInfo>
+
+MGRS and USNG coordinates can be searched with various precisions, from 10,000-meter square to 1-meter square precision. See the table below for examples of valid MGRS or USNG search input.
+
+**MGRS/USNG examples**
+
+<StyledTable headers={""}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+18SUH64
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+10,000-meter square
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2-digit coordinate
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+18SUH6743
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1,000-meter square
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+4-digit coordinate
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+18SUH678432
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+100-meter square
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+6-digit coordinate
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+18SUH67894321
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+10-meter square
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+8-digit coordinate
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+18SUH6789043210
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1-meter square
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+10-digit coordinate
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+
+
+Input x,y coordinates can be formatted in several ways:
+
+-   Coordinates can be input in either &lt;longitude>,&lt;latitude> or &lt;latitude>,&lt;longitude> order, and can be separated with either a comma or a space.
+-   Coordinates can be input in decimal degrees (DD) or degrees minutes seconds (DMS) format.
+-   Quadrants can be signified by using a minus sign (-) before the numeric value to signify the western or southern quadrants, or by using E, W, N, or S directional indicators before or after the numeric values.
+-   DMS coordinates can be separated with ° (degrees), ' (minutes), and " (seconds) symbols. 
+
+    <Note type={"note"}>
+
+    Some different forms of minute and second symbols may be supported, but in general it is best to use the apostrophe (') and quotation mark (") symbols shown here.
+
+    </Note>
+-   DMS coordinates can also be separated with the letters `d`  (degrees), `m`  (minutes), and `s`  (seconds).
+
+The following tables shows examples of different formats that can be used to search x,y coordinates. 
+
+Decimal degrees examples
+
+<StyledTable headers={"Longitude,Latitude,Example search input"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+\-14
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+28.4
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+\-14 28.4
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+14 W
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+28.4 N
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+45 W, 45 N
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+14.09W
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+28.37N
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+14.09W 28.37N
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+W14
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+N28.4
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+W14, N28.4
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+X: -14
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Y: 28.4
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+X: -14 Y: 28.4
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+\-14.079085
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+28.413518
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+\-14.079085, 28.413518
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+Degrees minutes seconds examples
+
+<StyledTable headers={"Longitude,Latitude,Example search input"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+14°05'20" W
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+28°25'01" N
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+14°05'20" W 28°25'01" N
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+\-14°05'20" 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+28°25'01"
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+\-14°05'20",28°25'01"
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+X:-14°05'20" 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Y:28°25'01"
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+X:-14°05'20" Y:28°25'01"
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+14° 05' 20" W
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+28° 25' 01" N
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+14° 05' 20" W 28° 25' 01" N
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+14d05m20s W
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+28d25m01s N
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+14d05m20s W 28d25m01s N
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+\-14d05m20s
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+28d25m01s
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+\-14d05m20s,28d25m01s
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+X:-14d05m20s 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Y:28d25m01s
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+X:-14d05m20s Y:28d25m01s
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+14d 05m 20s W
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+28d 25m 01s N
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+14d 05m 20s W 28d 25m 01s N
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+Searches for x,y coordinates can be ambiguous, because some users may place the longitude (x) coordinate first, while others may place the latitude (y) coordinate first. For instance, a search for x,y coordinates `80,50`  produces very different results when longitude is first than when latitude is first. The service handles this by returning candidates in both `<latitude>,<longitude>`  and `<longitude>,<latitude>`  formats for ambiguous coordinate searches. The ArcGIS Geocoding service returns two or three candidates with the following possible `Addr_type`  values for x,y coordinate searches:
+
+-   `LatLong` —Returned when the first coordinate in the input is either explicitly or implicitly determined to be the longitude coordinate. The corresponding `Match_addr`  value is formatted as `<longitude> <latitude>` , such as `10.000000 50.000000` .
+-   `XY` —Returned when the first coordinate in the input is either explicitly or implicitly determined to be the longitude coordinate. The corresponding `Match_addr`  value is formatted as `X:<longitude> Y:<latitude>` , such as `X:10.000000 Y:50.000000` .
+-   `YX` —Returned when the first coordinate in the input is either explicitly or implicitly determined to be the latitude coordinate. The corresponding `Match_addr`  value is formatted as `Y:<latitude> X:<longitude>` , such as `Y:50.000000 X:10.000000` .
+
+Details about the logic used by the service for x,y coordinate searches are listed below.
+
+-   For ambiguous x,y searches in which both input coordinates are valid as either latitude or longitude, three candidates are returned, one for each of the `Addr_type`  values listed above. Example—`10,50` 
+-   For x,y searches in which the longitude and latitude coordinates are explicitly defined by X/Y or directional (N, S, E, W) indicators, and the longitude value precedes the latitude value, `LatLong`  and `XY`  candidates are returned. Example—`10W,50N`  or `X:10,Y:50` 
+-   For x,y searches in which the longitude and latitude coordinates are explicitly defined by X/Y or directional (N, S, E, W) indicators, and the latitude value precedes the longitude value, only a `YX`  candidate is returned. Example—`50N,10W`  or `Y:50,X:10` 
+-   If one of the input coordinates is outside the valid range of latitude values and the service can implicitly determine that it is the longitude, and the longitude value precedes the latitude value, `LatLong`  and `XY`  candidates are returned. Example—`-120,50` 
+-   If one of the input coordinates is outside the valid range of latitude values and the service can implicitly determine that it is the longitude, and the latitude value precedes the longitude value, only a `YX`  candidate is returned. Example—`50,-120` 
+
+
+You can also use the [category](/category-filtering#disambiguate-coordinate-searches) parameter to disambiguate x,y coordinate searches. 
+
+</MoreInfo>
+
+#### Find MGRS / USNG coordinates
+
+##### Single-field
+
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Request</TabTitle>
+
+<TabTitle>Response</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=pjson&outFields=Addr_type&maxLocations=1&forStorage=false&SingleLine=18SUH6789043210&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "18SUH6789043210",
+   "location": {
+    "x": -76.511416672563,
+    "y": 38.327287449633
+   },
+   "score": 100,
+   "attributes": {
+    "Addr_type": "MGRS"
+   },
+   "extent": {
+    "xmin": -76.512416672563,
+    "ymin": 38.326287449633,
+    "xmax": -76.510416672563,
+    "ymax": 38.328287449633
+   }
+  }
+ ]
+}
+
+```
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=pjson&outFields=Addr_type&maxLocations=1&forStorage=false&SingleLine=18SUH6789043210&token=<ACCESS_TOKEN>
+
+``` */}
+</Tab>
+</Tabs>
+
+##### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=pjson&outFields=Addr_type&maxLocations=1&forStorage=false&Address=18SUH6789043210&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "18SUH6789043210",
+   "location": {
+    "x": -76.511416672563,
+    "y": 38.327287449633
+   },
+   "score": 100,
+   "attributes": {
+    "Addr_type": "MGRS"
+   },
+   "extent": {
+    "xmin": -76.512416672563,
+    "ymin": 38.326287449633,
+    "xmax": -76.510416672563,
+    "ymax": 38.328287449633
+   }
+  }
+ ]
+}
+
+```
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=pjson&outFields=Addr_type&maxLocations=1&forStorage=false&Address=18SUH6789043210&token=<ACCESS_TOKEN>
+``` */}
+</Tab>
+</Tabs>
+
+</Box>
+
+<Box>
+
+### Search for street blocks 
+
+The `findAddressCandidates`  operation supports searches for a group of house numbers representing one or more city blocks. The `Addr_type`  value returned for this type of search is StreetMidBlock. The location of such a feature is the approximated midpoint of the street segments that include the house numbers represented by the block number or block range. A StreetMidBlock match is more precise than a StreetName match, and less precise than a StreetAddress match. 
+
+<MoreInfo>
+
+A single block, or a range of blocks, may be searched for. Here are some examples of StreetMidBlock searches: 
+
+-   100 block of New York St, Redlands, CA
+-   1600 blk E Cliff Dr, El Paso
+-   200-500 block Taylor St, San Francisco
+-   1700-1900 blk of Locust St, Philadelphia, Pennsylvania
+
+For a StreetMidBlock match to be returned, the input text must follow this general syntax: 
+
+`<number or range>` `block | block of` `<street name>` 
+
+StreetMidBlock matching is useful for situations in which an exact address is unknown, such as emergency reporting. For example, a bystander witnessing an emergency may know the name of the street they're on and the general house numbers in their vicinity, but not the exact house number—emergency responders can use the block information to quickly find the approximate location of the incident.
+
+It's also useful for workflows in which anonymity is required for privacy concerns, such as crime data analysis by law enforcement agencies. In such cases, when law enforcement personnel respond to an incident, the street block where the incident occurred can be recorded instead of a person's complete address. StreetMidBlock matching is currently supported for the United States only.
+
+</MoreInfo>
+
+#### Find a single block number  
+
+##### Single-field
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?SingleLine=100 block of New York St, Redlands, CA&outFields=Addr_type&f=pjson&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?SingleLine=100%20block%20of%20New%20York%20St%2C%20Redlands%2C%20CA&outFields=Addr_type&f=pjson&token=<ACCESS_TOKEN>
+
+``` */}
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "100 Block of New York St, Redlands, California, 92373",
+   "location": {
+    "x": -117.195624321099,
+    "y": 34.054132171282
+   },
+   "score": 100,
+   "attributes": {
+    "Addr_type": "StreetMidBlock"
+   },
+   "extent": {
+    "xmin": -117.196567077114,
+    "ymin": 34.052789858379,
+    "xmax": -117.194556366429,
+    "ymax": 34.055594477321
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+
+##### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=100 block of New York St&city=San Francisco&outFields=addr_type&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=100%20block%20of%20New%20York%20St&city=San%20Francisco&outFields=addr_type&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "100 Block of New York St, Redlands, California, 92373",
+   "location": {
+    "x": -117.195624321099,
+    "y": 34.054132171282
+   },
+   "score": 100,
+   "attributes": {
+    "Addr_type": "StreetMidBlock"
+   },
+   "extent": {
+    "xmin": -117.196567077114,
+    "ymin": 34.052789858379,
+    "xmax": -117.194556366429,
+    "ymax": 34.055594477321
+   }
+  }
+ ]
+}
+
+``` 
+</Tab>
+</Tabs>
+
+#### Find a range of blocks 
+
+##### Single-field
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?SingleLine=200-500 block Taylor St, San Francisco&outFields=Addr_type&f=pjson&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+{/* 
+```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?SingleLine=200%2D500%20block%20Taylor%20St%2C%20San%20Francisco&outFields=Addr_type&f=pjson&token=<ACCESS_TOKEN>
+
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "200-500 Block of Taylor St, San Francisco, California, 94102",
+   "location": {
+    "x": -122.411532161018,
+    "y": 37.78699720641
+   },
+   "score": 100,
+   "attributes": {
+    "Addr_type": "StreetMidBlock"
+   },
+   "extent": {
+    "xmin": -122.412460493737,
+    "ymin": 37.78600586109,
+    "xmax": -122.410460493737,
+    "ymax": 37.78800586109
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+
+##### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=200-500 block Taylor St&city=San Francisco&outFields=addr_type&f=pjson&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "200-500 Block of Taylor St, San Francisco, California, 94102",
+   "location": {
+    "x": -122.411532161018,
+    "y": 37.78699720641
+   },
+   "score": 100,
+   "attributes": {
+    "Addr_type": "StreetMidBlock"
+   },
+   "extent": {
+    "xmin": -122.412460493737,
+    "ymin": 37.78600586109,
+    "xmax": -122.410460493737,
+    "ymax": 37.78800586109
+   }
+  }
+ ]
+}
+
+```
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=200%2D500%20block%20Taylor%20St&city=San%20Francisco&outFields=addr_type&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+</Tab>
+</Tabs>
+</Box>
+<Box>
+
+### Search for a street between two cross streets
+
+The `findAddressCandidates`  operation supports searching for a street between two intersecting cross streets. The `Addr_type`  value returned for this type of search is StreetBetween. The location of such a feature is along the matched street at the midpoint between the cross streets. The precision of a StreetBetween match is greater than a StreetName match, less than a StreetAddress match, and equal to a StreetMidBlock match. 
+
+<MoreInfo>
+Here are some examples of StreetBetween searches: 
+
+-   Conway Dr between Sheridan Ave and E El Norte Pkwy, Escondido, CA
+-   I-10 bt exit 75 and exit 76, Redlands, CA
+-   Pinckney btw Joy & Anderson, Boston
+
+For a StreetBetween match to be returned, the input text must follow this general syntax: 
+
+`<street name>` `between | btw | bt` `<cross street one>` `and` `<cross street two>` 
+
+Similar to StreetMidBlock, StreetBetween matching is useful for situations in which an exact address or location is unknown, such as emergency reporting. For example, a person involved in an incident may know the name of the street they're on and the nearby intersecting streets but not an exact address—emergency responders can use this information to quickly find the approximate location of the incident.
+
+StreetBetween matching is currently supported for the United States only.
+
+</MoreInfo>
+
+#### Find a street between two cross streets
+
+##### Single-field 
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleline=Conway Dr between Sheridan Ave and E El Norte Pkwy, Escondido, CA&outFields=Addr_type&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleline=Conway%20Dr%20between%20Sheridan%20Ave%20and%20E%20El%20Norte%20Pkwy%2C%20Escondido%2C%20CA&outFields=Addr_type&f=pjson&token=<ACCESS_TOKEN>
+
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Conway Dr between Sheridan Ave and E El Norte Pkwy, Escondido, California, 92027",
+   "location": {
+    "x": -117.074761248522,
+    "y": 33.147567713195
+   },
+   "score": 100,
+   "attributes": {
+    "Addr_type": "StreetBetween"
+   },
+   "extent": {
+    "xmin": -117.075761248522,
+    "ymin": 33.146567713195,
+    "xmax": -117.073761248522,
+    "ymax": 33.148567713195
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+
+#### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```javascript
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=Conway Dr between Sheridan Ave and E El Norte Pkwy&city=Escondido&region=CA&outFields=Addr_type&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=Conway%20Dr%20between%20Sheridan%20Ave%20and%20E%20El%20Norte%20Pkwy&city=Escondido&region=CA&outFields=Addr_type&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Conway Dr between Sheridan Ave and E El Norte Pkwy, Escondido, California, 92027",
+   "location": {
+    "x": -117.074761248522,
+    "y": 33.147567713195
+   },
+   "score": 100,
+   "attributes": {
+    "Addr_type": "StreetBetween"
+   },
+   "extent": {
+    "xmin": -117.075761248522,
+    "ymin": 33.146567713195,
+    "xmax": -117.073761248522,
+    "ymax": 33.148567713195
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+</Box>
+
+<Box>
+
+### Specify individual `outfields` for a POI search
+
+The `findAddressCandidates`  operation allows you to specify individual output fields or return all output fields. The `outFields`  parameter is used for this. If you want to return all supported output fields, set `outFields=*` ; if you only want to return the default output fields, `outFields`  does not need to be passed in the request. If you want to return specific fields, pass the desired field names as comma-separated values, such as `outFields=PlaceName,Type,City,Country` , which returns the name, feature type, city, and country for a POI search. 
+
+{/* See [Service output](/service-output#output-fields) for details about the fields returned by a `findAddressCandidates`  request.
+
+#### Example
+
+Specify individual `outfields`  for a POI search (PlaceName,Type,City,Country)  */}
+
+#### Single-field
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=coffee shops austin&outFields=PlaceName,Type,City,Country&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=coffee%20shops%20austin&outFields=PlaceName%2CType%2CCity%2CCountry&f=pjson&token=<ACCESS_TOKEN>
+
+``` */}
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Caribou Coffee",
+   "location": {
+    "x": -92.985396,
+    "y": 43.684369
+   },
+   "score": 100,
+   "attributes": {
+    "Type": "Coffee Shop",
+    "PlaceName": "Caribou Coffee",
+    "City": "Austin",
+    "Country": "USA"
+   },
+   "extent": {
+    "xmin": -92.986396,
+    "ymin": 43.683369,
+    "xmax": -92.984396,
+    "ymax": 43.685369
+   }
+  }
+ ]
+}
+```
+</Tab>
+</Tabs>
+</Box>
+
+<Box>
+
+### Specify the output spatial reference
+
+By default, the ArcGIS Geocoding service returns candidate geometry in WGS84 coordinates (decimal degrees). You can specify a different spatial reference for output coordinates by using the `outSR`  parameter. This is necessary if you have a mapping application in which you display geocoding candidates and the map spatial reference is not WGS84. For example, the ArcGIS.com basemaps use a Web Mercator spatial reference, with coordinates in meters. To display geocoding candidates correctly in such a map, you would need to set `outSR=102100` , which is the well-known ID (WKID) of the Web Mercator spatial reference. 
+
+For a list of valid WKID values, see [Projected coordinate systems](https://links.esri.com/proj-coord-systems) and [Geographic coordinate systems](https://links.esri.com/geo-coord-systems).
+
+{/* #### Example
+
+Specify output coordinates in Web Mercator spatial reference (380 new york st redlands ca)  */}
+
+#### Single-field
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?SingleLine=380 new york st redlands ca&outSR=102100&f=pjson&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?SingleLine=380%20new%20york%20st%20redlands%20ca&outSR=102100&f=pjson&token=<ACCESS_TOKEN>
+
+``` */}
+
+ 
+
+</Tab>
+</Tabs>
+
+#### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=380 new york st&city=redlands&region=ca&outSR=102100&f=pjson&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=380%20new%20york%20st&city=redlands&region=ca&outSR=102100&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 102100,
+  "latestWkid": 3857
+ },
+ "candidates": [
+  {
+   "address": "380 New York St, Redlands, California, 92373",
+   "location": {
+    "x": -13046135.1498611271,
+    "y": 4036337.10429923097
+   },
+   "score": 100,
+   "attributes": {
+    
+   },
+   "extent": {
+    "xmin": -13046246.4693519212,
+    "ymin": 4036202.74072433496,
+    "xmax": -13046023.830370333,
+    "ymax": 4036471.46945925895
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+</Box>
+
+<Box>
+
+### Specify the maximum number of candidates
+
+The `maxLocations`  parameter allows you to specify the maximum number of candidates to be returned by a search, up to the maximum number of candidates allowed by the ArcGIS Geocoding service. By default, the service allows up to 50 candidates to be returned for searches. As an example, if you set `maxLocations=10` , `findAddressCandidates`  will return the top 10 candidates for the search. If no value is specified for `maxLocations` , `findAddressCandidates`  returns all matching candidates.
+
+{/* #### Example
+
+Specify the maximum number of candidates for a POI search (Starbucks in Redlands)  */}
+
+#### Single-field
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=starbucks in redlands&outFields=PlaceName,City,Country&maxLocations=2&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=starbucks%20in%20redlands&outFields=PlaceName%2CCity%2CCountry&maxLocations=2&f=pjson&token=<ACCESS_TOKEN>
+
+``` */}
+
+ 
+
+</Tab>
+</Tabs>
+
+#### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```javascript
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=starbucks&city=redlands&outFields=PlaceName,City,Country&maxLocations=2&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=starbucks&city=redlands&outFields=PlaceName%2CCity%2CCountry&maxLocations=2&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Starbucks",
+   "location": {
+    "x": -117.225684,
+    "y": 34.049181
+   },
+   "score": 100,
+   "attributes": {
+    "PlaceName": "Starbucks",
+    "City": "Redlands",
+    "Country": "USA"
+   },
+   "extent": {
+    "xmin": -117.226684,
+    "ymin": 34.048181,
+    "xmax": -117.224684,
+    "ymax": 34.050181
+   }
+  },
+  {
+   "address": "Starbucks",
+   "location": {
+    "x": -117.204248,
+    "y": 34.07144
+   },
+   "score": 100,
+   "attributes": {
+    "PlaceName": "Starbucks",
+    "City": "Redlands",
+    "Country": "USA"
+   },
+   "extent": {
+    "xmin": -117.205248,
+    "ymin": 34.07044,
+    "xmax": -117.203248,
+    "ymax": 34.07244
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+</Box>
+
+<Box>
+
+### Search within an extent
+
+The `findAddressCandidates`  operation allows spatial filtering of search results by using the `searchExtent`  parameter. If you want to confine a search to a localized area, something that is especially useful in a mobile application, you can define a bounding rectangle to search within. No candidates outside of the rectangle are returned. Bounding rectangle coordinates can be entered as a simple comma-separated string in the format &lt;lower left corner>,&lt;upper right corner>. If the simple format is used, the coordinates must be in the default spatial reference of the geocode service, which is WGS84. The `searchExtent`  parameter can be used with all supported search types (street address, POI, admin place, postal code). 
+
+<MoreInfo>
+
+The `searchExtent`  parameter is not intended to be used with extents that cover large areas, such as entire countries or provinces/states. Geocoding quality and performance may be reduced with large `searchExtent`  values. For example, if a request includes a `searchExtent`  that covers the state of California, an ambiguous input address such as `100 Main St`  would cause an excessive number of matching candidates to be generated, which would slow down the response. To counteract such a delay, the service may not process all possible candidates, leading to unexpected results.
+
+The following best practices will help you avoid issues when using `searchExtent` :
+
+-   Reduce the `searchExtent`  area. Ideally, the size of the extent should not exceed an area corresponding to a map scale of approximately 1:1,000,000.
+-   Include an administrative zone (such as city) or postal code in the request when searching for a place or address. For instance, instead of searching for `100 Main St` , be more specific and search for `100 Main St, Barstow` .
+-   Use the [`suggest` ](/suggest) operation together with `findAddressCandidates`  to take advantage of its autocomplete capability.
+
+</MoreInfo>
+
+{/* The example URL below illustrates how to find McDonald's in downtown San Diego using the `searchExtent`  format. */}
+
+#### Find POIs using searchExtent with default spatial reference 
+
+##### Single-field
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=mcdonalds&outFields=city,type&searchExtent=-117.172026,32.706517,-117.152498,32.725514&f=pjson&token=<ACCESS_TOKEN>
+```
+
+</Tab>
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=mcdonalds&outFields=city%2Ctype&searchExtent=-117.172026%2C32.706517%2C-117.152498%2C32.725514&f=pjson&token=<ACCESS_TOKEN>
+
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "McDonald's",
+   "location": {
+    "x": -117.158742,
+    "y": 32.71242
+   },
+   "score": 100,
+   "attributes": {
+    "type": "Fast Food",
+    "city": "San Diego"
+   },
+   "extent": {
+    "xmin": -117.159742,
+    "ymin": 32.71142,
+    "xmax": -117.157742,
+    "ymax": 32.71342
+   }
+  },
+  {
+   "address": "McDonald's",
+   "location": {
+    "x": -117.154059,
+    "y": 32.718697
+   },
+   "score": 100,
+   "attributes": {
+    "type": "Fast Food",
+    "city": "San Diego"
+   },
+   "extent": {
+    "xmin": -117.155059,
+    "ymin": 32.717697,
+    "xmax": -117.153059,
+    "ymax": 32.719697
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+
+</Tabs>
+
+##### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```javascript
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=mcdonalds&outFields=city,type&searchExtent=-117.172026,32.706517,-117.152498,32.725514&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=mcdonalds&outFields=city%2Ctype&searchExtent=-117.172026%2C32.706517%2C-117.152498%2C32.725514&f=pjson&token=<ACCESS_TOKEN>
+```
+
+  */}
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "McDonald's",
+   "location": {
+    "x": -117.158742,
+    "y": 32.71242
+   },
+   "score": 100,
+   "attributes": {
+    "type": "Fast Food",
+    "city": "San Diego"
+   },
+   "extent": {
+    "xmin": -117.159742,
+    "ymin": 32.71142,
+    "xmax": -117.157742,
+    "ymax": 32.71342
+   }
+  },
+  {
+   "address": "McDonald's",
+   "location": {
+    "x": -117.154059,
+    "y": 32.718697
+   },
+   "score": 100,
+   "attributes": {
+    "type": "Fast Food",
+    "city": "San Diego"
+   },
+   "extent": {
+    "xmin": -117.155059,
+    "ymin": 32.717697,
+    "xmax": -117.153059,
+    "ymax": 32.719697
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+
+</Tabs>
+
+<MoreInfo>
+
+You can specify a spatial reference for the `searchExtent` , which is necessary if your map uses a different spatial reference than the geocode service. For example, the default ArcGIS.com basemaps use a Web Mercator spatial reference (WKID = 102100), with coordinates in meters. The `searchExtent`  must be passed as a [JSON envelope object](DEVSITE/rest/services-reference/enterprise/geometry-objects/#envelope) if the coordinates are in a spatial reference other than WGS84. The following request URL uses the previous example of McDonald's in downtown San Diego, but specifies the bounding rectangle with Web Mercator coordinates. 
+
+Note that, in this example, the `outSR`  property is set to `102100` , so the output coordinates are also in Web Mercator coordinates. If `outSR`  was left blank, the coordinates would be returned in the WGS84 spatial reference.
+
+For a list of supported spatial references and their WKID values, see [Projected coordinate systems](https://links.esri.com/proj-coord-systems) and [Geographic coordinate systems](https://links.esri.com/geo-coord-systems).
+
+</MoreInfo>
+
+#### Find POIs using searchExtent with Web Mercator spatial reference  
+
+##### Single-field
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=mcdonalds&outFields=City,Type&searchExtent={"xmin":-13043558,"ymin":3856395,"xmax":-13041325,"ymax":3858918,"spatialReference":{"wkid":102100}}&outSR=102100&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=mcdonalds&outFields=City%2CType&searchExtent=%7B%22xmin%22%3A-13043558%2C%22ymin%22%3A3856395%2C%22xmax%22%3A-13041325%2C%22ymax%22%3A3858918%2C%22spatialReference%22%3A%7B%22wkid%22%3A102100%7D%7D&outSR=102100&f=pjson&token=<ACCESS_TOKEN>
+
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 102100,
+  "latestWkid": 3857
+ },
+ "candidates": [
+  {
+   "address": "McDonald's",
+   "location": {
+    "x": -13042051.5014205072,
+    "y": 3857194.44405129505
+   },
+   "score": 100,
+   "attributes": {
+    "Type": "Fast Food",
+    "City": "San Diego"
+   },
+   "extent": {
+    "xmin": -13042162.8209113032,
+    "ymin": 3857062.14109622128,
+    "xmax": -13041940.1819297168,
+    "ymax": 3857326.74848951353
+   }
+  },
+  {
+   "address": "McDonald's",
+   "location": {
+    "x": -13041530.1922451239,
+    "y": 3858024.9435766032
+   },
+   "score": 100,
+   "attributes": {
+    "Type": "Fast Food",
+    "City": "San Diego"
+   },
+   "extent": {
+    "xmin": -13041641.511735918,
+    "ymin": 3857892.63131060777,
+    "xmax": -13041418.8727543298,
+    "ymax": 3858157.25732620433
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+
+##### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=mcdonalds&outFields=City,Type&searchExtent={"xmin":-13043558,"ymin":3856395,"xmax":-13041325,"ymax":3858918,"spatialReference":{"wkid":102100}}&outSR=102100&f=pjson&token=<ACCESS_TOKEN>
+
+```
+
+</Tab>
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=mcdonalds&outFields=City%2CType&searchExtent=%7B%22xmin%22%3A-13043558%2C%22ymin%22%3A3856395%2C%22xmax%22%3A-13041325%2C%22ymax%22%3A3858918%2C%22spatialReference%22%3A%7B%22wkid%22%3A102100%7D%7D&outSR=102100&f=pjson&token=<ACCESS_TOKEN>
+
+``` */}
+```json
+{
+ "spatialReference": {
+  "wkid": 102100,
+  "latestWkid": 3857
+ },
+ "candidates": [
+  {
+   "address": "McDonald's",
+   "location": {
+    "x": -13042051.5014205072,
+    "y": 3857194.44405129505
+   },
+   "score": 100,
+   "attributes": {
+    "Type": "Fast Food",
+    "City": "San Diego"
+   },
+   "extent": {
+    "xmin": -13042162.8209113032,
+    "ymin": 3857062.14109622128,
+    "xmax": -13041940.1819297168,
+    "ymax": 3857326.74848951353
+   }
+  },
+  {
+   "address": "McDonald's",
+   "location": {
+    "x": -13041530.1922451239,
+    "y": 3858024.9435766032
+   },
+   "score": 100,
+   "attributes": {
+    "Type": "Fast Food",
+    "City": "San Diego"
+   },
+   "extent": {
+    "xmin": -13041641.511735918,
+    "ymin": 3857892.63131060777,
+    "xmax": -13041418.8727543298,
+    "ymax": 3858157.25732620433
+   }
+  }
+ ]
+}
+
+```
+ 
+</Tab>
+</Tabs>
+
+<MoreInfo>
+
+Requests that include `searchExtent`  can also include zone information (that is, city, state, and country). If the extent defined for `searchExtent`  is large enough to encompass multiple cities, it may be necessary to include the city name in the search to achieve optimal results. For example, if the `searchExtent`  covers the Dallas-Fort Worth metropolitan region, and you search for `Starbucks` , there could be matches returned in Dallas or Fort Worth or any of their suburbs. If you specifically want to find Starbucks in Garland, for example, this needs to be specified in the search.
+
+</MoreInfo>
+
+#### Find POIs using searchExtent and zone 
+
+##### Single-field 
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=starbucks garland&outFields=type,city,region&searchExtent=-97.407282,32.416436,-96.537829,33.141819&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=starbucks%20garland&outFields=type%2Ccity%2Cregion&searchExtent=-97.407282%2C32.416436%2C-96.537829%2C33.141819&f=pjson&token=<ACCESS_TOKEN>
+
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Starbucks",
+   "location": {
+    "x": -96.66027,
+    "y": 32.864458
+   },
+   "score": 100,
+   "attributes": {
+    "type": "Coffee Shop",
+    "city": "Garland",
+    "region": "Texas"
+   },
+   "extent": {
+    "xmin": -96.66127,
+    "ymin": 32.863458,
+    "xmax": -96.65927,
+    "ymax": 32.865458
+   }
+  }
+ ]
+}
+
+```
+
+
+</Tab>
+</Tabs>
+
+##### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=starbucks&city=garland&outFields=type,city,region&searchExtent=-97.407282,32.416436,-96.537829,33.141819&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+{/* 
+```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=starbucks&city=garland&outFields=type%2Ccity%2Cregion&searchExtent=-97.407282%2C32.416436%2C-96.537829%2C33.141819&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+ 
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Starbucks",
+   "location": {
+    "x": -96.66027,
+    "y": 32.864458
+   },
+   "score": 100,
+   "attributes": {
+    "type": "Coffee Shop",
+    "city": "Garland",
+    "region": "Texas"
+   },
+   "extent": {
+    "xmin": -96.66127,
+    "ymin": 32.863458,
+    "xmax": -96.65927,
+    "ymax": 32.865458
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+
+<MoreInfo>
+
+You can also search for street addresses within an extent. When the `searchExtent`  parameter is defined for an address search, city and postal code can be omitted from the search and valid matches can still be found. However, if the `searchExtent`  is large, it is possible for a street address to occur multiple times within the extent, and it may be necessary to refine the search by including city, state, postal code, or other distinguishing information. Additionally, if the search includes a city or postal code that is outside the `searchExtent` , no matches will be returned. See the following example, which illustrates finding a street address using `searchExtent` .
+
+</MoreInfo>
+
+#### Find a street address using searchExtent
+
+##### Single-field
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=380 new york st&searchExtent=-117.225635,34.015757,-117.119866,34.087402&f=pjson&token=<ACCESS_TOKEN>
+```
+
+</Tab>
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=380%20new%20york%20st&searchExtent=-117.225635%2C34.015757%2C-117.119866%2C34.087402&f=pjson&token=<ACCESS_TOKEN>
+
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "380 New York St, Redlands, California, 92373",
+   "location": {
+    "x": -117.195426038092,
+    "y": 34.056097983409
+   },
+   "score": 100,
+   "attributes": {
+    
+   },
+   "extent": {
+    "xmin": -117.196426038092,
+    "ymin": 34.055097983409,
+    "xmax": -117.194426038092,
+    "ymax": 34.057097983409
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+
+##### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=380 new york st&searchExtent=-117.225635,34.015757,-117.119866,34.087402&f=pjson&token=<ACCESS_TOKEN>
+```
+
+ 
+
+</Tab>
+
+<Tab>
+{/* 
+```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=380%20new%20york%20st&searchExtent=-117.225635%2C34.015757%2C-117.119866%2C34.087402&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "380 New York St, Redlands, California, 92373",
+   "location": {
+    "x": -117.195426038092,
+    "y": 34.056097983409
+   },
+   "score": 100,
+   "attributes": {
+    
+   },
+   "extent": {
+    "xmin": -117.196426038092,
+    "ymin": 34.055097983409,
+    "xmax": -117.194426038092,
+    "ymax": 34.057097983409
+   }
+  }
+ ]
+}
+
+```
+ 
+</Tab>
+</Tabs>
+</Box>
+
+<Box>
+
+### Proximity searches
+
+Geocoding results are typically sorted according to their relevance to the search and their relative importance. However, with some applications, especially mobile apps, users are more concerned with finding features closest to their current location. For this reason, the `findAddressCandidates`  operation supports prioritization of candidates based on their distance from a specified point. By passing in the `location`  parameter, you can define an area of influence for your searches. The `location`  value represents the center point of the area, which spans a radius of 50,000 meters. Features closest to the input location show up higher in the list of candidates. Results that are within the area of influence area receive a greater boost than those outside the area.
+
+<MoreInfo>
+
+It is important to note that proximity search does not filter results that are farther than 50,000 meters from the input location—it is intended to influence the sort order of results so the most locationally relevant candidates are returned first. For instance, if your location is in Las Vegas, and you search for Bellagio, the first candidate is Bellagio in Las Vegas. The second candidate is in a different part of the United States, much farther away than 50,000 meters, but is still returned because it is the second most relevant (closest) candidate. In general, the number of candidates returned by a proximity search is only limited by the `maxLocations`  parameter.
+
+The `location`  parameter can be used in place of administrative zone (city) or postal code in an address search, as long as a matching address exists within 50 kilometers of the input location. Consider the following example. 
+
+-   `251 Vesey St, New York, 10282`  is an address in Manhattan, New York City.
+-   Coordinates `-74.006,40.71437`  represent a point within central Manhattan, less than 1 kilometer away from the address. 
+
+If you search for `251 Vesey St`  (no city or postal) with `location=-74.006,40.71437`  included in the request, a match to `251 Vesey St, New York, 10282`  is returned. However, if instead you search for `251 Vesey St`  with a `location`  value in Washington, DC (350 kilometers away), an address match is not returned.
+
+</MoreInfo>
+
+#### Find a place name 
+
+##### Single-field
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=bellagio&outFields=City,Region,Country&maxLocations=10&location=-115.172783,36.114789&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=bellagio&outFields=City%2CRegion%2CCountry&maxLocations=10&location=-115.172783%2C36.114789&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Bellagio",
+   "location": {
+    "x": -115.1762689,
+    "y": 36.1131468
+   },
+   "score": 100,
+   "attributes": {
+    "City": "Las Vegas",
+    "Region": "Nevada",
+    "Country": "USA"
+   },
+   "extent": {
+    "xmin": -115.1812689,
+    "ymin": 36.1081468,
+    "xmax": -115.1712689,
+    "ymax": 36.1181468
+   }
+  },
+  {
+   "address": "Bellagio, Calabasas, California",
+   "location": {
+    "x": -118.6349961,
+    "y": 34.1439143
+   },
+   "score": 100,
+   "attributes": {
+    "City": "Calabasas",
+    "Region": "California",
+    "Country": "USA"
+   },
+   "extent": {
+    "xmin": -118.6379961,
+    "ymin": 34.1409143,
+    "xmax": -118.6319961,
+    "ymax": 34.1469143
+   }
+  }
+ ]
+}
+```
+
+</Tab>
+</Tabs>
+
+##### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=bellagio&outFields=City,Region,Country&maxLocations=10&location=-115.172783,36.114789&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=bellagio&outFields=City%2CRegion%2CCountry&maxLocations=10&location=-115.172783%2C36.114789&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Bellagio",
+   "location": {
+    "x": -115.1762689,
+    "y": 36.1131468
+   },
+   "score": 100,
+   "attributes": {
+    "City": "Las Vegas",
+    "Region": "Nevada",
+    "Country": "USA"
+   },
+   "extent": {
+    "xmin": -115.1812689,
+    "ymin": 36.1081468,
+    "xmax": -115.1712689,
+    "ymax": 36.1181468
+   }
+  },
+  {
+   "address": "Bellagio, Calabasas, California",
+   "location": {
+    "x": -118.6349961,
+    "y": 34.1439143
+   },
+   "score": 100,
+   "attributes": {
+    "City": "Calabasas",
+    "Region": "California",
+    "Country": "USA"
+   },
+   "extent": {
+    "xmin": -118.6379961,
+    "ymin": 34.1409143,
+    "xmax": -118.6319961,
+    "ymax": 34.1469143
+   }
+  }
+ ]
+}
+``` 
+
+</Tab>
+</Tabs>
+
+ 
+{/* If you only want to return candidates within a specific area, and sort the candidates according to their proximity to a location, you need to define a search extent by passing the `searchExtent`  parameter in the request along with the `location`  parameter. Consider the Golden Nugget example again. If your location is in Las Vegas and you want to confine your search results to places named Golden Nugget that are within the map extent, you would need to construct a request with the following parameters:
+
+-   `SingleLine`  (or `address` ): Bellagio
+-   `location` : -115.172783,36.114789
+-   `searchExtent` : -115.2568,36.045626,-115.07759,36.1904
+
+The request URL would be similar to the one below. See the [Search within an extent](/find-address-candidates#search-within-an-extent) section above for more information about the `searchExtent`  parameter. */}
+
+#### Find a place-name using both proximity and searchExtent
+
+##### Single-field 
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=bellagio&outFields=City,Region,Country&searchExtent=-115.2568,36.045626,-115.07759,36.1904&location=-115.172783,36.114789&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+```
+
+</Tab>
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=bellagio&outFields=City%2CRegion%2CCountry&searchExtent=-115.2568%2C36.045626%2C-115.07759%2C36.1904&location=-115.172783%2C36.114789&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Bellagio",
+   "location": {
+    "x": -115.1762689,
+    "y": 36.1131468
+   },
+   "score": 100,
+   "attributes": {
+    "City": "Las Vegas",
+    "Region": "Nevada",
+    "Country": "USA"
+   },
+   "extent": {
+    "xmin": -115.1812689,
+    "ymin": 36.1081468,
+    "xmax": -115.1712689,
+    "ymax": 36.1181468
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+
+</Tabs>
+
+##### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=bellagio&outFields=City,Region,Country&searchExtent=-115.2568,36.045626,-115.07759,36.1904&location=-115.172783,36.114789&forStorage=false&f=pjson&token=<ACCESS_TOKEN> 
+```
+</Tab>
+<Tab>
+{/* 
+```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=bellagio&outFields=City%2CRegion%2CCountry&searchExtent=-115.2568%2C36.045626%2C-115.07759%2C36.1904&location=-115.172783%2C36.114789&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+ 
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Bellagio",
+   "location": {
+    "x": -115.1762689,
+    "y": 36.1131468
+   },
+   "score": 100,
+   "attributes": {
+    "City": "Las Vegas",
+    "Region": "Nevada",
+    "Country": "USA"
+   },
+   "extent": {
+    "xmin": -115.1812689,
+    "ymin": 36.1081468,
+    "xmax": -115.1712689,
+    "ymax": 36.1181468
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+</Box>
+
+<Box>
+
+### Filter categories
+
+The `findAddressCandidates`  operation supports filtering searches by category values, which represent address and place types. By including the `category`  parameter in a `findAddressCandidates`  request, you can avoid false positive matches to unexpected place and address types due to ambiguous searches. 
+
+For example, a user may search for June, expecting the service to match to June Mountain ski resort. However, there are many places in the world named June, so the search returns several cities named June.
+
+#### Search for "June" without a category 
+
+##### Single-field
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=June&category=&outFields=PlaceName,Type,Place_Addr,City,Region&maxLocations=5&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+```
+
+</Tab>
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=June&category=&outFields=PlaceName%2CType%2CPlace_Addr%2CCity%2CRegion&maxLocations=5&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+ ```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "June, Missouri",
+   "location": {
+    "x": -94.360217,
+    "y": 36.80118
+   },
+   "score": 100,
+   "attributes": {
+    "Type": "Village",
+    "PlaceName": "June",
+    "Place_Addr": "June, Missouri",
+    "City": "June",
+    "Region": "Missouri"
+   },
+   "extent": {
+    "xmin": -94.367217,
+    "ymin": 36.79418,
+    "xmax": -94.353217,
+    "ymax": 36.80818
+   }
+  },
+  {
+   "address": "June, Lacombe County, Alberta",
+   "location": {
+    "x": -113.603535729,
+    "y": 52.482597831
+   },
+   "score": 100,
+   "attributes": {
+    "Type": "Village",
+    "PlaceName": "June",
+    "Place_Addr": "Lacombe County, Alberta",
+    "City": "Lacombe County",
+    "Region": "Alberta"
+   },
+   "extent": {
+    "xmin": -113.613535729,
+    "ymin": 52.472597831,
+    "xmax": -113.593535729,
+    "ymax": 52.492597831
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+
+The solution for this case is to pass the `category`  parameter in the request. By including `category=Ski Resort`  in the request, all places that are not ski resorts are bypassed by the search, and only ski resorts whose names begin with June are returned.
+
+#### Search for "June" with category=Ski Resort 
+
+##### Single-field
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=June&category=Ski Resort&outFields=PlaceName,Type,Place_Addr,City,Region&maxLocations=5&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=June&category=Ski%20Resort&outFields=PlaceName%2CType%2CPlace_Addr%2CCity%2CRegion&maxLocations=5&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "June Mountain Ski Area",
+   "location": {
+    "x": -119.1217968,
+    "y": 37.8256044
+   },
+   "score": 84.96,
+   "attributes": {
+    "Type": "Ski Resort",
+    "PlaceName": "June Mountain Ski Area",
+    "Place_Addr": "3819 State Highway 158, June Lake, California, 93529",
+    "City": "June Lake",
+    "Region": "California"
+   },
+   "extent": {
+    "xmin": -119.1267968,
+    "ymin": 37.8206044,
+    "xmax": -119.1167968,
+    "ymax": 37.8306044
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+
+See [Category filtering](/category-filtering) for details.
+
+</Box>
+<Box>
+
+### Set the geocode result language
+
+In some countries, multiple languages are spoken, and an address may be available in different languages. You may want to search for an address in one language but return it in another. The `langCode`  parameter is useful in this case. For instance, you may have an address in Israel that is in the Hebrew language and you want to geocode it and return the address in English. 
+
+#### Search for Hebrew address "הרימון 4, רמת גן" and return it in English 
+
+##### Single-field
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=הרימון 4, רמת גן&langCode=EN&outFields=LangCode,Addr_type&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=%D7%94%D7%A8%D7%99%D7%9E%D7%95%D7%9F%204%2C%20%D7%A8%D7%9E%D7%AA%20%D7%92%D7%9F&langCode=EN&outFields=LangCode%2CAddr_type&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "HaRimmon Street 4, Ramat Gan",
+   "location": {
+    "x": 34.808695257572,
+    "y": 32.08775764427
+   },
+   "score": 99.41,
+   "attributes": {
+    "Addr_type": "StreetAddress",
+    "LangCode": "ENG"
+   },
+   "extent": {
+    "xmin": 34.807695257572,
+    "ymin": 32.08675764427,
+    "xmax": 34.809695257572,
+    "ymax": 32.08875764427
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+
+##### Multifield 
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=הרימון 4&city=רמת גן&langCode=EN&outFields=LangCode,Addr_type&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=%D7%94%D7%A8%D7%99%D7%9E%D7%95%D7%9F%204&city=%D7%A8%D7%9E%D7%AA%20%D7%92%D7%9F&langCode=EN&outFields=LangCode%2CAddr_type&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+ ```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "HaRimmon Street 4, Ramat Gan",
+   "location": {
+    "x": 34.808695257572,
+    "y": 32.08775764427
+   },
+   "score": 99.41,
+   "attributes": {
+    "Addr_type": "StreetAddress",
+    "LangCode": "ENG"
+   },
+   "extent": {
+    "xmin": 34.807695257572,
+    "ymin": 32.08675764427,
+    "xmax": 34.809695257572,
+    "ymax": 32.08875764427
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+</Box>
+
+<Box>
+
+### Customize output values 
+
+The `preferredLabelValues`  parameter allows limited customization of output values in `findAddressCandidates`  responses. Refer to the parameter [overview](/find-address-candidates#preferredlabelvalues) for details about its functionality; this section includes examples showing how it can be used.
+
+<MoreInfo>
+
+The `preferredLabelValues`  parameter can be used to override the default city and street names returned in output fields for a geocoding transaction. The default values are based on country addressing conventions and data availability. United States addresses returned by the ArcGIS Geocoding service include the primary city name assigned to the postal code that is associated with the address; this is known as the postal city name. Sometimes the postal city name is different than the name of the city whose boundaries the address is within. For instance, one of the postal codes used in the city of Edgewood, Washington, is 98371. The primary name assigned to postal code 98371 is Puyallup, a city adjacent to the city of Edgewood. When addresses with postal code 98371 are geocoded by the ArcGIS Geocoding service, the output labels and fields include Puyallup as the city name by default.
+
+The following examples illustrate how to use the `preferredLabelValues`  parameter to modify the output city name for address `2420 Meridian Ave E, Edgewood, WA 98371`  in Edgewood, Washington. Without the parameter, Puyallup is included in geocoding results as the city name:
+
+</MoreInfo>
+
+#### Search for address "2420 Meridian Ave E, Edgewood, WA 98371" without preferredLabelValues 
+
+##### Single-field
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```javascript
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=2420 Meridian Ave E, Edgewood, WA 98371&preferredLabelValues=&outFields=Match_addr,City&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+{/* 
+```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=2420%20Meridian%20Ave%20E%2C%20Edgewood%2C%20WA%2098371&preferredLabelValues=&outFields=Match_addr%2CCity&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+ 
+
+</Tab>
+</Tabs>
+
+##### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=2420 Meridian Ave E&city=Edgewood&region=WA&postal=98371&preferredLabelValues=&outFields=Match_addr,City&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=2420%20Meridian%20Ave%20E&city=Edgewood&region=WA&postal=98371&preferredLabelValues=&outFields=Match_addr%2CCity&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "2420 Meridian Ave E, Puyallup, Washington, 98371",
+   "location": {
+    "x": -122.29413591243,
+    "y": 47.234864146322
+   },
+   "score": 100,
+   "attributes": {
+    "Match_addr": "2420 Meridian Ave E, Puyallup, Washington, 98371",
+    "City": "Puyallup"
+   },
+   "extent": {
+    "xmin": -122.29513591243,
+    "ymin": 47.233864146322,
+    "xmax": -122.29313591243,
+    "ymax": 47.235864146322
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+ 
+
+The `preferredLabelValues`  parameter can be used to return a more suitable city name for this address in geocoding results. Pass `preferredLabelValues=localCity`  in the `findAddressCandidates`  request to return Edgewood as the city name in the output.
+
+#### Search for an address with preferredLabelValues=localCity 
+
+##### Single-field 
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=2420 Meridian Ave E, Edgewood, WA 98371&preferredLabelValues=localCity&outFields=Match_addr,City&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=2420%20Meridian%20Ave%20E%2C%20Edgewood%2C%20WA%2098371&preferredLabelValues=localCity&outFields=Match_addr%2CCity&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+</Tab>
+</Tabs>
+
+##### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=2420 Meridian Ave E&city=Edgewood&region=WA&postal=98371&preferredLabelValues=localCity&outFields=Match_addr,City&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=2420%20Meridian%20Ave%20E&city=Edgewood&region=WA&postal=98371&preferredLabelValues=localCity&outFields=Match_addr,City&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "2420 Meridian Ave E, Edgewood, Washington, 98371",
+   "location": {
+    "x": -122.29413591243,
+    "y": 47.234864146322
+   },
+   "score": 100,
+   "attributes": {
+    "Match_addr": "2420 Meridian Ave E, Edgewood, Washington, 98371",
+    "City": "Edgewood"
+   },
+   "extent": {
+    "xmin": -122.29513591243,
+    "ymin": 47.233864146322,
+    "xmax": -122.29313591243,
+    "ymax": 47.235864146322
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+
+#### Search for an address without preferredLabelValues 
+
+In some cases, there are multiple postal or local city names associated with an address, and you may want to use the city name that was searched for in geocoding results instead of the primary postal or local city name. The `matchedCity`  option of the `preferredLabelValues`  parameter supports this. The city of Merriam, Kansas, is part of the Mission postal area, for which there are several alternate postal city names; one of these is Shawnee Mission. If you search for an address in this area without using the `preferredLabelValues`  parameter, Mission is returned as the city name by default, as illustrated in the following example.
+
+##### Single-field
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=9001 W 62nd St, Shawnee Mission, KS 66202&preferredLabelValues=&outFields=Match_addr,City&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=9001%20W%2062nd%20St%2C%20Shawnee%20Mission%2C%20KS%2066202&preferredLabelValues=&outFields=Match_addr%2CCity&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "9001 W 62nd St, Mission, Kansas, 66202",
+   "location": {
+    "x": -94.689890954033,
+    "y": 39.016897077214
+   },
+   "score": 99.9,
+   "attributes": {
+    "Match_addr": "9001 W 62nd St, Mission, Kansas, 66202",
+    "City": "Mission"
+   },
+   "extent": {
+    "xmin": -94.690890954033,
+    "ymin": 39.015897077214,
+    "xmax": -94.688890954033,
+    "ymax": 39.017897077214
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+
+##### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=9001 W 62nd St&city=Shawnee Mission&region=KS&postal=66202&preferredLabelValues=&outFields=Match_addr,City&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=9001%20W%2062nd%20St&city=Shawnee%20Mission&region=KS&postal=66202&preferredLabelValues=&outFields=Match_addr%2CCity&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "9001 W 62nd St, Mission, Kansas, 66202",
+   "location": {
+    "x": -94.689890954033,
+    "y": 39.016897077214
+   },
+   "score": 99.9,
+   "attributes": {
+    "Match_addr": "9001 W 62nd St, Mission, Kansas, 66202",
+    "City": "Mission"
+   },
+   "extent": {
+    "xmin": -94.690890954033,
+    "ymin": 39.015897077214,
+    "xmax": -94.688890954033,
+    "ymax": 39.017897077214
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+
+#### Search for an address with preferredLabelValues=matchedCity
+
+If `preferredLabelValues=matchedCity`  is passed in the `findAddressCandidates`  request for the same address, Shawnee Mission is returned as the city name instead.
+
+##### Single-field
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=9001 W 62nd St, Shawnee Mission, KS 66202&preferredLabelValues=matchedCity&outFields=Match_addr,City&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=9001%20W%2062nd%20St%2C%20Shawnee%20Mission%2C%20KS%2066202&preferredLabelValues=matchedCity&outFields=Match_addr%2CCity&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "9001 W 62nd St, Shawnee Mission, Kansas, 66202",
+   "location": {
+    "x": -94.689890954033,
+    "y": 39.016897077214
+   },
+   "score": 99.9,
+   "attributes": {
+    "Match_addr": "9001 W 62nd St, Shawnee Mission, Kansas, 66202",
+    "City": "Shawnee Mission"
+   },
+   "extent": {
+    "xmin": -94.690890954033,
+    "ymin": 39.015897077214,
+    "xmax": -94.688890954033,
+    "ymax": 39.017897077214
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+
+##### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=9001 W 62nd St&city=Shawnee Mission&region=KS&postal=66202&preferredLabelValues=matchedCity&outFields=Match_addr,City&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=9001%20W%2062nd%20St&city=Shawnee%20Mission&region=KS&postal=66202&preferredLabelValues=matchedCity&outFields=Match_addr%2CCity&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "9001 W 62nd St, Shawnee Mission, Kansas, 66202",
+   "location": {
+    "x": -94.689890954033,
+    "y": 39.016897077214
+   },
+   "score": 99.9,
+   "attributes": {
+    "Match_addr": "9001 W 62nd St, Shawnee Mission, Kansas, 66202",
+    "City": "Shawnee Mission"
+   },
+   "extent": {
+    "xmin": -94.690890954033,
+    "ymin": 39.015897077214,
+    "xmax": -94.688890954033,
+    "ymax": 39.017897077214
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+
+#### Search for an address without preferredLabelValues 
+
+Streets may be known by multiple names as well. For streets that have more than one name, the ArcGIS Geocoding service returns the name that was matched to from the request in the geocoding results. The street in the following example has two names—`IN-62`  is designated as the primary name, and `Highway 62 W`  is an alternate name. If you search for an address on this street by its alternate name `Highway 62 W` , without using the `preferredLabelValues`  parameter, `Highway 62 W`  is included in the output fields of the geocoding response.
+
+##### Single-field
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=71 Highway 62 W, Mount Vernon, Indiana, 47620&preferredLabelValues=&outFields=Match_addr,StAddr&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=71%20Highway%2062%20W%2C%20Mount%20Vernon%2C%20Indiana%2C%2047620&preferredLabelValues=&outFields=Match_addr%2CStAddr&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "71 Highway 62 W, Mount Vernon, Indiana, 47620",
+   "location": {
+    "x": -87.895667387148,
+    "y": 37.932216595452
+   },
+   "score": 98.9,
+   "attributes": {
+    "Match_addr": "71 Highway 62 W, Mount Vernon, Indiana, 47620",
+    "StAddr": "71 Highway 62 W"
+   },
+   "extent": {
+    "xmin": -87.896667387148,
+    "ymin": 37.931216595452,
+    "xmax": -87.894667387148,
+    "ymax": 37.933216595452
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+
+##### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=71 Highway 62 W&city=Mount Vernon&region=Indiana&postal=47620&preferredLabelValues=&outFields=Match_addr,StAddr&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+```
+
+</Tab>
+<Tab>
+{/* 
+```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=71%20Highway%2062%20W&city=Mount%20Vernon&region=Indiana&postal=47620&preferredLabelValues=&outFields=Match_addr%2CStAddr&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "71 Highway 62 W, Mount Vernon, Indiana, 47620",
+   "location": {
+    "x": -87.895667387148,
+    "y": 37.932216595452
+   },
+   "score": 98.9,
+   "attributes": {
+    "Match_addr": "71 Highway 62 W, Mount Vernon, Indiana, 47620",
+    "StAddr": "71 Highway 62 W"
+   },
+   "extent": {
+    "xmin": -87.896667387148,
+    "ymin": 37.931216595452,
+    "xmax": -87.894667387148,
+    "ymax": 37.933216595452
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+
+#### Search for an address with preferredLabelValues=primaryStreet 
+
+However, your use case may require that the standardized street names recognized as primary by the postal authority be returned by the geocoding application. If so, you can pass `preferredLabelValues=primaryStreet`  in the `findAddressCandidates`  request. For the previous example, `70 Highway 62 W, Mount Vernon, Indiana, 47620` , doing so causes `W 4th St`  to be returned as the street name.
+
+##### Single-field
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=71 Highway 62 W, Mount Vernon, Indiana, 47620&preferredLabelValues=primaryStreet&outFields=Match_addr,StAddr&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "71 W 4th St, Mount Vernon, Indiana, 47620",
+   "location": {
+    "x": -87.895667387148,
+    "y": 37.932216595452
+   },
+   "score": 98.9,
+   "attributes": {
+    "Match_addr": "71 W 4th St, Mount Vernon, Indiana, 47620",
+    "StAddr": "71 W 4th St"
+   },
+   "extent": {
+    "xmin": -87.896667387148,
+    "ymin": 37.931216595452,
+    "xmax": -87.894667387148,
+    "ymax": 37.933216595452
+   }
+  }
+ ]
+}
+
+```
+{/* 
+```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=71%20Highway%2062%20W%2C%20Mount%20Vernon%2C%20Indiana%2C%2047620&preferredLabelValues=primaryStreet&outFields=Match_addr%2CStAddr&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+```
+
+  */}
+
+</Tab>
+</Tabs>
+
+##### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=71 Highway 62 W&city=Mount Vernon&region=Indiana&postal=47620&preferredLabelValues=primaryStreet&outFields=Match_addr,StAddr&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "71 W 4th St, Mount Vernon, Indiana, 47620",
+   "location": {
+    "x": -87.895667387148,
+    "y": 37.932216595452
+   },
+   "score": 98.9,
+   "attributes": {
+    "Match_addr": "71 W 4th St, Mount Vernon, Indiana, 47620",
+    "StAddr": "71 W 4th St"
+   },
+   "extent": {
+    "xmin": -87.896667387148,
+    "ymin": 37.931216595452,
+    "xmax": -87.894667387148,
+    "ymax": 37.933216595452
+   }
+  }
+ ]
+}
+
+```
+{/* ```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?address=71%20Highway%2062%20W&city=Mount%20Vernon&region=Indiana&postal=47620&preferredLabelValues=primaryStreet&outFields=Match_addr%2CStAddr&maxLocations=1&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+</Tab>
+</Tabs>
+</Box>

@@ -1,0 +1,2773 @@
+---
+title: "Upgrade"
+description: "The upgrade operation upgrades, through either a patch or a release,ArcGIS Enterprise on Kubernetes to the current version."
+slug: "upgrade"
+url: "/upgrade"
+guid: "GUID-F9D9DDA1-6127-4CD5-9D6C-C3580E036A9C"
+migratedTopicMetadata:
+  FTITLE: "Upgrade"
+  FDESCRIPTION: ""
+  FCHANGES: "Changes for 11.1"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1-*"
+  CREATED-ON: "17/04/2023 10:14:56"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "21/04/2023 11:27:45"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-E138FA26-A98B-43B9-B5EC-E96EE97086AE"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /system/upgrades/upgrade
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /system/upgrades/upgrade
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed with either "Security and infrastructure" or "Servers" privileges
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `upgrade` operation upgrades, through either a patch or a release, an ArcGIS Enterprise on Kubernetes deployment to the current version.
+
+Before performing an upgrade, the unique ID associated with the patch or release must be retrieved from the version manifest using the [Available](/check-available-updates) operation. The version manifest is a JSON array of version objects that contain update-specific information, including a JSON array of container objects that specify affected containers and include their name, checksum, and image values.
+
+Once the ID has been retrieved, you must also retrieve the [required upgrade settings](/get-upgrade-settings) that will be passed through as part of the `upgrade` operation. Some settings will require user input before they can be used during an upgrade. For more information about current upgrade settings, see the [Upgrade settings section below](/upgrade#upgrade-settings).
+
+<Note type={"note"}>
+
+The organization is put into [read-only mode](/mode) during an upgrade.
+
+</Note>
+
+Once the `upgrade` job request has been submitted, the deployment will either install a new patch on the base version or upgrade the entire deployment to the latest release. While the job is running, the [Upgrades](/upgrades) resource will return detailed, real-time job messages and status information. The `upgrades` resource's child operations and resources will remain inaccessible for the duration of the upgrade.
+
+<Note type={"caution"}>
+
+The startup time for some containers may exceed expected wait times and timeout, causing the upgrade to fail. The timeout period can be extended by [modifying](/update-system-properties) the `containerStartUpTimeoutSeconds` [system property](/system-properties) to a value larger than the default 1,800 seconds. If the upgrade process continues to fail after modifying the timeout period and restarting, contact [Esri technical support](https://support.esri.com/en/contact-tech-support). This only applies when installing a patch.
+
+</Note>
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `versionManifest` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The unique ID associated with a patch or release. You can get the version manifest ID for a patch or release from the JSON view of the [Available](/check-available-updates) operation.
+
+      ```other label=Example
+      {"id": "rel_234567_2000"}
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `licenseFile` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      <Note type={"note"}>
+
+      This parameter was previously deprecated at 11.0 and has been reintroduced at 11.1. Licensing information can either be provided through the `licenseFile` parameter or the `upgradeSettings` parameter.
+
+      </Note>
+
+      The ArcGIS Enterprise on Kubernetes license file (`.json`). This license file-which contains information regarding your user types, apps, and capabilities-is obtained from My Esri. For more information, see [Obtain an authorization file](https://enterprise-k8s.arcgis.com/en/latest/deploy/obtaining-an-authorization-file.htm). This parameter is not required if the request is for a minor release or patch-based upgrade.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `versionManifestFile` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      <Note type={"caution"}>
+
+      This parameter is not currently supported.
+
+      </Note>
+
+      The file containing the version manifest.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `upgradeSettings` 
+
+      (Optional; Required for version 11.0)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      <Note type={"note"}>
+
+      Licensing information can either be provided through the `licenseFile` parameter or the `upgradeSettings` parameter.
+
+      </Note>
+
+      A JSON object containing details for release upgrade settings. These settings, retrieved from the [Get Upgrade Settings](/get-upgrade-settings) operation, must be included in the request for the upgrade to be successful. Currently, the object supports the following three upgrade settings: `updateToLatestPatch`, `licenseUpload`. These settings are applicable to ArcGIS Enterprise on Kubernetes versions 11.0 and later.
+
+      For more information about these settings, see the [Upgrade settings](/upgrade#upgrade-settings) section below.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `volumesConfig`
+
+      (Required for deployments using cloud-native relational data stores)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      <Note>
+
+      This parameter is separate from the `volumesConfig` that could previously be specified as part of the `upgradeSettings` parameter.
+
+      </Note>
+
+      Introduced at 11.4. A JSON object containing the storage configurations for a deployment's cloud-native relational data store, ensuring that the system has the required storage volume configuration established after the upgrade completes. The `volumesConfig` JSON object must include the following properties:
+
+      * `provisioningType`: Specifies the type of storage provisioning type (either `DYNAMIC` or `STATIC`).
+      * `component`: Indicates the component being upgraded. For cloud-native relational data stores, this value must be `REALTIONAL_UPGRADE`.
+      * `size`: Defines the size of the storage volume (ex: `16Gi`).
+      * `storageClass`: Specifies the storage class to use.
+      * `labels`: Defines any key-value pairs used to categorize and manage the storage volumes.
+
+      When upgrading from 11.4 to 11.5 (or later), or upgrading from one later version of ArcGIS Enterprise on Kubernetes to another, this parameter will need to be included in the request if a cloud-native relational stores have been registered with the deployment. This parameter is not applicable to environments upgrading from 11.3 to 11.4.
+
+      ```other label=Example
+      {
+        "volumesConfig": [
+          {
+            "provisioningType": "DYNAMIC",
+            "component": "REALTIONAL_UPGRADE",
+            "size": "16Gi",
+            "storageClass": "tz405rmnc1",
+            "labels": {
+              "arcgis/tier": "storage",
+              "arcgis/app": "postgres"
+            }
+          }
+        ]
+      }
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `cloudConfig`
+
+      (Required for deployments using cloud-native relational data stores)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.4. A JSON array containing the deployment's cloud storage configuration for a cloud-native relational data store, including the credentials for the service. For more information on the required properties for `cloudConfig`, see the Configure documentation's [Cloud configuration properties](configure/#cloud-configuration-properties) section.
+
+      When upgrading from 11.4 to 11.5 (or later), or upgrading from one later version of ArcGIS Enterprise on Kubernetes to another, this parameter will need to be included in the request if a cloud-native relational stores have been registered with the deployment. This parameter is not applicable to environments upgrading from 11.3 to 11.4.
+
+      ```other label=Example
+      [
+        {
+          "name": "AWS",
+          "credential": {
+            "type": "IAM-ROLE"
+          },
+          "cloudServices": [
+            {
+              "name": "AWS RDS for PostgreSQL",
+              "category": "databases",
+              "type": "relationalStore",
+              "instanceProvided": true,
+              "usage": "DEFAULT",
+              "connection": {
+                "region": "<region_code>",
+                "dbUri": "<primary_relational_database_endpoint_url>",
+                "dbReadonlyUri": "<primary_relational_database_endpoint_url>",
+                "dbPort": 5674, //placeholder value
+                "credential": {
+                  "type": "databaseUser",
+                  "databaseUsers": {
+                    "adminUser": {
+                      "authType": "PASSWORD",
+                      "name": "<db name>",
+                      "password": "<password>"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+### Upgrade settings
+
+The table below outlines the currently supported settings that are required when upgrading an ArcGIS Enterprise on Kubernetes deployment.
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `updateToLatestPatch` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      When set to `true`, patches included with a release will be automatically installed during the upgrade process. The default value of this property is `true`; the value should not be changed.
+
+      Values: `true`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `licenseUpload` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object that stores an uploaded ArcGIS Enterprise on Kubernetes license file (`.json`). When [upgrading](/upgrade), the `value` property must be updated to reflect the [upload ID](/uploads) of an [uploaded](/upload-item) ArcGIS Enterprise on Kubernetes license file.
+
+      ```markdown label=Example
+      {
+        "seqNum": 1,
+        "validFileExtensions": ["json"],
+        "name": "licenseUpload",
+        "description": "licenseFieldDescToken",
+        "id": "licenseUpload",
+        "type": "File",
+        "value": "caf81a83-b6a7-4810-9e7c-dbff96c6050a",
+        "required": true,
+        "newfield": ""
+      },
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `volumesConfig` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      <Note type={"note"}>
+
+      The `volumesConfig` upgrade setting has been deprecated at ArcGIS Enterprise on Kubernetes 11.1 and is only applicable to ArcGIS Enterprise on Kubernetes 11.0.
+
+      </Note>
+
+      A JSON object containing the storage configurations for persistent volumes that are required while upgrading.
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+### Deprecated parameters
+
+The following parameters have been deprecated at ArcGIS Enterprise on Kubernetes 11.0. The information previously specified by these parameters is now included with the `upgradeSettings` parameter:
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serverLicenseFile` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A valid ArcGIS GIS Server license file (either `.ecp` or `.prvc`). This parameter is not required if the request is for a minor release or patch-based upgrade.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `updateToLatestPatch` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      When set to `true`, patches included with a release will be automatically installed during the upgrade process. The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usages
+
+### Example one: license file
+
+The following is a sample POST request for the `upgrade` operation, demonstrating a request that includes the `licenseFile` parameter:
+
+```other
+POST /context/admin/system/upgrades/upgrade HTTP/1.1
+Host: organization.domain.com
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Length: []
+
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="versionManifest"
+
+{"id":"rel_123456_4000"}
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="licenseFile"; filename="AllUTs_AllAddOnApps.json"
+Content-Type: application/json
+
+{"MyEsri": {"version":"10.9.1","definitions": {"userTypes": [{"id":"viewerUT","name":"Viewer","description":"Viewer","level":"1","isEsriDefault":true,"apps": [{"isAppBundle":true,"id":"officeAppsAB","entitlements":[]},{"isAppBundle":false,"id":"runtimelite","entitlements":["runtimelite"]},{"isAppBundle":true,"id":"essentialAppsAB","entitlements":[]}]},...],"licenseManagement": {"licenses": [{"license": "U0VSV..."}]}}}}
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="versionManifestFile"; filename=""
+Content-Type: application/octet-stream
+
+
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="updateToLatestPatch"
+
+False
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="volumesConfig"
+
+
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="cloudConfig"
+
+
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="upgradeSettings"
+
+{}
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="f"
+
+pjson
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="token"
+
+<token>
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb--
+
+```
+
+### Example two: upgrade settings
+
+#### Prerequisites
+
+Before performing this operation, the list of required settings needed for the upgrade must be retrieved using the [Get Upgrade Settings](/get-upgrade-settings) operation:
+
+```other
+POST /context/admin/system/upgrades/getUpgradeSettings HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+upgradeId={"id": "rel_08042022_3000"}&f=pjson&token=<token>
+```
+
+Once the list of upgrade settings is retrieved, modify the settings as necessary. For example, when upgrading an ArcGIS Enterprise on Kubernetes deployment from version 10.9.1 to 11.0, you must modify the `value` property for the `licenseUpload` JSON object to reflect the [upload ID](/uploads) of an uploaded ArcGIS Enterprise on Kubernetes license file:
+
+```other
+{
+  "userInputs": [
+    {
+      "seqNum": 0,
+      "defaultValue": false,
+      "name": "updateToLatestPatch",
+      "description": "updateToLatestPatch",
+      "isManagerInvisibleField": true,
+      "id": "updateToLatestPatch",
+      "type": "Boolean",
+      "value": true,
+      "required": true,
+      "newfield": ""
+    },
+    {
+      "seqNum": 1,
+      "validFileExtensions": ["json"],
+      "name": "licenseUpload",
+      "description": "licenseFieldDescToken",
+      "id": "licenseUpload",
+      "type": "File",
+      "value": "caf81a83-b6a7-4810-9e7c-dbff96c6050a",
+      "required": true,
+      "newfield": ""
+    }
+  ]
+}
+```
+
+#### Example two: upgrade settings
+
+The following is a sample POST request for the `upgrade` operation, demonstrating a request that includes the `upgradeSettings` parameter:
+
+```other
+POST /context/admin/system/upgrades/upgrade HTTP/1.1
+Host: organization.domain.com
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Length: []
+
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="versionManifest"
+
+{"id": "rel_08042022_3000"}
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="licenseFile"; filename="AllUTs_AllAddOnApps.json"
+Content-Type: application/json
+
+
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="versionManifestFile"; filename=""
+Content-Type: application/octet-stream
+
+
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="updateToLatestPatch"
+
+False
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="volumesConfig"
+
+
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="cloudConfig"
+
+
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="upgradeSettings"
+
+{
+  "userInputs": [
+    {
+      "seqNum": 0,
+      "defaultValue": false,
+      "name": "updateToLatestPatch",
+      "description": "updateToLatestPatch",
+      "isManagerInvisibleField": true,
+      "id": "updateToLatestPatch",
+      "type": "Boolean",
+      "value": true,
+      "required": true,
+      "newfield": ""
+    },
+    {
+      "seqNum": 1,
+      "validFileExtensions": ["json"],
+      "name": "licenseUpload",
+      "description": "licenseFieldDescToken",
+      "id": "licenseUpload",
+      "type": "File",
+      "value": "caf81a83-b6a7-4810-9e7c-dbff96c6050a",
+      "required": true,
+      "newfield": ""
+    }
+  ]
+}
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="f"
+
+pjson
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="token"
+
+<token>
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb--
+
+```
+
+### Example three: cloud-native relational store
+
+The following is a sample POST request for the `upgrade` operation, demonstrating a request that includes inputs for the `volumesConfig` and `cloudConfig` parameters:
+
+```other
+POST /context/admin/system/upgrades/upgrade HTTP/1.1
+Host: organization.domain.com
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Length: []
+
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="versionManifest"
+
+{"id":"rel_123456_4000"}
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="licenseFile"; filename="AllUTs_AllAddOnApps.json"
+Content-Type: application/json
+
+
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="versionManifestFile"; filename=""
+Content-Type: application/octet-stream
+
+
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="updateToLatestPatch"
+
+False
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="volumesConfig"
+
+{
+  "volumesConfig": [
+    {
+      "provisioningType": "DYNAMIC",
+      "component": "REALTIONAL_UPGRADE",
+      "size": "16Gi",
+      "storageClass": "tz405rmnc1",
+      "labels": {
+        "arcgis/tier": "storage",
+        "arcgis/app": "postgres"
+      }
+    }
+  ]
+}
+
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="cloudConfig"
+
+[
+  {
+    "name": "AWS",
+    "credential": {
+      "type": "IAM-ROLE"
+    },
+    "cloudServices": [
+      {
+        "name": "AWS RDS for PostgreSQL",
+        "category": "databases",
+        "type": "relationalStore",
+        "instanceProvided": true,
+        "usage": "DEFAULT",
+        "connection": {
+          "region": "XXXX",
+          "dbUri": "XXXX",
+          "dbReadonlyUri": "XXXX",
+          "dbPort": 5674,
+          "credential": {
+            "type": "databaseUser",
+            "databaseUsers": {
+              "adminUser": {
+                "authType": "PASSWORD",
+                "name": "XXXX",
+                "password": "XXXX"
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+]
+
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="upgradeSettings"
+
+{}
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="f"
+
+pjson
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb
+Content-Disposition: form-data; name="token"
+
+<token>
+------WebKitFormBoundaryAMpB0mfM6ckdcpcb--
+
+```
+
+## JSON Response examples
+
+The example below demonstrates the immediate JSON response returned by a successful `upgrade` request.
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>In progress path upgrade</TabTitle>
+  <TabTitle>Completed patch upgrade</TabTitle>
+  <TabTitle>Release upgrade</TabTitle>
+  <TabTitle>Release ugrade with warnings</TabTitle>
+</TabNav>
+
+<Tab>
+
+<Note type={"note"}>
+
+When the current version of the deployment is represented, the version and build numbers are combined. For example, if the deployment version is 10.9.0 and the build number is 505, the current version is returned as 10.9.0.505. The version number is updated with each installed release, and the build number is updated with each update (either patch or release) installed. This representation is returned through the HTML view of the API, as well as in the upgrade job messages retained by the `currentVersion` and `upgrades` resources.
+
+</Note>
+
+```other
+{
+  "status": {
+    "state": "in_progress",
+    "code": 1,
+    "messages": [
+      {
+        "message": "Starting the upgrade process from 10.9.0.505 to 10.9.0.506.",
+        "when": 1601404416045,
+        "code": 2010
+      }
+    ]
+  }
+}
+```
+
+Once the upgrade process is complete, the JSON view of the [Upgrades](/upgrades) resource will return the full job messages of the job and success status.
+
+</Tab>
+
+<Tab>
+
+The example response below is returned after a successful patch upgrade. Abbreviated information is denoted by an ellipsis (...).
+
+```other
+{
+  "status": {
+    "code": 3,
+    "messages": [
+      {
+        "code": 2010,
+        "message": "Starting the upgrade process from 10.9.0.1089 to 10.9.0.1090.",
+        "when": 1618594328897
+      },
+      {
+        "code": 2168,
+        "message": "Launching upgrader... ",
+        "when": 1618594328914
+      },
+      {
+        "code": 2165,
+        "message": "System is going into Read-Only mode.",
+        "when": 1618594338162
+      },
+      {
+        "code": 2270,
+        "message": "Preparing an upgrade plan.",
+        "when": 1618594399266
+      },
+      {
+        "code": 2287,
+        "message": "Pre-diagnostics started.",
+        "when": 1618594399759
+      },
+      {
+        "code": 2288,
+        "message": "Pre-diagnostics completed.",
+        "when": 1618594399845
+      },
+      {
+        "code": 2271,
+        "message": "Executing upgrade plan.",
+        "when": 1618594399867
+      },
+      {
+        "code": 2291,
+        "message": "Update of main core rest APIs module started.",
+        "when": 1618594399908
+      },
+      {
+        "code": 2173,
+        "message": "2 out of 4 AgsDeployments updated. The patch upgrade of main core rest APIs has completed in 133808 millis (~ 2 minutes).",
+        "when": 1618594533739
+      },
+      {
+        "code": 2291,
+        "message": "Update of monitoring components module started.",
+        "when": 1618594563767
+      },
+      {
+        "code": 2173,
+        "message": "3 out of 4 AgsDeployments updated. The patch upgrade of monitoring components has completed in 35538 millis (~ 0 minutes).",
+        "when": 1618594599306
+      },
+      {
+        "code": 2291,
+        "message": "Update of apps module started.",
+        "when": 1618594599327
+      },
+      {
+        "code": 2173,
+        "message": "4 out of 4 AgsDeployments updated. The patch upgrade of apps has completed in 90445 millis (~ 1 minutes).",
+        "when": 1618594689773
+      },
+      {
+        "code": 2166,
+        "message": "System is coming out of Read-Only mode.",
+        "when": 1618594689802
+      },
+      {
+        "code": 2179,
+        "message": "Post-upgrade operations started.",
+        "when": 1618594749855
+      },
+      {
+        "code": 2011,
+        "message": "The upgrade process from 10.9.0.1089 to 10.9.0.1090 has completed in 00hr:06min:51sec:729millisec.",
+        "when": 1618594749879
+      },
+      {
+        "code": 2012,
+        "message": "The ArcGIS Enterprise on Kubernetes has been upgraded from 10.9.0.1089 to 10.9.0.1090 successfully.",
+        "when": 1618594749879
+      }
+    ],
+    "state": "success"
+  }
+}
+```
+
+</Tab>
+
+<Tab>
+
+The example response below is returned after a successful release upgrade. Abbreviated information is denoted by an ellipsis (...).
+
+```other
+{
+  "status": {
+    "code": 3,
+    "messages": [
+      {
+        "code": 2010,
+        "message": "Starting the upgrade process from 10.9.0.1089 to 10.9.0.2000.",
+        "when": 1618592862466
+      },
+      {
+        "code": 2168,
+        "message": "Launching upgrader... ",
+        "when": 1618592862743
+      },
+      {
+        "code": 2165,
+        "message": "System is going into Read-Only mode.",
+        "when": 1618592876884
+      },
+      {
+        "code": 2270,
+        "message": "Preparing an upgrade plan.",
+        "when": 1618592937143
+      },
+      {
+        "code": 2287,
+        "message": "Pre-diagnostics started.",
+        "when": 1618592937706
+      },
+      {
+        "code": 2094,
+        "message": "Validate PostgreSQL database.",
+        "when": 1618592937722
+      },
+      {
+        "code": 2281,
+        "message": "Perform Elasticsearch direct upgrade prerequisite check.",
+        "when": 1618592938131
+      },
+      {
+        "code": 2094,
+        "message": "Validate PostgreSQL database.",
+        "when": 1618592938156
+      },
+      {
+        "code": 2288,
+        "message": "Pre-diagnostics completed.",
+        "when": 1618592938665
+      },
+      {
+        "code": 2271,
+        "message": "Executing upgrade plan.",
+        "when": 1618592938665
+      },
+      {
+        "code": 2108,
+        "message": "Release upgrade of PostgreSQL started.",
+        "when": 1618592938723
+      },
+      {
+        "code": 2087,
+        "message": "Set primary arcgis-relational-store-r80en-e7p0 in read only mode.",
+        "when": 1618592938743
+      },
+      {
+        "code": 2094,
+        "message": "Validate PostgreSQL database.",
+        "when": 1618592939439
+      },
+      {
+        "code": 2090,
+        "message": "Promote the original standby as a new primary arcgis-relational-store-r80en-bjkp.",
+        "when": 1618592939586
+      },
+      {
+        "code": 2144,
+        "message": "Starting the postgres upgrade process from 12.4 to 12.4.",
+        "when": 1618592946974
+      },
+      {
+        "code": 2153,
+        "message": "The postgres upgrade result: {\"configStore\":{\"status\":\"succeeded\"},\"gwdb\":{\"status\":\"succeeded\"},\"datastoreConfigStore\":{\"status\":\"succeeded\"},\"status\":\"succeeded\"}.",
+        "when": 1618593158568
+      },
+      {
+        "code": 2145,
+        "message": "The postgres has been upgraded from 12.4 to 12.4.",
+        "when": 1618593158590
+      },
+      {
+        "code": 2109,
+        "message": "Release upgrade of PostgreSQL completed.",
+        "when": 1618593158590
+      },
+      {
+        "code": 2175,
+        "message": "2 out of 48 AgsDeployments updated. The release upgrade of postgres has completed in 219885 millis (~ 3 minutes).",
+        "when": 1618593158606
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of arcgis-queue-store started. ",
+        "when": 1618593159839
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of arcgis-object-store-ig9k8 started. ",
+        "when": 1618593159839
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of arcgis-in-memory-store-cgazf started. ",
+        "when": 1618593159839
+      },
+      {
+        "code": 2038,
+        "message": "Updating statefulset arcgis-queue-store with new image:...",
+        "when": 1618593159839
+      },
+      {
+        "code": 2038,
+        "message": "Updating statefulset arcgis-object-store-ig9k8 with new image:...",
+        "when": 1618593159839
+      },
+      {
+        "code": 2038,
+        "message": "Updating statefulset arcgis-object-store-ig9k8 with new image:...",
+        "when": 1618593159839
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of arcgis-queue-store started. ",
+        "when": 1618593159839
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of arcgis-object-store-ig9k8 started. ",
+        "when": 1618593159839
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of arcgis-in-memory-store-cgazf started. ",
+        "when": 1618593159839
+      },
+      {
+        "code": 2038,
+        "message": "Updating statefulset arcgis-queue-store with new image:...",
+        "when": 1618593159839
+      },
+      {
+        "code": 2038,
+        "message": "Updating statefulset arcgis-object-store-ig9k8 with new image:...",
+        "when": 1618593159839
+      },
+      {
+        "code": 2038,
+        "message": "Updating statefulset arcgis-object-store-ig9k8 with new image:...",
+        "when": 1618593159839
+      },
+      {
+        "code": 2038,
+        "message": "Updating statefulset arcgis-object-store-ig9k8 with new image:...",
+        "when": 1618593159861
+      },
+      {
+        "code": 2038,
+        "message": "Updating statefulset arcgis-queue-store with new image:...",
+        "when": 1618593159881
+      },
+      {
+        "code": 2038,
+        "message": "Updating statefulset arcgis-spatiotemporal-index-store-iucrb-coordinator with new image:...",
+        "when": 1618593159888
+      },
+      {
+        "code": 2038,
+        "message": "Updating statefulset arcgis-spatiotemporal-index-store-iucrb-coordinator with new image:...",
+        "when": 1618593159888
+      },
+      {
+        "code": 2038,
+        "message": "Updating statefulset arcgis-in-memory-store-cgazf with new image:...",
+        "when": 1618593159891
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of arcgis-in-memory-store-cgazf completed.",
+        "when": 1618593162228
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of arcgis-spatiotemporal-index-store-iucrb-coordinator completed.",
+        "when": 1618593162322
+      },
+      {
+        "code": 2187,
+        "message": "Updating portal content started.",
+        "when": 1618593194932
+      },
+      {
+        "code": 2188,
+        "message": "Updating portal content completed.",
+        "when": 1618593194991
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of arcgis-queue-store completed.",
+        "when": 1618593230455
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of arcgis-object-store-ig9k8 completed.",
+        "when": 1618593327082
+      },
+      {
+        "code": 2175,
+        "message": "6 out of 48 AgsDeployments updated. The release upgrade of data stores has completed in 168449 millis (~ 2 minutes).",
+        "when": 1618593327083
+      },
+      {
+        "code": 2101,
+        "message": "Release upgrade of deployment rest-administrator-api started. ",
+        "when": 1618593327107
+      },
+      {
+        "code": 2103,
+        "message": "Release upgrade of deployment rest-administrator-api completed.",
+        "when": 1618593327213
+      },
+      {
+        "code": 2101,
+        "message": "Release upgrade of deployment rest-portal-api started. ",
+        "when": 1618593327230
+      },
+      {
+        "code": 2103,
+        "message": "Release upgrade of deployment rest-portal-api completed.",
+        "when": 1618593328429
+      },
+      {
+        "code": 2101,
+        "message": "Release upgrade of deployment enterprise-manager started. ",
+        "when": 1618593328449
+      },
+      {
+        "code": 2103,
+        "message": "Release upgrade of deployment enterprise-manager completed.",
+        "when": 1618593328524
+      },
+      {
+        "code": 2101,
+        "message": "Release upgrade of deployment enterprise-portal started. ",
+        "when": 1618593328542
+      },
+      {
+        "code": 2103,
+        "message": "Release upgrade of deployment enterprise-portal completed.",
+        "when": 1618593328602
+      },
+      {
+        "code": 2175,
+        "message": "10 out of 48 AgsDeployments updated. The release upgrade of deployments has completed in 1515 millis (~ 0 minutes).",
+        "when": 1618593328620
+      },
+      {
+        "code": 2148,
+        "message": "Post upgrade of PostgreSQL started.",
+        "when": 1618593328647
+      },
+      {
+        "code": 2151,
+        "message": "Notify role change so that other part of the system can connect to the correct primary instance",
+        "when": 1618593328671
+      },
+      {
+        "code": 2087,
+        "message": "Set primary arcgis-relational-store-r80en-bjkp in read only mode.",
+        "when": 1618593460672
+      },
+      {
+        "code": 2092,
+        "message": "Add new standby arcgis-relational-store-r80en-e7p0 and connect and setup replication.",
+        "when": 1618593461274
+      },
+      {
+        "code": 2093,
+        "message": "Set new primary arcgis-relational-store-r80en-bjkp in read write mode.",
+        "when": 1618593568975
+      },
+      {
+        "code": 2149,
+        "message": "Post upgrade of PostgreSQL completed.",
+        "when": 1618593569220
+      },
+      {
+        "code": 2175,
+        "message": "10 out of 48 AgsDeployments updated. The release upgrade of postgres postupgrade has completed in 240589 millis (~ 4 minutes).",
+        "when": 1618593569237
+      },
+      {
+        "code": 2187,
+        "message": "Updating portal content started.",
+        "when": 1618594026368
+      },
+      {
+        "code": 2188,
+        "message": "Updating portal content completed.",
+        "when": 1618594028390
+      },
+      {
+        "code": 2175,
+        "message": "10 out of 48 AgsDeployments updated. The release upgrade of post deployments has completed in 606957 millis (~ 10 minutes).",
+        "when": 1618594176216
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of ingress-controller started. ",
+        "when": 1618594177037
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment ingress-controller with new image:...",
+        "when": 1618594177037
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of private-ingress-controller started. ",
+        "when": 1618594177037
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment private-ingress-controller with new image:...",
+        "when": 1618594177038
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of ingress-controller completed.",
+        "when": 1618594207248
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of private-ingress-controller completed.",
+        "when": 1618594237348
+      },
+      {
+        "code": 2175,
+        "message": "12 out of 48 AgsDeployments updated. The release upgrade of ingress controllers has completed in 61114 millis (~ 1 minutes).",
+        "when": 1618594237350
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of service-lifecycle-manager started. ",
+        "when": 1618594238183
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment service-lifecycle-manager with new image:...",
+        "when": 1618594238183
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of rest-services-api started. ",
+        "when": 1618594238183
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment rest-services-api with new image:...",
+        "when": 1618594238184
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of service-lifecycle-manager completed.",
+        "when": 1618594419453
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of rest-services-api completed.",
+        "when": 1618594478774
+      },
+      {
+        "code": 2175,
+        "message": "14 out of 48 AgsDeployments updated. The release upgrade of gis services prerequisites has completed in 241393 millis (~ 4 minutes).",
+        "when": 1618594478775
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of utilities-geometry-geometryserver started. ",
+        "when": 1618594514804
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment utilities-geometry-geometryserver with new image:...",
+        "when": 1618594514804
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of system-reportingtools-gpserver started. ",
+        "when": 1618594514804
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment system-reportingtools-gpserver with new image:...",
+        "when": 1618594514805
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of utilities-geometry-geometryserver started. ",
+        "when": 1618594514804
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment utilities-geometry-geometryserver with new image:...",
+        "when": 1618594514804
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of system-reportingtools-gpserver started. ",
+        "when": 1618594514804
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment system-reportingtools-gpserver with new image:...",
+        "when": 1618594514805
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of shared-mapserver started. ",
+        "when": 1618594514805
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of sampleworldcities-mapserver started. ",
+        "when": 1618594514805
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment shared-mapserver with new image:...",
+        "when": 1618594514857
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment sampleworldcities-mapserver with new image:...",
+        "when": 1618594514868
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of shared-mapserver completed.",
+        "when": 1618594605382
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of system-spatialanalysistools-gpserver started. ",
+        "when": 1618594605383
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment system-spatialanalysistools-gpserver with new image:...",
+        "when": 1618594605402
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of sampleworldcities-mapserver completed.",
+        "when": 1618594605482
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of utilities-geocodingtools-gpserver started. ",
+        "when": 1618594605482
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment utilities-geocodingtools-gpserver with new image:...",
+        "when": 1618594605482
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of utilities-geometry-geometryserver completed.",
+        "when": 1618594635410
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of utilities-offlinepackaging-gpserver started. ",
+        "when": 1618594635410
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment utilities-offlinepackaging-gpserver with new image:...",
+        "when": 1618594635410
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of system-reportingtools-gpserver completed.",
+        "when": 1618594635465
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of system-cachingcontrollers-gpserver started. ",
+        "when": 1618594635493
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment system-cachingcontrollers-gpserver with new image:...",
+        "when": 1618594635493
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of utilities-geocodingtools-gpserver completed.",
+        "when": 1618594725892
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of system-cachingtools-gpserver started. ",
+        "when": 1618594725893
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment system-cachingtools-gpserver with new image:...",
+        "when": 1618594725911
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of system-spatialanalysistools-gpserver completed.",
+        "when": 1618594755807
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of system-featureservicetools-gpserver started. ",
+        "when": 1618594755807
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment system-featureservicetools-gpserver with new image:...",
+        "when": 1618594755807
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of utilities-offlinepackaging-gpserver completed.",
+        "when": 1618594755854
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of system-publishingtools-gpserver started. ",
+        "when": 1618594755875
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment system-publishingtools-gpserver with new image:...",
+        "when": 1618594755875
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of system-cachingcontrollers-gpserver completed.",
+        "when": 1618594756094
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of system-scenecachingcontrollers-gpserver started. ",
+        "when": 1618594756095
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment system-scenecachingcontrollers-gpserver with new image:...",
+        "when": 1618594756147
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of system-scenecachingcontrollers-gpserver completed.",
+        "when": 1618594756204
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of utilities-printingtools-gpserver started. ",
+        "when": 1618594756205
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment utilities-printingtools-gpserver with new image:...",
+        "when": 1618594756205
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of system-featureservicetools-gpserver completed.",
+        "when": 1618594876108
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of system-scenecachingtools-gpserver started. ",
+        "when": 1618594876108
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment system-scenecachingtools-gpserver with new image:...",
+        "when": 1618594876108
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of system-scenecachingtools-gpserver completed.",
+        "when": 1618594876125
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of system-synctools-gpserver started. ",
+        "when": 1618594876147
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment system-synctools-gpserver with new image:...",
+        "when": 1618594876147
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of system-publishingtools-gpserver completed.",
+        "when": 1618594876306
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of shared-featureserver started. ",
+        "when": 1618594876313
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of system-cachingtools-gpserver completed.",
+        "when": 1618594876316
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment shared-featureserver with new image:...",
+        "when": 1618594876343
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of system-cachingtools-gpsyncserver started. ",
+        "when": 1618594876382
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment system-cachingtools-gpsyncserver with new image:...",
+        "when": 1618594876382
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of utilities-printingtools-gpserver completed.",
+        "when": 1618594876582
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of system-cachingcontrollers-gpsyncserver started. ",
+        "when": 1618594876602
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment system-cachingcontrollers-gpsyncserver with new image:...",
+        "when": 1618594876602
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of system-cachingtools-gpsyncserver completed.",
+        "when": 1618594909255
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of system-scenecachingcontrollers-gpsyncserver started. ",
+        "when": 1618594909255
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment system-scenecachingcontrollers-gpsyncserver with new image:...",
+        "when": 1618594909282
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of system-scenecachingcontrollers-gpsyncserver completed.",
+        "when": 1618594909340
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of system-spatialanalysistools-gpsyncserver started. ",
+        "when": 1618594909340
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment system-spatialanalysistools-gpsyncserver with new image:...",
+        "when": 1618594909340
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of system-cachingcontrollers-gpsyncserver completed.",
+        "when": 1618594911449
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of utilities-geocodingtools-gpsyncserver started. ",
+        "when": 1618594911449
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment utilities-geocodingtools-gpsyncserver with new image:...",
+        "when": 1618594911449
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of system-spatialanalysistools-gpsyncserver completed.",
+        "when": 1618594939479
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of utilities-printingtools-gpsyncserver started. ",
+        "when": 1618594939500
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment utilities-printingtools-gpsyncserver with new image:...",
+        "when": 1618594939500
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of utilities-geocodingtools-gpsyncserver completed.",
+        "when": 1618594941589
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of system-synctools-gpsyncserver started. ",
+        "when": 1618594941589
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment system-synctools-gpsyncserver with new image:...",
+        "when": 1618594941609
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of utilities-printingtools-gpsyncserver completed.",
+        "when": 1618594969637
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of system-scenecachingtools-gpsyncserver started. ",
+        "when": 1618594969637
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment system-scenecachingtools-gpsyncserver with new image:...",
+        "when": 1618594969637
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of system-scenecachingtools-gpsyncserver completed.",
+        "when": 1618594969681
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of system-publishingtools-gpsyncserver started. ",
+        "when": 1618594969681
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment system-publishingtools-gpsyncserver with new image:...",
+        "when": 1618594969681
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of system-synctools-gpsyncserver completed.",
+        "when": 1618594971792
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of system-reportingtools-gpsyncserver started. ",
+        "when": 1618594971812
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment system-reportingtools-gpsyncserver with new image:...",
+        "when": 1618594971812
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of shared-featureserver completed.",
+        "when": 1618594996734
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of utilities-offlinepackaging-gpsyncserver started. ",
+        "when": 1618594996734
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment utilities-offlinepackaging-gpsyncserver with new image:...",
+        "when": 1618594996753
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of system-reportingtools-gpsyncserver completed.",
+        "when": 1618595001987
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of system-featureservicetools-gpsyncserver started. ",
+        "when": 1618595001987
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment system-featureservicetools-gpsyncserver with new image:...",
+        "when": 1618595001987
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of system-synctools-gpserver completed.",
+        "when": 1618595026514
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of utilities-offlinepackaging-gpsyncserver completed.",
+        "when": 1618595026955
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of system-publishingtools-gpsyncserver completed.",
+        "when": 1618595029836
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of system-featureservicetools-gpsyncserver completed.",
+        "when": 1618595032143
+      },
+      {
+        "code": 2175,
+        "message": "42 out of 48 AgsDeployments updated. The release upgrade of gis services has completed in 523371 millis (~ 8 minutes).",
+        "when": 1618595032168
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of metrics-viewer started. ",
+        "when": 1618595033014
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment metrics-viewer with new image:...",
+        "when": 1618595033014
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of rest-metrics-api started. ",
+        "when": 1618595033014
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment rest-metrics-api with new image:...",
+        "when": 1618595033015
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of metrics-viewer completed.",
+        "when": 1618595068237
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of rest-metrics-api completed.",
+        "when": 1618595068311
+      },
+      {
+        "code": 2175,
+        "message": "44 out of 48 AgsDeployments updated. The release upgrade of monitoring components has completed in 36099 millis (~ 0 minutes).",
+        "when": 1618595068313
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of enterprise-web-style-app started. ",
+        "when": 1618595069540
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment enterprise-web-style-app with new image:...",
+        "when": 1618595069540
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of enterprise-help started. ",
+        "when": 1618595069540
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment enterprise-help with new image:...",
+        "when": 1618595069540
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of enterprise-apps started. ",
+        "when": 1618595069540
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment javascript-api with new image:...",
+        "when": 1618595069596
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment enterprise-apps with new image:...",
+        "when": 1618595069607
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of enterprise-apps completed.",
+        "when": 1618595220096
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of enterprise-help completed.",
+        "when": 1618595249926
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of javascript-api completed.",
+        "when": 1618595430045
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of enterprise-web-style-app completed.",
+        "when": 1618595670098
+      },
+      {
+        "code": 2175,
+        "message": "48 out of 48 AgsDeployments updated. The release upgrade of apps has completed in 601760 millis (~ 10 minutes).",
+        "when": 1618595670098
+      },
+      {
+        "code": 2166,
+        "message": "System is coming out of Read-Only mode.",
+        "when": 1618595670131
+      },
+      {
+        "code": 2179,
+        "message": "Post-upgrade operations started.",
+        "when": 1618595730215
+      },
+      {
+        "code": 2180,
+        "message": "Post-upgrade operations started for logging.",
+        "when": 1618595730238
+      },
+      {
+        "code": 2181,
+        "message": "Post-upgrade operations succeeded for logging.",
+        "when": 1618595736617
+      },
+      {
+        "code": 2178,
+        "message": "Refreshing autodeployed services post-upgrade started.",
+        "when": 1618595736640
+      },
+      {
+        "code": 2185,
+        "message": "Refreshing autodeployed services post-upgrade completed.",
+        "when": 1618595736707
+      },
+      {
+        "code": 2191,
+        "message": "Refreshing portal search indices for items, groups and users.",
+        "when": 1618595736744
+      },
+      {
+        "code": 2192,
+        "message": "Refreshing portal indices completed successfully.",
+        "when": 1618595854288
+      },
+      {
+        "code": 2011,
+        "message": "The upgrade process from 10.9.0.1089 to 10.9.0.2000 has completed in 00hr:49min:37sec:435millisec.",
+        "when": 1618595854318
+      },
+      {
+        "code": 2012,
+        "message": "The ArcGIS Enterprise on Kubernetes has been upgraded from 10.9.0.1089 to 10.9.0.2000 successfully.",
+        "when": 1618595854318
+      }
+    ],
+    "state": "success"
+  }
+}
+```
+</Tab>
+
+<Tab>
+
+The example response below is returned after release upgrade was successful, but contained warnings. Abbreviated information is denoted by an ellipsis (...).
+
+```other
+{
+  "totalDeployments": 23,
+  "sourceVersion": "11.3.0",
+  "targetBuild": "6284",
+  "message": "Upgrade succeeded with warnings. Please check the logs and events and warning information for more details.",
+  "postUpgradeDiagnosticsJobId": "j4253a772-c34a-4494-9a2e-3d3619100964",
+  "status": {
+    "code": 3,
+    "requestId": "d3f8e249-8abe-44c3-9875-31a0cdfa1a53",
+    "warnings": [
+      "The enterprise-help (id:kkqdyz0qfs58tv9hah1s3) deployment failed. To determine the cause and address this issue, review curated organization warnings and cluster events. Once this issue has been addressed, use ArcGIS Administrative API to refresh this deployment.",
+      "The enterprise-web-style-app (id:kts7afi5iudfa4p2teto0) deployment failed. To determine the cause and address this issue, review curated organization warnings and cluster events. Once this issue has been addressed, use ArcGIS Administrative API to refresh this deployment.",
+      "The utilities-symbols-symbolserver (id:kr4fuxx9jd1a9ul7x4293) service failed. To determine the cause and address this issue, review curated organization warnings and cluster events. Once this issue has been addressed, use ArcGIS Manager to stop and start the service."
+    ],
+    "stages": [
+      {
+        "duration": "868 millis (~ 0 minutes)",
+        "name": "check_licenses",
+        "action": "License validations",
+        "state": "completed",
+        "deploymentsUpdated": 0
+      },
+      {
+        "duration": "171 millis (~ 0 minutes)",
+        "name": "check_prerequisites",
+        "action": "Prerequisite validations",
+        "state": "completed",
+        "deploymentsUpdated": 0
+      },
+      {
+        "duration": "13725 millis (~ 0 minutes)",
+        "name": "pre_upgrade_diagnostics",
+        "action": "Validating system requirements",
+        "state": "completed",
+        "deploymentsUpdated": 0
+      },
+      {
+        "duration": "60320 millis (~ 1 minutes)",
+        "name": "enable_read_only",
+        "action": "Enabling read-only mode",
+        "state": "completed",
+        "deploymentsUpdated": 0
+      },
+      {
+        "duration": "133023 millis (~ 2 minutes)",
+        "name": "Postgres",
+        "action": "Updating relational store",
+        "state": "completed",
+        "deploymentsUpdated": 2
+      },
+      {
+        "duration": "240061 millis (~ 4 minutes)",
+        "name": "Data Stores",
+        "action": "Updating system managed data stores",
+        "state": "completed",
+        "deploymentsUpdated": 3
+      },
+      {
+        "duration": "42862 millis (~ 0 minutes)",
+        "name": "Portal content",
+        "action": "Updating portal content",
+        "state": "completed",
+        "deploymentsUpdated": 0
+      },
+      {
+        "duration": "2432 millis (~ 0 minutes)",
+        "name": "REST APIs and Core Applications",
+        "action": "Updating system deployments",
+        "state": "completed",
+        "deploymentsUpdated": 4
+      },
+      {
+        "duration": "123061 millis (~ 2 minutes)",
+        "name": "Postgres post-upgrade",
+        "action": "Performing relational store post-upgrade",
+        "state": "completed",
+        "deploymentsUpdated": 0
+      },
+      {
+        "duration": "124785 millis (~ 2 minutes)",
+        "name": "Configuration after database upgrade",
+        "action": "Updating configuration after database upgrade.",
+        "state": "completed",
+        "deploymentsUpdated": 0
+      },
+      {
+        "duration": "183407 millis (~ 3 minutes)",
+        "name": "REST APIs and Core Applications post-upgrade",
+        "action": "Performing system deployment post-upgrade",
+        "state": "completed",
+        "deploymentsUpdated": 0
+      },
+      {
+        "duration": "31534 millis (~ 0 minutes)",
+        "name": "Ingress Controllers",
+        "action": "Updating ingress controllers",
+        "state": "completed",
+        "deploymentsUpdated": 2
+      },
+      {
+        "duration": "242685 millis (~ 4 minutes)",
+        "name": "GIS services prerequisites",
+        "action": "Updating GIS service prerequisites",
+        "state": "completed",
+        "deploymentsUpdated": 4
+      },
+      {
+        "duration": "212488 millis (~ 3 minutes)",
+        "name": "GIS services",
+        "action": "Updating GIS services",
+        "state": "completed",
+        "deploymentsUpdated": 3
+      },
+      {
+        "duration": "141550 millis (~ 2 minutes)",
+        "name": "Monitoring components",
+        "action": "Updating metrics system deployments",
+        "state": "completed",
+        "deploymentsUpdated": 1
+      },
+      {
+        "duration": "1804183 millis (~ 30 minutes)",
+        "name": "Applications",
+        "action": "Updating apps",
+        "state": "completed",
+        "deploymentsUpdated": 4
+      },
+      {
+        "duration": "838 millis (~ 0 minutes)",
+        "name": "Configuration before system post-upgrade",
+        "action": "Updating configuration before post-upgrade.",
+        "state": "completed",
+        "deploymentsUpdated": 0
+      },
+      {
+        "duration": "180462 millis (~ 3 minutes)",
+        "name": "disable_read_only",
+        "action": "Disabling read-only mode",
+        "state": "completed",
+        "deploymentsUpdated": 0
+      },
+      {
+        "duration": "2316234 millis (~ 38 minutes)",
+        "name": "post_upgrade_operations",
+        "action": "Performing post-upgrade",
+        "state": "completed",
+        "deploymentsUpdated": 0
+      },
+      {
+        "duration": "777 millis (~ 0 minutes)",
+        "name": "persist_upgrade_results",
+        "action": "Finalizing upgrade results",
+        "state": "completed",
+        "deploymentsUpdated": 0
+      }
+    ],
+    "messages": [
+      {
+        "code": 2010,
+        "message": "Starting the upgrade process from 11.3.0.5814 to 11.4.0.6284.",
+        "when": 1730979412378
+      },
+      {
+        "code": 2209,
+        "message": "Validating portal license data.",
+        "when": 1730979427650
+      },
+      {
+        "code": 2210,
+        "message": "Validation of portal license completed.",
+        "when": 1730979428142
+      },
+      {
+        "code": 2208,
+        "message": "Validation of server license data completed.",
+        "when": 1730979428327
+      },
+      {
+        "code": 2094,
+        "message": "Validate PostgreSQL database.",
+        "when": 1730979441321
+      },
+      {
+        "code": 2094,
+        "message": "Validate PostgreSQL database.",
+        "when": 1730979441924
+      },
+      {
+        "code": 2281,
+        "message": "Perform Elasticsearch direct upgrade prerequisite check.",
+        "when": 1730979442087
+      },
+      {
+        "code": 2271,
+        "message": "Executing upgrade plan.",
+        "when": 1730979504087
+      },
+      {
+        "code": 2094,
+        "message": "Validate PostgreSQL database.",
+        "when": 1730979504298
+      },
+      {
+        "code": 2090,
+        "message": "Promote the original standby as a new primary arcgis-relational-store-bykin-mzvf.",
+        "when": 1730979504635
+      },
+      {
+        "code": 2144,
+        "message": "Starting the postgres upgrade process from 15.5 to 15.5.",
+        "when": 1730979508093
+      },
+      {
+        "code": 2153,
+        "message": "The postgres upgrade result: {\"configStore\":{\"status\":\"succeeded\"},\"gwdb\":{\"status\":\"succeeded\"},\"datastoreConfigStore\":{\"status\":\"succeeded\"},\"geodatabase\":{\"status\":\"succeeded\"},\"status\":\"succeeded\"}.",
+        "when": 1730979636897
+      },
+      {
+        "code": 2145,
+        "message": "The postgres has been upgraded from 15.5 to 15.5.",
+        "when": 1730979636898
+      },
+      {
+        "code": 2108,
+        "message": "Release upgrade of PostgreSQL started.",
+        "when": 1730979504291
+      },
+      {
+        "code": 2109,
+        "message": "Release upgrade of PostgreSQL completed.",
+        "when": 1730979636979
+      },
+      {
+        "code": 2175,
+        "message": "2 out of 23 AgsDeployments updated. The release upgrade of Postgres has completed in 132774 millis (~ 2 minutes).",
+        "when": 1730979637033
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of arcgis-queue-store-rhb3v started.",
+        "when": 1730979638398
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of arcgis-spatiotemporal-index-store-o2n4p-coordinator started.",
+        "when": 1730979638398
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of arcgis-in-memory-store-n5kkb started.",
+        "when": 1730979638398
+      },
+      {
+        "code": 2038,
+        "message": "Updating statefulset arcgis-spatiotemporal-index-store-o2n4p-coordinator with new image: docker.io/esrirelease/arcgis-opensearch:11.4.0.6284.",
+        "when": 1730979638398
+      },
+      {
+        "code": 2038,
+        "message": "Updating statefulset arcgis-queue-store-rhb3v with new image: docker.io/esrirelease/enterprise-rabbitmq:11.4.0.6284.",
+        "when": 1730979638398
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of arcgis-queue-store-rhb3v started.",
+        "when": 1730979638398
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of arcgis-spatiotemporal-index-store-o2n4p-coordinator started.",
+        "when": 1730979638398
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of arcgis-in-memory-store-n5kkb started.",
+        "when": 1730979638398
+      },
+      {
+        "code": 2038,
+        "message": "Updating statefulset arcgis-spatiotemporal-index-store-o2n4p-coordinator with new image: docker.io/esrirelease/arcgis-opensearch:11.4.0.6284.",
+        "when": 1730979638398
+      },
+      {
+        "code": 2038,
+        "message": "Updating statefulset arcgis-queue-store-rhb3v with new image: docker.io/esrirelease/enterprise-rabbitmq:11.4.0.6284.",
+        "when": 1730979638398
+      },
+      {
+        "code": 2038,
+        "message": "Updating statefulset arcgis-queue-store-rhb3v with new image: docker.io/esrirelease/enterprise-rabbitmq:11.4.0.6284.",
+        "when": 1730979638398
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of arcgis-queue-store-rhb3v started.",
+        "when": 1730979638398
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of arcgis-spatiotemporal-index-store-o2n4p-coordinator started.",
+        "when": 1730979638398
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of arcgis-in-memory-store-n5kkb started.",
+        "when": 1730979638398
+      },
+      {
+        "code": 2038,
+        "message": "Updating statefulset arcgis-spatiotemporal-index-store-o2n4p-coordinator with new image: docker.io/esrirelease/arcgis-opensearch:11.4.0.6284.",
+        "when": 1730979638398
+      },
+      {
+        "code": 2038,
+        "message": "Updating statefulset arcgis-in-memory-store-n5kkb with new image: docker.io/esrirelease/arcgis-fluent-bit:11.4.0.6284.",
+        "when": 1730979638490
+      },
+      {
+        "code": 2038,
+        "message": "Updating statefulset arcgis-queue-store-rhb3v with new image: docker.io/esrirelease/arcgis-fluent-bit:11.4.0.6284.",
+        "when": 1730979638714
+      },
+      {
+        "code": 2038,
+        "message": "Updating statefulset arcgis-spatiotemporal-index-store-o2n4p-coordinator with new image: docker.io/esrirelease/arcgis-fluent-bit:11.4.0.6284.",
+        "when": 1730979638978
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of arcgis-in-memory-store-n5kkb completed.",
+        "when": 1730979703947
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of arcgis-queue-store-rhb3v completed.",
+        "when": 1730979856348
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of arcgis-spatiotemporal-index-store-o2n4p-coordinator completed.",
+        "when": 1730979877197
+      },
+      {
+        "code": 2175,
+        "message": "5 out of 23 AgsDeployments updated. The release upgrade of Data Stores has completed in 239805 millis (~ 3 minutes).",
+        "when": 1730979877199
+      },
+      {
+        "code": 2187,
+        "message": "Updating portal content started.",
+        "when": 1730979879179
+      },
+      {
+        "code": 2188,
+        "message": "Updating portal content completed.",
+        "when": 1730979918861
+      },
+      {
+        "code": 2101,
+        "message": "Release upgrade of deployment rest-administrator-api started.",
+        "when": 1730979920665
+      },
+      {
+        "code": 2103,
+        "message": "Release upgrade of deployment rest-administrator-api completed.",
+        "when": 1730979920975
+      },
+      {
+        "code": 2101,
+        "message": "Release upgrade of deployment rest-portal-api started.",
+        "when": 1730979921033
+      },
+      {
+        "code": 2103,
+        "message": "Release upgrade of deployment rest-portal-api completed.",
+        "when": 1730979922291
+      },
+      {
+        "code": 2101,
+        "message": "Release upgrade of deployment enterprise-portal started.",
+        "when": 1730979922353
+      },
+      {
+        "code": 2103,
+        "message": "Release upgrade of deployment enterprise-portal completed.",
+        "when": 1730979922556
+      },
+      {
+        "code": 2101,
+        "message": "Release upgrade of deployment enterprise-manager started.",
+        "when": 1730979922616
+      },
+      {
+        "code": 2103,
+        "message": "Release upgrade of deployment enterprise-manager completed.",
+        "when": 1730979922765
+      },
+      {
+        "code": 2175,
+        "message": "9 out of 23 AgsDeployments updated. The release upgrade of REST APIs and Core Applications has completed in 2170 millis (~ 0 minutes).",
+        "when": 1730979922826
+      },
+      {
+        "code": 2151,
+        "message": "Notify role change so that other part of the system can connect to the correct primary instance",
+        "when": 1730979923366
+      },
+      {
+        "code": 2087,
+        "message": "Set primary {\"internalName\":\"arcgis-relational-store-bykin-mzvf\",\"role\":\"primary\",\"name\":\"arcgis-relational-store-bykin-primary\",\"pgPort\":7654} in read only mode.",
+        "when": 1730979954728
+      },
+      {
+        "code": 2092,
+        "message": "Add new standby {\"replicationSource\":{\"role\":\"primary\",\"name\":\"arcgis-relational-store-bykin-primary\",\"pgPort\":7654},\"internalName\":\"arcgis-relational-store-bykin-j6gw\",\"role\":\"standby\",\"name\":\"arcgis-relational-store-bykin-standby\",\"pgPort\":7654} and connect and setup replication.",
+        "when": 1730979955356
+      },
+      {
+        "code": 2093,
+        "message": "Set new primary {\"internalName\":\"arcgis-relational-store-bykin-mzvf\",\"role\":\"primary\",\"name\":\"arcgis-relational-store-bykin-primary\",\"pgPort\":7654} in read write mode.",
+        "when": 1730980045736
+      },
+      {
+        "code": 2148,
+        "message": "Post upgrade of PostgreSQL started.",
+        "when": 1730979923335
+      },
+      {
+        "code": 2149,
+        "message": "Post upgrade of PostgreSQL completed.",
+        "when": 1730980046095
+      },
+      {
+        "code": 2175,
+        "message": "9 out of 23 AgsDeployments updated. The release upgrade of Postgres post-upgrade has completed in 122866 millis (~ 2 minutes).",
+        "when": 1730980046165
+      },
+      {
+        "code": 2586,
+        "message": "Configuring portal content for all supported languages started.",
+        "when": 1730980302909
+      },
+      {
+        "code": 2587,
+        "message": "Configuring portal content for all supported languages completed.",
+        "when": 1730980354543
+      },
+      {
+        "code": 2175,
+        "message": "13 out of 23 AgsDeployments updated. The release upgrade of REST APIs and Core Applications post-upgrade has completed in 183190 millis (~ 3 minutes).",
+        "when": 1730980354600
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of ingress-controller started.",
+        "when": 1730980355417
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of private-ingress-controller started.",
+        "when": 1730980355417
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment ingress-controller with new image: docker.io/esrirelease/arcgis-ingress-controller:11.4.0.6284.",
+        "when": 1730980355417
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of ingress-controller started.",
+        "when": 1730980355417
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of private-ingress-controller started.",
+        "when": 1730980355417
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment private-ingress-controller with new image: docker.io/esrirelease/arcgis-ingress-controller:11.4.0.6284.",
+        "when": 1730980355679
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of ingress-controller completed.",
+        "when": 1730980385836
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of private-ingress-controller completed.",
+        "when": 1730980386268
+      },
+      {
+        "code": 2175,
+        "message": "15 out of 23 AgsDeployments updated. The release upgrade of Ingress Controllers has completed in 31253 millis (~ 0 minutes).",
+        "when": 1730980386269
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of rest-services-api started.",
+        "when": 1730980387411
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of gpserver-webhook-processor started.",
+        "when": 1730980387411
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment rest-services-api with new image: docker.io/esrirelease/catalog-server:11.4.0.6284.",
+        "when": 1730980387411
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of rest-services-api started.",
+        "when": 1730980387411
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of gpserver-webhook-processor started.",
+        "when": 1730980387411
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment rest-services-api with new image: docker.io/esrirelease/catalog-server:11.4.0.6284.",
+        "when": 1730980387411
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of service-lifecycle-manager started.",
+        "when": 1730980387411
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of featureserver-webhook-processor started.",
+        "when": 1730980387411
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment service-lifecycle-manager with new image: docker.io/esrirelease/config-factory-server:11.4.0.6284.",
+        "when": 1730980387777
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of rest-services-api started.",
+        "when": 1730980387411
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of gpserver-webhook-processor started.",
+        "when": 1730980387411
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment rest-services-api with new image: docker.io/esrirelease/catalog-server:11.4.0.6284.",
+        "when": 1730980387411
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of service-lifecycle-manager started.",
+        "when": 1730980387411
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of featureserver-webhook-processor started.",
+        "when": 1730980387411
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of rest-services-api started.",
+        "when": 1730980387411
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of gpserver-webhook-processor started.",
+        "when": 1730980387411
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment featureserver-webhook-processor with new image: docker.io/esrirelease/webhook-processor:11.4.0.6284.",
+        "when": 1730980388030
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment gpserver-webhook-processor with new image: docker.io/esrirelease/webhook-processor:11.4.0.6284.",
+        "when": 1730980388257
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of service-lifecycle-manager completed.",
+        "when": 1730980449007
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of gpserver-webhook-processor completed.",
+        "when": 1730980509497
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of featureserver-webhook-processor completed.",
+        "when": 1730980599357
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of rest-services-api completed.",
+        "when": 1730980628913
+      },
+      {
+        "code": 2175,
+        "message": "19 out of 23 AgsDeployments updated. The release upgrade of GIS services prerequisites has completed in 242389 millis (~ 4 minutes).",
+        "when": 1730980628998
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of portaladmin1_nonhosted_1-mapserver started.",
+        "when": 1730980660035
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of shared-tileserver started.",
+        "when": 1730980660035
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment portaladmin1_nonhosted_1-mapserver with new image: docker.io/esrirelease/map-server:11.4.0.6284.",
+        "when": 1730980660035
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of portaladmin1_nonhosted_1-mapserver started.",
+        "when": 1730980660035
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of shared-tileserver started.",
+        "when": 1730980660035
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment portaladmin1_nonhosted_1-mapserver with new image: docker.io/esrirelease/map-server:11.4.0.6284.",
+        "when": 1730980660035
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of shared-featureserver started.",
+        "when": 1730980660035
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of portaladmin1_nonhosted_1-mapserver started.",
+        "when": 1730980660035
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of shared-tileserver started.",
+        "when": 1730980660035
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment shared-featureserver with new image: docker.io/esrirelease/sds-feature-server:11.4.0.6284.",
+        "when": 1730980660336
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment shared-tileserver with new image: docker.io/esrirelease/tile-server:11.4.0.6284.",
+        "when": 1730980660533
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of shared-featureserver completed.",
+        "when": 1730980811261
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of portaladmin1_nonhosted_1-mapserver completed.",
+        "when": 1730980871078
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of shared-tileserver completed.",
+        "when": 1730980871608
+      },
+      {
+        "code": 2175,
+        "message": "22 out of 23 AgsDeployments updated. The release upgrade of GIS services has completed in 212175 millis (~ 3 minutes).",
+        "when": 1730980871608
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of rest-metrics-api started.",
+        "when": 1730980872183
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment rest-metrics-api with new image: docker.io/esrirelease/arcgis-prometheus:11.4.0.6284.",
+        "when": 1730980872183
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of rest-metrics-api completed.",
+        "when": 1730981013243
+      },
+      {
+        "code": 2175,
+        "message": "23 out of 23 AgsDeployments updated. The release upgrade of Monitoring components has completed in 141261 millis (~ 2 minutes).",
+        "when": 1730981013244
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of enterprise-help started.",
+        "when": 1730981014408
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of javascript-api started.",
+        "when": 1730981014408
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment enterprise-help with new image: docker.io/esrirelease/help:11.4.0.6284-wrong.",
+        "when": 1730981014408
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of enterprise-help started.",
+        "when": 1730981014408
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of javascript-api started.",
+        "when": 1730981014408
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of enterprise-web-style-app started.",
+        "when": 1730981014408
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of enterprise-apps started.",
+        "when": 1730981014409
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment javascript-api with new image: docker.io/esrirelease/jsapi:11.4.0.6284.",
+        "when": 1730981014935
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of enterprise-help started.",
+        "when": 1730981014408
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of javascript-api started.",
+        "when": 1730981014408
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment enterprise-help with new image: docker.io/esrirelease/help:11.4.0.6284-wrong.",
+        "when": 1730981014408
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of enterprise-web-style-app started.",
+        "when": 1730981014408
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of enterprise-apps started.",
+        "when": 1730981014409
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of enterprise-help started.",
+        "when": 1730981014408
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of javascript-api started.",
+        "when": 1730981014408
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment enterprise-help with new image: docker.io/esrirelease/help:11.4.0.6284-wrong.",
+        "when": 1730981014408
+      },
+      {
+        "code": 2134,
+        "message": "Release upgrade of enterprise-web-style-app started.",
+        "when": 1730981014408
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment enterprise-apps with new image: docker.io/esrirelease/apps:11.4.0.6284.",
+        "when": 1730981015258
+      },
+      {
+        "code": 2038,
+        "message": "Updating deployment enterprise-web-style-app with new image: docker.io/esrirelease/web-style:11.4.0.6284-wrong.",
+        "when": 1730981015430
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of javascript-api completed.",
+        "when": 1730981105852
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of enterprise-apps completed.",
+        "when": 1730981166571
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of enterprise-help completed.",
+        "when": 1730982817006
+      },
+      {
+        "code": 2132,
+        "message": "Release upgrade of enterprise-web-style-app completed.",
+        "when": 1730982817370
+      },
+      {
+        "code": 2175,
+        "message": "27 out of 23 AgsDeployments updated. The release upgrade of Applications has completed in 1803846 millis (~ 30 minutes).",
+        "when": 1730982817453
+      },
+      {
+        "code": 2179,
+        "message": "Post-upgrade operations started.",
+        "when": 1730982999448
+      },
+      {
+        "code": 2417,
+        "message": "Updating configurations at post-upgrade started.",
+        "when": 1730982999448
+      },
+      {
+        "code": 2418,
+        "message": "Updating configurations at post-upgrade completed.",
+        "when": 1730983010655
+      },
+      {
+        "code": 2180,
+        "message": "Post-upgrade operations started for logging.",
+        "when": 1730983010655
+      },
+      {
+        "code": 2181,
+        "message": "Post-upgrade operations succeeded for logging.",
+        "when": 1730983023529
+      },
+      {
+        "code": 2178,
+        "message": "Refreshing autodeployed services post-upgrade started.",
+        "when": 1730983023529
+      },
+      {
+        "code": 2185,
+        "message": "Refreshing autodeployed services post-upgrade completed.",
+        "when": 1730985290086
+      },
+      {
+        "code": 2228,
+        "message": "Portal license file population started.",
+        "when": 1730985290086
+      },
+      {
+        "code": 2229,
+        "message": "Portal license file population completed.",
+        "when": 1730985299979
+      },
+      {
+        "code": 2191,
+        "message": "Refreshing portal search indices for items, groups and users.",
+        "when": 1730985299980
+      },
+      {
+        "code": 2192,
+        "message": "Refreshing portal indices completed successfully.",
+        "when": 1730985314898
+      },
+      {
+        "code": 2273,
+        "message": "Checking sync status for portal search indices for items, groups and users.",
+        "when": 1730985314898
+      },
+      {
+        "code": 2491,
+        "message": "Updating the version manifest config map with new release URL.",
+        "when": 1730985315481
+      },
+      {
+        "code": 2492,
+        "message": "Successfully updated the version manifest config map with new release URL.",
+        "when": 1730985315502
+      },
+      {
+        "code": 2362,
+        "message": "Upgrade succeeded with warnings. Please check the logs and events and warning information for more details.",
+        "when": 1730985315789
+      },
+      {
+        "code": 2432,
+        "message": "Reloading cache and config store.",
+        "when": 1730985315883
+      },
+      {
+        "code": 2433,
+        "message": "Successfully reloaded config-store and cache.",
+        "when": 1730985316003
+      },
+      {
+        "code": 2364,
+        "message": "Persisting upgrade results to the database.",
+        "when": 1730985316600
+      },
+      {
+        "code": 2011,
+        "message": "The upgrade process from 11.3.0.5814 to 11.4.0.6284 has completed in 01hr:38min:10sec:381millisec.",
+        "when": 1730985316773
+      },
+      {
+        "code": 2012,
+        "message": "The ArcGIS Enterprise on Kubernetes has been upgraded from 11.3.0.5814 to 11.4.0.6284 successfully.",
+        "when": 1730985316773
+      },
+      {
+        "code": 2432,
+        "message": "Reloading cache and config store.",
+        "when": 1730985318905
+      },
+      {
+        "code": 2433,
+        "message": "Successfully reloaded config-store and cache.",
+        "when": 1730985318925
+      },
+      {
+        "code": 2432,
+        "message": "Reloading cache and config store.",
+        "when": 1730985319989
+      },
+      {
+        "code": 2433,
+        "message": "Successfully reloaded config-store and cache.",
+        "when": 1730985320140
+      }
+    ],
+    "startTime": 1730979426392,
+    "state": "success",
+    "endTime": 1730985316363,
+    "overallDuration": "01hr:38min:09sec:971millisec",
+    "operation": "upgrade",
+    "notableEvents": [
+      {
+        "reason": "Failed",
+        "eventLastTimestamp": "2024-11-07T12:06:56Z",
+        "involvedObject": "v1/Pod/arcgis-help-5b4fb5574b-jd8sq",
+        "sourceComponent": "kubelet",
+        "count": 6,
+        "sourceHost": "aks-delvaibhav-16972246-vmss000073",
+        "message": "Error: ImagePullBackOff",
+        "type": "Warning"
+      },
+      {
+        "reason": "Failed",
+        "eventLastTimestamp": "2024-11-07T12:05:55Z",
+        "involvedObject": "v1/Pod/arcgis-enterprise-web-style-app-v2xmx-7c757ddfb6-tc6tw",
+        "sourceComponent": "kubelet",
+        "count": 6,
+        "sourceHost": "aks-delvaibhav-16972246-vmss000074",
+        "message": "Error: ImagePullBackOff",
+        "type": "Warning"
+      },
+      {
+        "reason": "Failed",
+        "eventLastTimestamp": "2024-11-07T12:44:07Z",
+        "involvedObject": "v1/Pod/arcgis-utilities-symbols-symbolserver-xkm62-5979997859-kk6mg",
+        "sourceComponent": "kubelet",
+        "count": 5,
+        "sourceHost": "aks-delvaibhav-16972246-vmss000074",
+        "message": "Error: ImagePullBackOff",
+        "type": "Warning"
+      }
+    ]
+  },
+  "targetVersion": "11.4.0",
+  "sourceBuild": "5814"
+}
+
+```
+
+</Tab>
+
+</Tabs>

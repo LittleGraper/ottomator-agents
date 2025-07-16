@@ -1,0 +1,821 @@
+---
+title: "/settings/update: Update Organization Settings"
+description: "The update operation allows you to set an access notice and informational banner for your organization."
+slug: "update-organization-settings"
+url: "/update-organization-settings"
+guid: "GUID-B289CAE1-4050-435E-B504-2A1D8D5ABCD6"
+migratedTopicMetadata:
+  FTITLE: "Update Organization Settings"
+  FDESCRIPTION: ""
+  FCHANGES: "Removing conditions"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2-*"
+  CREATED-ON: "07/11/2023 07:50:10"
+  FAUTHOR: "tohara"
+  FSTATUS: "To be reviewed"
+  MODIFIED-ON: "07/11/2023 07:51:43"
+  VERSION: "7"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-39D28591-8A1E-40F2-8619-D666CFF23AB1"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /portals/[portalID]/settings/update
+  urlSegments:
+    - name: '[root]'
+      url: /root
+    - name: /portals/[portalID]/settings/update
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.8'
+---
+
+## Example usage
+
+The following is a sample ArcGIS Online POST request for the `update` operation:
+
+```markdown
+POST /sharing/rest/portals/0123456789ABCDEF/settings/update HTTP/1.1
+Host: org.arcgis.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+anonymousAccessNotice={
+  title": "Anonymous Access Notice Title",
+  text": "Anonymous Access Notice Text",
+  "buttons": "acceptAndDecline",
+  "enabled": true
+}&authenticatedAccessNotice=authenticatedAccessNotice={
+  "title": "Authenticated Access Notice Title",
+  "text": "Authenticated Access Notice Text",
+  "buttons": "okOnly",
+  "enabled":true
+}&informationalBanner={
+  "text": "Header Text",
+  "bgColor": "grey",
+  "fontColor": "blue",
+  "enabled": true
+}&f=pjson
+```
+
+The following is a sample ArcGIS Enterprise POST request for the `update` operation, formatted for readability. At 11.0, this operation includes the `portalConfigProperties` parameter:
+
+```other
+POST /webadaptor/sharing/rest/portals/0123456789ABCDEF/settings/update HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+anonymousAccessNotice={
+  title": "Anonymous Access Notice Title",
+  text": "Anonymous Access Notice Text",
+  "buttons": "acceptAndDecline",
+  "enabled": true
+}&authenticatedAccessNotice=authenticatedAccessNotice={
+  "title": "Authenticated Access Notice Title",
+  "text": "Authenticated Access Notice Text",
+  "buttons": "okOnly",
+  "enabled":true
+}&informationalBanner={
+  "text": "Header Text",
+  "bgColor": "grey",
+  "fontColor": "blue",
+  "enabled": true
+}&portalConfigProperties={
+  "extentService": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer",
+  "footerLinks": [],
+  "gcsBasemapService": "https://wi.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/MapServer",
+  "httpsDomains": [
+    "arcgis.com",
+    "arcgisonline.com",
+    "esrikr.com",
+    "premiumservices.blackbridge.com",
+    "esripremium.accuweather.com",
+    "gbm.digitalglobe.com",
+    "firstlook.digitalglobe.com",
+    "msi.digitalglobe.com"
+  ],
+  "longTokenExpiration": 20160,
+  "searchArcGISOnlineEnabled": true,
+  "surveyUrl": "https://survey123.arcgis.com",
+  "tokenExpiration": 120,
+  "configurePortalAGOEnv": "www.arcgis.com",
+  "portalAGOConfigEnabled": true,
+  "portalLivingAtlasConfigEnabled": true,
+  "iotViewerUrl": "https://velocity.arcgis.com"
+}&f=pjson
+```
+
+ 
+
+## Description
+
+The `update` operation allows you to enable and customize an access notice and informational banner for your organization, as well as set advanced portal settings for the organization. The access notice, for authenticated and anonymous access, acts as a terms of service that users must agree to before accessing the portal site. The informational banner allows you to alert members of your organization about the site's current status and content, such as a notice that the site is currently in [read-only mode](DEVSITE/rest/enterprise-administration/portal/mode) or containing content of a specific classification level. For more information, see [Configure security settings](https://enterprise.arcgis.com/en/portal/latest/administer/windows/configure-security.htm).
+
+Starting at ArcGIS Enterprise 11.0, this operation also customizes advanced portal options, such as configuring a disconnected deployment using the `portalConfigProperties` parameter. Previously, administrators who needed to customize the portal's behavior made updates to the editable version of the portal's configuration file (`config.js`). Though administrators no longer need to update the configuration file, it is recommended that a backup of it be made before upgrading to an 11.0 deployment to preserve the portal's previous customization and settings as a reference. After the upgrade, the properties defined in the configuration file must be manually applied to the `portalConfigProperties` parameter, as the Sharing API does not automatically collect and apply the information in the file. For a list of the properties supported by `portalConfigProperties` and their default values, see the [Advanced portal configuration properties](/update-organization-settings/#advanced-portal-configuration-properties) section below.
+
+<Note type={"note"}>
+
+For Windows and Linux deployments, the editable version of the portal's configuration file is available at `<Portal for ArcGIS installation directory>\customizations\<version number>\framework\webapps\arcgis#home\js\arcgisonline\config.js`. The original workflow for setting advanced portal settings was only applicable to Windows and Linux deployments. ArcGIS Enterprise on Kubernetes 11.0 supports the `portalConfigProperties` parameter, as well as establishing disconnected deployments, but earlier versions of ArcGIS Enterprise on Kubernetes do not have a portal configuration file. The `portalConfigProperties` property is not supported for ArcGIS Online.
+
+</Note>
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `anonymousAccessNotice` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object representing a notice that is shown to your organization's anonymous users. For the required properties for this parameter, see the [Access notification properties](/update-organization-settings/#access-notification-properties) section below.
+
+      Example
+
+      ```markdown
+      anonymousAccessNotice={
+        "title": "Anonymous Access Notice Title",
+        "text": "Anonymous Access Notice Text",
+        "buttons": "acceptAndDecline",
+        "enabled": true
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `authenticatedAccessNotice` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object representing a notice that is shown to your organization's authenticated users. For the required properties for this parameter, see the [Access notification properties](/update-organization-settings/#access-notification-properties) section below.
+
+      <Note type={"note"}>
+
+      Currently, only ArcGIS Online supports this parameter.
+
+      </Note>
+
+      Example
+
+      ```markdown
+      authenticatedAccessNotice={
+        "title": "Authenticated Access Notice Title",
+        "text": "Authenticated Access Notice Text",
+        "buttons": "okOnly",
+        "enabled": true
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `informationalBanner` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object representing the informational banner that is shown at the top of your organization's page. For the required properties for this parameter, see the [Informational banner properties](/update-organization-settings/#information-banner-properties) section below.
+
+      Example
+
+      ```markdown
+      informationalBanner={
+        "text": "Header Text",
+        "bgColor": "grey",
+        "fontColor": "blue",
+        "enabled": true
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `portalConfigProperties` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at ArcGIS Enterprise 11.0. A JSON object representing advanced configuration options for the portal. The properties can be used to customize the behavior of the portal to match the organization's needs or to configure a disconnected deployment. For information about the configurable properties, see the [Advanced portal configuration properties](/update-organization-settings/#advanced-portal-configuration-properties) section below.
+
+      <Note type={"note"}>
+
+      This parameter is supported for ArcGIS Enterprise on Windows and Linux, as well as ArcGIS Enterprise on Kubernetes. This parameter is not supported in ArcGIS Online.
+
+      </Note>
+
+      Example
+
+      ```other
+      portalConfigProperties={
+        "extentService": "https://services.arcgisonline.com/ArcGIS/rest/services/
+        World_Street_Map/MapServer",
+        "footerLinks": [],
+        "gcsBasemapService": "https://wi.maptiles.arcgis.com/arcgis/rest/services/
+        World_Imagery/MapServer",
+        "httpsDomains": [
+          "arcgis.com",
+          "arcgisonline.com",
+          "esrikr.com",
+          "premiumservices.blackbridge.com",
+          "esripremium.accuweather.com",
+          "gbm.digitalglobe.com",
+          "firstlook.digitalglobe.com",
+          "msi.digitalglobe.com"
+        ],
+        "longTokenExpiration": 20160,
+        "searchArcGISOnlineEnabled": true,
+        "surveyUrl": "https://survey123.arcgis.com",
+        "tokenExpiration": 120,
+        "webEditorEnabled": true,
+        "configurePortalAGOEnv": "www.arcgis.com",
+        "portalAGOConfigEnabled": true,
+        "portalLivingAtlasConfigEnabled": true,
+        "iotViewerUrl": "https://velocity.arcgis.com"
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+### Access notification properties
+
+The table below outlines the properties required by the `anonymousAccessNotice` and `authenticatedAccessNotice` parameters.
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `title` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The title of the access notice.
+
+      Example
+
+      ```markdown
+      "title": "Anonymous Access Notice Title"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `text` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The text displayed in the access notice.
+
+      Example
+
+      ```markdown
+      "text": "Authenticated Access Notice Text"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `buttons` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the button option for the access notice. Users will be prompted to select either **Accept** or **Decline**, or only **OK**.
+
+      Values: `acceptAndDecilne` | `okOnly`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `enabled` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies whether the access notice is enabled.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+### Information banner properties
+
+The table below outlines the properties required by the `informationalBanner` parameter.
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `text` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The text displayed in the informational banner.
+
+      Example
+
+      ```markdown
+      "text": "Authenticated Access Notice Text"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `bgColor` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The background color of the informational banner. This property recognizes common color names (such as red or blue) and hexadecimal color values. While you can choose any color for this property, it is recommended that you choose a color that contrasts appropriately with the `fontColor` property value, as poor contrast will cause a warning to appear on the **Security** settings page of your Enterprise portal indicating the insufficient contrast.
+
+      Example
+
+      ```markdown
+      "bgColor": "grey"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `fontColor` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The font color of the informational banner. This property recognizes common color names (such as red or blue) and hexadecimal color values. While you can choose any color for this property, it is recommended that you choose a color that contrasts appropriately with the `bgColor` property value, as poor contrast will cause a warning to appear on the **Security** settings page of your Enterprise portal indicating the insufficient contrast.
+
+      Example
+
+      ```markdown
+      "fontColor": "blue"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `enabled` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies whether the informational banner is enabled.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+### Advanced portal configuration properties
+
+The following table outlines the configurable properties for the `portalConfigProperties` parameter and their default values.
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `extentService` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at ArcGIS Enterprise 11.0. The service that will be used to update, or set the extent of, a web map item. The service must be a tiled map service that uses the WGS84 geographic coordinate system with well-known ID (WKID) 4326.
+
+      Example
+
+      ```other
+      "extentService": "http://services.arcgisonline.com/ArcGIS/rest/services/
+      World_Street_Map/MapServer"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `footerLinks` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at ArcGIS Enterprise 11.0. The user-specified links displayed on all page footers, such as the Terms of Use, Privacy, Contact Us, and Report Abuse links. By default, this property is an empty array.
+
+      Example
+
+      ```markdown
+      "footerLinks": [
+        {
+          title: "Organization",
+          url: "http://www.myorganiz.com"
+        },
+        {
+          title: "Terms of Use",
+          url: "http://www.myorganiz.com/legal/licensing/termsofuse.html"                        
+        },
+        {
+          title: "Privacy",
+          url: "http://www.myorganiz.com/legal/privacy.html"                                     
+        },
+        {
+          title: "Contact Us",
+          email: "feedback@myorganiz.com",
+          type: "contactUs"
+        },
+        {
+          title: "Report Abuse",
+          email: "feedback@myorganiz.com",
+          type: "reportAbuse"
+        }
+      ],
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `gcsBasemapService` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at ArcGIS Enterprise 11.0. The service that will be used as the basemap for OGC WMS services that do not support the Web Mercator coordinate system.
+
+      Example
+
+      ```other
+      "gcsBasemapService": "https://wi.maptiles.arcgis.com/arcgis/rest/services/
+      World_Imagery/MapServer"
+      ```
+
+      <Note type="legacy">
+
+      The previous default basemap URL for `gcsBasemapService` was retired in 2022 and is no longer accessible.
+
+      </Note>
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `httpsDomain` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at ArcGIS Enterprise 11.0. A list of federated servers that Map Viewer Classic can use to switch services from using HTTP to HTTPS.
+
+      Example
+
+      ```markdown
+      "httpsDomains": [
+        "arcgis.com",
+        "arcgisonline.com",
+        "esrikr.com",
+        "premiumservices.blackbridge.com",
+        "esripremium.accuweather.com",
+        "gbm.digitalglobe.com",
+        "firstlook.digitalglobe.com",
+        "msi.digitalglobe.com"
+      ]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `longTokenExpiration` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at ArcGIS Enterprise 11.0. The expiration time for tokens created when a user selects **Keep me signed in** when signing in. If **Keep me signed in** is not selected, the `tokenExpiration` value overrides the time defined by this property. The default value is 20160 minutes (14 days).
+
+      Example
+
+      ```markdown
+      "longTokenExpiration": 20160
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `restrictOrganizationPageToAdmin`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      <Note type="legacy">
+
+      This property has been deprecated at ArcGIS Enterprise 11.3. For organizations that previously used this property to limit access to the Organization page, please refer to the [Member roles](https://enterprise.arcgis.com/en/portal/latest/administer/windows/member-roles.htm) and [Privileges granted to roles](https://enterprise.arcgis.com/en/portal/latest/administer/windows/privileges-for-roles-orgs.htm) documentation for information on how custom roles and privileges can be used to allow or disallow access to specific workflows and pages in the Enterprise portal.
+
+      </Note>
+
+      Introduced at ArcGIS Enterprise 11.0. Specifies whether the **Organization** page of the portal is visible to all organization members. If this property is set to `true`, the **Organization** page will be hidden from all members expect those assigned the default administrator role. The default value is `false`, which leaves the page visible to all members.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `searchArcGISOnlineEnabled` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at ArcGIS Enterprise 11.0. Specifies whether the option to search for ArcGIS Online layers using both Map Viewer Classic and, starting at ArcGIS Enterprise 11.2, Map Viewer is enabled. When disabled (`false`), the option to search for ArcGIS Online layers is hidden from the **Search for Layers** dialog box. The default value is `true`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `showCreateDashboard` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      <Note type="legacy">
+
+      This property has been deprecated at ArcGIS Enterprise 11.3. For organizations that previously used this property to enable or disable access to ArcGIS Dashboards in Enterprise portal, refer to the [Blocked Esri apps](https://enterprise.arcgis.com/en/portal/latest/administer/windows/configure-security.htm#ESRI_SECTION2_CE007AFEA465444887036BD6D7038639) documentation for an updated workflow.
+
+      </Note>
+
+      Introduced at ArcGIS Enterprise 11.0. Specifies whether ArcGIS Dashboards is accessible in the portal. If disabled (`false`), Dashboards is hidden from the **Share** dialog box in Map Viewer Classic, as well as the **Create Web App** option on the item detail page and the **Create App** option on the **My Content** tab of the **Content** page. The default value is `true`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `showInAppLauncher` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      <Note type="legacy">
+
+      This property has been deprecated at ArcGIS Enterprise 11.3. For organizations that previously used this property to manage the list of Esri applications that display in the app launcher, refer to the [Blocked Esri apps](https://enterprise.arcgis.com/en/portal/latest/administer/windows/configure-security.htm#ESRI_SECTION2_CE007AFEA465444887036BD6D7038639) documentation for an updated workflow.
+
+      </Note>
+
+      Introduced at ArcGIS Enterprise 11.0. A list of Esri applications that display in the app launcher. Entries must be separated by a comma and match the application title expected by ArcGIS Enterprise.
+
+      <Note type={"caution"}>
+
+      Updates to the `showInAppLauncher` property are not maintained during upgrades. Any updates made to the property prior to an upgrade must be made again once the upgrade process is complete.
+
+      </Note>
+
+      The example below shows the most recent default list of applications. For the list of default applications supported at your deployment's version of ArcGIS Enterprise, reference your Portal Directory API installed help.
+
+      Example
+
+      ```markdown
+      "showInAppLauncher": [
+        "ArcGIS Dashboards",
+        "ArcGIS Enterprise Sites",
+        "Track Viewer",
+        "Ortho Maker",
+        "ArcGIS Workforce",
+        "ArcGIS QuickCapture Web Designer",
+        "ArcGIS StoryMaps",
+        "ArcGIS Experience Builder",
+        "ArcGIS Field Maps",
+        "ArcGIS Map Viewer",
+        "ArcGIS Map Viewer Classic",
+        "ArcGIS Solutions",
+        "Deep Learning Studio",
+        "Instant Apps",
+        "Scene Viewer",
+        "Vector Tile Style Editor"
+      ],
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sceneViewerEnabled` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      <Note type="legacy">
+
+      This property has been deprecated at ArcGIS Enterprise 11.3. For organizations that previously used this property to hide Sciene Viewer options in Enterprise portal, refer to the [Navigation Bar](https://enterprise.arcgis.com/en/portal/latest/administer/windows/configure-general.htm#ESRI_SECTION1_D28DC26205D642BB957F42BE1E8483D4) documentation for an updated workflow.
+
+      </Note>
+
+      Introduced at ArcGIS Enterprise 11.0. Specifies whether Scene Viewer is accessible in the portal. When disabled (`false`), Scene Viewer options are hidden from all dialog boxes and ribbons in the portal. The default value is `true`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `surveyUrl` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at ArcGIS Enterprise 11.0. The URL used to access the Survey123 website. This URL can point to an installed Survey123 website, including any port numbers or reverse proxy access points.
+
+      Example
+
+      ```markdown
+      "surveyUrl": "https://survey123.arcgis.com"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `tokenExpiration` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at ArcGIS Enterprise 11.0. The expiration time for tokens generated when a user signs in. If, when signing in, a user selects **Keep me signed in**, the `longTokenExpiration` property will override the time set for this property. The default value is 120 minutes (2 hours).
+
+      Example
+
+      ```markdown
+      "tokenExpiration": 120
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `webAppBuilderEnabled` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      <Note type="legacy">
+
+      This property has been deprecated at ArcGIS Enterprise 11.3. For organizations that previously used this property to enable or disable access to Enterprise portal, refer to the [Blocked Esri apps](https://enterprise.arcgis.com/en/portal/latest/administer/windows/configure-security.htm#ESRI_SECTION2_CE007AFEA465444887036BD6D7038639) documentation for an updated workflow.
+
+      </Note>
+
+      Introduced at ArcGIS Enterprise 11.0. Specifies whether ArcGIS Web AppBuilder is accessible to the portal. When disabled (`false`), Web AppBuilder is hidden from the **Share** dialog box in Map Viewer Classic, as well as the **Create App** option on the **My Content** tab of the portal's **Content** page. The default value is `true`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `configurePortalAGOEnv` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at ArcGIS Enterprise 11.0. The proxy used for configured utility services. For a disconnected environment, set this property to `false`. The default proxy for non-disconnected environments is shown in the example below.
+
+      Example
+
+      ```markdown
+      "configurePortalAGOEnv": "www.arcgis.com"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `portalAGOConfigEnabled` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at ArcGIS Enterprise 11.0. Specifies whether the **ArcGIS Online** tab is displayed on the portal's **Organization Settings** page. If you're configuring a disconnected environment, set this property to `false`. Before doing so, you must disable access to ArcGIS Living Atlas content. See [Configure ArcGIS Living Atlas content](https://enterprise.arcgis.com/en/portal/latest/administer/windows/configure-living-atlas-content.htm#ESRI_SECTION1_B0E53E4796E9430EB48A57D7D8518F42). The default value is `true`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `portalLivingAtlasConfigEnabled` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at ArcGIS Enterprise 11.0. Specifies whether the **Configure Living Atlas Content** section will be displayed on the **ArcGIS Online** tab on the portal's **Organization Settings** page. In a disconnected environment, set this property to `false`. Before doing so, you must disable access to ArcGIS Living Atlas content. See [Configure ArcGIS Living Atlas content](https://enterprise.arcgis.com/en/portal/latest/administer/windows/configure-living-atlas-content.htm#ESRI_SECTION1_B0E53E4796E9430EB48A57D7D8518F42). The default value is `true`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `iotViewerUrl` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at ArcGIS Enterprise 11.1. This is the URL to access the ArcGIS Velocity application that can point to an installed ArcGIS Velocity deployment.
+
+      Example
+
+      ```markdown
+      "iotViewerUrl": "https://velocity.arcgis.com"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `webEditorEnabled` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at ArcGIS Enterprise 11.3. Indicates whether the Web Editor setup has been installed. When this property is `false`, it indicates to the organization and any associated client applications that the Web Editor setup has not been installed and options to open the Web Editor app (ex: App Launcher) are hidden within the Enterprise portal. When the software is installed, this property will be updated to `true` and options to open the Web Editor will be made visible.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## JSON Response example
+
+```other
+{"success": true}
+```

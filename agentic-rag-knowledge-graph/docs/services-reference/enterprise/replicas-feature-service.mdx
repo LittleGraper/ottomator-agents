@@ -1,0 +1,214 @@
+---
+title: "Replicas (Feature Service)"
+description: "The replicas resource lists all replicas that have been created on the feature service."
+slug: "replicas-feature-service"
+url: "/replicas-feature-service"
+guid: "GUID-DE698443-C409-4032-A53B-31FD8B25EC98"
+migratedTopicMetadata:
+  FTITLE: "Replicas (Feature Service)"
+  FDESCRIPTION: ""
+  FCHANGES: "Changes for 10.9"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9 -*"
+  CREATED-ON: "08/02/2021 21:09:02"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "12/02/2021 11:02:22"
+  VERSION: "6"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-3C22C762-4979-4DCD-BA0F-087D75627E7B"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/FeatureServer/replicas
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/FeatureServer/replicas
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.0'
+---
+
+## Description
+
+The `replicas`  resource lists all replicas that have been created on the feature service. This list includes the replica name and replica ID of each replica. For secured services, all replicas are listed when logged in as the admin user. Otherwise, only replicas created by the logged-in user are listed. 
+
+### New at 10.8.1
+
+New `advancedReplicasResourceCapabilities`  properties in `syncCapabilities`  are provided for sync enabled feature services published from ArcGIS Pro that reference enterprise geodatabase data. These describe new parameters that can be passed to the replicas resource. These include `replicaVersion` , `returnLastSyncDate` , and `returnVersion` . See details below in the Request Parameters table.
+
+For sync enabled, branch versioned data, determined by the layer resource returning `isDataBranchVersioned`  as `true` , the `replicas`  resource will list, and allow, access to all replicas from all users if the connected user has the Version Management privilege assigned to them either [through the default administrator role or through a custom role](https://enterprise.arcgis.com/en/portal/latest/administer/windows/roles.htm). Users with this privilege can also unregister any replica from any users.
+
+<Note type={"note"}>
+
+Users with this privilege can't view or unregister replica from others if the data is not branch versioned.
+
+</Note>
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`replicaVersion` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Can be set when the service resource's `advancedReplicasResourceCapabilities`  property includes `supportsVersion`  as `true` . When `replicaVersion`  is included in the request, only replicas with a replica version matching the value provided will be returned in the replicas response.
+
+<Note type={"note"}>
+
+The parameter value is not applied if the data is not versioned.
+
+</Note>
+
+Example
+
+```javascript
+replicaVersion=SDE.DEFAULT
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnVersion` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Can be set if the service resource's `advancedReplicasResourceCapabilties`  property includes `supportsReturnVersion`  as true. When `returnVersion`  is `true` , the version name associated with each replica is included in the replicas response. The default value is `false` .
+
+<Note type={"note"}>
+
+The parameter value is not applied if the data is not versioned.
+
+</Note>
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnLastSyncDate` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Can be set if the service resource's `advancedReplicasResourceCapabilities`  property includes `supportsReturnLastSyncData`  as `true` . when `returnLastSyncData`  is `true` , the `lastSyncDate`  value associated with each replica is included in the replicas response. The default value is `false` .
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` .
+
+Values: `html`  \| `json`  \| `pjson` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+URL listing the replicas, as well as the version name and `lastSyncDate`  values associated with each replica, in the USA feature service:
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/USA/FeatureServer/replica?returnVersion=true&returnLastSyncDate=true&f=pjson
+```
+
+ 
+
+## JSON Response syntax
+
+```other
+[ 
+  {
+    "replicaName": "replicaName1",
+    "replicaID": "replicaID1"
+  },
+  {
+    "replicaName": "replicaName1",
+    "replicaID": "replicaID2"
+  }
+]
+```
+
+ 
+
+## JSON Response examples
+
+The following response demonstrates the information returned when `returnLastSyncDate`  and `returnVersion`  are `true` :
+
+```other
+[
+  {
+		  "replicaName": "Ags_Fs_1587781611176",
+		  "replicaID": "A849811F-6FDF-4AEC-9DD0-3E3DF7142603",
+		  "replicaVersion": "GDB.admin_counties_v_1587781587098",
+		  "lastSyncDate": 1587781611254
+	 },
+	 {
+		  "replicaName": "Ags_Fs_1587781611208",
+		  "replicaID": "1FBA41AA-55B0-432A-B918-96024ECF2533",
+		  "replicaVersion": "GDB.admin_counties_v_1587781587066",
+		  "lastSyncDate": 1587781611286
+	 }
+]
+
+```
+
+ 
+
+The following response demonstrates what is returned when `replicaVersion`  is defined (for this example, it was defined as `GBD.admin_counties_v_1587781587098` ) and `returnVersion`  is `true` .
+
+```javascript
+[
+  {
+	   "replicaName": "Ags_Fs_1587781611176",
+	   "replicaID": "A849811F-6FDF-4AEC-9DD0-3E3DF7142603",
+	   "replicaVersion": "GDB.admin_counties_v_1587781587098"
+  }
+]
+
+```
+
+ 

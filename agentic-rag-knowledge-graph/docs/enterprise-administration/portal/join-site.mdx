@@ -1,0 +1,147 @@
+---
+title: "Join Site"
+description: "The joinSite  operation connects a portal to an existing site."
+slug: "join-site"
+url: "/join-site"
+guid: "GUID-0C3A0B66-BE69-49FF-BC50-D6D80A03D31F"
+migratedTopicMetadata:
+  FTITLE: "Join Site"
+  FDESCRIPTION: ""
+  FCHANGES: "Style changes"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1- *"
+  CREATED-ON: "18/02/2023 17:00:20"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "27/09/2023 08:50:41"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-36DB7EFB-E9E3-48C9-96A5-732E5829B1C5"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /joinSite
+  urlSegments:
+    - name: <root>
+      url: /portal-administration-root
+    - name: /joinSite
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '10.4'
+  requiredCapabilities:
+    - name: Access allowed only with the default administrator role
+      url: /privileges-for-portal-admin-api
+---
+
+## Description
+
+<Note type={"caution"}>
+
+This operation cannot be performed if this is the first portal machine registered to the site. The first portal machine of a site must use the [Create Site](/create-site) operation instead.
+
+</Note>
+
+The `joinSite` operation performs the following tasks when invoked:
+
+- Registers a machine to an existing site (active machine)
+- Creates a snapshot of the database of the active machine
+- Updates the token shared key
+- Updates Web Adaptor configurations
+- Sets up replication to keep the database of both machines in sync
+
+You must provide an account with administrative privileges to the site for the operation to be successful. When an attempt is made to join a site, the site validates the administrative credentials of the user invoking the operation. Once the administrative credentials are validated, the site returns connection information about its configuration store back to the portal machine. The portal machine then uses the connection information to work with the configuration store.
+
+The operation is time-consuming as the database is configured on the machine and all configurations are applied from the active machine. After the operation is complete, the web server that hosts the API will be restarted.
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `machineAdminUrl` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The admin URL of the existing portal site to which a machine will be joined.
+
+      ```other label=Example
+      machineAdminURL=https://portalhost.domain.com:7443
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `username` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The username for the initial administrator account of the existing portal site.
+
+      ```javascript label=Example
+      username=admin
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `password` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The password for the initial administrator account of the existing portal site.
+
+      ```javascript label=Example
+      password=admin.secret
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample request for the `joinSite` operation:
+
+```markdown
+https://webadaptor.domain.com/webadaptor/portaladmin/joinSite?machineAdminUrl=https://portalhost.domain.com:7443&username=admin&password=admin.secret&f=json
+
+```
+
+
+## JSON Response example
+
+```other
+{
+  "status": "success",
+  "recheckAfterSecs": 10
+}
+```

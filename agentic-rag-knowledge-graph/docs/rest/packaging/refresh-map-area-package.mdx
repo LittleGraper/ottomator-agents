@@ -1,0 +1,315 @@
+---
+title: "Refresh Map Area Package"
+description: "The Refresh Map Area Package task refreshes existing map area packages to update them with changes made on the source data since the last time those packages were created or refreshed."
+slug: "refresh-map-area-package"
+url: "/refresh-map-area-package"
+guid: "GUID-AF548EC3-307C-40F1-8700-CD08422B3EC8"
+migratedTopicMetadata:
+  FTITLE: "Refresh Map Area Package"
+  FDESCRIPTION: ""
+  FCHANGES: "Update URLs to HTTPS"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.6.1 - *"
+  CREATED-ON: "01/07/2019 13:50:08"
+  FAUTHOR: "ssanchez"
+  FSTATUS: "Released"
+  MODIFIED-ON: "23/07/2019 08:40:40"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-3981BD99-54B2-4E01-8C56-02B2E19B5B03"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  urls:
+    - label: ArcGIS Online
+      urlSegments:
+        - name: https://packaging.arcgis.com/arcgis/rest/services/OfflinePackaging/GPServer/RefreshMapAreaPackage/submitJob
+    - label: ArcGIS Enterprise
+      urlSegments:
+        - name: <catalog-url>
+          url: /rest/services-reference/enterprise/catalog/
+        - name: /Utilities/OfflinePackaging/GPServer/RefreshMapAreaPackage/submitJob
+  methods: ["post"]
+  sslOnly: 'no'
+  versionIntroduced: 10.6.1
+---
+
+## Description
+
+The Refresh Map Area Package task refreshes existing map area packages to update them with changes made on the source data since the last time those packages were created or refreshed.
+
+<Note type={"note"}>
+
+The API does not support request body using multipart/form-data encoding.
+
+</Note>
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The supported output format is JSON.
+
+Example: `f=json` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`token` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+An access token that identifies the authenticated user and controls access to restricted resources and operations.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`packages` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A JSON array consisting of packages that need to be refreshed, specified with the ID of each package item. Packages can belong to different map areas. A package item should only be listed if you are the owner of the package item or organization administrators.
+
+Example:
+
+```javascript
+[
+ {"itemId":"96e08c56db8145dab4de2328b058fe97"},
+ {"itemId":"0de0b83abe014901b2df42cac9e31d3c"},
+ {"itemId":"c8d1ae20448b487c9e28ad1e8eab13b7"},
+ {"itemId":"0da8bbef893a44a484be48732c7f018b"}
+]
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Response properties
+
+When a job request is submitted, the service assigns a unique job identifier for the transaction. A JSON response with the job ID and job status are returned as below:
+
+```javascript
+{
+  "jobId": "<jobID>",
+  "jobStatus":  |  |  |  |  |  |  | 
+}
+```
+
+ 
+
+### Check job status
+
+After the initial request is submitted, you can use the job ID to check its status and messages periodically by calling as below:
+
+```
+https://packaging.arcgis.com/arcgis/rest/services/OfflinePackaging/GPServer/RefreshMapAreaPackage/jobs/<jobID>?token=<token>&returnMessages=true&f=json
+```
+
+ 
+
+JSON response syntax during job execution
+
+```javascript
+{
+    "jobId": "<jobId>",
+    "jobStatus": "<jobStatus>",
+    "messages": [
+        {
+            "type": "<type1>",
+            "description": "<description1>"
+        },
+        {
+            "type": "<type2>",
+            "description": "<description2>"
+        }
+    ]
+}
+```
+
+ 
+
+### Retrieve results
+
+When the status of the job is `esriJobSucceeded` upon its successful completeness, you can retrieve the output results in below form:
+
+```
+https://packaging.arcgis.com/arcgis/rest/services/OfflinePackaging/GPServer/RefreshMapAreaPackage/jobs/<jobID>/results/<outputParameter>?token=<token>&f=json
+```
+
+ 
+
+You can also retrieve the value of any input parameter by calling:
+
+```
+https://packaging.arcgis.com/arcgis/rest/services/OfflinePackaging/GPServer/RefreshMapAreaPackage/jobs/<jobID>/inputs/<inputParameter>?token=<token>&f=json
+```
+
+ 
+
+Upon successful execution, the service returns the list of packages along with their states using the following output parameter:
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`result` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A JSON object that contains properties for the output parameter name, data type and value. The `value` property is a JSON array that contains the list of packages specified with the `source` (source service URL), `itemId` (corresponding package item ID) and `state` (package state) of each.
+
+Supported values for `state` are: `unchanged` \| `updated`.
+
+Example:
+
+```javascript
+{
+ "paramName": "result",
+ "dataType": "GPString",
+ "value": [
+  {
+   "source":  "https://services.arcgis.com/J423vH8fR9HV444k/arcgis/rest/services/featureService1/FeatureServer",
+    "itemId":  "96e08c56db8145dab4de2328b058fe97",
+    "state":  "updated"
+  },
+   {
+   "source":  "https://services.arcgis.com/J423vH8fR9HV444k/arcgis/rest/services/featureService1/FeatureServer",
+    "itemId":  "0de0b83abe014901b2df42cac9e31d3c",
+    "state":  "updated"
+  },
+   {
+   "source":  "https://services.arcgis.com/J423vH8fR9HV444k/arcgis/rest/services/featureService2/FeatureServer",
+    "itemId":  "0da8bbef893a44a484be48732c7f018b",
+    "state":  "unchanged"
+  },
+   {
+   "source":  "https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer",
+    "itemId":  "c8d1ae20448b487c9e28ad1e8eab13b7",
+    "state":  "new"
+  }
+ ]
+}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+Request URL to submit the job
+
+```
+https://packaging.arcgis.com/arcgis/rest/services/OfflinePackaging/GPServer/RefreshMapAreaPackage/submitJob
+```
+
+ 
+
+JSON Response Example
+
+```javascript
+{
+ "jobId": "j89daf187f78b4ecbae8f10fbeb83a22e",
+ "jobStatus": "esriJobSubmitted"
+}
+```
+
+ 
+
+Check job status
+
+Request URL to query job status
+
+```
+https://packaging.arcgis.com/arcgis/rest/services/OfflinePackaging/GPServer/RefreshMapAreaPackage/jobs/j89daf187f78b4ecbae8f10fbeb83a22e
+```
+
+ 
+
+JSON Response
+
+```javascript
+{
+ "jobId": "j89daf187f78b4ecbae8f10fbeb83a22e",
+ "jobStatus": "esriJobExecuting",
+ "messages": []
+}
+```
+
+ 
+
+Retrieve results
+
+Request URL to return output map area item
+
+```
+https://packaging.arcgis.com/arcgis/rest/services/OfflinePackaging/GPServer/RefreshMapAreaPackage/jobs/jdadca3e7f8e84b7c974cc1f47b615761/results/result
+```
+
+ 
+
+JSON Response
+
+```javascript
+{
+ "paramName": "result",
+ "dataType": "GPString",
+ "value": [
+  {
+   "itemId":  "0de0b83abe014901b2df42cac9e31d2s",
+    "error":  "Error accessing item 0de0b83abe014901b2df42cac9e31d2s",
+    "state":  "unchanged"
+  },
+   {
+   "source":  "https://services.arcgis.com/J423vH8fR9HV444k/arcgis/rest/services/myFeatureServiceName/FeatureServer",
+    "itemId":  "96e08c56db8145dab4de2328b058fe97",
+    "state":  "unchanged"
+  }
+ ]
+}
+```
+
+ 

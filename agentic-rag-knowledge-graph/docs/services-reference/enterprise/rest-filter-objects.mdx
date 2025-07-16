@@ -1,0 +1,145 @@
+---
+title: "Filter objects"
+description: "JSON  filter objects are used by the ArcGIS Data Reviewer REST API."
+slug: "rest-filter-objects"
+url: "/rest-filter-objects"
+guid: "GUID-8283B11B-D97A-4C63-8A6A-DA333B3038FF"
+migratedTopicMetadata:
+  FTITLE: "REST: Filter objects"
+  FDESCRIPTION: ""
+  FCHANGES: "moving content for clarification"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.5 - *"
+  CREATED-ON: "02/02/2021 12:46:37"
+  FAUTHOR: "igalvan"
+  FSTATUS: "Released"
+  MODIFIED-ON: "12/02/2021 12:27:18"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-E2757305-0D68-46D2-9F2D-7B6251EC6F86"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata: {}
+---
+
+import GUID_2552D38B_743E_4F04_B17A_20DFD25517C8_GUID_E6C28557_ADDB_4260_92CF_C8983F9552C4 from "./snippets/GUID-2552D38B-743E-4F04-B17A-20DFD25517C8/_GUID-E6C28557-ADDB-4260-92CF-C8983F9552C4";
+
+## Overview
+
+<Note>
+The ArcGIS Data Reviewer extension is required to use this resource.
+</Note>
+
+The `filtersArray` is a `JSON` object that contains an array composed of filter objects. You can add one or more filters to this array. 
+
+Filters are enclosed in curly ({'{'}{'}'}) braces and are composed of key-value pairs. The key-value pairs depend upon the filter type. A colon separates keys and values, while commas separate key-value pairs. 
+
+When filtering results or `reviewerResultsBy` by attribute values, you can use field names from the Data Reviewer workspace's REVTABLEMAIN table. 
+
+This API supports four filter types: 
+
+-   singleAttributeFilter
+-   listAttributeFilter
+-   rangeAttributeFilter
+-   spatialFilter
+
+##  singleAttributeFilter
+
+This filter specifies a single value in a [Dashboard](/rest-dashboard) result. `singleAttributeFilter` has two key-value pairs: `fieldName` and `fieldValue`. The `fieldName` key indicates the field to be filtered. The `fieldValue` key indicates the value to filter by.
+
+<Note>
+You must enclose the `fieldName` value in quotes.
+</Note>
+
+### JSON Syntax
+
+```javascript
+{singleAttributeFilter:[{fieldName:"<field>",fieldValue:<value>}]}
+```
+
+### JSON Example
+
+```javascript
+{singleAttributeFilter:[{fieldName:"severity",fieldValue:1}]}
+```
+
+##  listAttributeFilter
+
+This filter specifies a list of values in a [Dashboard](/rest-dashboard) result. `listAttributeFilter` has two key-value pairs: `fieldName` and `fieldValue`. The `fieldName` key indicates the field to be filtered. The `fieldValue` key indicates a list of values to filter by. The filter evaluates elements in the list using an `OR` operand: _element 1_ `OR`  _element 2_ `OR`  _element 3_.
+
+<Note>
+You must enclose the `fieldName` value in quotes.
+</Note>
+
+### JSON Syntax
+
+```javascript
+{listAttributeFilter:[{fieldName:"<field>",fieldValue:[<array of values>]}]}
+```
+
+### JSON Example
+
+```javascript
+{listAttributeFilter:[{fieldName:"subType",fieldValue:["Building","Tower"]}]}
+```
+
+##  rangeAttributeFilter
+
+This filter specifies a range of values in a [Dashboard](/rest-dashboard) result. `rangeAttributeFilter` has two key-value pairs: `fieldName` and `fieldValue`. The `fieldName` key indicates the value to be filtered. The `fieldValue` key indicates a range of values to filter by. The range's boundary values are included in the filter; using a range of 1 to 4 will filter by values 1-4 (not 2-3). 
+
+### JSON Syntax
+
+```javascript
+{filtersArray:[{rangeAttributeFilter:[{fieldName:"<field>",fieldValue:{minFieldValue:<value 1>,maxFieldValue:<value 2>}}]}]}
+```
+
+### JSON Example
+
+```javascript
+{filtersArray:[{rangeAttributeFilter:[{fieldName:"severity",fieldValue:{minFieldValue:1,maxFieldValue:3}}]}]}
+```
+
+##  spatialFilter
+
+The `spatialFilter` specifies a `JSON` polygon. The polygon defines a filter extent for a field. Features from REVTABLEPOINT, REVTABLELINE, and REVTABLEPOLY that intersect the filter polygon are included in the field operation. These features relate to summaries in REVTABLEMAIN by a join on LINKID to REVTABLEMAIN.RECORDID. 
+
+The polygon contains an array of rings. Each ring is represented as an array of points. The first point of each ring is always the same as the last point. Each point in the ring is represented as a 2-element array. The 0-index is the x-coordinate and the 1-index is the y-coordinate. 
+
+You must also assign a `spatialReference` to the polygon. You specify this as a key-value pair. 
+
+### JSON Syntax
+
+```javascript
+{filtersArray:[{spatialFilter:[{"rings" : [ [ [<x11>, <y11>], [<x12>, <y12>], ..., [<x11>, <y11>] ], [ [<x21>, <y21>], [<x22>, <y22>], ..., [<x21>, <y21>] ]],"spatialReference" : {<spatialReference>}}}]}]}
+```
+
+### JSON Example
+
+```javascript
+{filtersArray:[{spatialFilter:[{"rings" : [ [ [-97.7325, 30.259],[97.7180,30.259 ], [-97.7180, 30.2687],[-97.7325, 30.2687],[-97.7325, 30.259] ]],"spatialReference" : {"wkid" : 4326}}]}]}
+```
+
+##  filtersArray
+
+A filtersArray is a JSON object that contains an array of filters. This object has one key-value pair: the `filtersArray`  key and an array of filters. Each filter is separated by a comma. 
+
+### JSON Syntax
+
+```javascript
+{filtersArray:[{<filter type>:[{fieldName:"<field type>",fieldValue:<value to filter by>}]}]}
+{filtersArray:[{<filter type>:[{fieldName:"<field type>",fieldValue:<value to filter by>}]},{<filter type>:[{fieldName:"<field type>",fieldValue:<value to filter by>}]}]}
+```
+
+### JSON Example
+
+```javascript
+{filtersArray:[{singleAttributeFilter:[{fieldName:"severity",fieldValue:3}]}]}
+{filtersArray:[{singleAttributeFilter:[{fieldName:"severity",fieldValue:2},{fieldName:"SubType",fieldValue:"Building"}]}]}
+{filtersArray:[{singleAttributeFilter:[{fieldName:"severity",fieldValue:3}]},{listAttributeFilter:[{fieldName:"SubType",fieldValue:["Building","County Boundary"]}]}]}
+{filtersArray:[{rangeAttributeFilter:[{fieldName:"severity",fieldValue:{minFieldValue:1,maxFieldValue:3}}]},{spatialFilter:[{"rings" : [ [ [-97.7300477260853,30.297977761151],[-97.6975021395297,30.297977761151], [-97.6975021395297,30.2593722255952],[-97.7300477260853,30.2593722255952],[-97.7300477260853,30.297977761151] ]],"spatialReference" : {"wkid" : 4326}}]}]}
+```

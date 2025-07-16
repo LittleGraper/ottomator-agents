@@ -1,0 +1,851 @@
+---
+title: "Create Task"
+description: "The createTask operation creates scheduled tasks for a deployment that run automatically."
+slug: "create-task"
+url: "/create-task"
+guid: "GUID-09B4FF5E-2FDD-4069-A8FA-58FA054F6981"
+migratedTopicMetadata:
+  FTITLE: "Create Task"
+  FDESCRIPTION: ""
+  FCHANGES: "Updating parameters description"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0-*"
+  CREATED-ON: "23/06/2022 11:03:10"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "18/07/2022 15:44:09"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "7"
+  ED: "GUID-AF834348-3EA8-4589-A3D1-A5E4A6375061"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /system/tasks/createTask
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /system/tasks/createTask
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: 10.9.1
+  requiredCapabilities:
+    - name: Access allowed only with the default administrator role
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `createTask` operation creates scheduled tasks for a deployment that run automatically. Once the task has been created, it can be updated using the [Update](/edit-task) operation. In addition, scheduled tasks can be disabled, reenabled, and deleted using other operations in the ArcGIS Enterprise Administrator API. This operation supports the following tasks:
+
+* Creating scheduled tasks to create backups of your deployment of ArcGIS Enterprise on Kubernetes
+* Creating scheduled tasks to perform and generate health check reports for your organization
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `title`
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The title of the task.
+
+      ```markdown label=Example
+      title=backups
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `type` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The task type. Starting at 11.4, this parameter can specify either `CreateBackup` or `CreateHealthCheckReports` as the scheduled task type. Prior to 11.4, this parameter only supported `CreateBackup`.
+
+      ```markdown label=Example
+      type=CreateBackup
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `parameters` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object of additional parameters that will be added to the task run request. For more information on the required properties for `parameters` see the [Task parameters] section below.
+
+      ```markdown label=Example
+      //Create a backup at midnight, local time, with each backup getting deleted after 14 days
+      parameters={
+        "name": "myBackup",
+        "passcode": "myPassword",
+        "storeName": "backups",
+        "metaData": {
+          "recurring": false,
+          "startTime": "04:00",
+          "retention": {
+            "type": "day",
+            "value": 14
+          }
+        },
+        "retentionOffset": 1209600000
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `startDate` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The date, defined in epoch milliseconds (Unix time), the task will begin running.
+
+      ```markdown label=Example
+      startDate=1589428800000
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `endDate` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The date, defined in epoch milliseconds (Unix time), the task will stop running.
+
+      ```markdown label=Example
+      endDate=1589428800000
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `minute` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A valid CRON expression (`,` `-` `*` `/`) that specifies the minute value for the task's schedule. For sample schedules, [see the CRON expressions section below](/create-task#cron-expressions).
+
+      ```markdown label=Example
+      minute=0
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `hour` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A valid CRON expression (`,` `-` `*` `/`) that specifies the hour value for the backup task's schedule. For sample schedules, [see the CRON expressions section below](/create-task#cron-expressions).
+
+      ```markdown label=Example
+      hour=0
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `dayOfMonth` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A valid CRON expression (`,` `-` `*` `?` `/` `L` `W` `LW`) that specifies the day of the month value for the backup task's schedule. For sample schedules, [see the CRON expressions section below](/create-task#cron-expressions).
+
+      ```markdown label=Example
+      dayOfMonth=?
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `month` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A valid CRON expression (`,` `-` `*` `/`) that specifies the month value for the task's schedule. For sample schedules, [see the CRON expressions section below](/create-task#cron-expressions).
+
+      ```markdown label=Example
+      month=*
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `dayOfWeek` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A valid CRON expression (`,` `-` `*` `?` `/` `L` `#`) that specifies the day of the week value for the backup task's schedule. For sample schedules, [see the CRON expressions section below.](/create-task#cron-expressions)
+
+      ```markdown label=Example
+      dayOfWeek=7
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `maxOccurrences` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum number of occurrences the task will execute.
+
+      ```markdown label=Example
+      maxOccurrences=1
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+### Task parameters
+
+The table below outlines the required properties for `parameters` and which task type (either `CreateBackup` or `CreateHealthCheckReports`) the properties are required for.
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `name`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The prefix of the backup or health check report name, which is appended with the date the backup or health check report was created.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `passcode`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This property only applies when a scheduled task's type is `CreateBackup`. The value that will be used to encrypt the backup when it is created and decrypt the backup when it is restored. The passcode must be at least eight characters.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `storeName`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This property only applies when a scheduled task's type is `CreateBackup`. The backup store in which the backup will reside.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `suiteIds`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This property only applies when a scheduled task's type is `CreateHealthCheckReports`. The type of health check report being performed. At 11.4, only basic health check reports (`BSHC-001`) are supported.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `itemId`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This property only applies when a scheduled task's type is `CreateHealthCheckReports`. A placeholder property that does not need to be included in the request.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `metaData`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      JSON array that determines when the scheduled task starts, if it is recurring, and the retention information for the backup or health check report. The following properties are required for both `CreateBackup` and `CreateHealthCheckReports` tasks:
+
+      - `recurring`: A Boolean (`true` and `false`) value that determines whether a backup or health check report is created once or is recurring.
+      - `startTime`: A string representation of the time the backup will be created in Greenwich mean time, using 24-hour notation.
+      - `retention`: A JSON object that specifies the retention information for a backup or health check report. The JSON object includes a `type` property that sets the time units (`day`, `week`, or `month`) of how long the backup or health check will be retained, as well as a `value` property that specifies the length of time as it relates to the time unites (for example, 14 weeks, where `14` is set as the value for the `value` property and `week` is set as the value for `type`).
+      - `retentionOffset`: The milliseconds calculation of the retention value. This should match the information in the `retention` JSON array for the `metaData` property.
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+### CRON expressions
+
+Special characters and wildcards can be used to customize scheduled jobs. The following table lists the supported characters:
+
+<StyledTable headers={"Character,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `*` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies all values.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `?` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      No specific value for `dayOfMonth`  and `dayOfWeek`  expressions.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `-` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A range.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `,` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A list of additional values.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `/` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies increments.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `#` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The nth day name of the month (applies only to `dayOfWeek`).
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `L` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The last day of the week or month.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `W` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The weekday (Monday-Friday) nearest the given day (applies only to `dayOfMonth`).
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `LW` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The last weekday of the month.
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+The following table shows sample schedules and how they translate to CRON values for the `minute`, `hour`, `dayOfMonth`, `month`, and `dayOfWeek` parameters:
+
+
+<StyledTable headers={"Schedule,minute,hour,dayOfMonth,month,dayOfWeek"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Hourly at 15 minutes past the hour
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      15
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      \*
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      \*
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      \*
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      ?
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Every four hours during weekdays
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      0
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      \*/4
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      ?
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      \*
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      1-5
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Weekly on Sundays at 12:00 p.m.
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      0
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      12
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      ?
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      \*
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      7
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Twice a month on the 1st and 15th at 12:00 a.m.
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      0
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      0
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      1,15
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      \*
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      ?
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Last Friday of every month at 10:00 p.m.
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      0
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      22
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      ?
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      \*
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      6L
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Last day of the month at 10:00 p.m.
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      0
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      22
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      L
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      \*
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      ?
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Last weekday of the month at 6:00 p.m.
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      0
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      18
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      LW
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      \*
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      ?
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Closest weekday to the 15th of each month at midnight
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      0
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      0
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      15W
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      \*
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      ?
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usages
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Create Backup</TabTitle>
+  <TabTitle>Create Health Check Reports</TabTitle>
+</TabNav>
+
+<Tab>
+
+The following is a sample POST request for the `createTask` operation that demonstrates scheduling a `CreateBackup` task that will run weekly on Sundays at 12:00 a.m.:
+
+```other
+POST /context/admin/system/tasks/createTask HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+title=backups&type=CreateBackup&parameters={"name": "myBackup","passcode": "myPassword","storeName": "backups","metaData": {"recurring": false,"startTime": "04:00","retention": {"type": "day","value": 14}},"retentionOffset": 1209600000}&startDate=1589428800000&endDate=1589428800000&minute=0&hour=0&dayOfMonth=?&month=*&dayOfWeek=7&maxOccurrences=1&f=pjson&token=<token>
+
+```
+</Tab>
+
+<Tab>
+
+The following is a sample POST request for the `createTask` operation that demonstrates scheduling a `CreateHealthCheckReports` task that will run daily at 11:02 PM:
+
+```other
+POST /context/admin/system/tasks/createTask HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+title=DailyReport&type=CreateHealthCheckReports&startDate=1731087120000&minute=32&hour=17&dayOfMonth=*/1&month=*&dayOfWeek=?&dayOffset=0&parameters={"name": "DailyReport","suiteIds": "BSHC-001","itemId": "","metaData": {"recurring": true,"startTime": "17:32","retention": {"type": "day","value": 14}},"retentionOffset": 1209600000}&maxOccurrences=&f=pjson&token=<token>
+
+```
+
+</Tab>
+
+</Tabs>
+
+## JSON Response examples
+
+The sample response below is returned for a `CreateBackup` task:
+
+```other
+{
+  "name": "schedule1",
+  "passcode": "{crypt}3ngE7lQuQGDfaiab4uogjg==",
+  "storeName": "default",
+  "itemId": "",
+  "metaData": {
+    "recurring": true,
+    "startTime":" 20:00",
+    "retention": {
+      "type": "day",
+      "value": 14
+    }
+  },
+  "retentionOffset": 1209600000
+}
+```
+
+The sample response below is returned for a `CreateHealthCheckReports` task:
+
+```other
+{
+  "task": {
+    "generation": 0,
+    "active": true,
+    "ownerId": "0db8f0e0b5cd474e838bf45b9ad5d741",
+    "type": "CREATE_HEALTHCHECK_REPORT_TASK_TYPE",
+    "orgId": "0123456789ABCDEF",
+    "cronSchedule": {
+      "dayOfWeek": "?",
+      "hour": "17",
+      "month": "*",
+      "dayOfMonth": "*/1",
+      "minute": "32"
+    },
+    "cronExpression": "0 32 17 */1 * ?",
+    "runIntervalSeconds": 0,
+    "taskType": "CreateHealthCheckReports",
+    "taskTitle": "DailyReport",
+    "maxOccurrences": -1,
+    "id": "961d54be9fe14500be6c0b573d33f011",
+    "parameters": {
+      "itemId": "",
+      "metaData": {
+        "recurring": true,
+        "startTime": "17:32",
+        "retention": {
+          "type": "day",
+          "value": 14
+        }
+      },
+      "retentionOffset": 1209600000,
+      "name": "DailyReport",
+      "suiteIds": "BSHC-001"
+    },
+    "taskId": "961d54be9fe14500be6c0b573d33f011",
+    "startDate": 1731087120000
+  },
+  "status": "success"
+}
+
+```

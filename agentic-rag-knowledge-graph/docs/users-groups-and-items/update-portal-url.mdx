@@ -1,0 +1,206 @@
+---
+title: "/updatePortalUrl: Update Portal URL"
+description: "The updatePortalUrl operation modifies the public-facing URL for ArcGIS Enterprise portal."
+slug: "update-portal-url"
+url: "/update-portal-url"
+restInfoMetadata:
+  apiPath: /portals/[portalID]/urls/updatePortalUrl
+  urlSegments:
+    - name: <root>
+      url: /root
+    - name: /portals/[portalID]/urls/updatePortalUrl
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '11.4'
+---
+
+## Example usage
+
+The following is a sample ArcGIS Enterprise POST request for the `updatePortalUrl` operation:
+
+```other
+POST /webadaptor/sharing/rest/portals/0123456789ABCDEF/urls/updatePortalUrl HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+newUrl=https://modifiedPublicURL.domain.com/portal&f=pjson&token=<token>
+
+
+```
+
+
+## Description
+
+The `updatePortalUrl` operation modifies the public-facing URL for ArcGIS Enterprise portal. This operation supports modifying the domain, subdomain, and context of the URL. When this operation is performed, the Enterprise portal items that [used the previous URL](/generate-url-report) are updated to use the new URL. Performing this operation will cause Enterprise portal to restart, resulting in the system being unavailable for some time.
+
+To ensure that the organization's resources will remain accessible after the update, the [URLs for each federated server](/update-federated-server-url) will also need to be updated.
+
+<Note type="caution">
+
+It is recommended that you [create a backup of the organization](https://enterprise.arcgis.com/en/portal/latest/administer/windows/create-web-gis-backup.htm) before updating the public-facing URL.
+
+</Note>
+
+When a URL is updated, the following areas will be impacted:
+
+- ArcGIS Pro users will need to [update their connections to Enterprise portal](https://enterprise.arcgis.com/en/portal/latest/use/use-with-desktop.htm) with the new URL.
+- Preexisting distributed collaborations will need to be recreated by [removing](/remove-participant) and [inviting participants](/invite-collaboration-participant) back to the collaboration.
+- Organizations that have configured OpenID Connect logins will need to [update the OIDC IDP configuration](https://enterprise.arcgis.com/en/portal/latest/administer/windows/openid-connect-logins.htm) with the new login and logout redirect URLs.
+- Organizations that have configured a SAML-compliant identity provider will need to [download and import the updated portal metadata file](https://enterprise.arcgis.com/en/portal/latest/administer/windows/configuring-a-saml-compliant-identity-provider-with-your-portal.htm#ESRI_STEP_BD2FE74A6D9D41D88499035A69801EE6) to the identity provider.
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `newUrl`
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Sets the new public-facing URL for ArcGIS Enterprise portal.
+      
+      ```other
+      newUrl=https://modifiedPublicURL.domain.com/portal
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      If `true`, the request is run as an asynchronous job. If set as `true`, the response will return job details.
+
+      <Note>
+
+      It is recommended that this operation is performed asynchronously. Only organizations with a small number of items, and few federated servers, should performed this operation synchronously.
+
+      </Note>
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## JSON Response examples
+
+The tabs below show the JSON responses returned for synchronous and asynchronous requests:
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Synchronous</TabTitle>
+  <TabTitle>Asynchronous</TabTitle>
+</TabNav>
+
+<Tab>
+
+The following response is returned when `async` is set to `false`:
+
+```other
+{
+  "reregisterUrlResults": {
+    "type": "reregisterPortalUrl",
+    "id": "0f207870-8b05-4c3b-8ea9-964beefbd035",
+    "reregisterURL": "https://modifiedPublicURL.domain.com/portal",
+    "reregisteredServerSecurityConfig": true,
+    "reregisteredPortalDatabase": false,
+    "reregisteredWebContextURL": true,
+    "itemUrls": {
+      "succeededCount": 58,
+      "failedCount": 0,
+      "failedItems": [
+        
+      ],
+      "notProcessedCount": 0
+    },
+    "created": 1727131308924
+  }
+}
+
+```
+
+</Tab>
+
+<Tab>
+
+If the `async` parameter is set as `true`, the request will return a job ID and job URL. The returned URL can be used to access the job resource and periodically poll the jobs status.
+
+```other
+{
+  "jobId": "e8c9560278a94c6f88d8d4dbd82c863f",
+  "key": "5qVOT43M4lcK_tcNKfIcdho2FOCN0NbvUwRxH7FuxI4",
+  "jobUrl": "https://machine.domain.com/webadaptor/sharing/rest/portals/self/jobs/e8c9560278a94c6f88d8d4dbd82c863f"
+}
+
+```
+
+Once the job is completed, the following response is returned:
+
+```other
+{
+  "id": "3b030adbdb77497cbc036906f3984623",
+  "definition": {
+    "type": "reregisterPortalUrl",
+    "siteKey": "0f207870-8b05-4c3b-8ea9-964beefbd035"
+  },
+  "status": "completed",
+  "created": 1727130311697,
+  "modified": 1727130382989,
+  "messages": [
+ "Started - Exporting items to package. update URL :https://modifiedPublicURL.domain.com/portal",
+    "Completed - Exporting items to package. update URL :https://modifiedPublicURL.domain.com/portal",
+    "Started - Updating portal url of federated server security config to https://modifiedPublicURL.domain.com/portal",
+    "Updated portal url of federated server: https://machine2.domain.com/server's security config to https://modifiedPublicURL.domain.com/portal",
+    "Updated portal url of federated server: https://machine3.domain.com/server's security config to https://modifiedPublicURL.domain.com/portal"
+  ],
+  "result": {
+    "reregisterUrlResults": {
+      "type": "reregisterPortalUrl",
+      "id": "0f207870-8b05-4c3b-8ea9-964beefbd035",
+      "reregisterURL": "https://modifiedPublicURL.domain.com/portal",
+      "reregisteredServerSecurityConfig": true,
+      "reregisteredPortalDatabase": true,
+      "reregisteredWebContextURL": true,
+      "itemUrls": {
+        "succeededCount": 50,
+        "failedCount": 0,
+        "failedItems": [],
+        "notProcessedCount": 0
+      },
+      "created": 1727130311698
+    }
+  }
+}
+
+```
+
+</Tab>
+
+</Tabs>

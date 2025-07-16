@@ -1,0 +1,372 @@
+---
+title: "Merge"
+uid: pf-merge
+description: "The merge operation creates a new parcel by merging two or more existing parcels in the parcel fabric."
+slug: "merge-parcel-fabric-server"
+url: "/merge-parcel-fabric-server"
+guid: "GUID-35C7709D-DE4E-4149-A545-2867BDA5B4DC"
+migratedTopicMetadata:
+  FTITLE: "merge-parcel-fabric-server"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "14/08/2023 14:04:07"
+  FAUTHOR: "cleslie"
+  FSTATUS: "Released"
+  MODIFIED-ON: "29/09/2023 11:51:53"
+  VERSION: "7"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-05562A4D-60F9-475B-BDBD-2CE9A807218F"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/ParcelFabricServer/merge
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/ParcelFabricServer/merge
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.8'
+  requiredCapability: ArcGIS Advanced Editing
+---
+
+## Description
+
+The `merge` operation creates a new parcel by merging two or more existing parcels in the parcel fabric. Adjacent parcels can be merged to create a single parcel and disjoint parcels can be merged to create multipart parcels. The original parent parcels will be retired as historic.
+
+[Learn more about merging parcels](https://pro.arcgis.com/en/pro-app/latest/help/data/parcel-editing/mergeparcels.htm)
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>  
+    <StyledTableCell cellStyle="markdown">
+
+      `gdbVersion` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The name of the geodatabase version (the default is the `DEFAULT`  version).
+
+      Syntax
+
+      ```javascript
+      gdbVersion=<version>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sessionId` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The token (GUID) used to lock the version. If the calling client is editing a named version, the `sessionId`  value is required. If the specified version is currently locked by another session, the request will fail if the `sessionId`  value is not provided or does not match the `sessionId`  value that holds the exclusive lock. If the client is editing the default version, the `sessionId`  value is not required.
+
+      Syntax
+
+      ```javascript
+      sessionId=<guid>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `parentParcels` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The parent parcels that will be merged. 
+
+      Syntax
+
+      ```javascript
+      parentParcels=[{"id":"<parcelguid>","layerId":"<layerID>"},{...}]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `record` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The unique identifier (GUID) of the record that will be used for the merge. Merged parcels will be associated with the specified record.
+
+      Syntax
+
+      ```javascript
+      record=<guid>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `targetParcelType` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The parcel type (ID) in which the new, merged parcel will be created.
+
+      Syntax
+
+      ```javascript
+      targetParcelType=<layer id>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `mergeInto` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The parent parcel into which the other parcels will be merged. Merging parcels into existing parcels will not create historic parcels.
+
+      Syntax
+
+      ```javascript
+      mergeInto=<parcelguid>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `defaultAreaUnit` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The default area units that will be used when calculating the stated area of the merged parcel. The stated area of the merged parcel will be calculated if the stated areas exist on the parcels being merged.
+
+      Syntax
+
+      ```javascript
+      defaultAreaUnit=<area unit code>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `attributeOverrides` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      A list of attributes that will be used to override and replace attributes on the new merged parcel.
+
+      Syntax
+
+      ```javascript
+      attributeOverrides={"type":"PropertySet","propertySetItems":["<FieldName>",<value>,"<FieldName>",<value>,.....,"IsSeed",0]}
+
+      //If not overriding any attributes
+      attributeOverrides={"type":"PropertySet","propertySetItems":["isseed",0]}
+      ```
+  
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.1.
+
+      Specifies whether the request will be processed as an asynchronous job and a URL that points to a location displaying the status of the job will be returned. See the topic regarding [asynchronous](HTTP://RESOURCES.ARCGIS.COM/EN/HELP/ARCGIS-REST-API/02R3/02R3000000RT000000.HTM) usage for more information. The default is `false`.
+
+      Values: `true` | `false` 
+
+      Syntax
+
+      ```javascript
+      async=true|false
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+This example shows the steps for merging parcels using the `merge` operation.
+
+<Note type={"note"}>
+
+  The `sessionId` parameter value must be the same for starting the edit session, performing the edit operation, and stopping the edit session.
+
+</Note>
+
+1.  [Start a service session](/start-reading) on the version.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/VersionManagementServer/versions/E4DAED9D-C859-489B-9053-767A45F1D97C/startReading
+    f=json
+    sessionId={02DB3EE7-17D4-47B2-AFD1-F8EAFA22584E}
+    ```
+     
+2.  [Start an edit session](/start-editing) on the version.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/VersionManagementServer/versions/E4DAED9D-C859-489B-9053-767A45F1D97C/startEditing
+    f=json
+    sessionId={02DB3EE7-17D4-47B2-AFD1-F8EAFA22584E}
+    ```
+     
+3.  Merge two parcels into a single parcel. Override the `Name`, `StatedArea`, and `StatedAreaUnit` attributes.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/ParcelFabricServer/merge
+    f=json
+    gdbVersion=admin.Version1
+    sessionId={02DB3EE7-17D4-47B2-AFD1-F8EAFA22584E}
+    parentParcels=[{"id":"{A6486E07-47A6-44B6-AEC1-84581489E17C}","layerId":"28"},{"id":"{A8888BF3-4EC0-440C-92AF-DED78210F94C}","layerId":"28"}]
+    record={8CF6DC8D-41F4-4D75-93B5-87375BC8F9E3}
+    targetParcelType=28
+    defaultAreaUnit=109405
+    attributeOverrides={"type":"PropertySet","propertySetItems":["name","0713210004","statedarea",15440.6,"statedareaunit",109406,"isseed",0]}
+    async=false
+    ```
+     
+4.  If edits are complete, [stop the edit session](/stop-editing).
+
+5.  [Stop](/stop-reading) and release the service session. 
+
+## JSON Response syntax
+
+The following response is returned when `async` is `false`:
+
+```other
+{
+  "exceededTransferLimit: <true | false>,
+  "moment": <datetime>,
+  "error": {
+    "extendedCode": <HRESULT>,
+    "message": <error message>,
+    "details": [<detail>]
+  },
+  "serviceEdits": {  // only if transfer limit is not exceeded
+    "editedFeatures": {
+      "updates": {
+        "attributes": {},
+        "geometry": {}
+      },
+      {
+        "adds": {
+          "attributes": {},
+          "geometry": {}
+        },
+        {
+          "deletes": {}
+        },
+        {
+          "spatialReference": {<spatial reference>}
+        },
+        "id": <layerID>
+      }
+    },
+    "success": <true | false>,
+    "error": {  // only if success is false
+      "extendedCode": <HRESULT>,
+      "message": <error message>,
+      "details": [<detail>]
+    }
+  }
+}
+``` 
+
+The following response is returned when `async` is `true`:
+
+```other
+{
+		"statusUrl": <url>
+}
+```
+
+
+ 

@@ -1,0 +1,537 @@
+---
+title: "/import: Import Group Content"
+description: "The import  operation imports supported content items from an export package that has been uploaded to the organization."
+slug: "import-group"
+url: "/import-group"
+guid: "GUID-D314203C-69A3-4577-B9A2-3D0A7C81E625"
+migratedTopicMetadata:
+  FTITLE: "Import Group"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0-*"
+  CREATED-ON: "31/05/2023 09:30:20"
+  FAUTHOR: "svennapoosa"
+  FSTATUS: "Released"
+  MODIFIED-ON: "27/09/2023 13:41:41"
+  VERSION: "8"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-C326AEBB-BCF9-445A-A84D-0C2043AD3526"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /community/groups/[groupID]/import
+  urlSegments:
+    - name: '[root]'
+      url: /root
+    - name: /community/groups/[groupID]/import
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: 'ArcGIS Enterprise 10.8.1'
+  requiredCapability: Administrator | Group Owner
+---
+
+## Example usage
+
+The following is a sample ArcGIS Enterprise POST request for the `import` operation:
+
+```markdown
+POST /webadaptor/sharing/rest/community/groups/d9151a601867423cab48b3e2d60e105f/import HTTP/1.1
+Host: machine.domain.com
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryZu1ZLNLoz0r07YNm
+
+------WebKitFormBoundarycnhdXN08VxWWOPxq
+Content-Disposition: form-data; name="itemId"
+
+668d62829b5c4035bc94c7456159018a
+------WebKitFormBoundarycnhdXN08VxWWOPxq
+Content-Disposition: form-data; name="itemIdList"
+
+------WebKitFormBoundarycnhdXN08VxWWOPxq
+Content-Disposition: form-data; name="folderId"
+
+------WebKitFormBoundarycnhdXN08VxWWOPxq
+Content-Disposition: form-data; name="folderOwnerUsername"
+
+------WebKitFormBoundarycnhdXN08VxWWOPxq
+Content-Disposition: form-data; name="importContentFolder"
+
+testFolder
+------WebKitFormBoundarycnhdXN08VxWWOPxq
+Content-Disposition: form-data; name="keepPackageItemAfterImport"
+
+true
+------WebKitFormBoundarycnhdXN08VxWWOPxq
+Content-Disposition: form-data; name="f"
+
+pjson
+------WebKitFormBoundarycnhdXN08VxWWOPxq--
+```
+
+## Description
+
+<Note type={"note"}>
+
+This operation is only supported in ArcGIS Enterprise.
+
+</Note>
+
+The `import` operation imports [supported content items](/export-group-content#supported-items) from an export package (generated using the [export](/export-group-content) operation) into the selected group. To call this operation, the export package must first be added to the receiving environment using the [Add Item](/add-item) operation, as the import operation will not upload the export package to the organization. When the items are imported, their item IDs are maintained and URLs are updated to reflect the new environment. Once the items have been imported successfully, the export package will be deleted. It is important to note that the receiving organization must be using the same version (or later) of ArcGIS Enterprise as the environment where the export package was generated.
+
+<Note type={"note"}>
+
+This operation is also supported for groups that had the **Shared updates** designation set during group creation.
+
+</Note>
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `itemId` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The item ID of the export package. Before calling this operation, the export package must be added to the receiving organization using the [Add Item](/add-item) operation. The resulting item ID will be used as the value for this parameter.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `itemIdList` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A comma-separated list of item IDs included in the export package. By default, the system will attempt to import [all supported items](/export-group-content#supported-items) included in the export package. If item IDs are specified in this parameter, the system will instead only attempt to import those specific items.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `previewOnly` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      If `true`, the import is not performed. Instead, a summary of what is included in the export package is returned.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `overwriteExistingItems` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      If `true`, and the item exists within the importing organization, the existing item will be overwritten with the corresponding item in the export package.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      If `true`, the job is run asynchronously and the response returns job details.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `folderId` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at ArcGIS Enterprise 10.9. It designates the destination folder for the imported items. Starting at 11.4, imported items can be sent to the root folder by setting the value as a forward slash (/) rather than a folder ID. If a value is provided for `folderId` it will take precedence over any values set for the `importContentFolder` parameter.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `folderOwnerUsername` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.9. It specifies the username of the folder's owner.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `importContentFolder`
+
+      (Optional) 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.4. The name of the folder the imported items will be added to. If no folder name is specified, the imported items will be added to a folder named **Exports**.
+
+      ```markdown
+      testFolder
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `keepPackageItemAfterImport` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.3. Specifies whether the export package item will be deleted after it's items have been imported. If `true`, the package will not be deleted and will remain as an item in the organization. By default, the package will be deleted (`false`).
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` \| `json` \| `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Upload .epk item to receiving environment
+
+To upload the export package to the receiving environment, you must use `addItem` and, at minimum, define the `title`, `type`, `typeKeywords`, and `tags` in the request:
+
+```markdown
+POST /webadaptor/sharing/rest/content/users/userID/addItem HTTP/1.1
+Host: machine.domain.com
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="file"; filename=""
+Content-Type: application/octet-stream
+
+Test_2020531_102838.epk
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="url"
+
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="text"
+
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="dataUrl"
+
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="title"
+
+Test Export Package
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="thumbnail"; filename=""
+Content-Type: application/octet-stream
+
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="thumbnailUrl"
+
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="metadata"; filename=""
+Content-Type: application/octet-stream
+
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="type"
+
+Export Package
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="categories"
+
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="typeKeywords"
+
+Export Package,epk
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="description"
+
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="tags"
+
+epk
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="snippet"
+
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="licenseinfo"
+
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="culture"
+
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="properties"
+
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="extent"
+
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="callback.html"
+
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="originItemId"
+
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="destinationItemId"
+
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="relationshipTypes"
+
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="serviceUsername"
+
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="servicePassword"
+
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="serviceCredentialsType"
+
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="serviceProxyParams"
+
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="serviceProxyFilter"
+
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+Content-Disposition: form-data; name="appCategories"
+
+------WebKitFormBoundaryFxWOiSZOhHdxL2Zg
+```
+
+The response from this request is demonstrated below. The id will be added as the value for `itemId` when the import operation is called.
+
+```markdown
+{
+  "success": true,
+  "id": "668d62829b5c4035bc94c7456159018a",
+  "folder": null
+}
+```
+
+## Additional example usage
+
+Below is a sample POST request that demonstrates how to preview the contents of an export package before performing the `import` operation:
+
+```markdown
+POST /webadaptor/sharing/rest/community/groups/d9151a601867423cab48b3e2d60e105f/import HTTP/1.1
+Host: machine.domain.com
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryZu1ZLNLoz0r07YNm
+
+------WebKitFormBoundaryZu1ZLNLoz0r07YNm
+Content-Disposition: form-data; name="itemId"
+
+668d62829b5c4035bc94c7456159018a
+------WebKitFormBoundaryZu1ZLNLoz0r07YNm
+Content-Disposition: form-data; name="itemIdList"
+
+------WebKitFormBoundaryZu1ZLNLoz0r07YNm
+Content-Disposition: form-data; name="previewOnly"
+
+true
+------WebKitFormBoundaryZu1ZLNLoz0r07YNm
+Content-Disposition: form-data; name="folderId"
+
+------WebKitFormBoundaryZu1ZLNLoz0r07YNm
+Content-Disposition: form-data; name="folderOwnerUsername"
+
+------WebKitFormBoundaryZu1ZLNLoz0r07YNm
+Content-Disposition: form-data; name="f"
+
+pjson
+------WebKitFormBoundaryZu1ZLNLoz0r07YNm--
+```
+
+<Note type={"note"}>
+
+When the `previewOnly` parameter is true, the job path will be updated to the following: \
+`https://machine.domain.com/webadaptor/community/groups/d9151a601867423cab48b3e2d60e105f/importPreview/` \
+`69867fb59ac84a8d847442e232d43277?f=json&start=1&num=25`. The default values for `start` is `1` and `num` is `25`. You will be able to pass different `start` and `num` parameter values to page through the preview results.
+
+</Note>
+
+## Accessing results
+
+If `async` is `true`, asynchronous job details are returned for this operation:
+
+```markdown
+{
+  "jobId": "ff84f1e4646e4d4c9464c5476b699735",
+  "key": "BvOoz3Xnp13qWhR69g7ltU2ilqE1KarXZcPROHxpwsU="
+}
+```
+
+Group owners attempting to import group content, but who are not administrators, must use both the `jobID` and `key` values to check the job's results and status using the following URL format:
+
+```markdown
+https://machine.domain.com/webadaptor/sharing/rest/portals/<orgID>/jobs/<jobID>?key=<keyValue>
+```
+
+Administrators can check the job's results and status using the `jobID` value in the following URL format:
+
+```markdown
+https://machine.domain.com/webadaptor/sharing/rest/portals/<orgID>/jobs/<jobID>
+```
+
+If successful, a success response will be returned containing an assortment of `itemID` elements for each published item and other job information. The published items will be placed in a folder, named after the group, in the [user's content](/user-content). The published items can also be found on the [Group Content](/group-content) resource page.
+
+## JSON Response examples
+
+Below is a response example demonstrating the preview function:
+
+```other
+{
+  "packageSummary": {
+    "id": "69867fb59ac84a8d847442e232d43277",
+    "fileName": "Test_2020531_102838",
+    "packageVersion": "1.0",
+    "packageCreated": 1590989318963,
+    "sourcePortalInfo": {
+      "httpsUrl": "https://machine.domain.com/webadaptor",
+      "httpUrl": "http://machine.domain.com/webadaptor",
+      "version": "10.8.1",
+      "portalId": "d65a043d-2d49-492e-ab1e-4f87a92c6e1b",
+      "isPortal": true
+    }
+  },
+  "total": 3,
+  "start": 1,
+  "num": 3,
+  "nextStart": -1,
+  "results": [
+    {
+      "id": "4a0fe3a6f8c3432490822a7ccffc6602",
+      "type": "Shapefile",
+      "title": "example shape file",
+      "size": 5369,
+      "exists": false,
+      "canImport": true,
+      "created": 1590673414612,
+      "modified": 1590673414612
+    },
+    {
+      "id": "6a05e1064c2848918059a849a300d509",
+      "type": "Web Map",
+      "title": "example web map",
+      "size": 3228,
+      "exists": false,
+      "canImport": true,
+      "created": 1590673580319,
+      "modified": 1590673585488
+    },
+    {
+      "id": "2aba832a4afa429d886d8d8c8f6fbede",
+      "type": "Feature Service",
+      "title": "example hosted feature service",
+      "size": 5369,
+      "exists": false,
+      "canImport": true,
+      "created": 1590673414796,
+      "modified": 1590673439011
+    }
+  ]
+}
+```
+
+Below is a sample response for the import operation run synchronously:
+
+```other
+{
+  "result": {
+    "itemsImported": [
+      {
+        "itemId": "4a0fe3a6f8c3432490822a7ccffc6602"
+      },
+      {
+        "itemId": "2aba832a4afa429d886d8d8c8f6fbede"
+      },
+      {
+        "itemId": "6a05e1064c2848918059a849a300d509"
+      }
+    ],
+    "itemsSkipped": [],
+    "itemsFailedImport": []
+  }
+}
+```
+
+Below is a sample response returned via the job page when import is run asynchronously:
+
+```other
+{
+  "id": "ff84f1e4646e4d4c9464c5476b699735",
+  "definition": {
+    "type": "import",
+    "itemId": "69867fb59ac84a8d847442e232d43277",
+    "groupId": "142b3c7995ec447288f15db4d301fe53",
+    "groupTitle": "myGroup"
+  },
+  "status": "completed",
+  "created": 1586902163432,
+  "modified": 1586902163592,
+  "messages": [
+    "Starting import of items from EPK item '69867fb59ac84a8d847442e232d43277' to group 'myGroup'.",
+    "Starting the import of exported package item '69867fb59ac84a8d847442e232d43277' containing 3 items.",
+    "Import option to overwrite items if they exist is set to 'true'."
+  ],
+  "result": {
+    "itemsImported": [
+      {
+        "itemId": "4a0fe3a6f8c3432490822a7ccffc6602"
+      },
+      {
+        "itemId": "2aba832a4afa429d886d8d8c8f6fbede"
+      },
+      {
+        "itemId": "6a05e1064c2848918059a849a300d509",
+      }
+    ],
+    "itemsSkipped": [],
+    "itemsFailedImport": []
+  }
+}
+```
+
+ 

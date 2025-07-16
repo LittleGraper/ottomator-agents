@@ -1,0 +1,5448 @@
+---
+title: "Query Contingent Values (Feature Service)"
+description: "This operation allows a client to retrieve the CAVs from all layers of a service."
+slug: "query-contingent-values-feature-service"
+url: "/query-contingent-values-feature-service"
+guid: "GUID-353BEB57-3225-42E6-9D4F-5066B88C7975"
+migratedTopicMetadata:
+  FTITLE: "Query Contingent Values (Feature Service)"
+  FDESCRIPTION: "Allows a client to perform a query on a feature service resource to retrieve the contingent values from all layers of a services with only one REST call."
+  FCHANGES: "Minor changes"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2- *"
+  CREATED-ON: "03/10/2023 09:58:28"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "04/10/2023 11:44:06"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-BEA913C9-2217-44D7-B1DA-2318FC41A3FA"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/FeatureServer/queryContingentValues
+  urlSegments:
+    - name: <root>
+      url: /site
+    - name: /<serviceName>/FeatureServer/queryContingentValues
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.7'
+---
+
+## Description
+
+The `queryContingentValues`  operation is performed on a feature service resource, allowing a client to retrieve contingent attribute values (CAVs)—also called contingent values or contingencies—from all layers of a service with only one REST call, as the CAVs are defined and stored for each layer individually and not on the service level. This operation is implemented in ArcGIS Online and ArcGIS Enterprise for nonhosted feature services. Support was added at ArcGIS Enterprise 11.2 for hosted feature services.
+
+The core parameters used are identical. Accessing the CAVs on the layer level, and editing CAVs through the Services Directory administrative API, is only supported for hosted feature services. Because CAVs are an optional part of a table definition, only layers that are based on a table with CAVs can be used.
+
+The following support properties on the service level indicate whether a client has access to CAVs or `DataElement` :
+
+-   `supportsQueryContingentValues` —Will be `true`  if a client supports CAVs. However, this is not an indication that any layer of the service has CAVs.
+-   `supportedContingentValuesFormats` —Indicates the formats in which CAVs can be returned by the `queryContingentValues`  operation (JSON or Protocolbuffer Binary Format \[PBF])
+-   `supportsContingentValuesJson` —Only supported for hosted feature services. If a service supports the newer JSON format for CAVs, the value will be 2.
+-   `supportsQueryDataElements` —Will be `true`  if a client has access to the `DataElement`  value; otherwise, it will be `false` . 
+
+Example
+
+```javascript
+"supportsQueryContingentValues": true, 
+"supportedContingentValuesFormats": "JSON, PBF", 
+"supportsContingentValuesJson": 2, 
+```
+
+ 
+
+The following support property on the layer level indicates whether a client has access to CAVs or `DataElement` :
+
+-   `hasContingentValuesDefinition` —Will be `true`  if a layer has CAVs; otherwise, the support property will be either `false`  or not present.
+
+Example
+
+```javascript
+"hasContingentValuesDefinition": true
+```
+
+ 
+
+## New at 11.2
+
+Hosted feature services on a relational data store now support contingent attribute values. Support for this is indicated when the service-level `supportsQueryContingentValues`  property is set as `true` .
+
+## Request parameters
+
+<Note type={"note"}>
+
+Duplicate IDs are removed, and an error is returned if invalid IDs are supplied. The listing order is maintained by default.
+
+</Note>
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`layers` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The list of layer and table IDs in which the CAVs will be returned. If this parameter is omitted or the list is empty, all layers or tables with CAVs will be included.
+
+For hosted feature services, the `layers`  parameter supports the new printer style input for numbers. Using this format, ranges can be specified without listing every layer ID. This results in a more compact, less error prone, and more readable input. The new style also supports removing IDs and ranges, allowing a client additional control. Commas and semicolons are supported as separating characters.
+
+Syntax
+
+```javascript
+layers=[<layer1>,<layer2>,<table1>]
+```
+
+ 
+
+Examples (both a pure string list and a JSON array representation are supported)
+
+```javascript
+//Pure string list
+layers=0,1,2
+
+//JSON array
+layers=[0,1,2]
+
+//For hosted feature services. Results in all layers between layer 3 and 52 being selected
+layers=3-52
+
+//For hosted feature services. Combining two or more ranges and individual layers
+layers=0,4-7,12-15
+
+//For hosted feature services. All layers between layer 3 abd 52, but the layer with ID 7 is excluded
+layers=3-52,-7
+
+//For hosted feature services. All layers between 3 and 52, but layers between ID 7 and 13 are excluded
+layers=3-52,-7,-13
+
+```
+
+ 
+
+Syntax
+
+```javascript
+layers=[<layer1>,<layer2>,<table1>]
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`compactFormat` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+For hosted feature services. By default, this parameter is `false` , that is, the returned JSON returns codes as values of the contingencies exactly as they are stored in the CAVs. The result is a more compact JSON format; however, readability may be poor. If this parameter is set to `true` , the codes are resolved with the description of the corresponding value in the `domain dictionary (=f(domain[subtype]))` . This representation is more understandable but is also verbose. Because different codes can have the same description, this representation is inappropriate for recreating the CAVs on the client side.
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`domainDictionaries` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+For hosted feature services. This parameter specifies whether the domain dictionaries that are used by the CAVs will be included in the JSON. By default, the domain dictionaries will not be included (`none` ). If complete is specified, every domain dictionary that is used by the CAVs—including all domain values, even those that are not referenced by a CAV—will be prepended to the JSON. If the `compactFormat`  parameter is specified, the client can decode the CAVs without an additional REST call to get the domains. If `trimmed`  is specified, only the domain entries that are used by the contingencies are listed. Depending on the data, this may result in a more compact JSON.
+
+Values: `none`  \| `complete`  \| `trimmed` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `JSON` .
+
+Values: `json`  \| `pjson`  \| `pbf` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+### Returned formats
+
+The only required parameter of the API is the return format `f` . JSON and PBF formats are supported. The primary purpose of CAVs returned in JSON format is inspection, development, and debugging. The PBF format is recommended for efficient processing.
+
+#### JSON
+
+The JSON response is different for non-hosted and hosted feature services. Non-hosted feature services return a simple JSON response that includes only the basic information about CAVs (V1). Additional information about the `FieldGroups`  value, which is needed to complete the CAVs, can be accessed from the `DataElement`  value when working with CAVs on non-hosted feature services. To get the `DataElement`  value, use the `queryDataElement`  operation for non-hosted feature services on non-hosted feature services; the `queryDataElement`  operation uses a layer ID list as input.
+
+The JSON format that is used for hosted feature services (V2) includes `FieldGroups` , because there is no concept of `DataElement` . In addition to these differences, the V2 format can include optional information that simplifies the CAVs, such as resolving codes to their associated descriptions or including relevant domain dictionaries.
+
+#### PBF
+
+PBF is the recommended format for processing. This is a binary format, using Google's `protobuf`  framework (available as a NuGet package to add to a project). The `protobuf`  definition for CAVs can be downloaded and added to a development project.
+
+## Example usages
+
+### Example one
+
+The following is a sample request URL that demonstrates the minimal call for the `queryContingentValues`  operation in `pjson`  format:
+
+```javascript
+https://machine.domain.com/OrgID//rest/services/MyService/FeatureServer/queryContingentValues?f=pjson
+```
+
+ 
+
+### Example two
+
+The following is a sample request URL for `queryContingentValues`  that specifies only layers 0 and 2, has `compactFormat`  set as `true`  and `domainDictionaries`  set as `none` , returned in `pjson`  format:
+
+```javascript
+https://machine.domain.com/OrgID//rest/services/MyService/FeatureServer/queryContingentValues?layerIDs=0,2&compactFormat=true&domainDictionaries=none&f=pjson
+```
+
+ 
+
+### Example three
+
+The following is a sample request URL for `queryContingentValues`  that specifies only layer 0, sets `compactFormat`  as `true`  and sets `domainDictionaries`  as none, returned in `pjson`  format:
+
+```javascript
+https://machine.domain.com/OrgID//rest/services/MyService/FeatureServer/queryContingentValues?layerIDs=0&compactFormat=true&domainDictionaries=none&f=pjson
+```
+
+ 
+
+### Example four
+
+The following is a sample request URL for `queryContingentValues`  that specifies layer 0, sets `compactFormat`  as `true`  and sets `domainDictionaires`  as `complete` , returned in `pjson`  format:
+
+```javascript
+https://machine.domain.com/OrgID//rest/services/MyService/FeatureServer/queryContingentValues?layerIDs=0&compactFormat=true&domainDictionaries=complete&f=pjson
+```
+
+ 
+
+### Example five
+
+The following is a sample request URL for `queryContingentValues`  that specifies only layer 0, sets `compactFormat`  as `true`  and sets `domainDictionaries`  as `trimmed` , returned in `pjson`  format:
+
+```javascript
+https://machine.domain.com/OrgID//rest/services/MyService/FeatureServer/queryContingentValues?layerIDs=0&compactFormat=true&domainDictionaries=trimmed&f=pjson
+```
+
+ 
+
+### Example six
+
+The following is a sample request URL for `queryContingentValues`  that specifies only layer 0, sets `compactFormat`  as `false`  and sets `domainDictionaries`  as `none` , returned in `pjson`  format:
+
+```javascript
+https://machine.domain.com/OrgID//rest/services/MyService/FeatureServer/queryContingentValues?layerIDs=0&compactFormat=false&domainDictionaries=none&f=pjson
+```
+
+ 
+
+### Example seven
+
+The following is a sample request URL for `queryContingentValues`  that specifies only layer 0, sets `compactFormat`  as `false`  and sets `domainDictionaries`  as `none` , returned in `pbf`  format. In this example the CAVs are requested in PBF. If run in a web browser, the `.pbf`  file will be downloaded to the client's Download folder or other specified folder location:
+
+```javascript
+https://machine.domain.com/OrgID//rest/services/MyService/FeatureServer/queryContingentValues?layerIDs=0&compactFormat=false&domainDictionaries=complete&f=pbf
+```
+
+ 
+
+### Example eight
+
+The following is a sample request URL for `queryContingentValues`  that specifies only layer 0, sets `compactFormat`  as `false`  and sets `domainDictionaries`  as `none` , returned in `pjson`  format. In this example, an error message is returned when performing the query because the feature service has no CAVs:
+
+```javascript
+https://machine.domain.com/OrgID//rest/services/MyService/FeatureServer/queryContingentValues?layerIDs=0&compactFormat=false&domainDictionaries=none&f=pjson
+```
+
+ 
+
+## JSON Response examples
+
+
+### Example one
+
+The following is a sample JSON response for the [first example request](/query-contingent-values-feature-service#example-one):
+
+```other
+{
+  "typeCodes": [
+    "Unknown",
+    "Any",
+    "Null",
+    "Code",
+    "Range"
+  ],
+  "stringDicts": [
+    {
+      "domain": "drating",
+      "entries": [
+        "Good",
+        "Excellent",
+        "HasIssues",
+        "OK"
+      ]
+    }
+  ],
+  "contingentValuesDefinitions": [
+    {
+      "layerID": 0,
+      "layerName": "bulkdb.map.CV_Table",
+      "geometryType": "esriGeometryPoint",
+      "hasSubType": true,
+      "fieldGroups": [
+        {
+          "name": "make_rating",
+          "restrictive": true,
+          "fields": [
+            {
+              "id": 0,
+              "name": "vmake",
+              "fieldType": "esriFieldTypeInteger"
+            },
+            {
+              "id": 1,
+              "name": "vrating",
+              "fieldType": "esriFieldTypeString"
+            }
+          ],
+          "subTypes": [
+            {
+              "code": 100,
+              "name": "Airplane",
+              "domains": {
+                "vmake": "dmakes",
+                "vrating": "drating"
+              },
+              "contingentValues": [
+                {
+                  "id": 1,
+                  "types": [3, 3],
+                  "values": [3, 0]
+                },
+                {
+                  "id": 2,
+                  "types": [3, 3],
+                  "values": [4, 0]
+                },
+                {
+                  "id": 3,
+                  "types": [3, 1],
+                  "values": [7]
+                },
+                {
+                  "id": 4,
+                  "types": [3, 3],
+                  "values": [8, 0]
+                },
+                {
+                  "id": 5,
+                  "types": [3, 3],
+                  "values": [10, 1]
+                },
+                {
+                  "id": 6,
+                  "types": [3, 3],
+                  "values": [3, 2]
+                },
+                {
+                  "id": 7,
+                  "types": [3, 3],
+                  "values": [3, 3]
+                },
+                {
+                  "id": 8,
+                  "types": [3, 3],
+                  "values": [4, 1]
+                },
+                {
+                  "id": 9,
+                  "types": [3, 3],
+                  "values": [8, 1]
+                },
+                {
+                  "id": 10,
+                  "types": [3, 3],
+                  "values": [10, 0]
+                }
+              ]
+            },
+            {
+              "code": 200,
+              "name": "Automobile",
+              "domains": {
+                "vmake": "dmakes",
+                "vrating": "drating"
+              },
+              "contingentValues": [
+                {
+                  "id": 11,
+                  "types": [3, 3],
+                  "values": [1, 1]
+                },
+                {
+                  "id": 12,
+                  "types": [3, 3],
+                  "values": [1, 0]
+                },
+                {
+                  "id": 13,
+                  "types": [3, 3],
+                  "values": [1, 3]
+                },
+                {
+                  "id": 14,
+                  "types": [3, 3],
+                  "values": [2, 0]
+                },
+                {
+                  "id": 15,
+                  "types": [3, 3],
+                  "values": [2, 3]
+                },
+                {
+                  "id": 16,
+                  "types": [3, 1],
+                  "values": [5]
+                },
+                {
+                  "id": 17,
+                  "types": [3, 3],
+                  "values": [6, 1]
+                },
+                {
+                  "id": 18,
+                  "types": [3, 3],
+                  "values": [6, 0]
+                },
+                {
+                  "id": 19,
+                  "types": [3, 3],
+                  "values": [6, 3]
+                },
+                {
+                  "id": 20,
+                  "types": [3, 3],
+                  "values": [10, 1]
+                },
+                {
+                  "id": 21,
+                  "types": [3, 3],
+                  "values": [10, 3]
+                },
+                {
+                  "id": 51,
+                  "types": [3, 1],
+                  "values": [9]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "make_model2",
+          "restrictive": true,
+          "fields": [
+            {
+              "id": 0,
+              "name": "vmake",
+              "fieldType": "esriFieldTypeInteger"
+            },
+            {
+              "id": 1,
+              "name": "vmodel",
+              "fieldType": "esriFieldTypeInteger"
+            }
+          ],
+          "subTypes": [
+            {
+              "code": 100,
+              "name": "Airplane",
+              "domains": {
+                "vmake": "dmakes",
+                "vmodel": "dmodels"
+              },
+              "contingentValues": [
+                {
+                  "id": 22,
+                  "types": [3, 3],
+                  "values": [3, 5]
+                },
+                {
+                  "id": 23,
+                  "types": [3, 3],
+                  "values": [3, 6]
+                },
+                {
+                  "id": 26,
+                  "types": [3, 3],
+                  "values": [4, 7]
+                },
+                {
+                  "id": 27,
+                  "types": [3, 3],
+                  "values": [4, 8]
+                },
+                {
+                  "id": 30,
+                  "types": [3, 3],
+                  "values": [7, 14]
+                },
+                {
+                  "id": 31,
+                  "types": [3, 3],
+                  "values": [7, 15]
+                },
+                {
+                  "id": 32,
+                  "types": [3, 3],
+                  "values": [7, 16]
+                },
+                {
+                  "id": 33,
+                  "types": [3, 3],
+                  "values": [8, 12]
+                },
+                {
+                  "id": 34,
+                  "types": [3, 3],
+                  "values": [8, 13]
+                },
+                {
+                  "id": 35,
+                  "types": [3, 3],
+                  "values": [10, 28]
+                },
+                {
+                  "id": 36,
+                  "types": [3, 3],
+                  "values": [10, 29]
+                }
+              ]
+            },
+            {
+              "code": 200,
+              "name": "Automobile",
+              "domains": {
+                "vmake": "dmakes",
+                "vmodel": "dmodels"
+              },
+              "contingentValues": [
+                {
+                  "id": 24,
+                  "types": [3, 3],
+                  "values": [1, 1]
+                },
+                {
+                  "id": 25,
+                  "types": [3, 3],
+                  "values": [1, 2]
+                },
+                {
+                  "id": 28,
+                  "types": [3, 3],
+                  "values": [2, 3]
+                },
+                {
+                  "id": 29,
+                  "types": [3, 3],
+                  "values": [2, 4]
+                },
+                {
+                  "id": 37,
+                  "types": [3, 3],
+                  "values": [5, 9]
+                },
+                {
+                  "id": 38,
+                  "types": [3, 3],
+                  "values": [5, 10]
+                },
+                {
+                  "id": 39,
+                  "types": [3, 3],
+                  "values": [5, 11]
+                },
+                {
+                  "id": 40,
+                  "types": [3, 3],
+                  "values": [6, 21]
+                },
+                {
+                  "id": 41,
+                  "types": [3, 3],
+                  "values": [6, 24]
+                },
+                {
+                  "id": 42,
+                  "types": [3, 3],
+                  "values": [6, 22]
+                },
+                {
+                  "id": 43,
+                  "types": [3, 3],
+                  "values": [6, 25]
+                },
+                {
+                  "id": 44,
+                  "types": [3, 3],
+                  "values": [9, 17]
+                },
+                {
+                  "id": 45,
+                  "types": [3, 3],
+                  "values": [9, 18]
+                },
+                {
+                  "id": 46,
+                  "types": [3, 3],
+                  "values": [9, 19]
+                },
+                {
+                  "id": 47,
+                  "types": [3, 3],
+                  "values": [9, 20]
+                },
+                {
+                  "id": 48,
+                  "types": [3, 3],
+                  "values": [10, 26]
+                },
+                {
+                  "id": 49,
+                  "types": [3, 3],
+                  "values": [10, 27]
+                },
+                {
+                  "id": 50,
+                  "types": [3, 3],
+                  "values": [6, 23]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+ 
+
+### Example two
+
+The following is a sample JSON response for the [second example request](/query-contingent-values-feature-service#example-two):
+
+```other
+{
+  "typeCodes": [
+    "Unknown",
+    "Any",
+    "Null",
+    "Code",
+    "Range"
+  ],
+  "stringDicts": [
+    {
+      "domain": "MAB_DEVICE_1_manufacturer",
+      "entries": [
+        "EL"
+      ]
+    },
+    {
+      "domain": "MAB_DEVICE_3_manufacturer",
+      "entries": [
+        "EL"
+      ]
+    },
+    {
+      "domain": "MAB_DEVICE_13_manufacturer",
+      "entries": [
+        "XX",
+        "TD"
+      ]
+    },
+    {
+      "domain": "MAB_DEVICE_1_material",
+      "entries": [
+        "B",
+        "M"
+      ]
+    },
+    {
+      "domain": "MAB_DEVICE_3_material",
+      "entries": [
+        "B",
+        "M"
+      ]
+    },
+    {
+      "domain": "MAB_DEVICE_13_material",
+      "entries": [
+        "M"
+      ]
+    },
+    {
+      "domain": "MAB_DEVICE_1_mcode",
+      "entries": [
+        "M022916",
+        "M022929",
+        "M022917",
+        "M022918",
+        "M032168",
+        "M032169",
+        "M022923",
+        "M022928"
+      ]
+    },
+    {
+      "domain": "MAB_DEVICE_3_mcode",
+      "entries": [
+        "M022896",
+        "M022921",
+        "M032155",
+        "M032262",
+        "M032261",
+        "M032260",
+        "M032264",
+        "M032836",
+        "M041540",
+        "M032263"
+      ]
+    },
+    {
+      "domain": "MAB_DEVICE_13_mcode",
+      "entries": [
+        "M022452",
+        "M022278",
+        "M020317",
+        "M025190",
+        "M025192",
+        "M020985",
+        "M020988",
+        "M020989",
+        "M020979",
+        "M020990",
+        "M020980",
+        "M020921",
+        "M020922",
+        "M020923",
+        "M020924"
+      ]
+    },
+    {
+      "domain": "MAB_LINE_1_manufacturer",
+      "entries": [
+        "PE",
+        "XX"
+      ]
+    },
+    {
+      "domain": "MAB_LINE_2_manufacturer",
+      "entries": [
+        "PE",
+        "XX"
+      ]
+    },
+    {
+      "domain": "MAB_LINE_7_manufacturer",
+      "entries": [
+        "RW",
+        "EL"
+      ]
+    },
+    {
+      "domain": "MAB_LINE_1_pipegrade",
+      "entries": [
+        "B",
+        "1"
+      ]
+    },
+    {
+      "domain": "MAB_LINE_2_pipegrade",
+      "entries": [
+        "B",
+        "1"
+      ]
+    },
+    {
+      "domain": "MAB_LINE_7_pipegrade",
+      "entries": [
+        "B"
+      ]
+    },
+    {
+      "domain": "MAB_LINE_1_mcode",
+      "entries": [
+        "M016083",
+        "M016078",
+        "M011574",
+        "M010067",
+        "M011575",
+        "M011576",
+        "M010163",
+        "M011951",
+        "M011036",
+        "M012643",
+        "M011935"
+      ]
+    },
+    {
+      "domain": "MAB_LINE_2_mcode",
+      "entries": [
+        "M016080",
+        "M010007",
+        "M011826",
+        "M010003",
+        "M011829",
+        "M011578",
+        "M010147",
+        "M016085",
+        "M011692",
+        "M010178",
+        "M010364",
+        "M011693",
+        "M010014",
+        "M011688",
+        "M016077",
+        "M010029",
+        "M011689",
+        "M016081",
+        "M011804",
+        "M010034",
+        "M011948",
+        "M010037",
+        "M011819",
+        "M011827",
+        "M010509",
+        "M011828",
+        "M010366",
+        "M011786"
+      ]
+    },
+    {
+      "domain": "MAB_LINE_7_mcode",
+      "entries": [
+        "M040881",
+        "M041034",
+        "M041035",
+        "M041036",
+        "M040826",
+        "M040827",
+        "M040828",
+        "M040829",
+        "M041038",
+        "M041040",
+        "M041062",
+        "M041063",
+        "M041060",
+        "M041061",
+        "M040883",
+        "M041037",
+        "M041039"
+      ]
+    }
+  ],
+  "contingentValuesDefinitions": [
+    {
+      "layerID": 0,
+      "layerName": "MABDevice_3",
+      "geometryType": "esriGeometryPoint",
+      "hasSubType": true,
+      "fieldGroups": [
+        {
+          "name": "MCode Filter",
+          "restrictive": false,
+          "fields": [
+            {
+              "id": 0,
+              "name": "diameter",
+              "fieldType": "esriFieldTypeDouble"
+            },
+            {
+              "id": 1,
+              "name": "manufacturer",
+              "fieldType": "esriFieldTypeString"
+            },
+            {
+              "id": 2,
+              "name": "material",
+              "fieldType": "esriFieldTypeString"
+            },
+            {
+              "id": 3,
+              "name": "wallthickness",
+              "fieldType": "esriFieldTypeDouble"
+            },
+            {
+              "id": 4,
+              "name": "mcode",
+              "fieldType": "esriFieldTypeString"
+            }
+          ],
+          "subTypes": [
+            {
+              "code": 1,
+              "name": "Excess Flow Valve",
+              "domains": {
+                "diameter": "MAB_DEVICE_1_diameter",
+                "manufacturer": "MAB_DEVICE_1_manufacturer",
+                "material": "MAB_DEVICE_1_material",
+                "wallthickness": "MAB_DEVICE_1_wallthickness",
+                "mcode": "MAB_DEVICE_1_mcode"
+              },
+              "contingentValues": [
+                {
+                  "id": 1,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    0.5,
+                    0,
+                    0,
+                    0.090000000000000011,
+                    0
+                  ]
+                },
+                {
+                  "id": 2,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    0.5,
+                    0,
+                    0,
+                    0.090000000000000011,
+                    1
+                  ]
+                },
+                {
+                  "id": 4,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    0,
+                    0,
+                    0.099,
+                    2
+                  ]
+                },
+                {
+                  "id": 5,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    0,
+                    0,
+                    0.099,
+                    3
+                  ]
+                },
+                {
+                  "id": 8,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    0.75,
+                    0,
+                    1,
+                    0.113,
+                    4
+                  ]
+                },
+                {
+                  "id": 9,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    0.75,
+                    0,
+                    1,
+                    0.113,
+                    5
+                  ]
+                },
+                {
+                  "id": 10,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1.25,
+                    0,
+                    0,
+                    0.166,
+                    6
+                  ]
+                },
+                {
+                  "id": 11,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    2,
+                    0,
+                    0,
+                    0.216,
+                    7
+                  ]
+                }
+              ]
+            },
+            {
+              "code": 3,
+              "name": "Controllable Valve",
+              "domains": {
+                "diameter": "MAB_DEVICE_3_diameter",
+                "manufacturer": "MAB_DEVICE_3_manufacturer",
+                "material": "MAB_DEVICE_3_material",
+                "wallthickness": "MAB_DEVICE_3_wallthickness",
+                "mcode": "MAB_DEVICE_3_mcode"
+              },
+              "contingentValues": [
+                {
+                  "id": 3,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    0.5,
+                    0,
+                    0,
+                    0.090000000000000011,
+                    0
+                  ]
+                },
+                {
+                  "id": 6,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    0,
+                    0,
+                    0.099,
+                    1
+                  ]
+                },
+                {
+                  "id": 7,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    0.75,
+                    0,
+                    1,
+                    0.113,
+                    2
+                  ]
+                },
+                {
+                  "id": 27,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    3,
+                    0,
+                    0,
+                    0.304,
+                    3
+                  ]
+                },
+                {
+                  "id": 28,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    4,
+                    0,
+                    0,
+                    0.391,
+                    4
+                  ]
+                },
+                {
+                  "id": 29,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    0,
+                    0,
+                    0.602,
+                    5
+                  ]
+                },
+                {
+                  "id": 30,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    0,
+                    0,
+                    0.602,
+                    6
+                  ]
+                },
+                {
+                  "id": 31,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    0.5,
+                    0,
+                    0,
+                    0.090000000000000011,
+                    7
+                  ]
+                },
+                {
+                  "id": 32,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    0,
+                    0,
+                    0.121,
+                    8
+                  ]
+                },
+                {
+                  "id": 33,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    2,
+                    0,
+                    0,
+                    0.216,
+                    9
+                  ]
+                },
+                {
+                  "id": 34,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    4,
+                    0,
+                    0,
+                    0.333,
+                    4
+                  ]
+                },
+                {
+                  "id": 35,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    8,
+                    0,
+                    0,
+                    0.639,
+                    6
+                  ]
+                }
+              ]
+            },
+            {
+              "code": 13,
+              "name": "Short Stop",
+              "domains": {
+                "diameter": "MAB_DEVICE_13_diameter",
+                "manufacturer": "MAB_DEVICE_13_manufacturer",
+                "material": "MAB_DEVICE_13_material",
+                "wallthickness": "MAB_DEVICE_13_wallthickness",
+                "mcode": "MAB_DEVICE_13_mcode"
+              },
+              "contingentValues": [
+                {
+                  "id": 12,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    0,
+                    0,
+                    0.133,
+                    0
+                  ]
+                },
+                {
+                  "id": 13,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    0,
+                    0,
+                    0.133,
+                    1
+                  ]
+                },
+                {
+                  "id": 14,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    4,
+                    1,
+                    0,
+                    0.237,
+                    2
+                  ]
+                },
+                {
+                  "id": 15,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    0,
+                    0,
+                    0.28,
+                    3
+                  ]
+                },
+                {
+                  "id": 16, 
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    0,
+                    0,
+                    0.365,
+                    4
+                  ]
+                },
+                {
+                  "id": 17,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    1,
+                    0,
+                    0.365,
+                    5
+                  ]
+                },
+                {
+                  "id": 18,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    1,
+                    0,
+                    0.365,
+                    6
+                  ]
+                },
+                {
+                  "id": 19,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    12,
+                    1,
+                    0,
+                    0.375,
+                    7
+                  ]
+                },
+                {
+                  "id": 20,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    1,
+                    0,
+                    0.365,
+                    8
+                  ]
+                },
+                {
+                  "id": 21,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    12,
+                    1,
+                    0,
+                    0.375,
+                    9
+                  ]
+                },
+                {
+                  "id": 22,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    12,
+                    1,
+                    0,
+                    0.375,
+                    10
+                  ]
+                },
+                {
+                  "id": 23,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    1,
+                    0,
+                    0.28,
+                    11
+                  ]
+                },
+                {
+                  "id": 24,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    8,
+                    1,
+                    0,
+                    0.322,
+                    12
+                  ]
+                },
+                {
+                  "id": 25,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    1,
+                    0,
+                    0.365,
+                    13
+                  ]
+                },
+                {
+                  "id": 26,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    12,
+                    1,
+                    0,
+                    0.375,
+                    14
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "layerID": 2,
+      "layerName": "MABLine_3",
+      "geometryType": "esriGeometryPolyline",
+      "hasSubType": true,
+      "fieldGroups": [
+        {
+          "name": "MCode Filter",
+          "restrictive": false,
+          "fields": [
+            {
+              "id": 0,
+              "name": "nominaldiameter",
+              "fieldType": "esriFieldTypeDouble"
+            },
+            {
+              "id": 1,
+              "name": "manufacturer",
+              "fieldType": "esriFieldTypeString"
+            },
+            {
+              "id": 2,
+              "name": "pipegrade",
+              "fieldType": "esriFieldTypeString"
+            },
+            {
+              "id": 3,
+              "name": "wallthickness",
+              "fieldType": "esriFieldTypeDouble"
+            },
+            {
+              "id": 4,
+              "name": "mcode",
+              "fieldType": "esriFieldTypeString"
+            }
+          ],
+          "subTypes": [
+            {
+              "code": 1,
+              "name": "Service Pipe",
+              "domains": {
+                "nominaldiameter": "MAB_LINE_1_nominaldiameter",
+                "manufacturer": "MAB_LINE_1_manufacturer",
+                "pipegrade": "MAB_LINE_1_pipegrade",
+                "wallthickness": "MAB_LINE_1_wallthickness",
+                "mcode": "MAB_LINE_1_mcode"
+              },
+              "contingentValues": [
+                {
+                  "id": 1,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    0,
+                    0,
+                    0.099,
+                    0
+                  ]
+                },
+                {
+                  "id": 2,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1.25,
+                    0,
+                    0,
+                    0.166,
+                    1
+                  ]
+                },
+                {
+                  "id": 8,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    0.75,
+                    1,
+                    1,
+                    0.113,
+                    2
+                  ]
+                },
+                {
+                  "id": 9,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    0.75,
+                    1,
+                    1,
+                    0.113,
+                    3
+                  ]
+                },
+                {
+                  "id": 10,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    1,
+                    1,
+                    0.133,
+                    4
+                  ]
+                },
+                {
+                  "id": 11,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1.25,
+                    1,
+                    1,
+                    0.14,
+                    5
+                  ]
+                },
+                {
+                  "id": 12,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1.25,
+                    1,
+                    1,
+                    0.14,
+                    6
+                  ]
+                },
+                {
+                  "id": 15,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    0.75,
+                    1,
+                    1,
+                    0.154,
+                    7
+                  ]
+                },
+                {
+                  "id": 16,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    0.75,
+                    1,
+                    1,
+                    0.154,
+                    8
+                  ]
+                },
+                {
+                  "id": 17,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1.25,
+                    0,
+                    0,
+                    0.166,
+                    9
+                  ]
+                },
+                {
+                  "id": 18,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    1,
+                    1,
+                    0.17900000000000002,
+                    10
+                  ]
+                }
+              ]
+            },
+            {
+              "code": 2,
+              "name": "Distribution Pipe",
+              "domains": {
+                "nominaldiameter": "MAB_LINE_2_nominaldiameter",
+                "manufacturer": "MAB_LINE_2_manufacturer",
+                "pipegrade": "MAB_LINE_2_pipegrade",
+                "wallthickness": "MAB_LINE_2_wallthickness",
+                "mcode": "MAB_LINE_2_mcode"
+              },
+              "contingentValues": [
+                {
+                  "id": 3,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    3,
+                    0,
+                    0,
+                    0.304,
+                    0
+                  ]
+                },
+                {
+                  "id": 4,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    4,
+                    0,
+                    0,
+                    0.333,
+                    1
+                  ]
+                },
+                {
+                  "id": 5,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    4,
+                    0,
+                    0,
+                    0.391,
+                    2
+                  ]
+                },
+                {
+                  "id": 6,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    0,
+                    0,
+                    0.4910000000000001,
+                    3
+                  ]
+                },
+                {
+                  "id": 7,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    0,
+                    0,
+                    0.57600000000000007,
+                    4
+                  ]
+                },
+                {
+                  "id": 13,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    2,
+                    1,
+                    1,
+                    0.154,
+                    5
+                  ]
+                },
+                {
+                  "id": 14,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    2,
+                    1,
+                    1,
+                    0.154,
+                    6
+                  ]
+                },
+                {
+                  "id": 19,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    2,
+                    0,
+                    0,
+                    0.216,
+                    7
+                  ]
+                },
+                {
+                  "id": 20,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    3,
+                    1,
+                    1,
+                    0.216,
+                    8
+                  ]
+                },
+                {
+                  "id": 21,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    3,
+                    1,
+                    1,
+                    0.216,
+                    9
+                  ]
+                },
+                {
+                  "id": 22,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    4,
+                    1,
+                    1,
+                    0.237,
+                    10
+                  ]
+                },
+                {
+                  "id": 23,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    4,
+                    1,
+                    1,
+                    0.237,
+                    11
+                  ]
+                },
+                {
+                  "id": 24,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    1,
+                    1,
+                    0.28,
+                    12
+                  ]
+                },
+                {
+                  "id": 25,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    1,
+                    1,
+                    0.28,
+                    13
+                  ]
+                },
+                {
+                  "id": 26,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    3,
+                    0,
+                    0,
+                    0.304,
+                    14
+                  ]
+                },
+                {
+                  "id": 27,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    8,
+                    1,
+                    1,
+                    0.322,
+                    15
+                  ]
+                },
+                {
+                  "id": 28,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    8,
+                    1,
+                    1,
+                    0.322,
+                    16
+                  ]
+                },
+                {
+                  "id": 29,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    4,
+                    0,
+                    0,
+                    0.333,
+                    17
+                  ]
+                },
+                {
+                  "id": 30,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    1,
+                    1,
+                    0.365,
+                    18
+                  ]
+                },
+                {
+                  "id": 31,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    1,
+                    1,
+                    0.365,
+                    19
+                  ]
+                },
+                {
+                  "id": 32,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    12,
+                    1,
+                    1,
+                    0.375,
+                    20
+                  ]
+                },
+                {
+                  "id": 33,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    12,
+                    1,
+                    1,
+                    0.375,
+                    21
+                  ]
+                },
+                {
+                  "id": 34,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    16,
+                    1,
+                    1,
+                    0.375,
+                    22
+                  ]
+                },
+                {
+                  "id": 35,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    4,
+                    0,
+                    0,
+                    0.391,
+                    23
+                  ]
+                },
+                {
+                  "id": 36,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    0,
+                    0,
+                    0.4910000000000001,
+                    24
+                  ]
+                },
+                {
+                  "id": 37,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    0,
+                    0,
+                    0.57600000000000007,
+                    25
+                  ]
+                },
+                {
+                  "id": 38,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    8,
+                    0,
+                    0,
+                    0.639,
+                    26
+                  ]
+                },
+                {
+                  "id": 39,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    8,
+                    0,
+                    0,
+                    0.75,
+                    27
+                  ]
+                }
+              ]
+            },
+            {
+              "code": 7,
+              "name": "Riser Pipe",
+              "domains": {
+                "nominaldiameter": "MAB_LINE_7_nominaldiameter",
+                "manufacturer": "MAB_LINE_7_manufacturer",
+                "pipegrade": "MAB_LINE_7_pipegrade",
+                "wallthickness": "MAB_LINE_7_wallthickness",
+                "mcode": "MAB_LINE_7_mcode"
+              },
+              "contingentValues": [
+                {
+                  "id": 40,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    0,
+                    0,
+                    0.099,
+                    0
+                  ]
+                },
+                {
+                  "id": 41,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    0,
+                    0,
+                    0.099,
+                    1
+                  ]
+                },
+                {
+                  "id": 42,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    0,
+                    0,
+                    0.099,
+                    2
+                  ]
+                },
+                {
+                  "id": 43,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1.25,
+                    0,
+                    0,
+                    0.166,
+                    3
+                  ]
+                },
+                {
+                  "id": 44,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    0.5,
+                    0,
+                    0,
+                    0.090000000000000011,
+                    4
+                  ]
+                },
+                {
+                  "id": 45,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    0.5,
+                    0,
+                    0,
+                    0.090000000000000011,
+                    5
+                  ]
+                },
+                {
+                  "id": 46,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    0.5,
+                    0,
+                    0,
+                    0.090000000000000011,
+                    6
+                  ]
+                },
+                {
+                  "id": 47,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    0.5,
+                    0,
+                    0,
+                    0.090000000000000011,
+                    7
+                  ]
+                },
+                {
+                  "id": 48,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    2,
+                    1,
+                    0,
+                    0.216,
+                    8
+                  ]
+                },
+                {
+                  "id": 49,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    1,
+                    0,
+                    0.099,
+                    9
+                  ]
+                },
+                {
+                  "id": 50,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    1,
+                    0,
+                    0.099,
+                    10
+                  ]
+                },
+                {
+                  "id": 51,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    1,
+                    0,
+                    0.099,
+                    11
+                  ]
+                },
+                {
+                  "id": 52,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    1,
+                    0,
+                    0.099,
+                    12
+                  ]
+                },
+                {
+                  "id": 53,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    1,
+                    0,
+                    0.099,
+                    13
+                  ]
+                },
+                {
+                  "id": 54,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1.25,
+                    1,
+                    0,
+                    0.166,
+                    14
+                  ]
+                },
+                {
+                  "id": 55,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1.25,
+                    1,
+                    0,
+                    0.166,
+                    15
+                  ]
+                },
+                {
+                  "id": 56,
+                  "types": [
+                    3,
+                    3,
+                    3,
+                    3,
+                    3
+                  ],
+                  "values": [
+                    2,
+                    1,
+                    0,
+                    0.216,
+                    16
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+ 
+
+### Example three
+
+The following is a sample JSON response for the [third example request](/query-contingent-values-feature-service#example-three):
+
+```other
+{
+  "typeCodes": [
+    "Unknown",
+    "Any",
+    "Null",
+    "Code",
+    "Range"
+  ],
+  "stringDicts": [
+    {
+      "domain": "drating",
+      "entries": [
+        "Good",
+        "Excellent",
+        "HasIssues",
+        "OK"
+      ]
+    }
+  ],
+  "contingentValuesDefinitions": [
+    {
+      "layerID": 0,
+      "layerName": "bulkdb.map.CV_Table",
+      "geometryType": "esriGeometryPoint",
+      "hasSubType": true,
+      "fieldGroups": [
+        {
+          "name": "make_rating",
+          "restrictive": true,
+          "fields": [
+            {
+              "id": 0,
+              "name": "vmake",
+              "fieldType": "esriFieldTypeInteger"
+            },
+            {
+              "id": 1,
+              "name": "vrating",
+              "fieldType": "esriFieldTypeString"
+            }
+          ],
+          "subTypes": [
+            {
+              "code": 100,
+              "name": "Airplane",
+              "domains": {
+                "vmake": "dmakes",
+                "vrating": "drating"
+              },
+              "contingentValues": [
+                {
+                  "id": 1,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    3,
+                    0
+                  ]
+                },
+                {
+                  "id": 2,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    4,
+                    0
+                  ]
+                },
+                {
+                  "id": 3,
+                  "types": [
+                    3,
+                    1
+                  ],
+                  "values": [
+                    
+                  ]
+                },
+                {
+                  "id": 4,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    8,
+                    0
+                  ]
+                },
+                {
+                  "id": 5,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    1
+                  ]
+                },
+                {
+                  "id": 6,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    3,
+                    2
+                  ]
+                },
+                {
+                  "id": 7,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    3,
+                    3
+                  ]
+                },
+                {
+                  "id": 8,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    4,
+                    1
+                  ]
+                },
+                {
+                  "id": 9,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    8,
+                    1
+                  ]
+                },
+                {
+                  "id": 10,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    0
+                  ]
+                }
+              ]
+            },
+            {
+              "code": 200,
+              "name": "Automobile",
+              "domains": {
+                "vmake": "dmakes",
+                "vrating": "drating"
+              },
+              "contingentValues": [
+                {
+                  "id": 11,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    1
+                  ]
+                },
+                {
+                  "id": 12,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    0
+                  ]
+                },
+                {
+                  "id": 13,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    3
+                  ]
+                },
+                {
+                  "id": 14,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    2,
+                    0
+                  ]
+                },
+                {
+                  "id": 15,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    2,
+                    3
+                  ]
+                },
+                {
+                  "id": 16,
+                  "types": [
+                    3,
+                    1
+                  ],
+                  "values": [
+                    5
+                  ]
+                },
+                {
+                  "id": 17,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    1
+                  ]
+                },
+                {
+                  "id": 18,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    0
+                  ]
+                },
+                {
+                  "id": 19,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    3
+                  ]
+                },
+                {
+                  "id": 20,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    1
+                  ]
+                },
+                {
+                  "id": 21,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    3
+                  ]
+                }, 
+                {
+                  "id": 51,
+                  "types": [
+                    3,
+                    1
+                  ],
+                  "values": [
+                    9
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "make_model2",
+          "restrictive": true,
+          "fields": [
+            {
+              "id": 0,
+              "name": "vmake",
+              "fieldType": "esriFieldTypeInteger"
+            },
+            {
+              "id": 1,
+              "name": "vmodel",
+              "fieldType": "esriFieldTypeInteger"
+            }
+          ],
+          "subTypes": [
+            {
+              "code": 100,
+              "name": "Airplane",
+              "domains": {
+                "vmake": "dmakes",
+                "vmodel": "dmodels"
+              },
+              "contingentValues": [
+                {
+                  "id": 22,
+                  "types": [
+                    3,
+                    3
+                  ], 
+                  "values": [
+                    3,
+                    5
+                  ]
+                },
+                {
+                  "id": 23,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    3,
+                    6
+                  ]
+                },
+                {
+                  "id": 26,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    4,
+                    7
+                  ]
+                },
+                {
+                  "id": 27,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    4,
+                    8
+                  ]
+                },
+                {
+                  "id" : 30,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    7,
+                    14
+                  ]
+                },
+                {
+                  "id": 31,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    7,
+                    15
+                  ]
+                },
+                {
+                  "id": 32,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    7,
+                    16
+                  ]
+                },
+                {
+                  "id": 33,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    8,
+                    12
+                  ]
+                },
+                {
+                  "id": 34,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    8,
+                    13
+                  ]
+                },
+                {
+                  "id": 35,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    28
+                  ]
+                },
+                {
+                  "id": 36,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    29
+                  ]
+                }
+              ]
+            },
+            {
+              "code" : 200,
+              "name" : "Automobile",
+              "domains": {
+                "vmake": "dmakes",
+                "vmodel": "dmodels"
+              },
+              "contingentValues": [
+                {
+                  "id": 24,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    1
+                  ]
+                },
+                {
+                  "id": 25,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    2
+                  ]
+                },
+                {
+                  "id": 28,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    2,
+                    3
+                  ]
+                },
+                {
+                  "id": 29,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    2,
+                    4
+                  ]
+                },
+                {
+                  "id": 37,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    5,
+                    9
+                  ]
+                },
+                {
+                  "id": 38,
+                  "types": [
+                    3,
+                    3
+                  ], 
+                  "values": [
+                    5,
+                    10
+                  ]
+                },
+                {
+                  "id": 39,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    5,
+                    11
+                  ]
+                },
+                {
+                  "id": 40,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    21
+                  ]
+                },
+                {
+                  "id": 41,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    24
+                  ]
+                },
+                {
+                  "id": 42,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    22
+                  ]
+                },
+                {
+                  "id": 43,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    25
+                  ]
+                },
+                {
+                  "id": 44,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    9,
+                    17
+                  ]
+                },
+                {
+                  "id": 45,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    9,
+                    18
+                  ]
+                },
+                {
+                  "id" : 46,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    9,
+                    19
+                  ]
+                },
+                {
+                  "id" : 47,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    9,
+                    20
+                  ]
+                },
+                {
+                  "id": 48,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    26
+                  ]
+                },
+                {
+                  "id": 49,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    27
+                  ]
+                },
+                {
+                  "id": 50,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    23
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+ 
+
+### Example four
+
+The following is a sample JSON response for the [fourth example request](/query-contingent-values-feature-service#example-four):
+
+```other
+{
+  "typeCodes": [
+    "Unknown",
+    "Any",
+    "Null",
+    "Code",
+    "Range"
+  ],
+  "stringDicts": [
+    {
+      "domain": "drating",
+      "entries": [
+        "Good",
+        "Excellent",
+        "HasIssues",
+        "OK"
+      ]
+    }
+  ],
+  "domainDicts": {
+    "dmakes": {
+      "1": "Toyota",
+      "2": "Honda",
+      "3": "Boeing",
+      "4": "Airbus",
+      "5": "Subaru",
+      "6": "Ford",
+      "7": "Tupolev",
+      "8": "Embraer",
+      "9": "Tata",
+      "10": "Saab",
+      "11": "Audi"
+    },
+    "drating": {
+      "Dangerous": "Dangerous",
+      "Excellent": "Excellent",
+      "Good": "Good",
+      "HasIssues": "HasIssues",
+      "OK": "OK"
+    },
+    "dmodels": {
+      "1": "Camry",
+      "2": "4Runner",
+      "3": "Accord",
+      "4": "Pilot",
+      "5": "747",
+      "6": "737",
+      "8": "A350",
+      "9": "Impreza",
+      "10": "Outback",
+      "11": "Crosstrek",
+      "12": "E170",
+      "13": "ERJ140",
+      "14": "ANT-1",
+      "15": "ANT-4",
+      "16": "M-17B",
+      "17": "Hexa",
+      "18": "Zest",
+      "19": "Harrier",
+      "20": "Nano",
+      "21": "Focus",
+      "22": "E350",
+      "23": "Ranger",
+      "24": "Excort",
+      "25": "Mustang",
+      "26": "S9000",
+      "27": "9-4X",
+      "28": "Gripen",
+      "29": "Viggen"
+    }
+  },
+  "contingentValuesDefinitions": [
+    {
+      "layerID": 0,
+      "layerName": "bulkdb.map.CV_Table",
+      "geometryType": "esriGeometryPoint",
+      "hasSubType": true,
+      "fieldGroups": [
+        {
+          "name": "make_rating",
+          "restrictive": true,
+          "fields": [
+            {
+              "id": 0,
+              "name": "vmake",
+              "fieldType": "esriFieldTypeInteger"
+            }, 
+            {
+              "id": 1,
+              "name": "vrating",
+              "fieldType": "esriFieldTypeString"
+            }
+          ],
+          "subTypes": [
+            {
+              "code": 100,
+              "name": "Airplane",
+              "domains": {
+                "vmake": "dmakes",
+                "vrating": "drating"
+              },
+              "contingentValues": [
+                {
+                  "id": 1,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    3,
+                    0
+                  ]
+                },
+                {
+                  "id": 2,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    4,
+                    0
+                  ]
+                },
+                {
+                  "id": 3,
+                  "types": [
+                    3,
+                    1
+                  ],
+                  "values": [
+                    7
+                  ]
+                },
+                {
+                  "id": 4,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    8,
+                    0
+                  ]
+                },
+                {
+                  "id": 5,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    1
+                  ]
+                },
+                {
+                  "id" : 6,
+                  "types": [
+                    3,
+                    3
+                  ], 
+                  "values": [
+                    3,
+                    2
+                  ]
+                },
+                {
+                  "id": 7,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    3,
+                    3
+                  ]
+                },
+                {
+                  "id": 8,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    4,
+                    1
+                  ]
+                },
+                {
+                  "id": 9,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    8,
+                    1
+                  ]
+                },
+                {
+                  "id": 10,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    0
+                  ]
+                }
+              ]
+            },
+            {
+              "code": 200,
+              "name": "Automobile",
+              "domains": {
+                "vmake": "dmakes",
+                "vrating": "drating"
+              },
+              "contingentValues": [
+                {
+                  "id": 11,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    1
+                  ]
+                },
+                {
+                  "id": 12,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    0
+                  ]
+                },
+                {
+                  "id": 13,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    3
+                  ]
+                },
+                {
+                  "id": 14,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    2,
+                    0
+                  ]
+                },
+                {
+                  "id": 15,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    2,
+                    3
+                  ]
+                },
+                {
+                  "id": 16,
+                  "types": [
+                    3,
+                    1
+                  ],
+                  "values": [
+                    5
+                  ]
+                },
+                {
+                  "id": 17,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    1
+                  ]
+                },
+                {
+                  "id": 18,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    0
+                  ]
+                },
+                {
+                  "id": 19,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    3
+                  ]
+                },
+                {
+                  "id": 20,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    1
+                  ]
+                },
+                {
+                  "id": 21,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    3
+                  ]
+                },
+                {
+                  "id": 51,
+                  "types": [
+                    3,
+                    1
+                  ],
+                  "values": [
+                    9
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "make_model2",
+          "restrictive": true,
+          "fields": [
+            {
+              "id": 0,
+              "name": "vmake",
+              "fieldType": "esriFieldTypeInteger"
+            }, 
+            {
+              "id": 1,
+              "name": "vmodel",
+              "fieldType": "esriFieldTypeInteger"
+            }
+          ],
+          "subTypes": [
+            {
+              "code": 100,
+              "name": "Airplane",
+              "domains": {
+                "vmake": "dmakes",
+                "vmodel": "dmodels"
+              },
+              "contingentValues": [
+                {
+                  "id": 22,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    3,
+                    5
+                  ]
+                },
+                {
+                  "id": 23,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    3,
+                    6
+                  ]
+                },
+                {
+                  "id": 26,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    4,
+                    7
+                  ]
+                },
+                {
+                  "id": 27,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    4,
+                    8
+                  ]
+                },
+                {
+                  "id": 30,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    7,
+                    14
+                  ]
+                },
+                {
+                  "id": 31,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    7,
+                    15
+                  ]
+                },
+                {
+                  "id": 32,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    7,
+                    16
+                  ]
+                },
+                {
+                  "id": 33,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    8,
+                    12
+                  ]
+                },
+                {
+                  "id": 34,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    8,
+                    13
+                  ]
+                },
+                {
+                  "id": 35,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    28
+                  ]
+                },
+                {
+                  "id": 36,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    29
+                  ]
+                }
+              ]
+            },
+            {
+              "code": 200,
+              "name": "Automobile",
+              "domains": {
+                "vmake": "dmakes",
+                "vmodel": "dmodels"
+              },
+              "contingentValues": [
+                {
+                  "id": 24,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    1
+                  ]
+                },
+                {
+                  "id": 25,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    2
+                  ]
+                },
+                {
+                  "id": 28,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    2,
+                    3
+                  ]
+                },
+                {
+                  "id": 29,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    2,
+                    4
+                  ]
+                },
+                {
+                  "id": 37,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    5,
+                    9
+                  ]
+                },
+                {
+                  "id": 38,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    5,
+                    10
+                  ]
+                },
+                {
+                  "id": 39,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    5,
+                    11
+                  ]
+                },
+                {
+                  "id": 40,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    21
+                  ]
+                },
+                {
+                  "id": 41,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    24
+                  ]
+                },
+                {
+                  "id": 42,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    22
+                  ]
+                },
+                {
+                  "id": 43,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    25
+                  ]
+                },
+                {
+                  "id": 44,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    9,
+                    17
+                  ]
+                },
+                {
+                  "id": 45,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    9,
+                    18
+                  ]
+                },
+                {
+                  "id": 46,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    9,
+                    19
+                  ]
+                },
+                {
+                  "id": 47,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    9,
+                    20
+                  ]
+                },
+                {
+                  "id": 48,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    26
+                  ]
+                },
+                {
+                  "id": 49,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    27
+                  ]
+                },
+                {
+                  "id": 50,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    23
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+ 
+
+### Example five
+
+The following is a sample JSON response for the [fifth example request](/query-contingent-values-feature-service#example-five):
+
+```other
+{
+  "typeCodes": [
+    "Unknown",
+    "Any",
+    "Null",
+    "Code",
+    "Range"
+  ],
+  "stringDicts": [
+    {
+      "domain": "drating",
+      "entries": [
+        "Good",
+        "Excellent",
+        "HasIssues",
+        "OK"
+      ]
+    }
+  ],
+  "domainDicts": {
+    "dmakes": {
+      "1" : "Toyota",
+      "2": "Honda",
+      "3": "Boeing",
+      "4": "Airbus",
+      "5": "Subaru",
+      "6": "Ford",
+      "7": "Tupolev",
+      "8": "Embraer",
+      "9": "Tata",
+      "10": "Saab"
+    },
+    "drating": {
+      "Excellent": "Excellent",
+      "Good": "Good",
+      "HasIssues": "HasIssues",
+      "OK": "OK"
+    },
+    "dmodels": {
+      "1" : "Camry",
+      "2": "4Runner",
+      "3": "Accord",
+      "4": "Pilot",
+      "5": "747",
+      "6": "737",
+      "8": "A350",
+      "9": "Impreza",
+      "10": "Outback",
+      "11": "Crosstrek",
+      "12": "E170",
+      "13": "ERJ140",
+      "14": "ANT-1",
+      "15": "ANT-4",
+      "16": "M-17B",
+      "17": "Hexa",
+      "18": "Zest",
+      "19": "Harrier",
+      "20": "Nano",
+      "21": "Focus",
+      "22": "E350",
+      "23": "Ranger",
+      "24": "Excort",
+      "25": "Mustang",
+      "26": "S9000",
+      "27": "9-4X",
+      "28": "Gripen",
+      "29": "Viggen"
+    }
+  },
+  "contingentValuesDefinitions": [
+    {
+      "layerID": 0,
+      "layerName": "bulkdb.map.CV_Table",
+      "geometryType": "esriGeometryPoint",
+      "hasSubType": true,
+      "fieldGroups": [
+        {
+          "name": "make_rating",
+          "restrictive": true,
+          "fields": [
+            {
+              "id": 0,
+              "name": "vmake",
+              "fieldType": "esriFieldTypeInteger"
+            },
+            {
+              "id": 1,
+              "name": "vrating",
+              "fieldType": "esriFieldTypeString"
+            }
+          ],
+          "subTypes": [
+            {
+              "code": 100,
+              "name": "Airplane",
+              "domains": {
+                "vmake": "dmakes",
+                "vrating": "drating"
+              },
+              "contingentValues": [
+                {
+                  "id": 1,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    3,
+                    0
+                  ]
+                },
+                {
+                  "id": 2,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    4,
+                    0
+                  ]
+                },
+                {
+                  "id": 3,
+                  "types": [
+                    3,
+                    1
+                  ],
+                  "values": [
+                    7
+                  ]
+                },
+                {
+                  "id": 4,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    8,
+                    0
+                  ]
+                },
+                {
+                  "id": 5,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    1
+                  ]
+                },
+                {
+                  "id": 6,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    3,
+                    2
+                  ]
+                },
+                {
+                  "id": 7,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    3,
+                    3
+                  ]
+                },
+                {
+                  "id": 8,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    4,
+                    1
+                  ]
+                },
+                {
+                  "id": 9,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    8,
+                    1
+                  ]
+                },
+                {
+                  "id": 10,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    0
+                  ]
+                }
+              ]
+            },
+            {
+              "code": 200,
+              "name": "Automobile",
+              "domains": {
+                "vmake": "dmakes",
+                "vrating": "drating"
+              },
+              "contingentValues": [
+                {
+                  "id": 11,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    1
+                  ]
+                },
+                {
+                  "id": 12,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    0
+                  ]
+                },
+                {
+                  "id": 13,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    3
+                  ]
+                },
+                {
+                  "id": 14,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    2,
+                    0
+                  ]
+                },
+                {
+                  "id": 15,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    2,
+                    3
+                  ]
+                },
+                {
+                  "id": 16,
+                  "types": [
+                    3,
+                    1
+                  ],
+                  "values": [
+                    5
+                  ]
+                },
+                {
+                  "id": 17,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    1
+                  ]
+                },
+                {
+                  "id": 18,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    0
+                  ]
+                },
+                {
+                  "id": 19,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    3
+                  ]
+                },
+                {
+                  "id": 20,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    1
+                  ]
+                },
+                {
+                  "id": 21,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    3
+                  ]
+                },
+                {
+                  "id": 51,
+                  "types": [
+                    3,
+                    1
+                  ],
+                  "values": [
+                    9
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "make_model2",
+          "restrictive": true,
+          "fields": [
+            {
+              "id": 0,
+              "name": "vmake",
+              "fieldType": "esriFieldTypeInteger"
+            }, 
+            {
+              "id": 1,
+              "name": "vmodel",
+              "fieldType": "esriFieldTypeInteger"
+            }
+          ],
+          "subTypes": [
+            {
+              "code": 100,
+              "name": "Airplane",
+              "domains": {
+                "vmake": "dmakes",
+                "vmodel": "dmodels"
+              },
+              "contingentValues": [
+                {
+                  "id": 22,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    3,
+                    5
+                  ]
+                },
+                {
+                  "id": 23,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    3,
+                    6
+                  ]
+                },
+                {
+                  "id": 26,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    4,
+                    7
+                  ]
+                },
+                {
+                  "id": 27,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    4,
+                    8
+                  ]
+                },
+                {
+                  "id": 30,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    7,
+                    14
+                  ]
+                },
+                {
+                  "id": 31,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    7,
+                    15
+                  ]
+                },
+                {
+                  "id": 32,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    7,
+                    16
+                  ]
+                },
+                {
+                  "id": 33,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    8,
+                    12
+                  ]
+                },
+                {
+                  "id": 34,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    8,
+                    13
+                  ]
+                },
+                {
+                  "id": 35,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    28
+                  ]
+                },
+                {
+                  "id": 36,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    29
+                  ]
+                }
+              ]
+            },
+            {
+              "code": 200,
+              "name": "Automobile",
+              "domains": {
+                "vmake": "dmakes",
+                "vmodel": "dmodels"
+              },
+              "contingentValues": [
+                {
+                  "id": 24,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    1
+                  ]
+                },
+                {
+                  "id": 25,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    1,
+                    2
+                  ]
+                },
+                {
+                  "id": 28,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    2,
+                    3
+                  ]
+                },
+                {
+                  "id": 29,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    2,
+                    4
+                  ]
+                },
+                {
+                  "id": 37,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    5,
+                    9
+                  ]
+                },
+                {
+                  "id": 38,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    5,
+                    10
+                  ]
+                },
+                {
+                  "id": 39,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    5,
+                    11
+                  ]
+                },
+                {
+                  "id": 40,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    21
+                  ]
+                },
+                {
+                  "id": 41,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    24
+                  ]
+                },
+                {
+                  "id": 42,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    22
+                  ]
+                },
+                {
+                  "id": 43,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    25
+                  ]
+                },
+                {
+                  "id": 44,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    9,
+                    17
+                  ]
+                },
+                {
+                  "id": 45,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    9,
+                    18
+                  ]
+                },
+                {
+                  "id": 46,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    9,
+                    19
+                  ]
+                },
+                {
+                  "id": 47,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    9,
+                    20
+                  ]
+                },
+                {
+                  "id": 48,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    26
+                  ]
+                },
+                {
+                  "id": 49,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    10,
+                    27
+                  ]
+                },
+                {
+                  "id": 50,
+                  "types": [
+                    3,
+                    3
+                  ],
+                  "values": [
+                    6,
+                    23
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+ 
+
+### Example six
+
+The following is a sample JSON response for the [sixth example request](/query-contingent-values-feature-service#example-six):
+
+```other
+{
+  "contingentValuesDefinitions": [
+    {
+      "layerID": 0,
+      "layerName": "bulkdb.map.CV_Table",
+      "geometryType": "esriGeometryPoint",
+      "hasSubType": true,
+      "fieldGroups": [
+        {
+          "name": "make_rating",
+          "restrictive": true,
+          "fields": [
+            {
+              "id": 0,
+              "name": "vmake",
+              "fieldType": "esriFieldTypeInteger"
+            }, 
+            {
+              "id": 1,
+              "name": "vrating",
+              "fieldType": "esriFieldTypeString"
+            }
+          ],
+          "subTypes": [
+            {
+              "code": 100,
+              "name": "Airplane",
+              "domains": {
+                "vmake": "dmakes",
+                "vrating": "drating"
+              },
+              "contingentValues": [
+                {
+                  "id" : 1,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Boeing",
+                    "Good"
+                  ]
+                },
+                {
+                  "id": 2,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Airbus",
+                    "Good"
+                  ]
+                },
+                {
+                  "id": 3,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Any"
+                  ],
+                  "values": [
+                    "Tupolev"
+                  ]
+                },
+                {
+                  "id": 4,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Embraer",
+                    "Good"
+                  ]
+                },
+                {
+                  "id": 5,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Saab",
+                    "Excellent"
+                  ]
+                },
+                {
+                  "id": 6,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Boeing",
+                    "HasIssues"
+                  ]
+                },
+                {
+                  "id": 7,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Boeing",
+                    "OK"
+                  ]
+                },
+                {
+                  "id": 8,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Airbus",
+                    "Excellent"
+                  ]
+                },
+                {
+                  "id": 9,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Embraer",
+                    "Excellent"
+                  ]
+                },
+                {
+                  "id": 10,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Saab",
+                    "Good"
+                  ]
+                }
+              ]
+            },
+            {
+              "code": 200,
+              "name": "Automobile",
+              "domains": {
+                "vmake": "dmakes",
+                "vrating": "drating"
+              },
+              "contingentValues": [
+                {
+                  "id": 11,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Toyota",
+                    "Excellent"
+                  ]
+                },
+                {
+                  "id": 12,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Toyota",
+                    "Good"
+                  ]
+                },
+                {
+                  "id": 13,
+                  "retired" : false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Toyota",
+                    "OK"
+                  ]
+                },
+                {
+                  "id": 14,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Honda",
+                    "Good"
+                  ]
+                },
+                {
+                  "id": 15,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Honda",
+                    "OK"
+                  ]
+                },
+                {
+                  "id": 16,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Any"
+                  ],
+                  "values": [
+                    "Subaru"
+                  ]
+                },
+                {
+                  "id": 17,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Ford",
+                    "Excellent"
+                  ]
+                },
+                {
+                  "id": 18,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Ford",
+                    "Good"
+                  ]
+                },
+                {
+                  "id": 19,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Ford",
+                    "OK"
+                  ]
+                },
+                {
+                  "id": 20,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Saab",
+                    "Excellent"
+                  ]
+                },
+                {
+                  "id": 21,
+                  "retired" : false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Saab",
+                    "OK"
+                  ]
+                },
+                {
+                  "id": 51,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Any"
+                  ],
+                  "values": [
+                    "Tata"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "make_model2",
+          "restrictive": true,
+          "fields": [
+            {
+              "id": 0,
+              "name": "vmake",
+              "fieldType": "esriFieldTypeInteger"
+            }, 
+            {
+              "id": 1,
+              "name": "vmodel",
+              "fieldType": "esriFieldTypeInteger"
+            }
+          ],
+          "subTypes": [
+            {
+              "code": 100,
+              "name": "Airplane",
+              "domains": {
+                "vmake": "dmakes",
+                "vmodel": "dmodels"
+              },
+              "contingentValues": [
+                {
+                  "id": 22,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Boeing",
+                    "747"
+                  ]
+                },
+                {
+                  "id": 23,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Boeing",
+                    "737"
+                  ]
+                },
+                {
+                  "id": 26,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Airbus",
+                    7
+                  ]
+                },
+                {
+                  "id": 27,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Airbus",
+                    "A350"
+                  ]
+                },
+                {
+                  "id": 30,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Tupolev",
+                    "ANT-1"
+                  ]
+                },
+                {
+                  "id": 31,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Tupolev",
+                    "ANT-4"
+                  ]
+                },
+                {
+                  "id": 32,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Tupolev",
+                    "M-17B"
+                  ]
+                },
+                {
+                  "id": 33,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Embraer",
+                    "E170"
+                  ]
+                },
+                {
+                  "id": 34,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Embraer",
+                    "ERJ140"
+                  ]
+                },
+                {
+                  "id": 35,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Saab",
+                    "Gripen"
+                  ]
+                },
+                {
+                  "id": 36,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Saab",
+                    "Viggen"
+                  ]
+                }
+              ]
+            },
+            {
+              "code": 200,
+              "name": "Automobile",
+              "domains": {
+                "vmake": "dmakes",
+                "vmodel": "dmodels"
+              },
+              "contingentValues": [
+                {
+                  "id": 24,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Toyota",
+                    "Camry"
+                  ]
+                },
+                {
+                  "id": 25,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Toyota",
+                    "4Runner"
+                  ]
+                },
+                {
+                  "id": 28,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Honda",
+                    "Accord"
+                  ]
+                },
+                {
+                  "id": 29,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Honda",
+                    "Pilot"
+                  ]
+                },
+                {
+                  "id": 37,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Subaru",
+                    "Impreza"
+                  ]
+                },
+                {
+                  "id": 38,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Subaru",
+                    "Outback"
+                  ]
+                },
+                {
+                  "id": 39,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Subaru",
+                    "Crosstrek"
+                  ]
+                },
+                {
+                  "id": 40,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Ford",
+                    "Focus"
+                  ]
+                },
+                {
+                  "id": 41,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Ford",
+                    "Excort"
+                  ]
+                },
+                {
+                  "id": 42,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Ford",
+                    "E350"
+                  ]
+                },
+                {
+                  "id": 43,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Ford",
+                    "Mustang"
+                  ]
+                },
+                {
+                  "id": 44,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Tata",
+                    "Hexa"
+                  ]
+                },
+                {
+                  "id": 45,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Tata",
+                    "Zest"
+                  ]
+                },
+                {
+                  "id": 46,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Tata",
+                    "Harrier"
+                  ]
+                },
+                {
+                  "id": 47,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Tata",
+                    "Nano"
+                  ]
+                },
+                {
+                  "id": 48,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Saab",
+                    "S9000"
+                  ]
+                },
+                {
+                  "id": 49,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Saab",
+                    "9-4X"
+                  ]
+                },
+                {
+                  "id": 50,
+                  "retired": false,
+                  "types": [
+                    "Code",
+                    "Code"
+                  ],
+                  "values": [
+                    "Ford",
+                    "Ranger"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+ 
+
+### Example seven
+
+The following is a sample JSON response for the [eighth example request](/query-contingent-values-feature-service#example-eight):
+
+```other
+{
+  "error": {
+    "code": 400,
+    "message": "",
+    "details": [
+      "There are no Field Groups or Contingent Values on this table(0). Try to refresh the online cache of the table, add Field Groups and Contingent Values, or remove the layer from this layer selection."
+    ]
+  }
+}
+```
+
+ 

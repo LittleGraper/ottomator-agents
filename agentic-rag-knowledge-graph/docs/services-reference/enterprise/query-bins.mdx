@@ -1,0 +1,1461 @@
+---
+title: "Query Bins (Feature Service/Layer)"
+description: "The queryBins operation returns an array of results divided into bins based on a numeric or date field."
+slug: "query-bins"
+url: "/query-bins"
+restInfoMetadata:
+  apiPath: /services/<serviceName>/FeatureServer/<layerId>/queryBins
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /services/<serviceName>/FeatureServer/<layerId>/queryBins
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '11.3'
+---
+
+## Description
+
+The `queryBins` operation returns an array of results divided into bins based on a numeric or date field. The response includes statistical aggregations for each bin, such as a `count` or `avg`.
+
+The parameters property define the bins, the aggregate information returned, and the included features. The `outStatistics` parameter defines the information each bin will provide. Included features can be specified by providing a WHERE condition, and a spatial filter, similar to a query operation.
+
+Bins are defined using the `bin` parameter. The contents of the `bin` parameter provide flexibility for defining bin boundaries. The `bin` parameter's `parameters` property defines the way each bin is calculated. The properties can be defined with the amount of bins present, the range of the bins, the bin boundaries or defining bins with the help of dates (e.g. `fixedIntervalBin`, `autoIntervalBin`, `fixedBoundariesBin`, or `dateBin`).
+
+A bin can either be based on a date or on a numeric value.
+
+### Dates
+
+Defining bins providing calendar-awareness with a fixed number of seconds, minutes, hours, days, weeks, months, quarters, or years.
+
+Calendar-aware intervals understand that daylight savings changes the length of specific days, months have different amounts of days, and leap seconds can be tacked onto a particular year.
+
+The starting position of the bin is the earliest moment in the specified unit. For example, each year begins at midnight of January 1. An offset inside the bin parameter can provide an offset to the starting position of the bin. This can contain a positive or negative integer value.
+
+The offset is optional.
+
+<Note>
+
+OnField needs to declare a temporal field (a date).
+
+Spatiotemporal does not accept binning for multiple weeks, months, quarters, and years.
+
+</Note>
+
+When dealing with dates, the `unit` property defines the time width of each bin, such as one year, quarter, month, day, or hour. The `offset` property defines an offset within that time unit. For example, if your bin unit is `day`, and you want bin boundaries to go from noon to noon on the next day, the offset would be 12 hours
+
+### Intervals
+
+-	Declaring the interval. The total range will be divided into equal bins of the declared size. The number of bins will be variable depending on the whole range and the defined interval.
+-	Defining the number of bins. The interval is calculated automatically by the total range divided by the number of bins.
+-	Defining fixed boundaries of each bin. This allows bins of different sizes.
+
+The interval operations can be used with numeric and date fields. Note that dates are treated as numbers in this case. 
+
+When using `queryBins` on a date field use Unix format for `esriFieldTypeDate` fields and a standardized iso-string for `esriFieldTypeTimestampOffset` (2023-12-15T12:00:00.000).
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `bin`
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON parameter that describes the characteristics of the bins, such as the size of the bin and its starting position. The size of each bin is either determined by a parameter or calculated dynamically. A bin can either be based on a date or on a numeric value. For more information and examples for supported bin types, see the [Binning](/#binning) section below.
+
+      <Note>
+
+      The base range of the bins can be fixed with the `start` and `end` properties in the `bin` parameter, except for the `fixedBoundariesBin` operation.
+
+      </Note>
+
+      ```other label=Syntax
+      {
+          "type": " <dateBin | fixedIntervalBin | autoIntervalBin | fixedBoundariesBin >",
+          "onField": <field>,
+          "parameters": <json-object>,
+          "transformation": <naturalLog | squareRoot>   // optional
+      }
+
+      ```
+
+      ```other label=Example
+      // Date Bin example
+      {
+        "type": "dateBin",
+        "onField": "the_field",
+        "parameters": {
+          "number": 12,
+          "unit": "hour",
+          "offset": {
+            "number": 5,
+            "unit": "hour"
+          }
+        }
+      }
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `binOrder`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Results can be returned in ascending or descending order. The default is ascending (`ASC`).
+
+      Values: `ACS`| `DESC`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `outTimeReference`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Defines the timezone for the calculation of bins and the output of dates.
+
+      ```other label=Example
+      //Date Bin syntax
+      {
+        "timeZone": "<Windows-ID>",
+        "respectsDaylightSaving": <boolean>, //true by default
+        
+        //or
+        "ianaTimeZone: <IANA-ID>
+      }
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `outStatistics`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The definitions for one or more field-based statistics to be calculated.
+
+      Defaults to a histogram (`count` on `onField` defined in the `bin` parameter) with `outStatisticFieldName` as `frequency`. By default, if a value is missing it will be ignored when performing the statistics.
+
+      The current supported spatial aggregations are `CentroidAggregate`, `EnvelopeAggregate` and `ConvexHullAggregate`. These statisticTypes return a geometry.
+
+      <Note>
+
+      If the `outStatisticFieldName` property is empty or missing, the map server assigns a field name to the returned statistic field. A valid field name can only contain alphanumeric characters and an underscore. If the `outStatisticFieldName` is a reserved keyword of the underlying DBMS, the operation can fail. If this happens, try specifying an alternative `outStatisticFieldName`. If the `statisticType` is histogram, no `onStatisticField` is needed.
+
+      </Note>
+
+      ```other label=Syntax
+      outStatistics=[
+        {
+          "statisticType": "<count | sum | min | max | avg | stddev | var | percentile_const |
+          percentile_desc | CentroidAggregate | EnvelopeAggreagate | ConvexHullAggregate>",
+          "onStatisticField": "Field1", 
+          "outStatisticFieldName": "Out_Field_Name1"
+        },
+        {
+          "statisticType": "<count | sum | min | max | avg | stddev | var | percentile_const |
+          percentile_desc | CentroidAggregate | EnvelopeAggreagate | ConvexHullAggregate>",
+          "onStatisticField": "Field2",
+          "outStatisticFieldName": "Out_Field_Name2"
+
+        }  
+      ]
+
+      ```
+
+      ```other label=Example
+      outStatistics=[
+        {
+          "statisticType": "avg",
+          "onStatisticField": "age",
+          "outStatisticFieldName": "AverageAge"
+        }
+      ]
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `where`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A WHERE clause for the query filter.
+
+      SQL-92 WHERE clause syntax on the fields in the layer is supported for most data sources. Some data sources have restrictions on what is supported. Hosted feature services in ArcGIS Enterprise running on a spatiotemporal data source only support a subset of SQL-92. For example, spatiotemporal-based feature services support the `like` operator but do not support the `not like` operator or field equivalency expressions such as `field1 = field2`. The following is a list of supported SQL-92 with spatiotemporal-based feature services:
+
+      ```other
+      ( '<=' | '>=' | '<' | '>' | '=' | '!=' | '<>' | LIKE )
+      (AND | OR)
+      (IS | IS_NOT)
+      (IN | NOT_IN) ( '(' ( expr ( ',' expr )* )? ')' )
+      COLUMN_NAME BETWEEN LITERAL_VALUE AND LITERAL_VALUE
+
+      ```
+      For information on how to format time and date information, see the [Date-time queries](/#date-time-queries) section.
+
+      ```other label=Example
+      where=POP2000 > 350000
+
+      where=CITY_NAME = 'Barrington'
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `geometry`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The geometry to apply as the spatial filter. The structure of the geometry is the same as the structure of the JSON geometry objects returned by the REST API. In addition to the JSON structures, you can specify the geometry of envelopes and points with a simple comma-separated syntax.
+
+      ```other label=Syntax
+      //JSON structures
+      geometryType=<geometryType>&geometry={ geometry}
+
+      //Envelope simple syntax
+      geometryType=esriGeometryEnvelope&geometry=<xmin>,<ymin>,<xmax>,<ymax>
+
+      //Point simple syntax
+      geometryType=esriGeometryPoint&geometry=<x>,<y>
+      
+      ```
+
+      ```other label=Example
+      //Envelop example
+      geometryType=esriGeometryEnvelope&geometry={xmin: -104, ymin: 35.6, xmax: -94.32, ymax: 41}
+
+      //Envelope example
+      geometryType=esriGeometryEnvelope&geometry=-104,35.6,-94.32,41
+
+      //Point example
+      geometryType=esriGeometryPoint&geometry=-104,35.6
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `geometryType`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The type of geometry specified by the `geometry` parameter. The geometry type can be an envelope, a point, a line, or a polygon. The default geometry type is an envelope.
+
+      Values: `esriGeometryPoint` | `esriGeometryMultipoint` | `esriGeometryPolyline` | `esriGeometryPolygon` | `esriGeometryEnvelope`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `distance`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The buffer distance for the input geometries. The distance unit is specified by units. For example, if the distance is 100, the query geometry is a point, units is set to meters, and all points within 100 meters of the point are returned. The geodesic buffer is created based on the datum of the output spatial reference if it exists. If there is no output spatial reference, the input geometry spatial reference is used. Otherwise, the native layer spatial reference is used to generate the geometry buffer used in the query. This parameter only applies if `supportsQueryWithDistance` is `true`.
+
+      ```other label=Syntax
+      distance=<distance>
+      
+      ```
+
+      ```other label=Example
+
+      distance=100
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `units`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The unit for calculating the buffer distance. If `units` is not specified, the default will be `esriSRUnit_Foot` when querying feature services in ArcGIS Enterprise, and esriSRUnit_Meter when querying feature services in ArcGIS Online. This parameter only applies if `supportsQueryWithDistance` is `true`.
+
+      Values: `esriSRUnit_Meter` | `esriSRUnit_StatuteMile` | `esriSRUnit_Foot` | `esriSRUnit_Kilometer` | `esriSRUnit_NauticalMile` | `esriSRUnit_USNauticalMile`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `spatialRel`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The spatial relationship to be applied to the input geometry while performing the query. The supported spatial relationships 
+      include intersects, contains, envelop intersects, within, and so on. The default spatial relationship is intersects 
+      (`esriSpatialRelIntersects`).
+
+      Values: `esriSpatialRelIntersects` | `esriSpatialRelContains` | `esriSpatialRelCrosses` | `esriSpatialRelEnvelopeIntersects`
+      | `esriSpatialRelIndexIntersects` | `esriSpatialRelOverlaps` | `esriSpatialRelTouches` | `esriSpatialRelWithin`
+
+    </StyledTableCell>
+  </StyledTableRow>
+ <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `defaultSR`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The spatial reference used for input and output geometry if `inSR` or `outSR` are not specified.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `inSR`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The spatial reference of the input geometry. The spatial reference can be specified as either a well-known ID or as a [spatial reference JSON object](/geometry-objects). If the `inSR` is not specified, the geometry is assumed to be in the spatial reference of the layer.
+
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `outSR`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The spatial reference of the returned geometry. The spatial reference can be specified as either a well-known ID or as a [spatial reference JSON object](/geometry-objects). If `outSR` is not specified, the geometry is returned in the spatial reference of the map.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `quantizationParameters`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object used to project the geometry onto a virtual grid, likely representing pixels on the screen. The properties of the JSON object include `extent`, `mode`, `originPosition`, and `tolerance`. For more information, see the [Quantization parameters JSON properties](/#quantization-parameters-json-properties) section below.
+
+
+      <Note>
+
+      This parameter only applies if the `supportsCoordinateQuantization` property is `true`.
+
+      </Note>
+
+      ```other expandable label=Example
+      //upperLeft origin position
+      {
+        "mode": "view",
+        "originPosition": "upperLeft",
+        "tolerance": 1.0583354500042335,
+        "extent": {
+          "type": "extent",
+          "xmin": -18341377.47954369,
+          "ymin": 2979920.6113554947,
+          "xmax": -7546517.393554582,
+          "ymax": 11203512.89298139,
+          "spatialReference": {
+            "wkid": 102100,
+            "latestWkid": 3857
+          }
+        }
+      }
+
+      //lowerLeft origin position
+      {
+        "mode": "view",
+        "originPosition": "lowerLeft",
+        "tolerance": 1.0583354500042335,
+        "extent": {
+          "type": "extent",
+          "xmin": -18341377.47954369,
+          "ymin": 2979920.6113554947,
+          "xmax": -7546517.393554582,
+          "ymax": 11203512.89298139,
+          "spatialReference": {
+            "wkid": 102100,
+            "latestWkid": 3857
+          }
+        }
+      }
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `datumTransformation`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This parameter applies a datum transformation while projecting geometries in the results when outSR is different than the layer's spatial reference. When specifying transformations, you need to think about which datum transformation best projects the layer (not the feature service) to the outSR and sourceSpatialReference property in the layer resource report. For a list of valid datum transformation ID values and well-known text strings, see [Using spatial references](/using-spatial-references). For more information on datum transformations, see the transformation parameter in the [Project](/project) operation.
+
+      <Note>
+
+      The `supportsQueryWithDatumTransformation` layer property in `advancedQueryCapabilities` will be `true` if this parameter is supported.
+
+      </Note>
+
+      ```other label=synatx
+      //Syntax to apply a simple transformation
+      datumTransformation=<wkid>
+
+      //Syntax to apply a simple transformation
+      datumTransformation={"wkt": "<WKT>"}
+
+      //Syntax to apply a composite transformation
+      datumTransformation={"geoTransforms":[{"wkid":<id>,"forward":<true|false>},
+      {"wkt":"<WKT>","forward":<true|false>}]}
+
+      ```
+
+      ```other expandable label=Example
+      //Applies a simple transformation
+      datumTransformation=1623
+
+      //Applies a composite transformation
+      datumTransformation={
+        "geoTransforms":[
+          {
+            "wkid":1088,
+            "transformForward": true
+          },
+          {
+            "wkid": "GEOGTRAN[\"S_JTSK_To_WGS_1984_1\",GEOGCS[\"GCS_S_JTSK\",
+            DATUM[\"D_S_JTSK\",SPHEROID[\"Bessel_1841\",6377397.155,299.1528128]],
+            PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],
+            GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",
+            6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],
+            UNIT[\"Degree\",0.0174532925199433]],METHOD[\"Position_Vector\"],
+            PARAMETER[\"X_Axis_Translation\",570.8],PARAMETER[\"Y_Axis_Translation\",85.7],
+            PARAMETER[\"Z_Axis_Translation\",462.8],PARAMETER[\"X_Axis_Rotation\",4.998],
+            PARAMETER[\"Y_Axis_Rotation\",1.587],PARAMETER[\"Z_Axis_Rotation\",5.261],
+            PARAMETER[\"Scale_Difference\",3.56]]",
+            "transformForward":false
+          }
+        ]
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `lowerBoundaryAlias`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This parameter changes the default name of the lower `boundary` property returned in the response to a user-specified name. The `boundary` property indicates the value at the edge of each bin that is returned in a response. Unless changed using the `lowerBoundaryAlias` parameter, this field will be named `lowerBoundary` by default.
+
+      ```other label=Example
+      lowerBoundaryAlias=temperatureBinValueLower
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `upperBoundaryAlias`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This parameter changes the default name of the upper `boundary` property returned in the response to a user-specified name. The `boundary` property indicates the value at the edge of each bin that is returned in a response. Unless changed using the `upperBoundaryAlias` parameter, this field will be named `upperBoundary` by default.
+
+      ```other label=Example
+      upperBoundaryAlias=temperatureBinValueUpper
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies whether the operation will run synchronously (false) or asynchronously (true).
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+
+### Support parameters
+
+The support parameters defined in `queryBinsCapabilities` define which `queryBins` operation is allowed in the dialect of the feature layer. The following support parameters are defined:
+
+-	`supportsDateBin`
+-	`supportsFixedIntervalBin`
+-	`supportsAutoIntervalBin`
+-	`supportsFixedBoundariesBin`
+-	`supportedStatisticTypes` (provides a list of the supported statistics operations for the dialect)
+
+### Binning
+
+There are four different binning operations that all work slightly differently, especially when it comes to boundaries. It is important to understand what each operations goal is to understand how the binning works and how the boundaries are defined.
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>autoIntervalBin</TabTitle>
+  <TabTitle>fixedBoundariesBin</TabTitle>
+  <TabTitle>fixedIntervalBin</TabTitle>
+  <TabTitle>dateBin</TabTitle>
+</TabNav>
+
+<Tab>
+
+  #### autoIntervalBin
+
+  For Auto Interval the focus lies in the number of bins. The size of the bins will be calculated using the range of the dataset and the number of bins. The last item of the range will be added to the last bin.
+
+  For example, in a dataset having items 10, 34, 56 and 88, and a desired number of bins of 3, this would be the distribution:
+
+  1.	`[10 – 36]: 10, 34`
+  2.	`[36 – 62]: 56`
+  3.	`[62 – 88]: 88`
+
+
+  ```other label=Syntax
+  {
+    "type": "autoIntervalBin",
+    "onField": < numericField | dateField >,
+    "parameters": {
+      "numberOfBins": <integer>,
+      "start": < numeric | date >,
+      "end": < numeric | date >
+    }
+  }
+  ```
+
+  ```other label=Example
+  {
+    "type": "autoIntervalBin",
+    "onField": "the_field",
+    "parameters": {
+      "numberOfBins": 10,
+      "start": 0,
+      "end": 12500.5
+    }
+  }
+  ```
+
+</Tab>
+
+<Tab>
+
+  #### fixedBoundariesBin
+
+  Fixed Boundaries follows the input strictly. The first item of the array displays the start and the last item displays the end, both in an inclusive way. The items inbetween display each lower boundary. For example: [5, 123, 500, 512] results in these bins:
+
+  1.	`[5 – 123]`
+  2.	`[123 – 500]`
+  3.	`[500 – 512]`
+
+
+  ```other label=Syntax
+  {
+    "type": "fixedBoundariesBin",
+    "onField": <numericField | dateField>,
+    "parameters": {
+      "boundaries": <array of numeric | array of dates >
+    }
+  }
+
+  ```
+
+  ```other label=Example
+  {
+    "type": "fixedBoundariesBin",
+    "onField": "the_field",
+    "parameters": {
+      "boundaries": [-0.5,10,100,1000,2000,10000]
+    }
+  }
+
+  //Fixed Boundaries Bin example with a date field
+  {
+    "type": "fixedBoundariesBin",
+    "onField": "the_date_field",
+    "parameters": {
+      "boundaries":[1701871982000, 1701873982000, 1701874982000]
+    }
+  }
+
+  ```
+
+</Tab>
+
+<Tab>
+
+  #### fixedIntervalBin
+
+  In the case of a Fixed Interval the number of bins is not important but the interval needs to match the input. For the last bin the output will display the last item as the upper boundary. This allows the result to display where the last item is, otherwise a `max` operation would be needed. Now if the last item of the dataset lands on a potential boundary, for example, if the defined intervals are 100, the first item is 100 and the last 300, then item 300 would not be placed in bin 2 but in bin 3. Because of the output rule mentioned above the result might look confusing at first:
+
+  1.	`[100 – 200]: 100`
+  2.	`[200 – 300]: -`
+  3.	`[300 – 300]: 300`
+
+  This is because between 100 and 199 there is space for 100 items. If item 300 was put in bin 2, then that bin would make the bin hold 101 items, making it bigger than the other bins.
+
+  ```other label=Syntax
+  {
+    "type": "fixedIntervalBin",
+    "onField": < numericField | dateField >,
+    "parameters": {
+      "interval": < numeric >,
+      "start": < numeric | date >,
+      "end": < numeric | date >
+    }
+  }
+
+  ```
+
+  ```other label=Example
+  {
+    "type": "fixedIntervalBin",
+    "onField": "the_field",
+    "parameters": {
+      "interval": 500
+    }
+  }
+
+  ```
+
+</Tab>
+
+<Tab>
+
+  #### dateBin
+
+  Date Bin works similar to a fixed interval except the intervals depend on the calender unit. For months, each interval would be the size of the respective month. The only difference is that date bins always start at the beginning of the calendar unit and not at the first item. For example, if a month `dateBin` with the following dataset was produced: [January 2, January 5, February 3, March 1]. Then this would be the result:
+
+  1.	`January: [January 2, January 5]`
+  2.	`February: [February 3]`
+  3.	`March: [March 1]`
+
+  When dates are binned in `queryBins`, they start at the beginning of the temporal unit as follows: 
+
+  -	An hour starts at minute 00.
+  -	A day starts at 12 a.m. 
+  -	A week starts on Sunday
+  -	A month starts on the first day of the month
+  -	A quarter starts on the first month of the quarter (January, April, July, or October).
+  -	A year starts on January 1st.
+
+  <Note>
+
+  Spatiotemporal (Opensearch/Elasticsearch) translated 24 of the unit `hour` as 1 `day` that starts and end at midnight. Use `offset` if a later start is required.
+
+  </Note>
+
+  ```other label=Syntax
+  {
+    "type": "dateBin",
+    "onField": <temporalField>,
+    "parameters": {
+      "unit": <second | minute | hour | day | week | month | quarter | year>,
+      "number": <integer>,
+      "offset": {
+        "number": <integer>,
+        "unit": <second | minute | hour | day>
+      },
+      "start": < date >,
+      "end": < date >
+    }
+  }
+
+  ```
+
+  ```other label=Example
+  {
+    "type": "dateBin",
+    "onField": "the_field",
+    "parameters": {
+      "number": 12,
+      "unit": "hour",
+      "offset": {
+        "number": 5,
+        "unit": "hour"
+      }
+    }
+  }
+
+  ```
+
+</Tab>
+
+</Tabs>
+
+#### Output
+
+The output of the bins always has a lower boundary and an upper boundary. The lower boundary is inclusive and the upper boundary is exclusive. The only exception to this is the upper boundary of the last bin, which is also inclusive.
+
+In the following example items 0, 10, 40 and 99 would be in bin 1. Item 100 would be in bin 2. But item 300 would be in bin 3:
+
+1.	`0 (inclusive) – 100 (exclusive)`
+2.	`100(inclusive) – 200 (exclusive)`
+3.	`200 (inclusive) – 300 (inclusive)`
+
+While the output works the same for each binning operation, the way the bins are calculated differs.
+
+
+### Date-time queries
+
+#### Date and time format
+
+The `INTERVAL` syntax can be used in place of the date-time queries and is standardized across all map and feature services. The [INTERVAL](https://www.esri.com/arcgis-blog/products/api-rest/data-management/querying-feature-services-date-time-queries/)  syntax can be used to specify either the current date or timestamp in the query:
+
+```javascript
+//Date
+<DateField> >= CURRENT_DATE -+ INTERVAL '<IntervalValue>' <TimeStampFormat>
+
+//Timestamp
+<DateField> >= CURRENT_TIMESTAMP -+ INTERVAL '<IntervalValue>' <TimeStampFormat>
+
+```
+
+For the syntax demonstrated above, you can interchange the `CURRENT_DATE`  and `CURRENT_TIMESTAMP`  values. Both can be used with `+`  or `-`  of `INTERVAL`  values.
+
+<Note type={"note"}>
+
+For relational, spatiotemporal, and online hosted feature services, `CURRENT_TIMESTAMP`  will always pass and return the date and time in UTC. Values are also always stored in UTC. For referenced services, `CURRENT_TIMESTAMP`  is passed directly to the back end database and the database will use the time zone of the machine that it is running on, which can be the same time zone as `dateFieldsTimeReference` . 
+
+</Note>
+
+The examples below outline the different ways in which the INTERVAL syntax can be modified for the purposes of your query:
+
+```javascript
+//'DD' Day
+<DateField> >= CURRENT_TIMESTAMP -+ INTERVAL 'DD' DAY
+
+//'HH' Hour
+<DateField> >= CURRENT_TIMESTAMP -+ INTERVAL 'HH' HOUR
+
+//'MI' Minute
+<DateField> >= CURRENT_TIMESTAMP -+ INTERVAL 'MI' MINUTE
+
+//'SS(.FFF)' Second
+<DateField> >= CURRENT_TIMESTAMP -+ INTERVAL 'SS(.FFF)' SECOND
+
+//'DD HH' DAY TO HOUR
+<DateField> >= CURRENT_TIMESTAMP -+ INTERVAL 'DD HH' DAY TO HOUR
+
+//'DD HH:MI' DAY TO MINUTE
+<DateField> >= CURRENT_TIMESTAMP -+ INTERVAL 'DD HH:MI' DTY TO MINUTE
+
+//'DD HH:MI:SS(.FFF)' DAY TO SECOND
+<DateField> >= CURRENT_TIMESTAMP -+ INTERVAL 'DD HH:MI:SS(.FFF)' DAY TO SECOND
+
+//'HH:MI' HOUR TO MINUTE
+<DateField> >= CURRENT_TIMESTAMP -+ INTERVAL 'HH:MI' HOUR TO MINUTE
+
+//'HH:SS(.FFF)' HOUR TO SECOND
+<DateField> >= CURRENT_TIMESTAMP -+ INTERVAL 'HH:SS(.FFF)' HOUR TO SECOND
+
+//'MI:SS(.FFF)' MINUTE TO SECOND
+<DateField> >= CURRENT_TIMESTAMP -+ INTERVAL 'MI:SS(.FFF)' MINUTE TO SECOND
+
+```
+
+ 
+
+<Note type={"note"}>
+
+There are some additional considerations. Except for the second (`.FFF` ) value, all values must be integers. If a date field is specified in the `outFields`  list, the date-time will always be returned in formatted UTC.
+
+</Note>
+
+To demonstrate the `INTERVAL`  format, the example below uses the INTERVAL syntax to query data gathered over the 3 days, 5 hours, 32 minutes, and 28 seconds:
+
+```javascript
+DateField >= CURRENT_TIMESTAMP - INTERVAL '3 05:32:28' DAY TO SECOND
+
+```
+
+ 
+
+### Percentile statistic type
+
+The percentile `statisticType`  is supported if the `supportsPercentileStatistics`  layer property (in `advancedQueryCapabilities` ) is `true` . The percentile indicates the value below or above which a given percentage of values in a group of data values falls. For example, the ninetieth percentile (value 0.9) is the value below which 90 percent of the data values may be found. For percentile statistics, there are two `statisticTypes` , `PERCENTILE_DISC`  (discrete) and `PERCENTILE_CONT`  (continuous). Discrete returns a data value from within that dataset while continuous is an interpolated value. 
+
+The `orderBy`  statistic parameter can also be used to calculate the percentile. For example, in a set of 10 values from 1 to 10, the percentile `value`  for 0.9 with `orderBy`  set as ascending (`ASC` ) is 9, while the percentile for `value`  0.9 with `orderBy`  set as descending (`DESC` ) is 2. The default is `ASC` .
+
+<Note type={"note"}>
+
+Percentile `statisticTypes`  cannot be used with the `havingClause`  parameter.
+
+</Note>
+
+Syntax
+
+```other
+[
+  {
+    "statisticType": "<PERCENTILE_CONT | PERCENTILE_DISC>",
+    "statisticParameters": {
+      "value": percentile_value,
+      "orderBy": "<ASC | DESC>"
+    },
+    "onStatisticField": "Field1", 
+    "outStatisticFieldName": "Out_Field_Name1"
+  },
+  {
+    "statisticType": "<PERCENTILE_CONT | PERCENTILE_DISC>",
+    "statisticParameters": {
+      "value": percentile_value,
+      "orderBy": "<ASC | DESC>"
+    },
+    "onStatisticField": "Field2", 
+    "outStatisticFieldName": "Out_Field_Name2"
+  }
+]
+```
+
+ 
+
+Example
+
+```other
+[
+  {
+    "statisticType": "PERCENTILE_CONT",
+    "statisticParameters": {
+      "value": 0.9
+    },
+    "onStatisticField": "NEAR_DIST",
+    "outStatisticFieldName": "pop90_cont"
+  },
+  {
+    "statisticType": "PERCENTILE_DISC",
+    "statisticParameters": {
+      "value": 0.9,
+      "orderBy": "DESC"
+    },
+    "onStatisticField": "population",
+    "outStatisticFieldName": "pop90_desc"
+  }
+]
+```
+
+ 
+
+### Quantization parameters JSON properties
+
+<StyledTable headers={"Property,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`extent` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+An extent defining the quantization grid bounds. Its spatialReference matches the input geometry spatial reference if one is specified for the query. Otherwise, the extent will be in the layer's spatial reference.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`mode` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Geometry coordinates are optimized for viewing and displaying of data. The view value specifies that geometry coordinates should be optimized for viewing and displaying of data. The edit value specifies that full-resolution geometries should be returned, which can support lossless editing.
+
+<Note type={"note"}>
+
+The edit value can only be used when the `supportsQuantizationEditMode`  layer property is `true` .
+
+</Note>
+
+Value: `view`  \| `edit` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`originPosition` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Integer coordinates will be returned relative to the origin position defined by this property value. The default value is `upperLeft` .
+
+Values: `upperLeft`  \| `lowerLeft` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`tolerance` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The tolerance is the size of one pixel in the outSpatialReference units. This number is used to convert the coordinates to integers by building a grid with resolution matching the tolerance. Each coordinate is then snapped to one pixel on the grid. Consecutive coordinates snapped to the same pixel are removed to reduce the overall response size. 
+
+The units of `tolerance`  are defined by outSpatialReference. If the `outSpatialReference`  is not specified, tolerance is assumed to be in the unit of the spatial reference of the layer. If the tolerance is not specified, the [maxAllowableOffset](/query-related-records-feature-service-layer)  is used.
+
+<Note type={"note"}>
+
+If the tolerance and [maxAllowableOffset](/query-related-records-feature-service-layer) are not specified, a default 10,000 by 10,000 grid is used.
+
+</Note>
+
+If `mode`  is set to `edit` , the `tolerance`  is always set to the full-resolution tolerance of the spatial reference regardless of what is passed in or set for the `maxAllowableOffset` . If `mode`  is set to `view`  and the `tolerance`  and [maxAllowableOffset](/query-related-records-feature-service) are not specified, a default 10,000 by 10,000 grid is used.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+
+
+## Example usages
+
+The following examples demonstrate different ways to modify the features returned by the `queryBins` operation.
+
+### Example one
+
+Suppose you want to find out what the average income is for each generation in the US. You'd like to define your bins as the different age groups (2012-1997-1981-1965-1955-1946-1928-1922)
+
+Since the bins do not all have the same size we will use the bin type boundaries. Since you're looking at year of birth, you'll use a field named `yearOfBirth` as the `onField`.
+
+```other
+Bin={
+  "type": "fixedBoundariesBin",
+  "onField": "yearOfBirth",
+  "parameters": {
+    "boundaries": [1922,1928,1946,1955,1965,1981,1997,2012]
+  }
+}
+
+```
+
+You can define what information is returned using the `outStatistics` parameters. For analysis, you're interested in seeing the counts and averages of the data. This will return the amount of people in the generation and the average income:
+
+```other
+outStatistics = [
+  {
+    "statisticType": "count",
+    "onStatisticField": "yearOfBirth",
+    "outStatisticFieldName": "sum_of_people"
+  },
+  {
+    "statisticType": "avg",
+    "onStatisticField": "yearlyIncome",
+    "outStatisticFieldName": "avg_income"
+  }
+]
+
+```
+
+Now you have the basics of your desired result. You can further refine results by providing filters on the data, such as filtering certain products using a where filter, or using spatial filters to look at regional data.
+
+#### Example URL
+
+The following is a sample GET request for the `queryBins` operation, demonstrating the workflow discussed above:
+
+```other
+https://machine.domain.com/webadaptor/rest/services/Hosted/Sales21/FeatureServer/0/queryBins?bin={"type":"fixedBoundariesBin","onField":"yearOfBirth","parameters":{"boundaries":[1922,1928,1946,1955,1965,1981,1997,2012]}}&outStatistics=[{"statisticType":"count","onStatisticField":"yearOfBirth","outStatisticFieldName":"sum_of_people"},{"statisticType":"avg","onStatisticField":"yearlyIncome","outStatisticFieldName":"avg_income"}]&f=pjson
+```
+
+#### JSON Response example
+
+The following JSON response is a sample of the information returned from the request:
+
+```other
+{
+  "features": [
+    {
+      "attributes": {
+        "lowerBoundary": 1922,
+        "upperBoundary": 1928,
+        "sum_of_people": 54,
+        "avg_income": 0
+      }
+    },
+    {
+      "attributes": {
+        "lowerBoundary": 1928,   
+        "upperBoundary": 1946,
+        "sum_of_people": 664000,
+        "avg_income": 0
+      }
+    },
+    {
+      "attributes": {
+        "lowerBoundary": 1946,
+        "upperBoundary": 1955,
+        "sum_of_people": 18226800,
+        "avg_income": 41969
+      }
+    },
+    {
+      "attributes": {
+        "lowerBoundary": 1955,
+        "upperBoundary": 1965,
+        "sum_of_people": 68325600,
+        "avg_income": 71183
+      }
+    },
+    {
+      "attributes": {
+        "lowerBoundary": 1965,
+        "upperBoundary": 1981,
+        "sum_of_people": 65105200,
+        "avg_income": 102512
+      }
+    },
+    {
+      "attributes": {
+        "lowerBoundary": 1981,
+        "upperBoundary": 1997,
+        "sum_of_people": 71944400,
+        "avg_income": 84563
+      }
+    },
+    {
+      "attributes": {
+        "lowerBoundary": 1997,
+        "upperBoundary": 2012,
+        "sum_of_people": 69321600,
+        "avg_income": 42335
+      }
+    }
+  ],
+  "exceededTransferLimit": false,
+  "fields": [
+    {
+      "defaultValue": null,
+      "name": "lowerBoundary",
+      "length": 131089,
+      "alias": "lowerBoundary",
+      "type": "esriFieldTypeInteger"
+    },
+    {
+      "defaultValue": null,
+      "name": "upperBoundary",
+      "length": 131089,
+      "alias": "upperBoundary",
+      "type": "esriFieldTypeInteger"
+    },
+    {
+      "defaultValue": null,
+      "name": "sum_of_people",
+      "length": 20,
+      "alias": "sum_of_people",
+      "type": "esriFieldTypeBigInteger"
+    },
+    {
+      "defaultValue": null,
+      "name": "avg_income",
+      "length": 131089,
+      "alias": "avg_income",
+      "type": "esriFieldTypeDouble"
+    }
+  ]
+}
+
+```
+
+### Example two
+
+You want to create a histogram graph again for income date but this time you want to showcase how many people earn how much in steps of $5000. That means the `onField` will be `annual_income`. We will choose a bin with an interval of 5000, starting at 0 and capping it at 200,000. Since histogram is the default, we don’t need the `outStatistics` parameter.
+
+```other
+Bin={
+  "type": "fixedIntervalBin",
+  "onField": "annual_income",
+  "parameters": {
+    "interval": 50000,
+    "start": 0,
+    "end": 200000
+  }
+}
+
+```
+
+#### Example URL
+
+The following is a sample GET request for the `queryBins` operation, demonstrating the workflow discussed above:
+
+```other
+https://machine.domain.com/webadaptor/rest/services/Hosted/AZTempRec/0/queryBins?bin={"type":"fixedIntervalBin","onField":"annual_income","parameters":{"interval":50000,"start":0,"end":200000}}&f=pjson
+```
+
+#### JSON Response example
+
+```other
+{
+  "features": [
+    {
+      "attributes": {
+        "lowerBoundary": 0,
+        "upperBoundary": 50000,
+        "frequency": 105475
+      }
+    },
+    {
+        "attributes ": {
+        "lowerBoundary": 50000,
+        "upperBoundary": 100000,
+        "frequency": 2849115
+      }
+    },
+    {
+        "attributes": {
+        "lowerBoundary":100000,
+        "upperBoundary": 150000,
+        "frequency": 1568721
+      }
+    },
+    {
+        "attributes": {
+        "lowerBoundary": 150000,
+        "upperBoundary": 200000,
+        "frequency": 1053475
+      }
+    }
+  ],
+  "exceededTransferLimit": false,
+  "fields": [
+    {
+      "defaultValue": null,
+      "name": "boundary",
+      "length": 131089,
+      "alias": "boundary",
+      "type": "esriFieldTypeDouble"
+    },
+    {
+      "defaultValue": null,
+      "name": "frequency",
+      "length": 20,
+      "alias": "frequency",
+      "type": "esriFieldTypeBigInteger"
+    }
+  ]
+}
+
+```
+
+### Example three
+
+Suppose you want to do a daily breakdown of sales for the month of January 2021. You'd like to define your days as starting at 8:00am.
+
+You'd start by defining the bins. You want a breakdown of single days, so you'll use the unit type day. By default, daily bins start at 00:00:00 UTC. To get the desired bins, you want to shift the time forward 8 hours by providing an offset. This gives you the bin definition. Since you're looking at sales, you'll use the `dateSold` field as the `onField`.
+
+```other
+Bin={
+  "type": "dateBin",
+  "onField": "dateSold",
+  "parameters": {
+    "unit": "day",
+    "start": 1609516800000,
+    "end": 1612195199999,
+    "offset": {
+      "number": 8,
+      "unit": "hour"
+    }
+  }
+}
+```
+
+You're not sure that the data stretches across every day of the month. The last two days fall on a weekend, and the stores are only open on weekdays. If you only have data to the January 29, you could miss the last two days from appearing in the result, but you would instead like those to show up as days with zero sales. To ensure that all days in January are displayed, as well as restricting the included features to only January (and to 7:59 am on February 1), you can define a time extent on the data from January 1 at 8:00 a.m. to February 1 at 7:59:59:9999 a.m.
+
+Note that if you wish to restrict the days to January, but to not include the last two days, you can use the where parameter.
+
+You can define what information is returned using the statistics parameters. For analysis, you're interested in seeing the counts and averages of the data. This will return the count of items and the average sales price:
+
+```other
+outStatistics=[
+  {
+    "statisticType": "count",
+    "onStatisticField": "objectid",
+    "outStatisticFieldName": "item_sold_count"
+  },
+  {
+    "statisticType": "avg",
+    "onStatisticField": "price",
+    "outStatisticFieldName": "avg_daily_revenue"
+  }
+]
+
+```
+
+Now you have the basics of your desired result. You can further refine results by providing filters on the data, such as filtering certain products using a where filter, or using spatial filters to look at regional data.
+
+#### Example URL
+
+The following is a sample GET request for the `queryBins` operation, that demonstrates the workflow discussed above:
+
+```other
+https://machine.domain.com/webadaptor/rest/services/Hosted/Sales21/FeatureServer/0/queryBins?bin={"type":"dateBin","onField":"dateSold","parameters":{"unit":"day","offset":{"number":8,"unit":"hour"},"start":1609516800000,"end":1612195199999}}& outStatistics=[{"statisticType": "count","onStatisticField": "objectid","outStatisticFieldName": "item_sold_count"},{"statisticType": "avg","onStatisticField": "price","outStatisticFieldName": "avg_daily_revenue "}]&where=&binOrder=&geometry=&inSR=&outSR=&spatialRel=esriSpatialRelIntersects&returnCentroid=false&quantizationParameters=&resultOffset=&resultRecordCount=&returnExceededLimitFeatures=false&f=pjson
+```
+
+#### JSON Response example
+
+The following JSON response is a sample of the information returned from the request:
+
+```other
+{
+  "features": [
+    {
+      "attributes": {
+        "lowerBoundary": 1609516800000,
+        "upperBoundary": 1609603200000,
+        "avg_daily_revenue": 300.40,
+        "item_sold_count": 79
+      }
+    },
+    {
+      "attributes": {
+        "lowerBoundary": 1609603200000,
+        "upperBoundary": 1612195199999,
+        "avg_daily_revenue": null,
+        "item_sold_count": 0
+      }
+    }
+  ],
+  "fields": [
+    {
+      "name": "lowerBoundary",
+      "type": " esriFieldTypeDate"
+    },
+    {
+      "name": "upperBoundary",
+      "type": "esriFieldTypeDate"
+    },
+    {
+      "name": "item_sold_count",
+      "alias": "item_sold_count",
+      "type": "esriFieldTypeInteger"
+    },
+    {
+      "name": "avg_daily_revenue",
+      "alias": "avg_daily_revenue",
+      "type": "esriFieldTypeDouble"
+    }
+  ]
+}
+
+```
+
+### Example four
+
+You want to create yearly bins for Arizona temperature data, beginning from 1/1/1976 and ending on the final date contained in the record data, starting at 5:00 a.m. You want to include only data that contains a temperature reading for each year together with the centroid. To achieve this, the following information is included in your request:
+
+```other
+
+bin={
+  "type": "dateBin",
+  "onField": "recorded_date",
+  "parameters": {
+    "unit": "year",
+    "offset": {
+      "number": 5,
+      "unit": "hour"
+    },
+    "start": 189331200000
+  }
+}
+
+outTimeReference ={
+  "timeZone": "Mountain Standard Time",
+  "respectsDaylightSaving": true
+}
+
+
+outStatistics=[
+  {
+    "statisticType": "count",
+    "onStatisticField": "temperature",
+    "outStatisticFieldName": "results_count"
+  },
+  {
+    "statisticType": "avg",
+    "onStatisticField": "temperature",
+    "outStatisticFieldName": "temperature_avg"
+  }
+]
+
+where=temperature is not null
+
+returnCentroid=true
+
+```
+
+#### Example URL
+
+The following is a sample request URL for the workflow discussed above:
+
+```other
+https://machine.domain.com/webadaptor/rest/services/Hosted/AZTempRec/0/ queryBins?bin={"type":"dateBin","onField":"recorded_date","parameters":{"unit":"year","offset":{"number":5,"unit":"hour"},"start":189331200000}}& outStatistics=[{"statisticType": "count","onStatisticField": "temperature","outStatisticFieldName": "results_count"},{"statisticType": "avg","onStatisticField": "temperature","outStatisticFieldName": "temperature_avg"}]&outTimeReference={"timeZone":"Mountain Standard Time","respectsDaylightSaving":"true"}&where=temperature is not null &binOrder=&geometry=&inSR=&outSR=&spatialRel=esriSpatialRelIntersects &returnCentroid=true &quantizationParameters=&resultOffset=&resultRecordCount=&returnExceededLimitFeatures=false&f=pjson
+```
+
+#### JSON Response example
+
+```other
+{
+  "features": [
+    {
+      "centroid": {
+        "x": -84.02204922365141,
+        "y": 35.93228062956047
+      },
+      "attributes": {
+        "lowerBoundary": "1976-01-01T05:00:00-07",
+        "upperBoundary": "1977-01-01T05:00:00-07",
+        "temperature_avg": 59.82,
+        "results_count": 60964
+      }
+    },
+    {
+      "centroid": {
+        "x": -84.32106073325814,
+        "y": 35.930795102124708
+      },
+      "attributes": {
+        "lowerBoundary": "1977-01-01T05:00:00-07",
+        "upperBoundary": "1978-01-01T05:00:00-07",
+        "temperature_avg": 59.77,
+        "results_count": 67719
+      }
+    },
+    "fields": [
+      {
+        "name": "lowerBundary",
+        "type": "esriFieldTypeTimestampOffset"
+      },
+      {
+        "name": "upperBundary",
+        "type": "esriFieldTypeTimestampOffset"
+      },
+      {
+        "name": "results _count",
+        "alias": "results _count",
+        "type": "esriFieldTypeInteger"
+      },
+      {
+        "name": "temperature_avg", 
+        "alias": "temperature_avg",
+        "type": "esriFieldTypeDouble"
+      }
+    ],
+    "geometryType": "esriGeometryPoint"
+  ]
+}
+```
+
+## JSON Response syntax
+
+```other
+{
+  "fields": [
+    {
+      "name": "<fieldName1>",
+      "type": "<fieldType1>",
+      "alias": "<fieldAlias1>"
+    },
+    {
+      "name": "<fieldName2>",
+      "type": "<fieldType2>",
+      "alias": "<fieldAlias2>"
+    }
+  ],
+  "features": [
+    <feature1>,
+    <feature2>
+  ]
+}
+
+```

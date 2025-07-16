@@ -1,0 +1,181 @@
+---
+title: "Create Reviewer Session"
+description: "This resource creates a new Data Reviewer session."
+slug: "rest-create-reviewer-session"
+url: "/rest-create-reviewer-session"
+guid: "GUID-4F8AA639-9334-4C65-B6DF-BD1B080AEE6C"
+migratedTopicMetadata:
+  FTITLE: "REST: Create Reviewer Session"
+  FDESCRIPTION: ""
+  FCHANGES: "adding note for AO10 deprecation per 1258"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9 - *"
+  CREATED-ON: "28/01/2021 17:58:02"
+  FAUTHOR: "igalvan"
+  FSTATUS: "Released"
+  MODIFIED-ON: "12/02/2021 12:26:38"
+  VERSION: "5"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-E211D662-2BDF-475C-8108-948C9FBCFB1E"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /createReviewerSession
+  urlSegments:
+    - name: <Utilities-url>
+      url: /rest-data-reviewer-map-service
+    - name: /createReviewerSession
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: 10.2.2
+  relatedResources:
+    - name: Utilities
+      url: /rest-utilities
+  requiredCapabilities:
+    - name: Data Reviewer Server
+      url: /rest-data-reviewer-map-service
+---
+
+import GUID_2552D38B_743E_4F04_B17A_20DFD25517C8_GUID_E6C28557_ADDB_4260_92CF_C8983F9552C4 from "./snippets/GUID-2552D38B-743E-4F04-B17A-20DFD25517C8/_GUID-E6C28557-ADDB-4260-92CF-C8983F9552C4";
+import GUID_2552D38B_743E_4F04_B17A_20DFD25517C8_GUID_5492D5C4_A7A6_4DC8_A922_84958A9EFC03 from "./snippets/GUID-2552D38B-743E-4F04-B17A-20DFD25517C8/_GUID-5492D5C4-A7A6-4DC8-A922-84958A9EFC03";
+
+## Description
+
+<Note>
+The ArcGIS Data Reviewer extension is required to use this resource.
+</Note>
+
+<Note>
+This resource is dependent on the ArcGIS Data Reviewer ArcMap runtime-based server object extension (SOE). ArcGIS Enterprise 10.9.x, part of the ArcGIS 2021 releases, is the last release of ArcGIS Enterprise to support services published from ArcMap.
+
+Consider Data Reviewer capabilities enabled using ArcGIS Pro and integrated in the [Validation service](/validation-server).
+</Note>
+
+Creates a new Data Reviewer session.
+
+A Data Reviewer session organizes results discovered from automated validation and visual inspection. Sessions define a series of validation and quality control transactions performed by data checks or manual review. Sessions are stored in the Data Reviewer workspace.
+
+Reviewer sessions have properties that control how results are written to the Data Reviewer workspace. You can set the following properties:
+
+-   `userName`  – The user account to associate with a session. The default `userName` value is the logged in account of the SOE. 
+-   `versionName`  – Indicates an enterprise geodatabase version to associate with the session. Results created in this session will be written to this version. The default value is the geodatabase's default version. 
+-   `duplicateFilter`  – Indicates how to handle duplicate results when writing the results to the Data Reviewer workspace. The following options are valid: 
+
+    -   **Session** – When writing results to the Data Reviewer workspace, the system searches for duplicates by checking OBJECTID or IDENTIFIER, REVIEWSTATUS, ORIGINTABLE, and PARAMETER fields in REVTABLEMAIN for this session. The system does not write a new result if a duplicate is found. Set this option when you do not want the system to write duplicate results within a session. 
+    -   **Database**– When writing results to the Data Reviewer workspace, the system searches for duplicates by checking OBJECTID or IDENTIFIER, REVIEWSTATUS, ORIGINTABLE, and PARAMETER fields in REVTABLEMAIN across the entire Data Reviewer workspace. The system does not write a new result if a duplicate is found. Set this option when you do not want the system to generate duplicate results in any session. 
+    -   **None** – The system does not perform any duplicate checking. Duplicate results can be written to the Data Reviewer workspace. This option may produce the best performance when creating results. This is the default. 
+-   `Store Geometry`  – Indicates if validation result geometries are stored in the Data Reviewer workspace. Valid options are **true** and **false**. The default is **true**.
+
+    -   **true** – Result geometry is stored in the REVDATASET in the Data Reviewer workspace. Result geometry represents the problem a check was configured to find. You can perform spatial analysis on this geometry. This is the default.
+    -   **false** – Result geometry is not stored in the Data Reviewer workspace. This may increase the performance of writing the results to the Data Reviewer workspace. You can only interact with the result as a table row. You cannot view the result geometry. 
+
+<Note>
+This functionality is supported only with an enterprise geodatabases (eGdb). You cannot use this REST operation against file geodatabases (fGdb). 
+</Note>
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sessionName` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Name of the Reviewer session to create. Value can be a String ("QC Session") or a Long (12345).
+
+Values: "session name"
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sessionProperties` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Properties to apply to the session.
+
+Values: {'{'}"`userName`":"&lt;name>", "`versionName`":"&lt;geodatabase version name>", "`duplicateFilter` ":"Session"|"Database"|"None","`storeGeometry`":"true"|"false"{'}'} 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html`. 
+
+Values: `html` | json` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+Example 1: Create a new Data Reviewer session named "qc_analysis" with no session properties set.
+
+```javascript
+https://localhost:6443/arcgis/rest/services/reviewer/MapServer/exts/DataReviewerServer/Utilities/createReviewerSession?sessionName="qc_analysis"&sessionProperties=&f=pjson 
+```
+
+## JSON Response example
+
+```javascript
+{
+ "sessionAttributes": {
+  "sessionId": 2803,
+  "sessionName": "\"qc_analysis\"",
+  "userName": "arcgis",
+  "versionName": "sde.DEFAULT"
+ }
+}
+
+```
+
+Example 2: Create a new Data Reviewer session named "QC_Pass_1" with the session properties `duplicateFilter` set to **Session** and `storeGeometry` set to **false**.
+
+```javascript
+https://localhost:6443/arcgis/rest/services/reviewer/MapServer/exts/DataReviewerServer/Utilities/createReviewerSession?sessionName="QC_Pass_1"&sessionProperties={"duplicateFilter":"Session","storeGeometry":"false"}&f=pjson 
+```
+
+## JSON Response example
+
+```javascript
+{
+ "sessionAttributes": {
+  "sessionId": 2804,
+  "sessionName": "\"QC_Pass_1\"",
+  "userName": "arcgis",
+  "versionName": "sde.DEFAULT"
+ }
+}
+```

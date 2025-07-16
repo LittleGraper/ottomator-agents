@@ -1,0 +1,155 @@
+---
+title: "Layer source objects"
+description: "Learn about the JSON representation of layer source objects."
+slug: "layer-source-object"
+url: "/layer-source-object"
+---
+
+## Overview
+
+This topic discusses the JSON representation of layer source objects.
+
+The following objects are discussed:
+
+* Dynamic map layer
+* Dynamic data layer
+* Dynamic workspace layer
+
+### Dynamic map layer
+
+A dynamic map layer refers to a layer in the current map service. If supported, use `gdbVersion` to specify an alternate geodatabase version.
+
+<Note>
+
+The `type` and `mapLayerId` properties are required.
+
+</Note>
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Syntax</TabTitle>
+  <TabTitle>Example</TabTitle>
+</TabNav>
+
+<Tab>
+
+  ```markdown
+  {
+    "type": "mapLayer", //required
+    "mapLayerId": <layerId>, //required
+    "gdbVersion": "<version name>"
+  }
+  ```
+</Tab>
+
+<Tab>
+
+  ```markdown
+  {
+    "type": "mapLayer",
+    "mapLayerId": 3,
+    "gdbVersion": "SDE.dynamicLayers"
+  }
+  ```
+</Tab>
+
+</Tabs>
+
+### Dynamic data layer
+
+A dynamic data layer is an on-the-fly layer created off of data from a registered workspace. The following data sources are supported:
+
+* Source data from a [table data source](/data-source-object/#table-data-source)
+* Source data from a [query table data source](/data-source-object/#query-table-data-source)
+* Source data from a [raster data source](/data-source-object/#raster-data-source)
+* Source data from a [join table data source](/data-source-object/#join-table-data-source)
+
+<Note>
+
+Use fields to control field visibility. If this value is null, all fields are visible on the dynamicLayer. The `type` and `dataSource` properties are required.
+
+</Note>
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Syntax</TabTitle>
+  <TabTitle>Example</TabTitle>
+</TabNav>
+
+<Tab>
+
+  ```markdown
+  {
+    "type": "dataLayer", //required
+    "dataSource": <dataSource>, //required
+    "fields": [
+      {"name":"<fieldName1>","alias":"<fieldAlias1>"},
+      {"name":"<fieldName2>","alias":"<fieldAlias2>"}
+    ]
+  }
+  ```
+</Tab>
+
+<Tab>
+
+  ```markdown
+  {
+    "type": "dataLayer",
+    "dataSource": {
+      "type": "table",
+      "workspaceId": "MAP",
+      "dataSourceName": "SDE.Counties",
+      "gdbVersion": "SDE.dynamicLayers"
+    },
+    "fields": [
+      {"name":"name","alias":"County Name"},
+      {"name":"fips","alias":"County FIPS"}
+    ]
+  }
+  ```
+</Tab>
+
+</Tabs>
+
+## Dynamic workspace layer
+
+A dynamic workspace layer refers to a pre-authored Layer File (.lyrx) created from ArcGIS Pro. These files reside in a registered folder. It allows you to dynamically use a pre-authored layer, with an advanced renderer and cartographically enriched symbols that are not supported by map service's REST API specifications, to a map service operation on a per request basis. There must be only one layer in a Layer File. For example, you cannot have a group layer or any other composite layer. The source of the layer inside a Layer File cannot be a map service, feature service, or WMS service.
+
+<Note>
+
+The `type`, `workspaceId` and `layerId` properties are required.
+
+</Note>
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Syntax</TabTitle>
+  <TabTitle>Example</TabTitle>
+</TabNav>
+
+<Tab>
+
+  ```markdown
+  {
+    "type": "workspaceLayer", //required
+    "workspaceId": <registered workspace id>>, //required
+    "layerId": "<lyrx file name with extension>" //required
+  }
+  ```
+</Tab>
+
+<Tab>
+
+  ```other
+  {
+    "type": "workspaceLayer",
+    "workspaceId": "lyrx_folder",
+    "layerId": "WorldCities.lyrx"
+  }
+  ```
+</Tab>
+
+</Tabs>

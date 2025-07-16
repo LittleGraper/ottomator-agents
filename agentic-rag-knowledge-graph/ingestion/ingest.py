@@ -12,7 +12,6 @@ from typing import List, Dict, Any, Optional
 from datetime import datetime
 import argparse
 
-import asyncpg
 from dotenv import load_dotenv
 
 from .chunker import ChunkingConfig, create_chunker, DocumentChunk
@@ -34,7 +33,7 @@ except ImportError:
     from agent.models import IngestionConfig, IngestionResult
 
 # Load environment variables
-load_dotenv()
+load_dotenv(dotenv_path=Path(__file__).parent.parent / '.env')
 
 logger = logging.getLogger(__name__)
 

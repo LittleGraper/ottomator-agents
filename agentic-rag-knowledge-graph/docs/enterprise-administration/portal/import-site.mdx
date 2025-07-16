@@ -1,0 +1,153 @@
+---
+title: "Import Site"
+description: "The importSite  operation imports a portal site configuration from a backup."
+slug: "import-site"
+url: "/import-site"
+guid: "GUID-95B8165A-B561-4C41-8FE6-33D4EC5C014B"
+migratedTopicMetadata:
+  FTITLE: "Import Site"
+  FDESCRIPTION: ""
+  FCHANGES: "Style changes"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1 - *"
+  CREATED-ON: "18/02/2023 16:55:23"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "27/09/2023 08:52:25"
+  VERSION: "5"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-F814856F-4694-4D9A-9D3E-0ACAA5707A3A"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /importSite
+  urlSegments:
+    - name: <root>
+      url: /portal-administration-root
+    - name: /importSite
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.4'
+  requiredCapabilities:
+    - name: Access allowed only with the default administrator role
+      url: /privileges-for-portal-admin-api
+---
+
+## Description
+
+<Note type={"caution"}>
+
+This administrative operation is not available when accessed through a web adaptor, reverse proxy, or load balancer. This operation should be accessed using a direct URL to one of the portal machines in the site.
+
+</Note>
+
+The `importSite` operation restores a site from a backup site configuration file that was created using the `exportSite` operation. When importing the site configuration file into the currently running portal site, all site configurations are replaced with information included in the backup file and the portal content index is updated. For more information about what is included in the backup file, see the [Export Site](/export-site) documentation.
+
+<Note type={"caution"}>
+
+This operation is computationally intensive and may run for a long time. Since this operation changes the portal site configuration completely, it is recommended that no portal items are accessed and that no administrative operations or functions are performed on the site while the operation is running.
+
+</Note>
+
+### Token expiration when importing site
+
+<Note type={"note"}>
+
+The information in this section applies only to organizations using a deployment of ArcGIS Enterprise at version 10.8 or lower.
+
+</Note>
+
+When using the `importSite` operation to restore a backup, a token is generated that will expire after an hour. If the backup is taking longer than an hour to restore, the import process will fail. To avoid this, [generate a token using the Sharing API](DEVSITE/rest/users-groups-and-items/generate-token/) and specify the expiration time to be longer than the default time. If the Portal Admin Directory is accessed through a web browser, append the token generated through the Sharing API to the `importSite` operation URL. If you're calling the operation from a script, include the new token in the API call.
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `location` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The file path to an exported configuration.
+
+      ```javascript label=Example
+      location=\\server\share\backup\Oct-06-2018_10-20-55.portalsite
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `validate` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at ArcGIS Enterprise 11.1. This parameter validates the file path specified in the `location` parameter, ensuring that it is accessible before performing the `importSite` operation. If set to `true`, the path will be validated, and the operation will return either a success response or an error message. The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `json` | `html` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `importSite` operation that demonstrates validating the information provided in the `location` parameter:
+
+```javascript
+POST /arcgis/portaladmin/importSite HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+location=\\server\share\backup\Oct-06-2022_10-20-55.portalsite&validate&f=json
+```
+
+## JSON Response example
+
+### Example one: success response
+
+The sample response below demonstrates a success response. For requests that do not validate the file location (`validate` set as `false`), a success response is returned when the request is performed successfully. For requests that validate the file location (`validate` set as `true`), a success response is returned when the file path specified with the `location` parameter is accessible to Portal for ArcGIS:
+
+```other
+{
+  "status": "success"
+}
+```
+
+### Example two: failure response
+
+The following is a sample response that demonstrates a failed request. For this example, the validation for the specified file location failed, meaning that the location was not accessible to Portal for ArcGIS:
+
+```javascript
+{
+  "status": "error",
+  "messages": ["Unable to read from \\server\share\backup\Oct-06-2022_10-20-55.portalsite. Verify the location is accessible and the service account running Portal for ArcGIS can read from it."],
+  "code": 500
+}
+```

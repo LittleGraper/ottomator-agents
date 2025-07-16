@@ -1,0 +1,212 @@
+---
+title: "Query Locks"
+description: "This operation queries the LRS locks table and returns a list of lock records."
+slug: "lr-query-locks"
+url: "/lr-query-locks"
+guid: "GUID-9C8DBF9E-B95D-4D89-8D38-12FDAC42D81E"
+migratedTopicMetadata:
+  FTITLE: "LR Query Locks"
+  FDESCRIPTION: "New REST endpoint for ConPrev"
+  FCHANGES: "Add note and use GUID in query samples (3343)"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.7 - *"
+  CREATED-ON: "27/01/2021 14:50:18"
+  FAUTHOR: "jgardner"
+  FSTATUS: "Released"
+  MODIFIED-ON: "25/05/2023 11:00:16"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-7F094D6F-3B1D-4DA2-B2CA-8DABE44B09FA"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /query
+  urlSegments:
+    - name: <locks-url>
+      url: /lr-locks
+    - name: /query
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.7'
+  requiredCapability: The ArcGIS Location Referencing license is required to use this resource.
+  parentResource: []
+---
+
+import GUID_FDC3EA81_25C0_4AC4_8B57_2008547446AD_GUID_E6C28557_ADDB_4260_92CF_C8983F9552C4 from "./snippets/GUID-FDC3EA81-25C0-4AC4-8B57-2008547446AD/_GUID-E6C28557-ADDB-4260-92CF-C8983F9552C4";
+import GUID_CF31BD86_ACFA_4774_8343_CC7C8307F248_GUID_338B692C_1241_497E_A75E_A120E90C5078 from "./snippets/GUID-CF31BD86-ACFA-4774-8343-CC7C8307F248/_GUID-338B692C-1241-497E-A75E-A120E90C5078";
+import GUID_CF31BD86_ACFA_4774_8343_CC7C8307F248_GUID_A18843D2_866B_4EFB_B533_9736C6767514 from "./snippets/GUID-CF31BD86-ACFA-4774-8343-CC7C8307F248/_GUID-A18843D2-866B-4EFB-B533-9736C6767514";
+import EncodeURLsNote from "./snippets/GUID-CF31BD86-ACFA-4774-8343-CC7C8307F248/_EncodeURLsNote";
+
+## Description
+
+This operation queries the LRS locks table and returns a list of lock records that match the `WHERE` clause.
+
+An error response is returned from this operation when conflict prevention is not enabled on the LRS. Refer to the `conflictPreventionEnabled` property of the [Locks](/lr-locks) resource.
+
+The `eventFeatureClassName` property in the response is populated for event lock objects and left empty for route lock objects.
+
+##  Request Parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      `f`
+
+      (Optional)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      <GUID_CF31BD86_ACFA_4774_8343_CC7C8307F248_GUID_338B692C_1241_497E_A75E_A120E90C5078 />
+      <GUID_CF31BD86_ACFA_4774_8343_CC7C8307F248_GUID_A18843D2_866B_4EFB_B533_9736C6767514 />
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      `WHERE`
+
+      (Required)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      A `WHERE` clause for the query filter. Any legal SQL `WHERE` clause that operates on LRS locks table fields is allowed.
+      <Note type={"note"}>
+      For branch versioned databases, the version GUID is stored in the LRS locks table instead of the version name. Ensure the `WHERE` clause includes the GUID instead of the name. You can find more information about branch versions by querying the versions endpoint in the [Version Management Service](/versions).
+      </Note>
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      `returnReleasableStatus`
+
+      (Optional)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Specifies whether the response will contain the `releasableStatus` property. If `returnReleasableStatus` is set to `true`, the server will add a `releasableStatus` attribute to every object of the locks array in the response. 
+      The possible `releasableStatus` values are:
+      - `no`—When the current user does not hold the lock.
+      - `yes`—When the current user holds the lock, but no edits have been made in the version associated with the lock on the line, route (or anything related to it such as a calibration point, centerline sequence, and so on), or event (in the case of an event lock).
+      - `onPost`—When the current user holds the lock and the version associated with it has been modified by changes to the line, route (or anything related to it such as a calibration point, centerline sequence, and so on), or event (in the case of an event lock).
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Example Usage
+
+The following examples demonstrate lock queries by attribute.
+
+<EncodeURLsNote />
+
+### Example 1
+
+URL for querying locks by version name.
+
+```other
+https://sampleserver/arcgis/rest/services/MyLRS/MapServer/exts/LRServer/locks/query?f=json&where=LockVersion%3D'{'{'}20878084-24FC-40CB-8AF0-B7979CF9FE03{'}'}' 
+```
+
+### Example 2
+
+URL for querying locks by username.
+
+```other
+https://sampleserver/arcgis/rest/services/MyLRS/MapServer/exts/LRServer/locks/query?f=json&where=LockUser%3D'alice'
+``` 
+
+### Example 3
+
+URL for querying locks by version name and username.
+
+```other
+https://sampleserver/arcgis/rest/services/MyLRS/MapServer/exts/LRServer/locks/query?f=json&where=LockVersion%3D'{'{'}20878084-24FC-40CB-8AF0-B7979CF9FE03{'}'}'%20and%20LockUser%3D'alice'
+``` 
+
+### Example 4
+
+URL for querying locks by route (or line) ID and network layer.
+
+```other
+https://sampleserver/arcgis/rest/services/MyLRS/MapServer/exts/LRServer/locks/query?f=json&where=RouteId%20in('I90','US101')%20and%20NetworkId%3D1
+```
+
+## JSON response syntax
+
+```json
+{
+  "locks": [
+    {
+      "routeId": "<routeId>",
+      "layerId": <layerId>,
+      "lrsNetworkId": <networkId>,
+      "lrsNetworkName": "<networkName>",
+      "user": "<username>",
+      "versionName": "<versionName>",
+      "versionGuid": "<versionGuid",
+      "lockDate": <timestamp>,
+      "eventFeatureClassName": "<eventFeatureClassName>"
+    },
+    {
+      "lineId": "<lineId>",
+      "layerId": <layerId>,
+      "lrsNetworkId": <networkId>,
+      "lrsNetworkName": "<networkName>",
+      "user": "<username>",
+      "versionName": "<versionName>",
+      "versionGuid": "<versionGuid",
+      "lockDate": <timestamp>,
+      "eventFeatureClassName": "<eventFeatureClassName>"
+    } ,
+    ...
+  ]
+}
+  
+```
+
+ 
+
+## JSON response example
+
+```json
+{
+  "locks": [
+    {
+      "routeId": "I90",
+      "layerId": 3,
+      "lrsNetworkId": 1,
+      "lrsNetworkName": "Highways",
+      "user": "alice",
+      "versionName": "bob.job_65",
+      "versionGuid": "{66E39C10-9A79-4DC7-BDAC-F692251E91F7}",
+      "lockDate": 1397517340000,
+      "eventFeatureClassName": ""
+    },
+    {
+      "lineId": "NWS Line A",
+      "layerId": 4,
+      "lrsNetworkId": 2,
+      "lrsNetworkName": "Pipelines",
+      "user": "bob",
+      "versionName": "bob.job_23",
+      "versionGuid": "{DB13BAC4-08BB-4DCF-A93B-48BF105DC804}",
+      "lockDate": 1393888540000,
+      "eventFeatureClassName": ""
+    },
+    {
+      "lineId": "NWS Line B",
+      "layerId": 5,
+      "lrsNetworkId": 2,
+      "lrsNetworkName": "Pipelines",
+      "user": "alice",
+      "versionName": "alice.job_24",
+      "versionGuid": "{679599AE-16A2-4F8F-AC48-E278D6892016}",
+      "lockDate": 1393888542000,
+      "eventFeatureClassName": "P_Anomaly"
+    }
+  ]
+}
+  
+```
+
+ 

@@ -1,0 +1,181 @@
+---
+title: "Get Estimates (Feature Service)"
+description: "The service-level getEstimates operation returns an array of up-to-date approximations of information for each layer or table specified in the request."
+slug: "get-estimate-feature-service"
+url: "/get-estimate-feature-service"
+restInfoMetadata:
+  apiPath: /<serviceName>/FeatureServer/getEstimates
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/FeatureServer/getEstimates
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '11.4'
+  requiredCapability: 'Query'
+---
+
+## Description
+
+The service-level `getEstimates` operation returns an array of up-to-date approximations of information, such as row count and extent for each layer or table specified in the request. Support for this operation, and what information will be returned, is indicated by the service's `infoInEstimates` property. For example, the `infoInEstimates` property below shows that both `count` and `extent` are supported by at least one of the service's layers.
+
+<Note>
+
+You can view the layer-level `infoInEstimates` property to see what each individual layer supports.
+
+</Note>
+
+```other
+...
+"infoInEstimates": [
+  "extent",
+  "count"
+],
+...
+
+```
+
+If `extent` is supported, this response will include the layer's extent. Extent information is returned as an envelope. The information returned by this operation may be larger than the actual extent.
+
+If `count` is supported, this response will include the layer's total row count from the data in the data store. The information returned by this operation does not apply any attribute or spatial filters that may be baked into the layer. If the data is archived (`isDataArchived` is `true`), the count will be based on the entire archive, not just the live rows. Archived data types includes branch versioned and archived, non-versioned data. Traditional versioned layers and tables do not support `count`.
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `layers`
+      
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The list of layers and tables to include in the response. If no layers are specified, all layers and tables in the service will be included in the response.
+
+      Syntax
+
+      ```other
+      layers=[<layer1>, <layer2>, <table1>]
+
+      ```
+
+      Examples
+
+      ```other
+      layers=0, 1, 2
+      layers=[0, 1, 2]
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+The following is a sample request URL for the `getEstimates` operation:
+
+```other
+https://machine.domain.com/webadaptor/rest/services/GasNetwork/FeatureServer/getEstimates?layers=[0,1,2]f=pjson
+
+```
+
+## JSON Response syntax
+
+```other
+{
+  "layerEstimates": [
+    {
+      "extent": {
+        "xmin": <xmin>,
+        "ymin": <ymin>,
+        "xmax": <xmax>,
+        "ymax": <ymax>
+        "spatialReference": {
+          "wkid": <wkid>,
+          "latestWkid": <latestWkid>
+        }
+      },
+      "layerId": <number of rows>,
+      "count": <number of rows>
+    }
+  ]
+}
+
+```
+
+## JSON Response example
+
+The response below demonstrates a response returned from a `getEstimates` request that included three layers and one table. The three layers supported both `count` and `extent`, and the response returns the relevant extent and row count information for each layer. The table only supports `count`, and the response only returns the row count information for the table.
+
+```other
+{
+  "layerEstimates": [
+    {
+      "layerId": 0,
+      "count": 48,
+      "extent": {
+        "xmin": -17566683.1021,
+        "ymin": 2429747.6297000013,
+        "xmax": -7762276.193299999,
+        "ymax": 8049395.400899999,
+        "spatialReference": {
+          "wkid": 102100,
+          "latestWkid": 3857
+        }
+      }
+    },
+    {
+      "layerId": 1,
+      "count": 69,
+      "extent": {
+        "xmin": -17647150.463,
+        "ymin": 2349280.2688000016,
+        "xmax": -7681808.8324,
+        "ymax": 8129862.761799999,
+        "spatialReference": {
+          "wkid": 102100,
+          "latestWkid": 3857
+        }
+      }
+    },
+    {
+      "layerId": 2,
+      "count": 48,
+      "extent": {
+        "xmin": -19838806.0889,
+        "ymin": 2146082.1816000007,
+        "xmax": -7455049.400699999,
+        "ymax": 11542768.540600002,
+        "spatialReference": {
+          "wkid": 102100,
+          "latestWkid": 3857
+        }
+      }
+    },
+    {
+      "layerId": 4,
+      "count": 4
+    }
+  ]
+}
+
+```

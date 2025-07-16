@@ -1,0 +1,209 @@
+---
+title: "Generate Proxy Configuration"
+description: "Generates an Apache HTTPD configuration file."
+slug: "generate-proxy-configuration"
+url: "/generate-proxy-configuration"
+guid: "GUID-203A4992-54F0-454E-AA17-0DB66C25678F"
+migratedTopicMetadata:
+  FTITLE: "Generate Proxy Configuration"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9.*"
+  CREATED-ON: "03/02/2021 07:38:44"
+  FAUTHOR: "shefner"
+  FSTATUS: "Released"
+  MODIFIED-ON: "01/10/2021 13:04:49"
+  VERSION: "1"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "7"
+  ED: "GUID-2B87ADB6-EE30-435D-816B-F3E4172A5007"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /proxyGen
+  urlSegments:
+    - name: <admin-root>
+      url: /admin-site-root
+    - name: /proxyGen
+  methods:
+    - post
+  sslOnly: 'yes'
+  versionIntroduced: '10.9'
+  requiredCapability: Administrator
+---
+
+## Description
+
+Generates an Apache HTTPD configuration file and can set the `webContextURL`  and `webSocketContextURL`  in [Properties](/systems-properties) automatically when the correct `topContext` , `proxyFQDN`  and `setContextUrls`  are given.
+
+##  Request Parameters 
+
+<StyledTable headers={"Parameter,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`topContext` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Required. String. the top level context of a proxy server to generate the proxy directives. 
+
+Example: `your.proxy.com/thistopcontext` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`setContextUrls` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Optional. Boolean. Sets the `WebSocketContextURL`  and `WebContextURL`  in [Properties](/systems-properties) to the proxyFQDN provided.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`proxyFQDN` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Required when `setContextURLs=true` . String. The FQDN of the reverse proxy to be configured with Mission Server.
+
+Example:`your.reverse.proxy.com` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` .
+
+Values: `html`  \| `json`  \| `file` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+Below is a sample POST request for `proxyGen` :
+
+```other
+POST /webadaptor/admin/proxyGen HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+topContext=thistopcontext
+setContextUrls=true
+proxyFQDN=your.reverse.proxy.com
+f=html
+```
+
+ 
+
+## HTML Response example
+
+```javascript
+### ArcGIS Mission Server Apache Proxy Configuration
+###
+### These Apache HTTPD directives configure Apache HTTP server to
+### operate as a reverse proxy for ArcGIS Mission Server.
+###
+### Because 'setContextUrl' was set to true for proxy generation, these Mission Server
+### properties have been set in admin/system/properties
+### -------------------
+### System Properties:
+### {
+###    "WebContextURL":"https://your.reverse.proxy/thistopcontext",
+###    "WebSocketContextURL":"wss://your.reverse.proxy/thistopcontext"
+###  }
+### -------
+###
+### Instructions:
+###
+### Add these configuration directives within a
+### <VirtualHost> container configured with SSL.
+###
+### Refer to the Apache documentation for your platform
+### for the location of the Apache configuration files.
+###
+### For example, on CentOS/Red Hat Linux, add the directives
+### below into /etc/httpd/conf.d/ssl.conf. 
+### For Ubuntu, add the directives 
+### to /etc/apache2/sites-enabled/default-ssl.conf
+###
+### Required Apache Version: 2.4.6 and later
+###
+### Required Apache Modules:
+###
+### LoadModule ssl_module modules/mod_ssl.so
+### LoadModule proxy_module modules/mod_proxy.so
+### LoadModule proxy_http_module modules/mod_proxy_http.so
+### LoadModule proxy_wstunnel_module modules/mod_proxy_wstunnel.so
+###
+### 
+
+## Enable proxy engine for SSL
+SSLProxyEngine on
+
+## Required if untrusted (self signed) certificates are in use.
+## Can be commented out if certificate trust can be established.
+SSLProxyVerify none
+
+## Uncomment the below directive when troubleshooting
+# LogLevel proxy:trace3 proxy_wstunnel:trace3
+
+ProxyPass /thistopcontext/missions/ wss://your.reverse.proxy.com:20301/arcgis/missions/ disablereuse=On
+
+ProxyPass /thistopcontext/ https://your.reverse.proxy.com:20443/arcgis/
+ProxyPassReverse /thistopcontext/ https://your.reverse.proxy.com:20443/arcgis/
+
+## Optional. Enable balancer manager. Requires mod_status.so
+## 
+## Do not enable balancer manager on a public facing system, unless
+## you know what you are doing.
+##
+## If not already loaded, add
+## LoadModule status_module modules/mod_status.so
+#<Location "/balancer-manager">
+# SetHandler balancer-manager
+#</Location>
+
+### End ArcGIS Mission Server Apache Proxy Config
+```
+
+ 

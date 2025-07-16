@@ -1,0 +1,213 @@
+---
+title: "/canReassignItems: Can Reassign Items"
+description: "The canReassignItems  operation checks if the items owned by one user can be successfully reassigned to a specified user."
+slug: "can-reassign-items"
+url: "/can-reassign-items"
+guid: "GUID-9367D844-5421-476B-83B4-BF4569494C3B"
+migratedTopicMetadata:
+  FTITLE: "Can Reassign Items"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0-*"
+  CREATED-ON: "07/06/2023 13:07:57"
+  FAUTHOR: "svennapoosa"
+  FSTATUS: "Released"
+  MODIFIED-ON: "27/09/2023 13:14:12"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "6"
+  ED: "GUID-AFBF24FC-8FC8-4FA9-A4C5-2B151787DA25"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /content/users/[userName]/canReassignItems
+  urlSegments:
+    - name: '[root]'
+      url: /root
+    - name: /content/users/[userName]/canReassignItems
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: 'ArcGIS Enterprise 11.0'
+---
+
+## Example usage
+
+The following is a sample ArcGIS Enterprise POST request for the `canReassignItems` operation:
+
+```markdown
+POST /webadaptor/sharing/rest/content/users/itemOwner/canReassignItems HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+items=0000737d2de44ea0a275a7fceba4da73&targetUsername=newOwner&f=pjson
+```
+
+## Description
+
+The `canReassignItems` operation checks whether the items owned by one user can be successfully [reassigned to a specified user](/reassign-items) before performing the [Reassign Items](/reassign-items) operation. Users assigned the default administrator role, or a custom role with administrative privileges, can perform this operation. The item owner can also use this operation; if the item owner that performs this operation is not a default administrator, or assigned a custom role with administrative privileges, they must have the `portal:user:reassignItems` privilege assigned to them to transfer content to another user.
+
+<Note type={"note"}>
+
+If any of the items that are being reassigned have a `private` sharing level, the receiving member must have sharing access to all groups which those items are currently shared to.
+
+</Note>
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `items` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A comma-separated list of item IDs that will have their ownership transferred. The maximum number of items that can be transferred at one time is 100.
+
+      Example:
+
+      ```markdown
+      items=0000737d2de44ea0a275a7fceba4da73
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `targetUsername` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The username of the user the items will be reassigned to. For a user to be eligible to receive transferred content, they must meet the following requirements:
+
+      -   The user must be assigned the `portal:user:receiveItems` privilege to receive the transferred content.
+      -   The user must have a user type that allows them to own content. To learn more about user types, see the [User types, roles, and privileges](https://enterprise.arcgis.com/en/portal/latest/administer/windows/roles.htm) topic.
+      -    If the items being transferred to the user are shared with a group, the user receiving the items must be a member of the group. If the group is a view-only group, the user receiving the items must be the group owner or a group manager.
+
+      If the above requirements are not met, an error response will be returned.
+
+      Example:
+
+      ```markdown
+      targetUsername=newOwner
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` \| `json` \| `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## JSON Response syntax
+
+The response syntax example below demonstrates an error response, returned when the user specified in the `targetUsername` parameter does not have the proper permissions to be reassigned an item:
+
+```other
+{
+  "error": {
+    "code": <error code>,
+    "messageCode": "<error message code>",
+    "message": "<error message>",
+    "details": [
+      {
+        "itemId": "<item id>",
+        "type": "<item type>",
+        "url": "<url>",
+        "reservedTypeKeywords": [
+          "<reserved type keyword1>"
+        ],
+        "owner": "<owner>"
+      },
+      {
+        "itemId": "<item id>",
+        "type": "<item type>",
+        "url": "<url>",
+        "reservedTypeKeywords": [
+          "<reserved type keyword1>"
+        ],
+        "owner": "<owner>"
+      }
+    ]
+  }
+}
+```
+
+The response syntax example below demonstrates a success response:
+
+```markdown
+{
+  "itemId": "<item id>",
+  "success": true | false
+}
+```
+
+## JSON Response example
+
+The response example below demonstrates an error response, returned when the user specified in the `targetUsername` parameter does not have the proper permissions to be reassigned an item:
+
+```other
+{
+  "error": {
+    "code": 403,
+    "messageCode": "CONT_0291",
+    "message": "Unable to reassign item, Target user does not have right privileges.",
+    "details": [
+      {
+        "itemId": "07efda2ec8934d0cab3b68018758701a",
+        "type": "Feature Service",
+        "url": "https://machine.domain.com/webadaptor/rest/services/FS123/FeatureServer",
+        "reservedTypeKeywords": [
+        "Hosted Service"
+        ],
+        "owner": "FSowner1"
+      },
+      {
+        "itemId": "bb8e3d443ab44878ab8315b00b0612ca",
+        "type": "Feature Service",
+        "url": "https://machine.domain.com/webadaptor/rest/services/FS456/FeatureServer",
+        "reservedTypeKeywords": [
+        "Hosted Service"
+        ],
+        "owner": "FSowner2"
+      }
+    ]
+  }
+}
+```
+
+The response example below demonstrates a success response:
+
+```markdown
+{
+  "results": [
+    {
+      "itemId": "a56f1cdb2ad54af284549fa5769f709c",
+      "success": true
+    }
+  ]
+}
+```
+
+ 

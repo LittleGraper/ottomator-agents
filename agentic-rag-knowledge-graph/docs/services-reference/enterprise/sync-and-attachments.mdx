@@ -1,0 +1,104 @@
+---
+title: "Sync and attachments"
+description: "Attachments can be synced if the data involved has attachments, and the attachments are based on GlobalIDs."
+slug: "sync-and-attachments"
+url: "/sync-and-attachments"
+guid: "GUID-E419B5E8-80B6-41DE-AD0B-C985E3DF6B18"
+migratedTopicMetadata:
+  FTITLE: "Sync and attachments"
+  FDESCRIPTION: ""
+  FCHANGES: "HTTP-S"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.7 -*"
+  CREATED-ON: "27/07/2018 14:51:29"
+  FAUTHOR: "gkelly"
+  FSTATUS: "Released"
+  MODIFIED-ON: "14/08/2018 10:22:53"
+  VERSION: "5"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-F94E1E51-BB50-4266-8955-3DAC0D941F7A"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata: {}
+---
+
+Attachments can be synced if the data involved has [attachments](/attachment-infos-feature-service), and the attachments are based on GlobalIDs. To sync attachments, the `returnAttachments`  parameter must be set to `true`  when the [createReplica](/create-replica) operation is called. When `returnAttachments`  is `true` , attachments, as well as data, are returned in the result. To synchronize attachments, simply synchronize the layer that has the attachments. When [`synchronizeReplica` ](/synchronize-replica) is called, attachments that have been edited on the client, as well as any edits to the data since the last sync, can be uploaded. Attachment edits and any edits applied to the data on the server since the last sync can also be downloaded on sync.
+
+## SQLite data format
+
+If the data format is SQLite, the attachments are embedded in the SQLite response.
+
+## JSON data format
+
+An attachment has the following: 
+
+-   AttachmentId
+-   GlobalId
+-   ParentGlobalId
+-   Content type
+-   Name
+-   Data (An attachment's data can be either embedded base-64 data or by reference.)
+
+When an attachment is coming from the server to a client, the attachment data by reference comes in a URL.
+
+When an attachment is submitted by a client to the server, attachment data by reference to the server is sent by uploading the data to the server. A client first uploads the attachment data to the server using [Uploads](/uploads) and obtains an upload ID. It then uses the upload ID as a reference to the uploaded item in the attachment JSON.
+
+Attachments returned from the server have an `attachmentId` . This can be used by clients to help manage attachments in the client side store. When an attachment is sent to the server, a `globalId`  is required, but the `attachmentId`  is not required. 
+
+When a feature with attachments is returned to the client during a sync operation, the attachments are returned in an attachment array. An attachment's `parentGlobalId`  references the `globalID`  of its associated feature.
+
+## Attachment syntax
+
+```javascript
+{
+  "attachmentId" : <attachmentId>,
+  "globalId" : "globalID", 	     // attachment's globalID
+  "parentGlobalId": "globalID",  // parent feature's globalID
+  "contentType": "contentType",
+  "size": <file size>,
+  "name": "AttachmentName",
+  "data": Base 64 Encoded Data, 	 // Embedded data
+  "url": "URL",			                // Attachment data url.	
+  "uploadId" : "uploadId" 	       // Upload item ID for the attachment.
+}
+          
+```
+
+ 
+
+## Attachment coming from the server
+
+```javascript
+{
+		"attachmentId" :10,
+  "globalId" : "{55E85F98-FBDD-4129-9F0B-848DD40BD911}",
+  "parentGlobalId": "{02041AEF-4174-4d81-8A98-D7AC5B9F4C2F}",
+  "contentType": "image\/jpeg",
+  "size": 8108,
+  "name": "Pothole.jpg",
+  "url": "https://services.myserver.com/ERmEceOGq5cHrItq/ArcGIS/rest/services/Incidents/FeatureServer/0/5005/attachments/10"
+}
+          
+```
+
+ 
+
+## Attachment being submitted to the server by a client
+
+```javascript
+{
+  "globalId" : "{55E85F98-FBDD-4129-9F0B-848DD40BD911}",
+  "parentGlobalId": "{02041AEF-4174-4d81-8A98-D7AC5B9F4C2F}",
+  "contentType":"image/pjpeg",
+  "name":"Pothole.jpg",
+  "uploadId" : "{DD1D0A30-CD6E-4ad7-A516-C2468FD95E5E}"
+}
+          
+```
+
+ 

@@ -1,0 +1,1352 @@
+---
+title: "Publish Routing Services"
+description: "The Publish Routing Services service is described."
+slug: "publish-routing-services"
+url: "/publish-routing-services"
+guid: "GUID-AB7355AD-F90C-4DD2-8AB7-C9D6ABE45016"
+migratedTopicMetadata:
+  FTITLE: "Publish routing services"
+  FDESCRIPTION: ""
+  FCHANGES: "Update solution for 30278"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1-*"
+  CREATED-ON: "23/02/2023 16:41:24"
+  FAUTHOR: "pchopra"
+  FSTATUS: "Released"
+  MODIFIED-ON: "24/02/2023 08:33:20"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-B792022B-C715-42EC-A885-58F2B9F726D7"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /System/PublishingTools/GPServer/PublishRoutingServices
+  urlSegments:
+    - name: <catalog-url>
+      url: /catalog
+    - name: /System/PublishingTools/GPServer/Publish Routing Services
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '11.0'
+---
+
+## Description
+
+The `Publish Routing Services`  service is one of the services available in the out-of-the-box `PublishingTools`  geoprocessing service, which is used by an administrator to publish [routing services](https://enterprise.arcgis.com/en/server/latest/publish-services/windows/what-is-a-routing-service.htm) based on a network dataset to an ArcGIS Server site. These services can be used to perform route, closest facility, service area, location-allocation, origin destination cost matrix, or vehicle routing problem analyses on transportation networks.
+
+If the ArcGIS Server site is federated with a portal, the services are configured as utility services with the portal. Once published, the services can be used in client applications such as ArcGIS Pro or Map Viewer Classic on the ArcGIS Enterprise portal to [get directions](https://enterprise.arcgis.com/en/portal/latest/use/get-directions-mv.htm) and [perform analysis](https://enterprise.arcgis.com/en/portal/latest/use/perform-analysis-mv.htm). 
+
+The services are similar to directions and routing services available with ArcGIS Online but are based on a network dataset and run in ArcGIS Enterprise. 
+
+<Note type={"note"}>
+
+To use this service, the ArcGIS Server site must have an [ArcGIS Network Analyst extension license](https://enterprise.arcgis.com/en/server/latest/get-started/windows/server-extensions.htm).
+
+</Note>
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`networkDataset` 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The network dataset used by the routing services. The workspace containing the network dataset must be registered as a [data store item](https://enterprise.arcgis.com/en/portal/latest/use/data-store-items.htm) in the ArcGIS Enterprise portal or the stand-alone ArcGIS Server site. The value for this parameter is specified as a JSON that contains `datastoreId`  and `path`  properties. The `datastoreId`  value is the ID of the data store item referencing the workspace of the network dataset. The `path`  value is the relative path to the network dataset in the data store.
+
+For example, if the catalog path of the network dataset in a file geodatabase on the ArcGIS Server machine is `C:\data\streets\NorthAmerica.gdb\Routing\Routing_ND`  and the data store item with ID `3eba512c2a0841d5adcc4c83029d8bf6`  is referencing `C:\data` , the value for this parameter is specified as the following:
+
+```other
+{
+  "datastoreId": "3eba512c2a0841d5adcc4c83029d8bf6",
+  "path": "/streets/NorthAmerica.gdb/Routing/Routing_ND"
+}
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`serviceFolder` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The name for the server folder that will contain all the routing services created by this service. The service returns an error if the folder contains existing services.
+
+The default value is `Routing` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`solverTypes` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The list of Network Analyst solvers to be included in the services. The default is to include all the solvers except `SnapToRoads`.
+
+Values: `ClosestFacility`  \| `Location-Allocation`  \| `OriginDestinationCostMatrix`  \| `Route`  \| `ServiceArea`  \| `VehicleRoutingProblem` \| `LastMileDelivery` \| `SnapToRoads`
+
+The following example shows how to publish routing services only for `Route`  and `OriginDestinationCostMatrix`  solvers:
+
+```json
+[
+  "OriginDestinationCostMatrix",
+  "Route"
+]
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`configFile` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The file containing additional configuration for the services. If no value is specified, the system default configuration file is used.
+
+To specify a value for this parameter, first upload the configuration file using the `upload`  operation. Then specify the item ID of the uploaded file as the value for this parameter.
+
+For example, if the configuration file is uploaded as item ID `i6c15a27e-4f40-44d3-bc27-70809936d04d` , the value for this parameter is specified as the following:
+
+```json
+{
+  "itemID": "i6c15a27e-4f40-44d3-bc27-70809936d04d" 
+}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default format is `html` .
+
+Values: `html`  \| `json`  \| `pjson` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+<Note type={"note"}>
+
+The service description page for the `Publish Routing Services`  service at `https://<host>/<instance>/rest/services/System/PublishingTools/GPServer/Publish%20Routing%20Services`  includes the `networkDatasetExtents`  and `authenticationInfo`  parameters that are currently unsupported. Do not pass any value for these parameters when calling the service.
+
+</Note>
+
+## Example usage
+
+### Example using the required parameters
+
+This example shows how to call the service using only the required parameters. The routing services are published to a server folder named Routing and include services for all the solvers. The system default configuration file for service settings is used.
+
+```javascript
+POST https://dev0017162.esri.com/server/rest/services/System/PublishingTools/GPServer/Publish%20Routing%20Services/submitJob HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+f=json
+&token=<ACCESS_TOKEN>
+&networkDataset=
+{
+  "datastoreId": "3eba512c2a0841d5adcc4c83029d8bf6",
+  "path": "/streets/NorthAmerica.gdb/Routing/Routing_ND"
+}
+
+```
+
+ 
+
+### Example using all parameters
+
+This example shows how to call the service using all the parameters. The routing services are published in a server folder named NorthAmerica and only include services for `Route`  and `OriginDestinationCostMatrix`  solvers. The service uses settings from a custom configuration file. 
+
+```javascript
+POST https://dev0017162.esri.com/server/rest/services/System/PublishingTools/GPServer/Publish%20Routing%20Services/submitJob HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+f=json
+&token=<ACCESS_TOKEN>
+&networkDataset=
+{
+  "datastoreId": "3eba512c2a0841d5adcc4c83029d8bf6",
+  "path": "/streets/NorthAmerica.gdb/Routing/Routing_ND"
+}
+&serviceFolder=NorthAmerica
+&solverTypes=
+[
+  "OriginDestinationCostMatrix",
+  "Route"
+]
+&configFile=
+{
+  "itemID": "i6c15a27e-4f40-44d3-bc27-70809936d04d" 
+}
+
+```
+
+ 
+
+##  Errors and warnings 
+
+The following are errors and warnings associated with the `Publish Routing Services`  service:
+
+<StyledTable headers={"Error code,Message,Description,Solution"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30055
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Network dataset does not support directions.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The directions have not been set up for the network dataset.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Set up the directions for the network dataset and rebuild it.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30206
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+An unexpected error occurred while running the tool.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Something unexpected caused the tool to fail, and no exception handling is in place to provide a specific error message.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This error is considered a bug. Contact [Esri Technical Support](https://esriurl.com/support) to report a bug for your scenario.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30252
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The network data source must have at least one time-based travel mode that does not use the Public Transit evaluator.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+When publishing the LastMileDelivery solver type as a routing service, the network dataset should have at least one time based travel mode that does not use the Public Transit evaluator.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+[Create at least one travel mode](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/create-travel-mode.htm) on the network dataset that does not use the [public transit evaluator](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/public-transit-evaluator.htm), or do not choose Last Mile Delivery solver type.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30253
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Network has no travel modes.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The selected network has no travel modes and cannot be used for this analysis.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+[Create at least one travel mode](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/create-travel-mode.htm) on the network dataset, or use a different network dataset that includes a travel mode.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30258
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Only specify a value for the `networkDataset`  parameter or the `networkDatasetExtents`  parameter but not both. 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The Publish Routing Services tool only works with a network dataset or the network dataset extents.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify a value for either the `networkDataset`  parameter or the `networkDatasetExtents`  parameter, but not both, and rerun the tool.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30259
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Invalid value for the "&lt;value>" parameter. The value must be a JSON containing "&lt;value>" properties.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The input JSON value specified for the parameter is invalid. 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify a JSON value containing the `datastoreId`  and `path`  property values. The `datastoreId`  value is the ID of the data store item referencing the workspace of the network dataset. The `path`  value is the relative path to the network dataset in the data store. For example, if the catalog path of the network dataset in a file geodatabase on the ArcGIS Server machine is `C:\data\streets\NorthAmerica.gdb\Routing\Routing_ND`  and the data store item is referencing `C:\data` , specify the value for this parameter as `{"datastoreId": "3eba512c2a0841d5adcc4c83029d8bf6", "path": "/streets/NorthAmerica.gdb/Routing/Routing_ND"}` .
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30260
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Network dataset "&lt;value>" does not exist within the data store
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The network dataset that was specified using the `path`  property does not exist.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the correct relative path to the network dataset in the data store using the `path`  property. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30261
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Network dataset extents "&lt;value>" does not exist within the data store.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The network dataset extent feature class that was specified using the `path`  property does not exist.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the correct relative path to the network dataset extent feature class in the data store using the `path`  property. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30262
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Failed to get the token. 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The Publish Routing Services tool failed to obtain a token from the signed-in user. 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Ensure that the `PublishingTools`  system service is secure and does not allow anonymous access. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30263
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Failed to get the logged in user.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The Publish Routing Services tool failed to obtain the signed-in user.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Ensure that the signed-in user is a valid user in the ArcGIS Enterprise portal.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30264
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Invalid data store id: "&lt;value>".
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The data store item specified using `datastoreId`  does not exist.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify a valid data store item ID.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30265
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Invalid path "&lt;value>" for the network dataset as it does not contain a feature dataset name and a network dataset name 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The network dataset that was specified using the `path`  property does not exist.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+When referencing a network dataset from an enterprise geodatabase, the `path`  property must include the name of the feature dataset containing the network dataset and the name of the network dataset. For example, if the network dataset named Routing_ND is in a feature dataset named Routing, the `path`  property must be specified as `/Routing/Routing_ND` .
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30266
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The network dataset does not have at least one time based cost attribute 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The Publish Routing Services tool requires a network dataset that has at least one cost attribute with time-based units.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Use a network dataset with at least one time-based cost attribute or [create a time-based cost attribute](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/cost-attributes.htm) on the network dataset.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30267
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The network dataset does not have at least one distance based cost attribute 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The Publish Routing Services tool requires a network dataset that has at least one cost attribute with distance-based units.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Use a network dataset with at least one distance-based cost attribute or [create a distance-based cost attribute](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/cost-attributes.htm) on the network dataset.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30268
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A service area index has not been created on the network dataset. 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The input network dataset is missing the service area index.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+While it is not required, a [service area index](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/service-area-index.htm) improves performance when generating service areas and also improves the appearance of the polygons. It is recommended that you define a service area index on the network dataset.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30269
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The network dataset has not been dissolved. 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The input network dataset has not been dissolved.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+While it is not required, dissolving a network dataset reduces the time it takes to solve analyses, draw results, and generate driving directions. It is recommended that you [dissolve the network dataset](https://pro.arcgis.com/en/pro-app/latest/tool-reference/network-analyst/dissolve-network.htm).
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30270
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The network dataset is not stored in a geodatabase. 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The Publish Routing Services tool only works with network datasets that are stored in a geodatabase.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify a network dataset that is stored in a file geodatabase, a mobile map package, or an enterprise geodatabase.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30271
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The network dataset does not have a travel mode of type `Truck`  or a cost attribute named `TruckTravelTime` . The geoprocessing services might return unexpected results when the Impedance parameter is set to "Truck Time".
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The input network dataset does not define the `TruckTravelTime`  cost attribute.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The `TruckTravelTime`  cost attribute must be available on the input network dataset for the tools in the `NetworkAnalysis`  and `NetworkAnalysisSync`  geoprocessing services to run as expected. If this cost attribute is missing, the tools use the first cost attribute defined on the network dataset, which may cause unexpected analysis results. 
+
+If the network dataset can model the travel time taken by trucks to travel on streets, define the `TruckTravelTime`  cost attribute on the network dataset. Otherwise, do not use the `Truck Time`  option when specifying the `Impedance`  parameter for the tools. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30272
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The network dataset does not have a travel mode of type `Walk`  or a cost attribute named `WalkTime` . The geoprocessing services might return unexpected results when the Impedance parameter is set to "Walk Time ".
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The input network dataset does not define the `WalkTime`  cost attribute.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The `WalkTime`  cost attribute must be available on the input network dataset for the tools in the `NetworkAnalysis`  and `NetworkAnalysisSync`  geoprocessing services to run as expected. If this cost attribute is missing, the tools use the first cost attribute defined on the network dataset, which may cause unexpected analysis results. 
+
+If the network dataset can model the time taken by pedestrians to walk on streets, define the `WalkTime`  cost attribute on the network dataset. Otherwise, do not use the `Walk Time` option when specifying the `Impedance`  parameter for the tools. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30273
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The following warnings were returned when analyzing the input network dataset:
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The input network dataset returned warnings that may result in reduced performance of the routing services.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Modify the network dataset properties or perform additional processing on the network dataset such as creating a service area index or dissolving the network dataset.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30274
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The following errors were returned when analyzing the input network dataset:
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The input network dataset returned errors that prevented routing services from publishing.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Modify the network dataset properties to fix the errors reported from the analyzer.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30276
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Failed to create the network dataset layer.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The Publish Routing Services tool did not create a network dataset layer from the input network dataset.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Ensure that the [ArcGIS Server account](https://enterprise.arcgis.com/en/server/latest/administer/windows/the-arcgis-server-account.htm) has been granted at least read-only access to the network dataset. 
+
+If you are using a licensed network dataset, ensure that the data license is successfully installed on the ArcGIS Server machine running [Windows](https://support.esri.com/en/technical-article/000012654) or [Linux](https://enterprise.arcgis.com/en/server/latest/administer/linux/configuring-an-arcgis-data-license.htm). 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30277
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+User "&lt;value>" does not have privileges to publish services 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The signed-in user running the Publish Routing Services tool does not have privileges to publish services.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Assign the Administrator or Publisher role to the user running the Publish Routing Services tool. The User role is insufficient.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30278
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+User "&lt;value>" does not have privileges to publish web tools and server-based layers
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The signed-in user running the Publish Routing Services tool does not have privileges to publish web tools and ArcGIS Server web layers.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Assign the correct [privilege](https://enterprise.arcgis.com/en/portal/latest/administer/windows/roles.htm) to the user running the tool to publish web tools and ArcGIS Server web layers.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30279
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+User "&lt;value>" does not have administrator privilege 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The signed-in user running the Publish Routing Services tool does not have privileges to publish geoprocessing services.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+When publishing to a stand-alone ArcGIS Server site, the user running the tool must be assigned the Administrator role. If the user is assigned the Publisher role, [enabling](https://enterprise.arcgis.com/en/server/latest/administer/windows/change-geoprocessing-service-and-service-extension-publishing-privileges.htm) the Publisher role to publish geoprocessing services is not supported.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30280
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Service folder, "&lt;value>", is not empty 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The service folder contains one or more services.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify a new service folder (not an existing folder), or remove all the services from the specified folder. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30281
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Failed to create service folder, "&lt;value>" 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The service folder cannot be created because it has one or more invalid characters.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Ensure that the name does not contain any spaces or characters from the following list:
+
+-   " (quotation mark)
+-   &lt; (open angle bracket)
+-   \> (close angle bracket)
+-   | (vertical bar)
+-   : (colon)
+-   \* (asterisk)
+-   ? (question mark)
+-   , (comma)
+-   / (forward slash)
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30282
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Failed to run "&lt;value>" tool 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A geoprocessing tool that was expected to publish one of the geoprocessing services failed to run successfully.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Refer to the messages returned from the Publish Routing Services tool to determine the cause of the tool failure. Rerun the tool. If the error persists, contact [Esri Technical Support](https://esriurl.com/support).
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30283
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Failed to create supporting files required by the network analysis utility geoprocessing service.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+An unexpected error was encountered when creating the supporting files required by the network analysis utility geoprocessing service.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This error is considered a bug. Contact [Esri Technical Support](https://esriurl.com/support) to report a bug for your scenario.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30284
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The network dataset is configured to retrieve live traffic from a portal other than the one to which the service is being published 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The source for live traffic configured with the input network dataset is not the same as the ArcGIS Enterprise portal to which the ArcGIS Server site is federated. 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Modify the [live traffic source](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/live-traffic.htm) for the network dataset to match the ArcGIS Enterprise portal with which the ArcGIS Server site is federated. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30317
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The token is valid for &lt;value> minutes and might expire before the tool finishes running. Use a token that is valid for at least &lt;value> minutes.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The token used when publishing the routing service may expire and cause failures.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+-   If you are publishing a routing service to a federated ArcGIS Server site, review the value set for the [maximum token expiration time](https://enterprise.arcgis.com/en/portal/10.9.1/administer/windows/specify-the-default-token-expiration-time.htm) in your ArcGIS Enterprise portal and set it to a higher value.
+-   If you are publishing a routing service to a stand-alone ArcGIS Server site, edit the [lifespan of long-lived tokens](https://enterprise.arcgis.com/en/server/10.9.1/administer/linux/editing-token-settings-in-manager.htm). 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30320
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Invalid authentication info "&lt;value>". The value must be a JSON containing "token" property.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The input JSON value specified for the parameter is invalid.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The value for this parameter is specified as a JSON that must contain the `token`  property and optionally the `referer`  property.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30321
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The token has expired. Use a token that is valid for at least &lt;value> minutes.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The token used when publishing the routing service has expired resulting in failures.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+For the Publish Routing Services tool to obtain a token that does not expire before the tool finishes running, update the [maximum token expiration time](https://enterprise.arcgis.com/en/portal/10.9.1/administer/windows/specify-the-default-token-expiration-time.htm) in your ArcGIS Enterprise portal to a higher value if publishing to a federated ArcGIS Server site or update the [lifespan of long-lived tokens](https://enterprise.arcgis.com/en/server/10.9.1/administer/linux/editing-token-settings-in-manager.htm) if publishing to a stand-alone ArcGIS Server site and rerun the tool.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30327
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Failed to renew the portal token.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The Publish Routing Services tool did not obtain a token that is valid for a longer duration.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Sign out of your ArcGIS Enterprise portal, sign back in, and rerun the Publish Routing Services tool.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30328
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The config file is not a valid json file.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The file containing the additional service properties is not a valid JSON file.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Review the contents of the input config file using a JSON validator tool to fix any syntax errors and rerun the Publish Routing Services tool.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30329
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The version of the config file is not supported.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The file containing the additional service properties is not supported with the current version of ArcGIS Enterprise.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If you are using the config file from an earlier version of ArcGIS Enterprise, obtain the template config file from the version of ArcGIS Enterprise you are currently using, modify the file with the necessary changes, and rerun the Publish Routing Services tool.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30353
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Network has no time zone attribute.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+When publishing the LastMileDelivery solver type as a routing service the network dataset should have a time zone attribute.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Create a [time zone attribute](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/time-zone-attribute.htm) on your network dataset, or do not choose Last Mile Delivery solver type.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30358
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Network has no travel modes with a time based impedance attribute and a distance attribute.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+When publishing the LastMileDelivery solver type as a routing service, the network dataset should have at least one travel mode with a time based impedance attribute and a distance attribute.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+[Create at least one travel mode](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/create-travel-mode.htm) on the network dataset that uses a time based impedance attribute, or do not choose Last Mile Delivery solver type.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+30378
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The network dataset is not stored in a mobile geodatabase.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+When publishing the SnapToRoads solver type as a routing service the network dataset should be stored in a mobile geodatabase.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Export your network dataset to be stored in a mobile geodatabse using [Create Mobile Map Package](https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/create-mobile-map-package.htm) geoprocessing tool, or do not choose SnapToRoads solver type.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>

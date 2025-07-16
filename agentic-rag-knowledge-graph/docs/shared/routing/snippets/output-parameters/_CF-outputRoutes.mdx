@@ -1,0 +1,184 @@
+
+import Stats from "../../snippets/shared-attributes/_Status.mdx"
+import SnapXYZ from "../../snippets/shared-attributes/_SnapXYZ-DistToNet.mdx"
+import NetworkLocation from "../../snippets/shared-attributes/_NetworkLocationFields.mdx"
+import StartTimeEndTimeUTC from "../../snippets/shared-attributes/_StartEndTimeUTC.mdx"
+
+import ParamMetadata from "../../../components/param-metatdata" 
+
+<ParamMetadata types={[{name:"feature",link:"../routing-data-types#feature"}]} />
+
+{/* <p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p> */}
+
+Provides access to the resulting route or routes between the facilities and the incidents.
+
+<If c="requestType == 'job'">
+
+The [`route_shape`](#route_shape) and [`route_line_simplification_tolerance`](#route_line_simplification_tolerance) parameters influence the shape of the output routes.
+
+The route geometries are returned in the spatial reference specified as the [`context`](#context) parameter.
+
+</If>
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for output routes</span></summary>
+
+<If c="requestType == 'direct'">
+-   <p class="space-x-2"><span class="font-bold">ObjectID</span><span class="font-sm text-color-3">integer</span></p>
+
+    The system-managed ID field.
+    
+</If>
+
+-   <p class="space-x-2"><span class="font-bold">Name</span><span class="font-sm text-color-3">string (length: 500)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The name of the closest facility route is based on the names of the associated facility and incident.
+
+    <If c="requestType == 'job'">
+    The facility name is first if the value for the `travel_direction` parameter is set to `Facility to Incident`. For example, `Facility 5 - Incident 3` indicates that the route travels from Facility 5 to Incident 3.
+
+    If `Incident to Facility` is specified as the value for the `travel_direction` parameter, the incident name is first, for example, `Incident 3 — Facility 5`.
+    </If>
+
+    <If c="requestType == 'direct'">
+    The facility name is first if the value for the `travelDirection` property on the analysis object is set to `esriNATravelDirectionFromFacility`. For example, Facility 5 - Incident 3 indicates that the route travels from Facility 5 to Incident 3.
+
+    If `esriNATravelDirectionToFacility` is specified as the value for the `travelDirection` property, the incident name is first, for example, Incident 3 — Facility 5 .
+    </If>
+
+-  <p class="space-x-2"><span class="font-bold">FacilityRank</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The rank of the facility among all facilities found for the associated incident; the closest facility has a rank of 1.
+
+-  <p class="space-x-2"><span class="font-bold">FacilityID</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    <If c="requestType == 'job'">
+    The user-defined unique ID of the facility the route visits. The values for this field are copied from the `ID` field on the input facilities.
+    </If>
+
+    <If c="requestType == 'direct'">
+    The unique ID of the facility the route visits.
+
+    If you specify `preserveObjectID=false`, the value for this field will be a system-generated ID. If `preserveObjectID=True`, the value for this field will be the `ObjectID` of your associated input.  
+    </If>
+
+<If c="requestType == 'job'">
+-  <p class="space-x-2"><span class="font-bold">FacilityOID</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+   
+    The `ObjectID` value of the input facility used to generate the route. This field is often used to join information from facilities to routes.
+
+-   <p class="space-x-2"><span class="font-bold">IncidentOID</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The `ObjectID` value of the input incident used to generate the route. This field is often used to join information from incidents to routes.
+</If>
+
+-  <p class="space-x-2"><span class="font-bold">IncidentID</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    <If c="requestType == 'job'">
+    The user-defined unique ID of the incident the route visits. The values for this field are copied from the `ID` field on the input incidents.
+    </If>
+
+    <If c="requestType == 'direct'">
+    The unique ID of the incident the route visits.
+
+    If you specify `preserveObjectID=false`, the value for this field will be a system-generated ID. If `preserveObjectID=True`, the value for this field will be the `ObjectID` of your associated input.  
+    </If>
+
+
+-   <p class="space-x-2"><span class="font-bold">FacilityCurbApproach</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    **Allowed values:** `1`, `2`
+
+    The side of the vehicle the facility is on when arriving at or departing from the facility. 
+    
+    -    `1`—Indicates the right side of vehicle
+    -    `2`—Indicates the left side of vehicle
+
+-   <p class="space-x-2"><span class="font-bold">IncidentCurbApproach</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    **Allowed values:** `1`, `2`
+
+    The side of the vehicle the incident is on when arriving at or departing from the incident.
+    
+    -    `1`—Indicates the right side of vehicle
+    -    `2`—Indicates the left side of vehicle 
+
+<StartTimeEndTimeUTC />
+
+<If c="requestType == 'job'">
+
+-   <p class="space-x-2"><span class="font-bold">Total_Minutes</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The cumulative travel time in minutes of the route between the facility and the incident. This includes any `AdditionalTime` values for the visited facility and incident if specified.
+
+    <Note type="note" block>
+
+    -   An additional field, `Total_[TimeUnits]`, is included if `measurement_units` is time based and its value is not set to `Minutes`. The field values are in the units specified by the `measurement_units` parameter.
+
+    -   Additional fields, `Total_[AccumulateAttributeName]_[TimeUnits]`, are included for each time-based cost attribute that is accumulated during the analysis. 
+
+    </Note>
+
+
+-   <p class="space-x-2"><span class="font-bold">Total_Miles</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The cumulative travel distance in miles of the route between the facility and the incident. This includes any `AdditionalDistance` values for the visited facility and incident if specified.
+
+    <Note type="note" block>
+
+    -   An additional field, `Total_[DistanceUnits]`, is included if the `measurement_units` parameter is distance based and its value is not `Miles` or `Kilometers`. The field values are in the units specified by the `measurement_units` parameter.
+
+    -   Additional fields, `Total_[AccumulateAttributeName]_[DistanceUnits]`, are included for each distance-based cost attribute that is accumulated during the analysis.  
+
+    </Note>
+ 
+-   <p class="space-x-2"><span class="font-bold">Total_Kilometers</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The cumulative travel distance in kilometers of the route between the facility and the incident. This includes any `AdditionalDistance` values for the visited facility and incident if specified.
+
+    <Note type="note" block>
+
+    -   An additional field, `Total_[DistanceUnits]`, is included if the `measurement_units` parameter is distance based and its value is not `Miles` or `Kilometers`. The field values are in the units specified by the `measurement_units` parameter.
+
+    -   Additional fields, `Total_[AccumulateAttributeName]_[DistanceUnits]`, are included for each distance-based cost attribute that is accumulated during the analysis.  
+
+    </Note>
+
+-   <p class="space-x-2"><span class="font-bold">Total_Other</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The cumulative travel cost in unknown units of the route between the facility and the incident. This includes any `AdditionalCost` values for the visited facility and incident if specified.
+
+    This field is included only when the travel mode used for the analysis has an impedance attribute that is neither time-based nor distance-based.
+
+    <Note type={"note"}>
+
+    Additional fields, `Total_[AccumulateAttributeName]_Other`, are included for each cost attribute that is neither time based nor distance based and accumulated during the analysis.
+
+    </Note>
+
+<Note type={"note"}>
+
+An additional field with the name `Total_[MeasurementUnits]` is included if the `measurement_units` parameter is not equal to `Miles`, `Kilometers`, or `Minutes`. For example, if the `measurement_units` parameter is specified as `Meters`, the `output_routes` parameter will include `Total_Meters`, `Total_Miles`, `Total_Kilometers`, and `Total_Minutes` fields.
+
+</Note>
+
+</If>
+
+<If c="requestType == 'direct'">
+-   <p class="space-x-2"><span class="font-bold">Total_[Cost]</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The total distance, time, or other travel cost from the beginning of the first stop to the end of the last stop. The total travel cost and the `Attr_[Cost]` of the visited stops are included in this value.
+
+    This field will be populated if the `[Cost]` part of this field is used as impedance attribute or accumulated attributes.
+</If>
+
+</details>
+
+<If c="requestType == 'job'">
+**Example:**
+
+The following shows an example of the output closest facilities.
+
+<CodeBlock language="json" source="../../code-samples/closestFacility/examples/outputs/outputRoutes.json" group="json" maxLines={20} expandable/>
+</If>

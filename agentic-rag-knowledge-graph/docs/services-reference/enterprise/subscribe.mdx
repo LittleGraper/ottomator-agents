@@ -1,0 +1,452 @@
+---
+title: "Subscribe"
+description: "The subscribe endpoint for a stream service service provides users the ability to connect to a stream service."
+slug: "subscribe"
+url: "/subscribe"
+guid: "GUID-35FE2A5E-BF93-429E-8089-81BD871D8577"
+migratedTopicMetadata:
+  FTITLE: "Subscribe"
+  FDESCRIPTION: "10.7"
+  FCHANGES: "Fixing style elements"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1 - *"
+  CREATED-ON: "22/05/2023 12:44:31"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "06/06/2023 13:58:39"
+  VERSION: "7"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-88CAC590-F492-404F-92C0-39D60FB71935"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/StreamServer/subscribe
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/StreamServer/subscribe
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.3'
+---
+
+## Description
+
+<Note type={"note"}>
+
+You must license your ArcGIS Server as an ArcGIS GeoEvent Server in order to use this resource.
+
+</Note>
+
+The `subscribe` endpoint for a stream service provides users with the ability to connect to a stream service. Clients connecting to a stream service immediately begin receiving event data broadcast through the service.
+
+The HTML page for this endpoint provides a window that displays the JSON content broadcasted through the service. From this page, users first connect to the stream service as a client. Next, they see a JSON representation of the event data in the window.
+
+Custom applications that consume a stream service need to connect to the WebSockets endpoint and, optionally, specify a filter and a security access token as URL parameters. If the connection is successfully established, data flows from the server to the client over the WebSocket. Additionally, a new filter can be specified or an existing filter can be modified by sending JSON messages (explained below) over the same WebSocket connection to limit the data the application receives.
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`token` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The security access token if the stream service is secured.
+
+Syntax
+
+```other
+token=<token string from metadata>
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outSR` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The well-known ID (WKID) for the spatial reference in which the client needs to receive data. Once the spatial reference is set, it cannot be changed for the life of the connection (a new WebSocket connection must be created).
+
+The example below overrides the default spatial reference and sets it to Web Mercator (102100).
+
+Example
+
+```other
+outSR=102100
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geometry` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The geometry part of the filter that will be applied to the data before it is sent from the server.
+
+Syntax
+
+```other
+geometry=<xmin>,<ymin>,<xmax>,<ymax>
+```
+
+Example:
+
+```other
+geometry=("xmin": -109.55,"ymin": 25.76,"xmax": -86.39,"ymax": 49.94,"spatialReference": {"wkid": 4326})
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geometryType` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The type of geometry specified by the geometry parameter. This property is currently ignored and is assumed to be `esriGeometryEnvelope`.
+
+Value: `esriSpatialRelIntersects` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`spatialRel` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The spatial relationship to be applied on the input geometry while performing the query. The supported spatial relationships include intersects, contains, envelope intersects, and within.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`where` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The `where` filter is an SQL-Like expression that filters features from the data stream by checking whether their attributes match the specified `where` clause.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outFields` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The fields within the data stream can be individually filtered using `outFields`. The desired fields are defined using a comma-separated list of field names.
+
+Syntax
+
+```javascript
+outFields=Field1,Field2,Field3
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+```other
+ws(s)://host:port/<streamservice-ws-url>/subscribe?token=<token>&outSR=102100
+```
+
+## Configuring a filter
+
+After a WebSocket connection has been established, additional messages can be sent over the same connection to define a new filter or modify an existing filter. This is possible because WebSocket supports full-duplex, bidirectional communication.
+
+The example below demonstrates the filter's basic structure:
+
+```other
+{
+  "filter": {
+    "geometry": {...},
+    "where": "...",
+    "outFields": "Field1,Field2,..."
+  }
+}
+```
+
+A filter can include a spatial component, an SQL-like query component, and an `outFields`  component. These can be set and cleared independently so any, all, or none of them can be in effect at any point in time. To set one part of the filter, simply specify that part and leave the rest out. The other parts of the filter will remain unchanged. Here is an example of how to set the geometry filter, leaving the `where`  and `outFields`  filter unchanged.
+
+```other
+{
+  "filter": {
+    "geometry": {...}
+  }
+}
+```
+
+To clear part of the filter, specify `null`  as the value for that part as shown in the example that follows.
+
+```other
+{
+  "filter": null
+}
+```
+
+## Filter configuration response from the server
+
+The server processes the filter configuration that is passed in by the client, and sends back a response that describes the result. If there is a problem with the filter, an error message is sent back describing what is wrong with the filter. If the configuration was successfully applied, the `error` property value is `null`. Regardless of the result, the server always includes the current state of the filtering logic so that the client always knows what the server is doing.
+
+The next example shows a response that indicates no error was encountered while applying the filter. Note that the response includes the newly applied filter and the `error`  value is `null` .
+
+```other
+{
+  "filter": {
+    "where": "DepArpt='KZSE'",
+    "outFields": "FID,Location,DepArpt"
+  },
+  "error": null
+}
+```
+
+The next example shows a response that indicates an error was encountered while applying the filter, and that the error was due to invalid formatting (a nonexistent field was included in the `outFields` list). Note that the response includes the original filter and the resultant error message.
+
+```other
+{
+  "filter": {
+    "where": "DepArpt='KZSE'",
+    "outFields": "FID,Location,DepArpt"
+  },
+  "error": ["The field \"Invalid_Field_Name\" does not exist in this Stream Service's schema."]
+}
+```
+
+## The `geometry` filter
+
+The geometry part of the filter is the same as the structure of the [JSON geometry objects](/geometry-objects) returned by the ArcGIS REST API. To preserve the performance of the stream service, only envelopes are accepted as a geometry type for the current release. The next example shows a geometry filter.
+
+```other
+{
+  "filter": {
+    "geometry": {
+      "xmin": -104,
+      "ymin": 35.6,
+      "xmax": -94.32,
+      "ymax": 41
+    }
+  }
+}
+```
+
+The filter can include a spatial relationship identified by the keyword `spatialRel` . This represents the spatial relationship to be applied on the input geometry while performing the query. Currently, the only supported spatial relationship is intersects (`esriSpatialRelIntersects`), which is the default.
+
+The geometry filter is assumed to be in the same spatial reference as the connection (which can only be overridden at connection time). If a different spatial reference is specified as part of the geometry, the envelope is projected into the connection's spatial reference for use when filtering features from the data stream, as shown in the following example:
+
+```other
+{
+  "filter": {
+    "geometry": {
+      "xmin": -104,
+      "ymin": 35.6,
+      "xmax": -94.32,
+      "ymax": 41,
+      "spatialReference": {
+        "wkid": 4326
+      }
+    }
+  }
+}
+```
+
+## The `where` filter
+
+The `where` filter is an SQL-like expression that filters features from the data stream by checking to see whether their attributes match the specified where clause. The expression should be a quoted JSON string value. The supported operations include: 
+
+- `AND` 
+- `OR` 
+- `NOT` 
+- `=` 
+- `!=` 
+- `<` 
+- `<=` 
+- `>` 
+- `>=` 
+- `IS NULL` 
+- `IS NOT NULL` 
+- `IN` 
+- `LIKE` 
+
+Comparisons can be made between a field and a literal value (`field1 > 1`) or between two fields of the same type (`field1 > field2`). Parentheses can be added to make precedence explicitly enforced.
+
+### Numerical comparison
+
+This example compares a field (Altitude) with a numeric value.
+
+```other
+{
+  "filter": {
+    "where": "Altitude < 1000"
+  }
+}
+```
+
+### Field comparison
+
+This example compares two fields.
+
+```other
+{
+  "filter": {
+    "where": "speed > maxSpeed"
+  }
+}
+```
+
+### String comparison
+
+Strings can be compared. Comparisons are always case-sensitive, and literal values should be surrounded with single quotes.
+
+```other
+{
+  "filter": {
+    "where": "Departure_Airport='KZSE'"
+  }
+}
+```
+
+### `LIKE` statements
+
+Strings can be compared using the `LIKE` statement to make use of wildcards. The percent sign (%) is any number of characters, and the underscore (\_) can be any single character. The following filter will accept people whose name has the second and third character equal to "am", such as "Samantha" and "James", but not "Calamity Jane". 
+
+```other
+{
+  "filter": {
+    "where": "name LIKE '_am%'"
+  }
+}
+```
+
+### `IN` statements
+
+The `IN` statement allows lists of literal values to be specified. If the field matches any value in the list, then the feature is passed through the stream. The following example shows a list of strings:
+
+```other
+{
+  "filter": {
+    "where": "name IN ('Bob','Jane','Henry')"
+  }
+}
+```
+
+Here is an example of the `IN` statement using a list of numeric values.
+
+```other
+{
+  "filter": {
+    "where": "alertCode IN (404,500,505)"
+  }
+}
+```
+
+It is also possible to use a Boolean field in place of a Boolean expression. So, for example, if your features contain a field named `active` that has Boolean data type, you could write a where clause, such as shown in the example below. It allows any features through that have the `active` field set to `true`.
+
+```other
+{
+  "filter": {
+    "where": "active"
+  }
+}
+```
+
+## The `outFields` filter
+
+The fields within the data stream can be individually filtered using the Out Fields Filter identified with the keyword `outFields`. The fields you want are defined using a comma-separated list of field names.
+
+```other
+{
+  "filter": {
+    "outFields": "Field1,Field2,Field3"
+  }
+}
+```
+
+##  Close frames and return codes
+
+When closing an established WebSocket connection, the stream service may include a custom error code and indicate a reason for closure. More information on error codes can be found at: [(https://tools.ietf.org/html/rfc6455)](https://tools.ietf.org/html/rfc6455).
+
+- 1001 — The WebSocket connection was dropped because the stream service was either deleted or stopped on the server.
+- 4400 — The parameters in the URL (where clause, wkid, outfields, etc.) are invalid in some way. The message embedded in the close frame will give details on which parameter is invalid and why.
+
+    Example:
+
+    ```other
+    ws(s)://host:port/<streamservice-url>/subscribe?outSR=<bad_sr>
+    ```
+
+-   4401—The stream service is protected, and the client has not supplied an access token, which is necessary to connect to the `subscribe` endpoint.
+
+    Example:
+
+    ```other
+    ws(s)://host:port/<streamservice-url>/subscribe
+    ```
+ 
+-   4403—The stream service is protected, and the client has provided a valid token, but the token is not allowed to see the requested service. The administrator needs to give this user permission to see the content.
+
+    4404— While parsing the URL to determine the name of the stream service, the server could not find a matching stream service. Either the service name is wrong, or the URL is malformed in some way.
+
+    Example:
+
+    ```other
+    ws(s)://host:port/arcgis/ws/services/WrongService/StreamServer/subscribe?token=XYZ
+    ```
+
+     

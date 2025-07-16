@@ -1,0 +1,848 @@
+---
+title: "/export: Export Group Content"
+description: "This operation allows you to extract all supported items, or a set of supported items, from a group into an export package (.epk) that can be uploaded and published into a separate ArcGIS Enterprise organization."
+slug: "export-group-content"
+url: "/export-group-content"
+guid: "GUID-D4C7265F-3A95-437D-AA0A-E7BD58BE0B71"
+migratedTopicMetadata:
+  FTITLE: "Export Group Content"
+  FDESCRIPTION: ""
+  FCHANGES: "Adding support for Instant Apps"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2-*"
+  CREATED-ON: "13/07/2023 13:30:31"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "15/08/2023 14:02:05"
+  VERSION: "8"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-EA3FE518-41F8-42BE-B737-E8017C15A705"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /community/groups/[groupID]/export
+  urlSegments:
+    - name: '[root]'
+      url: /root
+    - name: /community/groups/[groupID]/export
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: 'ArcGIS Enterprise 10.8.1'
+  requiredCapability: Administrator | Group Owner
+---
+
+## Example usage
+
+<Note type={"note"}>
+
+This operation is only supported in ArcGIS Enterprise.
+
+</Note>
+
+The following is a sample POST request for the `export` operation:
+
+```markdown
+POST /webadaptor/sharing/rest/community/groups/3ca5299f4b3d423ebd66e9f72f9ef638/export HTTP/1.1
+Host: machine.domain.com
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryYhbOXGMMNAbGl1gv
+
+------WebKitFormBoundaryYhbOXGMMNAbGl1gv
+Content-Disposition: form-data; name="itemIdList"
+
+------WebKitFormBoundaryYhbOXGMMNAbGl1gv
+Content-Disposition: form-data; name="async"
+
+true
+------WebKitFormBoundaryYhbOXGMMNAbGl1gv
+Content-Disposition: form-data; name="exportContentFolderId"
+
+
+------WebKitFormBoundaryYhbOXGMMNAbGl1gv
+Content-Disposition: form-data; name="exportContentFolder"
+
+testFolder
+------WebKitFormBoundaryYhbOXGMMNAbGl1gv
+Content-Disposition: form-data; name="previewOnly"
+
+false
+------WebKitFormBoundaryYhbOXGMMNAbGl1gv
+Content-Disposition: form-data; name="f"
+
+pjson
+------WebKitFormBoundaryYhbOXGMMNAbGl1gv--
+```
+
+## Description
+
+The `export` operation extracts all supported items, or a set of supported items, from a group and exports them into an export package (`.epk`) that can be [uploaded](/add-item) and [imported](/import-group) into a separate ArcGIS Enterprise organization. In addition, the `export` operation can be used to extract content so that it can be moved between disconnected environments, as well as assist with workflows where select content needs to be [backed up and restored](https://enterprise.arcgis.com/en/portal/latest/administer/windows/create-web-gis-backup.htm) or archived. It is important to note that the receiving organization must be using the same version (or later) of ArcGIS Enterprise as the environment where the export package was generated.
+
+<Note type={"note"}>
+
+This operation is also supported for groups that had the **Shared updates** designation set during group creation.
+
+</Note>
+
+To demonstrate this functionality, consider the following scenario: You are a group owner who wants to move a set of the group's items from your organization's development environment to staging, and then from staging to production. You can call this operation and specify a list of item IDs for the items you wish to move to staging using the `itemIdList` parameter. Once the selected items have been exported into the downloadable export package, you can upload the package to your staging environment using the [Add Item](/add-item) operation and, once added, call the [Import](/import-group) operation to add the items to a designated group in your staging environment. This process can then be repeated to move the group's content from staging to production.
+
+<Note>
+
+When content is exported, the item's metadata is included in the export package. Starting at 11.3, sublayer metadata is also included in the export package.
+
+</Note>
+
+### Supported items
+
+The following table specifies the items that can be exported and included in an export package.
+
+<Note type={"note"}>
+
+Group-based Esri configurable app templates are not supported.
+
+</Note>
+
+<StyledTable headers={"Item types,Configurable App Template,Configurable Solution Apps"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      ArcPad Package
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Attachment Viewer
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Web AppBuilder
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      CAD Drawing
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Story Map Cascade
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      CityEngine Web Scene
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Compare
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Code Attachment
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Crowdsource Polling
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      CSV Collection
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Directions
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      CSV
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Edit
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Deep Learning Package
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      GeoForm
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Desktop Application Template
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Image Mask
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Hosted Feature Services
+
+      <Note type={"note"}>
+
+      Only hosted feature services are supported. <br />Spatiotemporal-based hosted feature services,
+      proxied <br />feature services, and hosted feature service views are not <br />supported.
+      Hosted feature services will be exported <br />with their associated data. References to
+      layers within web map, <br />web scene, and web mapping applications will be updated to
+      <br />reflect the ArcGIS Enterprise organization where they have <br />been imported.
+
+      </Note>
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Imagery Viewer
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      File Geodatabase
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Image Visit
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      GeoJson
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Impact Summary
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      GeoPackage
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Informational Lookup
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Geoprocessing Sample
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Filter
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Image Collection
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Interactive Legend
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Image
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Local Perspective
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      ArcGIS Instant Apps
+
+      <Note type={"note"}>
+
+      Support added at ArcGIS Enterprise 10.9.1
+
+      </Note>
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      iWork Keynote
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Story Map Journal
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      iWork Numbers
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Story Map Series
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      iWork Pages
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Map Tools
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      KML Collection
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Story Map Tour
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      KML
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Media Map
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Map Template
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Minimalist
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Microsoft Excel
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Nearby
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Microsoft PowerPoint
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Classic Viewer
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Microsoft Word
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Elevation Profile
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      PDF
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Public Information
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Shapefile
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Simple Map Viewer
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      StoryMap
+
+      <Note type={"note"}>
+
+      Support added at ArcGIS Enterprise 11.0
+
+      </Note>
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Story Map Basic
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      StoryMap Theme
+
+      <Note type={"note"}>
+
+      Support added at ArcGIS Enterprise 11.0
+
+      </Note>
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Story Map Swipe and Spyglass
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      SQLite Geodatabase
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Map Styler
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Visio Document
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Summary Viewer
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Web Experience
+
+      <Note type={"note"}>
+
+      Support added at ArcGIS Enterprise 11.1
+
+      </Note>
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Web Experience Template
+
+      <Note type={"note"}>
+
+      Support added at ArcGIS Enterprise 11.1
+
+      </Note>
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Web Map
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Time Aware
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Web Mapping Application
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Basic Viewer
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Web Scene
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Zone Look Up
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+### Additional considerations
+
+Only items contained in the group will be exported. If an item has any dependencies, such as a web map with a dependency on the operation service items contained in the map, both the item and its dependency must be shared with the group. If the dependent items are not included in the export package, and they don't already exist in the receiving portal, any calls made to the dependent items will fail.
+
+An export package cannot exceed 5 GB, and any one item within the package cannot exceed 1 GB. The system will check to ensure that the portal content store has a minimum of 10 GB of disk space available before attempting to either export or import group content.
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `itemIdList` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A comma separated list of item IDs, that exist within the group, to be included in the export package. By default, the system will attempt to export all supported item in the group into an export package. If item IDs are specified in this parameter, the system will instead attempt to only export those items.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      If `true`, the request is run as an asynchronous job. If set as `true`, the response will return job details.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `exportContentFolderId`
+
+      (Optional) 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.4. The ID of the folder the export package will be added to. To set the export package's destination as the root folder, set the value as a forward slash (/) rather than a folder ID. If a value is provided for `exportContentFolderId` it will take precedence over any values set for the `exportContentFolder` parameter.
+
+      ```markdown
+      //Specifying the root folder
+      /
+
+      //Specifying a specific folder
+      1851c185888a43fcb3d6fffb78ae7c94
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `exportContentFolder`
+
+      (Optional) 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.4. The name of the folder the export package will be added to. If no folder name is specified, the export package will be added to a folder named **Exports**.
+
+      ```markdown
+      testFolder
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `outputFilename`
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.3. Sets a user-defined name for the export package. If no name is provided, the export package will be named using the following format:
+
+      ```markdown label=syntax
+      groupName_timestamp.epk
+      ```
+
+      For example, if the group's name was "Test Group", and no value for `outputFilename` was specified, the export package would be named:
+
+      ```markdown label=Example
+      Test_Group_2024402_032742.epk
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `previewOnly`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.4. If set to `true`, when the export operation is performed, an export package is not created. Instead, the operation returns a list of the supported items that could be included in the export package.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Accessing results
+
+If `async` is `false`, and `f` is set to `html`, the response is an octet stream a client uses for downloading the export package. If `f` is set to `json`, the octet stream response cannot be returned on a successful export and an HTTP Status 400 error is returned.
+
+If there are no items to export, a JSON response resembling the one below will be returned:
+
+```markdown
+{
+  "itemsExported": [],
+  "itemsSkipped": [],
+  "itemsFailedExport": []
+}
+```
+
+If `async` is `true`, a `jobID` and `key` is returned:
+
+```markdown
+{
+  "jobId": "0c3d9012681845e4aa3ca3e5f9aae8fa",
+  "key": "DjUElZ3XQjbJ2S/g7D5644SCEaTfDniHo5XQYYVWGjY="
+} 
+```
+
+Group owners attempting to export group content, but who are not administrators, must use both the `jobID` and `key` values to check the job's results and status using the following URL format:
+
+```markdown
+https://machine.domain.com/webadaptor/sharing/rest/portals/<orgID>/jobs/<jobID>?key=<keyValue>
+```
+
+Administrators can check the job's results and status using the jobID value in the following URL format:
+
+```markdown
+https://machine.domain.com/webadaptor/sharing/rest/portals/<orgID>/jobs/<jobID>
+```
+
+If successful, a success response will be returned containing an `itemID` and other job information. To download the export package, append the `itemID` from the response using the following URL format:
+
+```markdown
+https://machine.domain.com/webadaptor/portal/sharing/rest/content/items/<itemID>/data
+```
+
+## JSON Response example
+
+```other
+{
+  "id": "fadcd0a7b58c422ebcf0847aad76885d",
+  "definition": {
+    "type": "export",
+    "operationId": "cm009fe62d885748a4a19050844e1f8c20",
+    "groupId": "3ca5299f4b3d423ebd66e9f72f9ef638",
+    "groupTitle": "myGroup"
+  },
+  "status": "succeeded",
+  "created": 1586901221029,
+  "modified": 1586901241914,
+  "messages": [
+    "Starting export of items in group 'myGroup' with id '142b3c7995ec447288f15db4d301fe53'.",
+    "{\"itemsExported\":[{\"itemId\":\"7c1124277b2f4847ae668de6c5135e6d\"},{\"itemId\":\"ac34a93042bb468faf17e933609ade79\"},{\"itemId\":\"f672235d835d46008b4d68145238ab19\"}],\"itemsSkipped\":[],\"itemsFailedExport\":[]}",
+    "Added Export Package item with id '63a078b6aef54f1c91102fd9d4aa47f5' for group with id '142b3c7995ec447288f15db4d301fe53'."
+  ],
+  "result": {
+    "itemId": "63a078b6aef54f1c91102fd9d4aa47f5",
+    "created": 1586901241910
+  }
+}
+```
+
+ 

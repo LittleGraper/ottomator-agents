@@ -1,0 +1,570 @@
+---
+title: "Edit (Default Properties)"
+description: "The edit operation modifies the default scaling and resource allocation properties for a specific microservice within your organization."
+slug: "edit-deployment-properties"
+url: "/edit-deployment-properties"
+guid: "GUID-73410988-5D79-4BA2-AF80-3E722A2FC272"
+migratedTopicMetadata:
+  FTITLE: "Edit Deployment Properties"
+  FDESCRIPTION: ""
+  FCHANGES: "Changing supported hpaVersion"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2-*"
+  CREATED-ON: "31/10/2023 16:31:17"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "12/11/2023 11:22:42"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-3A4731DB-CE5A-4DCF-9A42-575AA7329B8D"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /system/deployments/properties/<propertyTemplateID>/edit
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /system/deployments/properties/<propertyTemplateID>/edit
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed only with the default administrator role
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `edit` operation modifies the default scaling and resource allocation properties for a specific microservice within your organization. Once the default properties have been updated, all newly published microservices that match the `type`, `provider`, and `mode` values of the default template will have the updated properties assigned to them. You'll need to update preexisting deployment properties individually using the [Edit](/edit-deployment) deployment operation.
+
+Starting at ArcGIS Enterprise 11.2 on Kubernetes, the `edit` operation can also be used to set the default [node affinity and toleration](/edit-placement-policy) values on GIS service microservices.
+
+### Scaling in ArcGIS Enterprise on Kubernetes
+
+Either manual scaling or autoscaling can be set for a microservice using the `propertyJson` parameter. Introduced at ArcGIS Enterprise on Kubernetes 10.9.1, autoscaling allows administrators to configure and deploy systems that respond to unexpected performance demands with minimal intervention and overhead. The ArcGIS Enterprise on Kubernetes autoscaling capability uses [horizontal pod autoscaling](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/), which, in response to an increase in resource usage, deploys additional pods according to the values set by the administrator.
+
+When a specific CPU utilization threshold (`averageUtilization`) is crossed, ArcGIS Enterprise on Kubernetes scales the number of pods up to the maximum (`max`) value set in the `replicas` JSON object. When utilization drops, and the additional resources are no longer needed, the system scales itself back down to no lower than the minimum (`min`) value set in the `replicas` JSON object. For more information about enabling autoscaling, see the [Editable properties](/edit-deployment-properties#GUID-7A9AB32E-6ABE-4804-B87E-CD675C8F4D4D) section below.
+
+<Note type={"caution"}>
+
+Though scaling properties can be updated using the [Edit](/edit-deployment-properties) default properties and [Edit](/edit-deployment) deployment operations, to reduce risk of errors it is recommended that changes to scaling information is performed using the [Edit](/edit-scaling) scaling operation.
+
+</Note>
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `propertyJson` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The JSON object representing the default property template that specifies the scaling (`min` and `max`) and resource allocations (`memoryMin`, `cpuMin`, `memoryMax`, and `cpuMax`) for a particular microservice type. For more information, see the [Template properties](/edit-deployment-properties#template-properties) section below.
+
+      ```other label=Example
+      propertyJson={
+        "mode": "Dedicated",
+        "provider": "ArcObjects11",
+        "id": "pflhvjnd6z3hy56dkfo55",
+        "type": "GPSyncServer",
+        "spec": {
+          "replicas": {
+            "min": 3,
+            "max": 3,
+            "scalingMode": "manual" //Added at 11.0
+          },
+          "containers": [
+            {
+              "name": "main-container",
+              "resources": {
+                "memoryMin": "1.5Gi",
+                "memoryMax": "5Gi",
+                "cpuMin": "0.125",
+                "cpuMax": "2"
+              },
+              "containerImageKey": "GP_SERVER"
+            },
+            {
+              "name": "filebeat",
+              "resources": {
+                "memoryMin": "32Mi",
+                "memoryMax": "50Mi",
+                "cpuMin": "0.05",
+                "cpuMax": "0.25"
+              },
+              "containerImageKey": "FILEBEAT"
+            }
+          ]
+        },
+        "revision": 1618223886566
+      }
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Template properties
+
+The example below demonstrates a full JSON object of a property template.
+
+```other
+{
+  "mode": "Dedicated",
+  "provider": "ArcObjects11",
+  "id": "pflhvjnd6z3hy56dkfo55",
+  "type": "GPSyncServer",
+  "spec": {
+    "replicas": {
+      "min": 3,
+      "max": 3,
+      "scalingMode": "manual" //Added at 11.0
+    },
+    "containers": [
+      {
+        "name": "main-container",
+        "resources": {
+          "memoryMin": "1.5Gi",
+          "memoryMax": "5Gi",
+          "cpuMin": "0.125",
+          "cpuMax": "2"
+        },
+        "containerImageKey": "GP_SERVER"
+      },
+      {
+        "name": "filebeat",
+        "resources": {
+          "memoryMin": "32Mi",
+          "memoryMax": "50Mi",
+          "cpuMin": "0.05",
+          "cpuMax": "0.25"
+        },
+        "containerImageKey": "FILEBEAT"
+      }
+    ]
+  },
+  "revision": 1618223886566
+}
+
+```
+
+ The subsections below describe the individual properties included in the property template JSON object that can, and cannot, be updated using this operation.
+
+
+### Editable properties
+
+The properties below can be updated using the `edit` operation.
+
+<Note type={"caution"}>
+
+Though scaling properties can be updated using the [Edit](/edit-deployment-properties) default properties and [Edit](/edit-deployment) deployment operations, to reduce risk of errors it is recommended that changes to scaling information is performed using the [Edit](/edit-scaling) scaling operation.
+
+</Note>
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `replicas` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The number of replicas for the microservice. The default value for `manual` scaling for `min` and `max` is 1. For manual scaling, both the `min` and `max` values must be the same.
+
+      ```markdown label=Example
+      "replicas": {
+        "min": 3,
+        "max": 3,
+        "scalingMode": "manual"
+      },
+      ```
+
+      For organizations using ArcGIS Enterprise 11.2 on Kubernetes or later versions, version 2 (v2) of the autoscaling feature can be enabled by passing in the JSON object below and modifying the `min`, `max`, `scalingMode`, and `averageUtilization` values.
+
+      <Note type={"legacy"}>
+
+      Prior to 11.2, the beta version of v2 autoscaling (v2beta2) could be enabled and be used to configure advanced scaling settings. At Kubernetes v1.26, [v2beta2 is no longer supported](https://kubernetes.io/blog/2022/11/18/upcoming-changes-in-kubernetes-1-26/#removal-of-the-v2beta2-horizontalpodautoscaler-api). Organizations that are upgrading to v1.26, and are using a deployment of ArcGIS Enterprise on Kubernetes at 11.2 or higher, must update their HPA configurations from `autoscaling/v2beta2` to `autoscaling/v2`.
+
+      </Note>
+
+      Autoscaling can be enabled by adjusting the `scalingMode` value to `auto`. The `averageUtilization` value will act as the CPU utilization threshold for autoscaling. If the threshold is crossed, ArcGIS Enterprise on Kubernetes scales up to the number of pods specified by the `max` value, and will return to no lower than the default pod level (the value set for `min`) once utilization decreases.
+
+      ```markdown label=Example
+      "replicas": {
+        "min": 1,
+        "max": 10,
+        "scalingMode": "auto",
+        "autoscaling": {
+          "hpaSpec": {
+            "metrics": [
+              {
+                "resource": {
+                  "name": "cpu",
+                  "target": {
+                    "averageUtilization": "65",
+                    "type": "Utilization"
+                  }
+                },
+                "type": "Resource"
+              }
+            ],
+            "hpaVersion": "autoscaling/v2"
+          }
+        }
+      },
+      ```
+
+      Organizations using ArcGIS Enterprise on Kubernetes 10.9.1 can enable version 1 of the autoscaling feature by passing in the JSON object below and modifying the `min`, `max`, `scalingMode`, and `targetCPUUtilizationPercentage` values:
+
+      ```markdown label=Example
+      "replicas": {
+        "min": 1,
+        "max": 5,
+        "scalingMode": "auto",
+        "autoscaling": {
+          "hpaSpec": {
+            "targetCPUUtilizationPercentage": 50
+          },
+          "hpaVersion": "autoscaling/v1"
+        }
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `podPlacementPolicy` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.2. Sets the node affinity or tolerations applied that will be applied the pods of a GIS service deployment. For more information on configuring node affinity or tolerations, see the [Edit (Placement Policy)](/edit-placement-policy) operation.
+
+      ```markdown lable=nodeAffinity
+      "nodeAffinity": {
+        "requiredDuringSchedulingIgnoredDuringExecution": {
+          "nodeSelectorTerms": [
+            {
+              "matchExpressions": [
+                {
+                  "key": "affinity",
+                  "operator": "In",
+                  "values": [
+                    "true"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+
+
+      ```
+
+      ```markdown label=Tolerations
+      "tolerations": [
+        {
+          "effect": "NoExecute",
+          "key": "tolerates",
+          "operator": "Equal",
+          "value": "true"
+        }
+      ]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `resources` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The minimum and maximum resource allocations for the microservice, including the minimum memory (`memoryMin`) and minimum CPU (`cpuMin`) resources required for the microservice to start. The default values for `memoryMin`, `cpuMin`, `memoryMax`, and `cpuMax` are shown in the example below.
+
+      ```markdown label=Example
+      "resources": {
+        "memoryMin": "500Mi",
+        "memoryMax": "2Gi",
+        "cpuMin": "0.125",
+        "cpuMax": "2"
+      },
+      ```
+
+      Starting at ArcGIS Enterprise 11.3 on Kubernetes, organizations can implement device plugins to enable GPU nodes in their cluster to optimize workflows for raster analytics and deep learning. Requests and limits for GPU are set using the `customResources` object.
+
+      The following deployments will need to have `request` and `limits` values set for GPU:
+
+      * `system-rasteranalysistools-gpsyncserver` (used for training models)
+      * `system-rasterprocessinggpu-dpserver` (used for processing)
+
+      Values for `requests` and `limits` only need to be set on `main-container`.
+
+      <Note>
+      
+      To enable GPU, a [NVIDIA device plugin for Kubernetes](https://github.com/nvidia/k8s-device-plugin) is required. For more information on enabling GPU, see [GPU enabled mods](https://enterprise-k8s.arcgis.com/en/latest/deploy/gpu-enabled-nodes.htm).
+
+      </Note>
+
+      The example below shows the accepted values for both `requests` and `limits`:
+
+      ```markdown label=Example
+      "resources": {
+        "memoryMin": "32Mi",
+        "memoryMax": "50Mi",
+        "cpuMin": "0.05",
+        "cpuMax": "0.25",
+        "customResources": {
+          "limits": {
+            "nvidia.com/gpu": "1"
+          },
+          "requests": {
+            "nvidia.com/gpu": "1"
+          }
+        }
+      }
+
+      ```
+
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+### Uneditable properties
+
+The following properties cannot be edited but are required to be passed through in the `propertyJson` object:
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `mode` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The microservice mode. A mode type of `Undefined` is used when the microservice is system related (Admin API, portal sharing, ingress controller, and so on.). Only microservices related to an ArcGIS service type return `Dedicated` or `Shared` for this property.
+
+      Values: `Shared` | `Dedicated` | `Undefined` | `Primary` | `Standby` | `Coordinator`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `provider` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The microservice provider. Only microservices related to an ArcGIS service type have a provider type. A provider type of `Undefined` is used for microservices that are not service related (Admin API, portal sharing, ingress controller, and so on).
+
+      Values: `SDS` | `ArcObjects11` | `DMaps` | `Undefined` | `Postgres` | `Tiles` | `Ignite` | `MinIO` | `Elasticsearch` | `RabbitMQ` | `ArcObjectsRasterRendering`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `id` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The template ID.
+
+      ```markdown label=Example
+      "id": "9375dd81-30d1-41c0-a802-cabb425159a9",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `type` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The microservice type. For example, if the microservice is a shared feature server containing feature services, the `type` will be `FeatureServer`. For microservices that are not service related, the `type` will be `System`.
+
+      Values: `FeatureServer` | `GeometryServer` | `GPServer` | `GPSyncServer` | `MapServer` | `TileServer` | `System` | `InMemoryStore` | `ObjectStore` | `SpatiotemporalIndexStore` | `QueueServer` | `RelationalStore` | `WebhookProcessor` (Added at 11.0)
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `spec` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The JSON object representation of the template's specifications, including replicas and container resources.
+
+      ```other label=Example
+      "spec": {
+        "replicas": {
+          "min": 3,
+          "max": 3,
+          "scalingMode": "manual"
+        },
+        "containers": [
+          {
+            "name": "main-container",
+            "resources": {
+              "memoryMin": "1.5Gi",
+              "memoryMax": "4Gi",
+              "cpuMin": "0.125",
+              "cpuMax": "2"
+            },
+            "containerImageKey": "GP_SERVER"
+          },
+          {
+            "name": "filebeat",
+            "resources": {
+              "memoryMin": "32Mi",
+              "memoryMax": "50Mi",
+              "cpuMin": "0.05",
+              "cpuMax": "0.25"
+            },
+            "containerImageKey": "FILEBEAT"
+          }
+        ]
+      },
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `revision` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The date, in milliseconds from epoch format, of the latest revision to the template.
+
+      ```markdown label=Example
+      "revision": 1598217421474
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+<Note type={"caution"}>
+
+Though both the scaling and placement policy for a deployment can be updated using the [Edit](/edit-deployment) deployment and [Edit](/edit-deployment-properties) default properties operations, to reduce risk of errors it is recommended that changes to these properties are performed at the service-level for currently configured services. For scaling, see the [Edit](/edit-scaling) scaling operation. For placement policies, see the [Edit](/edit-placement-policy) placement policy operation.
+
+</Note>
+
+The following is a sample POST request for the `edit` operation that demonstrates autoscaling, formatted for readability:
+
+```other
+POST /context/admin/system/deployments/properties/9375dd81-30d1-41c0-a802-cabb425159a9/edit HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+propertyJson={
+  "mode": "Dedicated",
+  "provider": "ArcObjects11",
+  "id": "pflhvjnd6z3hy56dkfo55",
+  "type": "GPSyncServer",
+  "spec": {
+    "replicas": {
+      "min": 1,
+      "max": 4,
+      "scalingMode": "auto",
+      "autoscaling": {
+        "hpaSpec": {
+          "metrics": [
+            {
+              "resource": {
+                "name": "cpu",
+                "target": {
+                  "averageUtilization": "50",
+                  "type": "Utilization"
+                }
+              },
+              "type": "Resource"
+            }
+          ],
+          "hpaVersion": "autoscaling/v2"
+        }
+      }
+    },
+    "containers": [
+      {
+        "name": "main-container",
+        "resources": {
+          "memoryMin": "1.5Gi",
+          "memoryMax": "5Gi",
+          "cpuMin": "0.125",
+          "cpuMax": "2"
+        },
+        "containerImageKey": "GP_SERVER"
+      },
+      {
+        "name": "filebeat",
+        "resources": {
+          "memoryMin": "32Mi",
+          "memoryMax": "50Mi",
+          "cpuMin": "0.05",
+          "cpuMax": "0.25"
+        },
+        "containerImageKey": "FILEBEAT"
+      }
+    ]
+  },
+  "revision": 1618223886566
+}
+&f=pjson&token=ShyoW_1p9PjJNuVfR0D3a4qpLSAOJKVPoFWS6cEC6J3rXVkEWKEbD82VjAB0VQ_hWImd9pd-1h7AsHTt0m45N1_mzyzR-66Rqhu2Ydl7zc1Yk7JVRneVmQORFy2efBnc1ZndpXfuoKe41XRFGz3wl9LI8kG35lqAPGjM5F7v_hQMkhC1Ky37BDLizZCR4-xtq3h0Nb4VfYNtJRjwoKUUkgaaJSEUtilXj936p1yNBnPYQWb7dDjVuSVr502EzjvB
+
+```
+
+## JSON Response example
+
+```other
+{"status": "success"}
+```

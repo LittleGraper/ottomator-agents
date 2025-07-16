@@ -1,0 +1,365 @@
+---
+title: "Validate Network Topology"
+description: "Validating the network topology for a trace network maintains consistency between feature editing space and network topology space."
+slug: "validatenetworktopology-trace-network-server"
+url: "/validatenetworktopology-trace-network-server"
+guid: "GUID-8277B367-D490-4A97-8CC6-C45E2D0CBE3D"
+migratedTopicMetadata:
+  FTITLE: "validateNetworkTopology (Trace Network Server)"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9 - *"
+  CREATED-ON: "27/08/2020 09:11:01"
+  FAUTHOR: "mjarman"
+  FSTATUS: "Released"
+  MODIFIED-ON: "11/12/2020 05:59:55"
+  VERSION: "1"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "14"
+  ED: "GUID-8A7199B2-DB96-4C55-B94B-942329A2D2FF"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/TraceNetworkServer/validateNetworkTopology
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/TraceNetworkServer/validateNetworkTopology
+  methods: 
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapability: Requires the ArcGIS Advanced Editing user type extension license
+---
+
+import GUID_A40984C0_8A9D_4F77_9443_3255FBBE0784_GUID_B83145AF_12E5_417F_829B_9D31F145BA69 from "./snippets/GUID-A40984C0-8A9D-4F77-9443-3255FBBE0784/_GUID-B83145AF-12E5-417F-829B-9D31F145BA69";
+
+## Description
+
+Validating the network topology for a trace network maintains consistency between feature editing space and network topology space. Validating a network topology may include all or a subset of the dirty areas present in the network.
+
+<GUID_A40984C0_8A9D_4F77_9443_3255FBBE0784_GUID_B83145AF_12E5_417F_829B_9D31F145BA69 />
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The output format of the response. The default response format is `html`. 
+
+```
+f=html | json | pjson
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`gdbVersion` 
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the name of the geodatabase version. The default is `sde.Default`.
+
+Syntax: `gdbVersion=<version>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sessionID` 
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the token guid used to lock the version. If the calling client is editing a named version, the sessionId must be provided; if the client is editing DEFAULT, the version may not be locked and the sessionId should not be specified.
+
+Syntax: `sessionId=<guid>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`validateArea` 
+
+(Required)   
+
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The envelope of the area to validate.
+
+Syntax:
+
+```json
+{
+ "xmin": <minimum x-coordinate>,
+ "ymin": <minimum y-coordinate>,
+ "xmax": <maximum x-coordinate>,
+ "ymax": <maximum y-coordinate>,
+ "spatialReference": {
+  "wkid": <spatial reference well-known identifier>,
+  "latestWkid": <the current wkid value associated with the wkid>	
+ }
+}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnEdits` 
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Boolean property specifying whether to return the modified features. Returned results are organized in a layer-by-layer fashion. If `returnEdits` is set to `true`, each layer may have edited features returned in an editedFeatures object.
+
+The editedFeatures object returns full features including the original features prior to delete; the original and current features for updates; and the current rows for inserts, which may contain implicit changes (for example, as a result of a calculation rule).
+
+The response includes no `editedFeatures` and `exceededTransferLimit` = `true` if the count of edited features to return is more than the `maxRecordCount`. If clients are using this parameter to maintain a cache, they should invalidate the cache when exceededTransferLimit = true is returned. If the server encounters an error when generating the list of edits is the response, `exceededTransferLimit` = `true` is also returned.
+
+Edited features are returned in the spatial reference of the feature service as defined by the services spatialReferenceobject or by the spatialReference of the layer's extent object.
+
+The default for this parameter is `false`.
+
+```
+returnEdits=true | false
+``` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## JSON Response syntax
+
+JSON response:
+
+```json
+{
+  "moment" : <datetime>,
+  "fullUpdate" : <true | false>,
+  "validateErrorsCreated" : <true | false>, 
+  "dirtyAreaCount" : <long>,
+  “exceededTransferLimit : <true | false>,  // only if returnEdits is true 
+  “serviceEdits” : [                        // only if returnEdits is true 
+    { 
+      “id” : <layerId>,  
+      “editedFeatures” : 
+        { 
+          "adds" : [<currentFeature1>, <currentFeature2>], 
+          "updates" : [ 
+            [<originalFeature3>, <currentFeature3>], 
+            [<originalFeature4>, <currentFeature4>] 
+          ], 
+          "deletes" : [<originalFeature5>, <originalFeature6>] 
+        } 
+    } 
+  ], 
+  "success" : <true | false>,
+  "error" : {                   // only if success is false
+    "extendedCode" : <HRESULT>,
+    "message" : <error message>,
+    "details" : [ <detail> ]
+  }
+}
+
+```
+
+ 
+
+## Example usage
+
+Validate a specified extent for a trace network using the `validateNetworkTopology` operation.
+
+Request URL and parameters:
+
+`https://myserver.esri.com/server/rest/services/LandUse/TraceNetworkServer/validateNetworkTopology` 
+
+```json
+f=json
+gdbVersion=sde.default
+validateArea=
+{	
+ "xmin": 1034659.2752358826,	
+ "ymin": 1871561.7755379943,	
+ "xmax": 1034730.4307899779,	
+ "ymax": 1871623.0833411064,	
+ "spatialReference": {
+  "wkid": 102671,
+  "latestWkid": 3435	
+ }
+}
+returnEdits=true
+
+```
+
+ 
+
+JSON response:
+
+```json
+{
+ "exceededTransferLimit": false,
+ "serviceEdits": [
+  {
+   "id": 5,
+   "editedFeatures": {
+    "spatialReference": {
+     "wkid": 4326,
+     "latestWkid": 4326,
+     "xyTolerance": 8.983152841195215e-09,
+     "zTolerance": 0.00020000000000000001,
+     "mTolerance": 0.001,
+     "falseX": -400,
+     "falseY": -400,
+     "xyUnits": 999999999.999999881,
+     "falseZ": -100000,
+     "zUnits": 10000,
+     "falseM": -100000,
+     "mUnits": 10000
+    },
+    "adds": [
+     {
+      "attributes": {
+       "OBJECTID": 3,
+       "GLOBALID": "{BFB2C23B-44D3-42CA-AD85-6ED841F405AE}"
+      },
+      "geometry": {
+       "x": -79.7467916069999774,
+       "y": 35.76075521100006
+      }
+     },
+     {
+      "attributes": {
+       "OBJECTID": 4,
+       "GLOBALID": "{6645BB68-6F5B-4F63-B9AC-5A03534FA2D1}"
+      },
+      "geometry": {
+       "x": -78.6244635199999493,
+       "y": 35.8222526400000447
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": 6,
+   "editedFeatures": {
+    "spatialReference": {
+     "wkid": 4326,
+     "latestWkid": 4326,
+     "xyTolerance": 8.983152841195215e-09,
+     "zTolerance": 0.00020000000000000001,
+     "mTolerance": 0.001,
+     "falseX": -400,
+     "falseY": -400,
+     "xyUnits": 999999999.999999881,
+     "falseZ": -100000,
+     "zUnits": 10000,
+     "falseM": -100000,
+     "mUnits": 10000
+    },
+    "deletes": [
+     {
+      "attributes": {
+       "OBJECTID": 22,
+       "ISRETIRED": 1,
+       "STATUS": 0,
+       "SOURCEID": 4,
+       "GUID": "{F8DFB8B3-2CAB-4858-9B5C-8CC56B036065}",
+       "UPDATETYPE": 0,
+       "CREATIONDATE": 1602622524000,
+       "CREATOR": "tnadmin",
+       "LASTUPDATE": 1602622524000,
+       "UPDATEDBY": "tnadmin",
+       "GLOBALID": "{431D1360-0729-431D-9245-39D4693948AF}",
+       "Shape__Area": 0.069020505107294516,
+       "Shape__Length": 2.36765175312757492
+      },
+      "geometry": {
+       "rings": [
+        [
+         [
+          -79.7467916969999351,
+          35.7607551210000452
+         ],
+         [
+          -79.7467916969999351,
+          35.8222527300000593
+         ],
+         [
+          -78.6244634299999348,
+          35.8222527300000593
+         ],
+         [
+          -78.6244634299999348,
+          35.7607551210000452
+         ],
+         [
+          -79.7467916969999351,
+          35.7607551210000452
+         ]
+        ]
+       ]
+      }
+     }
+    ]
+   }
+  }
+ ],
+ "moment": 1602622532489,
+ "validateErrorsCreated": false,
+ "dirtyAreaCount": 0,
+ "fullUpdate": false,
+ "success": true
+}
+```
+
+ 

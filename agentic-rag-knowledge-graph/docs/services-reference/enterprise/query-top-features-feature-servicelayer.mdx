@@ -1,0 +1,772 @@
+---
+title: "Query Top Features (Feature Service/Layer)"
+description: "The queryTopFeatures  operation is performed on a feature service layer resource."
+slug: "query-top-features-feature-servicelayer"
+url: "/query-top-features-feature-servicelayer"
+guid: "GUID-C08A8694-4169-46AC-A81E-47A913A5AC30"
+migratedTopicMetadata:
+  FTITLE: "Query Top Features (Feature Service/Layer)"
+  FDESCRIPTION: ""
+  FCHANGES: "Adding info to explain the time parameter"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.8.1-*"
+  CREATED-ON: "15/02/2022 09:27:48"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "07/06/2022 09:00:30"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-C750B60D-A801-4728-8807-63AFBF572B03"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/FeatureServer/<layerId>/queryTopFeatures
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/FeatureServer/<layerId>/queryTopFeatures
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.7'
+  requiredCapability: Query
+---
+
+## Description
+
+<Note type={"note"}>
+
+This operation is available for hosted feature services on spatiotemporal data sources.
+
+</Note>
+
+The `queryTopFeatures`  operation is performed on a feature service layer resource. This operation returns a feature set based on the top features by order within a group. For example, when querying counties in the United States, you want to return the top five counties by population in each state. To do this, you can use `queryTopFeatures`  to group by state name, order by descending population, and return the first five rows from each group (state).
+
+The `topFilter`  parameter is used to set the group by, order by, and count criteria used in generating the result. The operation also has many of the same parameters (for example, `where`  and `geometry` ) as the layer query operation. However, unlike the layer query operation, `queryTopFeatures`  does not support parameters such as `outStatistics`  and its related parameters or `returnDistinctValues` . Consult the `advancedQueryCapabilities`  layer property for more details.
+
+<Note type={"note"}>
+
+The `queryTopFeatures`  operation will support pagination if `"supportsPaginationOnAggregatedQueries"`  is `true` .
+
+</Note>
+
+If the feature service supports the `queryTopFeatures`  operation, it will include `supportsTopFeaturesQuery`  as `true`  in the `advancedQueryCapabilities`  layer property.
+
+<Note type={"note"}>
+
+In ArcGIS Enterprise, there is no link from the REST services directory layer page to the `queryTopFeatures`  HTML page. For layers with `supportsTopFeaturesQuery`  as `true`  in their metadata, you can access the `queryTopFeatures`  HTML page using the following format:
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/<serviceName>/FeatureServer/<layerId>/queryTopFeatures
+```
+
+</Note>
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`where` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A WHERE clause for the query filter. SQL-92 WHERE clause syntax on the fields in the layer is supported for most data sources. Some data sources have restrictions. For more information, see [Query (Feature Service/Layer)](/query-feature-service-layer).
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`objectIds` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The object IDs of the layer or table to be queried.
+
+Syntax
+
+```javascript
+objectIds=<objectId1,objectId2>
+```
+
+ 
+
+Example
+
+```javascript
+objectIds=42,93
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`time` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The time instant or the time extent to query.
+
+<Note type={"note"}>
+
+This parameter is only supported if the feature layer JSON information contains the `timeInfo`  property. The `timeInfo`  property can either be added to a feature layer using the [Add to Definition (Feature Layer)](/add-to-definition-feature-layer) operation or by setting the time properties on data in ArcGIS Pro. For an example of the `timeInfo`  property, see [Layer (Feature Service)](/layer-feature-service#example-nine-timeinfo-).
+
+</Note>
+
+Syntax
+
+```javascript
+//Time instant
+time=<timeInstant>
+
+//Time extent
+time=<startTime>, <endTime>
+
+```
+
+ 
+
+Example
+
+```javascript
+//Time instant (1 Jan 2008 00:00:00 GMT)
+time=1199145600000
+
+//Time extent (1 Jan 2008 00:00:00 GMT to 1 Jan 2008 00:00:00 GMT)
+time=1199145600000, 1230768000000
+
+```
+
+ 
+
+A null value specified for start time or end time will represent infinity for start or end time, respectively.
+
+Example
+
+```javascript
+time=null, 1230768000000
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`topFilter` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The JSON parameters that define the aggregation of the data. `groupByFields`  defines the field or fields used to aggregate the data. `topCount`  defines the number of features returned from the top features query and is a numeric value. `orderByFields`  defines the order in which the top features will be returned. `orderByFields`  can be specified in either ascending (`asc` ) or descending (`desc` ) order. The default is ascending.
+
+Syntax
+
+```javascript
+{
+  "groupByFields": <"field1, field2, ..., <fieldN">,
+  "topCount": <topCount>,
+  "orderByFields": <"field1">
+}
+```
+
+ 
+
+Example
+
+```javascript
+{
+  "groupByFields": "worker",
+  "topCount": 1,
+  "orderByFields": "employeeNumber"
+}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geometry` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The geometry to apply as the spatial filter. The structure of the geometry is the same as the structure of the [JSON geometry objects ](/geometry-objects) returned by the ArcGIS REST API. In addition to the JSON structures, you can specify the geometry of envelopes and points with a simple comma-separated syntax.
+
+Syntax
+
+```javascript
+//JSON structures
+geometryType=<geometryType>&geometry={geometry}
+
+//Envelope syntax
+geometryType=esriGeometryEnvelope&geometry=<xmin>,<ymin>,<xmax>,<ymax>
+
+//Point simple syntax
+geometryType=esriGeometryPoint&geometry=<x>,<y>
+
+```
+
+ 
+
+Examples
+
+```javascript
+//JSON structure example
+geometryType=esriGeometryEnvelope&geometry=-104,35.6,-94.32,41
+
+//Envelope example
+geometryType=esriGeometryEnvelope&geometry={xmin: -104, ymin: 35.6, xmax: -94.32, ymax: 41}
+
+//Point simple example
+geometryType=esriGeometryPoint&geometry=-104,35.6
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geometryType` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The type of geometry specified by the geometry parameter. The geometry type can be an envelope, a point, a line, or a polygon. The default geometry type is an envelope.
+
+Values: `esriGeometryPoint`  \| `esriGeometryMultipoint`  \| `esriGeometryPolyline`  \| `esriGeometryPolygon`  \| `esriGeometryEnvelope` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`inSR` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The spatial reference of the input geometry. The spatial reference can be specified as either a well-known ID or as a spatial reference JSON object. If the `inSR`  parameter is not specified, the geometry is assumed to be in the spatial reference of the map.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`spatialRel` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The spatial relationship to be applied to the input geometry while performing the query. The supported spatial relationships include intersects, contains, envelope intersects, within, and so on. The default spatial relationship is intersects ( `esriSpatialRelIntersects` ).
+
+Values: `esriSpatialRelIntersects`  \| `esriSpatialRelContains`  \| `esriSpatialRelCrosses`  \| `esriSpatialRelEnvelopeIntersects`  \| `esriSpatialRelIndexIntersects`  \| `esriSpatialRelOverlaps`  \| `esriSpatialRelTouches`  \| `esriSpatialRelWithin` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`distance` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The buffer distance for the input geometries. The distance unit is specified by units. For example, if the distance is 100, the query geometry is a point, `units`  is set to `meters` , and all points within 100 meters of the point are returned.
+
+The geodesic buffer is created based on the datum of the output spatial reference if it exists. If there is no output spatial reference, the input geometry spatial reference is used. Otherwise, the native layer spatial reference is used to generate the geometry buffer used in the query. This parameter only applies if `supportsQueryWithDistance`  is `true` .
+
+Syntax
+
+```javascript
+distance=<distance>
+```
+
+ 
+
+Example
+
+```javascript
+distance=100
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`units` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The unit for calculating the buffer distance. If `units`  is not specified, the unit is derived from the geometry spatial reference. If the geometry spatial reference is not specified, the unit is derived from the feature service data spatial reference. This parameter only applies if `supportsQueryWithDistance`  is `true` .
+
+Values: `esriSRUnit_Meter`  \| `esriSRUnit_StatuteMile`  \| `esriSRUnit_Foot`  \| `esriSRUnit_Kilometer`  \| `esriSRUnit_NauticalMile`  \| `esriSRUnit_USNauticalMile` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outFields` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The list of fields to be included in the returned result set. This list is a comma-delimited list of field names. You can also specify the wildcard (`*` ) as the value of this parameter. In this case, the query results include all the field values.
+
+Example
+
+```javascript
+//General example
+outFields=NAME,ST,AREA
+
+//Wildcard example
+outFields=*
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnGeometry` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , the result includes the geometry associated with each feature returned. The default is `true` .
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`maxAllowableOffset` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The maximum allowable offset to be used for generalizing geometries returned by the query operation. The `maxAllowableOffset`  is in the units of `outSR` . If `outSR`  is not specified, `maxAllowableOffset`  is assumed to be in the unit of the spatial reference of the map.
+
+Example
+
+```javascript
+maxAllowableOffset=2
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geometryPrecision` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The number of decimal places in the response geometries returned by the query operation. This applies to x- and y-values only (not m- or z-values).
+
+Example
+
+```javascript
+geometryPrecision=3
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outSR` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The spatial reference of the returned geometry. The spatial reference can be specified as either a well-known ID or as a spatial reference JSON object. If `outSR`  is not specified, the geometry is returned in the spatial reference of the map.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnIdsOnly` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , the response only includes an array of object IDs. Otherwise, the response is a feature set. The default is `false` . While there is a limit to the number of features included in the feature set response, there is no limit to the number of object IDs returned in the ID array response. Clients can exploit this to get all the query conforming object IDs by specifying `returnIdsOnly`  as `true`  and subsequently requesting feature sets for subsets of object IDs.
+
+When `objectIds`  are specified, setting this parameter to `true`  is invalid.
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnCountOnly` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , the response only includes the `count`  (number of features or records) that would be returned by a query. Otherwise, the response is a feature set. The default is `false` . This option supersedes the `returnIdsOnly`  parameter. If `returnCountOnly`  is set to `true` , the response will return both the count and the extent.
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnExtentOnly` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , the response only includes the extent of the features that would be returned by the query. The default is `false` . If `returnCountOnly`  is set to `true` , the response will return both the count and the extent. This parameter applies only if the `supportsReturningQueryExtent`  property of the layer is `true` .
+
+Values: `true`  \| `false` 
+
+<Note type={"note"}>
+
+At 10.3, this option is only available for hosted feature services. At 10.3.1, this option is available for hosted and nonhosted feature services.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnZ` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , z-values are included in the results if the features have z-values. Otherwise, z-values are not returned. The default is `false` . This parameter only applies if `returnGeometry=`  is `true` , and the layer's `hasZ`  property is `true` .
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnM` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , m-values are included in the results if the features have m-values. Otherwise, m-values are not returned. The default is `false` . This parameter only applies if `returnGeometry`  is `true` , and the layer's `hasM`  property is `true` .
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`resultType` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The `resultType`  parameter can be used to control the number of features returned by the query operation. Support for the `resultType`  parameter is advertised on the layer resource's metadata (`supportQueryWithResultType`  as true). The tile value is used when the client is using a virtual tiling scheme when querying features. A virtual tiling scheme works similar to tiles in a tile map service layer. The standard value is used with a nontiled query in which the client will send only one query for the full extent. For more information, see the [Considerations for `resultType` ](/query-top-features-feature-servicelayer#considerations-for-resulttype-) section below.
+
+Values: `none`  \| `standard`  \| `tile` 
+
+<Note type={"note"}>
+
+Pagination query also supports the `resultType`  query parameter.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` . The values supported are defined by the `"supportedQueryFormats"`  layer property.
+
+Values: `html`  \| `json`  \| `pbf`  \| `geojson` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+### Considerations for `resultType` 
+
+The `maxTileRecordCount`  and `maxStandardRecordCount`  are determined by the server. The feature service assigns the `maxRecordCount`  relevant to the value from the `resultType`  parameter. If `resultType`  is not included in the request, the default `maxRecordCount`  is always used. This can be the default server assigned value (1000, 2000) or an overwritten value provided by the service owner or admin. The values of the max record counts may vary based on the type of data ([polygon](/layer-feature-service), [point](/layer-feature-service), [polyline](/layer-feature-service), [table](/layer-feature-service)).
+
+The server advertises `maxRecordCount`  with the layer metadata. For example, the following max record count is returned for points data:
+
+```javascript
+{"maxRecordCount": 2000, "tileMaxRecordCount": 8000, "standardMaxRecordCount": 32000}
+```
+
+ 
+
+If the `resultType`  is specified, but the `resultRecordCount`  is not specified with the `resultOffset` , the server will determine the `maxRecordCount`  relevant to the `resultType`  query parameter. The client can supply the `resultRecordCount`  parameter in the request. This cannot be greater than the standard/tile `maxRecordCount`  value if `resultType`  is used.
+
+The layer metadata also includes [maxRecordCountFactor](/feature-layer)  that can be configured from the admin API. The server `maxRecordCountFactor`  for the `tileMaxRecordCount`  and `standardMaxRecordCount`  is used as a multiplier for the server base value. All `maxRecordCount`  values are adjusted with the `maxRecordCountFactor` .
+
+## Example usage
+
+
+### Example one: standard query
+
+The following is a sample request URL that demonstrates how to query the last two deliveries made by an employee:
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/Hosted/deliveries/FeatureServer/0/queryTopFeatures?where=&objectIds=&time=&topFilter={"groupByFields": "employeeName", "topCount": 2, "orderByFields": "deliveryNumber desc"}&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&distance=&units=esriSRUnit_Foot&outFields=employeeName,deliveryNumber&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&returnZ=false&returnM=false&resultType=&f=pjson
+```
+
+ 
+
+### Example two: `resultType`  of `none` , `maxRecordCount` 
+
+The following is a sample request URL used to demonstrate the `none` `resultType`  value. Along with the `none`  value, the [maxRecordCount](/feature-layer)  is always used (`"maxRecordCount": 2000` ) or an overwritten value by the service owner or admin is used.
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/USAStatesRiversCapitals/FeatureServer/2/query?where=1=1&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&resultType=none&distance=&units=esriSRUnit_Meter&outFields=*&returnGeometry=true&multipatchOption=&maxAllowableOffset=&geometryPrecision=&outSR=&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&returnDistinctValues=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&resultOffset=&resultRecordCount=&returnZ=false&returnM=false&quantizationParameters=&sqlFormat=none&f=html&token=
+```
+
+ 
+
+### Example three: `resultType`  of `standard` , `standardMaxRecordCount` 
+
+The following is a sample request URL used to demonstrate the `standard` `resultType`  value. Along with the `standard`  value, the [standardMaxRecordCount](/feature-layer)  is always used (`"standardMaxRecordCount": 3200` ) for point and table layers.
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/USAStatesRiversCapitals/FeatureServer/2/query?where=1=1&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&resultType=standard&distance=
+&units=esriSRUnit_Meter&outFields=*&returnGeometry=true&multipatchOption=&maxAllowableOffset=&geometryPrecision=&outSR=&returnIdsOnly=false
+&returnCountOnly=false&returnExtentOnly=false&returnDistinctValues=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=
+&resultOffset=&resultRecordCount=&returnZ=false&returnM=false&quantizationParameters=&sqlFormat=none&f=html&token=
+```
+
+ 
+
+### Example four: `resultType`  of `tile` , `tileMaxRecordCount` 
+
+The following is a sample request URL used to demonstrate the `tile` `resultType`  value. Along with the `tile`  value, the [tileMaxRecordCount](/feature-layer)  is always used (`"tileMaxRecordCount": 8000` ) for point layers.
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/USAStatesRiversCapitals/FeatureServer/2/query?where=1=1&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&resultType=tile&distance=
+&units=esriSRUnit_Meter&outFields=*&returnGeometry=true&multipatchOption=&maxAllowableOffset=&geometryPrecision=&outSR=&returnIdsOnly=false
+&returnCountOnly=false&returnExtentOnly=false&returnDistinctValues=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=
+&resultOffset=&resultRecordCount=&returnZ=false&returnM=false&quantizationParameters=&sqlFormat=none&f=html&token=
+```
+
+ 
+
+## JSON Response syntax
+
+```other
+{
+  "exceededTransferLimit": <true | false>,
+  "features: [<feature1, feature2>],
+  "fields": [
+    {
+      "name": "<fieldName1>",
+      "type": "<fieldType1>",
+      "alias": "<fieldAlias1>",
+      "length": "<length1>"
+    },
+    {
+      "name": "<fieldName2>",
+      "alias": "<fieldAlias2>",
+      "type": "<fieldType2>",
+      "length": "<length2>"
+    }
+  ],
+ "geometryType": "<geometryType>",
+ "spatialReference": {<spatialReference>},
+ "globalIdFieldName": "<fieldName>",
+ "objectIdFieldName": "<fieldName>",
+ "hasZ": <true | false>,
+ "hasM": <true | false>
+}
+```
+
+ 
+
+## JSON Response example
+
+```other
+{
+  "exceededTransferLimit": false,
+  "features": [
+    {
+      "attributes": {
+        "employeeName": "Jason",
+	       "deliveryNumber": 25
+      },
+      "geometry": {
+        "x": -76.9505202472378,
+        "y": 36.02168768903079
+      }
+    },
+    {
+      "attributes": {
+        "employeeName": "Jason",
+	       "deliveryNumber": 24
+      },
+      "geometry": {
+        "x": -80.28022828451529,
+        "y": 34.9904342763449
+      }
+    },
+  ],
+  "fields": [
+    {
+      "name": "employee",
+      "alias": "employee",
+      "type": "esriFieldTypeString",
+      "length": 100
+    },
+    {
+      "name": "deliveryNumber",
+      "alias": "deliveryNumber",
+      "type": "esriFieldTypeDouble",
+      "length": 1000
+    }
+  ],
+  "geometryType": "esriGeometryPoint",
+  "spatialReference": {
+    "wkid": 4326,
+    "latestWkid": 4326
+  },
+  "globalIdFieldName": "globalid",
+  "objectIdFieldName": "objectid",
+  "hasZ": false,
+  "hasM": false
+}
+```
+
+ 

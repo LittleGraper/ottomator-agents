@@ -1,0 +1,151 @@
+---
+title: "Import Tiles"
+description: "The import tiles operation is used to import tiles into an existing service."
+slug: "import-tiles"
+url: "/import-tiles"
+guid: "GUID-B4F0993C-D0F7-4E22-BC93-9BCEC79C082E"
+migratedTopicMetadata:
+  FTITLE: "Import Tiles"
+  FDESCRIPTION: "Import Tiles doc "
+  FCHANGES: "add missing param replaceTiles"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "6.3/10.7 - *"
+  CREATED-ON: "02/07/2018 13:09:47"
+  FAUTHOR: "kzhang"
+  FSTATUS: "Released"
+  MODIFIED-ON: "04/02/2019 12:20:28"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-5425FFB6-7A7C-41E7-AB54-001AF7D8507A"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /services/<serviceName>/MapServer/importTiles
+  urlSegments:
+    - name: <adminservicecatalog-url>
+      url: /administering-arcgis-online-hosted-services
+    - name: /services/<serviceName>/MapServer/importTiles
+  methods: []
+  sslOnly: 'no'
+---
+
+## Description
+
+The `importTiles`  operation supports importing tiles into an existing cached service.
+
+## Prerequisites
+
+Before executing this operation, you will need to make certain the following prerequisites are met: 
+
+1.  Upload the TPK you wish to merge with the existing service, take note of its item ID.
+2.  Make certain that the uploaded TPK item's tiling scheme matches with the service you wish to import into.
+3.  The source service LOD's should include all the LOD's that are part of the imported TPK item. For example, if the source service has tiles from levels 0 through 10, you can import tiles only within these levels and not above it.
+
+## Parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`f`</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The response format. The default response format is `html`  .
+
+      Supported values: `html`  \| `json`  \| `pjson` .
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`token`</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">An access token that identifies the authenticated user and controls access to restricted resources and operations.</StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`sourceItemId`</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">&lt;Required> The TPK file's item ID. This TPK file contains to-be-extracted bundle files which are then merged into an existing cached service.</StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`extent`</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      &lt;Optional> Use only if needing to extract specific bundles from the TPK file to an existing cached service. Specify the custom extent for these extracted bundles.
+
+      Example: 
+
+      `6224324.092137296,487347.5253569535,11473407.698535524,4239488.369818687`  the minx, miny, maxx, maxy values or,
+
+      `{"xmin":6224324.092137296,"ymin":487347.5253569535,"xmax":11473407.698535524,"ymax":4239488.369818687,"spatialReference":{"wkid":102100}}`  the JSON representation of the Extent object.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`levels`</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">&lt;Optional> By default, all level bundle files are extracted from the TPK file to the existing cached service.</StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`mergeBundle`</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">&lt;Optional> Default is `false`  and applicable to compact cache storage format. It controls whether the bundle files from the TPK file are merged with the one in the existing cached service. Otherwise, the bundle files are overwritten.</StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`replaceTiles`</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">&lt;Optional> Default is `false` , applicable to compact cache storage format and used when `mergeBundle=true` . It controls whether the new tiles will replace the existing ones when merging bundles.</StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## JSON Response Syntax
+
+```javascript
+{
+  "id":<id>,
+  "name": <service name>,
+  "itemId": <item id>,
+  "status": <success | failed>,
+  "type": <map service>,
+  "jobId": <job id>,
+  "message" : "<message>"
+}
+or 
+{
+  "error": {
+    "code": <code>,
+    "message": "<description>",
+    "details": [
+      "<message>"
+    ]
+  }
+}
+```
+
+ 
+
+## JSON Response Example (succeeds)
+
+```javascript
+{
+  "id" : "82cc6785db3dcd0d", 
+  "name" : "World",  
+  "itemId" : "87147b59c92c44de92152730634aa1a4", 
+  "status" : "Success",
+  "type" : "Map Service", 
+  "jobId" : "bee23b456506f414", 
+  "message" : "success"
+}
+          
+```
+
+ 
+
+## JSON Response Example (fails)
+
+```javascript
+{
+  "error" : 
+  {
+    "code" : 500, 
+    "message" : "Specified level id \"19\" is not within the min and max scale range.",
+    "details" : null
+  }
+}
+          
+```
+
+ 

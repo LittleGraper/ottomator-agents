@@ -1,0 +1,495 @@
+---
+title: "Export Service"
+description: "This operation exports the service definition for a map service or a hosted feature service."
+slug: "export-service"
+url: "/export-service"
+restInfoMetadata:
+  apiPath: /System/PublishingTools/GPServer/Export Service/submitJob
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /System/PublishingTools/GPServer/Export Service/submitJob
+  methods:
+    - post
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '11.4'
+---
+
+## Description
+
+The `Export Service` operation exports the service definition for a map service (both by-reference and by-value) or a hosted feature service. The resulting service definition can then be published to a new ArcGIS Enterprise organization.
+
+Whether an organization needs to move a map or hosted feature service from a Windows or Linux deployment of ArcGIS Enterprise to a deployment of ArcGIS Enterprise on Kubernetes, or is moving services from an on-premises deployment to a cloud deployment of ArcGIS Enterprise, the `Export Service` operation allows an organization to move their services from one system to another while conserving the service's references and any enabled extensions or capabilties. For example, a map service may have enabled extensions, such as WMS. Performing the `Export Service` for that map service will move the map service's configuration as a whole, keeing the extension enabled.
+
+<Note>
+
+Map tile caches will not be included in the exported service definition.
+
+</Note>
+
+The tabs below outline the workflows for exporting and adding a service definition for hosted feature services and map services.
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Hosted Feature Services</TabTitle>
+  <TabTitle>Map Services</TabTitle>
+</TabNav>
+
+<Tab>
+
+### Hosted feature services
+
+To move hosted feature services from one organization to another, perform the `Export Service` operation by specifying the service's name, service type, and the folder the service is located in. This operation must be performed on the hosting server. The result of the `Export Service` operation will be a job ID that, when appended to a modified version of the request URL, is used to access the `job` resource. From the `job` resource, access the Exported Data and use the provided URL to download the exported service definition. An example of this workflow can be seen in the [JSON Response section below](#json-response-example).
+
+Once the service definition has been exported, [add it as a new item](DEVSITE/rest/users-groups-and-items/add-item) to the target organization. After being added to the target organization, the service item can be published as normal from the ArcGIS Enterprise portal website. However, additional steps can be taken to preserve the service's item ID from the originating portal during publishing. 
+
+To preserve the service's item ID, gather the service's `itemID` value from the [service's portal properties](DEVSITE/rest/enterprise-administration/server/service) in the originating organization, an example of which is shown below:
+
+```other
+...
+"portalProperties": {
+  "isHosted": true,
+  "portalItems": [
+    {
+      "itemID": "ded77a3196b74e28b12915add2caf55f",
+      "type": "FeatureServer"
+    }
+  ]
+},
+...
+
+```
+
+With the item ID gathered, [publish the service definition to the target organization](DEVSITE/rest/users-groups-and-items/publish-item). The service's item ID from the originating organization should be passed in the request as the value for the `itemIdToCreate` parameter. An example POST request for the `publish` operation is shown below:
+
+```other
+POST /webadaptor/sharing/rest/content/users/jsmith/publish HTTP/1.1
+Host: machine.domain.com
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryuepCq6o7ZaemK9qe
+Content-Length: []
+
+------WebKitFormBoundaryuepCq6o7ZaemK9qe
+Content-Disposition: form-data; name="itemid"
+
+22d4ba1a9f6b4589abb7afc01212cdd0
+------WebKitFormBoundaryuepCq6o7ZaemK9qe
+Content-Disposition: form-data; name="file"; filename=""
+Content-Type: application/octet-stream
+
+
+------WebKitFormBoundaryuepCq6o7ZaemK9qe
+Content-Disposition: form-data; name="filetype"
+
+serviceDefinition
+------WebKitFormBoundaryuepCq6o7ZaemK9qe
+Content-Disposition: form-data; name="publishParameters"
+
+
+------WebKitFormBoundaryuepCq6o7ZaemK9qe
+Content-Disposition: form-data; name="buildInitialCache"
+
+false
+------WebKitFormBoundaryuepCq6o7ZaemK9qe
+Content-Disposition: form-data; name="outputType"
+
+
+------WebKitFormBoundaryuepCq6o7ZaemK9qe
+Content-Disposition: form-data; name="itemIdToCreate"
+
+ded77a3196b74e28b12915add2caf55f
+------WebKitFormBoundaryuepCq6o7ZaemK9qe
+Content-Disposition: form-data; name="f"
+
+pjson
+------WebKitFormBoundaryuepCq6o7ZaemK9qe
+Content-Disposition: form-data; name="token"
+
+<token>
+------WebKitFormBoundaryuepCq6o7ZaemK9qe--
+
+```
+
+</Tab>
+
+<Tab>
+
+### Map services
+
+Before performing the `Export Service` operation for either a by-reference or by-value map service, members must determine if the target organization has the required data stores registered. The target organization must register the same data stores the map service uses in the originating organization for its web layer data. To identify which data stores the map service uses, and how specifically the service uses the data stores, perform the [GetServiceDatastoreInfo](/get-service-datastore-info) operation. The `GetServiceDatastoreInfo` operation must be performed in the originating organization. Part of the operation's response will be the information for the map service's data stores, as shown below:
+
+```other
+...
+"datastores": [
+  {
+    "id": "9cd5cdbbb62342b38a881186c29ff744",
+    "path": "/enterpriseDatabases/EGDB_shared_db",
+    "type": "egdb"
+  }
+],
+...
+
+```
+
+The data store information returned by `GetServiceDatastoreInfo` can then be used find and gather the [full data store connection details](DEVSITE/rest/enterprise-administration/server/dataitem) for each data store, which is used to [check if the data stores are registered in the target organization](/is-datastore-registered).
+
+Once it has been confirmed that the target organization has the data stores registered, perform the `Export Service` operation in the originating organization. Include the service's name, service type, and the folder the service is located in (if applicable). The result of the `Export Service` operation will be a job ID that, when appended to a modified version of the request URL, can be used to access the `job` resource. From the `job` resource, access the `Exported Data` resource and use the provided URL to download the exported service definition. An example of this workflow can be seen in the [JSON Response section below](#json-response-example).
+
+<Note>
+
+This operation also supports moving map services from one standalone server to another.
+
+</Note>
+
+Once the service definition has been exported, it can either be [published through ArcGIS Server Manager](https://enterprise.arcgis.com/en/server/latest/publish-services/windows/about-service-definition-files.htm) or, if the service ID needs to be preserved, the service definition can first be [uploaded to the target organization](DEVSITE/rest/enterprise-administration/server/uploaditem) before being published.
+
+To preserve the service's item ID, copy the [service's portal properties](DEVSITE/rest/enterprise-administration/server/service) from the originating organization, an example of which is shown below:
+
+```other
+...
+{
+  "portalProperties": {
+    "isHosted": false,
+    "portalItems": [
+      {
+        "itemID": "ce18c910bcaf477b8b714be93dad1f92",
+        "type": "MapServer"
+      }
+    ]
+  }
+},
+...
+```
+
+<Note>
+
+If you are preserving the item ID for a map service, and the map service has extensions enabled such as WMS or Feature Server, you can also preserve the item ID of the extensions. To preserve the extension's item ID, copy the service's portal properties from the originating organization, including the item IDs for the extensions. An example of this is shown below:
+
+```other
+{
+"portalProperties": {
+    "isHosted": false,
+    "portalItems": [
+      {
+        "itemID": "d5590eef6b7343e597da52ec4b940a98",
+        "type": "MapServer"
+      },
+      {
+        "itemID": "b0625e1fe42c4be0ab0d407795b3af36",
+        "type": "WMSServer"
+      }
+    ]
+  }
+}
+```
+
+</Note>
+
+With the service's portal properties gathered, publish the service definition in the target organization using the `Publish Service Definition` operation. Include the service definition's uploaded item ID and the service's portal properties from the originating organization, adding the `preserveIDs` property set as `true`, in the request. If you will also be preserving the item IDs of enabled extensions, ensure that those item IDs are included in the request.
+
+An example POST request for the `Publish Service Definition` is shown below:
+
+```other
+POST /webadaptor/rest/services/System/PublishingTools/GPServer/Publish%20Service%20Definition/submitJob HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+in_sdp_id=i8331f3bb-98fd-4e5f-8948-19fe36dee86d&in_config_overwrite=&in_publish_options={"portalProperties": {"isHosted": false,"preserveIDs": true,"portalItems": [{"itemID": "d5590eef6b7343e597da52ec4b940a98","type": "MapServer"},{"itemID": "b0625e1fe42c4be0ab0d407795b3af36","type": "WMSServer"}]}}&f=pjson
+
+```
+
+</Tab>
+
+</Tabs>
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serviceName`
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The service's name.
+
+      ```markdown
+      serviceName=serviceToMigrate
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serviceType`
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The service type.
+
+      Values: `MapServer` | `FeatureServer`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serviceFolder`
+      
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The name of the folder the service is located in.
+
+      ```markdown
+      //Feature service example
+      serviceFolder=Hosted
+
+      //Map service example
+      serviceFolder=SeattleStreets
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `exportOptions`
+      
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A set of additional options for the request. At this time, no options are available or supported.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `returnZ`
+      
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean that determines if z-values are included as part of the result. If `true`, z-values will be included in the results if the features have z-values. Otherwise, z-values will not be returned. The default is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `returnTrueCurves`
+      
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean that specifies whether true curves will be returned in the output geometries (`true`). When `false`, curves will be converted to densified polylines or polygons. The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `simplifyFeatures`
+      
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean that specifies whether geometries should be simplified (`true`). Simplifying can siginificantly reduce the size of the response while fulfiling the accuracy needs for most analysis, espeically for complex and large geometries. The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `context`
+      
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Additional settings that affect the result of the operation:
+
+      - `outSR` is the spatial reference of the output geometries.
+      - `processSR` is the spatial reference that the model will use to perform geometry operations.
+      - `extent` will only process features that overlap the specified extent. The output features will have an extent that is the same or larger than the `extent` value.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following are sample requests (GET and POST) for the `Export Service` operation:
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>GET Request</TabTitle>
+  <TabTitle>POST Request</TabTitle>
+</TabNav>
+
+<Tab>
+
+```other
+https://machine.domain.com/webadaptor/rest/services/System/PublishingTools/GPServer/Export%20Service/submitJob?serviceName=&serviceType=&serviceFolder=&exportOptions=&returnZ=false&returnM=false&returnTrueCurves=false&simplifyFeatures=true&context=&f=pjson
+
+```
+
+</Tab>
+
+<Tab>
+
+```other
+POST /webadaptor/rest/services/System/PublishingTools/GPServer/Export%20Service/submitJob HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+serviceName=&serviceType=&serviceFolder=&exportOptions=&returnZ=false&returnM=false&returnTrueCurves=false&simplifyFeatures=true&context=&f=pjson
+```
+
+</Tab>
+
+</Tabs>
+
+
+## JSON Response example
+
+The tabbed sections below outline the workflow to obtain the service's exported service defintion.
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Export Service Response</TabTitle>
+  <TabTitle>Job Resource Response</TabTitle>
+  <TabTitle>Exported Data Response</TabTitle>
+</TabNav>
+
+<Tab>
+
+When the `Export Service` job request is submitted, the following JSON response is returned:
+
+```other
+{
+  "jobId": "j5f3aa768e0a24dcfbdff45f379870553",
+  "jobStatus": "esriJobSubmitted"
+}
+
+```
+The value for `jobId` can be appended to a modified version of the request URL (shown below) to access the `job` resource:
+
+```other
+https://machine.domain.com/webadaptor/rest/services/System/PublishingTools/GPServer/Export%20Service/jobs/j5f3aa768e0a24dcfbdff45f379870553?f=pjson
+
+```
+
+</Tab>
+
+<Tab>
+
+The `job` resource can be polled to check the status of the `Export Service` job. When the job is completed successfully, the following JSON response is returned:
+
+```other
+{
+  "jobId": "j5f3aa768e0a24dcfbdff45f379870553",
+  "jobStatus": "esriJobSucceeded",
+  "results": {
+    "exportedData": {
+      "paramUrl": "results/exportedData"
+    }
+  },
+  "inputs": {
+    "serviceName": {
+      "paramUrl": "inputs/serviceName"
+    },
+    "serviceType": {
+      "paramUrl": "inputs/serviceType"
+    },
+    "serviceFolder": {
+      "paramUrl": "inputs/serviceFolder"
+    }
+  },
+  "messages": [
+    {
+      "type": "esriJobMessageTypeInformative",
+      "description": "Start Time: Friday, September 20, 2024 5:24:24 PM"
+    },
+    {
+      "type": "esriJobMessageTypeInformative",
+      "description": "Succeeded at Friday, September 20, 2024 5:24:27 PM (Elapsed Time: 2.84 seconds)"
+    }
+  ]
+}
+
+```
+The value for the `exportedData` property's `paramUrl` can be appended to the `job` resource URL to access the `exportedData` resource:
+
+```other
+https://machine.domain.com/webadaptor/rest/services/System/PublishingTools/GPServer/Export%20Service/jobs/j0754c83d71884311a53b9d3018d40500/results/exportedData
+
+```
+</Tab>
+
+<Tab>
+
+The `exportedData` resource returns the following JSON response:
+
+```other
+{
+  "paramName": "exportedData",
+  "dataType": "GPDataFile",
+  "value": {
+    "url": "https://machine.domain.com/server/rest/directories/arcgisjobs/system/publishingtools_gpserver/j0754c83d71884311a53b9d3018d40500/scratch/New_Layer.sd"
+  }
+}
+
+```
+The URL address returned as part of the response can be copy and pasted into the browser window to download the service's exported service definition.
+
+</Tab>
+
+</Tabs>

@@ -1,0 +1,116 @@
+---
+title: "Update Credentials"
+description: "The connection operation updates provider credential information."
+slug: "provider-connection"
+url: "/provider-connection"
+guid: "GUID-3106BD69-95F8-4BC7-9489-D00A114A6590"
+migratedTopicMetadata:
+  FTITLE: "Provider Connection"
+  FDESCRIPTION: ""
+  FCHANGES: "Changes for cloud-native"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2-*"
+  CREATED-ON: "01/11/2023 10:06:56"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "09/11/2023 19:35:02"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "8"
+  ED: "GUID-59A1DC47-35A9-4F06-88E7-13912AC1170C"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /cloud/providers/<providerID>/credential/update
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /cloud/providers/<providerID>/credential/update
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '11.2'
+  requiredCapabilities:
+    - name: Access allowed only with the default administrator role
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `credential/update` operation updates provider credential information. Its a security best practice to rotate credentials at regular intervals if the cloud provider utilizes key-based authentication models. To update credentials, the request needs to include the `credential` information for the provider, which is returned by the [Providers](/providers-1) resource.
+
+Once submitted, the request will return a job ID. The HTML view returns a link that can be used to access the job page for the request. Otherwise, to access the `job` resource you can make a request of the following form:
+
+```markdown
+https://organization.domain.com/context/admin/jobs/<jobID>
+```
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `credential` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The updated connection information. The current connection information can be retrieved from the [Providers](/providers-1) resource and modified with the updated credentials.
+
+      ```other label=Examples
+      //Amazon S3
+      credential={"type":"ACCESS-KEY","secret":{"secret_key":"<secret_key>","access_key":"<access_key>"}}
+
+      //Azure Blob Store
+      credential={"type":"STORAGE-ACCOUNT-KEY","secret":{"storageAccountName":"<account_name>","storageAccountKey":"<account_key>"}}
+
+      //Google Cloud Storage
+      credential={"type":"HMAC-KEYS","secret":{"secretKey":"<secret_key>","accessKey":"<access_key>"}}
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `credential/update` operation:
+
+```other
+POST /context/admin/clouds/providers/xxmrejycd2/credential/update HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+credential={"type": "STORAGE-ACCOUNT-KEY","secret": {"storageAccountName": "{crypt}R68p/cvTUo1LmRcgXJ5U07WKv936mnCe","storageAccountKey": "{crypt}+1FSvRmPvGDJXo1FY5ug9vcxrlAuZ+QN}}&f=pjson&token= m7zGSezM7znt6ZuIwr827imJxOTSDsjYujVdd7SiAQLYG1HmesG8EbSnTwCbiekEh0QwRdmeyp1hP63M60TPrdZQ2NzIg5G7qFaQh40MdiOCfh60-6oPKC2MNoqwdVDZ3srzreVZb66QofWXws8GMrKWkgP45A-2an5crKvReUo-pwvkzm68W87Q0yPJFA2Kww39UnMYNw-5qd2-Bt04VmkrqKI-lCbA-jFZY_UGzeGzNqnBGrjKuVB_q17HogMw
+
+```
+
+## JSON Response example
+
+```other
+{
+  "cloudCredentialRotationJobId": j386a7e57-bf8b-4765-ab96-aa8b71bbf7d3",
+  "message": "A cloud credentials rotation job is in-progress"
+}
+```

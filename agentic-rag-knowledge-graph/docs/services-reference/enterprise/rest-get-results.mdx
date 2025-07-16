@@ -1,0 +1,526 @@
+---
+title: "Get Results"
+description: "This operation queries records from REVTABLEMAIN, REVBATCHRUNTABLE and REVCHECKRUNTABLE."
+slug: "rest-get-results"
+url: "/rest-get-results"
+guid: "GUID-00756A77-3BC5-4565-A288-46FB2C7D4F6D"
+migratedTopicMetadata:
+  FTITLE: "REST: Get Results"
+  FDESCRIPTION: ""
+  FCHANGES: "adding note for AO10 deprecation per 1258"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9 - *"
+  CREATED-ON: "02/02/2021 12:32:13"
+  FAUTHOR: "igalvan"
+  FSTATUS: "Released"
+  MODIFIED-ON: "12/02/2021 12:26:55"
+  VERSION: "6"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-09592A80-678D-469D-85C0-75812ED6DB00"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /getResults
+  urlSegments:
+    - name: <ReviewerResults-url>
+      url: /rest-reviewer-results
+    - name: /getResults
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '10.1'
+  relatedResources:
+    - name: Reviewer Results
+      url: /rest-reviewer-results
+    - name: Get Batch Run Details
+      url: /rest-get-batch-run-details
+    - name: Get Layer Definition
+      url: /rest-get-layer-definition
+    - name: Update Lifecycle Status
+      url: /rest-update-lifecycle-status
+    - name: Write Feature As Result
+      url: /rest-write-feature-as-result
+    - name: Write Result
+      url: /rest-write-result
+  requiredCapabilities:
+    - name: Data Reviewer Server
+      url: /rest-data-reviewer-map-service
+---
+
+import GUID_2552D38B_743E_4F04_B17A_20DFD25517C8_GUID_E6C28557_ADDB_4260_92CF_C8983F9552C4 from "./snippets/GUID-2552D38B-743E-4F04-B17A-20DFD25517C8/_GUID-E6C28557-ADDB-4260-92CF-C8983F9552C4";
+import GUID_2552D38B_743E_4F04_B17A_20DFD25517C8_GUID_5492D5C4_A7A6_4DC8_A922_84958A9EFC03 from "./snippets/GUID-2552D38B-743E-4F04-B17A-20DFD25517C8/_GUID-5492D5C4-A7A6-4DC8-A922-84958A9EFC03";
+
+## Description
+
+<Note>
+The ArcGIS Data Reviewer extension is required to use this resource.
+</Note>
+
+<Note>
+This resource is dependent on the ArcGIS Data Reviewer ArcMap runtime-based server object extension (SOE). ArcGIS Enterprise 10.9.x, part of the ArcGIS 2021 releases, is the last release of ArcGIS Enterprise to support services published from ArcMap.
+
+Consider Data Reviewer capabilities enabled using ArcGIS Pro and integrated in the [Validation service](/validation-server).
+</Note>
+
+The `getResults` operation queries records from REVTABLEMAIN, REVBATCHRUNTABLE and REVCHECKRUNTABLE. This operation does not return geometries but does support [spatialFilters](/rest-filter-objects#-spatialfilter) in its `filtersArray` parameter. Use this operation in conjunction with a Dynamic Layer and the [getLayerDefinition](/rest-get-layer-definition) operation to link map features to Reviewer attributes.
+
+This operation has two parameters, `queryParameters` and `filtersArray`. `filtersArray` is optional. If `filtersArray` is unset, all information is returned according to the setting specified in `queryParameters`. 
+
+This operation returns a non-spatial featureset. A featureset is a `JSON` object that contains a list of fields aliases, fields, and field values. See the ArcGIS Data Reviewer REST API reference to learn more about the structure of a featureset. 
+
+Results are paged. You specify the number of results per page with the `pageSize` `queryParameter`. You specify which page in the result set to return with the `pageNumber` `queryParameter`. You specify which fields to include in the featureset with the `returnFields` `queryParameter`. 
+
+`queryParameters` is a `JSON` object that contains the following key-value pairs: 
+
+-   `pageSize`: The number of items to list on a page. Specify a value between 1-1000. This pair is required. 
+-   `pageNumber`: The page number, zero based index, of the results to return. This pair is required. 
+-   `returnFields`: Optional `JSON` array of field names. Use " \* " to indicate ALL. Valid fields include: 
+
+    -   `recordId` 
+    -   `objectId` 
+    -   `subtype` 
+    -   `category` 
+    -   `sessionId` 
+    -   `checktitle` 
+    -   `resourceName` 
+    -   `checkName` 
+    -   `notes` 
+    -   `severity` 
+    -   `reviewStatus` 
+    -   `reviewTechnician` 
+    -   `correctionTechnician` 
+    -   `verificationTechnician` 
+    -   `reviewDateUtc` 
+    -   `correctionDateUtc` 
+    -   `verificationDateUtc` 
+    -   [lifecycleStatus](https://desktop.arcgis.com/en/arcmap/latest/extensions/data-reviewer/result-management-of-the-quality-review-process.htm) 
+    -   [lifecyclePhase](/rest-get-lifecycle-phase-strings) 
+-   `sortBy`: Optional. Indicates a field name by which to sort. The field must be included in `returnFields` if set.
+-   `sortDescending`: Optional. Controls sort order. Default is false.
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`queryParameters` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The `JSON` object that contains key-value pairs that control the number of items per page, page number, fields and sort order.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`filtersArray` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+An [array of filters](/rest-filter-objects). A filter is a `JSON` structure. Filters limit the number of features retrieved from the server to a specified criteria. Filters are similar in functionality to a SQL where clause.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html`.
+
+Values: `html` | `json` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+Example 1: Retrieve results from all the fields on page 1, limiting the page size to five items, sorting by `objectId`  in descending order.
+
+```javascript
+https://localhost:6443/arcgis/rest/services/reviewer/MapServer/exts/DataReviewerServer/ReviewerResults/getResults?queryParameters={"pageSize":5,"pageNumber":1,"sortyBy":"objectid","returnFields":["*"],"sortDescending":true}&filtersArray=&f=pjson
+```
+
+## JSON Response example
+
+```javascript
+{
+ "fieldAliases": {
+  "recordId": "RecordId",
+  "objectId": "ObjectId",
+  "subtype": "Subtype",
+  "category": "Category",
+  "sessionId": "SessionId",
+  "checktitle": "Checktitle",
+  "resourceName": "ResourceName",
+  "checkName": "CheckName",
+  "notes": "Notes",
+  "severity": "Severity",
+  "reviewStatus": "ReviewStatus",
+  "reviewTechnician": "ReviewTechnician",
+  "correctionTechnician": "CorrectionTechnician",
+  "verificationTechnician": "VerificationTechnician",
+  "reviewDateUtc": "ReviewDateUtc",
+  "correctionDateUtc": "CorrectionDateUtc",
+  "verificationDateUtc": "VerificationDateUtc",
+  "lifecycleStatus": "LifecycleStatus",
+  "lifecyclePhasee": "LifecyclePhase"
+ },
+ "fields": [
+  {
+   "name": "recordId",
+   "type": "esriFieldTypeInteger"
+  },
+  {
+   "name": "objectId",
+   "type": "esriFieldTypeInteger"
+  },
+  {
+   "name": "subtype",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "name": "category",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "name": "sessionId",
+   "type": "esriFieldTypeInteger"
+  },
+  {
+   "name": "checktitle",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "name": "resourceName",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "name": "checkName",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "name": "notes",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "name": "severity",
+   "type": "esriFieldTypeInteger"
+  },
+  {
+   "name": "reviewStatus",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "name": "reviewTechnician",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "name": "correctionTechnician",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "name": "verificationTechnician",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "name": "reviewDateUtc",
+   "type": "esriFieldTypeDate"
+  },
+  {
+   "name": "correctionDateUtc",
+   "type": "esriFieldTypeDate"
+  },
+  {
+   "name": "verificationDateUtc",
+   "type": "esriFieldTypeDate"
+  },
+  {
+   "name": "lifecycleStatus",
+   "type": "esriFieldTypeInteger"
+  },
+  {
+   "name": "lifecyclePhase",
+   "type": "esriFieldTypeInteger"
+ 	}
+ ],
+ "features": [
+  {
+   "attributes": {
+    "recordId": 291,
+    "objectId": 7927,
+    "subtype": "",
+    "category": "Feature Record",
+    "sessionId": 1,
+    "checktitle": "Orphan Storm Manholes",
+    "resourceName": "swManhole",
+    "checkName": "Geometry on Geometry Check",
+    "notes": "",
+    "severity": 2,
+    "reviewStatus": "Point does not intersect polyline",
+    "reviewTechnician": "homer",
+    "correctionTechnician": null,
+    "verificationTechnician": null,
+    "reviewDateUtc": 1351648012000,
+    "correctionDateUtc": null,
+    "verificationDateUtc": null,
+    "lifecycleStatus": 1,
+    "lifecyclePhase": 2
+   }
+  },
+  {
+   "attributes": {
+    "recordId": 290,
+    "objectId": 7926,
+    "subtype": "",
+    "category": "Feature Record",
+    "sessionId": 1,
+    "checktitle": "Orphan Storm Manholes",
+    "resourceName": "swManhole",
+    "checkName": "Geometry on Geometry Check",
+    "notes": "",
+    "severity": 2,
+    "reviewStatus": "Point does not intersect polyline",
+    "reviewTechnician": "homer",
+    "correctionTechnician": null,
+    "verificationTechnician": null,
+    "reviewDateUtc": 1351648012000,
+    "correctionDateUtc": null,
+    "verificationDateUtc": null,
+    "lifecycleStatus": 1,
+    "lifecyclePhase": 2
+   }
+  },
+  {
+   "attributes": {
+    "recordId": 289,
+    "objectId": 7924,
+    "subtype": "",
+    "category": "Feature Record",
+    "sessionId": 1,
+    "checktitle": "Orphan Storm Manholes",
+    "resourceName": "swManhole",
+    "checkName": "Geometry on Geometry Check",
+    "notes": "",
+    "severity": 2,
+    "reviewStatus": "Point does not intersect polyline",
+    "reviewTechnician": "homer",
+    "correctionTechnician": null,
+    "verificationTechnician": null,
+    "reviewDateUtc": 1351648012000,
+    "correctionDateUtc": null,
+    "verificationDateUtc": null,
+    "lifecycleStatus": 1,
+    "lifecyclePhase": 2
+   }
+  },
+  {
+   "attributes": {
+    "recordId": 288,
+    "objectId": 7922,
+    "subtype": "",
+    "category": "Feature Record",
+    "sessionId": 1,
+    "checktitle": "Orphan Storm Manholes",
+    "resourceName": "swManhole",
+    "checkName": "Geometry on Geometry Check",
+    "notes": "",
+    "severity": 2,
+    "reviewStatus": "Point does not intersect polyline",
+    "reviewTechnician": "homer",
+    "correctionTechnician": null,
+    "verificationTechnician": null,
+    "reviewDateUtc": 1351648012000,
+    "correctionDateUtc": null,
+    "verificationDateUtc": null,
+    "lifecycleStatus": 1,
+    "lifecyclePhase": 2
+   }
+  },
+  {
+   "attributes": {
+    "recordId": 287,
+    "objectId": 7919,
+    "subtype": "",
+    "category": "Feature Record",
+    "sessionId": 1,
+    "checktitle": "Orphan Storm Manholes",
+    "resourceName": "swManhole",
+    "checkName": "Geometry on Geometry Check",
+    "notes": "",
+    "severity": 2,
+    "reviewStatus": "Point does not intersect polyline",
+    "reviewTechnician": "homer",
+    "correctionTechnician": null,
+    "verificationTechnician": null,
+    "reviewDateUtc": 1351648012000,
+    "correctionDateUtc": null,
+    "verificationDateUtc": null,
+    "lifecycleStatus": 1,
+    "lifecyclePhase": 2
+   }
+  }
+ ]
+}
+```
+
+Example 2: Retrieve results from 3 fields on page 1, limiting the page size to 5 items, filtering for severities equal to 5:
+
+```javascript
+https://localhost:6443/arcgis/rest/services/reviewer/MapServer/exts/DataReviewerServer/ReviewerResults/getResults?queryParameters={"pageSize":5,"pageNumber":1,"returnFields":["recordId","resourceName","sessionId"]}&filtersArray={"filtersArray":[{"singleAttributeFilter":[{"fieldValue":5,"fieldName":"severity"}]}]}&f=pjson
+```
+
+## JSON Response example
+
+```javascript
+{
+ "fieldAliases": {
+  "recordId": "RecordId",
+  "resourceName": "ResourceName",
+  "sessionId": "SessionId"
+ },
+ "fields": [
+  {
+   "name": "recordId",
+   "type": "esriFieldTypeInteger"
+  },
+  {
+   "name": "resourceName",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "name": "sessionId",
+   "type": "esriFieldTypeInteger"
+  }
+ ],
+ "features": [
+  {
+   "attributes": {
+    "recordId": 14,
+    "resourceName": "Landmarks",
+    "sessionId": 2
+   }
+  },
+  {
+   "attributes": {
+    "recordId": 15,
+    "resourceName": "Landmarks",
+    "sessionId": 2
+   }
+  },
+  {
+   "attributes": {
+    "recordId": 16,
+    "resourceName": "Landmarks",
+    "sessionId": 2
+   }
+  },
+  {
+   "attributes": {
+    "recordId": 17,
+    "resourceName": "Landmarks",
+    "sessionId": 2
+   }
+  },
+  {
+   "attributes": {
+    "recordId": 18,
+    "resourceName": "Landmarks",
+    "sessionId": 2
+   }
+  }
+ ]
+}
+```
+
+Example 3: Return 1 result from page 0, from fields `ObjectId` , `SessionId` , `Severity` , `resourceName` , `ReviewStatus` , `ReviewTechnician` , and `Notes` .
+
+```javascript
+https://localhost:6443/arcgis/rest/services/reviewer/MapServer/exts/DataReviewerServer/ReviewerResults/getResults?queryParameters={"pageSize":"1","pageNumber":"0","returnFields":["ObjectId","SessionId","Severity","resourceName","ReviewStatus","ReviewTechnician","Notes"]}&filtersArray=&f=pjson 
+```
+
+## JSON Response example
+
+```javascript
+{
+ "fieldAliases": {
+  "objectId": "ObjectId",
+  "sessionId": "SessionId",
+  "severity": "Severity",
+  "resourceName": "ResourceName",
+  "reviewStatus": "ReviewStatus",
+  "reviewTechnician": "ReviewTechnician",
+  "notes": "Notes"
+ },
+ "fields": [
+  {
+   "name": "objectId",
+   "type": "esriFieldTypeInteger"
+  },
+  {
+   "name": "sessionId",
+   "type": "esriFieldTypeInteger"
+  },
+  {
+   "name": "severity",
+   "type": "esriFieldTypeInteger"
+  },
+  {
+   "name": "resourceName",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "name": "reviewStatus",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "name": "reviewTechnician",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "name": "notes",
+   "type": "esriFieldTypeString"
+  }
+ ],
+ "features": [
+  {
+   "attributes": {
+    "objectId": 35631,
+    "sessionId": 1,
+    "severity": 1,
+    "resourceName": "ssTap",
+    "reviewStatus": "Value is not unique:FACILITYID,  ",
+    "reviewTechnician": "roberts",
+    "notes": ""
+   }
+  }
+ ]
+}
+
+```

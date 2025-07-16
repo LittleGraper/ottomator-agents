@@ -1,0 +1,48 @@
+{/*Shared snippet for break_values and defaultBreaks*/}
+import ParamMetadata from "../../../components/param-metatdata" 
+
+<ParamMetadata types={[{name:"string"}]} />
+
+<If c="requestType == 'direct'">
+{/* <p class="space-x-2"><span class="font-sm text-color-3">type:string (comma-separated values)</span><span class="font-bold text-[#6d29cc]">default:`Minutes`</span></p> */}
+
+</If>
+
+{/* <If c="requestType == 'job'">
+<p class="space-x-2"><span class="font-sm text-color-3">type:string (space separated values)</span><span class="font-bold text-[#6d29cc]">default:`Minutes`</span></p>
+</If> */}
+
+Specify the size and number of service areas to generate for each facility. The service generates time-based or distance-based service areas depending on the units for this parameter. If units are time-based, the service areas are generated based on travel time along underlying streets. If units are distance-based, the service areas are generated based on travel distances.
+
+<If c="requestType == 'job'">
+The parameter value is specified as a space separated list of doubles. The units are determined by the `break_units` parameter. 
+</If>
+
+<If c="requestType == 'direct'">
+The unit for this parameter is based on the unit of the impedance attribute specified using the `impedanceAttributeName` parameter or the `impedanceAttributeName` value of the travel mode if the travel mode is specified. If the `impedanceAttributeName` parameter is set to `TravelTime` , the values specified as the `defaultBreaks` parameter are interpreted to be in `minutes`, and the service generates time-based service areas. Otherwise, the values are interpreted to be in `miles` or `kilometers` based on whether the `impedanceAttributeName` parameter is set to `Miles` or `Kilometers`, respectively, and the service generates distance-based service areas.
+
+The parameter value is specified as a comma-separated list of doubles.
+
+Multiple area breaks can be specified to create concentric service areas per facility. For example, to find 2-, 3-, and 5-mile service areas for each facility, specify `defaultBreaks=2,3,5`, separating the values using a comma and specify `Miles` for `impedanceAttributeName`.
+</If>
+
+<If c="publication == 'rest/online' && requestType== 'direct'">
+<Note type={"note"}>
+The service imposes a maximum `defaultBreaks` limit of 5 hours (300 minutes) when generating time-based service areas and a maximum limit of 300 miles (482.80 kilometers) when generating distance-based service areas. These limits are reduced to 15 minutes and 15 miles (24.14 kilometers), respectively, when generating detailed polygons (`outputPolygons = esriNAOutputPolygonDetailed`). If these values are exceeded, the response returns an error message.
+</Note>
+</If>
+
+<If c="publication == 'rest/online' && requestType== 'job'">
+<Note type={"note"}>
+The service imposes a limit of 5 hours (300 minutes) for the largest value that can be specified as the `break_values` parameter when generating time-based service areas and a limit of 300 miles (482.80 kilometers) when generating distance-based service areas. These limits are reduced to 15 minutes and 15 miles (24.14 kilometers), respectively, when generating detailed polygons (`detailed_Polygons = true`). If the value is exceeded, the response returns an error message.
+</Note>
+</If>
+
+<If c="requestType == 'job'">
+
+Multiple area breaks can be specified to create concentric service areas per facility. For instance, to find 2-, 3-, and 5-mile service areas for each facility, specify `break_values=2 3 5`, separating the values with a space, and set `break_units` to `Miles`.
+</If>
+
+<Note type={"note"}>
+The values should always use a period as the decimal separator, even in countries where a comma is traditionally used. For example:`break_values=3.3 5.5 7.5` to specify the decimal values.
+</Note>

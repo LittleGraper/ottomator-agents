@@ -1,0 +1,456 @@
+---
+title: "Export Tiles"
+description: "exportTiles  downloads map tiles from ArcGIS Server and stores them for offline use."
+slug: "export-tiles-map-service"
+url: "/export-tiles-map-service"
+guid: "GUID-FE1339D8-9BD6-4BEF-BA43-BDFB97476821"
+migratedTopicMetadata:
+  FTITLE: "Export Tiles (Map Service)"
+  FDESCRIPTION: ""
+  FCHANGES: "ArcMap changes"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0 - *"
+  CREATED-ON: "06/06/2022 12:07:55"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "06/06/2022 12:08:43"
+  VERSION: "10"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-B9E520D4-B621-4017-9B85-21D70BB86FA1"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /exportTiles
+  urlSegments:
+    - name: Map Service
+      url: /map-service
+    - name: /exportTiles
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: 10.2.1
+---
+
+## Description
+
+The `exportTiles`  operation is performed as an asynchronous task and allows client applications to download map tiles from a server for offline use. This operation is performed on a [map service](/map-service) that allows clients to export cache tiles. The result of this operation is a [map service job](/map-service-job). This job response contains a reference to the [Map Service Result](/map-service-result) resource, which returns a URL to the resulting tile package (.tpk/.tpkx) or a cache raster dataset. For more information on the properties returned in the job response, see [GP Job](/gp-job).
+
+<Note type={"note"}>
+
+Support for tile packages with the file extension of .tpkx was introduced at ArcGIS Enterprise 10.7.
+
+</Note>
+
+The `exportTiles`  operation can be enabled in a service by ArcGIS Pro or the ArcGIS Server Administrator Directory. In ArcGIS Pro, make an admin or publisher connection to the server, go to the service properties, and enable **Allow Clients to Export Cache Tiles** in the advanced caching page of the Service Editor. You can also specify the maximum tiles clients will be allowed to download. The default maximum allowed tile count is 100,000. To enable this capability using the Administrator Directory, edit the service, and set the `exportTilesAllowed`  property as `true`  and the `maxExportTilesCount`  property as 100000.
+
+<Note type={"note"}>
+
+At 10.2.2 and later versions, `exportTiles`  is supported as an operation of the Map Server. The use of the `submitJob`  operation is deprecated.
+
+</Note>
+
+You can provide arguments to the `exportTiles`  operation as defined in the following parameters table:
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`storageFormatType` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Introduced at 10.7. When set to `esriMapCacheStorageModeCompactV2` , the resulting tile package will use the .tpkx file extension. If the value is set to `esriMapCacheStorageModeCompact` , a tile package with the .tpk extension is generated.
+
+Values: `esriMapCacheStorageModeCompactV2`  \| `esriMapCacheStorageModeCompact` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`tilePackage` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Allows exporting either a tile package or a cache raster dataset. If the value is `true` , output will be in tile package format, and if the value is `false` , a cache raster dataset is returned. The default value is `false` .
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`exportExtent` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The extent (bounding box) of the tile package or the cache dataset to be exported. If the extent does not include a spatial reference, the extent values are assumed to be in the spatial reference of the map. The default value is the full extent of the tiled map service.
+
+Syntax
+
+```javascript
+exportExtent=<xmin>,<ymin>,<xmax>,<ymax>
+```
+
+ 
+
+Example
+
+```javascript
+//Example one
+exportExtent=-104,35.6,-94.32,41
+
+//Example two
+exportExtent={"xmin": -109.55,"ymin": 25.76,"xmax": -86.39,"ymax":49.94,"spatialReference": {"wkid": 4326}}
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`optimizeTilesForSize` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Use this parameter to enable compression of JPEG tiles and reduce the size of the downloaded tile package or the cache raster dataset. Compressing tiles slightly compromises the quality of tiles but helps reduce the size of the download. Try sample compressions to determine the optimal compression before using this feature.
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`compressionQuality` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+When `optimizeTilesForSize`  is `true` , you can specify a compression factor. The value must be between 0 and 100. 
+
+<Note type={"note"}>
+
+The value cannot be greater than the default compression already set on the original tile. For example, if the default value is 75, the value of `compressionQuality`  must be between 0 and 75. A value greater than 75 in this example will attempt to up sample an already compressed tile and will further degrade the quality of tiles. 
+
+</Note>
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`exportBy` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The criteria that will be used to select the tile service levels to export. The values can be Level IDs, cache scales, or the resolution (in the case of image services).
+
+Values: `LevelID`  \| `Resolution`  \| `Scale` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`levels` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the tiled service levels to export. The values should correspond to Level IDs, cache scales, or the resolution as specified in the `exportBy`  parameter. The values can be comma-separated values or a range.
+
+<Note type={"note"}>
+
+Make sure tiles are present at the levels where you attempt to export tiles.
+
+</Note>
+
+Example
+
+```javascript
+//Comma-separated
+levels=1,2,3,4,5,6,7,8,9
+
+//Range of values
+levels=1-4,7-9
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`areaOfInterest` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The `areaOfInterest`  polygon allows exporting tiles within the specified polygon areas. This parameter supersedes the `exportExtent`  parameter.
+
+Example
+
+```javascript
+{
+  "features": [
+    {
+      "geometry": {
+        "rings": [
+          [
+            [-100,35],
+            [-100,45],
+            [-90,45],
+            [-90,35],
+            [-100,35]
+          ]
+        ],
+        "spatialReference": {
+          "wkid":4326
+        }
+      }
+    }
+  ]
+}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` .
+
+Values: `html`  \| `json`  \| `pjson` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Additional properties
+
+### exportTilesUsingLocalTempFolder
+
+In a multiple-machine site, users can use `localTempFolders`  to generate TPKs, and then move them to the arcgisoutput directory rather than reading or writing caches from or to a shared network folder. This reduces the time it takes to export TPKs by reducing latency and input/output on servers.
+
+When set to `true` , it overrides the `useLocalCacheDir`  property set on cached services and generates TPKs in the local temp folder of ArcGIS Server. The default setting for this property is `false` .
+
+It's recommended that you have at least 2 GB of available space in this location for each running instance of the CachingControllers geoprocessing service. It's also recommended that you allocate twice the size of the average TPK being exported by users on the server for each running instance of the CachingControllers service.
+
+Set this property using the following steps:
+
+1.   Open the ArcGIS Server Administrator Directory and sign in as a user with administrator access. The URL is formatted as follows:
+
+    ```javascript
+    https://gisserver.domain.com:6080/arcgis/admin
+    ```
+
+     
+2.  Click **system** > **properties** > **update**.
+3.  On the dialog box, add the `exportTilesUsingLocalTempFolder`  property, for example:
+
+    ```javascript
+    {"exportTilesUsingLocalTempFolder": true}
+    ```
+
+     
+4.  Click **Update**.
+
+Subsequent export tile requests for TPKs will now use the local temp folder.
+
+### maximumOutstandingJobs
+
+At times, there can be a surge in the number of export tile requests that are made to the server by clients. If the server is not able to successfully handle the requests, you can add this property to the CachingController service configuration to throttle the number of jobs for exporting tiles (on a tiled map service).
+
+The value of this property is an integer: N for a finite number, -1 for unlimited (default), and 0 for stopping all requests. If a service configuration does not contain this property, it's treated as an infinite capacity queue. When submitting a job for the export tiles operation, ArcGIS Server checks the current outstanding jobs (from the jobs queue), and if the value is `>=`  max, it returns an HTTP 503 error (service unavailable) with a Retry-After header set to 300 seconds.
+
+<Note type={"note"}>
+
+This functionality is specific to the export tiles operation (and the corresponding CachingControllers service). Other cache operations, such as updating and importing tiles, are unaffected.
+
+Only jobs that are currently in a waiting state (not being worked on) are treated as outstanding jobs. Jobs that are currently executing are excluded from this number.
+
+</Note>
+
+Set this property using the following steps:
+
+1.   Open the ArcGIS Server Administrator Directory and sign in as a user with administrator access. The URL is formatted as follows:
+
+    ```javascript
+    https://gisserver.domain.com:6080/arcgis/admin
+    ```
+
+     
+2.  Click **services** > **System** > **CachingControllers** > **edit**.
+3.  On the dialog box, add the `maximumOutstandingJobs`  property to the `properties`  section of the JSON, for example:
+
+    ```other
+    "properties": {
+      "outputDir": "C:\\arcgisserver\\directories\\arcgisoutput",
+      "virtualOutputDir": "/rest/directories/arcgisoutput",
+      "showMessages": "Info",
+      "toolbox": "${AGSSERVER}/ArcToolBox/Services/Caching Controllers.tbx",
+      "jobsDirectory": "C:\\arcgisserver\\directories\\arcgisjobs",
+      "executionType": "Asynchronous",
+      "jobsVirtualDirectory": "/rest/directories/arcgisjobs",
+      "maximumRecords": "1000",
+      "maximumOutstandingJobs": 500
+    }
+    ```
+
+     
+4.  Click **Save Edits**.
+
+## Example usage
+
+###  Example one
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/World_Imagery/MapServer/exportTiles?tilePackage=true&exportExtent=&optimizeTilesForSize=false&compressionQuality=90&exportBy=levelId&levels=0-2&areaOfInterest=&f=html
+```
+
+ 
+
+### Example two
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/World_Imagery/MapServer/exportTiles?tilePackage=true&exportExtent=-13051380,4030276,-13037288,4041136&optimizeTilesForSize=true&compressionQuality=60&exportBy=levelId&levels=0-2&areaOfInterest=&f=json
+```
+
+ 
+
+### Example three
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/World_Imagery/MapServer/exportTiles?tilePackage=true&exportExtent=&optimizeTilesForSize=true&compressionQuality=60&exportBy=levelId&levels=3-5&areaOfInterest={"features": [{"geometry": {"rings": [[[-100,35],[-100,45],[-90,45],[-90,35],[-100,35]]],"spatialReference": {"wkid":4326}}}]}&f=html
+```
+
+ 
+
+## JSON Response syntax
+
+```other
+{
+  "jobId": "<jobId>",
+  "jobStatus": "<jobStatus>"
+}
+```
+
+ 
+
+## JSON Response example
+
+The response returns a unique job ID that an be used to check the status of the job and job messages.
+
+```other
+{
+  "jobId": "jeeb938cbb2774269a7ca9910df4ee700",
+  "jobStatus": "esriJobSubmitted"
+}
+```
+
+ 
+
+## Job status
+
+After the initial request is submitted, you can track the status of your request by accessing the following URL, where `jobId`  is value returned in the JSON response above:
+
+<Note type={"note"}>
+
+For more information on the properties returned in the job response, see [GP Job](/gp-job)
+
+</Note>
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/World_Imagery/MapServer/jobs/<jobId>
+```
+
+ 
+
+In addition to checking the job's status, you can also cancel the job by making a request of the following form:
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/World_Imagery/MapServer/jobs/<jobId>/cancel?f=pjson
+```
+
+ 
+
+When the job is cancelled, the following response is returned:
+
+```javascript
+{
+  "jobId": "ja34307c9308f4144aed630b264582df1",
+  "jobStatus": "esriJobCancelling"
+}
+```
+
+ 

@@ -1,0 +1,580 @@
+---
+title: "Validate License"
+description: "Validates a new input license before its imported."
+slug: "validate-license"
+url: "/validate-license"
+guid: "GUID-BFC14A02-DB03-4FC4-A748-159213BBC4A3"
+migratedTopicMetadata:
+  FTITLE: "Validate License"
+  FDESCRIPTION: ""
+  FCHANGES: "Implementing REST API style changes"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.8-*"
+  CREATED-ON: "14/08/2019 09:42:04"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "06/11/2019 00:32:49"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "11"
+  ED: "GUID-873B4DC7-92B8-4130-9C43-E8468006FAB5"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /license/validateLicense
+  urlSegments:
+    - name: <root>
+      url: /portal-administration-root
+    - name: /license/validateLicense
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.7'
+  requiredCapabilities:
+    - name: Access allowed with the "Manage Licenses" privilege
+      url: /privileges-for-portal-admin-api
+---
+
+## Description
+
+The `validateLicense` operation is used to validate an input license file. Only valid license files can be imported. If the provided file is valid, and the response format (`f`) is set to `json` and `pjson`, the operation will return user type, app bundle, and add-on license information.
+
+If the file is invalid, the operation will fail and return an error message.
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `file` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The portal license file.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `listAdministratorUserTypes` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Returns a list of user types that are compatible with the Administrator role. This identifies the user type(s) that can be assigned to the Initial Administrator Account when creating a portal.
+
+      Value: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default is `html`.
+
+      Value: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## JSON Response syntax
+
+Sample response syntax for `validateLicense` with the `listAdministratorUserTypes` parameter set to `false`.
+
+```other
+{"MyEsri": {
+  "version": <version number>,
+  "definitions": {
+    "userTypes": [
+      {
+        "id": "<user type ID>",
+        "name": "<user type name>",
+        "description": "<user type description>",
+        "level": <level number>,
+        "isEsriDefault": true
+      },
+      ...
+    ],
+    "appBundles": [
+      {
+        "name": "<app bundle name>",
+        "description": "<bundle description>",
+        "appBundleItemId": "<bundle ID>"
+      },
+      ...
+    ]
+  },
+  "provision": {
+    "extensions": [  //New at 10.8
+      {
+        "id": "<user type extension ID>",
+        "maxUsers": <number>,
+        "startDate": <start date in epoch>,
+        "entitlements": [{
+          "num": <maximum registered members allowed>,
+          "apiName": "<associated API>"
+        }]
+      },
+      ...
+    ],
+    "userTypes": [    
+      {
+        "id": "<user type ID>",
+        "maxUsers": <maximum registered members allowed>,
+        "startDate": <start date in epoch>,
+        "apps": null
+      },
+      ...
+    ],
+    "appBundles": [],
+      "apps": [
+        {
+          "id": "<app ID>",
+          "maxUsers": <maximum registered members allowed>,
+          "startDate": <start date  in epoch>
+        },
+        ...
+      ],
+    }
+  }
+}
+```
+
+Sample response syntax for `validateLicense` with the `listAdministratorUserTypes` parameter set to `true`.
+
+```other
+{"userTypes": [
+  {"id": <userType Id>},
+  {"id": <userType Id>},
+  ...
+]}
+```
+
+## JSON Response example
+
+Response example for `validateLicense` with the `listAdministratorUserTypes` parameter set to `false`.
+
+```other
+{"MyEsri": {
+  "version": "10.8",
+  "definitions": {
+    "userTypes": [
+      {
+        "id": "creatorUT",
+        "name": "Creator",
+        "description": "Creator",
+        "level": "2",
+        "isEsriDefault": true
+      },
+      {
+        "id": "GISProfessionalAdvUT",
+        "name": "GIS Professional Advanced",
+        "description": "GIS Professional Advanced",
+        "level": "2",
+        "isEsriDefault": true,
+        "extensions": [  //New at 10.8
+          {
+            "id": "parcelFabric",
+            "entitlements": ["parcelFabric"]
+          },
+          {
+            "id": "utilityNetwork",
+            "entitlements": ["utilityNetwork"]
+          }
+        ]
+      },
+      {
+        "id": "GISProfessionalStdUT",
+        "name": "GIS Professional Standard",
+        "description": "GIS Professional Standard",
+        "level": "2",
+        "isEsriDefault": true,
+        "extensions": [  //New at 10.8
+          {
+            "id": "parcelFabric",
+            "entitlements": ["parcelFabric"]
+          },
+          {
+            "id": "utilityNetwork",
+            "entitlements": ["utilityNetwork"]
+          }
+        ]
+      },
+      {
+        "id": "GISProfessionalBasicUT",
+        "name": "GIS Professional Basic",
+        "description": "GIS Professional Basic",
+        "level": "2",
+        "isEsriDefault": true
+      },
+      {
+        "id": "insightsAnalystUT",
+        "name": "Insights Analyst",
+        "description": "Insights Analyst",
+        "level": "2",
+        "isEsriDefault": true
+      },
+      {
+        "id": "fieldWorkerUT",
+        "name": "Field Worker",
+        "description": "Field Worker",
+        "level": "11",
+        "isEsriDefault": true
+      },
+      {
+        "id": "editorUT",
+        "name": "Editor",
+        "description": "Editor",
+        "level": "11",
+        "isEsriDefault": true
+      },
+      {
+        "id": "viewerUT",
+        "name": "Viewer",
+        "description": "Viewer (formerly a LV1 user)",
+        "level": "1",
+        "isEsriDefault": true
+      }
+    ],
+    "appBundles": [
+      {
+        "name": "Field Apps",
+        "description": "Field Apps",
+        "appBundleItemId": "fieldAppsAB"
+      },
+      {
+        "name": "Office Apps",
+        "description": "Office Apps",
+        "appBundleItemId": "officeAppsAB"
+      },
+      {
+        "name": "Essential Apps",
+        "description": "Essential Apps",
+        "appBundleItemId": "essentialAppsAB"
+      }
+    ]
+  },
+  "provision": {
+    "extensions": [  //New at 10.8
+      {
+        "id": "parcelFabric",
+        "maxUsers": 200,
+        "startDate": 1542672000000,
+        "entitlements": [{
+          "num": 200,
+          "apiName": "parcelFabric"
+        }]
+      },
+      {
+        "id": "parcelFabric",
+        "maxUsers": 0,
+        "startDate": 1603225394000,
+        "entitlements": [{
+          "num": 0,
+          "apiName": "parcelFabric"
+        }]
+      },
+      {
+        "id": "utilityNetwork",
+        "maxUsers": 200,
+        "startDate": 1542672000000,
+        "entitlements": [{
+          "num": 200,
+          "apiName": "utilityNetwork"
+        }]
+      },
+      {
+        "id": "utilityNetwork",
+        "maxUsers": 0,
+        "startDate": 1603225394000,
+        "entitlements": [{
+          "num": 0,
+          "apiName": "utilityNetwork"
+        }]
+      }
+    ],
+    "userTypes": [
+      {
+        "id": "creatorUT",
+        "maxUsers": 200,
+        "startDate": 1542672000000,
+        "apps": null
+      },
+      {
+        "id": "creatorUT",
+        "maxUsers": 0,
+        "startDate": 1603225394000,
+        "apps": null
+      },
+      {
+        "id": "GISProfessionalAdvUT",
+        "maxUsers": 200,
+        "startDate": 1542672000000
+      },
+      {
+        "id": "GISProfessionalAdvUT",
+        "maxUsers": 0,
+        "startDate": 1603225394000
+      },
+      {
+        "id": "GISProfessionalStdUT",
+        "maxUsers": 200,
+        "startDate": 1542672000000
+      },
+      {
+        "id": "GISProfessionalStdUT",
+        "maxUsers": 0,
+        "startDate": 1603225394000
+      },
+      {
+        "id": "GISProfessionalBasicUT",
+        "maxUsers": 200,
+        "startDate": 1542672000000
+      },
+      {
+        "id": "GISProfessionalBasicUT",
+        "maxUsers": 0,
+        "startDate": 1603225394000
+      },
+      {
+        "id": "insightsAnalystUT",
+        "maxUsers": 200,
+        "startDate": 1542672000000,
+        "apps": null
+      },
+      {
+        "id": "insightsAnalystUT",
+        "maxUsers": 0,
+        "startDate": 1603225394000,
+        "apps": null
+      },
+      {
+        "id": "editorUT",
+        "maxUsers": 200,
+        "startDate": 1542672000000,
+        "apps": null
+      },
+      {
+        "id": "editorUT",
+        "maxUsers": 0,
+        "startDate": 1603225394000,
+        "apps": null
+      },
+      {
+        "id": "viewerUT",
+        "maxUsers": 200,
+        "startDate": 1542672000000,
+        "apps": null
+      },
+      {
+        "id": "viewerUT",
+        "maxUsers": 0,
+        "startDate": 1603225394000,
+        "apps": null
+      },
+      {
+        "id": "fieldWorkerUT",
+        "maxUsers": 200,
+        "startDate": 1542672000000,
+        "apps": null
+      },
+      {
+        "id": "fieldWorkerUT",
+        "maxUsers": 0,
+        "startDate": 1603225394000,
+        "apps": null
+      }
+    ],
+    "appBundles": [
+      {
+        "id": "fieldAppsAB",
+        "maxUsers": 200,
+        "startDate": 1542672000000,
+        "apps": null
+      },
+      {
+        "id": "fieldAppsAB",
+        "maxUsers": 0,
+        "startDate": 1603225394000,
+        "apps": null
+      },
+      {
+        "id": "officeAppsAB",
+        "maxUsers": 200,
+        "startDate": 1542672000000,
+        "apps": null
+      },
+      {
+        "id": "officeAppsAB",
+        "maxUsers": 0,
+        "startDate": 1603225394000,
+        "apps": null
+      },
+      {
+        "id": "essentialAppsAB",
+        "maxUsers": 200,
+        "startDate": 1542672000000,
+        "apps": null
+      },
+      {
+        "id": "essentialAppsAB",
+        "maxUsers": 0,
+        "startDate": 1603225394000,
+        "apps": null
+      }
+    ],
+    "apps": [
+      {
+        "id": "arcgisprodesktop",
+        "maxUsers": 5600,
+        "startDate": 1542672000000
+      },
+      {
+        "id": "arcgisprodesktop",
+        "maxUsers": 0,
+        "startDate": 1603225394000
+      },
+      {
+        "id": "appstudiostd",
+        "maxUsers": 200,
+        "startDate": 1542672000000
+      },
+      {
+        "id": "appstudiostd",
+        "maxUsers": 0,
+        "startDate": 1603225394000
+      },
+      {
+        "id": "collector",
+        "maxUsers": 200,
+        "startDate": 1542672000000
+      },
+      {
+        "id": "collector",
+        "maxUsers": 0,
+        "startDate": 1603225394000
+      },
+      {
+        "id": "workforce",
+        "maxUsers": 200,
+        "startDate": 1542672000000
+      },
+      {
+        "id": "workforce",
+        "maxUsers": 0,
+        "startDate": 1603225394000
+      },
+      {
+        "id": "BusinessAnlyst",
+        "maxUsers": 200,
+        "startDate": 1542672000000
+      },
+      {
+        "id": "BusinessAnlyst",
+        "maxUsers": 0,
+        "startDate": 1603225394000
+      },
+      {
+        "id": "Drone2MapN",
+        "maxUsers": 200,
+        "startDate": 1542672000000
+      },
+      {
+        "id": "Drone2MapN",
+        "maxUsers": 0,
+        "startDate": 1603225394000
+      },
+      {
+        "id": "survey123",
+        "maxUsers": 200,
+        "startDate": 1542672000000
+      },
+      {
+        "id": "survey123",
+        "maxUsers": 0,
+        "startDate": 1603225394000
+      },
+      {
+        "id": "Insights",
+        "maxUsers": 200,
+        "startDate": 1542672000000
+      },
+      {
+        "id": "Insights",
+        "maxUsers": 0,
+        "startDate": 1603225394000
+      },
+      {
+        "id": "tracker",
+        "maxUsers": 200,
+        "startDate": 1546992000000
+      },
+      {
+        "id": "tracker",
+        "maxUsers": 0,
+        "startDate": 1603225394000
+      },
+      {
+        "id": "Navigator",
+        "maxUsers": 200,
+        "startDate": 1542672000000
+      },
+      {
+        "id": "Navigator",
+        "maxUsers": 0,
+        "startDate": 1603225394000
+      },
+      {
+        "id": "QuickCapture",
+        "maxUsers": 200,
+        "startDate": 1542672000000
+      },
+      {
+        "id": "QuickCapture",
+        "maxUsers": 0,
+        "startDate": 1603225394000
+      },
+      {
+        "id": "arcgisRuntimeAdvanced",
+        "maxUsers": 200,
+        "startDate": 1542672000000
+      },
+      {
+        "id": "arcgisRuntimeAdvanced",
+        "maxUsers": 0,
+        "startDate": 1603225394000
+      }
+    ]
+  },
+  "portalCapabilities": [{
+    "id": "indoors",
+    "startDate": 1542672000000,
+    "endDate": 1603225394000
+  }]
+}}
+```
+
+Response example for `validateLicense` with the `listAdministratorUserTypes` parameter set to `true`.
+
+```other
+{"userTypes": [
+  {"id": "creatorUT"},
+  {"id": "GISProfessionalStdUT"},
+  {"id": "GISProfessionalBasicUT"},
+  {"id": "GISProfessionalAdvUT"}
+]}
+```

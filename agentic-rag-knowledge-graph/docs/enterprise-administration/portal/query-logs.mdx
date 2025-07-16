@@ -1,0 +1,547 @@
+---
+title: "Query Logs"
+description: "The query operation allows you to retrieve specific recorded logs in your portal."
+slug: "query-logs"
+url: "/query-logs"
+guid: "GUID-51ABEC1A-1A40-4960-801C-893B1DBA8C8D"
+migratedTopicMetadata:
+  FTITLE: "Query Logs"
+  FDESCRIPTION: ""
+  FCHANGES: "Implementing REST API style changes"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.8 - *"
+  CREATED-ON: "13/08/2019 15:49:18"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "06/11/2019 00:37:27"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "11"
+  ED: "GUID-B04E520E-1E27-43FD-BFAB-9F41312293D5"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /logs/query
+  urlSegments:
+    - name: <root>
+      url: /portal-administration-root
+    - name: /logs/query
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: 10.3.1
+  requiredCapabilities:
+    - name: Access allowed with any authorized privilege
+      url: /privileges-for-portal-admin-api
+---
+
+## Description
+
+The `query` operation allows you to aggregate, filter, and page through logs written by ArcGIS Enterprise portal. Logs can be queried according to log levels and start and end times, and further filtered by the log code, users associated with the event being logged, the log's source, and by request ID (introduced at ArcGIS Enterprise 11.3).
+
+### Queryable log information
+
+#### Log level
+
+Each logged event has a specific level associated with them. The table below outlines the log level types:
+
+<StyledTable headers={"Level,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `SEVERE`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Serious problems that require immediate attention. This level only includes severe messages.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `WARNING`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Moderate problems that require attention. This level also includes severe messages.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `Info`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Common administrative messages of the portal, including messages about organization settings being updated. This level also includes severe and warning messages.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `Fine`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Common messages from use of the portal, like names of operations and requests received. This level includes severe, warning, and info messages.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `Verbose`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Messages providing more detail about how the portal fulfills operations and requests. This level includes severe, warning, info, and fine messages.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `Debug`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Highly verbose messages designed for developers and support technicians who want to obtain a better understanding of the portal's state when troubleshooting. Don't use this level in a production environment; it may cause a decrease in performance. If you're not troubleshooting an issue, use the Warning level instead.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `Off`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Logging is turned off. Events are not logged with the portal.
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+#### Time
+
+Each logged event records the time the event occurred. Events are organized chronologically, with the most recent event displayed first. Logs can be filtered for a specific time frame by specifying the start and end time for the query. The start time will be the most recent time and the end time will be the earliest time.
+
+#### Log codes
+
+Each logged event has a code associated with it. The codes are organized into several categories with specific ranges and content. You can specify a specific code or code range to display when querying the logs.
+
+<StyledTable headers={"Category,Range,Message Content"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `Publishing`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      200000–201999
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Publishing and deleting hosted services.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `Content management`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      202000–203999
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      - Adding, removing, updating, and moving items.
+      - Changing item ownership.
+      - Sharing items with everyone, the organization, and groups.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `Security`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      204000–205999
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      - Built-in or organization-specific user log in.
+      - Portal token generation and configuration.
+      - Disabling and enabling account sign up.
+      - Disabling and enabling the ArcGIS Portal Directory.
+      - Importing or exporting a security certificate.
+      - Creating, deleting, and disabling users.
+      - Changing user role privileges.
+      - Creating and deleting custom roles.
+      - Disabling and enabling HTTPS and anonymous access.
+      - Updating the identity store.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `Organization management`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      206000–207999
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      - Customizing the organization home page.
+      - Configuration of the gallery, basemaps, display units, utility services, and federated servers.
+      - Creating and deleting groups.
+      - Adding users to a group and removing users from a group.
+      - Invite users to a group or accepting an invitation to a group.
+      - Configuration of ArcGIS Pro licenses.
+      - ArcGIS Web Adaptor configuration.
+      - Modifying the location of the portal content directory.
+      - Configuring forward and reverse proxy servers.
+      - Exceeding the number of named users authorized for the portal.
+      - Editing log setting and deleting logs.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `Installation and upgrade`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      208000–209999
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Installing and upgrading the software, creating the portal website, and authorizing the software.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `Search index`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      210000–211999
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Generating the portal's item search index.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `General`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      212000–219999
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      - Restarting the portal.
+      - Configuring a highly available portal.
+      - Other general messages generated through regular use of the portal.
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+#### Source component
+
+The source of the logged events are generated from the sharing, administrative, and portal components of the software. Events related to publishing and users are categorized under Sharing. Events related to security and indexing are categorized under Portal Admin. Events related to installing the software are categorized under Portal.
+
+#### Request IDs
+
+Introduced at 11.3, logs for requests made through the Portal Admin API have a request ID associated with them that can be used to further filter logs. The request ID can be gathered and used during queries in the following way:
+
+1. Make an initial query request for the Enterprise portal logs to find a log associated with the request. Its recommended that the `source` is set as `PORTAL ADMIN` to limit log results to those that would return a request ID. Logs can be further filtered by specifying a time range the request occured within, specifying a log code range, or providing the username of the member who is associated with the request.
+2. Once you've found a log entry for the request, copy the request ID.
+3. Return to the `query` operation and perform a new request, this time including the request ID as part of the query. You can make queries to different log levels to identify any logs of that type that are associated with the request ID.
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `level` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Returns only records with a log level at or more severe than the level specified. The default is `WARNING`.
+
+      Values: `OFF` | `SEVERE` | `WARNING` | `INFO` | `FINE` | `VERBOSE` | `DEBUG`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `startTime` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The most recent time to query. If, after running a request, the `hasMore` response property is `true`, you can retrieve additional log records by running a new request that uses the value you had for the `endTime` parameter in the first request as the value for the `startTime` parameter for the new request. Time can be specified as a portal timestamp (format in `yyyy-mm-ddThh:mm:ss`) or in Unix format. The default is the current date. If the `startTime` parameter is specified, but `endTime` is not, all of the oldest logs are returned up to the start time.
+
+      ```markdown label=Examples
+      //Timestamp
+      { "startTime": "2015-05-01T13:15:00", ... }
+
+      //Unix
+      { "startTime": 1430504100, ... }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `endTime` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      <!-- If `PortalStart` is `true`, then the default is all logs since the portal was started.  -->
+
+      The oldest time to include in the result set. You can use this to limit the query to the last number of minutes, hours, days, months, and years as needed. Time can be specified as a portal timestamp (format in `yyyy-mm-ddThh:mm:ss`) or in Unix format. The default is the beginning of all logging. If the `endTime` parameter is specified, but `startTime` is not, all of the most recent logs will be returned up to the end time.
+
+      ```markdown label=Examples
+      //Timestamp
+      { "endTime": "2015-05-01T13:00:00", ... }
+
+      //Unix
+      { "endTime": "1430503200, ... }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `filterType`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The filter type. The only accepted value is `json`.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `filter` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Filters Enterprise portal logs by a set of filter definitions:
+        - `codes`: A comma-separated list of log codes. This list can include specific log code values, a log code range, or a combination of specific log codes and log code ranges. Specyfing a value for the codes filter definition will only return logs that are a match with a specific log code or are within the log code range.
+        - `users`: A comma-separated list of organization member usernames.
+        - `requestIds`: Introduced at 11.3. An ID associated with a request made using the Portal Admin API. Only logs with a source of `PORTAL ADMIN` will return a request ID.
+        - `source`: The source component of the logged event. Accepted values are `*` (meaning all source components are included in the query), `SHARING`, `PORTAL ADMIN`, and `PORTAL`.
+
+      <Note type="tip">
+
+      If any definition is omitted, the query operation will return all logs for that definition area (i.e. all log codes are returned, logs for all organization members are returned, etc.) as long as those logs fall within any other sepcified query parameters.
+
+      </Note>
+
+      ```markdown label=Example
+      //Filtering using log codes, username, and source component
+      filter={
+        "codes": [
+          204000–205999,
+          212015,
+          219114
+        ],
+        "users": [
+          "admin",
+          "jcho"
+        ],
+        "requestIds": [],
+        "source": ["PORTAL ADMIN"]
+      }
+
+      //Filtering using request ID
+      filter={
+        "codes": [],
+        "users": [],
+        "requestIds": ["311bbe1c-a8bc-4cd9-9f73-1b9a12cbf178"],
+        "source": []
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `pageSize` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum number of log records to be returned by this query. The default is 1000.
+
+      ```markdown label=Example
+      pageSize=1000
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `federatedServers` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at ArcGIS Enterprise 11.4. Specifies whether logs from federated servers should be included in the query. To include logs from every federated server, set the value for `federatedServers` to `all`. To include logs from a specific federated server, set the value as the [server's URL](DEVSITE/rest/enterprise-administration/portal/servers/). To exclude federated server logs from the query, leave the value for `federatedServers` empty.
+
+      ```markdown
+      //Include logs from all federated servers
+      federatedServers=all
+
+      //Include logs from a specific federated server
+      federatedServers=https://machine.domain.com/arcgis
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default is `html`.
+
+      Values: `html` | `json` | `xml` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample GET request for the `query` operation:
+
+```markdown
+https://machine.domain.com/webadaptor/portaladmin/logs/query?level=SEVERE&startTime=1569263675708&endTime=1569212579554&filterType=json&filter={"codes":["201999"],"users":["user1"],"requestIds":[],"source":["Sharing"]}&pageSize=1000&federatedServers=all&f=json
+```
+
+## JSON Response example
+
+```other
+{
+  "hasMore": false,
+  "startTime": 1569263675708,
+  "endTime": 1569212579554,
+  "logMessages": [
+    {
+      "type": "SEVERE",
+      "message": " Failed to delete folder 'user1/testFolder' (id:a1b2c3d4e5f6g7h8i9a1b2c3d4e5f6g7).  Some items in the folder cannot be deleted.",
+      "time": 1569263675708,
+      "source": "Sharing",
+      "machine": "MACHINE.DOMAIN.COM",
+      "user": "user1",
+      "code": 219999,
+      "elapsed": "",
+      "process": "13944",
+      "thread": "1",
+      "methodName": "",
+      "requestID": ""
+    },
+    {
+      "type": "SEVERE",
+      "message": " Failed to delete item 'https://machine.domain.com/webadaptor/rest/services/Hosted/testItem/FeatureServer' (id:edf7f18f65604380bb045da9cbe18833) in folder 'user1/testFolder' (id:a1b2c3d4e5f6g7h8i9a1b2c3d4e5f6g7). Unable to delete item: https://machine.domain.com/webadaptor/rest/services/Hosted/testItem/FeatureServer",
+      "time": 1569263645008,
+      "source": "Sharing",
+      "machine": "MACHINE.DOMAIN.COM",
+      "user": "user1",
+      "code": 219999,
+      "elapsed": "",
+      "process": "13944",
+      "thread": "1",
+      "methodName": "",
+      "requestID": ""
+    },
+    {
+      "type": "SEVERE",
+      "message": " Failed to delete item 'https://machine.domain.com/webadaptor/rest/services/Hosted/testItem2/FeatureServer' (id:edf7f18f65604380bb045da9cbe18833). Error while deleteing 'edf7f18f65604380bb045da9cbe18833' {\"success\":false,\"error\":{\"message\":\"Delete Service failed for url 'https://machine.domain.com/webadaptor/rest/services/Hosted/testItem2/FeatureServer (Delete service error: \\nException: Read timed out)'\"}}",
+      "time": 1569263645008,
+      "source": "Sharing",
+      "machine": "MACHINE.DOMAIN.COM",
+      "user": "user1",
+      "code": 219999,
+      "elapsed": "",
+      "process": "13944",
+      "thread": "1",
+      "methodName": "",
+      "requestID": ""
+    }
+  ]
+}
+```

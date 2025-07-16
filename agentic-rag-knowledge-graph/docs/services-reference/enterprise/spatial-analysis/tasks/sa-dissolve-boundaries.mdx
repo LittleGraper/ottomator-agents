@@ -1,0 +1,187 @@
+---
+title: "Dissolve Boundaries"
+description: "API reference for the Dissolve Boundaries service available on ArcGIS Online"
+slug: "sa-dissolve-boundaries"
+url: "/spatial-analysis/tasks/sa-dissolve-boundaries"
+redirectFrom:
+  - /sa-dissolve-boundaries
+guid: "GUID-F052A1BD-9D99-417C-B377-8943C3E7B428"
+migratedTopicMetadata:
+  FTITLE: "SA Dissolve Boundaries"
+  FDESCRIPTION: "REST API doc"
+  FCHANGES: "conref context"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "agol10.1-*:11.0-*"
+  CREATED-ON: "28/02/2022 16:34:51"
+  FAUTHOR: "sambrose"
+  FSTATUS: "Released"
+  MODIFIED-ON: "02/03/2022 13:22:56"
+  VERSION: "8"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-BBD45EC8-CBE3-425A-8E31-1CC621B24597"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata: {}
+---
+
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E0E9FDE9_9A98_4EA4_9164_0E878BADF591 from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-E0E9FDE9-9A98-4EA4-9164-0E878BADF591";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_D95DEC58_7F27_491A_AF3D_6E6A3C0A6F2D from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-D95DEC58-7F27-491A-AF3D-6E6A3C0A6F2D";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_30F3F406_9E06_4BE5_ABF8_AC3AC7C14E1C from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-30F3F406-9E06-4BE5-ABF8-AC3AC7C14E1C";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E671F554_89D2_4CAD_B032_525E1CE90C18 from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-E671F554-89D2-4CAD-B032-525E1CE90C18";
+
+![Dissolve Boundaries](../../images/GUID-7B5F69B0-3625-404F-8B52-2B562766C0BB-web.png)
+
+The Dissolve Boundaries task finds polygons that overlap or share a common boundary and merges them together to form a single polygon.
+
+You can control which boundaries are merged by specifying a field. For example, if you have a layer of counties, and each county has a `State_Name` attribute, you can dissolve boundaries using the `State_Name` attribute. Adjacent counties will be merged together if they have the same value for `State_Name`. The end result is a layer of state boundaries.
+
+## Request URL
+
+```javascript
+http://<analysis url>/DissolveBoundaries/submitJob
+```
+
+## Request Parameters
+<StyledTable headers={"Parameter,Description"}>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `inputLayer`
+         (Required)
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The layer containing polygon features that will be dissolved.
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E0E9FDE9_9A98_4EA4_9164_0E878BADF591 />
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_D95DEC58_7F27_491A_AF3D_6E6A3C0A6F2D />
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `dissolveFields`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         One or more fields from the `inputLayer` that control which polygons are merged. If you don't supply `dissolveFields`, or you supply an empty list of fields, polygons that share a common border (that is, they are adjacent) or polygon areas that overlap will be dissolved into one polygon. The result will always include a `Count` field, which represents the number of input features that share the dissolve criteria.
+
+         If you do supply values for the `dissolveFields` parameter, polygons that share a common border and contain the same value in one or more fields will be dissolved. For example, if you have a layer of counties, and each county has a `State_Name` attribute, you can dissolve boundaries using the `State_Name` attribute. Adjacent counties will be merged together if they have the same case-sensitive value for `State_Name`. The end result is a layer of state boundaries. If two or more fields are specified, the values in these fields must be the same for the boundary to be dissolved.
+
+         Example:`"dissolveFields": ["State_Name", "District"]`
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `summaryFields`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         A list of field names and statistical summary type that you wish to calculate from the polygons that are dissolved together. For example, if you are dissolving counties based on `State_Name`, and each county had a `Population` field, you can sum `Population`. The result would be a layer of state boundaries with total population.
+
+         Syntax: `["fieldName summaryType","fieldName summaryType", ...]`
+
+         `fieldName` is one of the numeric or date fields from the `inputLayer` parameter.
+
+         `summaryType` is one of the following:
+         -   `Sum`—Calculates the sum for all the input polygons that are dissolved into each output feature. This statistic type is not supported for date fields.
+         -   `Mean`—Calculates the average for all the input polygons that are dissolved into each output feature. This statistic type is not supported for date fields.
+         -   `Min`—Finds the smallest value for all the input polygons that are dissolved into each output feature. This statistic type is supported for date fields.
+         -   `Max`—Finds the largest value for all the input polygons that are dissolved into each output feature. This statistic type is supported for date fields.
+         -   `Stddev`—Finds the standard deviation for all the input polygons that are dissolved into each output feature. This statistic type is not supported for date fields.
+
+         Example: `"summaryFields": ["Annual_Sales Sum", "Annual_Sales Min"]`
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `multiPartFeatures`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+
+         Specifies whether multipart features (i.e. features which share a common attribute table but are not visibly connected) are allowed in the output feature class.
+         -   Type: Boolean
+         -   Values:
+              -   `True`: Specifies that multipart features are allowed.
+              -   `False`: Specifies that multipart features are not allowed. Instead of creating multipart features, individual features will be created for each part. Any existing multipart features from the `inputLayer` will be returned as single part features in the result.
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `outputName`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_30F3F406_9E06_4BE5_ABF8_AC3AC7C14E1C />
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `context`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E671F554_89D2_4CAD_B032_525E1CE90C18 />
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `f`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The response format. The default response format is `html`.
+
+         Values: `html` \| `json`
+      </StyledTableCell>
+   </StyledTableRow>
+</StyledTable>
+
+## Response
+When you submit a request, the service assigns a unique job ID for the transaction.
+
+Syntax:
+```javascript
+{
+"jobId": "<unique job identifier>",
+"jobStatus": "<job status>"
+}
+```
+After the initial request is submitted you can use the `jobId` to periodically check the status of the job and messages as described in the topic [Check job status](/checking-job-status-1). Once the job has successfully completed, you use the `jobId` to retrive the results. To track the status, you can make a request of the following form:
+```javascript
+http://<analysis url>/DissolveBoundaries/jobs/<jobId>
+```
+## Accessing results
+When the status of the job request is `esriJobSucceeded`, you can access the results of the analysis by making a request of the following form.
+```javascript
+http://<analysis url>/DissolveBoundaries/jobs/<jobId>/results/dissolvedLayer?token=<your token>&f=json
+```
+<StyledTable headers={"Parameter,Description"}>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `dissolvedLayer`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The result of dissolving the input polygons.
+
+         Example:
+         ```javascript
+         {"url": "http://<analysis url>/DissolveBoundaries/jobs/<jobId>/results/dissolvedLayer"}
+         ```
+         The result has properties for parameter name, data type, and value. The contents of value depends upon the `outputName` parameter provided in the initial request.
+         -   If `outputName` was provided, `value` contains the url to the feature service layer.
+         ```javascript
+         {
+        "paramName":"dissolvedLayer",
+        "dataType":"GPString",
+        "value":{"url":"<hosted featureservice layer url>"}
+         }
+         ```
+         -   If `OutputName` was not provided, `value` contains a feature collection.
+         ```javascript
+         {
+         "paramName":"dissolvedLayer",
+         "dataType":"GPString",
+         "value":{"layerDefinition": {}, "featureSet": {}  }
+         }
+         ```
+         See [Feature Output ](/feature-output-1) for more information about how the result layer or collection is accessed.
+      </StyledTableCell>
+   </StyledTableRow>
+</StyledTable>

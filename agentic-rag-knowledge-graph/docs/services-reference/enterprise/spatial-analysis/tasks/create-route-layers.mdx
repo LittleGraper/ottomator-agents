@@ -1,0 +1,201 @@
+---
+title: "Create Route Layers"
+description: "API reference for the Create Route Layers service available on ArcGIS Online."
+slug: "create-route-layers"
+url: "/spatial-analysis/tasks/create-route-layers"
+redirectFrom:
+  - /create-route-layers
+guid: "GUID-38E5253E-9CBA-402D-B3C8-CD35CC956864"
+migratedTopicMetadata:
+  FTITLE: "Create Route Layers"
+  FDESCRIPTION: "New analysis tool added with March 2017 release"
+  FCHANGES: "Changes for ArcMap"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0-*"
+  CREATED-ON: "06/06/2022 11:51:22"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "06/06/2022 12:00:26"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-AA226DF4-6EAE-4CE0-B1E4-A761428D598E"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata: {}
+---
+
+The Create Route Layers task creates route layer items on the portal from the input route data.
+
+A route layer includes all the information for a particular route such as the stops assigned to the route as well as the travel directions. Creating route layers is useful if you want to share individual routes with other members in your organization.
+
+Route data is a storage format used to describe the results of a network analysis and can be created in applications such as ArcGIS Pro.
+
+## Limits
+
+The maximum number of route layers that can be created is 1,000. If the input route data contains more than 1,000 routes, the task will fail with an error message.
+
+##  Request URL
+
+```javascript
+http://<analysis url>/CreateRouteLayers/submitJob
+```
+
+ 
+
+## Request parameters
+<StyledTable headers={"Parameter,Details"}>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `routeData`
+         (Required)
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The item id for the route data item that is used to create route layer items. Before running this task, the route data must be added to your portal as an item.
+
+         Syntax:
+         ```none
+         {
+         "itemId" : {item id of the route data item}
+         }
+         ```
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `deleteRouteData`
+         (Required)
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         Indicates if the input route data item should be deleted. You may want to delete the route data in case it is no longer required after the route layers have been created from it.
+
+         When `deleteRouteData` is set to `true` and the task fails to delete the route data item, it will return a warning message but still continue execution.
+
+         The default value is `false`.
+
+         Example:
+         ```javascript
+         "deleteRouteData": "true"
+         ```
+         Values: `true` \| `false`
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `outputName`
+         (Required)
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         Specify properties such as the title, tags, snippet, and the portal folder for the output route layer items.
+         -   `tags`: Specify tags used to describe and identify the route layer items. Individual tags are separated using a comma. The route name is always added as a tag even when a value for this property is not specified.
+         -   `snippet`: Specify the summary displayed as part of the item information for the route layer item. If a value for this property is not specified, a default summary text "Route and directions for &lt;Route Name>" is used.
+         -   `title`: A qualifier added to the title of every route layer item. This can be used to designate all routes for a specific purpose to have the same prefix in the title. The name of the route is always appended after this qualifier. If a value for this property is not specified, the title for the route layer item is created only using the route name.
+         -   `folderId`: Specify the id of an existing folder within your personal online workspace where the route layer items will be created. If a value for this property is not specified, the route layer items are created in the root folder of your online workspace.
+
+         Syntax:
+         ```other
+         {
+         "itemProperties": {
+         "title": "<Prefix>",
+         "tags": "<tag1>,<tag2>",
+         "snippet": "<A short summary common to every route item.>",
+         "folderId": "<folder id>"
+            }
+         }
+         ```
+         Example:
+         ```other
+         {
+         "itemProperties": {
+         "title": "Monday Routes",
+         "tags": "Delivery, Priority2",
+         "snippet": "Deliveries that must be performed on Monday.",
+         "folderId": "edffe6469763487cb7749c10a1c39f7d"
+            }
+         }
+         ```
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `context`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         [Context](../../reference/spatial-reference) contains additional settings that affect task execution. Currently, Create Route Layers does not honor any settings passed as part of `context`.
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `f`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The response format. The default response format is `html`.
+
+         Values: `html` \| `json` \| `pjson`
+      </StyledTableCell>
+   </StyledTableRow>
+</StyledTable>
+
+## Response
+When you submit a request, the service assigns a unique job ID for the transaction.
+
+Syntax:
+```other
+{
+"jobId": "<unique job identifier>",
+"jobStatus": "<job status>"
+}
+```
+After the initial request is submitted you can use the `jobId` to periodically check the status of the job and messages as described in the topic [Check job status](/checking-job-status-1). Once the job has successfully completed, you use the `jobId` to retrieve the results. To track the status, you can make a request of the following form:
+```other
+http://<analysis url>/CreateRouteLayers/jobs/<jobId>
+```
+## Accessing results
+When the status of the job request is `esriJobSucceeded`, you can access the results of the analysis by making a request of the following form.
+```other
+http://<analysis url>/CreateRouteLayers/jobs/<jobId>/results/<output parameter name>?token=<your token>&f=json
+```
+<StyledTable headers={"Parameter,Description"}>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `routeLayers`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The output route layer items.
+
+         Example:
+         ```other
+         {"url": "http://<analysis url>/CreateRouteLayers/jobs/<jobId>/results/routeLayers"}
+         ```
+         The result has properties for parameter name, data type, and value. The contents of value include the item ids of the output route layers as well as some additional properties such as the URL for the route layer items.
+
+         Syntax:
+         ```other
+         {
+          "paramName": "routeLayers",
+          "dataType": "GPString",
+          "value": {
+            "items": {
+              "<route layer 1 item id>": {
+                "url": "<route layer 1 item URL",
+                "routeName": "<route name>",
+                "title": "<Route name prefix>:  <route name>"
+              },
+              "<route layer 2 item id>": {
+                "url": "<route layer 1 item URL",
+                "routeName": "<route name>",
+                "title": "<Route name prefix>:  <route name>"
+              }
+            },
+            "folderId": "<folder id>",
+            "portalUrl": "<portal url>"
+          }
+        }
+         ```
+      </StyledTableCell>
+   </StyledTableRow>
+</StyledTable>

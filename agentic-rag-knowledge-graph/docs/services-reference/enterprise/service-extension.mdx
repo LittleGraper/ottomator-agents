@@ -1,0 +1,436 @@
+---
+title: "Service extension"
+description: "The ArcGIS REST API, which exposes out-of-the-box ArcGIS services to the web APIs, can be extended to provide the same support for custom SOEs as well—exposing GIS functionality contained in the SOE as resources and operations."
+slug: "service-extension"
+url: "/service-extension"
+guid: "GUID-62509EB1-EB5C-4F67-B23F-65EDC79E1153"
+migratedTopicMetadata:
+  FTITLE: "Service Extension"
+  FDESCRIPTION: ""
+  FCHANGES: "Update HTTP URLs to HTTPS: https://devtopia.esri.com/WebGIS/arcgis-rest-api-documentation/issues/181"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.7 - *"
+  CREATED-ON: "25/06/2019 11:12:49"
+  FAUTHOR: "ssanchez"
+  FSTATUS: "Released"
+  MODIFIED-ON: "02/07/2019 14:54:04"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-A169C99B-DED8-4847-BBF6-0D957E87099B"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<service-url>/exts/<extensionName>
+  urlSegments:
+    - name: <service-url>/exts/<extensionName>
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.0'
+---
+
+## Description
+
+Organizations extending ArcGIS Server via server object extensions (SOE) want to expose their custom GIS functionality through the web APIs. The ArcGIS REST API, which exposes out-of-the-box ArcGIS services to the web APIs, can be extended to provide the same support for custom SOEs as well—exposing GIS functionality contained in the SOE as resources and operations.
+
+Note that at version 10, only map service extensions are supported.
+
+To expose an SOE from REST, developers need to implement the `IRESTRequestHandler`  interface. This can be implemented in various languages including Java, C#, and C++. Details on implementing and registering custom SOEs are available in the documentation of [Java](DEVSITE/enterprise-sdk/guide/java/) and [.NET](DEVSITE/enterprise-sdk/guide/net/). Once implemented and registered with a service, a custom SOE will be accessible from the REST API. It will also be simultaneously available in the Services Directory for users to browse the various resources and operations exposed by the SOE.
+
+SOEs are discussed below in three sections from the perspective of the REST client: 
+
+-   [SOE schema](/service-extension)
+-   [SOE resources](/service-extension)
+-   [SOE operations](/service-extension)
+
+## Schema
+
+The resource and operation hierarchy of an SOE is based on the schema specified by the SOE. The REST handler invokes the `getSchema()`  method on the `IRESTRequestHandler`  interface to get the SOE schema. This schema should be returned as a JSON-formatted string. From the REST API, this schema is available by specifying a query parameter `f=schema`  on the root SOE resource: 
+
+`https://<service-url>/exts/<extensionName>?f=schema` 
+
+A few example schemas are provided below to show you how to specify the resource and operation hierarchy. 
+
+### Schema 1—SOE with one operation
+
+```javascript
+{
+  "operations" : [ "buffer" ]
+}
+
+
+```
+
+ 
+
+In the simplest case, an SOE exposes a single operation. From the perspective of the REST API, this SOE exposes two URLs—the root SOE resource and the `buffer`  operation:
+
+```javascript
+https://<service-url>/exts/<extensionName> //root SOE resource
+https://<service-url>/exts/<extensionName>/buffer //buffer operation
+
+
+```
+
+ 
+
+### Schema 2—SOE with multiple operations
+
+```javascript
+{
+  "operations" : [ "buffer", "near" ]
+}
+
+
+```
+
+ 
+
+Since the `operations`  property in the schema is an array, one can specify multiple operations. From the perspective of the REST API, this SOE exposes three URLs—the root SOE resource and the `buffer`  and `near`  operations:
+
+```javascript
+https://<service-url>/exts/<extensionName> //root SOE resource
+https://<service-url>/exts/<extensionName>/buffer //buffer operation
+https://<service-url>/exts/<extensionName>/near //near operation
+
+
+
+```
+
+ 
+
+### Schema 3—Operations with parameters and supported output formats specified
+
+```javascript
+{
+  "operations" : [
+    {
+      "name" : "buffer", 
+      "parameters" : ["location", "distance"], 
+      "supportedOutputFormats" : ["json"]
+    },
+    {
+      "name" : "near", 
+      "parameters" : ["location", "distance", "lookingFor"], 
+      "supportedOutputFormats" : ["json"]
+    }
+  ]
+}
+
+
+```
+
+ 
+
+This schema exposes the same URLs as the ones in [Schema 2](/service-extension). The only difference is that instead of specifying only the operation names, this schema specifies some more information pertaining to each operation. This allows the Services Directory to provide a more helpful form to the user for each operation, as will be discussed later.
+
+### Schema 4—Child resources
+
+```javascript
+{
+  "name" : "MyMapServiceExtension",
+  "operations" : ["export", "identify"],
+  "resources" : [
+    {
+      "name" : "metadata"
+    },
+    {
+      "name" : "layers",
+      "isCollection" : true,
+      "operations" : ["query"],
+      "resources" : [
+        {
+          "name" : "features",
+          "isCollection" : true
+        }
+      ]
+    }
+  ]
+}
+
+```
+
+ 
+
+In addition to operations, the schema can also specify child resources.
+
+This SOE includes two root-level operations: `export`  and `identify` . It also includes two child resources: `metadata`  and `layers` . The `metadata`  resource is available at this URL:
+
+```javascript
+https://<service-url>/exts/<extensionName>/metadata
+
+
+```
+
+ 
+
+Note that `layers`  is a collection resource (indicated by the `isCollection`  property being `true` ). This implies the existence of multiple layer resources such that each layer resource is available at this URL:
+
+```javascript
+https://<service-url>/exts/<extensionName>/layers/<layerId>
+
+```
+
+ 
+
+Also, each layer supports a `query`  operation, which is available at this URL:
+
+```javascript
+https://<service-url>/exts/<extensionName>/layers/<layerId>/query
+
+
+```
+
+ 
+
+Each layer in turn includes a `features`  child resource. Since `features`  is also a collection resource, each feature resource is available at this URL:
+
+```javascript
+https://<service-url>/exts/<extensionName>/layers/<layerId>/features/<featureId>
+
+```
+
+ 
+
+### Schema 5—POST-only operations
+
+```javascript
+{
+  "operations" : [
+    {
+      "name" : "addStop", 
+      "parameters" : ["location", "name"], 
+      "supportedOutputFormats" : ["json"],
+      "postOnly" : true
+    }
+  ]
+}
+
+
+```
+
+ 
+
+Certain types of operations should only be allowed with HTTP POST. A method can be marked as such using the `postOnly`  Boolean flag. More information on this is provided below.
+
+## Resources
+
+All SOEs will minimally support a root resource and, optionally, child resources if the SOE schema (for example, [Schema 4](/service-extension)) specifies them.
+
+The REST handler always requests a JSON representation for resources from the SOE. If REST clients request a resource with `f=json` , the JSON as returned by the SOE is sent to the client. However, the Services Directory view of this resource consumes the JSON sent by the SOE and transforms it into HTML that can be shown on a web page.
+
+### Collection child resources
+
+In [Schema 4](/service-extension), `layers`  is specified as a collection child resource of the root SOE resource. Assume that the JSON for the root resource returned by the SOE is as follows: 
+
+```javascript
+{
+  "description: "Contitental US",
+  "extent" : { "xmin" : ..., "ymin" : ..., ...},
+  "spatialReference" : {...},
+  ...
+  
+  "layers" : [
+    { "id" : 0, "name" : "Cities", ... },
+    { "id" : 1, "name" : "Counties", ... },
+    { "id" : 2, "name" : "States", ... }
+  ]
+  
+  ...
+}
+
+
+```
+
+ 
+
+When displaying this as HTML in the Services Directory, the REST handler finds a `layers`  property. Since the schema specifies this as a collection child resource, it first inspects if the value of this property is a JSON array. Further, if each element in the array is a JSON object with an `id`  and a `name`  property, it displays a link using the `name`  property for display and the `id`  in the URL. For example, the `Cities`  layer above gets this URL:
+
+```javascript
+https://<service-url>/exts/<extensionName>/layers/0 //the Cities layer
+
+
+```
+
+ 
+
+In the Services Directory, the list of `layers`  appears as shown below.
+
+![Extension—Child Resources](./images/GUID-3C021365-5A9E-4F1B-8FF2-55C8137379AB-web.jpg)
+
+### SOE method calls for resources
+
+Accessing an SOE resource from the REST API incurs a call to the `handleRESTRequest`  method on the `IRESTRequestHandler`  interface of the SOE. For resource requests, the `operationName`  parameter of this method will be an empty string (""), whereas the `resourceName`  parameter will be a string relative to the root SOE resource. Revisit [Schema 4](/service-extension) and notice how requests for various REST resources translate into values of the `resourceName`  parameter when calling `handleRESTRequest` .
+
+<StyledTable headers={"REST Resource URL,resourceName parameter"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+```javascript
+https://<service-url>/exts/<extensionName> 
+https://<service-url>/exts/<extensionName>/metadata 
+https://<service-url>/exts/<extensionName>/layers/1 
+https://<service-url>/exts/<extensionName>/layers/1/features/37 
+```
+
+ 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+```javascript
+"" //empty string 
+"metadata" 
+"layers/1" 
+"layers/1/features/37" 
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+SOE developers should return the resource representations based on the `resourceName`  parameter.
+
+## Operations
+
+If the SOE schema specifies that a certain resource supports operations, the Services Directory page for that resource will display links to those operations. For instance, [Schema 2](/service-extension) and [Schema 3](/service-extension) both specify that the root SOE resource supports `buffer`  and `near`  operations. Hence, the Services Directory page for this resource will include links to these operations, as shown below:
+
+![Extension—Supported Operations](./images/GUID-20CBABFA-A56E-431F-8062-8805DCD42D41-web.jpg)
+
+### Operations without specified parameters
+
+In [Schema 2](/service-extension), only the name of operations is specified; in other words, there is no information pertaining to the parameters and output formats supported by that operation. In such cases, the Services Directory page for that operation presents a form where the user is required to provide both the parameter values and the parameter names. For instance, the Services Directory page for the `buffer`  operation in [Schema 2](/service-extension) will appear as shown below:
+
+![Extension—Operation without specified parameters](./images/GUID-21A66224-1406-4422-8B2D-15525351242B-web.jpg)
+
+### Operations with specified parameters
+
+In [Schema 3](/service-extension), both parameters and supported output formats for the `buffer`  operation are specified. In such cases, the Services Directory page for that operation presents a form with parameter names as well as the list of supported formats, populated as shown below:
+
+![Extension—Operation with specified parameters](./images/GUID-D7B0FEC8-1287-40AF-83A4-6B579AC2EE15-web.jpg)
+
+### SOE method calls for operations
+
+Invoking an SOE operation from the REST API also incurs a call to the `handleRESTRequest`  method on the `IRESTRequestHandler`  interface of the SOE. For operation requests, the `operationName`  parameter of this method will be a nonempty string. The `resourceName`  parameter will continue to be a string relative to the root SOE resource. Revisit [Schema 4](/service-extension) and notice how requests for various REST operations translate into values of the `resourceName`  and `operationName`  parameters when calling `handleRESTRequest` .
+
+<StyledTable headers={"REST Operation URL,resourceName parameter,operationName parameter"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+```javascript
+https://<service-url>/exts/<extensionName>/export
+```
+
+ 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+```javascript
+"" //empty string
+```
+
+ 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+```javascript
+"export"
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+```javascript
+https://<service-url>/exts/<extensionName>/layers/1/query
+```
+
+ 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+```javascript
+"layers/1"
+```
+
+ 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+```javascript
+"query"
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+SOE developers should invoke the appropriate logic based on the combination of `resourceName`  and `operationName`  parameters.
+
+### Operation parameters
+
+REST clients send operation parameters as query parameters either in the URL (for GETs) or in the body (for POSTs). Before making the `handleRESTRequest`  call, the REST handler coerces the input parameters into a JSON object. The request parameter names become the JSON property names. The values are attempted to be coerced to valid JSON types—numbers, Booleans, JSON objects, and JSON arrays. If they cannot be coerced to any of the types mentioned above, they'll be treated as strings.
+
+The `outputFormat`  argument is set to the value of format parameter `f` .
+
+As an example, consider this request for the near operation specified by [Schema 3](/service-extension):
+
+```javascript
+https://<service-url>/exts/<extensionName>/near?
+location={x: -117.05, y: 34.11}&distance=2.5&&lookingFor=ATM&f=json
+
+
+```
+
+ 
+
+In this case, since the value of the `location`  parameter is a valid JSON, it will be coerced to a JSON object. Similarly, the value of `distance`  will be coerced to a number and the value of `lookingFor`  will be a string. Based on these values, the `operationInput`  parameter when making the `handleRESTRequest`  call will be set to the following JSON-formatted string:
+
+```javascript
+{
+  "location" : {x: -117.05, y: 34.11}, //JSON object
+  "distance" : 2.5, //number
+  "lookingFor" : "ATM" //string
+}
+
+
+```
+
+ 
+
+Finally, the `outputFormat`  parameter will be set to `json`  (the value of the format parameter `f` ) when making the `handleRESTRequest`  call.
+
+### POST-only operations
+
+Operations that can permanently change the state of your system should not be allowed with HTTP GET. All add, update, and delete operations fall into this category. SOE developers can mark such operations as POST-only operations using the `postOnly`  property as shown in [Schema 5](/service-extension). The REST handler will enforce this condition by not calling the `handleRESTRequest`  for POST-only operations if the request was made using anything but HTTP POST. An appropriate error message with an error code of 405 (Method not allowed) will be sent to the client in such cases.

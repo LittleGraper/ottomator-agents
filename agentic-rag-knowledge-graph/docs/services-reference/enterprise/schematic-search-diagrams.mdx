@@ -1,0 +1,605 @@
+---
+title: "Schematic Search Diagrams"
+description: "The searchDiagrams operation allows to search for schematic diagrams related to the schematic service."
+slug: "schematic-search-diagrams"
+url: "/schematic-search-diagrams"
+guid: "GUID-7016AB8F-9CCE-4B4E-9AE9-CFCCACCA0573"
+migratedTopicMetadata:
+  FTITLE: "Schematic Search Diagrams"
+  FDESCRIPTION: ""
+  FCHANGES: "Broken links"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.7 -*"
+  CREATED-ON: "21/03/2019 13:34:16"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "22/03/2019 14:55:07"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-9EAF8004-75E5-45BF-8E61-EBC469B644A5"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /searchDiagrams
+  urlSegments:
+    - name: <schematicsserver-url>
+      url: /schematic-service
+    - name: /searchDiagrams
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.1'
+---
+
+## Description
+
+The `searchDiagrams` operation allows to search for schematic diagrams related to the schematic service. It is performed on the [Schematic Service](/schematic-service) resource. The result of this operation is an array of [Schematic Diagram Information Object](/schematic-diagram-information-object).
+
+It is used to search diagrams in the schematic service by criteria; that is, diagrams filtered out via a where clause on any schematic diagram class table field, diagrams that contain schematic features associated with a specific set of GIS features/objects, or diagrams that contain schematic features associated with the same GIS features/objects related to another set of schematic features.
+
+<Note type={"note"}>
+
+-   When specifying the `where`  parameter and any other `searchDiagrams` operation parameter, the `where`  criteria is ignored.
+-   When specifying both the `relatedObjects`  and `relatedSchematicObjects`  parameter, the search returns the diagrams which verify at least one of those parameters. That is, the list of diagrams returned from the `relatedObjects`  parameter is merged with the list returned from the `relatedSchematicObjects`  parameter.
+
+</Note>
+
+You can provide arguments to the Schematic Search Diagrams operation as query parameters defined in the parameters table below.
+
+## New in 10.2
+
+`where`  parameter value must conform to the standardized queries. Learn more about [standardized queries](https://enterprise.arcgis.com/en/server/latest/administer/windows/about-standardized-queries.htm).
+
+##  Request Parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` .
+
+Values: `html`  \| `json` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`where` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A where clause for the query filter. Any legal SQL where clause operating on the fields in the schematic diagram class table is allowed. See the [Schematic diagram class table fields](/schematic-search-diagrams#schematic-diagram-class-fields) section below to know the exact list of field names that can be used in this where clause.
+
+Sample One: Syntax and example for seaching diagrams updated by a given user
+
+Syntax: `UPDATEDBY = '<updatedBy>'` 
+
+Example: `UPDATEDBY = 'ABL4732'` 
+
+Sample Two: Syntax and example for searching diagrams stored in a given schematic folder and created by a given user
+
+Syntax: `FOLDERID = <folderObjectID> AND CREATOR = '<createdBy>'` 
+
+Example: `FOLDERID = 1 AND CREATOR = 'NCA3885'` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`relatedObjects` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+An array containing the list of the GIS features/objects IDs per feature class/table name that are in relation with schematic features in the resulting queried diagrams. Each GIS feature/object ID corresponds to a value of the OBJECTID field in the GIS feature class/table.
+
+Syntax:
+
+```javascript
+[
+  { 
+    "objectClassName" : "<objectClassName1>",
+    "objectIDs" : [ID1_1, ..., ID1_N]
+  }, 
+  { 
+    "objectClassName" : "<objectClassName2>",
+    "objectIDs" : [ID2_1, ..., ID2_M]
+  }
+]
+
+
+
+```
+
+ 
+
+Example: 
+
+```javascript
+[{"objectClassName": "PipelinesDatabase.SDE.pug_PUG_gas_plants", "objectIDs": [6]},{"objectClassName": "PipelinesDatabase.SDE.joined_pipe", "objectIDs" : [691, 675]}]
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`relatedSchematicObjects` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+An array containing the list of the schematic feature names per schematic feature class ID that have the same associated GIS features/objects with schematic features in the resulting queried diagrams. Each schematic feature name corresponds to a value of the SCHEMATICTID field in the schematic feature class.
+
+Syntax: 
+
+```javascript
+[
+  {
+    "featureClassID" : <schFeatureClass1ID>,
+    "objectNames" : ["<schFeatureName1>", ...,"<schFeatureNameN>"]
+  },
+  {
+    ...
+  },
+  {
+    "featureClassID" : <schFeatureClass2ID>,
+    "objectNames" : ["<schFeatureName1>", ...,"<schFeatureNameM>"]
+  }
+]
+
+```
+
+ 
+
+Example:
+
+```javascript
+[{"featureClassID": 885,"objectNames": ["859-6-0"]},{"featureClassID": 884, "objectNames": ["858-691-0","858-675-0"]}]
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+### Schematic diagram class fields
+
+<StyledTable headers={"Field Name to use in the WHERE clause,Data Type,Related item in the JSON"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+ID
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Long Integer
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+objectID
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+NAME
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Text
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+name
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+FOLDERID
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Long Integer
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+folderObjectID
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+DIAGRAMCLASSID
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Long Integer
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+templateObjectID
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+LASTUPDATE
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Date
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+lastUpdateDate
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+VERSION
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Text
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+version
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+CREATIONDATE
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Date
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+creationDate
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+CREATOR
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Text
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+createdBy
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+UPDATEDBY
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Text
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+lastUpdateBy
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+LOCKSTATUS
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Long Integer 
+
+-   0: unlocked diagram
+-   1: diagram in edition
+-   2: locked diagram
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Not directly returned by the JSON Schematic Diagram Information Object. However, there is a link between LOCKSTATUS and the lockedBy item returned by the JSON Schematic Diagram Information Object. When LOCKSTATUS=0, lockedBy is empty. While when LOCKSTATUS=1 or 2, lockedBy is not empty. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+MODIFIEDBY
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Text
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+lastModificationBy
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+Example 1: searchDiagrams with a where clause based on the FOLDERID field returns all the schematic diagrams stored in the specified schematic folder
+
+```javascript
+https://myserver.esri.com/arcgis/rest/services/S1_Schematics/MapServer/exts/SchematicsServer/searchDiagrams?where=FOLDERID%3D3&relatedObjects=&relatedSchematicObjects=&f=pjson
+```
+
+ 
+
+Example 2: searchDiagrams with `relatedObjects = [{"objectClassName": "Substation", "objectIDs": [1]}]`  returns all the schematic diagrams which contain schematic features associated with the Substation 1 GIS feature
+
+```javascript
+https://myserver.esri.com/arcgis/rest/services/S1_Schematics/MapServer/exts/SchematicsServer/searchDiagrams?where=&relatedObjects=%5B%7B%22objectClassName%22%3A+%22Substation%22%2C+%22objectIDs%22%3A+%5B1%5D%7D%5D&relatedSchematicObjects=&f=pjson
+```
+
+ 
+
+Example 3: searchDiagrams with `relatedSchematicObjects = [{"featureClassID": 100,"objectNames": ["37-1-0"]}]`  returns all the schematic diagrams which contain schematic features that have the same associated GIS features/objects with the 37-1-0 Substation schematic feature
+
+```javascript
+https://myserver.esri.com/arcgis/rest/services/S1_Schematics/MapServer/exts/SchematicsServer/searchDiagrams?where=&relatedObjects=&relatedSchematicObjects=%5B%7B%22featureClassID%22%3A+100%2C%22objectNames%22%3A+%5B%2237-1-0%22%5D%7D%5D&f=pjson
+```
+
+ 
+
+## JSON Response syntax
+
+```javascript
+"diagrams" : [
+   <diagramInfo1—See [Schematic Diagram Information Object - JSON Syntax](/schematic-diagram-information-object)>,
+   ...
+   <diagramInfoN—See [Schematic Diagram Information Object - JSON Syntax](/schematic-diagram-information-object)
+]
+          
+```
+
+ 
+
+[Learn about Schematic Diagram Information Object—JSON Syntax](/schematic-diagram-information-object)
+
+## JSON Response example
+
+Response when `where = CREATOR='NCA3885'` 
+
+```javascript
+//For the sample schematic service, the only diagram created by the NCA3885 user is returned
+"diagrams" : [
+  {
+    "name" : "ESTANCIA",
+    "id" : "0-334",
+    "templateIdentifier" : "0",
+    "templateObjectID" : 3204,
+    "schematicLayerIdentifier" : 0,
+    "folderObjectID" : 1,
+    "folderIdentifier" : "1",
+    "objectID" : 334,
+    "createdBy" : "NCA3885",
+    "lastModificationBy" : "ABL4732",
+    "lastUpdateBy" : "",
+    "creationDate" : "01/21/2011 16:07:46",
+    "lastModificationDate" : "02/14/2011 18:34:46",
+    "lastUpdateDate" : "",
+    "lockedBy" : "",
+    "version" : "",
+    "extent" : {
+      "xmin" : 6.0370819091796868,
+      "ymin" : -8.059234619140625,
+      "xmax" : 29.909512329101563,
+      "ymax" : 11.059844970703125,
+      "spatialReference" : {
+        "wkid" : null
+      }
+    },
+    "rootNodes" : [
+      "115"
+    ]
+  }
+]
+
+
+          
+```
+
+ 
+
+## JSON Response example
+
+Response when `relatedObjects = [{"objectClassName" : "Feeder", "objectIDs" : [2]}]` 
+
+```javascript
+//For the sample schematic service, two diagrams containing schematic features associated with the Feeder 2 GIS feature are found and returned
+"diagrams" : [
+  {
+    "name": "Main_GoldmineAll",
+    "id": "0-3",
+    "templateIdentifier": "0",
+    "templateObjectID": 5443,
+    "schematicLayerIdentifier": 0,
+    "folderObjectID": 4,
+    "folderIdentifier": "4",
+    "objectID": 3,
+    "createdBy": "ABL4732",
+    "lastModificationBy": "ABL4732",
+    "lastUpdateBy": "",
+    "creationDate": "02/10/11 12:35:09",
+    "lastModificationDate": "02/11/11 10:35:08",
+    "lastUpdateDate": "",
+    "lockedBy": "",
+    "version": "SDE.DEFAULT",
+    "extent": {
+      "xmin": 378116.2965000011,
+      "ymin": 1545363.3225000005,
+      "xmax": 402460.91349999979,
+      "ymax": 1571390.8075000022,
+      "spatialReference": {
+        "wkid": null
+       }
+    }
+  },
+  {
+    "name": "Main_CentralArea",
+    "id": "0-1",
+    "templateIdentifier": "0",
+    "templateObjectID": 5443,
+    "schematicLayerIdentifier": 0,
+    "folderObjectID": 4,
+    "folderIdentifier": "4",
+    "objectID": 1,
+    "createdBy": "ABL4732",
+    "lastModificationBy": "ABL4732",
+    "lastUpdateBy": "NCA3885",
+    "creationDate": "02/10/11 11:31:03",
+    "lastModificationDate": "03/29/11 15:48:29",
+    "lastUpdateDate": "03/29/11 15:48:30",
+    "lockedBy": "",
+    "version": "SDE.DEFAULT",
+    "extent": {
+    "xmin": 371978.9869999974,
+    "ymin": 1540107.6944999993,
+    "xmax": 383462.8330000015,
+    "ymax": 1552900.375500004,
+    "spatialReference": {
+      "wkid": 3519,
+      "latestWkid": 3519
+       }
+    }
+  }  
+]
+
+
+```
+
+ 

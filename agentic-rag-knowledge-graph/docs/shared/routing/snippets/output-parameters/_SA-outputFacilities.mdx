@@ -1,0 +1,103 @@
+import Stats from "../../snippets/shared-attributes/_Status.mdx"
+import SnapXYZ from "../../snippets/shared-attributes/_SnapXYZ-DistToNet.mdx"
+import NetworkLocation from "../../snippets/shared-attributes/_NetworkLocationFields.mdx"
+
+import ParamMetadata from "../../../components/param-metatdata" 
+
+<ParamMetadata types={[{name:"feature",link:"../routing-data-types#feature"}]} />
+
+
+{/* <p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p> */}
+
+Provides access to the attributes of the facilities that are used in the service area analysis. You can use the attributes from this data type, such as the Status field, to determine why a facility was not used in the analysis.
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for output facilities</span></summary>
+
+<If c="requestType == 'direct'">
+-   <p class="space-x-2"><span class="font-bold">ObjectID</span><span class="font-sm text-color-3">integer</span></p>
+
+    If you specify `preserveObjectID=false`, the value for this field will be a system-generated ID. If `preserveObjectID=True`, the value for this field will be the `ObjectID` of your associated input.
+    
+</If>
+
+-   <p class="space-x-2"><span class="font-bold">Name</span><span class="font-sm text-color-3">string (length: 500)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The name of the facility. The values for this field are copied from the `Name` field on the input facilities.
+
+<NetworkLocation />
+
+-   <p class="space-x-2"><span class="font-bold">CurbApproach</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The direction a vehicle may arrive at and depart from the facility. The values for this field are copied from the `CurbApproach` field on the input facilities.
+
+<Stats />
+
+<SnapXYZ />
+
+<If c="requestType == 'job'">
+
+-  <p class="space-x-2"><span class="font-bold">FacilityOID</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The `ObjectID` value of the input facility. 
+
+-   <p class="space-x-2"><span class="font-bold">Bearing</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The values for this field are copied from the `Bearing` field on the input facilities.
+
+-   <p class="space-x-2"><span class="font-bold">BearingTol</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The values for this field are copied from the `BearingTol` field on the input facilities.
+
+-   <p class="space-x-2"><span class="font-bold">NavLatency</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The values for this field are copied from the `NavLatency` field on the input facilities.
+
+-   <p class="space-x-2"><span class="font-bold">Breaks</span><span class="font-sm text-color-3">string (length: 128)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The values for this field are copied from the `Breaks` field on the input [`facilities`](#facilities).
+
+-   <p class="space-x-2"><span class="font-bold">AdditionalTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The values for this field are copied from the `AdditionalTime` field on the input facilities.
+
+-   <p class="space-x-2"><span class="font-bold">AdditionalDistance</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The values for this field are copied from the `AdditionalDistance` field on the input facilities.
+
+</If>
+
+{/* IMP: Need to figure out the If condition. The content is not shown if the publication part of the IF is used. When the publication part is removed, the content appears. But there is specific content for the direct request for rest and enterprise publications, so this need to be figured out as to why the If statement is not working with the two conditions */}
+
+<If c="requestType =='direct'">
+
+-   <p class="space-x-2"><span class="font-bold">Attr_[Cost]</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    This field stores the additional time, distance, or other travel cost for the facility. Adding a value to this field reduces the reach of the service area. 
+
+    If you're finding the service areas for three facilities using `TravelTime` as the cost, the `Attr_TravelTime`  field can be used to store the amount of time spent at the facility.
+
+    The value you enter affects the analysis only when the [Cost] part of the field name (`Attr_[Cost]`) is used as impedance attribute or accumulate attribute for the analysis. For example, if you add a 5 to `Attr_TravelTime`, but the cost attribute used in the analysis is `Attr_TruckTravelTime`, the additional five minutes aren't included in the analysis results; however, if you change the network cost attribute to `TravelTime`, which corresponds with `Attr_TravelTime`, the five minutes you entered are added to the results.
+</If>
+
+
+<If c="requestType== 'direct' && publication == 'rest/online'">
+
+-   <p class="space-x-2"><span class="font-bold">Breaks_[Impedance]</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    You can store different polygon break values for each service area facility in the `Breaks_[Impedance]` field. Given two facilities, this means you can generate 5- and 10- minute service area polygons for one facility and 6-, 9-, and 12- minute polygons for another facility.
+
+    The value for the `Breaks_[Impedance]` attribute overrides the `defaultBreaks` parameter value. If `Breaks_[Impedance]` is not set for a facility, the service will use the value specified as the `defaultBreaks` parameter.
+</If>
+
+<If c="requestType== 'direct' && publication == 'services-reference/enterprise'">
+    
+-   <p class="space-x-2"><span class="font-bold">Breaks_[Cost]</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    You can store different polygon break values for each service area facility in the `Breaks_[Cost]` field. Given two facilities, this means you can generate 5- and 10- minute service area polygons for one facility and 6-, 9-, and 12- minute polygons for another facility.
+
+    The value for the `Breaks_[Cost]` attribute overrides the `defaultBreaks` parameter value. If `Breaks_[Cost]` is not set for a facility, the service will use the value specified as the `defaultBreaks` parameter.
+</If>
+
+</details>
+

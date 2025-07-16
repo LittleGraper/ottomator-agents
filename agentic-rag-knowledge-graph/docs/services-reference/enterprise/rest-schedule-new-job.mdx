@@ -1,0 +1,196 @@
+---
+title: "Schedule New Job"
+description: "This resource schedules a new job for execution."
+slug: "rest-schedule-new-job"
+url: "/rest-schedule-new-job"
+guid: "GUID-C0125C44-11C9-40D9-AE9B-36DABB309B97"
+migratedTopicMetadata:
+  FTITLE: "REST: Schedule New Job"
+  FDESCRIPTION: ""
+  FCHANGES: "adding note for AO10 deprecation per 1258"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9 - *"
+  CREATED-ON: "02/02/2021 12:37:35"
+  FAUTHOR: "igalvan"
+  FSTATUS: "Released"
+  MODIFIED-ON: "12/02/2021 12:26:59"
+  VERSION: "5"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-3D23F8A8-B922-49DB-AE0C-1F6B092DBED9"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /scheduleNewJob
+  urlSegments:
+    - name: <BatchValidation-url>
+      url: /rest-batch-validation
+    - name: /scheduleNewJob
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '10.1'
+  relatedResources:
+    - name: Batch Validation
+      url: /rest-batch-validation
+  requiredCapabilities:
+    - name: Data Reviewer Server
+      url: /rest-data-reviewer-map-service
+---
+
+import GUID_2552D38B_743E_4F04_B17A_20DFD25517C8_GUID_E6C28557_ADDB_4260_92CF_C8983F9552C4 from "./snippets/GUID-2552D38B-743E-4F04-B17A-20DFD25517C8/_GUID-E6C28557-ADDB-4260-92CF-C8983F9552C4";
+import GUID_2552D38B_743E_4F04_B17A_20DFD25517C8_GUID_5492D5C4_A7A6_4DC8_A922_84958A9EFC03 from "./snippets/GUID-2552D38B-743E-4F04-B17A-20DFD25517C8/_GUID-5492D5C4-A7A6-4DC8-A922-84958A9EFC03";
+
+## Description
+
+<Note>
+The ArcGIS Data Reviewer extension is required to use this resource.
+</Note>
+
+<Note>
+This resource is dependent on the ArcGIS Data Reviewer ArcMap runtime-based server object extension (SOE). ArcGIS Enterprise 10.9.x, part of the ArcGIS 2021 releases, is the last release of ArcGIS Enterprise to support services published from ArcMap.
+
+Consider Data Reviewer capabilities enabled using ArcGIS Pro and integrated in the [Validation service](/validation-server).
+</Note>
+
+A REST resource that schedules a new job for execution. Execution does not start until the date and time you specify. Use a cron time and date string to indicate time of execution.
+
+The `batchValidationSettings` parameter contains the following name/value pairs:
+
+-   `batchJobFileItemId` : The `itemId` of an uploaded batch job file. Use the Data Reviewer map server's upload operation to upload the batch job file to the server. The upload operation returns the `itemId`. See the [ArcGIS REST API](http://links.esri.com/arcgis-rest-api) documentation for more information about uploading. 
+-   `sessionId`: The session in which validation will occur. Use the full string format of session Id: `Session 1 : Session 1`. 
+-   `productionWorkspace`: This parameter is optional. A path to a production workspace. A production workspace allows you to validate data in a different workspace than what is referenced in the batch job file (`.rbj` ). The workspace path can be absolute or UNC. The ArcGIS server account must have access to the folder that contains the workspace (fGdb) or the connection file that references the workspace (eGdb). Example: `c:\\arcgisserver\\data\\arcsde_connection_file.sde`.
+-   `productionWorkspaceVersion`: This parameter is optional. This parameter applies only if a production workspace is specified and it is an enterprise geodatabase. The `productionWorkspaceVersion` parameter allows you to validate data in a particular version. If the `productionWorkspaceVersion`  parameter is not specified, the version saved in the production workspace connection file is validated. Example: "`productionWorkspaceVersion`" : `"SDE.DEFAULT"`.
+-   `analysisArea`: This parameter is optional. JSON polygon features that will be joined to create a processing area. Features that intersect this area will be validated by the Reviewer batch job. Features outside this area will not be validated. Example JSON structure:"`analysisArea` ": {'{'}"rings":\[\[\[-97.74, 30.303],\[-97.738,30.303 ], \[-97.738, 30.305],\[-97.74, 30.305],\[-97.74, 30.303]]],"spatialReference":{'{'}"wkid": 4326{'}'}{'}'}
+-   `changedFeaturesOnly`: This parameter is optional and only applies to multiversioned eGdb data. The default value is false. If true, validation is limited to features that have changed from a parent to the child version. Changes between versions include the following: 
+
+    -   Features inserted in the child version but not the parent 
+    -   Features changed in the child version and unchanged in the parent 
+    -   Features changed in both child and parent versions
+    -   Features changed in the child version and deleted in the parent 
+
+    <Note>
+    To validate data with `changedFeaturesOnly`, the connection file in `productionWorkspace` must reference a child version. 
+    </Note>
+
+The schedule parameter contains the following name/value pairs: 
+
+-   [cronExpression](http://www.quartz-scheduler.org/documentation/quartz-2.2.2/tutorials/tutorial-lesson-06.html) : A cron string indicating time and date of execution. The time is in UTC. Cron expressions follow this format: seconds, minutes, hours, day-of-month, month, day-of-week, year. For example: a cron schedule of 0 30 10 \* \* ? executes the job every day at 10:30 UTC. The server will return an error if you try to schedule a job that executes more frequently than once every 15 minutes. 
+-   `executionsEndDate` (optional): specifies ending date, in epoch time in milliseconds, for a batch validation schedule. If both this property and `maxNumberOfExecutions` are set, the Batch Validation schedule will finish with whichever condition happens first. For example: "`executionsEndDate` ":"1349817000000" equates to October 9, 2012 at 21:10:00. 
+-   `maxNumberOfExecutions` (optional): specifies the maximum number of batch validation executions that can run. If both this property and `executionsEndDate` are set, the Batch Validation schedule will finish with whichever condition happens first. 
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`batchValidationSettings` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+JSON object with four name/value pairs
+
+Values: {'{'}"`batchJobFileItemId`":"&lt;upload `itemId`>","`sessionId`":"&lt;reviewer_session_id>","`productionWorkspace`":"&lt;path to production workspace>","`productionWorkspaceVersion`":"&lt;name of version>","`analysisArea` ":&lt;JSON polygon>,"`changedFeaturesOnly` ":`true` | `false`{'}'} 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`schedule` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+JSON object with one required name/value pair and two optional name/value pairs.
+
+Values: {'{'}"`cronExpression`":"seconds, minutes, hours, day-of-month, month, day-of-week, year," "`executionsEndDate` (optional)":"&lt;ending date in epoch time in milliseconds>", "`maxNumberOfExecutions` (optional)":"&lt;number of executions>"{'}'}. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`batchValidationJobTitle` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The batch validation job title. This information is stored in the scheduler database with the adhoc job information. It is not stored in the Data Reviewer workspace. The [getJobDetails](/rest-get-job-details) operation returns information that includes the job title. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`batchValidationJobCreatedBy` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Indicates the user name that executes the adhoc job. This information is stored in the scheduler database with the adhoc job information. It is not stored in the Reviewer workspace. The [getJobDetails](/rest-get-job-details) operation returns information that includes the job created by name. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html`.
+
+Values: `html` | `json` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+Schedules a batch job. The request specifies a production workspace, an upload `itemId`, a session, and an execution schedule of every day at 10:30 (0 30 10 \* \* ?). Submitting this request will return an scheduled job id, but actual batch validation execution may fail if you don't have this production workspace or session. To use this sample request: 
+
+1.  Change the production workspace (or remove it). 
+2.  Change the session id if your Data Reviewer workspace does not have a session called "`Session 1 : Session 1`." 
+3.  Upload a batch job file. The upload operation returns an `itemId`. Change the `batchJobFileItemId` to your uploaded `itemId`. 
+
+```javascript
+https://localhost:6080/arcgis/rest/services/reviewer/MapServer/exts/DataReviewerServer/BatchValidation/scheduleNewJob?batchValidationSettings={"batchJobFileItemId":"ifff042a8-cbc5-43e7-b1ad-1a4edd593c0e","sessionId":"Session 1 : Session 1","productionWorkspace":"c:\\data\\LocalGovernment.gdb"}&schedule={"cronExpression":"0 30 10 * * ?"}&batchValidationJobTitle=&batchValidationJobCreatedBy=&f=pjson 
+```
+
+## JSON Response example
+
+```javascript
+{
+  "scheduledJobId": "f43570ee-c9db-4a6c-bcd1-54bf6f9627c7"
+}
+```

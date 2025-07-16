@@ -1,0 +1,720 @@
+---
+title: "Update Identity Store"
+description: "This operation can be used to change the identity providers for ArcGIS Enterprise."
+slug: "update-identity-store"
+url: "/update-identity-store"
+guid: "GUID-E3A5B09A-8793-4525-B45C-5C65E1CFC848"
+migratedTopicMetadata:
+  FTITLE: "Update Identity Store"
+  FDESCRIPTION: ""
+  FCHANGES: "Updating terminology per new terminology guidelines"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.8 - *"
+  CREATED-ON: "12/10/2020 10:26:32"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "12/02/2021 09:54:39"
+  VERSION: "12"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "6"
+  ED: "GUID-FD35BC46-2480-48FA-8943-066553C1F9F9"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /security/config/updateIdentityStore
+  urlSegments:
+    - name: <root>
+      url: /portal-administration-root
+    - name: /security/config/updateIdentityStore
+  methods:
+    - post
+  sslOnly: 'yes'
+  versionIntroduced: 10.2.1
+  requiredCapabilities:
+    - name: Access allowed with the "Security and Infrastructure" privilege
+      url: /privileges-for-portal-admin-api
+---
+
+## Description
+
+The `updateIdentityStore` operation changes the identity provider and group store configuration for ArcGIS Enterprise. When Portal for ArcGIS is first installed, ArcGIS Enterprise is configured support token-based authentication and built-in groups using the built-in identity store. This configuration can be modified to enable ArcGIS Enterprise to connect to your enterprise authentication mechanism and group store by changing the `type` of provider and modifying the configuration properties appropriately. For more information, see the [Example usage](/update-identity-store#example-usage) section below.
+
+## Request parameters
+
+<StyledTable headers={"Parameters,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `userStoreConfig` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      JSON that specifies the properties being changed for the identity provider.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `groupStoreConfig` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      JSON that specifies the properties being changed for the group store.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Identity and group store properties
+
+<StyledTable headers={"Properties,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `type` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the authentication mechanisms for the identity store and group store.
+
+      Values: `BUILTIN` | `WINDOWS` | `LDAP`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `userPassword` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The password for the domain account.
+
+      ```markdown label=Example
+      "userPassword": "secret"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `isPasswordEncrypted` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Indicates if the `userPassword` property is an encrypted password or plain text. If the property is `false`, the API will encrypt the password automatically.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `user` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A user account with at least read permissions to look up the email addresses and user names of users in your organization. If possible, use an account whose password does not expire.
+
+      ```markdown label=Example
+      //Windows Active Directory
+      "user": "mydomain\\winaccount"
+
+      //LDAP example
+      "user": "uid=admin,ou=system"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `userFullnameAttribute` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The attribute in Windows Active Directory or LDAP that contains the full name of the users.
+
+      ```markdown label=Example
+      "userFullnameAttribute": "cn"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `ldapURLForUsers` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The URL to your LDAP that points to the user accounts. The URL to your LDAP will need to be provided by your LDAP administrator. Although both LDAP and LDAPS URLs are supported, LDAPS is highly recommended to ensure encrypted network traffic between Enterprise portal and LDAP servers. If LDAPS is not available, an LDAP URL can be used but traffic will be sent in clear-text. This property is not applicable when configuring Windows Active Directory.
+
+      ```markdown label=Example
+      "ldapURLForUsers": "ldaps://bar2:10636/ou=users,ou=ags,dc=example,dc=com"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `ldapURLForRoles` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The URL to your LDAP that points to the roles. The URL to your LDAP will need to be provided by your LDAP administrator. Although both LDAP and LDAPS URLs are supported, LDAPS is highly recommended to ensure encrypted network traffic between ArcGIS Enterprise and LDAP servers. If LDAPS is not available, an LDAP URL can be used but traffic will be sent in clear-text. This property is not applicable when configuring Windows Active Directory.
+
+      ```markdown label=Example
+      "ldapURLForRoles": "ldaps://bar2:10636/ou=roles,ou=ags,dc=example,dc=com"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `userEmailAttribute` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The attribute in Windows Active Directory or LDAP that contains the email addresses of the users.
+
+      ```markdown label=Example
+      "userEmailAttribute": "mail"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `usernameAttribute` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The LDAP attribute of the user entry that is to be treated as the user name. This property is not applicable when configuring Windows Active Directory.
+
+      ```markdown label=Example
+      "usernameAttribute": "cn"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `userSearchAttribute` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      When using LDAP and PKI to secure access to Enterprise portal, you'll need to specify the value for `userSearchAttribute`. The `userSearchAttribute` is the value of the Subject parameter of the PKI certificate. If your organization uses another attribute in the PKI certificate, such as email, you must update the `userSearchAttribute` to match the Subject parameter in the PKI certificate.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `caseSensitive` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      In the rare case where your Windows Active Directory is configured to be case sensitive, set this property to `true`. If your LDAP is configured to be case insensitive, set this property to `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `followReferrals` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This property controls whether LDAP referrals are followed when ArcGIS Enterprise queries domain controllers for user or group information. By default, this is set to `true`.
+      
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `domainControllerAddress` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The IP address of the domain controller to be used by Enterprise portal. You'll need to specify the domain controller if your Active Directory deployment includes multiple domain controllers, but not all domain controllers are configured as global catalog servers. Multiple IP addresses can be listed and IPv6 addresses are supported.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `domainControllerMapping` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The IP address of the domain controller for specific domains. Multiple domains can be listed along with multiple IP addresses for each domain. The IP addresses can be either IPv4 or IPv6.
+
+      ```other label=Example
+      "domainControllerMapping": "domain_name=ip_address, ip_address; domain_name=ip_address, ip_address"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `refreshUserMembershipDuringLoginEnabled` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This property is only applicable when configuring the group store. By default, each time an enterprise user signs in to Enterprise portal, the groups are refreshed automatically. If this behavior adversely affects login performance, it can be disabled by setting the value of this property to `false`. The default value of this property is `true`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `membershipRefreshIntervalHours` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This property is only applicable when configuring the group store. ArcGIS Enterprise periodically refreshes all user memberships. This property determines the interval at which the refresh repeats. The default value is `24` hours.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `membershipRefreshStartTime` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Determines the start time of the periodic refresh. The format is a 24 hour clock string. The default start time is midnight ("00:00"). The refresh operation may be computationally expensive, so it is recommended that the refresh time not be during business hours when Enterprise portal may be busy. This property is only applicable when configuring the group store.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `checkForMultipleUsernameFormats` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This property is only applicable when configuring the user store with Windows Active Directory and using portal-tier authentication to sign in. By default, `checkForMultipleUsernameFormats` is `false` and any enterprise user that signs into the organization will need to use the following username formats: `DOMAIN\username` or `username@DOMAIN`. If `checkForMultipleUsernameFormats` is `true`, ArcGIS Enterprise will attempt to use different username formats if the initial attempt fails (includes `username` and `username@DOMAIN.com`).
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `useSSLOnly` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This property applies to the Windows Active Directory only. It enforces encrypted communication between ArcGIS Enterprise and Active Directory. When the property is set to `true`, if encrypted communication fails, ArcGIS Enterprise does not attempt to communicate without encryption. This property is set to `false` by default.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `userGivenNameAttribute` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8, this property applies to both Windows Active Directory and LDAP. This property can be used to return the actual first name value stored in the Windows Active Directory or LDAP identity store.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `userSurnameAttribute` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8, this property applies to both Windows Active Directory and LDAP. This property can be used to return the actual last name value stored in the Windows Active Directory or LDAP identity store.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `saslAuthenticationScheme` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.9. Defines the SASL authentication scheme used by Portal for ArcGIS to connect to the domain controllers via LDAP. In 10.9, the only SASL authentication scheme that is supported is GSSAPI.
+
+      ```markdown label=Example
+      "saslAuthenticationScheme": "GSSAPI"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `krb5ConfigFilePath` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.9. Defines the path to the Kerberos configuration text file that is needed when utilizing the GSSAPI SASL authentication scheme. This file needs to reside in a location that the Portal for ArcGIS service account has read-access to.
+
+      ```markdown label=Example
+      //Example one
+      "krb5ConfigFilePath": "C:\\arcgisportal\\krb5.conf"
+
+      //Example two
+      "krb5ConfigFilePath": "/data/arcgis/krb5.conf"
+      ```
+
+      This configuration file is standard for Kerberos and should include default configuration settings and information on one or more Kerberos domain controllers for each Kerberos realm. An example is shown below:
+
+      ```other label=Example
+      [libdefaults]
+          dns_lookup_realm = false
+          ticket_lifetime = 24h
+          renew_lifetime = 7d
+          forwardable = true
+          rdns = false
+          default_ccache_name = KEYRING:persistent:%{uid}
+          dns_lookup_kdc = true
+          default_realm = EXAMPLE.COM
+          default_checksum = rsa-md5
+
+      [realms]
+
+      EXAMPLE.COM = {
+          kdc = domaincontroller.example.com
+          admin_server = domaincontroller.example.com
+      }
+
+      [domain_realm]
+          example.com = EXAMPLE.COM
+          .example.com = EXAMPLE.COM
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `updateIdentityStore` operation:
+
+```markdown
+POST /webadaptor/portaladmin/security/config/updateIdentityStore HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+userStoreConfig={
+  "type": "LDAP",
+  "properties": {
+    "userPassword": "secret",
+    "isPasswordEncrypted": "false",
+    "user": "uid=admin,ou=system",
+    "userFullnameAttribute": "displayName",
+    "userGivenNameAttribute": "givenName",
+    "userSurnameAttribute": "cn",
+    "ldapURLForUsers": "ldaps://ldapserver:10636/ou=users,ou=ags,dc=example,dc=com",
+    "userEmailAttribute": "mail",
+    "usernameAttribute": "uid",
+    "caseSensitive": "false",
+    "userSearchAttribute": "cn", 
+  }
+}&groupStoreConfig={}&f=pjson
+```
+
+## Configuration examples
+The following examples can be used to update Enterprise portal's identity and group store to:
+
+- [Configure enterprise users and built-in groups](/update-identity-store#configure-enterprise-users-and-built-in-groups)
+- [Configure enterprise users and enterprise groups (Windows Active Directory or LDAP)](/update-identity-store#configure-enterprise-users-and-enterprise-groups)
+- [Configure built-in Enterprise portal users and groups](/update-identity-store#configure-built-in-enterprise-portal-users-and-groups)
+
+### Configure enterprise users and built-in groups
+
+#### Windows Active Directory example
+
+The codeblock below specifies the input JSON object for the `userStoreConfig` parameter:
+
+```javascript
+{
+  "type": "WINDOWS",
+  "properties": {
+    "userPassword": "secret",
+    "isPasswordEncrypted": "false",
+    "user": "mydomain\\winaccount",
+    "userFullnameAttribute": "displayName",
+    "userEmailAttribute": "mail",
+    "userGivenNameAttribute": "givenName",
+    "userSurnameAttribute": "cn",
+    "caseSensitive": "false"
+  }
+}
+```
+
+In most cases, you will only need to alter values for the `user` and `userPassword` properties. In the rare case where Windows Active Directory is configured to be case sensitive, set the `caseSensitive` property to `true`.
+
+Update the `groupStoreConfig` parameter to include an empty JSON object. This will force ArcGIS Enterprise to use built-in groups.
+
+#### LDAPS example (highly recommended)
+
+The codeblock below specifies the input JSON object for the `userStoreConfig` parameter:
+
+```javascript
+{
+  "type": "LDAP",
+  "properties": {
+    "userPassword": "secret",
+    "isPasswordEncrypted": "false",
+    "user": "uid=admin,ou=system",
+    "userFullnameAttribute": "displayName",
+    "userGivenNameAttribute": "givenName",
+    "userSurnameAttribute": "cn",
+    "ldapURLForUsers": "ldaps://ldapserver:10636/ou=users,ou=ags,dc=example,dc=com",
+    "userEmailAttribute": "mail",
+    "usernameAttribute": "uid",
+    "caseSensitive": "false",
+    "userSearchAttribute": "cn", 
+  }
+}
+```
+
+Although both LDAP and LDAPS URLs are supported, LDAPS is highly recommended to ensure encrypted network traffic between Enterprise portal and LDAP servers. If LDAPS is not available, an LDAP URL can be used but traffic will be sent in clear-text.
+
+Update the `groupStoreConfig` parameter to include an empty JSON object. This will force ArcGIS Enterprise to use built-in groups.
+
+#### LDAP example
+
+The codeblock below specifies the input JSON object for the `userStoreConfig` parameter:
+
+```javascript
+{
+  "type": "LDAP",
+  "properties": {
+    "userPassword": "secret",
+    "isPasswordEncrypted": "false",
+    "user": "uid=admin,ou=system",
+    "userFullnameAttribute": "displayName",
+    "userGivenNameAttribute": "givenName",
+    "userSurnameAttribute": "cn",
+    "ldapURLForUsers": "ldap://ldapserver:10636/ou=users,ou=ags,dc=example,dc=com",
+    "userEmailAttribute": "mail",
+    "usernameAttribute": "uid",
+    "caseSensitive": "false",
+    "userSearchAttribute": "cn", 
+  }
+}
+```
+
+In most cases, you will only need to alter values for the `user`, `userPassword`, and `ldapURLForUsers` properties. The URL to your LDAP will need to be provided by your LDAP administrator. If your LDAP is configured to be case insensitive, set the `caseSensitive` property to `false`. The account you use for the `user` property needs permissions to look up the email address and user names of users in your organization.
+
+In the above example, the LDAP URL refers to users within a specific OU (ou=users). If users exist in multiple OUs, the LDAP URL can point to a higher level OU or even the root level if needed. In that case, the URL would instead look like this:
+
+```javascript
+"ldapURLForUsers": "ldaps://ldapserver:10636/dc=example,dc=com
+```
+
+Update the `groupStoreConfig` parameter to include an empty JSON object. This will force ArcGIS Enterprise to use built-in groups.
+
+
+### Configure enterprise users and enterprise groups
+
+#### Windows Active Directory example
+
+The codeblock below specifies the input JSON object for the `userStoreConfig` parameter:
+
+```javascript
+{
+  "type": "WINDOWS",
+  "properties": {
+    "userPassword": "secret",
+    "isPasswordEncrypted": "false",
+    "user": "mydomain\\winaccount",
+    "userFullnameAttribute": "displayName",
+    "userEmailAttribute": "mail",
+    "userGivenNameAttribute": "givenName",
+    "userSurnameAttribute": "cn",
+    "caseSensitive": "false"
+  }
+}
+```
+
+In most cases, you will only need to alter values for the `user` and `userPassword` properties. The account you use for the `user` property only needs permissions to look up the email address and full name of Windows accounts on the network. If possible, use an account whose password does not expire. In the rare case where Active Directory is configured to be case sensitive, set the `caseSensitive` property to `true`.
+
+Update the `groupStoreConfig` parameter with the group information from your organization's enterprise identity store:
+
+```javascript
+{
+  "type": "WINDOWS",
+  "properties": {
+    "isPasswordEncrypted": "false",
+    "userPassword": "secret",
+    "user": "mydomain\\winaccount"
+  }
+}
+```
+
+In most cases, you will only need to alter values for the `user` and `userPassword` property. The account you use for the `user` property only needs permissions to look up the names of Windows groups on the network. If possible, use an account whose password does not expire.
+
+#### LDAPS example (highly recommended)
+
+The codeblock below specifies the input JSON object for the `userStoreConfig` parameter:
+
+```javascript
+{
+  "type": "LDAP",
+  "properties": {
+    "userPassword": "secret",
+    "isPasswordEncrypted": "false",
+    "user": "uid=admin,ou=system",
+    "userFullnameAttribute": "displayName",
+    "userGivenNameAttribute": "givenName",
+    "userSurnameAttribute": "cn",
+    "ldapURLForUsers": "ldaps://ldapserver:10636/ou=users,ou=ags,dc=example,dc=com",
+    "userEmailAttribute": "mail",
+    "usernameAttribute": "uid",
+    "caseSensitive": "false",
+    "userSearchAttribute": "cn", 
+  }
+}
+```
+
+Although both LDAP and LDAPS URLs are supported, LDAPS is highly recommended to ensure encrypted network traffic between Enterprise portal and LDAP server. If LDAPS is not available, an LDAP URL can be used but traffic will be sent in clear-text.
+
+Update the `groupStoreConfig` parameter with the group information from your organization's enterprise identity store:
+
+```javascript
+{
+  "type": "LDAP",
+  "properties": {
+    "userPassword": "secret",
+    "isPasswordEncrypted": "false",
+    "user": "uid=admin,ou=system",
+    "ldapURLForUsers": "ldaps://ldapserver:10636/ou=users,ou=ags,dc=example,dc=com",
+    "ldapURLForRoles": "ldaps://ldapserver:10636/ou=users,ou=ags,dc=example,dc=com",
+    "userEmailAttribute": "mail",
+    "usernameAttribute": "cn",
+    "caseSensitive": "false",
+    "meberAttributeInRoles": "member",
+    "rolenameAttribute": "cn"
+  }
+}
+```
+
+#### LDAP example
+
+The codeblock below specifies the input JSON object for the `userStoreConfig` parameter:
+
+```javascript
+{
+  "type": "LDAP",
+  "properties": {
+    "userPassword": "secret",
+    "isPasswordEncrypted": "false",
+    "user": "uid=admin,ou=system",
+    "userFullnameAttribute": "displayName",
+    "userGivenNameAttribute": "givenName",
+    "userSurnameAttribute": "sn",
+    "ldapURLForUsers": "ldap://ldapserver:10636/ou=users,ou=ags,dc=example,dc=com",
+    "userEmailAttribute": "mail",
+    "usernameAttribute": "cn",
+    "caseSensitive": "false",
+    "userSearchAttribute": "cn" 
+  }
+}
+```
+
+In most cases, you will only need to alter values for the `user`, `userPassword`, and `ldapURLForUsers` properties. The URL to your LDAP will need to be provided by your LDAP administrator. The account you use for the `user` property needs permissions to look up the email address and user names of users in your organization. If your LDAP is configured to be case insensitive, set the `caseSensitive` property to `false`.
+
+In the above example, the LDAP URL refers to users within a specific OU (ou=users). If users exist in multiple OUs, the LDAP URL can point to a higher level OU or even the root level if needed. In that case, the URL would instead look like this:
+
+```javascript
+"ldapURLForUsers": "ldaps://bar2:10636/dc=example,dc=com"
+```
+
+Update the `groupStoreConfig` parameter with the group information from your organization's enterprise identity store:
+
+```javascript
+{
+  "type": "LDAP",
+  "properties": {
+    "userPassword": "secret",
+    "isPasswordEncrypted": "false",
+    "user": "uid=admin,ou=system",
+    "ldapURLForUsers": "ldap://ldapserver:10636/ou=users,ou=ags,dc=example,dc=com",
+    "ldapURLForRoles": "ldap://ldapserver:10636/ou=users,ou=ags,dc=example,dc=com",
+    "userEmailAttribute": "mail",
+    "usernameAttribute": "cn",
+    "caseSensitive": "false",
+    "memberAttributeInRoles": "member",
+    "rolenameAttribute": "cn" 
+  }
+}
+```
+
+
+### Configure built-in Enterprise portal users and groups
+
+Pass in empty JSON objects for the `userStoreConfig` and `groupStoreConfig` parameters to force ArcGIs Enterprise to use built-in groups and the built-in identity store.

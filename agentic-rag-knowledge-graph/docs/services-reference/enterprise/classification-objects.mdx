@@ -1,0 +1,129 @@
+---
+title: "Classification objects"
+description: "Learn about the JSON classification definition objects."
+slug: "classification-objects"
+url: "/classification-objects"
+---
+
+## Overview
+
+This topic discusses the JSON representation of classification definition objects. The classification definition optionally allows specifying symbology that returns a complete renderer object. It also includes an optional colorRamp object that's used to assign a unique color to each symbol.
+
+The following classification definitions are discussed:
+
+* Class Breaks
+* Unique Value
+
+### Class Breaks
+
+Use the class breaks classification scheme to group values into classes.
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Syntax</TabTitle>
+  <TabTitle>Example</TabTitle>
+</TabNav>
+
+<Tab>
+
+  ```markdown
+  {
+    "type": "classBreaksDef",
+    "classificationField": "<field name>",
+    "classificationMethod": "<esriClassifyNaturalBreaks | esriClassifyEqualInterval | esriClassifyQuantile | 
+esriClassifyStandardDeviation | esriClassifyGeometricalInterval>",
+    "breakCount": <count>,
+    "standardDeviationInterval": < 1 | 0.5 | 0.33 | 0.25 >, //use when classificationMethod is esriClassifyStandardDeviation
+    //optional. use to normalize class breaks
+    "normalizationType": "<esriNormalizeByField | esriNormalizeByLog | esriNormalizeByPercentOfTotal>",
+    "normalizationField": "<field name>", //use when normalizationType is esriNormalizeByField
+    //optional. use to define symbol for classes
+    "baseSymbol": <symbol>,
+    "colorRamp": <colorRamp>
+  }
+  ```
+</Tab>
+
+<Tab>
+
+  ```markdown
+  {
+    "type": "classBreaksDef",
+    "classificationField": "POP2010",
+    "classificationMethod": "esriClassifyNaturalBreaks",
+    "breakCount": 5,
+    "normalizationType": "esriNormalizeByField",
+    "normalizationField": "Area"
+  }
+  ```
+</Tab>
+
+</Tabs>
+
+Keep in mind the following for the properties above:
+
+* The `type` property for class breaks classification is `classBreaksDef`.
+* The `normalizationType` and `normalizationField` properties can be used to normalize class breaks. These properties are optional.
+* The optional properties, `baseSymbol` and `colorRamp`, can be used to include a symbol with varying color for each class.
+  * If `onlybaseSymbol` is defined, a default color ramp is used to assign a color for each class.
+  * If only `colorRamp` is defined, a default symbol is created based on `geometryType` of the feature class, and the `colorRamp` is used to assign color to the symbol for each class.
+  * If `baseSymbol` and `colorRamp` are missing, the map server assumes default values for these properties and returns the results with an appropriate symbol and color.
+* When `classificationMethod` is `esriClassifyStandardDeviation`, use `standardDeviationInterval` to specify the interval size. When done this way, `breakCount` is ignored.
+
+### Unique value
+
+Use the unique value classification scheme to group values based on a unique combination of one or more (up to three) fields.
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Syntax</TabTitle>
+  <TabTitle>Example</TabTitle>
+</TabNav>
+
+<Tab>
+
+  ```markdown
+  {
+    "type": "uniqueValueDef",
+    "uniqueValueFields": ["<field name 1 >","<field name 2>","<field name 3>"],
+    "fieldDelimiter": "field_delimiter_character",
+    //optional. use to define symbol for unique values
+    "baseSymbol": <symbol>,
+    "colorRamp": <colorRamp>
+  }
+  ```
+</Tab>
+
+<Tab>
+
+  ```markdown
+  {
+    "type": "uniqueValueDef",
+    "uniqueValueFields": ["Type", "AdminClass"],
+    "fieldDelimiter": ",",
+    "baseSymbol": {
+      "type": "esriSLS",
+      "style": "esriSLSSolid",
+      "width": 2
+    }
+    "colorRamp": {
+      "type": "algorithmic",
+      "fromColor": [115,76,0,255],
+      "toColor": [255,25,86,255],
+      "algorithm": "esriHSVAlgorithm"
+    }
+  }
+  ```
+</Tab>
+
+</Tabs>
+
+Keep in mind the following for the properties above:
+
+* The `type` property for unique value classification is `uniqueValueDef`.
+* The optional properties, `baseSymbol` and `colorRamp`, can be used to include a symbol with varying color for each class.
+  * If only `baseSymbol` is defined, a default color ramp is used to assign a color for each class.
+  * If only `colorRamp` is defined, a default symbol is created based on geometryType of the feature class, and the `colorRamp` is used to assign color to the symbol for each class.
+  * If `baseSymbol` and `colorRamp` are missing, the map server assumes default values for these properties and returns the results with an appropriate symbol and color.

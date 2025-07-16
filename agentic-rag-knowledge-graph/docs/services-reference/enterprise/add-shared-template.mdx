@@ -1,0 +1,340 @@
+---
+title: "Add (Feature Service/Shared Templates)"
+description: "The add operation adds shared templates to the back-end data source."
+slug: "add-shared-template"
+url: "/add-shared-template"
+restInfoMetadata:
+  apiPath: /services/<serviceName>/sharedTemplates/add
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /services/<serviceName>/sharedTemplates/add
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '11.4'
+  requiredCapability: 'SharedTemplateEditing capability enabled on the service'
+---
+
+## Description
+
+The `add` operation adds shared templates to the back-end data source. These templates can be used by any service that references the same back-end datasets. This operation can support adding multiple templates within the same request. Support for this operation is indicated when the service's `supportsSharedTemplates` property is set as `true` and the service has the `SharedTemplateEditing` capability enabled.
+
+When adding preset templates, if feature geometries are specified without an explicit spatial reference, the geometries are assumed to be in the service's spatial reference. The `userIdentity` value for the template, which specifies the template owner, will be set to the name of organization member that performs the operation. The `templateId` field values are assigned by the system.
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sharedTemplates`
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      An array of shared templates to be added. The array must contain the following fields:
+
+       - `name`
+       - `type`
+       - `layerId`
+       - `visible`
+       - `status`
+       - `definition`
+       - `subtype` (required if the data contains subtypes)
+          <Note>
+
+          Clients will use subtype defaults when subtypes are present, or field defaults, when `defaultValues` are not specified for some fields in the layer.
+
+          </Note>
+
+       - `globalId` (required if the `useGlobalIds` parameter is set as `true`)
+
+      A full list of fields that can be included can be found in the [Shared Templates](/shared-templates/#response-properties) resource.
+
+      Syntax
+
+      ```other
+      sharedTemplates=[<sharedTemplate1>, < sharedTemplate2>]
+
+      ```
+
+      Example
+
+      ```other
+      [
+        {
+          "globalId": "{D060DABE-265A-4428-BEFB-DFA5FFC42C20}",
+          "name": "Hydrant",
+          "defaultTool": "{2A8B3331-5238-4025-972E-452A69535B06}",
+          "type": "feature",
+          "layerId": 13,
+          "subtype": null,
+          "description": "",
+          "tags": "Point",
+          "visible": true,
+          "status": "protected",
+          "definition": {
+            "defaultValues": {
+              "ATEXT": "Hydrant"
+            } 
+          }
+        },
+        ...
+      ]
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `useGlobalIds`
+      
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      If set to `true`, the unique `globalId` value must be included for each new template. Including `globalId` values is important when adding sets of related templates, such as adding a group template. The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Exmple one</TabTitle>
+  <TabTitle>Example two</TabTitle>
+</TabNav>
+
+<Tab>
+
+The following is a sample POST request for the `add` operation that demonstrates adding two feature templates, with `useGlobalIds` set as `false`:
+
+```other
+POST /webadaptor/rest/services/MyService/FeatureServer/sharedTemplates/add HTTP/1/1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+sharedTemplates=[{"name": "My Point","defaultTool": "{2A8B3331-5238-4025-972E-452A69535B06}","type": "feature","layerId": 12,"subtype": null,"description": "","tag": "Point","visible": true,"status": "protected","definition": {"defaultValues": {"ATEXT": "Hydrant"}}},{"name": "My Feature","defaultTool": "{2A8B3331-5238-4025-972E-452A69535B06}","type": "feature","layerId": 13,"subtype": null,"description": "","tag": "Point","visible": true,"status": "protected","definition": {"defaultValues": {"ATEXT": "Building A"}}}]&useGlobalIds=false&f=pjson
+
+```
+
+The sample code below show the JSON array in the above request, formatted for readability:
+
+```other
+[
+  {
+    "name": "My Point",
+    "defaultTool": "{2A8B3331-5238-4025-972E-452A69535B06}",
+    "type": "feature",
+    "layerId": 12,
+    "subtype": null,
+    "description": "",
+    "tag": "Point",
+    "visible": true,
+    "status": "protected",
+    "definition": {
+      "defaultValues": {
+        "ATEXT": "Hydrant"
+      }
+    }
+  },
+  {
+    "name": "My Feature",
+    "defaultTool": "{2A8B3331-5238-4025-972E-452A69535B06}",
+    "type": "feature",
+    "layerId": 13,
+    "subtype": null,
+    "description": "",
+    "tag": "Point",
+    "visible": true,
+    "status": "protected",
+    "definition": {
+      "defaultValues": {
+        "ATEXT": "Building A"
+      }
+    }
+  }
+]
+
+```
+
+</Tab>
+
+<Tab>
+
+The following is a sample POST request for the `add` operation that demonstrates adding two feature templates and a group template. The group template references both feature templates. The feature templates must be listed first, ahead of the group template, since they are a part of the group template's definition. This request also sets `useGlobalIds` as `true` so that the group template can reference both the feature templates.
+
+```other
+POST /webadaptor/rest/services/MyService/FeatureServer/sharedTemplates/add HTTP/1/1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+sharedTemplates=[{"globalId": "{74285AA2-D1B0-45C6-9BD7-C03A13255CC3}","name": "myPoint New","defaultTool": "{00000000-0000-0000-0000-000000000000}","type": "feature","layerId": 13,"visible": true,"status": "protected","definition": {}},{"globalId": "{8FD58204-8F9B-4F2C-976E-DA9193C5106E}","name": "myBuilding New","defaultTool": "{8F79967B-66A0-4A1C-B884-F44BC7E26921}","type": "feature","layerId": 20,"tags": "Polygon; building","visible": true,"status": "protected","definition": {"defaultValues": {"ATEXT": "Building A New"},"excludedTools": ["{DDBE4C0C-063F-8B60-B2DA-B349A1E42E84}","{28C04532-3DAF-4D3D-B7BE-A589C9C9A03E}","{ACD53634-CBC7-44D5-BDE9-692FA8D45850}","{A281E635-0F22-47D4-A438-E4D29B920E22}","{D304243A-5C3A-4CCC-B98B-93684B15FD83}","{09C6F589-A3CE-48AB-81BC-46965C58F264}","{6C6970A7-5CA9-448C-9C7D-0D716CD2AC64}","{0A7C16B9-1CFD-467F-8ECE-6BA376192431}","{6F0ED2CC-C099-4895-BD7E-BEEC2F78ADBF}","{756CADF6-91E6-04B1-2938-E172A97AF51C}"]}},{"globalId": "{5F3176EE-58CB-4DC4-AE62-5A34368DB923}","name": "point/polygon Buffer","defaultTool": "{2A8B3331-5238-4025-972E-452A69535B06}","type": "group","layerId": 13,"tags": "Point; Group","visible": true,"status": "protected","definition": {"basePart": {"templateGlobalId": "{74285AA2-D1B0-45C6-9BD7-C03A13255CC3}","type": "esri_editing_transformation_pointPrimaryIdentity"},"createUtilityNetworkAssociations": true,"excludedTools": ["{C5C42E29-44DA-4A1C-8688-E02C07535BC3}","{28C04532-3DAF-4D3D-B7BE-A589C9C9A03E}","{6CF59352-8E14-402C-8F4C-ED72647F5E42}","{A947BA80-1C29-4BCD-8672-1963B7B9DDE0}","{09C6F589-A3CE-48AB-81BC-46965C58F264}","{AF2DBF8F-280E-44DB-8860-E399D0B30CF1}","{E22F7D98-007D-427C-8282-13704F7C84C3}","{0A7C16B9-1CFD-467F-8ECE-6BA376192431}","{6F0ED2CC-C099-4895-BD7E-BEEC2F78ADBF}","{7D3E17CF-30DD-4593-9BD8-0B2B8770F52A}","{E00209DD-05C5-4424-BE62-51581F9F811D}","{5664CAE4-C7DE-432A-9933-9586BC15ED39}"],"parts": [{"options": {"distanceValue": 30.48},"templateGlobalId": "{8FD58204-8F9B-4F2C-976E-DA9193C5106E}","type": "esri_editing_transformation_bufferPointToPolygon"}]}}]&useGlobalIds=true&f=pjson
+
+```
+
+The sample code below show the JSON array in the above request, formatted for readability:
+
+```other
+[
+  {
+    "globalId": "{74285AA2-D1B0-45C6-9BD7-C03A13255CC3}",
+    "name": "myPoint New",
+    "defaultTool": "{00000000-0000-0000-0000-000000000000}",
+    "type": "feature",
+    "layerId": 13,
+    "visible": true,
+    "status": "protected",
+    "definition": {}
+  },
+  {
+    "globalId": "{8FD58204-8F9B-4F2C-976E-DA9193C5106E}",
+    "name": "myBuilding New",
+    "defaultTool": "{8F79967B-66A0-4A1C-B884-F44BC7E26921}",
+    "type": "feature",
+    "layerId": 20,
+    "tags": "Polygon; building",
+    "visible": true,
+    "status": "protected",
+    "definition": {
+      "defaultValues": {
+        "ATEXT": "Building A New"
+      },
+      "excludedTools": [
+        "{DDBE4C0C-063F-8B60-B2DA-B349A1E42E84}",
+        "{28C04532-3DAF-4D3D-B7BE-A589C9C9A03E}",
+        "{ACD53634-CBC7-44D5-BDE9-692FA8D45850}",
+        "{A281E635-0F22-47D4-A438-E4D29B920E22}",
+        "{D304243A-5C3A-4CCC-B98B-93684B15FD83}",
+        "{09C6F589-A3CE-48AB-81BC-46965C58F264}",
+        "{6C6970A7-5CA9-448C-9C7D-0D716CD2AC64}",
+        "{0A7C16B9-1CFD-467F-8ECE-6BA376192431}",
+        "{6F0ED2CC-C099-4895-BD7E-BEEC2F78ADBF}",
+        "{756CADF6-91E6-04B1-2938-E172A97AF51C}"
+      ]
+    }
+  },
+  {
+    "globalId": "{5F3176EE-58CB-4DC4-AE62-5A34368DB923}",
+    "name": "point/polygon Buffer",
+    "defaultTool": "{2A8B3331-5238-4025-972E-452A69535B06}",
+    "type": "group",
+    "layerId": 13,
+    "tags": "Point; Group",
+    "visible": true,
+    "status": "protected",
+    "definition": {
+      "basePart": {
+        "templateGlobalId": "{74285AA2-D1B0-45C6-9BD7-C03A13255CC3}",
+        "type": "esri_editing_transformation_pointPrimaryIdentity"
+      },
+      "createUtilityNetworkAssociations": true,
+      "excludedTools": [
+        "{C5C42E29-44DA-4A1C-8688-E02C07535BC3}",
+        "{28C04532-3DAF-4D3D-B7BE-A589C9C9A03E}",
+        "{6CF59352-8E14-402C-8F4C-ED72647F5E42}",
+        "{A947BA80-1C29-4BCD-8672-1963B7B9DDE0}",
+        "{09C6F589-A3CE-48AB-81BC-46965C58F264}",
+        "{AF2DBF8F-280E-44DB-8860-E399D0B30CF1}",
+        "{E22F7D98-007D-427C-8282-13704F7C84C3}",
+        "{0A7C16B9-1CFD-467F-8ECE-6BA376192431}",
+        "{6F0ED2CC-C099-4895-BD7E-BEEC2F78ADBF}",
+        "{7D3E17CF-30DD-4593-9BD8-0B2B8770F52A}",
+        "{E00209DD-05C5-4424-BE62-51581F9F811D}",
+        "{5664CAE4-C7DE-432A-9933-9586BC15ED39}"
+      ],
+      "parts": [
+        {
+          "options": {"
+            distanceValue": 30.48
+          },
+          "templateGlobalId": "{8FD58204-8F9B-4F2C-976E-DA9193C5106E}",
+          "type": "esri_editing_transformation_bufferPointToPolygon"
+        }
+      ]
+    }
+  }
+]
+
+```
+
+</Tab>
+
+</Tabs>
+
+
+## JSON Response syntax
+
+```other
+[
+  {
+    <result1>
+  },
+  {
+    <result2>
+  }
+]
+
+```
+
+## JSON Response example
+
+The sample response below demonstrates the response returned when the operation completes successfully. The example below shows that two shared templates were successfully added:
+
+```other
+[
+  {
+    "templateId": 51,
+    "globalId": "{83EDCDB5-9CEE-4384-B713-18BD1969D819}",
+    "hash": "{1E597512-A127-4516-80A4-8DB449D0E257}"
+  },
+  {
+    "templateId": 52,
+    "globalId": "{DF6534B7-DE7C-425B-8B08-4DB789A39A01}",
+    "hash": "{B957F388-EF63-467C-A13E-F5C3E530C599}"
+  }
+]
+
+```
+
+The sample response below demonstrates the response returned when the operation fails. When the operation fails, all changes are rolled back and the failure message returned as part of the response is for the first template that has failed.
+
+```other
+{
+  "error": {
+    "code": 400,
+    "message": "Unable to complete operation.",
+    "details": [
+      "Parameter 'layerId' is required."
+    ]
+  }
+}
+
+```

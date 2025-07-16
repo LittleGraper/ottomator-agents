@@ -1,0 +1,443 @@
+---
+title: "Authentication"
+description: "Developers using ArcGIS can build browser-, device-, and server-based client applications that work with ArcGIS Online and ArcGIS Enterprise."
+slug: "authentication"
+url: "/authentication"
+guid: "GUID-A6A53989-A5BA-44A3-A127-BEC3A7216EDE"
+migratedTopicMetadata:
+  FTITLE: "Authentication"
+  FDESCRIPTION: ""
+  FCHANGES: "Adding note about app login limitations"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0-*"
+  CREATED-ON: "28/03/2022 11:51:51"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "03/06/2022 22:43:07"
+  VERSION: "5"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "7"
+  ED: "GUID-837B8BC9-4DC2-4E1E-888B-8BC0EBA025FA"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata: {}
+---
+
+Developers using ArcGIS can build browser-, device-, and server-based client applications that work with ArcGIS Online and ArcGIS Enterprise.
+
+## Client APIs
+
+Each client application has its own SDK that includes an object model for working with an organization using the REST API. Client SDKs include ArcGIS API for JavaScript, ArcGIS Runtime, and ArcGIS Pro SDK.
+
+All client SDKs include APIs to connect to, and access content in, ArcGIS Online and ArcGIS Enterprise. Application developers can use the REST API to augment the client SDKs with functionality that may not be available in the client API.
+
+## Types of applications and logins
+
+Using the supported client SDKs, developers can build the following types of applications:
+
+- Applications that target the end users of an ArcGIS organization. These applications must allow users to log in to their organization through the application. These types of logins are known as user logins.
+- Applications that target end users who are unknown to the ArcGIS organization. These applications must log in to their organization on behalf of the application. These types of logins are known as app logins.
+
+In this context, ArcGIS refers to either ArcGIS Online, which is available at `arcgis.com`, or an ArcGIS Enterprise portal available at a portal-specific URL along with all associated services.
+
+ArcGIS Online, as well as all contemporary versions of ArcGIS Enterprise, use OAuth2-based ArcGIS APIs for managing both user and app logins. All new applications should be should be developed using these OAuth2-based APIs. Legacy applications created before the introduction of OAuth2 will continue to be supported, but the identity of the application making the requests will remain unknown to the organization.
+
+<Note type={"note"}>
+
+All apps that use OAuth2 must be registered with the organization and have an assigned client ID. You can register applications by signing in to your organization using your developer or user account and using the `AddItem` operation to add and register the app. Registering assigns a client ID and an optional client secret to the app.
+
+</Note>
+
+## User logins
+
+The application can facilitate users signing in to their ArcGIS organization using OAuth2. User logins using the OAuth2-based ArcGIS APIs require the application to guide the user to a login page hosted by the ArcGIS organization. The application receives an access token on behalf of the user that it can use to access the ArcGIS organization. This is common to all types of applications, such as browser- and server-based web apps, device- and tablet-based apps, and desktop applications. Device, tablet, and desktop applications can also use client-side browser controls to integrate the user login into the app.
+
+The process to establish a user login experience varies for each application type. The sections below outline the process for browser-based, device-based, and server-based applications.
+
+<Note type={"note"}>
+
+This topic outlines the workflows for a variety of user logins. To learn more about the `authorize` and `token` operations, which most login types use as a key element to their workflow, see the [Authorize](/authorize) and [Token](/token) topics. 
+
+</Note>
+
+### User logins with browser-based applications
+
+User logins for browser-based applications use a single step workflow to acquire the access token. This process, known as an OAuth2 implicit grant, has the app direct the browser to the OAuth2 authorization URL for the ArcGIS organization. The example below demonstrates an authorization request for ArcGIS Online:
+
+```other
+https://www.arcgis.com/sharing/rest/oauth2/authorize?client_id=APPID&response_type=token&redirect_uri=<redirect_uri>
+```
+
+The example below demonstrates an authorization request for ArcGIS Enterprise:
+
+```other
+https://machine.domain.com/webadaptor/sharing/rest/oauth2/authorize?client_id=APPID&response_type=token&redirect_uri=<redirect_uri>
+```
+
+<Note type={"note"}>
+
+The value passed through for the `redirect_uri` parameter must be a superstring of a registered redirect URI for the application. Browser-based applications must register one or more redirect URIs at the time of registration, which act as the URI of the app and the URI the access token is returned to.
+
+</Note>
+
+To retrieve the access code, the user must both pass in valid credentials (such as their username and password) to the ArcGIS organization and accept the registered identity of the application that corresponds to the client ID. If both conditions are met, the server will redirect the browser to the specified redirect URI and append the access token as a URL fragment to the URI. For example, the browser may be redirected to the following URL with the appended access token:
+
+```other
+https://app.example.com/cb#access_token=2YotnFZFEjr1zCsicMWpAA&expires_in=3600
+```
+
+<Note type={"note"}>
+
+User access tokens retrieved from this workflow expire after two hours. You can request an access token that lasts longer than the default by providing the `expiration`  parameter value in the [initial request](/authorize). The token may have a different expiration value than the one submitted if the submitted value is higher than the maximum expiration time set by the organization.
+
+</Note>
+
+The application should set the access token, once received, into the Identity Manager of the client API. The Identity Manager ensures that the access token is included in all requests made by the client API to the organization and any federated servers. If the access token expires, and the Identity Manager receives a token expired failure message, the Identity Manager will call back to a registered handler for a new token.
+
+<Note type={"note"}>
+
+Applications that interact directly with the ArcGIS REST APIs must ensure that the access token is included in all REST requests to the organization. The application is also responsible for obtaining server-specific access tokens to interact with federated servers. A server-specific access token can be obtained using the Generate Token operation, passing in the access token received from the workflow above along with the server URL.
+
+</Note>
+
+When working with organizations that require HTTPS communications or are marked as `allSSL`, the application must ensure that requests are all HTTPS, as all non-HTTPS calls will be rejected.
+
+### User logins with device-based applications
+
+This section outlines the recommended workflow for iOS, Android and other device-based apps to retrieve user logins. This workflow, referred to as an authorization code grant, has two stages: obtaining an authorization code and exchanging the authorization code for an access token.
+
+#### Obtain an authorization code
+
+The first step in the authorization code grant workflow is obtaining an authorization code on behalf of the end user. To obtain the authorization code, the app must first open a browser window and direct the user to the OAuth2 authorization URL for their ArcGIS organization. The example URL below demonstrates an authorization request for ArcGIS Online:
+
+```other
+https://www.arcgis.com/sharing/rest/oauth2/authorize?client_id=APPID&response_type=code&redirect_uri=<redirect_uri>
+```
+
+The example URL below demonstrates an authorization request for ArcGIS Enterprise:
+
+```other
+https://machine.domain.com/webadaptor/sharing/rest//oauth2/authorize?client_id=APPID&response_type=code&redirect_uri=<redirect_uri>
+```
+
+Included in the authorize request is the `redirect_uri` parameter. The redirect URI value can be either a special value of `urn:ietf:wg:oauth:2.0:oob` or an application-specific custom URI that is handled on the device. The ArcGIS organization resolves the special URI to an ArcGIS-hosted URL for ArcGIS Online and ArcGIS Enterprise.
+
+<Note type={"note"}>
+
+iOS and Android applications can also register a custom redirect URI that the browser resolves back to an app handler running on the device. For example, if an Android application has a custom redirect URI of `x-com.mycorp.myapp://oauth.callback`, the browser will directly call the application's handler at the end of the user login.
+
+</Note>
+
+To retrieve the authorization code, the user must both pass in valid credentials (such as their username and password) to the authorization server for their ArcGIS organization and accept the registered identity of the application that corresponds to the client ID. If both conditions are met, the server will redirect the browser to the specified redirect URI with the authorization code appended to the URI as a query parameter.
+
+If the `redirect_uri` value is a custom URI (registered on the device and handled by the application), the application handler is responsible for receiving the URI and extracting the authorization code from the URL. The example URL below demonstrates what a server may return for a custom URI, with the authorization appended to the URL (the code query parameter):
+
+```other
+x-com.mycorp.myapp://oauth.callback?code=SplxlOBeZQQYbYS6WxSbIA
+```
+
+If the `redirect_uri` value is `urn:ietf:wg:oauth:2.0:oob`, the authorization server will redirect the browser to the approval resource page. For example, the authorization server may redirect the browser to the following URL for an ArcGIS Online user:
+
+```other
+https://www.arcgis.com/sharing/rest/oauth2/approval?code=SplxlOBeZQQYbYS6WxSbIA
+```
+
+The special value (the `code` parameter) is both appended to the URL and included in the title of the HTML page:
+
+```other
+<title>SUCCESS code=Sp1x1OBeZQQYbYS6WxSbIA</title>
+```
+
+It's up to the application hosting the web browser to extract the authorization code from the page's title. The application must also ensure that the browser window is dismissed if the code should not be displayed to the end user.
+
+#### Retrieve an access token
+
+In the final step of the authorization code grant, the application must exchange the authorization code it obtained for an access token.
+
+In a POST request made to the [`token`](/token) endpoint, the request body must include the following parameters:
+
+```other
+client_id=<the application ID>&
+client_secret=<the application secret>& //Optional, though recommended for additional security
+grant_type=authorization_code&
+code=<authorization code appended to page's URL and title from the previous step>
+```
+
+<Note type={"note"}>
+
+Including the `client_secret` parameter in the request body is optional for user logins. The ArcGIS organization's authentication of the app is based on the organization's acceptance of the application's identity as it corresponds to the `client_id` value.
+
+</Note>
+
+The request's JSON response contains the access token. Included in this response is the expiration value set for the access token (in seconds) and the refresh token value, which can be used to obtain a new access token once the previous one has expired:
+
+```other
+{
+  "access_token":"2YotnFZFEjr1zCsicMWpAA",
+  "expires_in": 3600,
+  "refresh_token":"tGzv3JOkF0XG5Qx2TlKWIA"     
+}
+```
+
+Once the access token has been returned, the app must use this token when making subsequent requests to the server. For more information about retrieving a new access token, see the Obtain a new access token section below.
+
+The iOS or Android application should set the obtained user access token into the Identity Manager in the client API. The Identity Manager handles the token in all requests made by the object model. If the access token expires and the Identity Manager receives a token expired failure, it will call back to a registered handler for a new token. The application should obtain a new access token using the refresh token and set it into the Identity Manager. If the refresh token has expired, the application should direct the user to log in again.
+
+<Note type={"note"}>
+
+Applications that interact directly with the ArcGIS REST APIs must ensure that the access token is included in all REST requests to the organization. The application is also responsible for obtaining server-specific access tokens to interact with federated servers. A server-specific access token can be obtained using the Generate Token operation, passing in the access token received from the workflow above along with the server URL.
+
+</Note>
+
+When working with organizations that require HTTPS communications or are marked as `allSSL`, the application must ensure that requests are all HTTPS, as all non-HTTPS calls will be rejected.
+
+#### Obtain a new access token
+
+Access tokens last only a short time, expiring within a set time period, such as 30 minutes. Once an access token has expired, the application can retrieve a new token using the `refresh_token` value returned in the JSON response from the [`token` ](/token) request.
+
+<Note type={"note"}>
+
+The duration of the refresh token is managed by the application. By default, the refresh token expires two weeks after it's been retrieved. The maximum number of days you can set for a refresh token before it expires is 90 days.
+
+</Note>
+
+The [`token`](/token) operation can be used to retrieve a new access token using the refresh token. The request requires the inclusion of the client ID information, the `grant_type` parameter set as `refresh_token`, and the refresh token obtained from the `access_token` response above:
+
+```other
+client_id=<the application ID>&
+grant_type=refresh_token&
+refresh_token=<the refresh token returned in the access token response>
+```
+
+The response returned by this request is similar to the access token response returned in the previous section, containing a new access token and a refresh token value that can be used later in this same workflow.
+
+<Note type={"note"}>
+
+If the refresh token has expired, this request will result in an error response and the application will prompt the user to log in again.
+
+</Note>
+
+### User logins with server-based web applications
+
+This section outlines the recommended workflow for server-based web applications to retrieve user logins. A server-based web application is an app in which the user interacts with the app through web pages that are displayed in a browser while the significant application logic runs server side. The workflow for these applications, referred to as an authorization code grant, has two stages: obtaining an authorization code and exchanging the authorization code for an access token.
+
+#### Obtain an authorization code
+
+The first step in the authorization code grant workflow is obtaining an authorization code on behalf of the end user. To obtain the authorization code, the app must first open a browser window and direct the user to the OAuth2 authorization URL for their ArcGIS organization. The example URL below demonstrates an authorization request for ArcGIS Online:
+
+```other
+https://www.arcgis.com/sharing/rest/oauth2/authorize?client_id=APPID&response_type=code&redirect_uri=<redirect_uri>
+```
+
+The example below demonstrates an authorization request for ArcGIS Enterprise:
+
+```other
+https://machine.domain.com/webadaptor/sharing/rest/oauth2/authorize?client_id=APPID&response_type=code&redirect_uri=<redirect_uri>
+```
+
+<Note type={"note"}>
+
+The value passed through for the `redirect_uri` parameter must be a registered redirect URI for the application. Server-based applications must register one or more redirect URIs at the time of registration, which act as the URI of the app and the URI the access token is returned to.
+
+</Note>
+
+To retrieve the authorization code, the user must both pass in valid credentials (such as their username and password) to the authorization server for their ArcGIS organization and accept the registered identity of the application that corresponds to the client ID. If both conditions are met, the server redirects the browser to the specified redirect URI with the authorization code appended to the URI as a query parameter, which will be accessible to the server-side application running at the redirect URI:
+
+```other
+https://app.example.com/cb?code=SplxlOBeZQQYbYS6WxSbIA
+```
+
+#### Retrieve an access token
+
+In the final step of the authorization code grant, the application must exchange the authorization code it obtained for an access token.
+
+In a POST request made to the [`token`](/token) operation, the request body must include the following parameters:
+
+```other
+client_id=<the application ID>&
+client_secret=<the application secret>& //Optional, though recommended for additional security
+grant_type=authorization_code&
+code=<authorization code appended to URI from previous step>
+```
+
+The request's JSON response contains the access token. Included in this response is the expiration value set for the access token (in seconds) and the refresh token value, which can be used to obtain a new access token once the previous one has expired:
+
+```other
+{
+  "access_token": "vuL9gSkBMZc9y40BOEjab-AmM",
+  "expires_in": 1800,
+  "username": "gis_user",
+  "ssl": true,
+  "refresh_token": "lHdi4mXwlu2NPtfL7ICydYGKpRsMsG",
+  "refresh_token_expires_in": 1209600
+}
+```
+
+Once the access token has been returned, the app must use this token when making subsequent requests to the server. For more information about retrieving a new access token, see the Obtain a new access token section below.
+
+#### Obtain a new access token
+
+Access tokens last only a short time, expiring within a set time period, such as 30 minutes. Once an access token has expired, the application can retrieve a new token using the `refresh_token` value returned in the JSON response from the [`token`](/token) request.
+
+<Note type={"note"}>
+
+The duration of the refresh token is managed by the application. By default, the refresh token expires two weeks after it's been retrieved. The maximum number of days you can set for a refresh token before it expires is 90 days.
+
+</Note>
+
+The [`token`](/token) operation can be used to retrieve a new access token using the refresh token. The request requires the inclusion of the `client_id` information, the `grant_type` parameter set as `refresh_token`, as well as the refresh token obtained from the `access_token` response above:
+
+```other
+client_id=<the application ID>&
+grant_type=refresh_token&
+refresh_token=<the refresh token returned in the access token response>
+```
+
+The response returned by this request is similar to the access token response returned in the previous section, containing a new access token value and a refresh token value that can be used later in this same workflow.
+
+<Note type={"note"}>
+
+If the refresh token has expired, this request will result in an error response and the application will prompt the user to log in again.
+
+</Note>
+
+### User logins using PKCE
+
+ArcGIS Online and ArcGIS Enterprise 10.8.1 and later support the Proof Key of Code Exchange (PKCE) extension to the user login workflows. PKCE prevents authorization code injections from malicious parties by having the client create a code verifier (separate from the client secret) that is used when exchanging the authorization code from the access token. This ensures that if the code is intercepted, the information cannot be used because it lacks the code verifier. Though initially designed for mobile applications, PKCE can be used with every application type.
+
+The following sections outline how to use PKCE with the authorization code workflow when obtaining an authorization code and exchanging it for an access token.
+
+#### Obtain an authorization code
+
+The first step in the PKCE modified workflow is having the application create a code verifier. The code verifier is a cryptographical string using alphanumeric characters (A-Z, a-z, 0-9) and punctuation characters (hyphen, period, underscore, and tilde). A code verifier string should be between 43 to 128 characters long.
+
+Once the code verifier has been created, it's used to derive the code challenge value, which will be included in the authorize request to obtain the authorization code. The code challenge can be a Base64-URL-encoded string of a SHA256 hash of the code verified or, if the app cannot create a hash value, the code challenge can be the plain-text of the code verifier string, though this option is less secure.
+
+With the code challenge value created, the app can open a browser window and direct the user to the OAuth2 authorization URL for their ArcGIS organization. The example URL below demonstrates an authorization request for ArcGIS Online:
+
+```other
+https://www.arcgis.com/sharing/rest/oauth2/authorize?client_id=APPID&response_type=code&redirect_uri=<redirect_uri>&code_challenge=<code challenge string>&code_challenge_method=<either S256 or plain>
+```
+
+The example URL below demonstrates an authorization request for ArcGIS Enterprise:
+
+```other
+https://machine.domain.com/webadaptor/sharing/rest/oauth2/authorize?client_id=APPID&response_type=code&redirect_uri=<redirect_uri>&code_challenge=<code challenge string>&code_challenge_method=<either S256 or plain>
+```
+
+Two parameters are included in the request when using PKCE: `code_challenge` and `code_challenge_method`. The `code_challenge` value must be the string derived from the code verifier described above. The `code_challenge_method` value can be either `S256` if the string is a SHA256 hash or `plain` if using the plain-text of the code verifier.
+
+<Note type={"note"}>
+
+Including a client secret is not required; however, the code verifier and the resulting code challenge are not substitutes for the client secret. It is recommended that you use PKCE with the client secret.
+
+</Note>
+
+To retrieve the authorization code, the user must both pass in valid credentials (such as their username and password) to the authorization server for their ArcGIS organization and accept the registered identity of the application that corresponds to the client ID. If both conditions are met, the server redirects the browser to the specified redirect URI with the authorization code appended to the URI as a query parameter. The authorization server should also associate the `code_challenge` parameter value with the authorization code that was generated.
+
+#### Retrieve an access token
+
+In the final step of the PKCE modified workflow, the application must exchange the authorization code it obtained for an access token.
+
+In a POST request made to the [`token`](/token) endpoint, the request body must include the following parameters:
+
+```other
+client_id=<the application ID>&
+client_secret=<the application secret>& //Optional, though recommended for additional security
+grant_type=authorization_code&
+code=<authorization code appended to URI from previous step>&
+code_verifier=<code verifier created by the app>
+```
+
+A new parameter, `code_verifier`, is included in the POST request when using PKCE. In the previous step, the authorization server associated the code challenge and the code challenge method with the application. If the method is `S256`, the authorization server will take the code verifier string and encode it to ensure that the values match. If the challenge method is `plain`, the authorization server ensures that the plain-text value for the code verifier and the challenge string value match.
+
+For both challenge methods, if the `code_verifier` and the `code_challenge` values match, the authorization server issues a JSON response containing the access token as normal. Included in this response is the expiration value set for the access token (in seconds) and the refresh token value, which can be used to obtain a new access token once the previous one has expired:
+
+```other
+{
+  "access_token": "vuL9gSkBMZc9y40BOEjab-AmM",
+  "expires_in": 1800,
+  "username": "gis_user",
+  "ssl": true,
+  "refresh_token": "lHdi4mXwlu2NPtfL7ICydYGKpRsMsG",
+  "refresh_token_expires_in": 1209600
+}
+```
+
+Once the access token has been returned, the app must use this token when making subsequent requests to the server.
+
+##  App logins
+
+Browser-, device-, and web-based applications that target end users who are unknown to the ArcGIS organization use app logins to connect to it. The server-side application component that has access to the application's credentials can obtain a token by submitting a POST request to the [`token`](/token) resource using the following required parameters:
+
+```ohter
+client_id=<the application ID>&
+client_secret=<the application secret>&
+grant_type=client_credentials
+```
+
+<Note type={"note"}>
+
+Application developers are responsible for building their application in a way that keeps the client secret hidden, including from malicious users who download and inspect the iOS or Android application, or view the source of the JavaScript application using developer tools. A malicious application that has access to the application's credentials (either the client ID or secret) can access billable services, which will be billed to the application. For most applications, this implies that the app must have a server-side application component that keeps the application credentials secure and performs work on behalf of the app.
+
+</Note>
+
+Successful authentication returns a JSON response containing the access token that allows the application to work with resources that are accessible to the application (that is, resources that have been shared with the application).
+
+The server-side application component that makes this call can be a custom component with its own API that wraps the ArcGIS API and exposes only those functions needed by the app. It can also be a proxy that preserves the ArcGIS REST signatures while forwarding calls to the ArcGIS API. The component must be a proxy if the application is built using ArcGIS client APIs that target the REST signatures.
+
+In both cases, the calls made by the server-side application component to the ArcGIS organization must include access tokens obtained by the component in exchange for application credentials using the client credentials grant type previously described. The server-side application component must also be secured so that only the application can access it.
+
+### Additional considerations and solutions
+
+The following are potential solutions for securing the server-side component to the application:
+
+- For applications that have their own authenticated users who remain unknown to the ArcGIS organization, the application can restrict access to the server-side application component to authenticated application user sessions. This assumes that app users who are developers are not malicious. However, if they are malicious and misuse the component, these users can be audited and tracked.
+- Applications whose users are anonymous even to the application can restrict access to the server-side application component to human end users by incorporating CAPTCHA technology into its user experience.
+- Applications can restrict the functionality exposed by the server-side component, place IP restrictions on the components, and build rate limits into the component as appropriate. Rate limits are effective in preventing misuse of the component by malicious server-side code.
+
+## Non-OAuth2-based applications
+
+Both ArcGIS Online and ArcGIS Enterprise support the [`generateToken`](/generate-token) operation, which supports either user credentials obtained from the user who is signing in to the ArcGIS organization through the application or the application's own credentials.
+
+Regardless of which credential type is used, the request will return an access token on successful authentication that must be included in subsequent requests.
+
+<Note type={"note"}>
+
+The `generateToken` request must be made over HTTPS. All subsequent requests that use the token must also be made over HTTPS if the portal or organization being accessed requires it.
+
+</Note>
+
+### User logins
+
+Applications that perform user logins through the `generateToken` request are responsible for presenting the end user with a login experience that allows them to enter their credentials.
+
+<Note type={"note"}>
+
+The application is responsible for ensuring that the user's credentials are secure and transmitted over an HTTPS connection.
+
+</Note>
+
+It is a best practice for the application to use the appropriate client SDK object model to connect to, and authenticate with, their ArcGIS organization rather than doing it directly through the REST API. Using this method frees the application from authentication details and the responsibility of safely handling user credentials.
+
+Applications can use their Identity Manager digit to allow users to sign in to the ArcGIS organization using an account it recognizes. Once the user has signed in, any subsequent requests made from that client session using the `esri.Request`  object are automatically part of that authenticated session.
+
+<Note type={"caution"}>
+
+There are a few limitations of implementing user logins in this manner. One limitation is that the identity of the app will remain unknown to the ArcGIS organization. Another limitation is that users cannot sign in using a federated identity provider that is accessible from their ArcGIS organization's hosted login page (exposed through the OAuth2 APIs).
+
+</Note>
+
+### App logins
+
+A user representing the application must be provisioned with a username and password. Applications targeting users unknown to the ArcGIS organization can log in using their username and password with the `generateToken`  operation. It is the app's responsibility to keep the user's credentials secure using server-side code or a server-side flow.
+
+<Note type={"caution"}>
+
+When using a token generated by the app login process, the token can only be used to access items owned by the owner of the application. These tokens cannot be used to perform administrative operations or to access another user's content.
+
+</Note>

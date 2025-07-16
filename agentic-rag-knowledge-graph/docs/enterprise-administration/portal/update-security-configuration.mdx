@@ -1,0 +1,264 @@
+---
+title: "Update Security Configuration"
+description: "This operation can be used to change the security settings for Enterprise portal."
+slug: "update-security-configuration"
+url: "/update-security-configuration"
+guid: "GUID-19B9BA29-AC5F-47D9-ABFB-CC0D5E0A1628"
+migratedTopicMetadata:
+  FTITLE: "Update Security Configuration"
+  FDESCRIPTION: ""
+  FCHANGES: "New property at 10.9.1"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9.1 - *"
+  CREATED-ON: "01/10/2021 09:34:38"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "04/10/2021 11:07:47"
+  VERSION: "11"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-FA362284-F90E-475A-851D-082E80F2F619"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /security/config/update
+  urlSegments:
+    - name: <root>
+      url: /portal-administration-root
+    - name: /security/config/update
+  methods:
+    - post
+  sslOnly: 'yes'
+  versionIntroduced: 10.2.1
+  requiredCapabilities:
+    - name: Access allowed with the "Security and Infrastructure" privilege
+      url: /privileges-for-portal-admin-api
+---
+
+## Description
+
+The `update` operation can be used to update the portal's security settings, such as whether or not enterprise accounts are automatically registered as members of your organization the first time they log in.
+
+The security configuration is stored as a collection of properties in a JSON object. The supported properties are defined in the [Security configuration properties](#security-configuration-properties) table below.
+
+<Note type={"note"}>
+
+The `webgisServerTrustKey` is automatically generated during the federation process and used for communication with a federated ArcGIS Server. This key should not be modified.
+
+</Note>
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `securityConfig` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The JSON object containing the properties listed below.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response value is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Security configuration properties
+
+<StyledTable headers={"Properties,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `allowedProxyHosts` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Restricts what hosts Enterprise portal can access directly. This restriction applies to several scenarios, including when the Enterprise portal accesses resources from a server that does not support Cross Origin Resources Sharing (CORS) or when saving credentials used to access a secure service. By default, this property is not defined and no restrictions are applied. Use the format `(.*).domain.com` to allow access to all machines within a specified domain.
+
+      Syntax: A comma-separated list of host names.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `enableAutomaticAccountCreation` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The automatic account creation flag. This determines the behavior for unregistered enterprise accounts the first time they access an organization. The default value for the property is `false`. When set to `false`, first-time users are not automatically registered as members of your organization and must have the same access privileges as other nonmembers. For these accounts to sign in, an administrator must register the enterprise accounts using the [Create User](/create-user) operation. When the value is set to `true`, ArcGIS Enterprise will add enterprise accounts automatically as a member of your organization.
+
+      <Note type={"caution"}>
+
+      Be aware that when `enableAutomaticAccountCreation` is set to `true`, enterprise accounts are added as members of your organization not only when users access the organization, but also when they view embedded web maps from your organization, or view a web map or web application from a link. This could result in a rapid increase in accounts.
+
+      </Note>
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `disableServicesDirectory` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Controls whether the HTML pages of the services directory should be accessible to the users. The default value for this property is `false`, meaning the services directory HTML pages are accessible to everyone.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `defaultRoleForUser` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      <Note type={"note"}>
+
+      At 10.8, the default user role is no longer set through the Portal Administration API. The default role for new members can now be set from the **New Member Defaults** tab in your organization settings or through the [Set User Default Settings](DEVSITE/rest/users-groups-and-items/set-user-default-settings/) operation in the Portal Directory API.
+
+      </Note>
+
+      Sets which [role](https://enterprise.arcgis.com/en/portal/latest/administer/windows/roles.htm) ArcGIS Enterprise automatically assigns to new accounts. By default, new accounts are assigned to `account_user`. Other possible values are `account_publisher` or the ID of one of the custom roles defined in your organization. To obtain a custom role ID, access the [Roles](DEVSITE/rest/users-groups-and-items/roles/) resource in the Portal Directory API where you can copy the custom role ID you want to use.
+
+      Values: `account_user` | `account_publisher` | `<custom role ID>`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `defaultIDPUsernameSuffix` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Appends an underscore and specified suffix to new enterprise accounts that will sign in via SAML. This applies to accounts created automatically and manually. This allows enterprise usernames in ArcGIS Enterprise to match corresponding enterprise usernames in ArcGIS Online. This is needed if editor tracking is enabled on a feature service that is edited by members from both ArcGIS Online and ArcGIS Enterprise.
+
+      For example, if the `defaultIDPUsernameSuffix` property is specified as `energy`, the enterprise user names created for SAML logins will append `_energy` to the user name. See the examples below:
+
+      - The user name `rsanchez` becomes `rsanchez_energy`.
+      - With an email address used as a user name, `rsanchez` becomes `rsanchez@domain.com_energy`. 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `defaultUserTypeIdForUser` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      <Note type={"note"}>
+
+      At 10.8, the default user type is no longer set through the Portal Administration API. The default user type for new members can now be set from the **New Member Defaults** tab in organization's settings or through the [Set User Default Settings](DEVSITE/rest/users-groups-and-items/set-user-default-settings/) operation in the Portal Directory API.
+
+      </Note>
+
+      Sets the default [user type](https://enterprise.arcgis.com/en/portal/latest/administer/windows/roles.htm) assigned to users during account creation and when creating built-in accounts. These user types must be compatible with the `defaultRoleForUser` that has been specified.
+
+      <Note type="legacy">
+
+      At ArcGIS Enterprise 11.4, the `GISProfessionalBasicUT` user type has been merged with the `creatorUT` user type; this change provides users assigned the `creatorUT` user type access to the applications previously included with `GISProfessionalBasicUT`.
+
+      </Note>
+
+      Values: `creatorUT` | `editorUT` | `GISProfessionalStdUT` | `GISProfessionalAdvUT` | `viewerUT` | `fieldWorkerUT`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `allowInternetCORSAccess` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.9.1. A boolean that controls the value of the `Access-Control-Allow-Private-Network` response header in a CORS pre-flight request to a portal service URL. This was added to support the Private Network Access web specification (CORS-RFC1918), which aims to protect websites accessed over a private network from being able to make internal cross-origin (CORS) requests. The default value is `true`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `contentSecurityPolicy` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.4. The `contentSecurityPolicy` property defines the Content-Security-Policy (CSP) response headers that are included when accessing the organization's portal website or any of its associated applications. The CSP for the portal website, and the CSP for its applications, are defiend separately. The values for each CSP can be one or more of the CSP directives based on the CSP specifications. For more information on CSP syntax and directives, reference the [Content-Security-Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy#values) documentation maintained by MDN Web Docs.
+
+      ```markdown
+      "contentSecurityPolicy": {
+        "home": "frame-ancestors 'self';",
+        "apps": "frame-ancestors 'self' sample.domain.com;"
+      }
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `update` operation:
+
+```markdown
+POST /webadaptor/portaladmin/security/config/update HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+securityConfig={
+  "disableServicesDirectory": false,
+  "enableAutomaticAccountCreation": false,
+  "contentSecurityPolicy": {
+    "home": "frame-ancestors 'self';",
+    "apps": "frame-ancestors 'self' sample.domain.com;"
+  }
+}&f=pjson
+```
+
+## JSON Response example
+
+```other
+{
+  "status": "success",
+  "recheckAfterSeconds": 10
+}
+```

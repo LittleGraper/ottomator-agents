@@ -1,0 +1,165 @@
+---
+title: "Image Tile"
+description: "REST API document to cache image tiles."
+slug: "image-tile"
+url: "/image-tile"
+guid: "GUID-79F8A741-5786-4AB1-A834-6F5662344ECA"
+migratedTopicMetadata:
+  FTITLE: "Image Tile"
+  FDESCRIPTION: ""
+  FCHANGES: "Added support for transposed raster tiles for multi dimensional data. "
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0  - *"
+  CREATED-ON: "22/04/2022 06:45:25"
+  FAUTHOR: "jswain"
+  FSTATUS: "Released"
+  MODIFIED-ON: "03/06/2022 23:09:41"
+  VERSION: "7"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "10"
+  ED: "GUID-86BD9BA3-E9A5-48B5-87AE-D8330080C59E"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /tile/<level>/<row>/<column>
+  urlSegments:
+    - name: <imageservice-url>
+      url: /image-service
+    - name: /tile/<level>/<row>/<column>
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.1'
+  requiredCapability: Image
+---
+
+## Description
+
+For cached image services, the `tile` resource represents a single cached tile for the image. The image bytes for the tile at the specified level, row, and column are directly streamed to the client. If the tile is not found, an HTTP status code of 404 (Not found) is returned.
+
+### Tile interpretation
+
+There are four types of tiles: map, elevation, raster, and multidimensional transposed raster. 
+
+Map tiles (introduced at ArcGIS 10.1) represent rendered map images, typically in JPEG or PNG. Elevation tiles (introduced at ArcGIS 10.3) represent elevation data and are stored as limited error raster compression (LERC) tiles. Raster tiles, introduced at ArcGIS 10.8.1, represent image tiles with meaningful pixel values for analysis, not just for rendering. They are stored as LERC2D, JPEGPLUS, or JPGPNG tiles. 
+
+Introduced at ArcGIS Enterprise 11.0, transposed multidimensional tiles of the raster tiles use LERC compression only. Raster tiles are available if the image service uses ArcObjects11 or ArcObjectsRasterRendering as the service provider. Multidimensional transposed raster tiles, introduced at ArcGIS 11.0 as a subtype of raster tiles, are hypercubic image tiles representing the specific variables over all the dimensions. It is created for optimizing performance when accessing pixel values across all multidimensional slices rather than for visualization at different map scales. So, the multidimensional transposed raster tiles only have one level and the level should always be 0 when requesting a such tile. There must be a "variable" parameter in the request too.
+
+In terms of topology, elevation tiles differ from normal map tiles in two ways:
+
+-   When the service specifies a tile size of _2_ pixels (rows/columns), elevation tiles actually contain _2_ pixels in each dimension.
+-   Pixel values for each elevation tile are sampled with an offset of _-0.5 \* resolution_ relative to the matching map tile.
+
+For a tile size of 4 by 4 pixels, these properties result in the following arrangement for a colocated map tile and elevation tile:
+
+![Tile interpretation](./images/GUID-EE4F950C-33FC-4BD7-B272-7FD514706B59-web.png)
+
+_Sample locations of colocated map and elevation tiles are shown._
+
+This arrangement allows the elevation samples (the pixels of the elevation tile) to be used directly as height values for the vertices of a regular-grid 3D mesh, and for the collocated map tile to be used as a texture for that mesh.
+
+### Derive tile extent from tile ID
+
+Given the following notations:
+
+```json
+Service Extent (serviceExt): {xmin, ymin, xmax, ymax} 
+Tile Origin (origin): {x, y}
+Tile Width and Height (tileSize): {cols, rows}
+Each LOD (lod): {level, resolution, scale}
+Tile ID (tileId): {level, row, column}
+Tile Extent (tileExt): {xmin, ymin, xmax, ymax}
+Level (lod): LODs[tileID.level]
+```
+
+ 
+
+Multidimensional transposed raster tiles share the `tileInfo`  with normal image tiles in general, but the tile width (`cols` ) and height (`rows` ) properties should use the ones under `transposeInfo` .
+
+Tile extent can be derived using the following formulas, which applies to both map and elevation tiles:
+
+```json
+tileExt.xmin = tileId.column * tileSize.cols * lod.resolution + origin.x;
+tileExt.xmax = tileExt.xmin + tileSize.cols * lod.resolution;
+tileExt.ymin = tileId.row * tileSize.rows * lod.resolution + origin.y;
+tileExt.ymax = tileExt.ymin + tileSize.rows * lod.resolution;
+```
+
+ 
+
+For more information about tiled elevation services, see [ArcGIS for Developers documentation](http://links.esri.com/TiledElevationService).
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`blankTile` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This applies only to cached image services that are configured to return blank or missing tiles for areas where caching is not available. When the parameter is set as `false` , the server will return a resource not found (HTTP 404) response instead of a blank or missing tile. When this parameter is not set, the response will contain the header `blank-tile` as `true` for a blank or missing tile.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sliceId` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This parameter was added at 10.8.1 and is available if the image service uses either ArcObjects11 or ArcObjectsRasterRendering as the service provider. This parameter applies to image services composed of multidimensional datasets with raster tiles enabled on top. Each dimensional slice has its own image tile at a specific level, row, and column combination. The `sliceId` of a dimensional slice can be queried from image service [`slices`](/slices) resource.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`variable` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+When transposed raster tiles are available at image services of multidimensional datasets, this parameter is used to retrieve the transposed tiles for a particular multidimensional variable. The transposed raster tiles are created for each multidimensional variable at the source raster resolution level only (i.e., level=0), with the same spatial reference, tile origin as the service's `tileInfo`. Each transposed tile is a multidimensional image hypercube with tile size rows and columns of the service's `transposeInfo`.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+The following request URL is used to access a map for the Toronto cached service:
+
+```json
+https://sampleserver6.arcgisonline.com/arcgis/rest/services/Toronto/ImageServer/tile/13/2990/2289
+```
+
+ 
+
+The following request URL demonstrates requesting a transposed image tile from a multidimensional image service with transposed raster tiles.
+
+```json
+https://myServer/arcgis/rest/services/myService/ImageServer/tile/0/2/2?variable=myVariableName
+```
+
+ 

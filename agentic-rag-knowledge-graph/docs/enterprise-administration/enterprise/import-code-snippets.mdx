@@ -1,0 +1,150 @@
+---
+title: "Import (Snippets)"
+description: "This operation adds code snippets from an input file to a notebook code snippet library."
+slug: "import-code-snippets"
+url: "/import-code-snippets"
+restInfoMetadata:
+  apiPath: /notebooks/snippets/import
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /notebooks/snippets/import
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '11.4'
+  requiredCapabilities:
+    - name: Access allowed with "Create and edit notebooks" privilege
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `import` operation adds code snippets from an input file to a notebook code snippet library. This operation can either add only the code snippets that do not currently exist in the library or overwrite all code snippets in the library with the code snippets from the input file.
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `itemId`
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The item ID (GUID) of the notebook code snippet library where the code snippets will be imported.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `file`
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A zipped file containing *.py files of code snippets.
+
+      The following is an example of the format for the *.py file:
+
+      ```other
+      snippet_properties = {
+        "notebookRuntimeName": "ArcGIS Notebook Python 3 Standard",
+        "lastUpdated": "",
+        "deprecated": False,
+        "name": "Check remaining credits (ArcGIS Online only)",
+        "description": "Checks the remaining credits of an ArcGIS Online organization. The GIS must be an administrator instance.",
+        "language": "Python",
+        "snippetLibrary": "GIS Administration",
+        "tags": "arcgis, agol, credits, admin",
+        "notebookRuntimeVersion": "9.0"
+      }
+      ##### SNIPPET BEGIN #####
+      from arcgis.gis import GIS
+      def check_org_credits_agol(gis: GIS) -> None:
+      if "admin" in gis.dict:
+      credits = gis.admin.credits.credits
+      print(f"This ArcGIS Online organization has {credits} credits.")
+      else:
+      print("Please connect to the ArcGIS Online organization as an administrator to check credits.")
+      # check_org_credits_agol(GIS)
+      ##### SNIPPET END #####
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `overwrite`
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean that specifies whether existing code snippets in the snippet library will be removed (overwritten) and all code snippets in the input file will be imported (`true`). When set to `false`, only the code snippets in the input file that do not already exist in the library will be imported. 
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `import` operation:
+
+```other
+POST /context/admin/notebooks/snippets/import HTTP/1.1
+Host: organization.domain.com
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryn5e81RgWj5QE2Ocz
+Content-Length: []
+
+------WebKitFormBoundaryn5e81RgWj5QE2Ocz
+Content-Disposition: form-data; name="itemId"
+
+00d461400981492e95622ea024d52cf2
+------WebKitFormBoundaryn5e81RgWj5QE2Ocz
+Content-Disposition: form-data; name="file"; filename="Test-1713927792623.zip"
+Content-Type: application/zip
+
+
+------WebKitFormBoundaryn5e81RgWj5QE2Ocz
+Content-Disposition: form-data; name="overwrite"
+
+false
+------WebKitFormBoundaryn5e81RgWj5QE2Ocz
+Content-Disposition: form-data; name="f"
+
+pjson
+```
+
+## JSON Response example
+
+```json
+{
+  "message": "Code snippet(s) imported successfully.",
+  "status": "success"
+}
+```

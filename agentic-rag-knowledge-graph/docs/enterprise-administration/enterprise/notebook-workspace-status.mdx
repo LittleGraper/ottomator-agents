@@ -1,0 +1,117 @@
+---
+title: "Status (Workspace)"
+
+description: "Returns the status of the notebook workspace."
+slug: "notebook-workspace-status"
+url: "/notebook-workspaces-status"
+restInfoMetadata:
+  apiPath: /notebooks/workspace/<workspaceId>/status
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /notebooks/workspaces/<workspaceId>/status
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '11.4'
+  requiredCapabilities:
+    - name: Access allowed with the "Security and infrastructure" privilege
+
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `status` resource returns the status of the notebook workspace. When the status is pending, ensure that the PV used for registering the workspace exists and can be bound. Details on a failure to bind a PV will be returned as part of `eventLogs` property in the notebook workspace status response.  Attempting to enable the Notebook Services capability when the workspace status is pending will result in a failure.   
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>    
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+
+        `f` 
+
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+
+        The response format. The default response format is `html`.
+        
+        Values: `html` | `json` | `pjson`
+
+        </StyledTableCell>
+    </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+The following is a sample request URL used to access the `status` resource: 
+
+ 
+```other
+https://organization.domain.com/context/admin/notebooks/workspaces/utz5kgaz4vd6dpj3xrsyb/status?f=json  
+```
+
+## JSON Response example
+
+```json
+{ 
+    "name": "arcgis-notebooks-workspace", 
+    "id": "utz5kgaz4vd6dpj3xrsyb", 
+    "type": "PVC", 
+    "spec": { 
+        "storageClassName": "arcgis-storage-default", 
+        "volumeName": "", 
+        "resources": { 
+            "requests": {"storage": "100Gi"}, 
+            "limits": {} 
+        }, 
+        "accessModes": ["ReadWriteMany"], 
+        "volumeMode": "Filesystem" 
+    }, 
+    "managedKubernetesResources": [{ 
+        "purpose": "pvc", 
+        "kind": "PersistentVolumeClaim", 
+        "name": "arcgis-nb-workspace-volume-utz5kgaz4vd6dpj3xrsyb" 
+    }], 
+    "revision": 1, 
+    "info": { 
+        "volumeIdentifier": "", 
+        "volumePath": "/arcgis/home" 
+    }, 
+    "status": "Bound" 
+} 
+```
+
+## JSON Response example 2
+
+```json
+{ 
+    "eventLogs": "Kubernetes Resource PersistentVolumeClaim/arcgis-nb-workspace-volume-uiqfeuaqq3fyt7cdiszuf reported event; count: 2, reason: FailedBinding, message: volume \"notebooksworkspace-pv-ar-123456789\" already bound to a different claim.. ", 
+    "name": "arcgis-notebooks-workspace", 
+    "id": "uiqfeuaqq3fyt7cdiszuf", 
+    "type": "PVC", 
+    "spec": { 
+        "storageClassName": "", 
+        "volumeName": "notebooksworkspace-pv-ar-123456789", 
+        "resources": { 
+            "requests": {"storage": "135Gi"}, 
+            "limits": {} 
+        }, 
+        "accessModes": ["ReadWriteMany"], 
+        "volumeMode": "Filesystem" 
+    }, 
+    "managedKubernetesResources": [{ 
+        "purpose": "pvc", 
+        "kind": "PersistentVolumeClaim", 
+        "name": "arcgis-nb-workspace-volume-uiqfeuaqq3fyt7cdiszuf" 
+    }], 
+    "revision": 1, 
+    "info": { 
+        "volumeIdentifier": "", 
+        "volumePath": "/arcgis/home" 
+    }, 
+    "status": "Pending" 
+} 
+```

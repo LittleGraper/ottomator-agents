@@ -1,0 +1,856 @@
+---
+title: "Sync workflow examples"
+description: "These examples highlight some typical workflows involving sync with custom clients."
+slug: "sync-workflow-examples"
+url: "/sync-workflow-examples"
+guid: "GUID-5ECFB09F-D759-4345-937F-9B2102CF98E8"
+migratedTopicMetadata:
+  FTITLE: "Sync workflow examples"
+  FDESCRIPTION: ""
+  FCHANGES: "HTTP-S"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.7 -*"
+  CREATED-ON: "27/07/2018 14:53:00"
+  FAUTHOR: "gkelly"
+  FSTATUS: "Released"
+  MODIFIED-ON: "14/08/2018 10:22:56"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-5FFCD55A-7733-4F9E-92EB-0466A4950541"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata: {}
+---
+
+## Overview
+
+The following examples highlight some typical workflows involving sync with custom clients. 
+
+<Note type={"note"}>
+
+All of these examples use JSON as the exchange format. Instead of JSON, you can use SQLite with the runtime APIs to complete the same workflows.
+
+</Note>
+
+-   [Workflow example 1: Bidirectional sync](/sync-workflow-examples#workflow-example-1-bidirectional-sync)
+-   [Workflow example 2: Sync with read only clients](/sync-workflow-examples#-workflow-example-2-sync-with-read-only-clients)
+-   [Workflow example 3: Setting up sync on multiple clients by a sharing a replica](/sync-workflow-examples#workflow-example-3-setting-up-sync-on-multiple-clients-by-a-sharing-a-replica)
+-   [Workflow example 4: Setting up sync using LayerQueries](/sync-workflow-examples#workflow-example-4-setting-up-sync-using-layerqueries)
+
+## Workflow example 1: Bidirectional sync
+
+In this example, a client is initially performing connected editing using the feature service. The client then decides to disconnect and continue to make edits while offline. Later, when connected back to the network, the client wants to synchronize the local edits with the server.
+
+A custom client application that supports editing and syncing while offline is required for this workflow. The following example shows how these types of applications can use the sync API to support the workflow.
+
+Initially, an editor is making edits using a [ sync-enabled](/sync-enabled-feature-services) feature service. In this example, the feature service has five layers. Before going offline, the client zooms to a location covering where edits are to be made and runs a process from the client application to set up sync. The application calls the [createReplica](/create-replica) operation as follows:
+
+### Create Replica
+
+Request URL:
+
+`https://services.myserver.com/ERmEceOGq5cHrItq/ArcGIS/rest/services/example1/FeatureServer/createReplica` 
+
+POST parameters:
+
+```javascript
+"geometry": {"xmin": -117.2037, "ymin": 33.4455, "xmax": -117.0593, "ymax": 33.569},
+    "geometryType": "esriGeometryEnvelope", 
+    "inSR": 4326,
+    "layerQueries": , // not set
+    "layers": "0,1,2,3,4",
+    "replicaName": "replica_for_my_iphone",
+    "returnAttachments": true,
+    "returnAttachmentsDataByUrl": true,
+    "transportType": "esriTransportTypeURL",
+    "async": false,
+    "syncModel": "perReplica",
+    "dataFormat": "json",
+    "replicaOptions": , // not set
+    "f": "json"
+```
+
+ 
+
+### Create Replica JSON response
+
+```javascript
+{
+  "transportType": "esriTransportTypeURL",
+  "responseType": "esriReplicaResponseTypeData",
+  "URL" : "https://services.myserver.com/ERmEceOGq5cHrItq/ArcGIS/rest/services/example1/replicafiles/600ccf2726d14bfebfcb8576b29edb6f.json"
+}
+```
+
+ 
+
+File content:
+
+```javascript
+{
+    "replicaName": "replica_for_my_iphone",
+    "replicaID": "{525c961e-5da8-4dc0-ad63-2c6a9c82b22f}",
+    "responseType": "esriReplicaResponseTypeData",
+    "replicaServerGen": 26793,
+    "syncModel": "perReplica",
+    "layers": [ 
+	    <data and attachments>
+    ]
+}
+```
+
+ 
+
+In the `createReplica`  call above, the five layers from the service are referenced in the `layers`  parameter. The map extent from the application is set as the `geometry` . The `transportType`  is set to `esriTransportTypeURL`  since the client wants to download the results when the operation completes. The `syncModel`  is set to `perReplica`  since the client intends to always sync all the layers together.
+
+In the response, `createReplica`  returns the data that the client application persists in a cache. Replica metadata is also returned including the `replicaID` , `syncModel` , and `replicaServerGen` , which are also persisted on the client. In this case, all layers have attachments that are available for download. The client chooses to pull all into the local cache. At this point, the sync setup is complete and the client is ready to go offline and make local edits.
+
+While offline, the client inserts records with attachments into layers 0, 1, and 2 using the client application. At the same time, records are inserted on the server for layers 3 and 4 with attachments.
+
+Later, when connected to the network, sync is run from the client application. The application initially [uploads](/uploads) the attachments that were collected. The `uploadIds`  returned from the upload process are then provided with the edits to identify the attachments. The call to the [synchronizeReplica](/synchronize-replica) operation is as follows:
+
+#### Synchronize Replica
+
+Request URL:
+
+`https://services.myserver.com/ERmEceOGq5cHrItq/ArcGIS/rest/services/example1/FeatureServer/synchronizeReplica` 
+
+POST parameters:
+
+```javascript
+"replicaID": "{525c961e-5da8-4dc0-ad63-2c6a9c82b22f}",
+    "replicaServerGen": 26793, 
+    "transportType": "esriTransportTypeURL",
+    "closeReplica": false,
+    "returnIdsForAdds": true,
+    "edits": <Edits to layers 0,1,2 with attachments by ref URL>,
+    "returnAttachmentsDataByUrl": true,
+    "syncDirection": "bidirectional",
+    "async": false,
+    "dataFormat": "json",
+    "rollbackOnFailure": false,
+    "syncLayers": , // not set
+    "f": "json"
+```
+
+ 
+
+#### Synchronize Replica JSON response (when transportType=esriTransportTypeURL, dataFormat=json)
+
+```javascript
+{
+  "transportType": "esriTransportTypeUrl",
+  "responseType": "esriReplicaResponseTypeEdits",
+  "URL" : "https://services.myserver.com/ERmEceOGq5cHrItq/ArcGIS/rest/services/example1/replicafiles/d575d50beca245baa8818f096ea5269d.json"
+}
+```
+
+ 
+
+File content:
+
+```javascript
+{
+    "replicaID": "{525c961e-5da8-4dc0-ad63-2c6a9c82b22f}",
+    "replicaServerGen": 27065,
+    "responseType": "esriReplicaResponseTypeEdits",
+    "syncModel": "perReplica",
+    "edits": [
+	    <edits and attachments from service>
+    ]
+}
+```
+
+ 
+
+The `synchronizeReplica`  process uploads and applies the edits with attachments to layers 0, 1, and 2. Since `syncDirection`  is set to `bidirectional` , any edits that intersect the geometry specified in `createReplica`  are also sent to the client. This includes the inserts on layers 3 and 4 mentioned above. The client gets the changes by downloading the changes file (JSON) referenced in the response (`esriTransportTypeURL` ). The client then downloads the attachments for layers 3 and 4, which are provided by reference URL in the response. Next, the client applies the edits from the server to the local copy. Finally, the new `replicaServerGen`  provided in the response is stored on the client for use on the next sync.
+
+Once the synchronization completes, the client and server are up to date. The client can now go offline and repeat the process.
+
+##  Workflow example 2: Sync with read-only clients
+
+The ArcGIS sync API can also be used for clients who want only to maintain a copy of the data with the latest updates. The client in this case uses the data for viewing and analysis and does not make edits.
+
+In this example, a similar five-layer feature service as in example 1 is used. As with example 1, the client zooms to a location and runs a process from a custom client application to get a local copy of the data and set up sync. To do this, the application calls the [createReplica](/create-replica) operation as follows:
+
+### Create Replica
+
+Request URL:
+
+`https://services.myserver.com/ERmEceOGq5cHrItq/ArcGIS/rest/services/example2/FeatureServer/createReplica` 
+
+POST parameters:
+
+```javascript
+"geometry": {"xmin": -117.2037, "ymin": 33.4455, "xmax": -117.0593, "ymax": 33.569},
+    "geometryType": "esriGeometryEnvelope", 
+    "inSR": 4326,
+    "layerQueries": , // not set
+    "layers": "0,1,2,3,4",
+    "replicaName": "read_only_replica_for_my_iphone",
+    "returnAttachments": true,
+    "returnAttachmentsDataByUrl": true,
+    "transportType": "esriTransportTypeURL",
+    "async": false,
+    "syncModel": "perReplica",
+    "dataFormat": "json",
+    "replicaOptions": , // not set
+    "f": "json"
+```
+
+ 
+
+### Create Replica JSON response
+
+```javascript
+{
+   "transportType": "esriTransportTypeUrl",
+   "responseType": "esriReplicaResponseTypeData",
+   "URL" : "https://services.myserver.com/ERmEceOGq5cHrItq/ArcGIS/rest/services/example2/replicafiles/712ccg2726d14bfebfcb8576b29ecc43.json"
+}
+```
+
+ 
+
+File content:
+
+```javascript
+{
+    "replicaName": "read_only_replica_for_my_iphone",
+    "replicaID": "{0ddfdadf-503f-4b8c-806b-1bdb3aeba2b2}",
+    "replicaServerGen": 26812,
+    "responseType": "esriReplicaResponseTypeData",
+    "syncModel": "perReplica",
+    "layers": [ 
+	    <data and attachments>
+    ]
+}
+```
+
+ 
+
+The data and attachments for the five layers intersecting the geometry as well as the `replicaID` , `syncModel` , and `replicaServerGen`  are returned and persisted on the client.
+
+Over time, inserts, updates, and deletes are applied to all five layers on the server. The client calls sync periodically to update the local copy with the latest edits on the service. To do this, the [synchronizeReplica](/synchronize-replica) operation is called as follows:
+
+#### Synchronize Replica
+
+Request URL:
+
+`https://services.myserver.com/ERmEceOGq5cHrItq/ArcGIS/rest/services/example2/FeatureServer/synchronizeReplica` 
+
+POST parameters:
+
+```javascript
+"replicaID": "{0ddfdadf-503f-4b8c-806b-1bdb3aeba2b2}",
+    "replicaServerGen": 26812, 
+    "transportType": "esriTransportTypeURL",
+    "closeReplica": false,
+    "returnIdsForAdds": false,
+    "edits": , // not set
+    "returnAttachmentsDataByUrl": true,
+    "syncDirection": "download",
+    "async": false,
+    "dataFormat": "json",
+    "syncLayers": , // not set
+    "f": "json"
+```
+
+ 
+
+#### Synchronize Replica JSON response
+
+```javascript
+{
+  "transportType": "esriTransportTypeUrl",
+  "responseType": "esriReplicaResponseTypeEdits",
+  "URL" : "https://services.myserver.com/ERmEceOGq5cHrItq/ArcGIS/rest/services/example2/replicafiles/c445b50beca245baa8818f096ea6825f.json"
+}
+```
+
+ 
+
+File content:
+
+```javascript
+{
+    "replicaID": "{0ddfdadf-503f-4b8c-806b-1bdb3aeba2b2}",
+    "replicaServerGen": 26856,
+    "responseType": "esriReplicaResponseTypeEdits",
+    "syncModel": "perReplica",
+    "edits": [
+	    <edits and attachments from service>
+    ]
+}
+```
+
+ 
+
+Any edits made on the five layers that intersect the geometry specified in `createReplica`  are returned and applied on the client. A new `replicaServerGen`  is also returned with the results and updated on the client. In this case, the `edits`  parameter was left empty since the client is not applying edits. The `syncDirection`  was also set to `download`  to ensure changes were sent from server to the client only.
+
+At this point, the client has the latest changes from the service. The client can continue to synchronize on a regular basis to stay in sync with the server.
+
+## Workflow example 3: Setting up sync on multiple clients by a sharing a replica
+
+The workflow in this example involves a field manager setting up a replica and sharing with workers deployed in the field. Field workers receiving a copy of the replica can then individually make edits and sync.
+
+This workflow requires a custom application for setting up the replica and an application that clients (field workers) can use to work with the copy. The following example describes how the sync API operations can be used by these types of applications. The Windows mobile project center and the Windows mobile clients are examples of applications that use this approach to share replicas.
+
+The first step in the process is for the field manager to publish a feature service that contains the data the field workers need. In this case, the service will have three layers, all with [attachments enabled](/sync-and-attachments). The manager will also [ sync enable](/sync-enabled-feature-services) the service, which allows replicas to be created and synced via the sync API.
+
+In the next step, the field manager goes through the process of setting up the replica that is to be shared. This involves running the [createReplica](/create-replica) operation.
+
+### Create Replica
+
+Request URL:
+
+`https://services.myserver.com/ERmEceOGq5cHrItq/ArcGIS/rest/services/example3/FeatureServer/createReplica` 
+
+POST parameters:
+
+```javascript
+"geometry": {"xmin": -117.2037, "ymin": 33.4455, "xmax": -117.0593, "ymax": 33.569},
+    "geometryType": "esriGeometryEnvelope", 
+    "inSR": 4326,
+    "layerQueries": , // not set
+    "layers": "0,1,2",
+    "replicaName": "shared_replica_for_project_A",
+    "returnAttachments": true,
+    "returnAttachmentsDataByUrl": true,
+    "transportType": "esriTransportTypeURL",
+    "async": false,
+    "syncModel": "perLayer",
+    "dataFormat": "json",
+    "replicaOptions": , // not set
+    "f": "json"
+```
+
+ 
+
+### Create Replica JSON response
+
+```javascript
+{
+  "transportType": "esriTransportTypeUrl",
+  "responseType": "esriReplicaResponseTypeData",
+  "URL" : "https://services.myserver.com/ERmEceOGq5cHrItq/ArcGIS/rest/services/example3/replicafiles/895ddf2726d14bfebfcb8576b29ee55d.json"
+}
+```
+
+ 
+
+File content:
+
+```javascript
+{
+    "replicaName": "shared_replica_for_project_A",
+    "replicaID": "{9b98603c-a24e-4a74-ac5a-988d899e3393}",
+    "layerServerGens": [
+    {
+      "id": 0,
+      "serverGen": 26428
+    },
+    {
+      "id": 1,
+      "serverGen": 26428
+    },
+    {
+      "id": 2,
+      "serverGen": 26428
+    }
+    ],
+    "responseType": "esriReplicaResponseTypeData",
+    "syncModel": "perLayer",
+    "layers": [ 
+	    <data and attachments>
+    ]
+}
+```
+
+ 
+
+In the `createReplica`  call above, the `geometry`  provided covers an area where all field workers are deployed. The `layers`  from the service are referenced, and the `replicaName`  is set by the manager so that it can be identified as the replica that is being shared. There is no difference between this replica and any other replica created by the service.
+
+A URL to a .json file with the `createReplica`  response is returned since the `transportType`  was set to `esriTransportTypeURL` . As shown above, this includes replica metadata such as the `replicaName`  and `replicaID` . Since `syncModel`  was set to `perLayer` , the results also include `layerServerGens` , which contains a `serverGen`  per layer. This allows clients to define synchronization on a layer-by-layer basis. All of this information, as well as the data and attachments, are persisted in a format that can be used by the client applications.
+
+In this example, the manager intends for field workers to collect data in layer2 while using layer0 and layer1 as a reference. To communicate these instructions, additional information is persisted with the shared replica by the application.
+
+The field manager then e-mails the shared replica to the field workers. Note that had the field workers been spread across several locations, the manager could have repeated the process of creating a shared replica and e-mailing workers for each location.
+
+When the workers receive the e-mail, they can open the shared replica using a custom client application running on their mobile devices. The data within the shared replica is then locally available for the workers to use. Before a worker can sync, the application needs to generate a new replica based on the shared replica. This is needed to allow each client to sync independently without affecting any other client.
+
+To do this, the `createReplica`  operation with the `replicaOptions`  parameter is called as shown below. The process registers a new replica based on the shared replica definition and returns the new replica metadata to the client. No data is returned with `createReplica`  when `replicaOptions`  is set.
+
+### Create Replica
+
+Request URL:
+
+`https://services.myserver.com/ERmEceOGq5cHrItq/ArcGIS/rest/services/example3/FeatureServer/createReplica` 
+
+POST parameters:
+
+```javascript
+"geometry": ,// not set
+    "geometryType": , // not set
+    "inSR": , // not set
+    "layerQueries": , // not set
+    "layers": , // not set
+    "replicaName": "Project_A_Device_ID_2500",
+    "returnAttachments": , // not set
+    "returnAttachmentsDataByUrl": , // not set
+    "transportType": "esriTransportTypeURL",
+    "async": false, 
+    "dataFormat": "json",
+    "syncModel": , // not set
+    "replicaOptions": 
+	    {
+	      "registerExistingData":
+	      { 
+	        "refReplicaId": "{9b98603c-a24e-4a74-ac5a-988d899e3393}",
+	        "refLayerServerGens": [
+	          {
+	            "id": 0,
+	            "serverGen": 26428
+	          },
+	          {
+	            "id": 1,
+	            "serverGen": 26428
+	          },
+	          {
+	            "id": 2,
+	            "serverGen": 26428
+	          }
+	        ]
+	     }
+    	}, 
+    "f": "json"
+```
+
+ 
+
+### Create Replica JSON response
+
+```javascript
+{
+  "transportType": "esriTransportTypeUrl",
+  "responseType": "esriReplicaResponseTypeInfo",
+  "URL" : "https://services.myserver.com/ERmEceOGq5cHrItq/ArcGIS/rest/services/example3/replicafiles/6627df2726d14bfebfcb8576b29f6d5a2.json"
+}
+```
+
+ 
+
+File content:
+
+```javascript
+{
+  "replicaName": "Project_A_Device_ID_2500", 
+  "replicaID": "{043d4cbc-1faf-4d14-a293-b957d150e646}", 
+  "layerServerGens": [
+    {
+      "id": 0, 
+      "serverGen": 26428
+    }, 
+    {
+      "id": 1, 
+      "serverGen": 26428
+    }, 
+    {
+      "id": 2, 
+      "serverGen": 26428
+    }
+  ], 
+  "responseType": "esriReplicaResponseTypeInfo", 
+  "syncModel": "perLayer"
+}
+
+```
+
+ 
+
+The `replicaOptions`  parameter above instructs `createReplica`  to generate a new replica using the `refReplicaId`  and `refLayerServerGens`  provided. In this case, the `refReplicaId`  and `refLayerServerGens`  from the shared replica are used. The `refLayerServerGens`  property describes how up-to-date the local data is and is needed on synchronization to determine the changes to send to the client. In this example, the client application also sets the `replicaName`  to a value that describes the project and the device ID on which the replica is created. Only the parameters specified above are needed. All other parameter values are derived from the pre-existing replica specified with `refReplicaId` .
+
+A new `replicaID`  is returned along with other metadata as shown above in the response. The client persists the new `replicaID`  and metadata, which will be used when syncing. At this point, the field worker can call sync to get the local copy up to date with the server.
+
+In this example, the field workers are required to collect edits on layer2 and periodically sync. The client application keeps track of the edits as they are made. Since the data is local, no network connectivity is needed when edits are collected. Connectivity is only required when a client runs sync. The sync process calls the [synchronizeReplica](/synchronize-replica) operation on the feature service as follows:
+
+#### Synchronize Replica
+
+Request URL:
+
+`https://services.myserver.com/ERmEceOGq5cHrItq/ArcGIS/rest/services/example3/FeatureServer/synchronizeReplica` 
+
+POST parameters:
+
+```javascript
+"replicaID": "{043d4cbc-1faf-4d14-a293-b957d150e646}",
+    "replicaServerGen": , // not set 
+    "transportType": "esriTransportTypeURL",
+    "closeReplica": false,
+    "returnIdsForAdds": true,
+    "edits": <Local edits for layer 2>,
+    "returnAttachmentsDataByUrl": true,
+    "syncDirection": , // not set
+    "async": false,
+    "dataFormat": "json",
+    "syncLayers":
+	    [
+	      {
+	        "id": 0,
+	        "syncDirection": "download",
+	        "serverGen": 26428
+    	  },
+	      {
+	        "id": 1,
+	        "syncDirection": "download",
+	        "serverGen": 26428
+	      },
+	      {
+	        "id": 2,
+	        "syncDirection": "upload",
+	        "serverGen": 26428
+	      }
+    	],
+    "f": "json"
+```
+
+ 
+
+#### Synchronize Replica JSON response
+
+```javascript
+{
+  "transportType": "esriTransportTypeUrl",
+  "responseType": "esriReplicaResponseTypeEdits",
+  "URL" : "https://services.myserver.com/ERmEceOGq5cHrItq/ArcGIS/rest/services/example3/replicafiles/aa22r50beca245baa8818f096ea354ff.json"
+}
+```
+
+ 
+
+File content:
+
+```javascript
+{
+    "replicaID": "{043d4cbc-1faf-4d14-a293-b957d150e646}",
+    "layerServerGens": [
+        {
+            "id": 0,
+            "serverGen": 26791
+        },
+        {
+            "id": 1,
+            "serverGen": 26791
+        },
+        {
+            "id": 2,
+            "serverGen": 26428
+        }
+    ],
+    "responseType": "esriReplicaResponseTypeEdits",
+    "syncModel": "perLayer",
+    "edits": [
+	    <edits and attachments from service>
+    ]
+}
+```
+
+ 
+
+In the `synchronizeReplica`  call above, the edits that were collected for layer2 are provided in the `edits`  parameter. The `replicaID`  is the new ID from the previous `createReplica`  call. The `syncLayers`  parameter instructs the server to accept edits from layer2 but only return changes for layer0 and layer1. The `replicaServerGen`  and `syncDirection`  parameters are not set, since their information is covered on a per-layer basis with the `syncLayers`  parameter.
+
+The service returns changes as well as new `serverGens`  for layer0 and layer1. The client application applies the changes and persists the new `serverGen`  values for use on a future sync. A new `serverGen`  value is not returned for layer2, since no changes were downloaded for layer2.
+
+The field worker then continues to insert features into the local copy for layer2. The next time sync is called, the field worker may choose to only upload features collected for layer2 and wait until the next sync to get updates on layer0 and layer1. For this, `synchronizeReplica`  is called as follows:
+
+#### Synchronize Replica
+
+Request URL:
+
+`https://services.myserver.com/ERmEceOGq5cHrItq/ArcGIS/rest/services/example3/FeatureServer/synchronizeReplica` 
+
+POST parameters:
+
+```javascript
+"replicaID": "{043d4cbc-1faf-4d14-a293-b957d150e646}",
+    "replicaServerGen": , // not set 
+    "transportType": "esriTransportTypeURL",
+    "closeReplica": false,
+    "returnIdsForAdds": true,
+    "edits": <Local edits for layer 2 (collected since last sync)>,
+    "returnAttachmentsDataByUrl": true,
+    "syncDirection": , // not set
+    "async": false,
+    "dataFormat": "json",
+    "syncLayers":
+	    [
+	      {
+	        "id": 2,
+	        "syncDirection": "upload",
+	        "serverGen": 26428
+	      }
+    	],
+    "f": "json"
+```
+
+ 
+
+#### Synchronize Replica JSON response
+
+```javascript
+{
+  "transportType": "esriTransportTypeUrl",
+  "responseType": "esriReplicaResponseTypeEdits",
+  "URL" : "https://services.myserver.com/ERmEceOGq5cHrItq/ArcGIS/rest/services/example3/replicafiles/a234f50beca245baa8818f096ea224ee.json"
+}
+```
+
+ 
+
+File content:
+
+```javascript
+{
+    "replicaID": "{043d4cbc-1faf-4d14-a293-b957d150e646}",
+    "layerServerGens": [
+        {
+            "id": 2,
+            "serverGen": 26428
+        }
+    ],
+    "responseType": "esriReplicaResponseTypeEdits",
+    "syncModel": "perLayer",
+    "edits": [
+        {
+            "id": 2,
+            "features": {
+                "adds": [],
+                "updates": [],
+                "deleteIds": [],
+                "addResults": [
+                    {
+                        "objectId": 85,
+                        "globalId": "04EBB902-E528-483E-B5BF-D9C08F1E0C50",
+                        "success": true
+                    }
+                ],
+                "updateResults": [],
+                "deleteResults": []
+            }
+        }
+    ]
+}
+```
+
+ 
+
+In the call above, the `syncLayers`  parameter is set to only upload edits for layer2. No edits are returned, but since `returnIdsForAdds`  was set to `true` , the objectId of the new feature applied via the sync is returned in `addResults` . The `serverGen`  for layer2 remains unchanged in the results since, again, no changes were downloaded for layer2.
+
+The field workers continue in this mode of collecting data and calling sync through the lifetime of the project. Once the project is completed, each field worker deletes the replica using the client application. During this process, the client application can make a call to the feature service's [unregisterReplica](/unregister-replica-feature-service) operation to remove the replica information from the server.
+
+### Unregister Replica
+
+Request URL:
+
+`https://services.myserver.com/ERmEceOGq5cHrItq/ArcGIS/rest/services/example3/FeatureServer/unregisterReplica` 
+
+POST parameters:
+
+```javascript
+"replicaID": "{043d4cbc-1faf-4d14-a293-b957d150e646}",
+    "f": "json"
+```
+
+ 
+
+### Unregister Replica JSON response
+
+```javascript
+{
+  "success" : true
+}
+```
+
+ 
+
+As shown above, the `unregisterReplica`  call takes only the `replicaID` . Once the call succeeds, the replica can no longer be synced.
+
+Since the project is completed, the field manager can also use the `unregisterReplica`  operation to remove the shared replica originally provided to the field workers. This will prevent a field worker from registering a new replica from the shared replica from this point forward.
+
+Field managers can also see which replicas exist on the service using the [ replicas](/replicas-feature-service) resource. The `replicas`  resource, along with the `unregisterReplica`  operation, allows managers to remove old replicas that are no longer in use. In this example, these are easily identified by the replicas whose name includes Project A.
+
+## Workflow Example 4: Setting up sync using LayerQueries
+
+This example describes a similar workflow to example 3, where field workers are deployed in the field to collect data. Each field worker's mobile device is set up with a local copy of data that can be edited and synced with a feature service. Field workers are to collect data on the local copy in layer2 while using the local copies of layer0 and layer1 as a reference. By working with the local copy, the field workers do not need to have network connectivity to do their work. A custom application on the mobile device that allows workers to upload local edits for layer2 and also download the latest for layer1 and layer0 through sync is required.
+
+The [createReplica](/create-replica) operation is used to get the local copy and set up sync on the mobile devices. Each field worker is issued a device and deployed to a specific location within the region. In this workflow, layer1 includes drop off/pick up locations that move throughout the region. To account for this, the sync setup process sets up layer1 to include all data from the region. Layer0 and layer2, however, need only include data for the location within the region where the worker is deployed. To do this, `createReplica`  is called as follows:
+
+### Create Replica
+
+Request URL:
+
+`https://services.myserver.com/ERmEceOGq5cHrItq/ArcGIS/rest/services/example3/FeatureServer/createReplica` 
+
+POST parameters:
+
+```javascript
+"geometry": {"xmin": -117.2037, "ymin": 33.4455, "xmax": -117.0593, "ymax": 33.569},
+    "geometryType": "esriGeometryEnvelope", 
+    "inSR": 4326,
+    "layerQueries": {
+        "1": {
+            "queryOption": "useFilter",
+            "useGeometry": false,
+            "where": "region = 'Southwest'"
+        }
+      }, 
+    "layers": "0,1,2",
+    "replicaName": "replica_for_device_25",
+    "returnAttachments": true,
+    "returnAttachmentsDataByUrl": true,
+    "transportType": "esriTransportTypeURL",
+    "async": false,
+    "syncModel": "perLayer",
+    "replicaOptions": , // not set
+    "f": "json"
+```
+
+ 
+
+### Create Replica JSON response
+
+```javascript
+{
+  "URL" : "https://services.myserver.com/ERmEceOGq5cHrItq/ArcGIS/rest/services/example4/replicafiles/87fe042ede17493a8cdeac0f2d062a69.json"
+}
+```
+
+ 
+
+File content:
+
+```javascript
+{
+    "replicaName": "Replica_for_device_25",
+    "replicaID": "ce2b42c0-0ebe-4c01-b006-b9ab9f47a2b7",
+    "transportType": "esriTransportTypeUrl",
+    "layerServerGens": [
+        {
+            "id": 0,
+            "serverGen": 28520
+        },
+        {
+            "id": 1,
+            "serverGen": 28520
+        },
+        {
+            "id": 2,
+            "serverGen": 28520
+        }
+    ],
+    "responseType": "esriReplicaResponseTypeData",
+    "syncModel": "perLayer",
+    "layers": [ 
+	    <data and attachments>
+    ]
+}
+```
+
+ 
+
+The `createReplica`  operation above applies defaults for layer0 and layer2 where only features intersecting the `geometry`  are returned. The envelope provided for the geometry covers the location where the field worker is deployed. For layer1, the `layerQueries`  parameter is used to override the default so that any feature in the Southwest region is returned. This is done by setting the `where`  property to `region = 'Southwest'`  and turning off the geometry criteria by setting `useGeometry`  to `false`  for layer1. Had the data model not included a region field, `layerQueries`  could have been set as follows:
+
+`layerQueries: { "1":{"queryOption" : "all"}}` 
+
+This would have included all features from any location in layer1.
+
+With the sync setup complete, field workers can start collecting data locally for layer2. At the same time, updates to drop off/pick up locations in layer1 can be applied on the server. This includes cases where a drop-off/pick-up location is moved outside the area in which a field worker is deployed.
+
+When network connectivity is available, field workers can call sync from their custom application running on the mobile device. The sync process includes a call to the feature service's [synchronizeReplica](/synchronize-replica) operation as follows:
+
+#### Synchronize Replica
+
+Request URL:
+
+`https://services.myserver.com/ERmEceOGq5cHrItq/ArcGIS/rest/services/example3/FeatureServer/synchronizeReplica` 
+
+POST parameters:
+
+```javascript
+"replicaID": "{ce2b42c0-0ebe-4c01-b006-b9ab9f47a2b7}",
+    "replicaServerGen": , // not set 
+    "transportType": "esriTransportTypeURL",
+    "closeReplica": false,
+    "returnIdsForAdds": true,
+    "edits": <Local edits for layer 2>,
+    "returnAttachmentsDataByUrl": true,
+    "syncDirection": , // not set
+    "async": false,
+    "syncLayers":
+	    [
+    	  {
+    	    "id": 0,
+    	    "syncDirection": "download",
+	        "serverGen": 28520
+	      },
+	      {
+	        "id": 1,
+	        "syncDirection": "download",
+	        "serverGen": 28520
+	      },
+	      {
+	        "id": 2,
+	        "syncDirection": "upload",
+    	    "serverGen": 28520
+    	  }
+    	],
+    "f": "json"
+```
+
+ 
+
+#### Synchronize Replica JSON response
+
+```javascript
+{
+  "URL" : "https://services.myserver.com/ERmEceOGq5cHrItq/ArcGIS/rest/services/three_layer/replicafiles/1d4eba032bbe4d089e8ca7c305d4c0de.json"
+}
+```
+
+ 
+
+File content:
+
+```javascript
+{
+    "replicaID": "{ce2b42c0-0ebe-4c01-b006-b9ab9f47a2b7}",
+    "layerServerGens": [
+        {
+            "id": 0,
+            "serverGen": 28743
+        },
+        {
+            "id": 1,
+            "serverGen": 28743
+        },
+        {
+            "id": 2,
+            "serverGen": 28520
+        }
+    ],
+    "responseType": "esriReplicaResponseTypeEdits",
+    "syncModel": "perLayer",
+    "edits": [
+	    <edits and attachments from service>
+    ]
+}
+```
+
+ 
+
+The `syncLayers`  parameter is set above so that edits are downloaded for layer0 and layer1, while edits are uploaded for layer2. Drop-off/pick-up locations that were moved outside the field workers location since the last sync are downloaded for layer1. This is because the `layerQueries`  settings described in the create replica process above are also applied during sync. Edits to features outside the workers location for layer2 are not downloaded, since layer2 was set up to only include features intersecting the workers location.

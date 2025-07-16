@@ -1,0 +1,180 @@
+---
+title: "Add (Enterprise Functions)"
+description: "The add operation enables premium capabilities for an organization, such as raster analytics or image services."
+slug: "add-enterprise-functions"
+url: "/add-enterprise-functions"
+guid: "GUID-EC229101-012F-4673-9012-6E5518C97E1B"
+migratedTopicMetadata:
+  FTITLE: "Add Enterprise Functions"
+  FDESCRIPTION: ""
+  FCHANGES: "New operation"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2-*"
+  CREATED-ON: "06/11/2023 17:08:15"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "12/11/2023 11:23:51"
+  VERSION: "1"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "8"
+  ED: "GUID-0D99A833-8C26-4BD3-AEE6-DFB25A4B208A"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /system/enterprisefunctions/add
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /system/enterprisefunctions/add
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '11.2'
+  requiredCapabilities:
+    - name: Access allowed with the "Security and infrastructure" privilege
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `add` operation enables premium capabilities for an organization, such as raster analytics or image hosting. The organization must have the appropriate licensing for these capabilities before performing this operation. For some premium capabilities, administrators may need to register an additional, specific type of data store.
+
+This operation is performed asynchronously and will return a job URL that can be used to check the status of the request. When the request is submitted, ArcGIS Enterprise on Kubernetes checks to see if the requirements for the specified capability has been met. If requirements have been met, the system will start the required [System](/system-service-folder) and [Utility](/system-utilities-folder) services and will add any required Utility services that are used as helper services. If the requirements are not met, the job will fail. If the job fails, the add operation can be performed again and the new job will resume from where the previous job left off.
+
+<Note type={"note"}>
+
+To enable image hosting, the organization must have an ArcGIS Image Services on Kubernetes license and a raster store created. To enable raster analytics, the organization must have a ArcGIS Raster Analytics on Kubernetes license and a raster store created.
+
+</Note>
+
+If the requirements are not met, the [Job](/job) resource will return a `FAILED` status and detailed messaging regarding the reason for failure. Otherwise, the job will return a `SUCCESS` response and the organization will be able to se the premium capabilities.
+
+<Note type={"note"}>
+
+Once the request is submitted, the job will take some time to complete.
+
+</Note>
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `enterpriseFunction` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the premium capability that is being enabled. Only one premium capability can be enabled per request.
+
+      Values: `ImageHosting` | `RasterAnalytics`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `add` operation:
+
+```other
+POST /context/admin/system/enterprisefunctions/add HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+enterpriseFunction=ImageHosting&f=pjson&token= MxOTGPw1srr5-B3I3xMdmzsjKFZ5XcX_ooLc2ijMfCZCMwYR2z2wa0NQXwm2crl9g419kgFdkU9Bhg56vQICl28agx-gAwPu9PfQ2SHS71i50RFsy8YIRw2D-BXNgp94XkIWsl3VplgL5VCoZI07cG8igG5cmX_rInNgDa79Vi5NHRy96elM_6SUbTmbQ9ioG7xbNoVMwpW7nBlP3H4YBke67mjFF6onGZ9FTAcz_8qjHuSPxQwZu6DEnLbkrfT1
+
+```
+
+## JSON Response examples
+
+The following response is returned each time a request is submitted:
+
+```javascript
+{
+  "jobsUrl": "https://organization.domain.com/context/admin/jobs/jcdbf4e88-c4ca-42bc-a40f-036c40bbce15",
+  "jobid": "jcdbf4e88-c4ca-42bc-a40f-036c40bbce15",
+  "status": "SUBMITTED"
+}
+```
+ 
+
+Once submitted, users can access the job using the `jobsUrl` returned above to periodically poll the job's status.
+
+If the job encounters an error, the following response is returned:
+
+```javascript
+{
+  "updatedtime": 1697690865773,
+  "jobid": "j7ca2e78c-a8c7-41d0-9df5-25f4635fd1bc",
+  "requestID": "06c4eb93-807c-4da5-9df9-5f1be1066b16",
+  "name": "addEnterpriseFunction",
+  "endtime": 1697690865777,
+  "messages": [
+    "Checking if license to enable 'RasterAnalytics' function is available.",
+    "Checking if a raster data store is present",
+    "Raster Store not available. Failed to assign RasterAnalysis role.",
+    "Error assigning 'RasterAnalytics' enterprise function. Check logs for more details."
+  ],
+  "starttime": 1697690865644,
+  "operationURI": "addEnterpriseFunction",
+  "status": "FAILED",
+  "username": "administrator"
+}
+```
+
+The following response is returned if the job is completed successfully without encountering any errors:
+
+```javascript
+{
+  "updatedtime": 1697691723840,
+  "jobid": "j0bbeed82-47ef-41a7-a92f-3641b95f90a0",
+  "requestID": "82a42e06-ed74-4dfb-b439-7b1928902a94",
+  "name": "addEnterpriseFunction",
+  "endtime": 1697691723847,
+  "messages": [
+    "Checking if license to enable 'RasterAnalytics' function is available.",
+    "Checking if a raster data store is present",
+    "Checking if RasterAnalytics Services need to be started",
+    "Starting System.RasterRendering.ImageServer",
+    "Starting System.RasterAnalysisTools.GPServer",
+    "Starting System.RasterProcessing.DPServer",
+    "Starting Utilities.RasterUtilities.GPServer",
+    "Starting System.RasterProcessingGPU.DPServer",
+    "System/RasterRendering.ImageServer started succesfully",
+    "System/RasterAnalysisTools.GPServer started succesfully",
+    "System/RasterProcessing.DPServer started succesfully",
+    "Utilities/RasterUtilities.GPServer started succesfully",
+    "System/RasterProcessingGPU.DPServer started succesfully",
+    "Updating the following services as Portal helper services - RasterAnalysisTools, RasterUtilities",
+    "Sharing RasterUtilities service with org",
+    "Adding 'RasterAnalytics' enterprise function"
+  ],
+  "starttime": 1697691137001,
+  "operationURI": "addEnterpriseFunction",
+  "status": "COMPLETED",
+  "username": "administrator"
+}
+```

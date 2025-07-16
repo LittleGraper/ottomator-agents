@@ -1,0 +1,302 @@
+---
+title: "Query (Feature Service/Shared Templates)"
+description: "The query operation returns information for shared editing templates that have been authored and persisted in the backend data store."
+slug: "query-shared-templates"
+url: "/query-shared-templates"
+restInfoMetadata:
+  apiPath: /services/<serviceName>/sharedTemplates/query
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /services/<serviceName>/sharedTemplates/query
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '11.3'
+  requiredCapability: Requires the Query capability
+---
+
+
+## Description
+
+The `query` operation returns information for shared editing templates that have been authored and persisted in the backend data store (e.g. enterprise geodatabase). The operation returns basic information about each template which can be used to display the editing templates in a template picker for example. The response include all columns from the `sharedTemplates` resource except for the `definition` column. The full definition of a shared template (including the contents of the definition column) can be obtained using the [Templates](/fs-template) resource.
+
+The query operation can be used when the service's `hasSharedTemplates` property is set as `true`.
+
+Results for the `query` operation are governed by the template status and the organization member performing the request. All templates owned by the organization member are returned in the results, along with other templates (not owned by the organization member) that have a protected status. Templates with a private status that are not owned by the organization member are not returned.
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `layers`
+
+      (Optional; Required if `templateIds` is not specified)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The feature service layers used to determine which shared templates to include in the response. Clients can provide the list of layers from the service in the map to get all the relevant shared templates.
+
+      ```other label=Syntax
+      layers=[<layerId1>, <layerId2>]
+
+      ```
+
+      ```other label=Example
+      layers=[0,1,2]
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `templateIds`
+
+      (Optional; Required if `layers` is not specified)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The template IDs of specific shared templates to be included in the response.
+
+      ```other label=Syntax
+      templateIds=[<templateId1>, <templateId2>]
+
+      ```
+
+      ```other label=Example
+      templateIds= [24,25]
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `tags`
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Filters the templates included in the response based on their tag value.
+
+      ```other label=Syntax
+      tags=[<string1>, <string2>]
+
+      ```
+
+      ```other label=Example
+      tags=["electric","gas"]
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `returnVisibleTemplatesOnly`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      When set to `true`, only templates with their `visible` property set as `true` will be returned. When `false`, templates will be returned regardless of if their `visible` property is set as `true` or `false`. The default is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `restrictTemplatesToReferencedLayers`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      When set to `true`, a group or preset template is returned only when all layers involved in all of the parts of the template are specified in the `layers` parameter. When set to `false`, a group or preset template is always returned as long as the layer for primary part is referenced in the `layers` parameter. The default value is `true`. This parameter only applies when the `layers` parameter is included in the request.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson` | `pbf`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usages
+
+### Example one
+
+The following is a sample GET request for the `query` operation that demonstrates querying shared templates based on their layer IDs:
+
+```other
+https://machine.domain.com/webadaptor/rest/services/MyService/FeatureServer/sharedTemplates/query?layers=[0,1]
+
+```
+
+###  Example two
+
+The following is a sample GET request for the `query` operation that demonstrates querying shared templates basesd on their template IDs:
+
+```other
+https://machine.domain.com/webadaptor/rest/services/MyService/FeatureServer/sharedTemplates/query?templateIds=[25,26]
+
+```
+
+
+## JSON Response syntax
+
+```other
+  {
+    "templates": [
+      <template1>,
+      <template2>, 
+      <template3>,
+      <template4>
+    ]
+  }
+```
+
+## JSON Response examples
+
+### Example one
+
+The example response below demonstrates the response returned for two layers with the layer IDs of 0 and 1:
+
+```other
+{
+  "templates": [
+    {
+      "templateId": 1,
+      "globalId": "{AE42301E-01D7-49D7-ADC6-36176ABDC2A1}",
+      "name": "MPatch",
+      "defaultTool": null,
+      "type": "feature",
+      "layerId": 0,
+      "subtype": null,
+      "description": "",
+      "tag": "",
+      "visible": true,
+      "hash": "{94573E39-CAEE-18C5-6071-B747D7F67BFA}",
+      "thumbnail": "iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAkElEQVR4nOXbQQ2AQBTE0B7qCB1oQhQ60PTJJuthD30KOgLGmbmBi6bXPf4hSuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuJcF/LTEQd9P+vvB2PrcCQ6AAAAAElFTkSuQmCC",
+      "status": "protected",
+      "userIdentity": "owner1"
+    },
+    {
+      "templateId": 2,
+      "globalId": "{486A4AD2-9F79-4EB7-86A6-999402B333F9}",
+      "name": "Cube Tool",
+      "defaultTool": "{401EFF2E-73DA-41D5-B0D8-6E64EEFE3E40}",
+      "type": "feature",
+      "layerId": 0,
+      "subtype": null,
+      "description": "",
+      "tag": "MultiPatch",
+      "visible": true,
+      "hash": "{F87E050D-4E38-A58E-93F8-8D2A595B2C27}",
+      "thumbnail": "iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAkElEQVR4nOXbQQ2AQBTE0B7qCB1oQhQ60PTJJuthD30KOgLGmbmBi6bXPf4hSuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuIkTuJcF/LTEQd9P+vvB2PrcCQ6AAAAAElFTkSuQmCC",
+      "status": "protected",
+      "userIdentity": "owner1"
+    },
+    {
+      "templateId": 4,
+      "globalId": "{97B2B68E-698C-49D4-961E-B88AD251CA70}",
+      "name": "dim",
+      "defaultTool": "{84F0950A-155A-11D4-80D7-00C04F601565}",
+      "type": "feature",
+      "layerId": 1,
+      "subtype": null,
+      "description": "dim",
+      "tag": "Dimension; tag",
+      "visible": true,
+      "hash": "{5D2505F4-300D-F8DE-133D-25160A36DE48}",
+      "thumbnail": null,
+      "status": "protected",
+      "userIdentity": "owner2"
+    },
+    {
+      "templateId": 5,
+      "globalId": "{FD1F160B-8DF3-47C4-83B2-C70427077D30}",
+      "name": "Style 1",
+      "defaultTool": "{B7082689-BE5C-4E06-A97E-6252388CA843}",
+      "type": "feature",
+      "layerId": 1,
+      "subtype": null,
+      "description": "",
+      "tag": "Dimension",
+      "visible": true,
+      "hash": "{5D383F03-6788-D04E-BD21-6A16ABA5322A}",
+      "thumbnail": null,
+      "status": "protected",
+      "userIdentity": "owner2"
+    }
+  ]
+}
+```
+
+
+### Example two
+
+The example response below demonstrates the response returned for templates with the template IDs of 25 and 26:
+
+```other
+  {
+    "templates": [
+      {
+        "templateId": 25,
+        "globalid": "{9D802A17-DD1B-4296-A95D-8503DBB9F772}",
+        "name": "hydrant",
+        "defaultTool": "{AF2DBF8F-280E-44DB-8860-E399D0B30CF1}",
+        "type": "feature",
+        "layerId": 0,
+        "thumbnail ": null,
+        "tags": "water",
+        "hash":  "{78862A7A-3766-C05B-1ED4-7C6F6AED3DAB}",
+        "subtype": null,
+        "description": "hydrant",
+        "visible": true,
+        "userIdentity": "creator1",
+        "status": "protected"
+      },
+      {
+        "templateId": 26,
+        "globalid": "{6CFA55FB-3278-41C5-B240-EE9A43D5BB64}",
+        "name": "pipe",
+        "defaultTool": "{AF2DBF8F-280E-44DB-8860-E399D0B30CF1}",
+        "type": "feature",
+        "layerId": 1,
+        "thumbnail ":iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAoElEQVR4nOXQsQlDMQDEUGG0UebISsZ4v6yRbGGywC/SfYheqeo4iZM4iZM4iZM4iZM4iZM4iZM4iZM4iZM4iZM4iZM4iZM4iZM4iZM4iZM4iZM4ifMq7r0fwOK/rDnn66cDzjmfMQYFXsW11ht4EiBxEidxEidxEidxEidxEidxEidxEidxEidxEidxEidxEidxEidxEidxEidx3j3gbl+aVQybjSBhigAAAABJRU5ErkJggg==”,
+        "tags": "water",
+        "hash": "{6F09C59F-C463-4D76-B299-2FD853A81E23}",
+        "subtype": 100,
+        "description": "water pipe",
+        "visible": true,
+        "userIdentity": "creator1",
+        "status": "protected"
+      }
+    ]
+  }
+```

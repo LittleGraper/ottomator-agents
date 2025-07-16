@@ -1,0 +1,217 @@
+---
+title: "Query Network Moments"
+description: "The queryNetworkMoments operation returns the moments related to the network topology and operations against the topology."
+slug: "querynetworkmoments-trace-network-server"
+url: "/querynetworkmoments-trace-network-server"
+guid: "GUID-940AD1DF-E904-42FF-8BBC-B3EEC76361C4"
+migratedTopicMetadata:
+  FTITLE: "queryNetworkMoments (Trace Network Server)"
+  FDESCRIPTION: ""
+  FCHANGES: "updating moments to reutrn parameter for being optional and having a default of all."
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9 - *"
+  CREATED-ON: "04/02/2021 13:41:09"
+  FAUTHOR: "mjarman"
+  FSTATUS: "Released"
+  MODIFIED-ON: "05/02/2021 07:09:27"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-0FED7F58-5379-44E5-8535-8D6C80E5126F"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/TraceNetworkServer/queryNetworkMoments
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/traceNetworkServer/queryNetworkMoments
+  methods: 
+    - get
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+---
+
+## Description
+
+The `queryNetworkMoments` operation returns the moments related to the network topology and operations against the topology. This includes when the topology was initially enabled, when it was last validated, when it was last disabled (and later enabled), and when the definition of the trace network was last modified.
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The output format of the response. The default format is `html`.
+
+```
+f=html | json | pjson
+```  
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`gdbVersion` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Description: Optional parameter specifying the name of the geodatabase version. The default is DEFAULT.
+
+Syntax: `gdbVersion=<version>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sessionId` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Description: Optional parameter specifying the sessionId (GUID) used to lock the version. If the calling client has previously started a service session (editing) and holds an exclusive lock on the specified version, the request will fail if the sessionId is not provided. If the specified version is currently locked by any other session, the request will fail if the sessionId is not provided or does not match the sessionId that holds the exclusive lock.
+
+Syntax: `sessionId=<guid>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`moment`
+
+(Optional) 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the session moment. The default is the version current moment. This should only be specified by the client when they do not want to use the current moment.
+
+Syntax: `moment=<Epoch time in seconds>` 
+
+Example: `moment=1603109606` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`momentsToReturn` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Description: Optional parameter representing the collection of validate moments to return. The default is all. This is provided as an array of strings.
+
+Values: 
+
+```json
+["initialEnableTopology" | "fullValidateTopology" |
+"partialValidateTopology" | "enableTopology" | "disableTopology" |
+ "definitionModification" | "indexUpdate" | "all" ]
+
+```
+
+ 
+
+Example: `momentsToReturn=["enableTopology","initialEnableTopology"]` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## JSON Response syntax
+
+```json
+{
+  "networkMoments" : [
+    {
+      "moment" : <momentType>,
+      "time" : <datetime>,
+      "duration" : <double>      // in milliseconds
+    }
+  ],  
+  "validNetworkTopology" : <true | false>,
+  "success" : <true | false>,
+  "error" : {                   // only if success is false
+    "extendedCode" : <HRESULT>,
+    "message" : <error message>,
+    "details" : [ <detail> ]
+  }
+}
+```
+
+ 
+
+## Example usage
+
+For the current state of a trace network, return the moment the network topology was initially enabled and the last time it was enabled using the `queryNetworkMoments` operation.
+
+Request URL and parameters:
+
+`https://myserver.esri.com/server/rest/services/LandUse/TraceNetworkServer/queryNetworkMoments` 
+
+```json
+f=json
+momentsToReturn=["enableTopology","initialEnableTopology"]
+
+```
+
+ 
+
+JSON response:
+
+```json
+{
+ "networkMoments": [
+  {
+   "moment": "enableTopology",
+   "time": 0,
+   "duration": 0
+  },
+  {
+   "moment": "initialEnableTopology",
+   "time": 1601505461,
+   "duration": 4099
+  }
+ ],
+ "validNetworkTopology": true,
+ "success": true
+}
+```
+
+ 

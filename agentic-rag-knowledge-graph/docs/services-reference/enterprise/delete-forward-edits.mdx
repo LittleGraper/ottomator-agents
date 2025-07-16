@@ -1,0 +1,168 @@
+---
+title: "Delete Forward Edits"
+description: "The deleteForwardEdits operation deletes all forward edits in a specified edit session."
+slug: "delete-forward-edits"
+url: "/delete-forward-edits"
+guid: "GUID-47D47570-1284-4C19-BA35-0FCB506AC680"
+migratedTopicMetadata:
+  FTITLE: "Delete Forward Edits"
+  FDESCRIPTION: ""
+  FCHANGES: "small wording change - trim to delete
+https://devtopia.esri.com/ArcGISPro/geodatabase/issues/11946"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.6 - *"
+  CREATED-ON: "03/08/2023 06:16:02"
+  FAUTHOR: "mjarman"
+  FSTATUS: "Released"
+  MODIFIED-ON: "22/09/2023 10:48:31"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "14"
+  ED: "GUID-6CFA95CB-6001-4AF4-89EE-AC98C3E62DF7"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/VersionManagementServer/versions/<versionGuid>/deleteForwardEdits
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/VersionManagementServer/versions/<versionGuid>/deleteForwardEdits
+  methods:
+    - post
+  requiredCapability: ArcGIS Advanced Editing user type extension license
+  versionIntroduced: '10.6'
+---
+
+## Description
+
+The `deleteForwardEdits` operation deletes all forward edits in a specified edit session.
+
+When a client application manages an edit session made of multiple operations and intends to support an undo/redo stack, the time stamps for each edit operation must be carefully managed.
+
+This operation requires the same session ID and organization member that was used for the `startEditing` operation.
+
+Review the read and edit session requirements for [version resource operations](/version).
+
+<Note type={"note"}>
+
+Organization members must be assigned a license for the [ArcGIS Advanced Editing user type extension](https://enterprise.arcgis.com/en/portal/latest/administer/windows/license-user-type-extensions.htm#ESRI_SECTION1_B75DA80066744473AD5DD1312734654A) to use this operation for ArcGIS Enterprise 11.3 and later..
+
+</Note>
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the output format of the response. The default response format is `html`.
+
+Values: `html` | `json` | `pjson`
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sessionId`
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the client-generated session ID (GUID).
+
+Syntax: `sessionId = <guid>` 
+
+Example: `sessionId = {3F2504E0-4F89-41D3-9A0C-0305E82C3301}` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`moment`
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies a specific `applyEdits` operation moment after which all subsequent (forward) edits will be deleted.
+
+<Note type={"note"}>
+
+The value must be an `applyEdits`  operation `editMoment`  value that is equal to or greater than the `modifiedDate`  property for the [`version` ](/version) resource.
+
+</Note>
+
+Syntax: `moment = <Epoch time in seconds>`
+
+Example: `moment =  1603109596000` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## JSON Response syntax
+
+```other
+{
+  "success" : <true | false>,
+  "error" : { // only if success is false
+    "extendedCode" : <HRESULT>,
+    "message" : <error message>,
+    "details" : [ <detail> ]
+  }
+}
+
+```
+
+ 
+
+## Example usage
+
+During an edit session, the `deleteForwardEdits`  operation is called before the `stopEditing`  operation to delete edits from the moment specified forward.
+
+Request URL and parameters:
+
+`https://myserver.esri.com/server/rest/services/LandUse/VersionManagementServer/versions/24417758-0DBD-4EC3-95B0-467CAA47FC43/deleteForwardEdits` 
+
+```javascript
+f=json
+sessionId={638ed440-b81f-406c-bd5d-757c91dbfd70}
+moment=1691093291637
+```
+
+ 
+
+JSON response:
+
+```javascript
+{
+ "success": true
+}
+```
+
+ 

@@ -1,5 +1,4 @@
 import os
-import sys
 import json
 import asyncio
 import requests
@@ -10,7 +9,14 @@ from datetime import datetime, timezone
 from urllib.parse import urlparse
 from dotenv import load_dotenv
 
-from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig, CacheMode
+from crawl4ai import (
+    AsyncWebCrawler, 
+    BrowserConfig,
+    CacheMode,
+    CrawlerRunConfig
+) 
+from crawl4ai import MemoryAdaptiveDispatcher
+from crawl4ai.models import CrawlResult, CrawlResultContainer
 from openai import AsyncOpenAI
 from supabase import create_client, Client
 
@@ -112,8 +118,8 @@ async def get_embedding(text: str) -> List[float]:
         print(f"Error getting embedding: {e}")
         return [0] * 1536  # Return zero vector on error
 
-async def process_chunk(chunk: str, chunk_number: int, url: str) -> ProcessedChunk:
-    """Process a single chunk of text."""
+async def process_chunk(chunk: str, chunk_number: int, url: str, source: str = "pydantic_ai_docs") -> ProcessedChunk: 
+    """Process a single chunk of text into a given format."""
     # Get title and summary
     extracted = await get_title_and_summary(chunk, url)
     
@@ -122,7 +128,7 @@ async def process_chunk(chunk: str, chunk_number: int, url: str) -> ProcessedChu
     
     # Create metadata
     metadata = {
-        "source": "pydantic_ai_docs",
+        "source": source,
         "chunk_size": len(chunk),
         "crawled_at": datetime.now(timezone.utc).isoformat(),
         "url_path": urlparse(url).path
@@ -138,8 +144,8 @@ async def process_chunk(chunk: str, chunk_number: int, url: str) -> ProcessedChu
         embedding=embedding
     )
 
-async def insert_chunk(chunk: ProcessedChunk):
-    """Insert a processed chunk into Supabase."""
+async def insert_chunk(chunk: ProcessedChunk, table_name: str = "site_pages") -> Any:
+    """Insert a single processed chunk into Supabase."""
     try:
         data = {
             "url": chunk.url,
@@ -151,7 +157,7 @@ async def insert_chunk(chunk: ProcessedChunk):
             "embedding": chunk.embedding
         }
         
-        result = supabase.table("site_pages").insert(data).execute()
+        result = supabase.table(table_name).insert(data).execute()
         print(f"Inserted chunk {chunk.chunk_number} for {chunk.url}")
         return result
     except Exception as e:
@@ -177,44 +183,53 @@ async def process_and_store_document(url: str, markdown: str):
     ]
     await asyncio.gather(*insert_tasks)
 
-async def crawl_parallel(urls: List[str], max_concurrent: int = 5):
+async def crawl_parallel(urls: List[str], max_concurrent: int = 10):
     """Crawl multiple URLs in parallel with a concurrency limit."""
+    run_config = CrawlerRunConfig(
+        cache_mode=CacheMode.BYPASS,  # Bypass cache to ensure fresh content
+        stream=False
+    )
+
     browser_config = BrowserConfig(
         headless=True,
         verbose=False,
         extra_args=["--disable-gpu", "--disable-dev-shm-usage", "--no-sandbox"],
     )
-    crawl_config = CrawlerRunConfig(cache_mode=CacheMode.BYPASS)
 
-    # Create the crawler instance
-    crawler = AsyncWebCrawler(config=browser_config)
-    await crawler.start()
+    # Configure a dispatcher to control concurrency
+    dispatcher = MemoryAdaptiveDispatcher(
+        max_session_permit=max_concurrent,
+        memory_threshold_percent=85.0,      # 当内存使用率达到85%时，进入内存压力模式
+        critical_threshold_percent=95.0,    # 当内存使用率达到95%时，进入临界模式，可能会重新排队任务
+        recovery_threshold_percent=75.0,    # 当内存使用率恢复到75%以下时，退出压力模式
+        check_interval=0.5,                 # 每0.5秒检查一次内存
+    )
 
-    try:
-        # Create a semaphore to limit concurrency
-        semaphore = asyncio.Semaphore(max_concurrent)
-        
-        async def process_url(url: str):
-            async with semaphore:
-                result = await crawler.arun(
-                    url=url,
-                    config=crawl_config,
-                    session_id="session1"
-                )
-                if result.success:
-                    print(f"Successfully crawled: {url}")
-                    await process_and_store_document(url, result.markdown_v2.raw_markdown)
-                else:
-                    print(f"Failed: {url} - Error: {result.error_message}")
-        
-        # Process all URLs in parallel with limited concurrency
-        await asyncio.gather(*[process_url(url) for url in urls])
-    finally:
-        await crawler.close()
+    # Use an async context manager for the crawler, which handles startup and shutdown
+    async with AsyncWebCrawler(config=browser_config) as crawler:
+        results: CrawlResultContainer[CrawlResult] = await crawler.arun_many(
+            urls=urls,
+            config=run_config, 
+            dispatcher=dispatcher
+        )
 
-def get_pydantic_ai_docs_urls() -> List[str]:
+    # After crawling, process and store the successful results in parallel
+    tasks = []
+    for result in results:
+        if result.success:
+            print(f"Successfully crawled: {result.url}")
+            # Create a task for processing and storing the document
+            task = process_and_store_document(result.url, result.markdown)
+            tasks.append(task)
+        else:
+            print(f"Failed: {result.url} - Error: {result.error_message}")
+    
+    # Run all processing and storing tasks concurrently
+    if tasks:
+        await asyncio.gather(*tasks)
+
+def get_sitemap_urls(sitemap_url: str = "https://ai.pydantic.dev/sitemap.xml") -> List[str]:
     """Get URLs from Pydantic AI docs sitemap."""
-    sitemap_url = "https://ai.pydantic.dev/sitemap.xml"
     try:
         response = requests.get(sitemap_url)
         response.raise_for_status()
@@ -233,7 +248,7 @@ def get_pydantic_ai_docs_urls() -> List[str]:
 
 async def main():
     # Get URLs from Pydantic AI docs
-    urls = get_pydantic_ai_docs_urls()
+    urls = get_sitemap_urls()
     if not urls:
         print("No URLs found to crawl")
         return

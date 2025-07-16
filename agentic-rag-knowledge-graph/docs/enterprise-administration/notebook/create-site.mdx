@@ -1,0 +1,353 @@
+---
+title: "Create New Site"
+description: "This is the first operation that you must invoke when you install ArcGIS Notebook Server for the first time. You can only run this operation when the machine is not participating in a site."
+slug: "create-site"
+url: "/create-site"
+guid: "GUID-09D4CCD0-43B9-4DFD-A52B-7C049F017F21"
+migratedTopicMetadata:
+  FTITLE: "Create Site"
+  FDESCRIPTION: ""
+  FCHANGES: "https://devtopia.esri.com/WebGIS/arcgis-enterprise-documentation/issues/5223"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "21/09/2023 10:11:50"
+  FAUTHOR: "bpolk"
+  FSTATUS: "Released"
+  MODIFIED-ON: "27/09/2023 12:52:10"
+  VERSION: "9"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-506FA3E1-14D0-4E1B-AD49-6D04CE8C2FB7"
+  FUSERGROUP: "VUSERGROUPSERVERDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /createNewSite
+  urlSegments:
+    - name: <notebookserveradmin>
+      url: /notebook-server-administration-root
+    - name: /createNewSite
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.7'
+  requiredCapability: Administrator
+---
+
+## Description
+
+The `createNewSite`  operation is the first operation that you must invoke when you install ArcGIS Notebook Server for the first time. You can only run this operation when the machine is not participating in a site.
+
+Creating a site involves the following tasks:
+
+-   Allocate a store to save the site configuration.
+-   Configure the ArcGIS Notebook Server content and log directories.
+-   Create the primary site administrator user.
+
+It takes only a few seconds to create a site. Once a site has been created, you can register ArcGIS Web Adaptor and federate the server with your ArcGIS Enterprise portal.
+
+Included in the request to this operation are JSON objects describing the file paths for the site configuration store and server directories.
+
+For Windows systems, to join additional ArcGIS Notebook Server machines to the site, the `SYSTEM`  and `OUTPUT`  server directories must be on shared drives, and the `WORKSPACE`  directory must be local to each machine. For more information, see [Join additional machines to an ArcGIS Notebook Server site](https://enterprise.arcgis.com/en/notebook/latest/install/windows/join-additional-machines-to-an-arcgis-notebook-server-site.htm).
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`username` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The name of the primary administrator account to be used by the site. This can be changed at a later time.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`password` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The credentials for the primary administrator account.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`configStoreConnection` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A JSON object representing the connection to the configuration store. By default, the configuration store is maintained in the installation directory.
+
+<Note type={"note"}>
+
+In versions earlier than 10.8, this parameter required the `ACCESS_KEY_ID`  and `SECRET_KEY`  (Amazon stores) and `AccountName`  and `AccountKey`  (Azure store) properties. However, at 10.8, these properties are replaced with `username`  and `password`  for both store types. This change supports storage for encrypted passwords in the configstore. When upgrading to 10.8 from 10.7 or 10.7.1, the connection string will be upgraded to reflect this change. New sites created at 10.8 and later must use the new properties.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`directories` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A JSON object representing the collection of server directories to create. By default, these directories are created locally.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`logsSettings` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Optional [log settings](DEVSITE/rest/enterprise-administration/server/logssettings.htm).
+
+A JSON object representing the log settings for the newly created site.
+
+Syntax:
+
+```javascript
+{
+  "maxLogFileAge": <number of days up to which logs should be retained>,
+  "logLevel": "SEVERE|WARNING|INFO|VERBOSE|DEBUG",
+  "logDir": "A local or a shared directory location for writing the log files"
+}
+```
+
+ 
+
+Example:
+
+```javascript
+{
+  "maxLogFileAge": 90,
+  "logLevel": "WARNING",
+  "logDir": "C:\\arcgisnotebookserver\\logs\\"
+}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`runAsync` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<Note type={"note"}>
+
+Asynchronous execution is not currently supported with this operation. If this parameter is set to `true` , an error will be returned and the operation will fail.
+
+</Note>
+
+A flag that indicates whether the operation must be run asynchronously.
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` .
+
+Values: `html`  \| `json`  \| `pjson` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+The following is an example usage of `createNewSite`  on a Windows machine:
+
+```json
+username=admin
+password=secret
+configStoreConnection= {
+  "connectionString": "\\myshare\arcgis\notebookserver\usr\config-store",
+  "configPersistenceType": "FILESYSTEM",
+  "className": "com.esri.arcgis.carbon.persistence.impl.filesystem.FSConfigPersistence"
+},
+directories=[{"path":"\\myshare\arcgis\notebookserver\usr\directories\arcgisoutput","name":"arcgisoutput","id":"b3f2cb48-40d2-4ba0-bc94-58481c8c0d7d","type":"OUTPUT"},{"path":"C:\\arcgisworkspace","name":"arcgisworkspace","id":"8f20d192-f503-4776-9f07-2dd728d4f0c6","type":"WORKSPACE"},{"path":"\\myshare\arcgis\notebookserver\usr\arcgissystem","name":"arcgissystem","id":"9939ee58-0187-4405-9eb7-9fc78100ae0d","type":"SYSTEM"}]
+logsSettings={"maxLogFileAge":90,"logLevel":"WARNING","logDir":"\\myshare\arcgis\notebookserver\usr\logs\"}"
+```
+
+ 
+
+The following is an example usage of `createNewSite`  on a Linux machine:
+
+```json
+username=admin
+password=secret
+configStoreConnection= {
+  "connectionString": "/myshare/arcgis/notebookserver/usr/config-store",
+  "configPersistenceType": "FILESYSTEM",
+  "className": "com.esri.arcgis.carbon.persistence.impl.filesystem.FSConfigPersistence"
+},
+directories=[{"path":"/myshare/arcgis/notebookserver/usr/directories/arcgisoutput","name":"arcgisoutput","id":"b3f2cb48-40d2-4ba0-bc94-58481c8c0d7d","type":"OUTPUT"},{"path":"/myshare/arcgis/notebookserver/usr/directories/arcgisworkspace","name":"arcgisworkspace","id":"8f20d192-f503-4776-9f07-2dd728d4f0c6","type":"WORKSPACE"},{"path":"/myshare/arcgis/notebookserver/usr/directories/arcgissystem","name":"arcgissystem","id":"9939ee58-0187-4405-9eb7-9fc78100ae0d","type":"SYSTEM"}]
+logsSettings={"maxLogFileAge":90,"logLevel":"WARNING","logDir":"/myshare/arcgis/notebookserver/usr/logs/"}"
+```
+
+ 
+
+The following is an example of a `configStoreConnection`  JSON object for an Amazon store (with pre-10.8 values):
+
+```json
+configStoreConnection= {
+  "connectionString":"NAMESPACE=namespace;REGION=region;ACCESS_KEY_ID=access_key_id;SECRET_KEY=secretKey",
+  "configPersistenceType":"AMAZON",
+  "className":"com.esri.arcgis.carbon.persistence.impl.amazon.AmazonConfigPersistence"
+}
+```
+
+ 
+
+The following is an example of a `configStoreConnection`  JSON object for an Amazon store:
+
+```json
+configStoreConnection= {
+  "configPersistenceType":"AMAZON",
+  "connectionString":"NAMESPACE=namespace;REGION=us-east-1",
+  "username":"<ACCESS_KEY_ID>",
+  "password":"<SECRET_KEY>",
+  "className":"com.esri.arcgis.carbon.persistence.impl.amazon.AmazonConfigPersistence"
+}
+```
+
+ 
+
+The following is an example of a `configStoreConnection`  JSON object for an Azure store (with pre-10.8 values):
+
+```json
+configStoreConnection= {
+  "configPersistenceType":"AZURE",
+  "connectionString":"NAMESPACE=inamespace;EndpointSuffix=core.windows.net;DefaultEndpointsProtocol=https;AccountName=accountname;AccountKey=accountkey",
+  "className":"com.esri.arcgis.carbon.persistence.impl.azure.AzureConfigPersistence"
+}
+```
+
+ 
+
+The following is an example of a `configStoreConnection`  JSON object for an Azure store:
+
+```json
+configStoreConnection= {
+  "configPersistenceType": "AZURE",
+  "connectionString": "NAMESPACE=testnamespace;EndpointSuffix=core.windows.net;DefaultEndpointsProtocol=https",
+  "username":"<AccountName>",
+  "password":"<AccountKey>",
+  "className": "com.esri.arcgis.carbon.persistence.impl.azure.AzureConfigPersistence"
+}
+```
+
+ 
+
+The following is an example of a `configStoreConnection`  JSON object for an Azure Service Principal: 
+
+```json
+{
+  "connectionString": "NAMESPACE=testNameSpace;AccountName=myStorageAccount;CredentialType=ServicePrincipal;TenantId=tenantId;ClientId=clientId",
+  "connectionSecret": "Client Secret",
+  "type": "AZURE"
+}
+```
+
+ 
+
+The following is an example of a `configStoreConnection`  JSON object for and Azure user-assigned managed identity. This is only supported when the Notebook Server is installed on an Azure VM: 
+
+```json
+{
+  "configPersistenceType": "AZURE",
+  "connectionString": "NAMESPACE=<managedIdentityNameSpace>;EndpointSuffix=core.windows.net;DefaultEndpointsProtocol=https;CredentialType=UserAssignedIdentity;ManagedIdentityClientId=<ManagedIdentityClientiD>",
+  "username": "<Name of the storage account>",
+  "password": "",
+  "className": "com.esri.arcgis.carbon.persistence.impl.azure.AzureConfigPersistence"
+}
+```
+
+ 
+
+The following is an example of a `configStoreConnection`  JSON object for an Azure Shared Access Signature (SAS) token:
+
+```json
+{
+  "configPersistenceType": "AZURE",
+  "connectionString": "NAMESPACE=<namespace>;AccountName=<Name of the storage account>;EndpointSuffix=core.windows.net;DefaultEndpointsProtocol=https;CredentialType=SASToken;SASToken=<SASToken>",
+  "className": "com.esri.arcgis.carbon.persistence.impl.azure.AzureConfigPersistence"
+}
+```
+
+ 
+
+## JSON Response syntax
+
+```other
+{"status":"<success|failure>"}
+```
+
+ 
+
+## JSON Response example
+
+```other
+{"status":"success"}
+```
+
+ 

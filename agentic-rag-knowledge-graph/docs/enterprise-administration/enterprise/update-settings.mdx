@@ -1,0 +1,139 @@
+---
+title: "Update (Disaster Recovery Settings)"
+description: "The update operation updates disaster recovery settings."
+slug: "update-settings"
+url: "/update-settings"
+guid: "GUID-B204B7E7-2A5E-4DEF-9610-0025D911C0E3"
+migratedTopicMetadata:
+  FTITLE: "Update Settings"
+  FDESCRIPTION: ""
+  FCHANGES: "Removing property and updating parameter info"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0-*"
+  CREATED-ON: "10/03/2022 10:27:36"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "24/05/2022 10:50:00"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "6"
+  ED: "GUID-90A2068F-36F6-444E-B483-D4C0C0568D27"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /system/disasterrecovery/settings/update
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /system/disasterrecovery/settings/update
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed with the "Security and infrastructure" privilege
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `update` operation updates the disaster recovery settings for your deployment. Currently, the only supported setting is `stagingVolumeConfig`. The `stagingVolumeConfig` setting must use a storage class to provision a persistent volume for use in backup and restore operations. Starting at ArcGIS Enterprise 11.3 on Kubernetes, static provisioning is supported.
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `settings` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object describing disaster recovery settings. Currently, the only supported setting is `stagingVolumeConfig`, which contains the following editable attributes:
+
+      - `provisioningType`: `DYNAMIC` or `STATIC`.
+      - `storageClass`: The storage class to use.
+      - `size`: The size for the persistent volume.
+      - `labels`: Key-value pair of labels assigned to the persistent volume. Only used when `provisioningType` is `STATIC`.
+      - `timeoutInSeconds`: Introduced at 11.0. Defines how long, in seconds, the job should run before timing out. The default property is two hours (7200 seconds). If your deployment has a large amount of content, consider setting the this property to a value larger than two hours.
+
+      <Note>
+
+      If static provisioning is used, you must patch the persistent volume to make it available to be bound to the disaster recovery pod before you run any disaster recovery operations.
+
+      </Note>
+
+      ```markdown label=Dynamic
+      settings={
+        "stagingVolumeConfig": {
+          "storageClass": "default",
+          "size": "64Gi",
+          "provisioningType": "DYNAMIC"
+        },
+        "timeoutInSeconds": 7200
+      }
+      ```
+
+      ```markdown label=Static
+      settings={
+        "stagingVolumeConfig": {
+          "storageClass": "default",
+          "size": "64Gi",
+          "provisioningType": "STATIC",
+          "labels": {"purpose":"backups"}   
+        },
+        "timeoutInSeconds": 7200
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `update` operation:
+
+```other
+POST /context/admin/system/disasterrecovery/settings/update HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+settings={
+  "stagingVolumeConfig": {
+    "storageClass": "default",
+    "size": "64Gi",
+    "provisioningType": "DYNAMIC"
+  },
+  "timeoutInSeconds": 7200
+}&f=pjson&token=HRozb6bnTL6gfA-SJO-IxhfLgJrioK1KJdMLWmCE5HjHWz9U3fOiFv3-HkgPZqsLljTkk2WDENGt5fjho5s39e_mZL5At60UvJPoNnC5O2sv2HTlumG7TsYfbtnokpWmS6-lf8XoQpSKusZwmxIkEMP-yE0Wxrj8o9sWKi29J-pxzkoCDhoUfdLt6NnBWxhESpegh8BzNcEruqxuDQD-JRmaTsbRDaBHTQTePMzQePhXl7KcEG9Cfkw2sa7P1W1e
+
+```
+
+## JSON Response example
+
+```other
+{"status": "success"}
+```

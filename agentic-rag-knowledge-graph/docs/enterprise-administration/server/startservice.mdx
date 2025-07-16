@@ -1,0 +1,114 @@
+---
+title: "Start Service"
+description: "The start operation starts a specific service."
+slug: "startservice"
+url: "/startservice"
+guid: "GUID-BFC556B6-8315-4D7D-869B-E34570DD80F0"
+migratedTopicMetadata:
+  FTITLE: "startService"
+  FDESCRIPTION: ""
+  FCHANGES: "Updating information about ArcMap support"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0 -*"
+  CREATED-ON: "20/04/2022 09:04:30"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "24/05/2022 09:34:31"
+  VERSION: "8"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "6"
+  ED: "GUID-7141246D-3717-4223-B0AC-C173C5C42A83"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /services/<serviceName>.<serviceType>/start
+  urlSegments:
+    - name: <root>
+      url: /site
+    - name: /services/<serviceName>.<serviceType>/start
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.1'
+  requiredCapabilities:
+    - name: Access allowed with any authorized privilege
+      url: /managing-access-to-the-server-administration-rest-api
+---
+
+## Description
+
+The `start` operation starts a specific service. When a service is started, the server creates the minimum instances on all [server machines](/machine) in the site. If the minimum instances are 0, the instances are created dynamically based on the incoming requests. Starting at ArcGIS Enterprise 11.0, publishing services from ArcMap is no longer supported. After upgrading to version 11.0 or later, any remaining geocode or geoprocessing services that were originally published from ArcMap cannot be started and [must be republished](https://enterprise.arcgis.com/en/server/latest/publish-services/windows/migrating-services-to-the-arcgis-pro-service-runtime.htm) from ArcGIS Pro.
+
+<Note type={"note"}>
+
+At 10.9.1, when installing ArcGIS Server, you had the option to disable the ArcMap service runtime. This allowed you to migrate services published from ArcMap to the ArcGIS Pro service runtime before support for the ArcMap service runtime was discontinued at Enterprise 11.0. If the ArcMap service runtime was not disabled, services using ArcMap as their service provider (ArcObjects) could still be started.
+
+</Note>
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Description"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `start` operation:
+
+```markdown
+POST /webadaptor/admin/services/Maps/SeattleMap.MapServer/start HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+f=pjson
+```
+
+## JSON Response examples
+
+The following is a sample success response for the `start` operation, indicating that the service was started successfully:
+
+```javascript
+{
+  "status": "success"
+}
+```
+
+The following error response is returned when an attempt is made to start a geocode service with ArcMap as its service provider:
+
+```javascript
+{
+  "status": "error",
+  "messages": ["This geocode service cannot be started because it was created for use with the ArcMap service runtime that is no longer supported at this version. Please republish this service using ArcGIS Pro. Information on how to migrate services to use the ArcGIS Pro service runtime is available in the help topic 'Migrating services to the ArcGIS Pro service runtime'."],
+  "code": 500
+}
+```
+
+The following error response is returned when an attempt is made to start a geoprocessing service with ArcMap as its service provider:
+
+```javascript
+{
+  "status": "error",
+  "messages": ["This geoprocessing service cannot be started because it was created for use with the ArcMap service runtime that is no longer supported at this version. Please republish this service using ArcGIS Pro. Information on how to migrate services to use the ArcGIS Pro service runtime is available in the help topic 'Migrating services to the ArcGIS Pro service runtime'."],
+  "code": 500
+}
+```

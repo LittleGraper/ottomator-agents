@@ -1,0 +1,1090 @@
+---
+title: /SolveVehicleRoutingProblem
+uid: vrp-service-job
+description: "Find directions using the global route service available with ArcGIS Location Services."
+context:
+  requestType: "job"
+---
+import VRPServiceDesc from "../../shared/routing/snippets/_VRP-service.mdx"
+import Orders from "../../shared/routing/snippets/request-parameters/_VRP-orders.mdx"
+import Depots from "../../shared/routing/snippets/request-parameters/_VRP-depots.mdx"
+import Routes from "../../shared/routing/snippets/request-parameters/_VRP-routes.mdx"
+import Troubleshooting from "../../shared/routing/snippets/_troubleshootVRP.mdx"
+import Impedance from "../../shared/routing/snippets/request-parameters/_Impedance-JDR-OnE.mdx"
+import BreakUnits from "../../shared/routing/snippets/request-parameters/_BreakUnits.mdx"
+import AttributeParameterValues from "../../shared/routing/snippets/request-parameters/_AttributeParameterValues-JDR-OnE.mdx"
+import TravelModes from "../../shared/routing/snippets/request-parameters/_TravelMode.mdx"
+import AnalysisRegion from "../../shared/routing/snippets/request-parameters/_AnalysisRegion-JR-OnE.mdx"
+import Context from "../../shared/routing/snippets/request-parameters/_Context.mdx"
+import LineBarriers from "../../shared/routing/snippets/request-parameters/_LineBarriers.mdx"
+import LocateSettings from "../../shared/routing/snippets/request-parameters/_LocateSettings.mdx"
+import OutputFormat from "../../shared/routing/snippets/request-parameters/_OutputFormat-JR-OnE.mdx"
+import PointBarriers from "../../shared/routing/snippets/request-parameters/_PointBarriers.mdx"
+import PolygonBarriers from "../../shared/routing/snippets/request-parameters/_PolygonBarriers.mdx"
+import SaveOutputNALayer from "../../shared/routing/snippets/request-parameters/_SaveOutputNALayer-JR-OnE.mdx"
+import SaveRouteData from "../../shared/routing/snippets/request-parameters/_SaveRouteData-JR-OnE.mdx"
+import TimeUnits from "../../shared/routing/snippets/request-parameters/_TimeUnits.mdx"
+import UTurnPolicy from "../../shared/routing/snippets/request-parameters/_VRP-UTurnPolicy.mdx"
+import UseHierarchy from "../../shared/routing/snippets/request-parameters/_UseHierarchy-JDR-OnE.mdx"
+import Restrictions from "../../shared/routing/snippets/request-parameters/_Restrictions-JDR-OnE.mdx"
+import Overrides from "../../shared/routing/snippets/request-parameters/_Overrides-JDR-OnE.mdx"
+import DistanceImpedance from "../../shared/routing/snippets/request-parameters/_DistanceImpedance-JR-OnE.mdx"
+import TimeImpedance from "../../shared/routing/snippets/request-parameters/_TimeImpedance-JR-OnE.mdx"
+import IgnoreInvalidOrderLocations from "../../shared/routing/snippets/request-parameters/_IgnoreInvalidOrderLocations-LMD.mdx"
+import TimeOfDay from "../../shared/routing/snippets/request-parameters/_TimeOfDay-JR-OnE.mdx"
+import TimeZoneForTimeOfDay from "../../shared/routing/snippets/request-parameters/_TimeZoneForTimeOfDay-JR-OnE.mdx"
+import LineBarrier from "../../shared/routing/snippets/request-parameters/_LineBarriers.mdx"
+import PolygonBarrier from "../../shared/routing/snippets/request-parameters/_PolygonBarriers.mdx"
+import PointBarrier from "../../shared/routing/snippets/request-parameters/_PointBarriers.mdx"
+import SolveSucceeded from "../../shared/routing/snippets/output-parameters/_SolveSucceeded.mdx"
+import UsageCost from "../../shared/routing/snippets/output-parameters/_UsageCost.mdx"
+import DefaultDate from "../../shared/routing/snippets/request-parameters/_VRP-defaultDate.mdx"
+import Breaks from "../../shared/routing/snippets/request-parameters/_VRP-breaks.mdx"
+import ExcessTransitFactor from "../../shared/routing/snippets/request-parameters/_VRP-excessTransitFactor.mdx"
+import OrderPairs from "../../shared/routing/snippets/request-parameters/_VRP-orderPairs.mdx"
+import PopulateRouteLines from "../../shared/routing/snippets/request-parameters/_VRP-populateRtLines.mdx"
+import RouteRenewals from "../../shared/routing/snippets/request-parameters/_VRP-routeRenewals.mdx"
+import RouteZones from "../../shared/routing/snippets/request-parameters/_VRP-routeZones.mdx"
+import ClusterRoutes from "../../shared/routing/snippets/request-parameters/_VRP-spatiallyClusterRoutes.mdx"
+import TimeWindowFactor from "../../shared/routing/snippets/request-parameters/_VRP-timeWindowFactor.mdx"
+import TimeZoneUsage from "../../shared/routing/snippets/request-parameters/_VRP-TimeZoneUsage.mdx"
+import PopulateStopShapes from "../../shared/routing/snippets/request-parameters/_VRP-populateStopShapes.mdx"
+import DirectionsLanguage from "../../shared/routing/snippets/request-parameters/_DirectionsLanguage-JDR-OnE.mdx"
+import DirectionsStyleName from "../../shared/routing/snippets/request-parameters/_DirectionsStyleName-JDR-OnE.mdx"
+import PopulateDirections from  "../../shared/routing/snippets/request-parameters/_PopulateDirections-JDR-OnE.mdx"
+import RtLineSimplificationTol from "../../shared/routing/snippets/request-parameters/_RouteLineSimplificationTolerance-JR-OnE.mdx"
+import TimeUnit from "../../shared/routing/snippets/request-parameters/_TimeUnits.mdx"
+import DistanceUnit from "../../shared/routing/snippets/request-parameters/_DistanceUnits.mdx"
+import VRPUsageLimit from "../../shared/routing/snippets/request-parameters/_VRP-UsageLimits.mdx"
+import OutStops from "../../shared/routing/snippets/output-parameters/_VRP-outStops.mdx"
+import OutRoutes from "../../shared/routing/snippets/output-parameters/_VRP-outRoutes.mdx"
+import Directions from "../../shared/routing/snippets/output-parameters/_outputDirections.mdx"
+import ResultFile from "../../shared/routing/snippets/output-parameters/_resultFile.mdx"
+import OutputNetworkAnalysisLayer from "../../shared/routing/snippets/output-parameters/_outputNetworkAnalysisLayer.mdx"
+import OutputRouteData from "../../shared/routing/snippets/output-parameters/_outRouteData.mdx"
+import CostUsage from "../../shared/routing/snippets/output-parameters/_UsageCost.mdx"
+import OutUnassignedStops from "../../shared/routing/snippets/output-parameters/_VRP-outUnassignedStops.mdx"
+
+import SharedContent from "../../shared/content/_required-params.mdx"
+
+import ParamMetadata from "../../shared/components/param-metatdata" 
+
+<CodeSwitcher>
+<CodeBlock language="curl" label="GET">{`GET  https://logistics.arcgis.com/arcgis/rest/services/World/VehicleRoutingProblem/GPServer/SolveVehicleRoutingProblem/submitJob`}</CodeBlock>
+<CodeBlock language="curl" label="POST">{`POST https://logistics.arcgis.com/arcgis/rest/services/World/VehicleRoutingProblem/GPServer/SolveVehicleRoutingProblem/submitJob`}</CodeBlock>
+</CodeSwitcher>
+
+<VRPServiceDesc />
+
+## Parameters
+
+<StyledTable headers="Name, Required, Type, Default, Description">
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[f](#f)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown"></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The request response format, either `json` or `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[token](#token)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    An access token with the [required privileges](#token).
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[orders](#orders)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">feature</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+   One or more locations that the routes of the VRP analysis will visit.  
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[depots](#depots)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">feature</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+   One or more depots for the given vehicle routing problem.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[routes](#routes)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">table</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+   One or more routes that describe vehicle and driver characteristics. 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[travel_modes](#travel_modes)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">object</StyledTableCell>
+    <StyledTableCell cellStyle="markdown"> 
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The mode of transportation for the analysis provided as a JSON object.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[locate_settings](#locate_settings)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">object</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Determines how input data are located.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[analysis_region](#analysis_region)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Region in which to perform the analysis. 
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[time_zone_usage_for_time_fields](#time_zone_usage_for_time_fields)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `GEO_LOCAL`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Time zone for the input date-time fields 
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[default_date](#default_date)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">datetime</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The date on which all the routes start.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[breaks](#breaks)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">feature</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Rest periods, or breaks, for the routes in a given fleet routing problem.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[time_units](#time_units)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `Minutes`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Time units for all time-based attribute values
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[distance_units](#distance_units)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `Miles`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     Units for all distance-based attribute values
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[time_window_factor](#time_window_factor)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `Medium`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Importance of honoring time windows without causing violations.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[spatially_cluster_routes](#spatially_cluster_routes)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Orders assigned to an individual route are spatially clustered.
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[route_zones](#route_zones)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">feature</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Delineates work territories for given routes. 
+    </StyledTableCell>
+  </StyledTableRow>  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[route_renewals](#route_renewals)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">feature</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Intermediate depots that routes can visit to reload or unload the cargo they are delivering or picking up.
+    </StyledTableCell>
+  </StyledTableRow>  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[order_pairs](#order_pairs)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">feature</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Pair pickup and delivery orders so they are serviced by the same route.
+    </StyledTableCell>
+  </StyledTableRow>  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[excess_transit_factor](#excess_transit_factor)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `Medium`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Rate the importance of reducing excess transit time of order pairs.
+    </StyledTableCell>
+  </StyledTableRow>   
+  
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[uturn_policy](#uturn_policy)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `Allowed only at Intersections and Dead Ends`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Restricts or allows a route to make U-turns at junctions.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[point_barriers](#point_barriers)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">feature</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      One or more points that act as temporary restrictions, additional time, or distance.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[line_barriers](#line_barriers)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">feature</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      One ore more lines that prohibit travel anywhere the lines intersect the streets.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[polygon_barriers](#polygon_barriers)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">feature</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Polygons that either prohibit travel or proportionately scale the time or distance required to travel on the streets.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[use_hierarchy_in_analysis](#use_hierarchy_in_analysis)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Hierarchy used when finding the shortest paths.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[restrictions](#restrictions)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">[string]</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The restrictions that should be honored by the service.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[attribute_parameter_values](#attribute_parameter_values)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">table</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Additional values required by an attribute or restriction.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[time_impedance](#time_impedance)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Time-based impedance.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[distance_impedance](#distance_impedance)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `Miles`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Distance-based impedance.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[impedance](#impedance)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Type of impedance.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[populate_route_lines](#populate_route_lines)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Specify shape of the output routes.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[route_line_simplification_tolerance](#route_line_simplification_tolerance)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">number</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `10`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Simplification level for the route geometry returned by the service.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[populate_directions](#populate_directions)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Generates the driving directions for each route.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[directions_language](#directions_language)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `en`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The language used when generating driving directions.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[directions_style_name](#directions_style_name)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `NA Desktop`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The formatting style for the directions. Used if`populate_directions=true`.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[save_route_data](#save_route_data)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Route data will be saved as a .zip file.
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[save_output_layer](#save_output_layer)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Save the analysis settings as a network analysis layer file.
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[populate_stop_shapes](#populate_stop_shapes)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Create the shapes for the output assigned and unassigned stops.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[output_format](#output_format)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `Feature Set`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Format in which the output features will be returned.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[context](#context)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">object</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Additional settings that affect task operation
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[overrides](#overrides)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      For internal use only.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[ignore_invalid_locations](#ignore_invalid_locations)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Ignores invalid input locations.
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Required parameters
+
+<Box>
+
+### f
+
+<SharedContent f/>
+
+</Box>
+
+<Box>
+
+### token
+
+<SharedContent token alpPrivileges="premium:user:networkanalysis:routing or premium:user:networkanalysis:optimizedrouting" agoPrivileges="premium:user:networkanalysis"/>
+
+</Box>
+
+<Box>
+
+### orders
+
+<Orders />
+
+</Box>
+
+<Box>
+
+### depots
+
+<Depots />
+
+</Box>
+
+<Box>
+
+### routes
+
+<Routes />
+
+</Box>
+
+## Optional parameters
+
+<Box>
+
+### travel_modes
+
+<TravelModes />
+
+</Box>
+
+<Box>
+
+### locate_Settings
+
+<LocateSettings VRP/>
+
+</Box>
+
+<Box>
+
+### analysis_region
+
+<AnalysisRegion />
+
+</Box>
+
+<Box>
+
+### time_zone_usage_for_time_fields
+
+<TimeZoneUsage />
+
+</Box>
+
+<Box>
+
+### default_date
+
+<DefaultDate />
+
+</Box>
+
+<Box>
+
+### breaks
+
+<Breaks />
+
+</Box>
+
+<Box>
+
+### time_units
+
+<TimeUnit vrp />
+
+</Box>
+
+<Box>
+
+### distance_units
+
+<DistanceUnit vrp />
+
+</Box>
+
+<Box>
+
+### time_window_factor
+
+<TimeWindowFactor />
+
+</Box>
+
+<Box>
+
+### spatially_cluster_routes
+
+<ClusterRoutes />
+
+</Box>
+
+<Box>
+
+### route_zones
+
+<RouteZones />
+
+</Box>
+
+<Box>
+
+### route_renewals
+
+<RouteRenewals />
+
+</Box>
+
+<Box>
+
+### order_pairs
+
+<OrderPairs />
+
+</Box>
+
+<Box>
+
+### excess_transit_factor
+
+<ExcessTransitFactor />
+
+</Box>
+
+<Box>
+
+### uturn_policy
+
+<UTurnPolicy />
+
+</Box>
+
+<Box>
+
+### point_barriers
+
+<PointBarrier />
+
+</Box>
+
+<Box>
+
+### line_barriers
+
+<LineBarrier />
+
+</Box>
+
+<Box>
+
+### polygon_barriers
+
+<PolygonBarrier />
+
+</Box>
+
+<Box>
+
+### use_hierarchy_in_analysis
+
+<UseHierarchy />
+
+</Box>
+
+<Box>
+
+### restrictions
+
+<Restrictions />
+
+</Box>
+
+<Box>
+
+### attribute_parameter_values
+
+<AttributeParameterValues />
+
+</Box>
+
+<Box>
+
+### time_impedance
+
+<TimeImpedance />
+
+</Box>
+
+<Box>
+
+### distance_impedance
+
+<DistanceImpedance />
+
+</Box>
+
+<Box>
+
+### impedance
+
+<Impedance />
+
+</Box>
+
+<Box>
+
+### populate_route_lines
+
+<PopulateRouteLines />
+
+</Box>
+
+<Box>
+
+### route_line_simplification_tolerance
+
+<RtLineSimplificationTol />
+
+</Box>
+
+<Box>
+
+### populate_directions
+
+<PopulateDirections VRP />
+
+</Box>
+
+<Box>
+
+### directions_language
+
+<DirectionsLanguage />
+
+</Box>
+
+<Box>
+
+### directions_style_name
+
+<DirectionsStyleName />
+
+</Box>
+
+<Box>
+
+### save_route_data
+
+<SaveRouteData />
+
+</Box>
+
+<Box>
+
+### save_output_layer
+
+<SaveOutputNALayer />
+
+</Box>
+
+<Box>
+
+### populate_stop_shapes
+
+<PopulateStopShapes />
+
+</Box>
+
+<Box>
+
+### output_format
+
+<OutputFormat />
+
+</Box>
+
+<Box>
+
+### context
+
+<Context />
+
+</Box>
+
+<Box>
+
+### overrides
+
+<Overrides />
+
+</Box>
+
+<Box>
+
+### ignore_invalid_order_locations
+
+<IgnoreInvalidOrderLocations VRP />
+
+</Box>
+
+## Response details 
+
+{/* Go to [Response types](xref:///routing-types/#routes-result) for an example of the JSON response object. */}
+
+On successful completion the service returns solution to the specified fleet routing problem. The solution is made up of the following output parameters: 
+
+<Box>
+
+### out_stops
+
+<OutStops />
+
+</Box>
+
+<Box>
+
+### out_routes
+
+<OutRoutes />
+
+</Box>
+
+<Box>
+
+### out_directions
+
+<Directions />
+
+</Box>
+
+<Box>
+
+### out_unassigned_stops
+
+<OutUnassignedStops />
+
+</Box>
+
+<Box>
+
+### out_route_data
+
+<OutputRouteData />
+
+</Box>
+
+<Box>
+
+### out_result_file
+
+<ResultFile />
+
+</Box>
+
+<Box>
+
+### save_output_network_analysis_layer
+
+<OutputNetworkAnalysisLayer />
+
+</Box>
+
+<Box>
+
+### usage_cost
+
+<CostUsage />
+
+</Box>
+
+<Box>
+
+### solve_succeeded
+
+<SolveSucceeded />
+
+</Box>
+
+## Examples
+
+<Note type={"mapping-guide"}>
+
+To build client application [see API reference examples](DEVSITE/documentation/mapping-and-location-services/routing-and-directions/cvehicle-routing-problem/#job-goods-delivery)
+
+</Note>
+
+<Note type={"caution"}>
+
+If you copy and paste the request URL from the examples into a web browser, you need to replace `<yourToken>`  with a valid token. See [Security and authentication](DEVSITE/documentation/security-and-authentication/) to learn more.
+
+</Note>
+
+<Box>
+
+### Service a set of orders with a fleet of vehicles
+
+In this example, you will find the best routes for a fleet of three vehicles, operated by a distribution company, to deliver goods from a distribution center to a set of nine grocery stores. Each store has a specific quantity of demand for the goods, and each truck has a limited capacity for carrying the goods. The main objective is to assign trucks in the fleet a subset of the stores to service and to sequence the deliveries in a way that minimizes the overall transportation costs.
+
+<MoreInfo>
+
+To solve this fleet routing problem, specify the stores as orders, the distribution center as depot, and the three trucks as routes. For orders and depots, the geometries are in the default spatial reference WGS84, so the `spatialReference`  property is not required. 
+
+For the `orders`  parameter, specify the following attributes: 
+
+-   The store name as the `Name`  attribute.
+-   The service time as the `ServiceTime`  attribute.
+-   The total weight of goods to be delivered as the `DeliveryQuantities`  attribute.
+-   The time range in which the store accepts deliveries as the `TimeWindowStart1`  and `TimeWindowEnd1`  attributes.
+-   Since the time windows should not be violated, specify `0`  as the value for the `MaxViolationTime1`  attribute.
+
+For the `depots`  parameter, specify the depot name as the `Name`  attribute and the depot operating time as the `TimeWindowStart1`  and `TimeWindowEnd1`  attributes. 
+
+For the `routes`  parameter, specify the following attributes:
+
+-   The name for each truck as the `Name`  attribute.
+-    The depot name from where the trucks operate as the `StartDepotName`  and `EndDepotName`  attributes.
+
+    <Note type={"caution"}>
+
+    The values for the `StartDepotName`  and `EndDepotName`  attributes need to match with the `Name`  attribute specified for the `depots`  parameter.
+
+    </Note>
+-   The time required to fully load the truck with goods as `StartDepotServiceTime`  attribute.
+-   The trucks can start operating as soon as the depot opens, so you specify the `EarliestStartTime`  and `LatestStartTime`  attributes to have the same values as the `TimeWindowStart1`  attribute for the `depots`  parameter.
+-   The maximum carrying capacity of each truck as the `Capacities`  attribute.
+-   The wage of the truck driver as the `CostPerUnitTime`  attribute.
+-   The average dollar amount spent per mile on fuel consumption, truck depreciation, and maintenance as the `CostPerUnitDistance`  parameter.
+-   The maximum number of stores that can be serviced by a truck as the `MaxOrderCount`  attribute.
+-   The maximum duration of the work shift for the drivers according to the workday constraints as the `MaxTotalTime`  attribute. 
+-   The maximum time a truck can spend driving on the streets as the `MaxTravelTime`  attribute. This considers the need to satisfy the workday constraints and still be able to serve a reasonable number of stores while taking into account the service time needed at a store.
+-   The maximum distance a truck can travel that balances the daily fuel and maintenance costs among the fleet as the `MaxTotalDistance`  attribute.
+
+Since your time-based attribute values, such as `ServiceTime` , `CostPerUnitDistance` , and `MaxTotalTime`  are in minutes, you can use the default value (which is minutes) for the `time_units`  parameter. Similarly, since your distance-based attributes values, such as `CostPerUnitDistance`  and `MaxTotalDistance` , are in miles, you can use the default value (which is miles) for the `distance_units`  parameter. It is difficult for these delivery trucks to make U-turns. Therefore, set the `uturn_policy`  parameter as `NO_UTURNS` . You need to generate driving directions in English for each route, so set the `populate_directions`  parameter to `true`  and the `directions_language`  parameter to `en` . Since you have time windows on orders and depots, you need to specify the `default_date`  parameter. The default values for all the remaining parameters are valid for this problem, and therefore you will not pass those parameters in your request. 
+
+</MoreInfo>
+
+Because you have three routes, you need to select the job request. The first request is to submit a job that returns the job ID.
+
+<Tabs>
+<TabNav slot="tab-nav">
+  <TabTitle is-active>1. Submit job</TabTitle>
+  <TabTitle>2. Check job status</TabTitle>
+  <TabTitle>3. Get out_routes</TabTitle>
+  <TabTitle>4. Get out_stops</TabTitle>
+</TabNav>
+
+<Tab is-active>
+
+**Request**
+
+<If c="publication=='rest/online'">
+<CodeSwitcher>
+  <CodeBlock language="http" source="../../shared/routing/code-samples/responseExample/job/VRP_submit_job.http" group="HTTP" maxLines={20} expandable/>
+</CodeSwitcher>
+</If>
+
+**Response (JSON)**
+
+<CodeBlock language="json" source="../../shared/routing/code-samples/responseExample/job/VRP_submit_job_response.json" maxLines={20} expandable/>
+
+</Tab>
+
+<Tab>
+
+The job ID obtained from the response of the first request can be queried periodically to determine the status of the job.
+
+**Request**
+
+<CodeSwitcher>
+  <CodeBlock language="http" source="../../shared/routing/code-samples/responseExample/job/VRP_query_job_status.http" group="HTTP" maxLines={20} expandable/>
+</CodeSwitcher>
+
+**Response (JSON)**
+
+<Note>
+Because the response is quite verbose, the repeated elements within the response are abbreviated for clarity.
+</Note>
+
+<CodeBlock language="json" source="../../shared/routing/code-samples/responseExample/job/VRP_query_job_status.json" maxLines={20} expandable/>
+
+</Tab>
+
+<Tab>
+
+Because the job succeeded, you can make a request to return the routes from the `out_routes` output parameter.
+
+**Request**
+
+<CodeSwitcher>
+  <CodeBlock language="http" source="../../shared/routing/code-samples/responseExample/job/VRP_out_routes.http" group="HTTP" maxLines={20} expandable/>
+</CodeSwitcher>
+
+**Response (JSON)**
+
+<CodeBlock language="json" source="../../shared/routing/code-samples/responseExample/job/VRP_out_routes.json" maxLines={20} expandable/>
+
+</Tab>
+
+<Tab>
+
+Because the job succeeded, you can make a request to return the orders assigned to routes from the `out_stops` output parameter.
+
+**Request**
+
+<CodeSwitcher>
+  <CodeBlock language="http" source="../../shared/routing/code-samples/responseExample/job/VRP_out_stops.http" group="HTTP" maxLines={20} expandable/>
+</CodeSwitcher>
+
+**Response (JSON)**
+
+<Note>
+Because the response is quite verbose, the repeated elements within the response are abbreviated for clarity.
+</Note>
+
+<CodeBlock language="json" source="../../shared/routing/code-samples/responseExample/job/VRP_out_stops.json" maxLines={20} expandable/>
+
+</Tab>
+
+</Tabs>
+
+</Box>
+
+## Service limits
+
+<If c="publication=='rest/online'">
+
+<Note type={"note"}> 
+
+The service works in all the supported countries as listed in the [data coverage page](/network-coverage). One or more countries are grouped together to form an analysis region. The service can determine the best region to use based on the location of the inputs; otherwise, you can use a parameter to specify a region. The service does not support requests that span more than one region. Consequently, the service will only generate results for inputs that fall within one region. 
+
+</Note>
+
+</If>
+
+<VRPUsageLimit />
+
+## Troubleshooting
+
+<Troubleshooting />

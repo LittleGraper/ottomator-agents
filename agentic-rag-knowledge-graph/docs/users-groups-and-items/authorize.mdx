@@ -1,0 +1,364 @@
+---
+title: "/authorize: Authorize"
+description: "User authorization for OAuth2 authentication flow is described."
+slug: "authorize"
+url: "/authorize"
+guid: "GUID-CF621A2D-9151-4EBB-904D-C3CC2CA67B20"
+migratedTopicMetadata:
+  FTITLE: "Authorize"
+  FDESCRIPTION: ""
+  FCHANGES: "AGOL 23.R01 changes"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "8.1 - *"
+  CREATED-ON: "07/02/2023 13:47:43"
+  FAUTHOR: "svennapoosa"
+  FSTATUS: "Released"
+  MODIFIED-ON: "24/02/2023 12:01:20"
+  VERSION: "13"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-D465415B-23BD-42D3-A7DF-D1018ABA1CF1"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /oauth2/authorize
+  urlSegments:
+    - name: '[root]'
+      url: /root
+    - name: /oauth2/authorize
+  methods: []
+  sslOnly: 'no'
+---
+
+## Example usage
+
+```markdown
+https://www.arcgis.com/sharing/rest/oauth2/authorize
+``` 
+
+## Description
+
+<Note type={"note"}>
+
+The user authorization step of the OAuth2 authentication flow is described below. The overall OAuth2 authentication flow is described in [Authentication](/authentication).
+
+</Note>
+
+Apps that support user logins use OAuth2 to allow users to sign in to the ArcGIS organization through the app. The `authorize` operation represents the login page for users to sign in to their ArcGIS organization. The login page renders an HTML form for the user to enter their credentials.
+
+The user authentication workflow starts with the authorization step. Apps need to direct the browser to the `authorize` endpoint. For the authentication workflow, the `client_id`, `response_type`, and `redirect_uri` parameters are required.
+
+Additional, optional parameters include the `response_type` parameter, which determines whether an implicit or authorization grant is used. Setting the `response_type` as `token` implies an implicit grant, and setting the `response_type` as `code` implies an authorization code grant.
+
+Implicit grants complete the authorization workflow in a single step. The result of successful authentication is an `access_token` value that's delivered to the specified `redirect_uri` value in the URL fragment. For more information, see the [Response](/authorize#sample-responses) section below.
+
+Until recently, implicit grants were used by ArcGIS Online organization home page logins. With the March 2022 release of ArcGIS Online, the organization home page logins were updated to use Proof Key for Code Exchange (PKCE). PKCE is an extension to authorization grant flow and is recommended for all the applications including web applications, rather than implicit grants.
+
+<Note type={"note"}>
+
+Support for PKCE was introduced in 2020 for ArcGIS Online and at version 10.8.1 for ArcGIS Enterprise.
+
+</Note>
+
+Authorization grants are used by mobile, desktop, and server-side applications, and they complete the flow in two steps. Authorization represents the first step of that flow. Successful authorization produces an authorization `code` value that's delivered to the specified `redirect_uri` value as a query parameter. See the [Sample responses](/authorize#sample-responses) section below for details. The second step of the flow requires exchanging the authorization code obtained in the first step for an `access_token` value. This is accomplished by accessing the [token end point](/token) with a `grant_type` of `authorization_code`. It is recommended that you use an authorization grant with PKCE for all applications.
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `client_id` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The ID of the registered application. This is also referred to as APPID.
+
+      Example:
+
+      ```other
+      client_id=GGjeDjEY6kKEiDmX
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `redirect_uri` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The URI where the `access_token` value or authorization `code` value will be delivered upon successful authorization. The URI must match one of the URIs specified during app registration; otherwise, authorization will be rejected. If registered, a special value of \
+      `urn:ietf:wg:oauth:2.0:oob` can also be specified for authorization grants. This will result in the authorization code being delivered to a portal URL (`/oauth2/approval`). This value is typically used by applications that don't have a web server or a custom URI scheme where the code can be delivered.
+
+      Example:
+
+      ```other
+      redirect_uri=https://app.example.com/cb
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `response_type` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The type of grant, either implicit (`token`) or authorization (`code`).
+
+      Values: `token` \| `code`
+
+      Example:
+
+      ```other
+      response_type=token
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `client_secret` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The secret of the registered application. This is also referred to as APPSECRET.
+
+      Example:
+
+      ```other
+      client_secret=57e2f75cd56346bf9d5654c3338a1250
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `code_challenge` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The Base64-URL-encoded SHA256 hash of the client-generated code verifier. The code verifier is a cryptographically random string using the characters A-Z, a-z, 0-9, and the punctuation characters -.\_~ (hyphen, period, underscore, and tilde), between 43 and 128 characters long.
+
+      Clients that cannot perform a SHA256 hash can use the `plain` code verifier string as the `code_challenge`. Using the `plain` code verifier provides less security benefits, so use only when necessary.
+
+      Example:
+
+      ```other
+      code_challenge=abcdsasdf34efghabcdsasdf3aaab234asdf3aaartyrtdsasdf3aa
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `code_challenge_method` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Indicates whether the `code_challenge` value is SHA256 hash or plain text. The default is `plain`.
+
+      If the value is set to `plain`, the authorization server will perform an exact match of the `code_challenge` value and the code challenge verifier. Using `plain` provides less security benefits, so use only when necessary.
+
+      Values: `S256` \| `plain`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `display` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the template used to render the login page. Based on the client platform, you can choose one of the supported templates for the app to render the login page. If not specified, the `default` template is used.
+
+      Values: `default` \| `iframe` \| `win8`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `expiration` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The requested validity, specified in minutes, of the `access_token` value for implicit grants or `refresh_token` value for authorization grants. For implicit grants, the default validity of the `access_token` value is 120 minutes. The `expiration` parameter, if specified, overrides the validity period up to a maximum of 20,160 minutes (two weeks).
+
+      For authorization grants, the default validity of the `access_token` value is 30 minutes and cannot be increased. The default validity of the `refresh_token` value is 20,160 minutes (two weeks). The `expiration` parameter, if specified, overrides the validity period of the `refresh_token` parameter up to a maximum of 90 days.
+
+      Example of two weeks:
+
+      ```markdown
+      expiration=20160
+      ``` 
+
+      <Note type={"note"}>
+
+      Organization administrators can specify the maximum validity period of tokens for their organization that supersedes the `expiration` parameter through the `maxTokenExpirationMinutes` parameter. An `access_token` value can become invalid before it expires, such as when a user changes their password. When it expires or is invalid, an error response similar to the following will be returned:
+
+      ```markdown
+      {
+          "error": {
+              "code": 498,
+              "message": "Invalid Token",
+              "details": []
+          }
+      }
+      ```
+      </Note>
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `locale` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The locale assumed to render the login page. The user's locale can be passed using this parameter. The login page will be rendered using the language corresponding to that locale. If not specified, the locale is based on the organization's setting or on the incoming request.
+
+      Example:
+
+      ```markdown
+      locale=fr
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `state` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      An opaque value used by applications to maintain state between authorization requests and responses. The `state` value, if specified, will be delivered back to the `redirect_uri` value as is. Use this parameter to correlate the authorization request sent with the received response.
+
+      Example:
+
+      ```markdown
+      state=qyxmpg9e5uWUPbxw
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `style` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies, the color scheme used to render the login page regardless of browser or operating system settings. If not specified, the style will follow the browser or OS color scheme if designated. The `light` option is the default style when there is no designation.
+
+      Values: `light` \| `dark`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Sample responses
+
+### Implicit grant
+
+The `access_token` value will be delivered to the specified `redirect_uri` value in the URL fragment.
+
+Example:
+
+`https://app.example.com/cb#access_token=2YotnFZFEjr1zCsicMWpAA&expires_in=3600&state=qyxmpg9e5uWUPbxw` 
+
+`expires_in` represents the token expiration in seconds from now.
+
+### Explicit grant
+
+The authorization `code` value will be delivered to the specified `redirect_uri` value as a query parameter.
+
+Example:
+
+`https://app.example.com/cb?code=KIV31WkDhY6XIWXmWAc6U&state=qyxmpg9e5uWUPbxw` 
+
+If the special value of `urn:ietf:wg:oauth:2.0:oob` is specified for the `redirect_uri` parameter, the authorization code will be delivered to a portal URL (`/oauth2/approval`). This URL will render an HTML page, and the code can be extracted from the `<title>` element of the page. 
+
+Example:
+
+```markdown
+https://www.arcgis.com/sharing/rest/oauth2/approval
+``` 
+
+The `<title>` element of the rendered HTML page will include the following code:
+
+```markdown
+<title>SUCCESS code=KIV31WkDhY6XIWXmWAc6U</title>
+``` 
+
+## Examples
+
+For all examples, assume this endpoint:
+
+```markdown
+https://www.arcgis.com/sharing/rest/oauth2/authorize
+``` 
+
+### Implicit grant
+
+Assume these parameters:
+
+```other
+client_id=GGjeDjEY6kKEiDmX&
+response_type=token&
+redirect_uri=https://app.example.com/cb
+```
+
+### Explicit grant
+
+Assume these parameters:
+
+```other
+client_id=GGjeDjEY6kKEiDmX&
+response_type=code&
+redirect_uri=https://app.example.com/cb
+``` 
+
+#### PKCE flow
+
+Assume these parameters:
+
+```other
+client_id=GGjeDjEY6kKEiDmX&
+response_type=code&
+redirect_uri=https://app.example.com/cb
+code_challenge=asdfasf23423asdfasf234234asdf224asdfasdasdfg456dgffgh
+code_challenge_method=S256
+```
+
+ 

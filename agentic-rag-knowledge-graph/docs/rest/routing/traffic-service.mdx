@@ -1,0 +1,603 @@
+---
+title: "Traffic map service"
+description: "Learn how to work with the traffic map service in ArcGIS Online."
+slug: "traffic-service"
+url: "/routing/traffic-service"
+guid: "GUID-6FC0E1FC-6117-4207-A180-79978060D42C"
+migratedTopicMetadata:
+  FTITLE: "Traffic Service"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "agol072023-*"
+  CREATED-ON: "21/07/2023 16:08:19"
+  FAUTHOR: "pchopra"
+  FSTATUS: "Released"
+  MODIFIED-ON: "29/08/2023 10:33:55"
+  VERSION: "6"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-F0444D0F-C97B-4036-A877-E609C878D9CB"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: "VUSERGROUPARCGISONLINEDOC"
+restInfoMetadata: {}
+---
+
+<CodeSwitcher>
+<CodeBlock language="curl" label="GET">{`GET  https://traffic.arcgis.com/arcgis/rest/services/World/Traffic/MapServer`}</CodeBlock>
+<CodeBlock language="curl" label="POST">{`POST https://traffic.arcgis.com/arcgis/rest/services/World/Traffic/MapServer`}</CodeBlock>
+</CodeSwitcher>
+
+## Description
+You can use the traffic map service to visualize real time traffic speeds and incidents such as accidents, construction sites, or street closures. Traffic visualization displays information about how travel speeds on specific road segments change over time. The traffic incidents in the map service provides the location of the incidents and some attributes such as the severity, the expected start and end time, as well as the description of the incident. The traffic speed and incident data is updated every five minutes.
+
+The traffic map service acts as a good background layer to display the results from Routing services. The traffic data used by the traffic map service is also used by the Routing services when performing analysis. If you want to emphasize why a particular route was returned by the route service, you can display the traffic map along with the route to show areas of traffic congestion that influenced the choice of roads used by the route. 
+
+The traffic data used by the service is updated every five minutes. Each traffic update also includes traffic speed predictions for the next 4 hours. This allows you to visualize traffic for future planning. The service archives the traffic information for up to 4 hours. This allows you to visualize traffic speeds within an 8-hour time window. The traffic incidents are not archived and are refreshed with every update.
+
+Traffic speeds in the service are displayed as a percentage of free-flow speeds, which is typically the speed limit or how fast cars tend to travel when unencumbered by other vehicles. The streets are color coded as follows: 
+
+-   Green (fast): 85—100 percent of free flow speeds
+-   Yellow (moderate)—65 to 85 percent of free flow speeds
+-   Orange (slow)—45 to 65 percent of free flow speeds
+-   Red (stop and go)—0 to 45 percent of free flow speeds
+
+The `IncidentType`  field in the traffic incident layers can have the following values:
+
+-   ACCIDENT
+-   CONGESTION
+-   CONSTRUCTION
+-   DISABLED VEHICLE
+-   LANE_RESTRICTION
+-   MASS TRANSIT
+-   MISCELLANEOUS
+-   OTHER NEWS
+-   PLANNED EVENT
+-   ROAD HAZARD
+-   ROAD_CLOSURE
+-   WEATHER
+
+The `Severity`  field in the traffic incident layers can have the following values:
+
+-   critical
+-   major
+-   minor
+-   low impact
+
+ The `critical`  value indicates a road closure, and `major`  indicates a blockage of multiple lanes. The `minor`  and `low impact`  values indicate incidents that have progressively less impact as compared to incidents with the `major`  value. 
+
+## Work with the traffic web map
+
+A [traffic web map](http://www.arcgis.com/home/item.html?id=BBDCD78953E5439985004023C8EDA03D) is available in ArcGIS Online that can be used to create browser-based and device-based apps that require traffic visualization. The web map includes a streets basemap for reference as well as preconfigured pop-ups for point features that provide additional information about the incidents. You can add other operational layers to the traffic web map and create your own web map or a web mapping app using the configurable templates available from ArcGIS Online. See the [Create apps from maps](http://doc.arcgis.com/en/arcgis-online/create-maps/create-map-apps.htm) topic to learn about the ways you can develop apps using web maps. 
+
+## Work with the traffic map service
+
+The traffic map service is a dynamic map service built on ArcGIS Server technology, so functionality that is listed in the [Map Service](DEVSITE/rest/services-reference/enterprise/map-service.htm) topic is available with the traffic map service. 
+
+The traffic map service can be used with [ArcGIS Maps SDK for JavaScript](https://developers.arcgis.com/javascript/latest/) to create fully customized web mapping apps or with [ArcGIS Maps SDKs for Native Apps](https://developers.arcgis.com/arcgis-runtime/) to build app for desktop and mobile devices. When using the APIs, the URL for the traffic map service is specified as `https://traffic.arcgis.com/arcgis/rest/services/World/Traffic/MapServer` .
+
+You can use the traffic map service to request an image containing traffic visualization for your area of interest at a given time instant. The traffic service generates an image based on the one or more layers from the service that represent the area of interest. The layers in the service represent traffic speeds and traffic incident information for a region. A region is composed of one or more countries that support traffic visualization. The [Data coverage](/network-coverage) topic provides the classification of countries into regions and can be used to determine the region corresponding to the area of interest. 
+
+For each region, the traffic map service contains a layer named Traffic that represents street speeds based on both historical and live traffic where available. Historical traffic is based on the average of observed speeds over the past three years. The traffic map service also contains a layer named Live Traffic that represents only those streets that support live traffic speeds. Depending on your app, you may want to request an image with one of the two layers being visible. For each region that supports traffic incidents, the traffic map service provides three layers representing traffic incidents. The layers become visible at certain map scales and provide symbology that is relevant at the given scale. For example, the Traffic Incidents Overview layer only symbolizes critical and major incidents. However, the Traffic Incidents Detailed layer symbolizes critical, major, minor, and low impact incidents.
+
+To work with the layers in the traffic map service, you must specify the IDs for the layers, not the layer names. The following table lists the IDs for the various layers in the traffic map service:
+
+<StyledTable headers={"Region name,Layer name,Layer ID"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+North America
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Traffic Incidents Overview
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Traffic Incidents Intermediate
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+3
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Traffic Incidents Detailed
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+4
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Live Traffic
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+6
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Traffic
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+7
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+South America
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Traffic Incidents Overview
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+10
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Traffic Incidents Intermediate
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+11
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Traffic Incidents Detailed
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+12
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Live Traffic
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+14
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Traffic
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+15
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Europe
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Traffic Incidents Overview
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+18
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Traffic Incidents Intermediate
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+19
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Traffic Incidents Detailed
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+20
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Live Traffic
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+22
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Traffic
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+23
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Middle East and Africa
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Traffic Incidents Overview
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+26
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Traffic Incidents Intermediate
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+27
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Traffic Incidents Detailed
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+28
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Live Traffic
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+30
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Traffic
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+31
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Asia Pacific
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Traffic Incidents Overview
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+46
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Traffic Incidents Intermediate
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+47
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Traffic Incidents Detailed
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+48
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Live Traffic
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+42
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Traffic
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+43
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+India
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Live Traffic
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+34
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Traffic
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+35
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+South East Asia
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Live Traffic
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+38
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Traffic
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+39
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+<Note type={"note"}>
+
+Do not use the Traffic and Live Traffic layers for the India and South East Asia regions, since the same content is available as part of the Traffic and Live Traffic layers for the Asia Pacific region. The traffic map service default visibility value for these layers is false.
+
+</Note>

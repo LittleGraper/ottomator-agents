@@ -1,0 +1,262 @@
+---
+title: "Data item"
+description: "A data item is a container of data that is registered with the server. The set of data items registered with the server comprises the server's data store."
+slug: "dataitem"
+url: "/dataitem"
+guid: "GUID-58C1276A-42D8-45CC-8C31-2F711E77A25F"
+migratedTopicMetadata:
+  FTITLE: "dataItem"
+  FDESCRIPTION: ""
+  FCHANGES: "Chaging this topic to be in the REST API template style and use as the Data Item resource topic"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2- *"
+  CREATED-ON: "05/07/2023 10:16:11"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "25/09/2023 20:54:49"
+  VERSION: "9"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "6"
+  ED: "GUID-53496BE2-CCD2-4E98-93FF-64130B3CF3D9"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /data/items/<dataItemType>/<dataItem>
+  urlSegments:
+    - name: <root>
+      url: /site
+    - name: /data/items/<dataItemType>/<dataItem>
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '10.1'
+  requiredCapabilities:
+    - name: Access allowed with any authorized privilege
+      url: /managing-access-to-the-server-administration-rest-api
+---
+
+## Description
+
+A resource for an individual data item returns information for specific data registered with the server. The set of data items registered with the server comprises the server's data store.
+
+A data item contains all the information required by the server to connect to a folder or database while serving out one or more GIS services. Data items are extensively used while publishing GIS services to the server, as they inform the publishing client (such as ArcGIS Pro) whether the data needs to be explicitly copied to the server or whether it can be referred from the server. The server supports the following types of data items:
+
+- Enterprise databases—Each of these data items represents an enterprise database that can contain an Esri geodatabase.
+- Big data file shares—**Deprecated at ArcGIS Enterprise 11.4.** Big data file share data items are network-accessible file system folders, Apache Hadoop Distributed File System (HDFS) or Apache Hive stores, or cloud stores that contain one or more datasets. Big data file share items are the inputs to analysis using GeoAnalytics Server.
+- Cloud stores—Cloud store data items represent a connection to an Amazon or Microsoft Azure store.
+- Raster stores—These are network-accessible file system folders or cloud stores that are output stores for raster analysis.
+- File shares—File share data items are network-accessible file system folders that contain one or more datasets.
+- Object store—Starting at 11.4, an object store is required as part of the base deployment for ArcGIS Enterprise. Organizations deploying ArcGIS Enterprise using Amazon Web Serivces (AWS) should deploy an object store using Amazon S3. Organizations deploying ArcGIS Enterprise using Microsoft Azure should deploy an object store using Azure Blob Storage.
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Response properties
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `path` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A unique identifier for each data item when it's registered with the server.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `type` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the type of the data item.
+
+      Values: `folder` | `egdb` | `bigDataFileShare` | `cloudstore` | `rasterStore`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `clientPath` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The client path for replicated folders.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `info` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object containing the connection string or file system path to the data item:
+
+      - `path`—The file system path to the data item.
+      - `clientConnectionString`—The connection string for the client to connect to a shared enterprise database.
+      - `connectionString`—The connection string for ArcGIS Server to connect to an enterprise database.
+      - `dataStoreConnectionType`—Indicates to the server whether the data item is `shared`, `replicated`, or `server` only.
+      - `isManaged`—Set to `true` if `dataStoreConnectionType` is set to `server`, indicating that the data store is managed by ArcGIS Server. Otherwise, `isManaged` is set to `false` by default.
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample request URL used to access an individual data item resource, demonstrating a data item URL for a big data file share:
+
+```markdown
+https://machine.domain.com/webadaptor/admin/data/bigDataFileShares?f=pjson
+```
+
+## JSON Response syntax
+
+The following is a sample JSON response for a data item. The exact JSON response returned from a data item resource depends on the type of data item being inspected.
+
+```javascript
+{
+  "path": "<unique path on the server>",
+  "type": "<folder|egdb|bigDataFileShare|cloudstore|rasterStore>", 
+  "clientPath": "<client paths for replicated folders>",
+  "info": {
+    "path": "<path to the folder>",
+    "clientConnectionString": "<connection string for client to connect to shared enterprise database>",
+    "connectionString": "<connection string for server to connect to enterprise database>",
+    "dataStoreConnectionType": "<shared|replicated|serverOnly>",
+    "isManaged": <true|false>
+  }
+}
+```
+
+## JSON Response example
+
+The sections below demonstrate the format of various data items supported by ArcGIS Server.
+
+### Enterprise database
+
+The example response below demonstrates a data item in which the publisher and ArcGIS Server are using different databases:
+
+```javascript
+{
+  "path": "/enterpriseDatabases/egdb_replicated",
+  "type": "egdb",
+  "id": "bca5e5cb-1bdb-4e22-878d-583a9c29a3a5",
+  "provider": "ArcGIS Data Store",
+  "totalRefCount": 0,
+  "info": {
+    "isManaged": false,
+    "connectionString": "ENCRYPTED_PASSWORD_UTF8=00022e684b754f4f38634b4f7a613951525a61737933442b77673d3d2a00;ENCRYPTED_PASSWORD=00022e6879685a4a542b6f64422f2f75416c44584a6a2f4341773d3d2a00;SERVER=aspen;INSTANCE=sde:postgresql:aspen;DBCLIENT=postgresql;DB_CONNECTION_PROPERTIES=aspen;DATABASE=pglakehume;USER=sde;VERSION=sde.DEFAULT;AUTHENTICATION_MODE=DBMS",
+    "dataStoreConnectionType": "replicated",
+  }
+}
+```
+
+### Cloud store
+
+The example response below demonstrates a Microsoft Azure cloud store data item:
+
+```javascript
+{
+  "path": "/cloudStores/test-blob",
+  "type": "cloudStore",
+  "id": "76775886-475c-4dce-804e-f2a4d1b0f8c4",
+  "provider": "azure",
+  "info": {
+    "isManaged": false,
+    "connectionString": "{\"accountKey\":\"<myAccountKey>\",\"accountName\":\"<myAccountName>\",\"defaultEndpointsProtocol\":\"https\",\"accountEndpoint\":\"core.windows.net\",\"credentialType\":\"<myAccessKey>\"}",
+    "objectStore": "blobtestContainer/Data"
+  }
+}
+```
+
+### Raster store
+
+The example response below demonstrates a raster store item with a `dataStore`  connection type:
+
+```javascript
+{
+  "path": "/rasterStores/rasterStoreAzure",
+  "type": "rasterStore",
+  "id": "289c689d-6905-4efd-a7ca-82d6fbb7b1ed",
+  "info": {
+    "connectionString": "{\"path\":\"/cloudStores/AzureTest\"}",
+    "connectionType": "dataStore"
+  }
+}
+```
+
+### File shares
+
+The example response below demonstrates a data item in which the folder for the publisher and ArcGIS Server use the same shared path:
+
+```javascript
+{
+  "path": "/fileShares/dlsDataStore_shared",
+  "type": "folder",
+  "id": "469b09033859489a9506871215d6505a",
+  "info": {
+    "isManaged": false,
+    "dataStoreConnectionType": "shared",
+    "path": "\\\\machine\\dlsDataStore",
+    "portalProperties": {"itemID": "469b09033859489a9506871215d6505a"}
+  }
+}
+```
+
+### Object store
+
+The example response below demonstrates a cloud-provided object store that uses IAM role authentication:
+
+```other
+{
+  "path": "/cloudStores/AS3_objecstore",
+  "type": "objectStore",
+  "provider": "amazon",
+  "info": {
+    "isManaged": true,
+    "systemManaged": false,
+    "isManagedData": true,
+    "category": "storage",
+    "purposes": [
+      "feature-tile",
+      "scene"
+    ],
+    "objectStore": "cache-us-west-2/services",
+    "connectionString": "{\"credentialType\":"\IAMRole\",\"regionEndpointUrl\":\"<myPrivateRegionEndpointUrlinS3>\",\"defaultEndpointsProtocol\":\"https\",\"region\":\"us-west-2\"}"
+  }
+}
+
+```

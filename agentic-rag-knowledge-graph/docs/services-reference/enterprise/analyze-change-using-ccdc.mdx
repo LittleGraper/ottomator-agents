@@ -1,0 +1,314 @@
+---
+title: "Analyze Changes Using CCDC"
+description: "The AnalyzeChangesUsingCCDC task evaluates changes in pixel values over time using the CCDC algorithm, and generates a multidimensional raster containing the model results."
+slug: "analyze-change-using-ccdc"
+url: "/analyze-change-using-ccdc"
+restInfoMetadata:
+  apiPath: /System/RasterAnalysisTools/GPServer/AnalyzeChangesUsingCCDC
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /System/RasterAnalysisTools/GPServer/AnalyzeChangesUsingCCDC
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '10.8.1'
+---
+
+![Analyze Changes Using CCDC diagram](./images/analyze-change-using-ccdc.png)
+
+
+## Description
+
+The `AnalyzeChangesUsingCCDC` task evaluates changes in pixel values over time using the CCDC algorithm, and generates a multidimensional raster containing the model results.
+
+
+<Note>
+
+As of 10.5.1, you must license your ArcGIS Server as an ArcGIS Image Server to use this resource.
+
+</Note>
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `inputMultidimensionalRaster`
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The Portal Item ID, Image Service URL, cloud multidimensional raster dataset or shared multidimensional raster dataset.
+
+      Syntax: JSON object describes the input multidimensional raster. At least one type of input needs to be provided in the JSON object. If multiple inputs are given, the `itemid` takes the priority.
+
+      Example:
+
+      ```other
+      {"itemId": <portal item id>} 
+      {“url”: <image service url>}
+      {“uri”: <cloud raster uri or shared data path>}
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `outputName`
+      
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Output hosted image service properties. If the hosted image service is already created, the portal item ID or service URL can be given to the service tool. The output path of the multidimensional raster dataset generated in the raster store will be used to update the existing service definition. The service tool can also generate new hosted image service with the given service properties.
+
+      The output hosted image service is stored in raster store and shared on either the Raster Analysis Image Server or Image Hosting Image Server depending on the Enterprise configuration.
+
+      Syntax: JSON object describes the output multidimensional raster. At least one type of input needs to be provided in the JSON object. If multiple inputs are given, the `itemId` takes priority.
+
+      <Note>
+
+      Set `image,metadata` as image service capabilities to make sure the output image service can be recognized as multidimensional by other raster analysis tools.
+
+      </Note>
+
+      ```other
+      outputName={"itemId": <portal item id>}
+      outputName={“url”: <image service url>}
+      outputName={“uri”: <cloud raster uri or shared data path>}
+      or
+      {
+        "serviceProperties": {
+          “name”: ”aggregated_watertemp_salinity”,
+          ”capabilities”: ”image, metadata”
+        }
+      }
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `bandsForDetectingChange`
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The band IDs to use for change detection. If no band IDs are provided, all the bands from the input raster dataset will be used.
+
+      Syntax: List of band IDs
+
+      Example:
+
+      ```other
+      bandsForDetectingChange=[1,2,3,4,6]
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `bandsForTemporalMasking`
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The band IDs of the green band and the SWIR band, to be used to mask for cloud, cloud shadow and snow. If band IDs are not provided, no masking will occur.
+
+      Syntax: List of band IDs
+
+      Example:
+
+      ```other
+      bandsForTemporalMasking=[1,4]
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `chiSquaredThreshold`
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The chi-square change probability threshold. If an observation has a calculated change probability that is above this threshold, it is flagged as an anomaly, which is a potential change event. The default value is 0.99.
+
+      Syntax: Double representing the chi-square threshold.
+
+      Example
+
+      ```other
+      chiSquaredThreshold=0.99
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `minAnomalyObservations`
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The minimum number of consecutive anomaly observations that must occur before an event is considered a change. A pixel must be flagged as an anomaly for the specified number of consecutive time slices before it is considered a true change. The default value is 6.
+
+      Syntax: Integer representing the minimum consecutive anomaly observations
+
+      Example:
+
+      ```other
+      minAnomalyObservations=6
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `updateFrequency`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The frequency, in years, at which to update the time series model with new observations. The default value is 1.
+
+      Syntax: Double representing the frequency.
+
+      Example
+
+      ```other
+      updateFrequency=1
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `context`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Contains additional settings that affect task execution. This task has the following settings:
+
+      * [Extent](/extent-ra) (`extent`)—A bounding box that defines the analysis area.
+      * [Output Spatial Reference](/output-spatial-reference) (`outSR`)—The output raster will be projected into the output spatial reference.
+      * [Snap Raster](/snap-raster) (`snapRaster`)—The output raster will have its cells aligned with the specified snap raster.
+      * [Cell Size](/cell-size) (`cellSize`)—The output raster will have the resolution specified by cell size.
+      * [Parallel Processing Factor](/parallel-processing-factor) (`parallelProcessingFactor`)—The specified number or percentage of processes will be used for the analysis.
+
+      Example:
+
+      ```other
+      context={"cellSize": "20", "parallelProcessingFactor": "4"}
+      
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Response
+
+When you submit a request, the task assigns a unique job ID for the transaction.
+
+Syntax:
+
+```other
+{ "jobId": "<unique job identifier>", "jobStatus": "<job status>" }
+
+```
+
+After the initial request is submitted, you can use the `jobId` to periodically check the status of the job and messages, as described in [Checking job status](/checking-job-status). Once the job has successfully completed, use the `jobId` to retrieve the results. To track the status, you can make a request of the following form:
+
+```other
+https://<analysis-url>/AnalyzeChangesUsingCCDC/jobs/<jobId>
+
+```
+
+## Accessing results
+
+When the status of the job request is `esriJobSucceded`, you can access the results of the analysis by making a request of the following form:
+
+```other
+https://<raster analysis url>/AnalyzeChangesUsingCCDC/jobs/<jobId>/results/outputCCDCAnalysisRaster?token=<your token>&f=json
+
+```
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `outputMultidimensionalRaster`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The output multidimensional raster `itemId` and URL
+
+      Example:
+
+      ```other
+      {"url": "http://<raster analysis url>/AnalyzeChangesUsingCCDC/jobs/<jobId>/results/outputCCDCAnalysisRaster"}
+
+      ```
+
+      The result has properties for parameter name, data type, and value. The content of the value is always the output raster dataset's `itemId` and image service URL.
+
+      ```other
+      {
+        "paramName": "outputCCDCAnalysisRaster",
+        "dataType": "GPString",
+        "value": {
+          "itemId": "c267610d0feb4370bf38cc6e2c4ac261",
+          "url": "https://<server name>/arcgis/rest/services/Hosted/<service name>/ImageServer"
+        }
+      }
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+

@@ -1,0 +1,1946 @@
+---
+title: "Apply Edits (Feature Service)"
+description: "This operation returns an array of edit results for each layer/table edited."
+slug: "apply-edits-feature-service"
+url: "/apply-edits-feature-service"
+guid: "GUID-FCF2DF69-AD53-456A-9C8E-FAF9FBFF0060"
+migratedTopicMetadata:
+  FTITLE: "Apply Edits (Feature Service)"
+  FDESCRIPTION: ""
+  FCHANGES: "Removing i from wkit"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1- *"
+  CREATED-ON: "27/04/2023 12:34:54"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "06/06/2023 14:01:28"
+  VERSION: "19"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-62E8317F-F4C6-4B36-95EB-D304AE6D623B"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/FeatureServer/applyEdits
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/FeatureServer/applyEdits
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.1'
+  requiredCapability: Create, Update, Delete. Create required to add features, Update required to update features, and Delete required to delete features.
+---
+
+import GUID_B11F5B4A_2241_4615_8A92_D9EFC9003B5B_GUID_C605A495_034C_41D9_88EE_D4B2184913D4 from "./snippets/GUID-B11F5B4A-2241-4615-8A92-D9EFC9003B5B/_GUID-C605A495-034C-41D9-88EE-D4B2184913D4";
+
+## Description
+
+The `applyEdits`  operation applies edits to features associated with multiple layers or tables in a single call (POST only). This operation is performed on a [ feature service resource](/feature-service). The result of this operation is an array of edit results for each layer/table edited. Each edit result identifies a single feature on a layer or table and indicates whether the edits were successful or not. If an edit is not successful, the edit result also includes an [ error code](/feature-service-error-codes) and an error description. 
+
+Starting at version 10.6, services can be published from enterprise geodatabase layers that have [ attribute rules](https://pro.arcgis.com/en/pro-app/latest/help/data/geodatabases/overview/an-overview-of-attribute-rules.htm). Attribute rules are applied to the back end datasets and fire when edits are applied. Types of attribute rules include calculation rules which automatically apply a calculated value to a field as well as constraint rules which will cause an edit to return an error if the constraint is violated. See the constraint rule violate JSON response examples below.
+
+Starting at 10.6.1, functionality has been added to support splitting features. The split operation can be combined with adds, updates, and deletes if needed. See the JSON example below for the split syntax and a response example. 
+
+<Note type={"note"}>
+
+Hosted feature services support adding or updating BLOB column values in Base64.
+
+</Note>
+
+<Note type={"note"}>
+
+Any geometry edits made to the service are validated with OGC standards.
+
+</Note>
+
+Starting at 10.8, the `returnServiceEditsInSourceSR`  parameter can be used when the `returnServiceEditsOption`  is set to `originalAndCurrentFeatures`  and the layer property `supportsReturnServiceEditsInSourceSR`  in `advanceEditingCapabilities`  (layer property) is set to `true` .
+
+### New at 11.4
+
+- This operation now supports `pbf` as an upload format for applying edits. A new parameter, `editsUploadFormat`, has been added to specify the format of the uploaded file specified in the `editsUploadId` parameter. Support for pbf is indicated when the service-level `advancedEditingCapabilities` property, under `supportedApplyEditsUploadIDFormats`, lists `PBF` as a value.
+- Reference feature services now support applying edits as pbf with control points.
+
+### New at 11.3
+
+- Four new field types are now supported: `esriFieldTypeTimeOnly`, `esriFieldTypeDateOnly`, `esriFieldTypeTimestampOffset`, `esriFieldTypeBigInteger`.
+- Reference feature services will return control points in the JSON response from query results and accept features with control points when applying edits. Control points are special vertices used to apply symbol effects to line or polygon features. Geometries are persisted in the geodatabase with an identifier as to whether each vertex is a control point.
+
+## New at 11.1
+
+-    This operation now includes the `editsUploadId`  parameter. Support for the new parameter is indicated when the service-level `supportsApplyEditsbyUploadID`  property, under `advancedEditingCapabilities` , is set to `true` .
+
+    <Note type={"note"}>
+
+    The service-level `supportedApplyEditsUploadFormats`  properties, under `advancedEditingCapabilities` , indicate which formats can be used for the edits in the uploaded file.
+
+    </Note>
+-    For non-hosted feature services referencing an enterprise geodatabase, the `async`  parameter now uses a geoprocessing service, which allows for longer running operations.
+-    For hosted feature services, a field's default value is now applied when a row is added with no provided value when using either this operation or [Append](/append-feature-service).
+
+    <Note type={"note"}>
+
+    This enhancement matches behavior already present for ArcGIS Online hosted feature services and ArcGIS Enterprise non-hosted feature services.
+
+    </Note>
+
+## New at 11.0
+
+-   ArcGIS Enterprise hosted feature services now support the `async`  parameter.
+-   A new parameter, `returnEditResults` , was introduced at this release. When set to `false` , `applyEdits`  only returns a response of the following form:
+
+    ```javascript
+    {"success": <true|false>}
+    ```
+
+     The `returnEditResults`  parameter can be set to `false`  only when `rollbackOnFailure`  is set to `true` . Support for this new parameter is indicated by a feature service having the service-level `supportsReturnedEditResults`  property, under `advancedEditingCapabilities` , set as `true` . At this release, `returnEditResults`  is supported by hosted feature services.
+
+## New at 10.9.1
+
+The service-level `applyEdits`  operation for hosted feature service in ArcGIS Online, and non-hosted feature service in ArcGIS Enterprise, includes an option to process requests asynchronously. This option is ideal for longer running edit operations that may timeout otherwise. The `async`  parameter can be used if the service resource has the `supportsAsyncApplyEdits`  service property as `true`  (found under `advancedEditingCapabilities` ).
+
+## New at 10.9
+
+A new parameter, `timeReferenceUnknownClient` , has been added at 10.9. Setting `timeReferenceUnknownClient`  as `true`  indicates that the client is capable of working with date field data values that are not in UTC. For more information on this parameter, see the table below.
+
+
+## Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `edits` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON array of layers and edits to be applied. Edits cannot be from a mix of nonversioned and traditional versioned layers or a mix of nonversioned and branch versioned layers. Edits to nonversioned layers must be applied separately from edits to traditional versioned or branch versioned layers. Features to be added or updated to a feature layer should include the [geometry](/feature-object). Records to be added or updated to a table should not include the geometry. To learn more about how to format the edit JSON array, see [Using globalIds and split in edits](/apply-edits-feature-service#using-globalids-and-splits-in-edits).
+
+      ```other label=Example
+      [
+        {
+          "id" : 0,
+          "adds" : [
+            {
+              "geometry" : {
+                  "x": -143.501,
+                  "y": 57.043000000000006
+              },
+              "attributes": {
+                "datetime": 1272210710000,
+                "depth": 31.100000000000001,
+                "region": "Andreanof Islands, Aleutian Islands, Alaska" 
+              } 
+            },
+            {
+              "geometry": {
+                "x": -72.865099999999927,
+                "y": -37.486599999999953 
+              },
+              "attributes": {
+                "datetime": 1272210142999,
+                "depth": "40.x",
+                "region": "Bio-Bio, Chile" 
+              } 
+            } 
+          ],
+          "updates": [
+            {
+              "geometry": {
+                "x": -149.450,
+                "y": 60.120 
+              },
+              "attributes": {
+                "OBJECTID": 50,
+                "datetime": 1272210710000,
+                "region": "Andreanof Islands, Aleutian Islands, Alaska" 
+              } 
+            } 
+          ],
+          "deletes": [
+            19,23 
+          ] 
+        },
+        {
+          "id": 1,
+          "deletes": [
+            34,44 
+          ] 
+        } 
+      ]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `gdbVersion` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Sets the geodatabase version to apply the edits. Values for this parameter can be either a traditional version or a branch version. This parameter applies only if the `isDataVersioned` layer-level property is `true`. If the `gdbVersion` is not specified, edits are made to the published map's version.
+
+      ```other label=Syntax
+      gdbVersion=<version>
+      ```
+
+      ```other label=Example
+      gdbVersion=SDE.DEFAULT
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `honorSequenceOfEdits` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This parameter specifies whether to apply edits in the order they are submitted in the JSON. If `true`, edits will apply in the submitted order. If `false`, which is the default, edits will apply in ascending layer-ID order. All the edits for the layer with the lowest ID will apply first.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `returnEditMoment` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies whether the response will report the time edits were applied. If set to `true`, the server will return the time edits were applied in the response's `editMoment` key.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `rollbackOnFailure` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies if the edits should be applied only if all submitted edits succeed. If `false`, the server will apply the edits that succeed, even if some of the submitted edits fail. If `true`, only the edits that succeed will be applied. The default value is `true`.
+
+      <Note type={"note"}>
+
+      Not all data supports this parameter. To verify support for this parameter, query the `supportsRollbackonFailureParameter` layer-level property. If the layer-level `supportsRollbackonFailureParameter` property is `false`, then `rollbackOnFailure` will be treated as if it was set to `true`, regardless of the input. If the layer-level `supportsRollbackonFailureParameter` property is `true`, the value set for `rollbackOnFailure` will be honored on edit operations. The `supportsRollbackOnFailureParameter` property will always be `true` if the published data is nonversioned, or nonversioned with archiving enabled with no composite relationships or attachments.
+
+      </Note>
+
+      <GUID_B11F5B4A_2241_4615_8A92_D9EFC9003B5B_GUID_C605A495_034C_41D9_88EE_D4B2184913D4 />
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `useGlobalIds` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      When set to `true`, additions, updates, or deletions for all layers in the edit parameter are identified by their `globalId`. The service adds the new features and attachments while preserving the `globalIds` submitted in the payload. If the `globalId` of a feature or attachment collides with pre-existing features or attachments, that addition fails. Other additions, updates, or deletions are attempted if `rollbackOnFailure` is set to `false`. If `rollbackOnFailure` is `true`, the whole operation will fail when any failure occurs, including a `globalId` collision. The default value is `false`.
+
+      <Note type={"note"}>
+
+      This requires the service's [supportsApplyEditsWithGlobalIds](/feature-service) property be set to `true`.
+
+      </Note>
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `trueCurveClient`
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Indicates to the server whether the client is true curve capable. When set to `true`, this indicates to the server that true curve geometries should be downloaded and that geometries containing true curves should be consumed by the feature service without converting those curves to densified polylines or polygons. When set to `false`, this indicates to the server that the client is not true curves capable and that curves should be converted to densified polylines or polygons. The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sessionID` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This is set by a client during long transaction editing on a branch version. The `sessionID` is a GUID value that clients establish at the beginning and use throughout the edit session. The `sessionID` ensures isolation during the edit session.
+
+      ```other label=Example
+      sessionID={E81C2E2D-C6A7-40CB-BF61-FB499E53DD1D}
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `usePreviousEditMoment` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This is set by a client during long transaction editing on a branch version. This parameter is used to apply the edits with the same edit moment as the previous set of edits. This allows an editor to apply a single block of edits partially, complete another task, and then complete the block of edits. When set to `true`, the edits are applied with the same edit moment as the previous sets of edits. When set to `false` the edits are applied with a new edit moment. By default, this parameter is set to `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `returnServiceEditsOption` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This parameter returns features edited due to the geodatabase behavior that results from applying the edits. For example, if a feature is deleted and it is the origin in a composite relationship, the destination feature is automatically deleted in the geodatabase. If set to `originalAndCurrentFeatures`, the deleted destination feature is returned along with a reference to the deleted origin feature in the response. Note that even for deletions, the geometry and attributes of the edited feature are returned. The `originalAndCurrentFeatures` option is only valid when `rollBackOnFailure` is `true`. The default response is `none`, which will not include `editedFeatures`.
+
+      Values: `none` | `originalAndCurrentFeatures`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `datumTransformation` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8. This parameter applies a datum transformation while projecting input geometries from their spatial reference to the layer's source spatial reference. When specifying transformations, you need to think about which datum transformation is best for this projection. For a list of valid datum transformation ID values and well-known text strings, see [Using spatial references](/using-spatial-references). For more information on datum transformations, see the transformation parameter in the [Project](/project) operation.
+
+      <Note type={"note"}>
+
+      The `datumTransformation` parameter may be used if the `supportsDatumTransformation` feature service property is set to `true`.
+
+      </Note>
+
+      ```other label=Example
+      //Syntax to apply a simple transformation
+      datumTransformation=<wkid>
+
+      //Syntax to apply a simple transformation
+      datumTransformation={"wkt": "<WKT>"}
+
+      //Syntax to apply a composite transformation
+      datumTransformation={
+        "geoTransforms": [
+          {
+            "wkid": <id>,
+            "forward": <true|false>
+          },
+          {
+            "wkt": "<WKT>",
+            "forward": <true|false>
+          }
+        ]
+      }
+      ```
+
+      ```other label=Example
+      //Applies a simple transformation
+      datumTransformation=1623
+
+      //Applies a composite transformation
+      datumTransformation={
+        "geoTransforms":[
+          {
+            "wkid":1088,
+            "transformForward": true
+          },
+          {
+            "wkt": "GEOGTRAN[\"S_JTSK_To_WGS_1984_1\",GEOGCS[\"GCS_S_JTSK\",
+              DATUM[\"D_S_JTSK\",SPHEROID[\"Bessel_1841\",6377397.155,299.1528128]],
+              PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],
+              GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",
+              SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],
+              UNIT[\"Degree\",0.0174532925199433]],METHOD[\"Position_Vector\"],
+              PARAMETER[\"X_Axis_Translation\",570.8],PARAMETER[\"Y_Axis_Translation\",85.7],
+              PARAMETER[\"Z_Axis_Translation\",462.8],PARAMETER[\"X_Axis_Rotation\",4.998],
+              PARAMETER[\"Y_Axis_Rotation\",1.587],PARAMETER[\"Z_Axis_Rotation\",5.261],
+              PARAMETER[\"Scale_Difference\",3.56]]",
+            "transformForward":false
+          }
+        ]
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `returnServiceEditsInSourceSR` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This parameter can be used when the `returnServiceEditsOption` is set to `originalAndCurrentFeatures` and the layer property, `supportsReturnServiceEditsInSourceSR` (in `advancedEditingCapabilities`) is set to `true`.
+
+      When this parameter is set to `true`, edits returned by the return service edits option will be in the source spatial reference of the layer they belong to. See the layer's metadata for it's `sourceSpatialReference` property. Returning service edits in the source spatial reference potentially prevents clients from having to project client side.
+
+      Values: `true` | `false` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `timeReferenceUnknownClient` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Setting `timeReferenceUnknownClient` as `true` indicates that the client is capable of working with data values that are not in UTC. If its not set to `true`, and the service layer's `datesInUnknownTimeZone` property is `true`, then an error is returned. The default is `false`.
+
+      Its possible to define a service's time zone of date fields as unknown. Setting the time zone as unknown means that date values will be returned as-is from the database, rather than as date values in UTC. Non-hosted feature services can be set to use an unknown time zone using [ArcGIS Server Manager](https://enterprise.arcgis.com/en/server/latest/publish-services/windows/edit-map-service-settings.htm#LI_A5825E4A9A3A42E991C662CD7B76A860). Setting the time zones to unknown also sets the `datesInUnknownTimeZone` layer property as `true`. Currently, hosted feature services do not support this setting. This setting does not apply to editor tracking date fields which are stored and returned in UTC even when the time zone is set to unknown.
+
+      Most clients released prior to ArcGIS Enterprise 10.9 will not be able to work with feature services that have an unknown time setting. The `timeReferenceUnknownClient` parameter prevents these clients from working with the service in order to avoid problems.. Setting this parameter to `true` indicates that the client is capable of working with unknown date values that are not in UTC.
+
+      <Note type={"note"}>
+
+      ArcGIS Pro 2.7 or newer can work with these feature services.
+
+      </Note>
+
+      Value: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      New at 10.9.1. The `async` parameter can be used if the service resource has the `supportsAsyncApplyEdits` property as `true` (found under `advancedEditingCapabilities`). If `true`, the request is processed as an asynchronous job, and a URL is returned that a client can visit to check the status of the job (`statusUrl`). The default value is `false`. For more information, see the topic on [asynchronous](/asynchronous-operations) usage.
+
+      The `status` and `resultUrl` properties are returned when checking the status of a job. However, the other [asynchronous](/asynchronous-operations) properties may not be returned by all services. Once the status is `COMPLETED`, a `resultUrl` is provided that returns responses matching the JSON response examples below.
+
+      Async `applyEdits` is meant to be used for longer running edit operations that may timeout in synchronous mode while the client is waiting for a response. For much larger and longer running processes, it is recommended that other operations, such as `append`, are used instead of `applyEdits`. For ArcGIS Enterprise non-hosted feature services, the async process is subject to the feature service timeout settings. For example, if the maximum time a client can use a service is 10 minutes, the async process will run up to 10 minutes. The number of instances configured per machine will also be shared by both synchronous and asynchronous calls.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `returnEditResults` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.0. Determines whether the request returns results per edit or a standard success response. When set to `false` , the request will only return a success message of either true or false.
+
+      The `returnEditResults` parameter can only be set to `false` when `rollbackOnFailure` is set to `true`. When `returnEditResults` is set to `true`, the request returns results per edit. The default value is `true`.
+
+      <Note type={"note"}>
+
+      This parameter is only supported for feature services that have the service-level `supportsReturnEditResults` property, under `advancedEditingCapabilities`, set as `true`.
+
+      </Note>
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `editsUploadId` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at ArcGIS Enterprise 11.1 for hosted and non-hosted feature services.
+
+      This parameter references an upload ID from an uploaded file containing service edits. This parameter provides the option to pre-upload edits to the ArcGIS Server and reference them through this parameter, rather than provide edits in-line with the `edits` parameter. The input for `editsUploadId` is the ID returned after performing the `upload` operation. If both `edit` and `editsUploadId` are included in a request, this parameter will take precedence.
+
+      <Note type={"note"}>
+
+      Support is for this parameter is indicated when the service-level `supportsApplyEditsbyUploadID` property, under `advancedEditingCapabilities`, is `true`. Supported formats for the file containing service edits are listed in the service-level `supportedApplyEditsUploadIDFormats` property, under `advancedEditingCapabilities`. For example, when JSON is listed as a supported upload format, the content of the file can be in JSON format. Starting at ArcGIS Enterprise 11.4, pbf is also a supported format.
+
+      </Note>
+
+      ```other label=Syntax
+      uploadId=<uploadID>
+      ```
+
+      ```other label=Example
+      uploadId=ibfd0aa4c-f40e-4554-b499-829bcfa2711a
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `editsUploadFormat`
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.4. Specifies the format of the uploaded file specified in the `editsUploadId` parameter. If this parameter is not included in the request, the format is assumed to be `json`. The default value is `json`.
+
+      Values: `json` | `pbf`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+ 
+
+## Using globalIds and splits in edits
+
+If `useGlobalIds`  is `true` , the features are added while preserving their `globalIds` . For new features and attachments, the client must generate a `globalId` . In order for a feature or attachment to be updated or deleted, clients must include its `globalId` . If `useGlobalIds`  is `false`  (default), `globalIds`  submitted with the features are ignored and new `globalIds`  are assigned when features are added. In order for a feature to be updated or deleted, the [ attributes property](/feature-object) of the feature must include the object ID of the feature along with the other attributes. Attachments are not supported as an edit payload when `useGlobalIds`  is false.
+
+Syntax when `useGlobalIds`  is `true` 
+
+```javascript
+[
+  {
+    "id": <layerId1>,
+    "adds": [<feature1>, <feature2>],
+    "updates": [<feature1>, <feature2>],
+    "deletes": [<GlobalID1>, <GlobalID2>],
+    "attachments: {
+      "adds": [<attachment1>,  <attachment2>],
+      "updates": [<attachment1>,  <attachment2>],
+      "deletes": ["<attachmentGlobalId1>", "<attachmentGlobalId2>"]
+    }
+  },
+  { 
+    "id": <layerId2>,
+    ...
+  }  
+]
+```
+
+ 
+
+Example when `useGlobalIds`  is `true` 
+
+```javascript
+[
+  {
+    "id": 0,
+    "adds": [
+      {
+        "geometry": {
+          "x": -118.15,
+          "y": 33.8
+        },
+        "attributes": {
+          "OWNER": "Joe Smith",
+          "VALUE": 94820.37,
+          "APPROVED": true,
+          "LASTUPDATE": 1227663551096,
+          "GlobalID": "{74100804-E229-49b8-8CDC-9B5D3EF03EDA}"
+        }
+      },
+      {
+        "geometry": {
+          "x": -118.37,
+          "y": 34.086
+        },
+        "attributes": {
+          "OWNER": "John Doe",
+          "VALUE": 17325.9,
+          "APPROVED": false,
+          "LASTUPDATE": 1227628579430,
+          "GlobalID": "{39B856DC-AFE4-4c02-B433-A9361ACD91CF}"
+        }
+      }
+    ],
+    "updates": [
+      {
+        "geometry": {
+          "x": -118.15,
+          "y": 33.8
+        },
+        "attributes": {
+          "OBJECTID": 37,
+          "OWNER": "Joe Smith",
+          "VALUE": 94820.37,
+          "APPROVED": true,
+          "LASTUPDATE": 1227667627940,
+          "GlobalID": "{1A9F8368-F9BB-428B-BB03-F45724362DB5}"
+        }
+      },
+      {
+        "geometry": {
+          "x": -118.37,
+          "y": 34.086
+        },
+        "attributes": {
+          "OBJECTID": 462,
+          "OWNER": "John Doe",
+          "VALUE": 17325.9,
+          "APPROVED": false,
+          "LASTUPDATE": 9269154204840,
+          "GlobalID": "{6CE34136-EC3A-40D7-80BF-E1D9BE33812A}"
+        }
+      }
+    ],
+    "deletes": [
+      "{0A196F7B-44A6-4EE8-94C0-4417EA3B0841}",
+      "{C2746F2C-80E5-4506-B51F-3B7B134BC58B}"
+    ],
+    "attachments": {
+      "adds": [
+        {
+          "globalId": "{55E85F98-FBDD-4129-9F0B-848DD40BD911}",
+          "parentGlobalId": "{74100804-E229-49b8-8CDC-9B5D3EF03EDA}",
+          "contentType": "image/pjpeg",
+          "name": "Pothole.jpg",
+          "uploadId": "{DD1D0A30-CD6E-4ad7-A516-C2468FD95E5E}"
+        },
+        {
+          "globalId": "{3373EE9A-4619-41B7-918B-DB54575465BB}",
+          "parentGlobalId": "{39B856DC-AFE4-4c02-B433-A9361ACD91CF}",
+          "contentType": "image/pjpeg",
+          "name": "Debree.jpg",
+          "data": "<base 64 encoded data>"
+        }
+      ],
+      "updates": [
+        {
+          "globalId": "{8FDD9AEF-E05E-440A-9426-1D7F301E1EBA}",
+          "contentType": "image/pjpeg",
+          "name": "IllegalParking.jpg",
+          "uploadId": "{57860BE4-3B85-44DD-A0E7-BE252AC79061}"
+        }
+      ],
+      "deletes": [
+        "{95059311-741C-4596-88EF-C437C50F7C00}",
+        "{18F43B1C-2754-4D05-BCB0-C4643C331C29}"
+      ]
+    }
+  },
+  {
+    "id": 1,
+    "deletes": [
+      "{8BCB622B-E45D-4A09-8BAC-1D8735E9625F}",
+      "{D44DFB67-C66B-45EA-B24C-FF4632C8081D}"
+    ]
+  }
+] 
+```
+
+ 
+
+When using `split` , the request should contain the `id`  of the layer that contains the feature you want to split, the `objectID`  of the feature to be split, and the geometry used to split the feature. The `split`  operation supports splitting polylines by points and polygons by polylines. To use `split` , `supportsRollbackOnFailureParameter`  set as `true`  must be present on the layer and `rollbackOnFailure`  needs to be `true`  when the edit is performed.
+
+Syntax demonstrating `splits` 
+
+```javascript
+[
+  {
+    "id": <layerId1>,
+    "adds": [
+      <feature1>,
+      <feature2>
+    ],
+    "updates": [
+      <feature1>,
+      <feature2>
+    ],
+    "deletes": [
+      <objectID1>,
+      <objectID2>
+    ], 
+    "splits": [
+      {
+        <objectID>,
+        <geometry>
+      }
+    ]
+  },
+  {
+    "id": <layerId2>,
+    "adds": [
+      <feature1>,
+      <feature2>
+    ],
+    "updates": [
+      <feature1>,
+      <feature2>
+    ],
+    "deletes": [
+      <objectID1>,
+      <objectID2>
+    ],
+    "splits": [
+      {
+        <objectID>,
+        <geometry>
+      }
+    ]
+  }  
+]
+```
+
+ 
+
+Example of `splits` 
+
+```javascript
+[  
+  {  
+    "id": 0,
+    "adds": [  
+      {  
+        "geometry": {  
+          "x": -143.501,
+          "y": 57.043000000000006
+        },
+        "attributes": {  
+          "datetime": 1272210710000,
+          "depth": 31.100000000000001,
+          "region": "Andreanof Islands, Aleutian Islands, Alaska"
+        }
+      },
+      {  
+        "geometry": {  
+          "x": -72.865099999999927,
+          "y": -37.486599999999953
+        },
+        "attributes": {  
+          "datetime": 1272210142999,
+          "depth": "40.x",
+          "region": "Bio-Bio, Chile"
+        }
+      }
+    ],
+    "updates": [  
+      {  
+        "geometry": {  
+          "x": -149.450,
+          "y": 60.120
+        },
+        "attributes": {  
+          "OBJECTID": 50,
+          "datetime": 1272210710000,
+          "region": "Andreanof Islands, Aleutian Islands, Alaska"
+        }
+      }
+    ],
+    "deletes": [  
+      19,
+      23
+    ],
+    "splits": [ 
+      {  
+        "OBJECTID": 11,
+        "geometry": {  
+          "x": -152.694,
+          "y": 62.942
+        }
+      }
+    ]
+  },
+  {  
+    "id": 1,
+    "deletes": [  
+      34,
+      44
+    ],
+    "splits": [  
+      {  
+        "OBJECTID": 23,
+        "geometry": {  
+          "paths": [  
+            [  
+              [  
+                -152.661,
+                60.761
+              ],
+              [  
+                -149.347,
+                62.143
+              ]
+            ],
+            [  
+              [  
+                -150.455,
+                61.088
+              ],
+              [  
+                -151.759,
+                60.236
+              ]
+            ]
+          ]
+        }
+      }
+    ]
+  }
+]
+```
+
+ 
+
+## editedFeatures object
+
+Results returned from `applyEdits`  are organized in a layer by layer fashion. If `returnServiceEditsOption`  is set to `originalAndCurrentFeatures` , each layer may have edited features returned in an `editedFeatures`  object.
+
+The `editedFeatures`  object returns full features including the original features prior to delete, the original and current features for updates and the current rows for inserts which may contain implicit changes (e.g. as a result of a calculation rule). 
+
+`editedFeatures`  response structure
+
+```javascript
+"editedFeatures":{
+	"adds":  [ <feature1>, <feature2>], 	// current features
+	"updates": [[<originalFeature3>, < currentFeature3>], [<originalFeature4>, < currentFeature4>]],
+	"deletes": [ <feature5>, <feature6>]	// original features
+},
+```
+
+ 
+
+The response includes no `editedFeatures`  and `exceededTransferLimit`  is set to true if the count of edited features to return is more than the `maxRecordCount` . If clients are using this parameter to maintain a cache, they should invalidate the cache when `exceedTransferLimit`  is returned as true. If the server encounters an error when generating the list of edits is the response, `exceedTransferLimit`  is returned as true.
+
+Edited features are returned in the spatial reference of the feature service as defined by the services `spatialReference`  object or by the `spatialReference`  of the layers `extent`  object.
+
+## Example usages
+
+
+### Example one
+
+This example demonstrates applying edits on a feature service with sample input for `adds` :
+
+```javascript
+POST /webadaptor/rest/services/PoolPermits/FeatureServer/applyEdits HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+edits=[
+  {
+    "id": 0,
+    "adds": [
+      {
+        "geometry": {
+    		    "x": -143.501,
+    		    "y": 57.043000000000006
+        },
+        "attributes": {
+          "datetime": 1272210710000,
+          "depth": 31.100000000000001,
+          "region": "Andreanof Islands, Aleutian Islands, Alaska" 
+        } 
+      },
+      {
+        "geometry": {
+          "x": -72.865099999999927,
+          "y": -37.486599999999953 
+        },
+        "attributes": {
+          "datetime": 1272210142999,
+          "depth": "40.x",
+          "region": "Bio-Bio, Chile" 
+        } 
+      } 
+    ],
+    "updates": [
+      {
+        "geometry": {
+          "x": -149.450,
+          "y": 60.120 
+        },
+        "attributes": {
+          "OBJECTID": 50,
+          "datetime": 1272210710000,
+          "region": "Andreanof Islands, Aleutian Islands, Alaska" 
+        } 
+      } 
+    ],
+    "deletes": [
+      19,23 
+    ] 
+  },
+  {
+    "id": 1,
+    "deletes": [
+      34,44 
+    ] 
+  } 
+]&gdbVersion=&rollbackOnFailure=false&useGlobalIds=true&returnEditMoment=false&sessionId=&usePreviousEditMoment=false&returnServiceEditsOption=&datumTransformations=&f=json
+```
+
+ 
+
+### Example two
+
+This example demonstrates adding a feature and attachment in one call with `useGlobalIds`  set to `true` :
+
+```javascript
+POST /webadaptor/rest/services/PoolPermits/FeatureServer/applyEdits HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+edits=[
+  {
+    "id": 0,
+    "adds": [
+      {
+        "geometry": {
+          "x": -118.15,
+          "y": 33.80
+        },
+        "attributes": {
+          "OWNER": "Joe Smith",
+          "GlobalID": "{74100804-E229-49b8-8CDC-9B5D3EF03EDA}",
+          "VALUE": 94820.37,
+          "APPROVED": true,
+          "LASTUPDATE": 1227663551096
+        }
+      }
+    ],
+    attachments": {
+      "adds": [
+        {
+          "globalId": "{55E85F98-FBDD-4129-9F0B-848DD40BD911}",
+          "parentGlobalId": "{74100804-E229-49b8-8CDC-9B5D3EF03EDA}",
+          "contentType": "image/pjpeg",
+          "name": "Pothole.jpg",  
+          "uploadId": {DD1D0A30-CD6E-4ad7-A516-C2468FD95E5E}"
+        }
+      ]
+    }
+  }
+]&gdbVersion=&rollbackOnFailure=false&useGlobalIds=true&returnEditMoment=false&sessionId=&usePreviousEditMoment=false&returnServiceEditsOption=&datumTransformations=&f=json
+```
+
+ 
+
+JSON Response example
+
+```javascript
+[
+  {
+    "id": 0,
+    "addResults": [
+      {
+        "objectId": 1000,
+        "globalId": "{74100804-E229-49b8-8CDC-9B5D3EF03EDA}",
+        "success": true
+      }
+    ],
+    "attachments": {
+      "addResults": [
+        {
+          "objectId": 2000,
+          "globalId": "{55E85F98-FBDD-4129-9F0B-848DD40BD911}",
+          "success": true
+        }
+      ]
+    }
+  }
+]
+```
+
+ 
+
+### Example three
+
+This example demonstrates adding features and a relationship between them in one call with `useGlobalIds`  set to `true` :
+
+Let us assume the service has a Parcel layer (id: 0) and Owner table (id: 1). Parcel is the Origin Class and Owner is the Distribution Class. The Parcel's `globalId`  is related to Owner's `ParcelGuid`  field, which makes `ParcelGuid`  a foreign key field. An editors want to add a parcel and an owner and have them related in one `applyEdits`  call:
+
+Example POST request for `applyEdits` , formatted for readability:
+
+```javascript
+POST /webadaptor/rest/services/PoolPermits/FeatureServer/applyEdits HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+edits=[
+  {
+    "id": 0,
+    "adds": [
+      {
+        "geometry": {
+    		  "x": -143.501,
+    		  "y": 57.043000000000006
+        },
+        "attributes": {
+          "datetime": 1272210710000,
+          "depth": 31.100000000000001,
+          "region": "Andreanof Islands, Aleutian Islands, Alaska" 
+        } 
+      },
+      {
+        "geometry": {
+          "x": -72.865099999999927,
+          "y": -37.486599999999953 
+        },
+        "attributes": {
+          "datetime": 1272210142999,
+          "depth": "40.x",
+          "region": "Bio-Bio, Chile" 
+        } 
+      } 
+    ],
+    "updates": [
+      {
+        "geometry": {
+          "x": -149.450,
+          "y": 60.120 
+        },
+        "attributes": {
+          "OBJECTID": 50,
+          "datetime": 1272210710000,
+          "region": "Andreanof Islands, Aleutian Islands, Alaska" 
+        } 
+      } 
+    ],
+    "deletes": [
+      19,23 
+    ] 
+  },
+  {
+    "id": 1,
+    "deletes": [
+      34,44 
+    ] 
+  }
+]&gdbVersion=&rollbackOnFailure=false&useGlobalIds=true&returnEditMoment=false&sessionId=&usePreviousEditMoment=false&returnServiceEditsOption=&datumTransformations=&f=json
+```
+
+ 
+
+The service will add a parcel to the Parcel layer (id: 0) and an owner record to the Owner table (id: 1). They will be related because of the identical values for the parcel's `globalId`  and the owner's `ParcelGuid` .
+
+JSON Response example
+
+```javascript
+[
+  {
+    "id": 0,
+    "addResults": [
+      {
+        "objectId": 2000,
+        "globalId": "{74100804-E229-49b8-8CDC-9B5D3EF03EDA}",
+        "success": true
+      }
+    ]
+  },
+  {
+    "id": 1,
+    "addResults": [
+      {
+        "objectId": 3000,
+        "globalId": "{EFC28461-50EC-4193-82A8-7C46CF34E613}",
+        "success": true
+      }
+    ]
+  }
+]
+```
+
+### Example four
+
+The following is a sample POST request to set vertices as control points for a feature. The control points are set in the `ids` array. The index of each `ids` array value matches up with the vertex at the same index in the geometry. In this example, the first and third vertices are set as being control points (value 1 on the `ids` array).
+
+```javascript
+POST /webadaptor/rest/services/SanFrancisco/pipes/FeatureServer/applyEdits HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+edits=[
+  {
+    "id": 0,
+    "updates": [
+      {
+        "attributes": {
+          "OBJECTID": 2
+        },
+        "geometry": {
+          "paths": [
+            [
+              [
+                -13123272.572900001,
+                3495029.6371000037
+              ],
+              [
+                -12883437.2676,
+                3497028.2646000013
+              ],
+              [
+                -12744038.6544,
+                3498189.9196999967
+              ],
+              [
+                -12631303.591699999,
+                3499129.3786000013
+              ]
+            ]
+          ],
+          "ids": [
+            [
+              1,
+              0,
+              1,
+              0
+            ]
+          ]
+        }
+      }
+    ]
+  }
+]&gdbVersion=&rollbackOnFailure=false&useGlobalIds=false&returnEditMoment=false&sessionId=&usePreviousEditMoment=false&returnServiceEditsOption=&datumTransformations=&f=json
+
+```
+
+### Example five
+
+The following is a sample POST request that demonstrates adding a new feature that includes the following field types: `esriFieldTypeTimestampOffset`, `esriFieldTypeDateOnly`, `esriFieldTypeTimeOnly`, and `esriFieldTypeBigInteger`:
+
+```javascript
+POST /webadaptor/rest/services/SanFrancisco/pipes/FeatureServer/applyEdits HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+edits=[
+  {
+    "id": 0,
+    "adds": [
+      {
+        "attributes": {
+          "dateonlyfld": "2023-08-23",
+          "timestampfld": "2003-01-25T17:00:00-05:00",
+          "abigint": 10111222333,
+          "timeonlyfld": "15:54:36"
+        },
+        "geometry": {
+          "x": -116.64799770499997,
+          "y": 34.13584615600007
+        }
+      }
+    ]
+  }
+]&gdbVersion=&rollbackOnFailure=false&useGlobalIds=false&returnEditMoment=false&sessionId=&usePreviousEditMoment=false&returnServiceEditsOption=&datumTransformations=&f=json
+```
+
+## JSON Response syntax
+
+```other
+[
+  {   
+    "id": <layerId1>,
+    "addResults": [
+      {
+        "objectId": <objectId1>,
+        "globalId": <globalId1>,
+        "success": <true | false>,
+        "error": { //only if success is false
+          "code": <code1>,
+          "description": "<description1>",
+        }
+      },
+      {
+        "objectId": <objectId2>,
+        "globalId": <globalId2>,
+        "success": <true | false>,
+        "error": { //only if success is false
+          "code": <code2>,
+          "description": "<description2>",
+        }
+      }
+    ],
+    "updateResults": [
+      {
+        "objectId": <objectId1>,
+        "globalId": <globalId1>,
+        "success": <true | false>,
+        "error": { //only if success is false
+          "code": <code1>,
+          "description": "<description1>",
+        }
+      },
+      {
+        "objectId": <objectId2>,
+        "globalId": <globalId2>,
+        "success": <true | false>,
+        "error": { //only if success is false
+          "code": <code2>,
+          "description": "<description2>",
+        }
+      }
+    ],
+    "deleteResults": [
+      {
+        "objectId": <objectId1>,
+        "globalId": <globalId1>,
+        "success": <true | false>,
+        "error": { //only if success is false
+          "code":  <code1>,
+          "description": "<description1>",
+        }
+      },
+      {
+        "objectId": <objectId2>,
+        "globalId": <globalId2>,
+        "success": <true | false>,
+        "error": { //only if success is false
+          "code": <code2>,
+          "description": "<description2>",
+        }
+      }
+    ],
+    "splitResults": [
+      {
+        "objectId": <objectId>,
+        "results": [
+          <objectId>,
+          <objectId1> // Split returns the objectId of the original feature and the feature(s) created from the split
+        ]
+      }
+    ],
+    "attachments": {
+      "addResults": [],
+      "updateResults": [],
+      "deleteResults": []
+    },
+  },
+  {   
+    "id": <layerId2>,
+    "addResults": [
+      {
+        "objectId": <objectId1>,
+        "globalId": <globalId1>,
+        "success": <true | false>,
+        "error": { //only if success is false
+          "code": <code1>,
+          "description": "<description1>",
+        }
+      },
+      {
+        "objectId": <objectId2>,
+        "globalId": <globalId2>,
+        "success": <true | false>,
+        "error": { //only if success is false
+          "code": <code2>,
+          "description": "<description2>",
+        }
+      }
+    ],
+    "updateResults": [
+      {
+        "objectId": <objectId1>,
+        "globalId": <globalId1>,
+        "success": <true | false>,
+        "error": { //only if success is false
+          "code": <code1>,
+          "description": "<description1>",
+        }
+      },
+      {
+        "objectId": <objectId2>,
+        "globalId": <globalId2>,
+        "success": <true | false>,
+        "error": { //only if success is false
+          "code": <code2>,
+          "description": "<description2>",
+        }
+      }
+    ],
+    "deleteResults": [
+      {
+        "objectId": <objectId1>,
+        "globalId": <globalId1>,
+        "success": <true | false>,
+        "error": { //only if success is false
+          "code": <code1>,
+          "description": "<description1>",
+        }
+      },
+      {
+        "objectId": <objectId2>,
+        "globalId": <globalId2>,
+        "success": <true | false>,
+        "error": { //only if success is false
+          "code": <code2>,
+          "description": "<description2>",
+        }
+      }
+    ],
+    "splitResults": [
+      {
+        "objectId": <objectId>,
+        "results": [
+          <objectId>,
+          <objectId1>,
+          <objectId2> // Split returns the objectId of the original feature and the feature(s) created from the split
+        ]
+      }
+    ],
+    "attachments": {
+      "addResults": [],
+      "updateResults": [],
+      "deleteResults": []
+    }
+  }
+]
+```
+
+ 
+
+## JSON Response examples
+
+### Example one
+
+When `edits`  includes `splits` :
+
+```javascript
+[
+  {  
+    "id": 0,
+    "splitResults": [  
+      {  
+        "objectId": 11,
+        "results": [  
+          11,
+          56
+        ]
+      }
+    ]
+  },
+  {  
+    "id": 1,
+    "splitResults": [  
+      {  
+        "objectId": 23,
+        "results": [  
+          23,
+          54,
+          53,
+          52,
+          55,
+          56
+        ]
+      }
+    ]
+  }
+]
+```
+
+ 
+
+### Example two
+
+Where `returnEditMoment`  and `useGlobalIds`  are set to `true` , and attachments were included
+
+```other
+[
+  {
+    "id": 0,
+				"editMoment" : 1457994488000,
+    "addResults": [
+      {
+        "objectId": 618,
+        "globalId": "{74100804-E229-49b8-8CDC-9B5D3EF03EDA}",
+        "success": true
+      },
+      {
+        "objectId": 619,
+        "globalId": "{39B856DC-AFE4-4c02-B433-A9361ACD91CF}",
+        "success": true
+      }
+    ],
+    "updateResults": [
+      {
+        "objectId": 50,
+        "globalId": "{1A9F8368-F9BB-428B-BB03-F45724362DB5}",
+        "success": true
+      },
+      {
+        "objectId": 51,
+        "globalId": "{6CE34136-EC3A-40D7-80BF-E1D9BE33812A}",
+        "success": true
+      }
+    ],
+    "deleteResults": [
+      {
+        "objectId": 25,
+        "globalId": "{0A196F7B-44A6-4EE8-94C0-4417EA3B0841}",
+        "success": true
+      },
+      {
+        "objectId": 26,
+        "globalId": "{C2746F2C-80E5-4506-B51F-3B7B134BC58B}",
+        "success": true
+      }
+    ],
+    "attachments": {
+      "addResults": [
+        {
+          "objectId": 500,
+          "globalId": "{55E85F98-FBDD-4129-9F0B-848DD40BD911}",
+          "success": true
+        },
+        {
+          "objectId": 501,
+          "globalId": "{3373EE9A-4619-41B7-918B-DB54575465BB}",
+          "success": true
+        }
+      ],
+      "updateResults": [
+        {
+          "objectId": 600,
+          "globalId": "{8FDD9AEF-E05E-440A-9426-1D7F301E1EBA}",
+          "success": true
+        },
+        {
+          "objectId": 600,
+          "globalId": "{6CE34136-EC3A-40D7-80BF-E1D9BE33812A}",
+          "success": true
+        }
+      ],
+      "deleteResults": [
+        {
+          "objectId": 800,
+          "globalId": "{95059311-741C-4596-88EF-C437C50F7C00}",
+          "success": true
+        },
+        {
+          "objectId": 801,
+          "globalId": " {18F43B1C-2754-4D05-BCB0-C4643C331C29}",
+          "success": true
+        }
+      ]
+    }
+  },
+  {
+    "id": 1,
+				"editMoment" : 1457994488000,
+    "deleteResults": [
+      {
+        "objectId": 25,
+        "globalId": "{8BCB622B-E45D-4A09-8BAC-1D8735E9625F}",
+        "success": true
+      },
+      {
+        "objectId": 26,
+        "globalId": "{D44DFB67-C66B-45EA-B24C-FF4632C8081D}",
+        "success": true
+      }
+    ]
+  }
+]
+```
+
+ 
+
+### Example three
+
+Where a constraint rule is violated and `rollBackOnFailure`  is `true` :
+
+```other
+{
+  "error": {
+    "code": 400,
+    "extendedCode": -2147207418,
+    "message": "Unable to complete operation.",
+    "details": [
+      "Violated attribute constraint rule. [Error No: -1, ]",
+      "Operation rolled back."
+    ]
+  }
+}
+```
+
+ 
+
+### Example four
+
+Where a constraint rule is violated but `rollBackOnFailure`  is `false` .
+
+```other
+[
+  {
+    "id": 1,
+    "updateResults": [
+      {
+        "objectId": 2,
+        "globalId": "{B703ACAC-A1A8-4F49-BB19-1E684A67A265}",
+        "success": false,
+        "error": {
+          "code": 1019,
+          "extendedCode": -2147207418,
+          "description": "Violated attribute constraint rule. [Error No: -1, ]"
+        }
+      },
+      {
+        "objectId": 1,
+        "globalId": "{2FACC38A-3E3E-43A5-A6EB-BC9075407EC8}",
+        "success": true
+      }
+    ]
+  }
+]
+```
+
+ 
+
+### Example five
+
+Where `retrunServiceEditsOption`  is set to `originalAndCurrentFeatures`  and an origin feature is deleted
+
+```other
+[
+  {
+    "id": 9,
+    "deleteResults": [
+      {
+        "objectId": 18,
+        "globalId": "{8ED93567-DC83-4DDA-837C-467C0138B22A}",
+        "success": true
+      }
+    ],
+    "editedFeatures": {
+      "deletes": [
+        {
+          "attributes": {
+            "STATE_NAME": "Connecticut",
+            "STATE_FIPS": "09",
+            "SUB_REGION": "N Eng",
+            "POP1996": 3287604,
+            "CALC_INT": null,
+            "GLOBALID": "{8ED93567-DC83-4DDA-837C-467C0138B22A}",
+            "reprowid": 13,
+            "OBJECTID": 18
+          },
+          "geometry": {
+            "rings": [
+              [
+                [
+                  -8185413.79680000059,
+                  5089741.03199999779
+                ],
+                [
+                  -8183939.36889999919,
+                  5111017.59870000184
+                ],
+                [
+                  -8180275.50779999979,
+                  5168072.90540000051
+                ],
+                [
+                  -8131452.56310000084,
+                  5166406.08200000226
+                ],
+                [
+                  -8127051.54419999942,
+                  5166360.96440000087
+                ],
+                [
+                  -8105941.36580000073,
+                  5165985.82320000231
+                ],
+                [
+                  -8106078.06100000069,
+                  5160543.51210000366
+                ],
+                [
+                  -8100500.73489999957,
+                  5161289.78400000185
+                ],
+                [
+                  -8099200.41330000013,
+                  5166036.78519999981
+                ],
+                [
+                  -8082907.47210000083,
+                  5165540.56889999658
+                ],
+                [
+                  -8082718.00349999964,
+                  5164381.11180000007
+                ],
+                [
+                  -8079832.93239999935,
+                  5164202.194600001
+                ],
+                [
+                  -8078643.93569999933,
+                  5165478.81440000236
+                ],
+                [
+                  -8071558.22189999931,
+                  5165574.73600000143
+                ],
+                [
+                  -8030234.64900000021,
+                  5164920.73650000244
+                ],
+                [
+                  -8025628.91169999912,
+                  5164830.51550000161
+                ],
+                [
+                  -7993054.0493999999,
+                  5163658.11640000343
+                ],
+                [
+                  -7992552.10989999957,
+                  5161605.117899999
+                ],
+                [
+                  -7991485.33699999936,
+                  5119352.91860000044
+                ],
+                [
+                  -7991970.35720000044,
+                  5107451.891900003
+                ],
+                [
+                  -7991701.96639999934,
+                  5101428.2324000001
+                ],
+                [
+                  -7993099.02050000057,
+                  5073856.45130000263
+                ],
+                [
+                  -7997913.70610000007,
+                  5072079.04389999807
+                ],
+                [
+                  -7996897.91599999927,
+                  5062897.7154000029
+                ],
+                [
+                  -7998111.62570000067,
+                  5060434.7949000001
+                ],
+                [
+                  -8000216.125,
+                  5060052.50919999927
+                ],
+                [
+                  -8046383.31760000065,
+                  5053884.94259999692
+                ],
+                [
+                  -8051385.68979999982,
+                  5055143.42369999737
+                ],
+                [
+                  -8057180.42390000075,
+                  5065327.90179999918
+                ],
+                [
+                  -8057151.59359999932,
+                  5053434.03989999741
+                ],
+                [
+                  -8073747.76750000007,
+                  5051301.10679999739
+                ],
+                [
+                  -8115991.06409999914,
+                  5052243.47439999878
+                ],
+                [
+                  -8137996.47829999961,
+                  5036109.59520000219
+                ],
+                [
+                  -8199079.04629999958,
+                  5012090.14180000126
+                ],
+                [
+                  -8199142.71859999932,
+                  5014188.5
+                ],
+                [
+                  -8207103.17620000057,
+                  5027140.92450000346
+                ],
+                [
+                  -8179595.24080000073,
+                  5043463.61529999971
+                ],
+                [
+                  -8187625.27009999938,
+                  5055733.52480000257
+                ],
+                [
+                  -8186961.13519999944,
+                  5066359.28899999708
+                ],
+                [
+                  -8185413.79680000059,
+                  5089741.03199999779
+                ]
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": 7,
+    "editedFeatures": {
+      "deletes": [
+        {
+          "attributes": {
+            "CITY_FIPS": "37000",
+            "CITY_NAME": "Hartford",
+            "STATE_FIPS": "09",
+            "STATE_NAME": "Connecticut",
+            "STATE_CITY": "0937000",
+            "TYPE": "city",
+            "ELEVATION": 99,
+            "ADATE": null,
+            "GLOBALID": "{405FB3AC-2E9C-4929-A2B9-15550C3D95B4}",
+            "AGUID": "{8ED93567-DC83-4DDA-837C-467C0138B22A}"
+            "reprowid": 12,
+            "OBJECTID": 710
+          },
+          "geometry": {
+            "x": -8091131.2201000005,
+            "y": 5125946.99199999869
+          }
+        }
+      ]
+    }
+  }
+]
+```
+
+ 
+
+### Example six
+
+Where `async`  is `true` . A status URL is returned, demonstrated below:
+
+```javascript
+{
+  "statusUrl": "https://machine.domain.com/webadaptor/rest/services/testservice/FeatureServer/jobs/sf_j9563cb9e-8cf4-4c99-945d-09e43d408ac7/status"
+}
+```
+
+ 
+
+Making a request to job status URL will return the following response once the operation has completed:
+
+```javascript
+{
+  "status": "COMPLETED",
+  "resultUrl": "https://machine.domain.com/webadaptor/rest/directories/arcgisoutput/testservice_MapServer/j9563cb9e-8cf4-4c99-945d-09e43d408ac7.json"
+}
+
+```
+
+ 
+
+The `resultUrl`  returned in the example above gives access to the results of `applyEdits` :
+
+```javascript
+[
+  {
+	   "id": 0,
+	   "addResults": [
+      {
+		      "objectId": 53,
+		      "globalId": "{2AF16CAD-D5B8-4F4C-BF36-432FBF660C0B}",
+		      "success": true
+	     }
+    ],
+	   "updateResults": [],
+	   "deleteResults": []
+  }
+]
+
+```
+
+ 
+
+### Example seven
+
+This example shows an error case where an edit is attempted for a capability that is not supported and `async`  is `true` . As with example six, a `statusUrl`  is returned in the response:
+
+```javascript
+{
+  "statusUrl": "https://machine.domain.com/webadaptor/rest/services/VRNVA/FeatureServer/jobs/sf_j7aadb493-7987-44cb-9a4c-53e1f9fd97bf/status"
+}
+
+```
+
+ 
+
+Making a request to job status URL will return the following response once the operation has completed:
+
+```javascript
+{
+  "status": "COMPLETED",
+  "resultUrl": "https://machine.domain.com/webadaptor/rest/directories/arcgisoutput/VRNVA_MapServer/j7aadb493-7987-44cb-9a4c-53e1f9fd97bf.json"
+}
+
+```
+
+ 
+
+In this case, however, info returned from the `resultUrl`  contains the error:
+
+```javascript
+{
+  "error" : {
+    "code" : 400,
+    "message" : "Requested operation is not supported by this service.",
+    "details" : []
+  }
+}
+```
+
+ 
+
+### Example eight
+
+This example shows a response when `returnEditResults`  is `false` , `async`  is `false` , and the operation is successful:
+
+```javascript
+{
+  "success": true
+}
+```
+
+ 
+
+### Example nine
+
+The sample response below is returned when the request sets the `editsUploadId`  parameter to reference a file where features and attachments were added, updated, and deleted from layer 0:
+
+```javascript
+[
+  {
+    "attachments": {
+      "addResults": [
+        {
+          "success": true,
+          "globalId": "{FAA66666-779F-48CA-993B-8A3FC57616AC}",
+          "objectId": 64
+        }
+      ],
+      "updateResults": [
+        {
+          "success": true,
+          "globalId": "{77C3C1FF-5755-482F-A065-A5F36E043FCB}",
+          "objectId": 28
+        }
+      ],
+      "deleteResults": [
+        {
+          "success": true,
+          "globalId": "{0DDA98DE-007B-447E-90CA-589A6B37A751}",
+          "objectId": 29
+        }
+      ]
+    },
+    "id": 0,
+    "addResults": [
+      {
+        "success": true,
+        "globalId": "{5FC9F84C-FB0A-498B-8AD9-161222DD23AB}",
+        "objectId": 110
+      }
+    ],
+    "updateResults": [
+      {
+        "success": true,
+        "globalId": "{5CFA5A27-15ED-4B4F-902E-524EB75A6406}",
+        "objectId": 27
+      }
+    ],
+    "deleteResults": [
+      {
+        "success": true,
+        "globalId": "{8FDB3E91-7E41-4F6B-859A-F86080F48F46}",
+        "objectId": 26
+      }
+    ]
+  }
+]
+```
+
+ 

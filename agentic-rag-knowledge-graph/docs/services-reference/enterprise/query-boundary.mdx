@@ -1,0 +1,240 @@
+---
+title: "Query Boundary"
+description: "Query a mosaic or raster dataset image service according to a defined boundary."
+slug: "query-boundary"
+url: "/query-boundary"
+guid: "GUID-DA00D67B-0DF6-4BEF-85E7-9C49947423BC"
+migratedTopicMetadata:
+  FTITLE: "Query Boundary"
+  FDESCRIPTION: ""
+  FCHANGES: "Update URLs to HTTPS: https://devtopia.esri.com/WebGIS/arcgis-rest-api-documentation/issues/181"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.8 - *"
+  CREATED-ON: "27/06/2019 09:46:50"
+  FAUTHOR: "ssanchez"
+  FSTATUS: "Released"
+  MODIFIED-ON: "05/07/2019 17:05:14"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-A5DDC518-CCBE-4763-B29F-FA39022F892E"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<imageservice-url>/queryBoundary
+  urlSegments:
+    - name: <imageservice-url>/queryBoundary
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.6'
+  requiredCapability: Image
+---
+
+## Description
+
+The Query Boundary operation is performed on an image service resource.
+
+The Query Boundary operation is supported by image services based on mosaic datasets or raster datasets.
+
+For an image service based on a mosaic dataset, the result of this operation includes the geometry shape of the mosaicked items' boundary and area of coverage in square meters.
+
+For an image service based on a raster dataset, the result of this operation includes the geometry shape of the dataset's envelope boundary and area of coverage in square meters.
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Description: The response format. The default response format is HTML.
+
+Values: `html | json` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outSR` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Description: The spatial reference of the boundary's geometry.
+
+The spatial reference can be specified as either a well-known ID or as a spatial reference JSON object.
+
+If the outSR is not specified, the boundary will be reported in the spatial reference of the image service.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`datumTransformation` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A WKID or a JSON object specifying the geographic datum transformation. Use it to apply a single datum transformation or a composite datum transformation chain to the exported image when the geographic datum of imageSR is different than the geographic datum of image service's spatial reference. When not specified, a default datum transformation will be applied if needed.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+#### Datum transformation information
+
+While specifying transformation, you need to think about which datum transformation is most applicable to project the image service to the `imageSR`. The spatialReference property of the image service resource reports which spatial reference is used by the service.
+For a list of valid datum transformation ID values (WKID) and well-known text (WKT) strings, see Using spatial references. For more information on datum transformation, see the transformation parameter in the Project operation.
+
+Syntax
+```json
+//Syntax of a single datum transformation number with WKID (Well-Known ID)
+datumTransformation=<wkid>
+
+//Syntax of a single datum transformation json element with WKID
+datumTransformation={"wkid": <wkid>}
+
+//Syntax of a single datum transformation json element with geoTransforms
+datumTransformation={"geoTransforms":[{"wkid": <wkid>,"transformForward": <boolean>}]}
+
+//Syntax of a single datum transformation json element with WKT (Well-Known Text)
+datumTransformation={"wkt": "<wkt>"}
+
+//Syntax of a composite datum transformation chain json element with geoTransforms of WKIDs
+datumTransformation={"geoTransforms":[{"wkid": <wkid1>,"transformForward": <boolean>}, {"wkid": <wkid2>,"transformForward": <boolean>}]}
+
+//Syntax of a composite datum transformation chain json element with geoTransforms of WKTs
+datumTransformation={"geoTransforms":[{"wkt": <wkt1>,"transformForward": <boolean>}, {"wkt": <wkt2>,"transformForward": <boolean>}]}
+
+```
+
+Example
+```json
+//a single datum transformation number with WKID (Well-Known ID)
+datumtransformation=1196
+
+//a single datum transformation json element with WKID
+datumtransformation={"wkid":1196}
+
+//a single datum transformation json element with geoTransforms
+datumtransformation={"geoTransforms":[{"wkid":1196,"transformForward":true}]}
+
+//a single datum transformation json element with WKT (Well-Known Text)
+datumTransformation={"wkt":"GEOGTRAN[\"OSGB_1936_To_WGS_1984_2\",GEOGCS[\"GCS_OSGB_1936\",DATUM[\"D_OSGB_1936\",SPHEROID[\"Airy_1830\",6377563.396,299.3249646]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],METHOD[\"Geocentric_Translation\"],PARAMETER[\"X_Axis_Translation\",371.0],PARAMETER[\"Y_Axis_Translation\",-112.0],PARAMETER[\"Z_Axis_Translation\",434.0],OPERATIONACCURACY[10.0]]"}
+
+//a composite datum transformation chain json element with geoTransforms of WKIDs
+datumTransformation={"geoTransforms":[{"wkid":1315,"transformForward":true},{"wkid":1138,"transformForward":true}]}
+
+//a composite datum transformation chain json element with geoTransforms of WKTs
+datumTransformation={"geoTransforms":[{"wkt":"GEOGTRAN[\"OSGB_1936_To_ED_1950_UKOOA\",GEOGCS[\"GCS_OSGB_1936\",DATUM[\"D_OSGB_1936\",SPHEROID[\"Airy_1830\",6377563.396,299.3249646]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],GEOGCS[\"GCS_European_1950\",DATUM[\"D_European_1950\",SPHEROID[\"International_1924\",6378388.0,297.0]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],METHOD[\"Position_Vector\"],PARAMETER[\"X_Axis_Translation\",535.948],PARAMETER[\"Y_Axis_Translation\",-31.357],PARAMETER[\"Z_Axis_Translation\",665.16],PARAMETER[\"X_Axis_Rotation\",0.15],PARAMETER[\"Y_Axis_Rotation\",0.247],PARAMETER[\"Z_Axis_Rotation\",0.998],PARAMETER[\"Scale_Difference\",-21.689],OPERATIONACCURACY[2.0]]","transformForward":true},{"wkt":"GEOGTRAN[\"ED_1950_To_WGS_1984_6\",GEOGCS[\"GCS_European_1950\",DATUM[\"D_European_1950\",SPHEROID[\"International_1924\",6378388.0,297.0]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],METHOD[\"Geocentric_Translation\"],PARAMETER[\"X_Axis_Translation\",-86.0],PARAMETER[\"Y_Axis_Translation\",-96.0],PARAMETER[\"Z_Axis_Translation\",-120.0],OPERATIONACCURACY[6.0]]","transformForward":true}]}
+
+```
+
+
+## Example usage
+
+Query boundary of an image service.
+
+https&#x3A;//myserver/arcgis/rest/services/myimageservice/ImageServer/queryBoundary?outSR=4326&f=json
+
+## JSON Response syntax
+
+```javascript
+{
+  "shape" : <polygon/envelope>,
+  "area" : <value>
+}
+
+```
+
+ 
+
+Refer to the [Geometry Object](/geometry-objects) for the syntax of a polygon or envelope shape.
+
+## JSON Response example
+
+```json
+{
+ "shape": {
+  "rings": [
+   [
+    [
+     -119.974672241592586,
+     45.2206154474027642
+    ],
+    [
+     -120.033534257808142,
+     45.0662933470099034
+    ],
+    [
+     -120.034237980308632,
+     45.066402936011599
+    ],
+    [
+     -120.566985010952365,
+     43.6451537283816862
+    ],
+    [
+     -122.8105746953721,
+     43.9706144540871691
+    ],
+    [
+     -122.304611805056538,
+     45.4800351537390739
+    ],
+    [
+     -121.769874462131938,
+     47.00459040109687
+    ],
+    [
+     -119.408468500569185,
+     46.65857333113042
+    ],
+    [
+     -119.967626469550851,
+     45.2390256105394215
+    ],
+    [
+     -119.967542321363723,
+     45.2390123482548105
+    ],
+    [
+     -119.974672241592586,
+     45.2206154474027642
+    ]
+   ]
+  ],
+  "spatialReference": {
+   "wkid": 4326,
+   "latestWkid": 4326
+  }
+ },
+ "area": 63827885551.805801
+}
+
+```
+
+ 

@@ -1,0 +1,140 @@
+---
+title: "Remove (Enterprise Functions)"
+description: "The remove operation disables a premium capability for an organization, such as raster analytics or image services."
+slug: "remove-enterprise-functions"
+url: "/remove-enterprise-functions"
+guid: "GUID-1A4D8635-7370-4E03-81FA-0753A9DD4BB8"
+migratedTopicMetadata:
+  FTITLE: "Remove Enterprise Functions"
+  FDESCRIPTION: ""
+  FCHANGES: "New operation"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2-*"
+  CREATED-ON: "06/11/2023 17:08:56"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "12/11/2023 11:21:56"
+  VERSION: "1"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-83E9EFEA-E5EF-4C69-A7FB-516C7F72C0E0"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /system/enterprisefunctions/remove
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /system/enterprisefunctions/remove
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '11.2'
+  requiredCapabilities:
+    - name: Access allowed with the "Security and infrastructure" privilege
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `remove` operation disables a premium capability for an organization, such as raster analytics or image hosting.
+
+This operation is performed asynchronously and will return a [job](/job) URL that can be used to check the status of the request. When the request is submitted, ArcGIS Enterprise on Kubernetes checks to see if any other premium capabilities that share the same [System](/system-service-folder) and [Utility](/system-utilities-folder) services are currently enabled.
+
+If another premium capability is still enabled, and both it and the capability being disabled share the same System and Utility services, those services are not stopped. For example, if `ImageHosting` is being disabled, but `RasterAnalytics` is still enabled, the System and Utility services used by both `ImageHosting` and `RasterAnalytics` are not disabled.
+
+If no other premium capability is enabled, the System and Utility services are stopped.
+
+<Note type={"note"}>
+
+Once the request is submitted, the job will take some time to complete.
+
+</Note>
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `enterpriseFunction` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the premium capability that is being disabled. Only one premium capability can be disabled per request.
+
+      Values: `ImageHosting` | `RasterAnalytics`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `remove` operation:
+
+```other
+POST /context/admin/system/enterprisefunctions/remove HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+enterpriseFunction=RasterAnalytics&f=pjson&token= MxOTGPw1srr5-B3I3xMdmzsjKFZ5XcX_ooLc2ijMfCZCMwYR2z2wa0NQXwm2crl9g419kgFdkU9Bhg56vQICl28agx-gAwPu9PfQ2SHS71i50RFsy8YIRw2D-BXNgp94XkIWsl3VplgL5VCoZI07cG8igG5cmX_rInNgDa79Vi5NHRy96elM_6SUbTmbQ9ioG7xbNoVMwpW7nBlP3H4YBke67mjFF6onGZ9FTAcz_8qjHuSPxQwZu6DEnLbkrfT1
+
+```
+
+## JSON Response example
+
+The following response is returned each time a request is submitted:
+
+```other
+{
+  "jobsUrl": "https://organization.domain.com/context/admin/jobs/jcdbf4e88-c4ca-42bc-a40f-036c40bbce15",
+  "jobid": "jcdbf4e88-c4ca-42bc-a40f-036c40bbce15",
+  "status": "SUBMITTED"
+}
+```
+
+Once submitted, users can access the job using the `jobsUrl` returned above to periodically poll the its status.
+
+The following response is returned if the job is completed successfully without encountering any errors:
+
+```other
+{
+  "updatedtime": 1699514547531,
+  "jobid": "jf846e55c-84dd-431f-895c-1b2573d2baf9",
+  "requestID": "f9dc2911-5ee6-40b5-8bb4-b6074640def6",
+  "name": "removeEnterpriseFunction",
+  "endtime": 1699514547532,
+  "messages": [
+    "Removing 'RasterAnalytics' enterprise function",
+    "Stopping RasterAnalytics Services",
+    "Unregistering the following services as Portal helper services - RasterAnalysisTools, RasterUtilities"
+  ],
+  "starttime": 1699514538638,
+  "operationURI": "removeEnterpriseFunction",
+  "status": "COMPLETED",
+  "username": "administrator"
+}
+```

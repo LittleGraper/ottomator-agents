@@ -1,0 +1,202 @@
+---
+title: "Webhook"
+description: "An individual webhook resource returns the configuration information of a specific webhook for either a geoprocessing service or a feature service."
+slug: "webhook"
+url: "/webhook"
+guid: "GUID-6DCB001C-3234-4BED-A843-CE36A08A2759"
+migratedTopicMetadata:
+  FTITLE: "Webhook"
+  FDESCRIPTION: ""
+  FCHANGES: "New topic"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1-*"
+  CREATED-ON: "09/12/2022 12:30:10"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "22/02/2023 11:02:47"
+  VERSION: "1"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "10"
+  ED: "GUID-02A6FC5B-1DA9-4110-865E-BEC5F0421218"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /services/<serviceName>.<serviceType>/webhooks/<webhookID>
+  urlSegments:
+    - name: <root>
+      url: /site
+    - name: /services/<serviceName>.<serviceType>/webhooks/<webhookID>
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '11.1'
+  requiredCapabilities:
+    - name: Access allowed with either the "Geoprocessing" or "Feature layer" privileges
+      url: /managing-access-to-the-server-administration-rest-api
+---
+
+## Description
+
+The resource for an individual webhook returns the configuration information for either a geoprocessing service or a feature service webhook. From this resource, administrators can edit the webhook's configuration, or delete the individual webhook rather than deleting all webhooks for a geoprocessing or feature service.
+
+<Note type={"note"}>
+
+ArcGIS Enterprise supports organization, feature service, and geoprocessing webhooks. The ArcGIS Portal Directory allows for the creation and management of organization webhooks, whereas the ArcGIS Server Administrative API Directory supports the creation and management of geoprocessing and feature service webhooks. For more information on organization webhooks in ArcGIS Enterprise, see either the ArcGIS Portal Directory API [webhook documentation](DEVSITE/rest/users-groups-and-items/create-webhooks.htm) or the [Manage webhooks in ArcGIS Enterprise](https://enterprise.arcgis.com/en/portal/latest/administer/windows/create-webhooks.htm) administrative documentation. ArcGIS Online also supports feature service webhooks, which are managed in the ArcGIS Online Administrative Services Directory. To learn more about ArcGIS Online feature service webhooks, see the [Web Hooks](DEVSITE/rest/services-reference/online/web-hooks-feature-service-.htm) API documentation.
+
+</Note>
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usages
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Geoprocessing service webhooks</TabTitle>
+  <TabTitle>Feature service webhooks</TabTitle>
+</TabNav>
+
+<Tab>
+
+The following is a sample request URL used to access an individual geoprocessing service webhook resource:
+
+```markdown
+https://machine.domain.com/webadaptor/admin/services/myService.GPServer/webhooks/a6a89a71-2cb1-47ff-89d4-46e6425e2908?f=pjson
+```
+</Tab>
+ 
+<Tab>
+
+The following is a sample request URL used to access an individual feature service webhook resource:
+
+```markdown
+https://machine.domain.com/webadaptor/admin/services/myService.FeatureServer/webhooks/a6a89a71-2cb1-47ff-89d4-46e6425e2908?f=pjson
+```
+</Tab>
+
+</Tabs>
+
+## JSON Response syntax
+
+```other
+{
+  "id": "<webhook ID>",
+  "folderName": "<the service's root folder name>",
+  "serviceName": "<the service name>",
+  "serviceType": "<the service type>",
+  "name": "<webhook name>",
+  "changeTypes": ["event triggers"],
+  "signatureKey": "<signature key>",
+  "hookUrl": "<payload URL>",
+  "active": <true | false>,
+  "contentType": "<application/json | application/x-www-form-urlencoded",
+  "scheduleInfo": { //The following object is only returned for feature service webhooks, as scheduling info is not applicable to geoprocessing webhooks
+    "name": "<user provided schedule name>",
+    "state": "enabled",
+    "startAt": <time in Epoch>,
+    "recurrenceInfo": {
+      "interval": <integer value>,
+      "frequency": "second"
+    }
+  },
+  "payloadFormat": "<json | pjson>",
+  "created": <time in Epoch when the webhook was created>,
+  "modified": <time in Epoch when the webhook was last modified>,
+  "ownerId": "<username of the webhook's owner>",
+  "modifiedId": "<username of the user to last modify the webhook>"
+}
+```
+
+## JSON Response examples
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Geoprocessing service webhooks</TabTitle>
+  <TabTitle>Feature service webhooks</TabTitle>
+</TabNav>
+
+<Tab>
+
+The following is a sample JSON Response for a geoprocessing service webhook resource:
+
+```other
+{
+  "id": "8674b8f4-1588-42bf-a529-9923266cb9ed",
+  "folderName": "System",
+  "serviceName": "CachingControllers",
+  "serviceType": "GPServer",
+  "name": "TestWebhook",
+  "changeTypes": ["*"],
+  "signatureKey": "12345ABCDEF",
+  "hookUrl": "https://app.logic.azure.com:443/workflows/...",
+  "active": true,
+  "contentType": "application/json",
+  "scheduleInfo": {},
+  "payloadFormat": "json",
+  "created": 1670618091416,
+  "modified": 1670618091416,
+  "ownerId": "webhookAdmin",
+  "modifiedId": "webhookAdmin"
+}
+```
+</Tab>
+
+<Tab>
+
+The following is a sample JSON Response for a feature service webhook resource:
+
+```javascript
+{
+  "id": "e394baf5-287c-4ea3-a0b0-ad40c3de6ac3",
+  "folderName": "Hosted",
+  "serviceName": "Test",
+  "serviceType": "FeatureServer",
+  "name": "TestWebhook",
+  "changeTypes": ["*"],
+  "signatureKey": "12345ABCDEF",
+  "hookUrl": "https://app.logic.azure.com:443/workflows/...",
+  "active": true,
+  "contentType": "application/json",
+  "scheduleInfo": {
+    "name": "Every20Seconds",
+    "state": "enabled",
+    "startAt": 1670617721049,
+    "recurrenceInfo": {
+      "interval": 20,
+      "frequency": "second"
+    }
+  },
+  "payloadFormat": "json",
+  "created": 1670617745208,
+  "modified": 1670617745208,
+  "ownerId": "webhookAdmin",
+  "modifiedId": "webhookAdmin"
+}
+```
+</Tab>
+
+</Tabs>

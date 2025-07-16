@@ -1,0 +1,59 @@
+import ParamMetadata from "../../../components/param-metatdata" 
+
+<ParamMetadata types={[{name:"feature",link:"../routing-data-types#feature"}]} />
+
+{/* <p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p> */}
+
+Specify the intermediate depots that routes can visit to reload or unload the cargo they are delivering or picking up. Specifically, a route renewal links a route to a depot. The relationship indicates the route can renew (reload or unload while en route) at the associated depot. 
+
+Route renewals can be used to model scenarios in which a vehicle picks up a full load of deliveries at the starting depot, services the orders, returns to the depot to renew its load of deliveries, and continues servicing more orders. For example, in propane gas delivery, the vehicle may make several deliveries until its tank is nearly or completely depleted, visit a refueling point, and make more deliveries. 
+
+Here are a few rules and options to consider:
+
+-   The reload/unload point, or renewal location, can be different from the start or end depot.
+-   Each route can have one or many predetermined renewal locations.
+-   A renewal location can be used more than once by a single route.
+-   In cases where there may be several potential renewal locations for a route, the closest available renewal location is identified by the solver.
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for route renewals</span></summary>
+
+ #### Attributes for route renewals
+
+-   <p class="space-x-2"><span class="font-bold">RouteName</span><span class="font-sm text-color-3">string (length: 1024)</span></p>
+
+    The name of the route that this renewal applies to. This attribute is a foreign key to the `Name`  attribute in the `routes`  parameter, so the values must match. The attribute cannot have a null value.
+
+-   <p class="space-x-2"><span class="font-bold">DepotName</span><span class="font-sm text-color-3">string (length: 1024)</span></p>
+
+    The name of the depot where this renewal takes place. This attribute is a foreign key to the `Name`  attribute in the `depots`  parameter, so the values must match. The attribute cannot have a null value.
+
+-   <p class="space-x-2"><span class="font-bold">ServiceTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:60</span></p>
+
+    The service time for the renewal. This attribute can contain a null value; a null value indicates zero service time. The units for this attribute value are specified by the `time_units`  parameter.
+
+    <Note type={"note"}>
+
+    The time taken to load a vehicle at a renewal depot may depend on the size of the vehicle and how full or empty the vehicle is. However, the service time for a route renewal is a fixed value and does not take into account the actual load. Therefore, the renewal service time should be given a value corresponding to a full truckload, an average truckload, or another time estimate of your choice.
+
+    </Note> 
+
+-   <p class="space-x-2"><span class="font-bold">Sequence</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#6d29cc]">default:null</span></p>    
+
+   Specify one or more sequences of visits to the renewal depot. This attribute can be used to preassign visits to the renewal depot. The attribute value is specified as a space-separated string of sequence values. The attribute can contain a null value; a null value indicates that the service will determine the best sequence to visit the renewal depot.
+
+</details>
+
+**Example**
+
+In this example, a distribution company makes deliveries from a central depot using two trucks. Over time, the distribution company also acquired two additional satellite distribution centers. These centers can be used by the trucks to renew their truckload while making their deliveries instead of returning to the main distribution center for renewal. So the new distribution centers are specified as route renewals when solving the fleet routing problem, and the service selects the best renewal locations that minimize the total cost.
+
+You need to specify two route renewal locations for each route, so you have a total of four route renewal features. You identify the depot location that can be used for renewal using the `DepotName`  attribute. You specify the name of the route the renewal applies to using the `RouteName`  attribute. Because it takes 15 minutes to load the truck at the renewal location, specify 15 as the value for the `ServiceTime`  attribute assuming the `time_units`  parameter is set to `Minutes` . The other attribute values are not specified because their default values are adequate in this scenario.
+
+<Note type={"note"}>
+
+Unlike the `depots`  and `orders`  parameters, the `spatialReference`  and `geometry`  properties are not required when specifying the `route_renewals`  parameter. 
+
+</Note>
+
+<CodeBlock language="json" source="../../code-samples/vrp/examples/inputs/routeRenewals_ex.json" group="json" maxLines={20} expandable/>

@@ -1,0 +1,103 @@
+---
+title: "Validation Service"
+description: "The Validation Server service exposes the management capabilities necessary to support validation of specific geodatabase rules."
+slug: "validation-server"
+url: "/validation-server"
+guid: "GUID-C6C6001F-A6A5-4674-BD06-2E5B5032EEFD"
+migratedTopicMetadata:
+  FTITLE: "Validation Server"
+  FDESCRIPTION: "The Validation Server is responsible for exposing the management capabilities necessary to support attribute rules, topology, and parcel fabric layers."
+  FCHANGES: "Adding conref about ArcGIS Advanced Editing UTE"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "25/09/2023 09:47:36"
+  FAUTHOR: "mjarman"
+  FSTATUS: "Released"
+  MODIFIED-ON: "27/09/2023 06:44:34"
+  VERSION: "5"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-1DA9B647-44EE-4BCC-B92F-EF89A079DFF9"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/ValidationServer
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/ValidationServer
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: ' 10.7'
+---
+
+## Description
+
+The `ValidationServer` service exposes the management capabilities necessary to support evaluation of geodatabase rules. This service is available when sharing to ArcGIS Enterprise by enabling the `Validation` capability. To learn more, see [Additional layers and capabilities](https://pro.arcgis.com/en/pro-app/latest/help/sharing/overview/additional-layers-and-capabilities.htm).
+
+The following rule types can be evaluated using the [`evaluate`](/evaluate) operation:
+
+-   Topology rules
+-   Batch calculation and validation attribute rules
+
+![Summary graphic of validation service operations](./images/validation_server.png)
+
+The validation server shares service instance settings and is tied to the published feature service as a [server object extension (SOE)](https://enterprise.arcgis.com/en/server/latest/develop/linux/about-extending-services.htm#ESRI_SECTION1_10A299337E3C4F3197F02F5C142B9BA8).
+
+[Learn how to configure service instance settings](https://enterprise.arcgis.com/en/server/latest/administer/windows/configure-service-instance-settings.htm)
+
+<Note type={"note"}>
+
+Organization members must be assigned a license for the [ArcGIS Advanced Editing user type extension](https://enterprise.arcgis.com/en/portal/latest/administer/windows/license-user-type-extensions.htm#ESRI_SECTION1_B75DA80066744473AD5DD1312734654A) to use the [Evaluate](/evaluate) Validation Server operation.
+
+</Note>
+
+## Capabilities
+
+The `capabilities` property was introduced at ArcGIS Enterprise 11.1. This property returns the capabilities that the service supports. Refer to the JSON Response syntax section below for the ArcGIS Enterprise version when each capability was first introduced:
+
+-   `supportsTopologyValidation`—The `evaluate` operation, supports the `evaluationType` of topologyRules.  
+-   `supportsTopologyErrorModification`—The `updateErrors` operation supports the `ruleType` property for the `errorFeatures` parameter. The property is to support the `updateErrors` operation for a topology.
+-   `supportsWriteErrors`—The `writeErrors` operation supports the ability to write errors to GDB_Validation*Errors tables.
+-   `supportsWriteErrorsWithSketchGeonetries`—The `writeErrors` operation supports the `objectIdSketchGeometryPairs` property for the `errors` parameter to enhance writing different types of sketched geometries to their corresponding GDB_Validation*Errors table.
+
+## JSON Response syntax
+
+root
+
+```other
+{
+  "name": "Validation Server",
+  "type": "Map Server Extension",
+  "capabilities": {
+    "supportsTopologyValidation": <true | false>, //Introduced in 10.8.1
+    "supportsTopologyErrorModification": <true | false>, //Introduced in 10.8.1
+    "supportsWriteErrors" : <true | false>, //Introduced at 11.3
+    "supportsWriteErrorsWithSketchGeometries" : <true | false>, //Introduced at 11.4
+  } 
+}
+
+```
+
+## Example usage
+
+Request URL: `https://myserver.esri.com/server/rest/services/LandUse/validationServer` 
+
+JSON response:
+
+```javascript
+{
+ "name": "Validation Server",
+ "type": "Map Server Extension",
+ "capabilities": {
+  "supportsTopologyValidation": true,
+  "supportsTopologyErrorModification": true,
+  "supportsWriteErrors": true
+  } 
+}
+```

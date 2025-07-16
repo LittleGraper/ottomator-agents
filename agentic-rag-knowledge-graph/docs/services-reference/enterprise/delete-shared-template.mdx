@@ -1,0 +1,123 @@
+---
+title: "Delete (Feature Service/Shared Templates)"
+description: "The delete operation deletes existing shared templates from the back-end data source."
+slug: "delete-shared-template"
+url: "/delete-shared-template"
+restInfoMetadata:
+  apiPath: /services/<serviceName>/sharedTemplates/delete
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /services/<serviceName>/sharedTemplates/delete
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '11.4'
+  requiredCapability: 'SharedTemplateEditing capability enabled on the service'
+---
+
+## Description
+
+The `delete` operation deletes existing shared templates from the back-end data source. Once a template is deleted, it will no longer be available to other services that may reference it. Only template owners, or orgaization administrators, can delete a shared template. Support for this operation is indicated when the service's `supportsSharedTemplates` property is set as `true` and the service has the `SharedTemplateEditing` capability enabled.
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `globalIds`
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      An array of `globalId` values for the shared templates to be deleted.
+
+      Syntax
+
+      ```other
+      globalIds=["<guid1>","<guid2>"]
+
+      ```
+
+      Example
+
+      ```other
+      globalIds= ["{FA46F1EB-796C-4FB9-8E7B-B184EC6D43DC}","{2D85EDA5-DBEB-4DD1-AA73-C25DFC8BD4B6}"]
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+The following is a sample POST request for the `delete` operation that demonstrates deleting two templates:
+
+```other
+POST /webadaptor/rest/services/MyService/FeatureServer/sharedTemplates/delete HTTP/1/1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+globalIds=["{FA46F1EB-796C-4FB9-8E7B-B184EC6D43DC}","{2D85EDA5-DBEB-4DD1-AA73-C25DFC8BD4B6}"]&f=pjson
+
+```
+
+## JSON Response syntax
+
+```other
+[
+  {
+    <result1>
+  },
+  {
+    <result2>
+  }
+]
+
+```
+
+## JSON Response example
+
+The sample response below demonstrates the response returned when the operation completes successfully. The example below shows that two shared templates were successfully updated:
+
+```other
+{
+  "success": true
+}
+
+```
+
+The sample response below demonstrates the response returned when the operation fails. The example below demonstrates a response that is returned when the template included in the request is referenced by a group or preset template. In order to delete this template, the group or preset template would need to be updated to remove the reference, or the templates would need to be deleted. If the operaiton fails for any reason, all changes are rolled back.
+
+```other
+{
+  "error": {
+    "code": 400,
+    "extendedCode": -2147467259,
+    "message": "Unable to complete operation.",
+    "details": [
+      "Failed to delete template: '{DA8E952E-1CF8-4202-826A-5C2422502732}'. Template is being used."
+    ]
+  }
+}
+
+```

@@ -1,0 +1,938 @@
+---
+title: "Append (Feature Service/Layer)"
+description: "The append operation upserts data to a feature layer."
+slug: "append-feature-service-layer"
+url: "/append-feature-service-layer"
+guid: "GUID-5890E8F4-3118-4A93-B238-F123899AA20F"
+migratedTopicMetadata:
+  FTITLE: "Append (Feature Service-Layer)"
+  FDESCRIPTION: "Efficient data loading API to append data to existing layer/service from different sources with upsert capability."
+  FCHANGES: "Updating 'Upsert'"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2-*"
+  CREATED-ON: "01/10/2023 22:13:11"
+  FAUTHOR: "eidolyantes"
+  FSTATUS: "Draft"
+  MODIFIED-ON: "01/10/2023 22:53:24"
+  VERSION: "11"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-2831E15B-A86D-4689-BD2E-3B20E22B416B"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/FeatureServer/<layerId>/append
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/FeatureServer/<layerId>/append
+  methods:
+    - post
+  sslOnly: 'no'
+---
+
+## Description
+
+ArcGIS Online and ArcGIS Enterprise feature service layers support an `append`  operation, a high-performance API capable of handling large volumes of data that has the ability to upsert data.
+
+### Upsert
+
+Upsert is a combination of insert and update, driven by the `featureId` . Upsert is used to add new features and update existing features at the same time. If a feature in the source data matches an existing feature in the destination layer, the existing feature is updated with the values from the source. If there is no match, a new feature is created based on the values from the source.
+
+By default, the `append`  operation supports `featureId`  of type `ObjectId`  and `GlobalId` . The reason is because `ObjectId`  and `GlobalId`  are indexed and has unique value. Technically you can `Upsert`  based on any field, as long as it set as index and must be unique.
+
+For example the JSON format for index should look like the following:
+
+```javascript
+{
+      "name": "FDO_GlobalID",
+      "fields": "GlobalID",
+      "isAscending": true,
+      "isUnique": true,
+      "description": ""
+},
+
+```
+
+ 
+
+### Unique index on source data `featureId` 
+
+The destination `objectId`  or `globalId`  fields do not need to be mapped to source fields of the same data type. The source `featureId`  can map to a different field type, as long as the values can be converted to an acceptable destination value for `featureId` . For example, the destination `globalId`  can be mapped to the `GlobalId` , `Guid` , `string`  field types; the `objectId`  can be mapped to the `short`  or `long`  field types.
+
+<Note type={"note"}>
+
+When `upsert`  is set to `true` , the `append`  operation checks for uniqueness in the source `featureId` . It is not acceptable to append two source rows to the same destination row, as the `append`  operation would return an error if more than one source feature shares the same `featureId` .
+
+</Note>
+
+### Enable and disable append capabilities
+
+<Note type={"note"}>
+
+This functionality is supported in ArcGIS Online and in ArcGIS Enterprise at 11.1.
+
+</Note>
+
+Feature service `Append`  capabilities must be enabled for the `append`  operation to be used by nonadministrative users. Organization administrators, or the service owner, can use the `append`  operation without having the `Append`  capability enabled on the feature service. The `Append`  capability needs to be added to the service capabilities only if the service owner or organization administrators need to allow nonadministrative users to append data to a feature service. Organization administrators or the service owner can enable or disable the `Append`  capability for an existing feature service using the `updateDefinition`  operation. For more information on how to configure Append and other capabilities on a feature service layer, see [Update Definition](/update-definition-feature-layer). 
+
+The `Append`  capability does not require any editing capabilities to be enabled. Features will be inserted or updated when `upsert`  is set to `true`  through the `append`  operation without the administrator adding either the `Create`  or `Update`  capabilities to the feature service.
+
+### Supports append
+
+A feature service layer can return the `supportsAppend`  metadata property. When this property is absent or returns as `false` , the `Append`  capability cannot be added and the feature service layer does not support the `append`  operation, even for the organization administrators of the feature service owner.
+
+### Append sources
+
+The source of the append operation can be one of three parameters: edits, `appendItemId` , or `appendUploadId` . edits is a literal feature collection string. `appendItemId`  references the `itemId`  of a file or hosted feature currently stored in the portal or geowarehouse. `appendUploadId`  references the `itemId`  of a file uploaded to the server through the uploads operation. The `itemId`  of a file in the portal or geowarehouse is completely independent from the `itemId`  of a file stored in the server uploads. Unless a file is needed in the portal or geowarehouse, using the uploads API is the recommended method. For ArcGIS Enterprise, `appendItemId`  is supported with 10.9 and later.
+
+ArcGIS Enterprise 11.3 introduces support for appending directly to a hosted feature service from another hosted feature service within the same Enterprise organization (not from a different Enterprise organization or from a source reference feature service). Both relational and spatiotemporal data stores can be used as the target of this operation, only relational can be used as a source at present.
+
+### Supported append formats
+
+A feature service that supports append returns the `supportedAppendFormats`  metadata property. This property lists the supported `appendUploadFormat`  values for this operation.
+
+The append formats are as follows:
+
+-   `sqlite` : sqlite database
+-   `geoPackage` : geopackage
+-   `shapefile` : shapefile
+-   `filegdb` : file geodatabase
+-   `featureCollection` : feature collection
+-   `geojson` : GeoJSON
+-   `csv` : Comma separated values
+-   `excel` : Microsoft Excel format
+- `featureService`: a hosted feature service
+
+### Sync and Change Tracking
+
+The `upsert`  parameter is not supported if the feature service has `sync`  or `changeTracking`  capabilities enabled. When `sync`  or `changeTracking`  are enabled, the `upsert`  parameter is blocked for the following reasons:
+
+-   The Esri`sync`  engines might not be able to support syncing the changes from the `upsert`  parameter. The `append`  operation might be using a very low level database API that might prevent the use of triggers to track the changes from the `upsert`  parameter. ArcGIS Online feature service `sync`  engines rely on triggers to track the edit changes.
+-   The volume of changes from `upsert`  might be quite large for the syncing process, and it will be better for the client to re-create the replica after `upsert` .
+-   Attempting to set the `upsert`  parameter to `true`  will return an error if sync or change tracking are enabled.
+
+### Feature service layer views
+
+The append operation can be used to enable feature service layer views.
+
+### Preserve `featureId` 
+
+The source `featureId`  (`ObjectId or GlobalId` ) is only preserved when `upsert`  is `true` . When `upsert`  is `false` , all new rows created will have their new `objectId`  or `globalId`  allocated by the system.
+
+### Feature service metadata
+
+The metadata for a feature service is updated after adding or updating data using the `append`  operation. The `lastEditDate`  of the feature service will be updated. The `extent`  will also be updated for ArcGIS Online feature services.
+
+### Spatial references
+
+The source data is projected to the layer spatial reference when appending data to the destination layers. Data from CSV, Geojson, and Excel is defaulted to GCS spatial reference (4326). If the source data from these data sources is in a different spatial reference than 4326, the source spatial reference can be passed in the `appendSourceInfo`  parameter (`sourceSR` ).
+
+### Geocoding (ArcGIS Online)
+
+The append operation supports geocoding geometry from CSV and Excel data. The cost and billing of geocoding is the same cost and billing of geocoding when publishing data as a feature service.
+
+### Editor tracking and ownership-based access control (OBAC)
+
+Editor tracking is supported with feature service `append`  API. The `CreationDate`  and `EditDate` , `Editor` , and `Creator`  fields are populated based on the user who is calling `append` . Editor tracking fields are set when inserting or updating existing features. The creator and the editor fields will be set to the append user.
+
+Service owner and administrators will bypass any OBAC set on the feature service. For nonowners, if `allowsUpdateToOthers`  is set to `false`  on the feature service, the append user can only update their features or the features owned by anonymous users.
+
+### Time zone
+
+Time zone information is supported in both ArcGIS Online and in ArcGIS Enterprise starting at ArcGIS Enterprise 11.4. Source data `timeZoneInfo`  can be specified in the `appendSourceInfo`  json object similar to the `timeZoneInfo`  passed in when publishing new feature service.
+
+Example
+
+```javascript
+{"dateFieldsTimeReference": {"timeZone": <"timezone">,"respectsDaylightSaving": true}}
+```
+
+ 
+
+### Appending multipatch data (ArcGIS Online)
+
+Appending/upserting data to a multipatch feature service is supported. For ArcGIS Online feature services, the client can turn on the `Append`  capability on multipatch feature services using the `updateDefinition`  admin API. Similar to a nonmultipatch feature service, `objectId` , `globalId` , or any other fields with a unique index can be used to upsert data to multipatch feature services. The `append`  operation returns an error when a client tries to append nonmultipatch geometry data into a feature service that stores multipatch geometries.
+
+## New at 11.2
+
+A new parameter, `truncateExisting` , has been added, which allows existing rows to be removed prior to appending new rows.
+
+## New at 11.1
+
+The updates and enhancements below have been added to hosted feature services running on a relational data store in ArcGIS Enterprise:
+
+-    The Append capability can now be set for qualifying hosted feature service layers to allow non-service owners and non-organization administrators with access to the feature service to run this operation. In prior releases, the Append capability could not be set for hosted feature services, limiting the scope of those who could use this operation on a given hosted feature service.
+-    The `esriFieldTypeBlob`  field type is now supported.
+-    A field's default value is now applied when a row is added with no provided value when using either this operation or [Apply Edits](/apply-edits-feature-service-layer).
+
+    <Note type={"note"}>
+
+    This enhancement matches behavior already present for ArcGIS Online hosted feature services and ArcGIS Enterprise non-hosted feature services.
+
+    </Note>
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sourceTableName` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Required only when the source data contains more than one table.
+
+      ```other label=Example
+      sourceTableName="Building"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `fieldMappings` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Maps source data to a destination layer. The `append` default behavior is to match by name; the operation tries to find fields in the source data that match the destination fields.
+
+      The `fieldMappings` parameter can be used as an input to define mappings for fields in the source that do not match the destination layer fields. There is no need to define mappings for fields that match the destination layer fields. The default behavior is to match fields by name even if they are not specified in the field mapping parameter. To prevent the default mapping fields behavior, the `appendFields` parameter can be used with append to restrict the list of fields that will be updated or inserted when using append API.
+
+      ```other label=Syntax
+      fieldMappings=[
+        {
+          "name": <"targetName">,
+          "source": <"sourceName">
+        },
+        ...
+      ]
+      ```
+
+      ```other label=Example
+      fieldMappings=[
+        {
+          "source":"FACILITYID",
+          "name":"FACILITYID"
+        },
+        {
+          "source":"FLOW",
+          "name":"FLOW"
+        },
+        {
+          "source":"DESC",
+          "name":"DESC"
+        }
+      ]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `edits` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A literal feature collection JSON string to be used as the source data.
+
+      ```other label=Example
+      edits={
+        "layers": [
+          {
+            "layerDefinition": {
+              "id": 0,
+              "name": "appendOrig",
+              "type": "Feature Layer",
+              "geometryType": "esriGeometryPoint",
+              "hasM": false,
+              "hasZ": false,
+              "objectIdField": "objectid",
+              "globalIdField": "globalid",
+              "fields": [
+                {
+                  "name": "objectid",
+                  "type": "esriFieldTypeOID",
+                  "alias": "OBJECTID",
+                  "domain": null,
+                  "nullable": false,
+                  "defaultValue": null,
+                  "modelName": "objectid",
+                  "editable": false
+                },
+                {
+                  "name": "data1",
+                  "type": "esriFieldTypeInteger",
+                  "alias": "data1",
+                  "domain": null,
+                  "editable": true,
+                  "nullable": true,
+                  "defaultValue": null,
+                  "modelName": "data1"
+                },
+                {
+                  "name": "string1",
+                  "type": "esriFieldTypeString",
+                  "alias": "string1",
+                  "domain": null,
+                  "editable": true,
+                  "nullable": true,
+                  "length": 8000,
+                  "defaultValue": null,
+                  "modelName": "string1"
+                },
+                {
+                  "name": "date1",
+                  "type": "esriFieldTypeDate",
+                  "alias": "date1",
+                  "domain": null,
+                  "editable": true,
+                  "nullable": true,
+                  "length": 29,
+                  "defaultValue": null,
+                  "modelName": "date1"
+                },
+                {
+                  "alias": "globalid",
+                  "name": "globalid",
+                  "length": 38,
+                  "domain": null,
+                  "nullable": false,
+                  "type": "esriFieldTypeGlobalID",
+                  "editable": false
+                }
+              ],
+              "geometryField": {
+                "name": "shape",
+                "type": "esriFieldTypeGeometry",
+                "alias": "Shape",
+                "domain": null,
+                "editable": true,
+                "nullable": false,
+                "defaultValue": null,
+                "modelName": "shape"
+              }
+            },
+            "featureSet": {
+              "geometryType": "esriGeometryPoint",
+              "spatialReference": {
+                "wkid": 102100,
+                "latestWkid": 3857
+              },
+              "features": [
+                {
+                  "attributes": {
+                    "objectid": 1,
+                    "data1": 12,
+                    "string1": "mystring",
+                    "date1": 1293840000000,
+                    "globalid": "{E716381A-C731-4EC8-be6D-C999BC6308F0}"
+                  },
+                  "geometry": {
+                    "spatialReference": {
+                      "wkid": 102100,
+                      "latestWkid": 3857
+                    },
+                    "x": 11131.949099998921,
+                    "y": 122458.96290000156
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `appendSourceInfo` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This is only needed when appending data from Excel or CSV. The `appendSourceInfo` can be the publishing parameter returned from analyzing the CSV or Excel files. Appending data from the CSV or Excel files requires the `appendSourceInfo` parameter that identifies the `locationType` of the geometry in addition to how to parse the content of the CSV and Excel files. The `appendSourceInfo` parameter is designed to be the same as analyzing publishing parameters returned from CSV or Excel files by the analyze operation.
+
+      ```other label=Example
+      appendSourceInfo={
+        "type": "csv",
+        "name": "StarbucksClosures",
+        "locationType": "coordinates",
+        "latitudeFieldName": "y",
+        "longitudeFieldName": "x",
+        "columnDelimiter": ",",
+        "qualifier": "\"",
+        "sourceSR": {
+          "wkid": 4326,
+          "latestWkid": 4326
+        },
+        "layerInfo": {
+          "id": 0,
+          "globalIdField": "",
+          "objectIdField": "objectid",
+          "fields": [
+            {
+              "name": "x",
+              "type": "esriFieldTypeDouble"
+            },
+            {
+              "name": "city",
+              "type": "esriFieldTypeString"
+            },
+            {
+              "name": "y",
+              "type": "esriFieldTypeDouble"
+            },
+            {
+              "name": "matchaddr",
+              "type": "esriFieldTypeString"
+            },
+            {
+              "name": "street",
+              "type": "esriFieldTypeString"
+            },
+            {
+              "name": "score",
+              "type": "esriFieldTypeInteger"
+            },
+            {
+              "name": "locname",
+              "type": "esriFieldTypeString"
+            },
+            {
+              "name": "st",
+              "type": "esriFieldTypeString"
+            },
+            {
+              "name": "objectid",
+              "type": "esriFieldTypeOID"
+            }
+          ]
+        }
+      }
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `appendSourceFilter`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Filters features from the source file. Source formats that support filtering can be determined by inspecting the layer's`supportedAppendSourceFilterFormats` property. Candidate values and format for this property are the same as for `supportedAppendFormats`.
+
+
+      ```other label=Syntax
+      appendSourceFilter=[{"id": <layerID>, "where": <SQL expression>}]
+      ```
+
+      ```other label=Example
+      appendSourceFilter=[{"id": 0, "where": "elevation >= 0"}]
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `upsert` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies whether the edits needs to be applied as updates if the feature already exists. The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `skipInserts` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Skips inserts if the value is `true`. The default value is `false`.
+
+      <Note type={"note"}>
+
+      This parameter is only used when `upsert` is `true`.
+
+      </Note>
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `skipUpdates` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Skips updates if the value is `true`. The default value is `false`.
+
+      <Note type={"note"}>
+
+      This parameter is only used when `upsert` is `true`.
+
+      </Note>
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `useGlobalIds` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies whether `upsert` needs to use `GlobalId` when matching features. The default value is `false` and `ObjectId` is used by default.
+
+      <Note type={"note"}>
+
+      If using `upsert`, either `useGlobalIds` or `upsertMatchingField` must be included in the request. If the request includes both parameters, `upsertMatchingField` will be override any value set for `useGlobalIds`.
+
+      </Note>
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `truncateExisting` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies whether existing rows should be truncated prior to appending new rows. The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `updateGeometry` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Skips updating the geometry and update only the attributes for existing features if they match source features by `objectId` or `globalId` (as specified by the `useGlobalIds` parameter). The default value is `true`.
+
+      <Note type={"note"}>
+
+      This parameter is only used when `upsert` is `true`.
+
+      </Note>
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `appendFields` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Restricts the list of destination fields that are appended, instead of automatically matching names. This is supported when `upsert` is specified.
+
+      ```other label=Example
+      appendFields=["FACILITYID","FLOW","DESC"]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `upsertMatchingField` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The layer field to be used when matching features with `upsert`. `ObjectId`, `GlobalId`, and any other field that has a unique index can be used with `upsert`.
+
+      <Note type={"note"}>
+
+      You can also use `upsertMatchField="GlobalId"`. So `upsertMatchField` is a generic way to specify the `upsert` field including `GlobalId`. `useGlobalIds` is a short use of `upsertMatchField = "GlobalId"`.
+
+      </Note>
+
+      ```other label=Example
+      upsertMatchingField="MyfieldWithUniqueIndex"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `useGlobalIds` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies whether `upsert` needs to use `GlobalId` when matching features. If the target layer has `GlobalId` and `upsert=true`, then `GlobalId` will always be preserved regardless of `useGlobalIds` is set or not.
+
+      The default value is `false` and `ObjectId` is used by default. `useGlobalIds=true` can be overridden by specifying `upsertMatchField="someFieldName"` in which case the `upsertMatchField` will be the match field.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `appendUploadId` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The `itemId` of the source file returned from the uploads operation. Used in conjunction with `editUploadFormat`. This ID can be passed to the append operation if analyzing the data is not needed. Any uploaded items are temporary items and will be cleaned by the system. The [uploads](/uploads) operation supports single-item uploads to 10M and multipart uploads for files larger than 10M.
+
+      ```other label=Example
+      appendUploadId=0c6b928f590f49ebac04761bab413e49
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `appendItemId` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The ID for the portal item or geowarehouse item that contains the source file or hosted feature service. This parameter is used in conjunction with `editsUploadFormat`. 
+
+      This ID may also be used for CSV and Excel files to get information using the analyze operation. Analysis can be done to learn information about a source's fields and provide a UX map to the source fields to the destination layer fields. The item added using the `addItem` operation is permanent and would need to be cleaned up, if necessary, by the caller after the `append` operation is finished.
+
+      ```other label=Example
+      appendItemId=894d8c12438v4baaac164b636f7e1e2f
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `appendUploadFormat` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The append source data format. The default is the `featureCollection` format.
+
+      Values: `sqllite` | `shapefile` | `filegdb` | `featureCollection` | `geojson` | `csv` | `excel`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `layerMappings` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This is needed if the source is featureService. It is used to map a source layer to a destination layer. Only one source can be mapped to a layer.
+
+      ```other label=Syntax
+      layerMappings=[{"id": <layerID>, "sourceId": <layer id>}]
+
+      ```
+
+      ```other label=example
+      //Feature service, layer 1
+      layerMappings=[{"id": 1, "sourceId": 3}]
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `rollbackOnFailure` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies whether the `upsert` edits need to be rolled back in case of failure. The default value is `false`.
+
+      Value: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default value is `html`.
+
+      Value: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+### Example one: append shape file to layer
+
+The following example demonstrates appending data from a shape file (with the `itemID`  of `0c6b928f590f49ebac04761bab413e49` ) to the feature service layer:
+
+```javascript
+POST /webadaptor/rest/services/USA/FeatureServer/0/append HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+sourceTableName=&fieldMappings=&edits=&appendSourceInfo=&upsert=false&skipInserts=false&skipUpdates=false&useFlobalIds=false&updateGeometry=false&appendFields=&upsertMatchingFields=&appendUploadId=0c6b928f590f49ebac04761bab413e49&appendItemId=&appendUploadFormat=shapeFile&rollbackOnFailure=&f=pjson
+```
+
+ 
+
+The above request generates the following response:
+
+```javascript
+{
+  "status": "processing",
+  "statusMessage": "Job Status for jobId: b62e9db7-507c-443d-3473-8a1f7a7e9fac",
+  "itemId": "cc7ddbc1e33440688d3110c885fa0b30"
+}
+```
+
+ 
+
+The `jobId`  from the response can be used to check the job status by making a request of the following form:
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/USA/FeatureServer/0/append/jobs/b62e9db7-507c-443d-3473-8a1f7a7e9fac?f=json
+```
+
+ 
+
+If the job is successful, and complete, the above request will return the following response:
+
+```javascript
+{
+  "layerName": "CITIES",
+  "submissionTime": 1520876908117,
+  "lastUpdatedTime": 1520876913647,
+  "recordCount": 2,
+  "status": "Completed"
+}
+```
+
+ 
+
+### Example two: append file geodatabase to layer
+
+The following example demonstrates appending data from a file geodatabase (with the `itemId`  of `0c6b928f590f49ebac04761bab413e49` ) to the feature service layer:
+
+```javascript
+POST /webadaptor/rest/services/USA/FeatureServer/0/append HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+sourceTableName=Hydrant&fieldMappings=[{"source":"FACILITYID","name":"FACILITYID"},{"source":"FLOW","name":"FLOW"},{"source":"LOCDESC","name":"LOCDESC"}]&edits=&appendSourceInfo=&upsert=false&skipInserts=false&skipUpdates=false&useGlobalIds=false&updateGeometry=true&appendFields=["FACILITYID","FLOW","LOCDESC"]&upsertMatchingField=&appendUploadId=0c6b928f590f49ebac04761bab413e49&appendItemId=&appendUploadFormat=filegdb&rollbackOnFailure=true&f=pjson
+```
+
+ 
+
+The above request generates the following response:
+
+```javascript
+{
+  "status": "processing",
+  "statusMessage": "Job Status for jobId: feeahh1e-e32c-45bf-680c-f4ed70569081",
+  "itemId": "aa7gdww1e55200527d3110c634fa0b30"
+}
+
+```
+
+ 
+
+The `jobId`  from the response can be used to check the job status by making a request of the following form:
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/USA/FeatureServer/0/append/jobs/feeahh1e-e32c-45bf-680c-f4ed70569081?f=json
+```
+
+ 
+
+If the job is successful, and complete, the above request will return the following response:
+
+```javascript
+{
+  "layerName": "Hydrant",
+  "submissionTime": 1520876908117,
+  "lastUpdatedTime": 1520876913647,
+  "recordCount": 5,
+  "status": "Completed"
+}
+```
+
+ 
+
+### Example three: append shapefile, upsert by matching objectId
+
+The following example demonstrates appending data from a shapefile (with the `itemId`  of `0c6b928f590f49ebac04761bab413e49` ) to the feature service layer. The data and geometries will update where the `objectId`  is matched and will insert where the `objectId`  is not matched:
+
+```javascript
+POST /webadaptor/rest/services/MyService/FeatureServer/0/append HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+sourceTableName=MyShapes&fieldMappings=[{"source":"myShapeDate","name":"datefield"},{"source":"myData","name":"mydata"},{"source":"myData2","name":"mydata2"},{"source":"FID","name":"objectid"}]&upsert=true&skipInserts=false&updateGeometry=true&appendFields=["datefield","mydata","mydata2","objectid"]&appendUploadId=62b7e088a2ff4b3da1a240d72f9994e3&appendUploadFormat=shapefile&rollbackOnFailure=true&f=json
+```
+
+ 
+
+The above request generates the following response:
+
+```javascript
+{
+  "status": "processing",
+  "statusMessage": "Job Status for jobId: feeahh1e-e32c-45bf-680c-f4ed70569081",
+  "itemId": "aa7gdww1e55200527d3110c634fa0b30"
+}
+```
+
+ 
+
+The `jobId`  from the response can be used to check the job status by making a request of the following form:
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/MyService/FeatureServer/0/append/jobs/feeahh1e-e32c-45bf-680c-f4ed70569081?f=json
+```
+
+ 
+
+If the job is successful, and complete, the above request will return the following response:
+
+```javascript
+{
+  "layerName": "MyService",
+  "submissionTime": 1520876908117,
+  "lastUpdatedTime": 1520876913647,
+  "recordCount": 50786,
+  "status": "Completed"
+}
+```
+
+ 
+
+### Example four: append a CSV to a table, upsert by matching global ID, skip inserts
+
+The following example demonstrates appending data from a comma-delimited CSV (with the `itemId`  of `i3ae29394-68f0-43b7-a30a-53fdfe2b4acd` ) to a feature service table. Because the CSV does not have geometry, and the heads of the file match the column names exactly, the `appendSourceInfo`  can be empty. The data will update where the `globalId`  is matched, and because `skipInserts`  is `true` , it will not insert where `globalId`  is not matched.
+
+```javascript
+POST /webadaptor/rest/services/MyService/FeatureServer/0/append HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+upsert=true&skipInserts=true&updateGeometry=false&appendUploadId=i3ae29394-68f0-43b7-a30a-53fdfe2b4acd&appendUploadFormat=csv&rollbackOnFailure=true&f=json&useGlobalIds=true&appendSourceInfo={}
+
+```
+
+ 
+
+The above request generates the following response:
+
+```javascript
+{
+  "status": "processing",
+  "statusMessage": "Job Status for jobId: feeahh1e-e32c-45bf-680c-f4ed70569081",
+  "itemId": "i3ae29394-68f0-43b7-a30a-53fdfe2b4acd"
+}
+```
+
+ 
+
+The `jobId`  from the response can be used to check the job status by making a request of the following form:
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/MyService/FeatureServer/0/append/jobs/feeahh1e-e32c-45bf-680c-f4ed70569081?f=json
+```
+
+ 
+
+If the job is successful, and complete, the above request will return the following response:
+
+```javascript
+{
+  "layerName": "MyService",
+  "submissionTime": 1520876908117,
+  "lastUpdatedTime": 1520876913647,
+  "recordCount": 506,
+  "status": "Completed"
+}
+```
+
+ 

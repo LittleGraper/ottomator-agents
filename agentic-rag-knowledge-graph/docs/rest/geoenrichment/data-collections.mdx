@@ -1,0 +1,4801 @@
+---
+title: "Data collections"
+description: "The GeoEnrichment service uses the concept of a data collection to define the data attributes returned by the enrichment service."
+slug: "data-collections"
+url: "/data-collections"
+guid: "GUID-0EE75B20-65F3-4D54-B98B-1C09F1EB0C3F"
+migratedTopicMetadata:
+  FTITLE: "Data Collections"
+  FDESCRIPTION: ""
+  FCHANGES: "Rewrite"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "25/05/2023 15:10:48"
+  FAUTHOR: "cdistefano"
+  FSTATUS: "Released"
+  MODIFIED-ON: "11/09/2023 07:32:24"
+  VERSION: "12"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "25"
+  ED: "GUID-03CFF299-01EA-4952-87B1-FCAD8F61BE56"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+---
+
+The GeoEnrichment service uses the concept of a data collection to specify a pre-defined list of attributes referred to as analysis variables or variables. For example, KeyGlobalFacts contains five commonly used variables: Total Population, Total Households, Male Population, Female Population and Average Household Size. KeyGlobalFacts is the default data collection and can be used in all countries that have data coverage. Each data collection has an ID that can be used with the enrich operation to enrich your data with those variables. Data collection IDs and individual variables can be discovered for a given country using the examples below.
+
+The `query`  parameter can be used to search for individual variables. A search string can be provided using the `query`  parameter to return variables that are an exact match, by default. Use the `query`  parameter together with the `returnSimilarity`  parameter to include variables that have a semantic similarity to the input search text. Searching for semantic similarities is supported by a pre-trained language model which is used to convert variable descriptions into vector representations. When using the `query`  parameter to pass a search string, the semantic meaning of the string is encoded into a vector representation and compared with the variable descriptions to find semantically similar and dissimilar strings and return the most similar variables.
+
+<Note type={"note"}>
+
+There are a few countries or areas that don't have all 5 variables in the KeyGlobalFacts data collection.
+
+There are two hierarchies of data collections for the U.S. The **census2020** hierarchy is the default and indicates the latest data based on the Census 2020 boundaries. The **census** hierarchy is based on the 2010 census boundaries and can be explicitly used in the URL request to override the default value. See [Examples](/data-collections#example-usage) 2 and 3 below.
+
+</Note>
+
+<Note type={"note"}>
+
+An examination of the entire global listing of variables, and associated datasets, can be conveyed with the use of this [data browser](http://doc.arcgis.com/en/esri-demographics/).
+
+</Note>
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[query](/data-collections#query)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Optional parameter used to search data collections for individual variables.
+
+Default: `null or empty` 
+
+**Example 1:**
+
+```javascript
+daytime population
+```
+
+ 
+
+**Example 2:**
+
+```javascript
+crime
+```
+
+ 
+
+**Example 3:**
+
+```javascript
+population growth
+```
+
+ 
+
+**Example 4:**
+
+```javascript
+unemployment rate
+```
+
+ 
+
+**Note:**
+
+-   When using the `query`  parameter exact matches are returned by default. To include results that also have a semantic similarity, use the `query`  parameter together with the `returnSimilarity`  parameter.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[returnSimilarity](/data-collections#returnsimilarity)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Optional parameter used to return a similarity score for variables which have semantic similarity to the search string used in the `query`  parameter
+
+**Default:**`false` 
+
+**Values:**`true`  \| `false` 
+
+**Note:**
+
+-   This parameter can be used with the `query`  parameter.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[minSimilarity](/data-collections#minsimilarity)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Optional parameter used to specify the minimum semantic similarity score for variables requested in the search string used in the `query`  parameter.
+
+**Default:**`null or empty` 
+
+**Example:** Values can range from 0-1.
+
+```javascript
+0.6
+```
+
+ 
+
+**Note:**
+
+-   This parameter can be used together with the `query`  and `returnSimilarity`  parameters.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[filters](/data-collections#filters)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Optional parameter that provides a set of controls to reduce the number of variables in the response.
+
+**Default:**`null or empty` 
+
+**Example 1:** Filter by data collection.
+
+```javascript
+(datacollection:1yearincrements) OR (datacollection:5yearincrements)
+```
+
+ 
+
+**Example 2:** Filter by name.
+
+```javascript
+(name:1yearincrements.AGE1_CY) OR (name:1yearincrements.AGE2_CY)
+```
+
+ 
+
+**Example 3:** Filter by category.
+
+```javascript
+(NOT category:Income) AND (NOT category:Race)
+```
+
+ 
+
+**Example 4:** Filter by source.
+
+```javascript
+Source:"U.S. Census" OR Source:"American Community Survey (ACS)"
+```
+
+ 
+
+**Example 5:** Filter by type.
+
+```javascript
+variableType:average OR variableType:index
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[langCode](/data-collections#langcode)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Optional parameter used to format and localize results. Localized output is available in English, French and Japanese languages.
+
+**Default:**`null or empty` 
+
+**Example 1:** Request output in English.
+
+```javascript
+en-us
+```
+
+ 
+
+**Example 2:** Request output in French.
+
+```javascript
+fr
+```
+
+ 
+
+**Example 3:** Request output in Japanese.
+
+```javascript
+ja
+```
+
+ 
+
+**Note:**
+
+-   Only en-us is supported when the `returnSimilarity`  parameter is true. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[addDerivativeVariables](/data-collections#-addderivativevariables)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Optional parameter to include calculated variables in the output such as percentages and averages. The list of accepted values are as follows `percent,index,average,all,*` 
+
+**Example:** Return all derived variables.
+
+```javascript
+all
+```
+
+ 
+
+**Note:**
+
+-   The `all`  and `*`  values both return all derived variables.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[outFields](/data-collections#outfields)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Optional parameter that returns only requested fields.
+
+**Default:**`null or empty` 
+
+**Example:**
+
+```javascript
+["id","alias","vintage"]
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[suppressNullValues](/data-collections#-suppressnullvalues)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Optional parameter to return only values that are not NULL in the output response. Adding the optional `suppressNullValues`  parameter to any statistical data collections discovery method will reduce the size of the output that is returned.
+
+**Default:**`false` 
+
+**Values:**`true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[f](/data-collections#f)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Optional parameter to specify the response format.
+
+**Example 1:**
+
+```javascript
+json
+```
+
+ 
+
+**Example 2:**
+
+```javascript
+geojson
+```
+
+ 
+
+**Default**
+
+`json` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[token](/data-collections#token)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Optional parameter used to provide the identity of a user who has permissions to access the service with an API key or OAuth2.0 access token. Learn how to get an access token in [Security and authentication](https://developers.arcgis.com/rest/enterprise-administration/enterprise/security/).
+
+**Example:**
+
+```javascript
+<ACCESS_TOKEN>
+```
+
+ 
+
+**Note:**
+
+-   The dataCollections resource and other discovery methods does not require authentication. Operations such as `enrich`  and `createReport`  require authentication.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Required parameters
+
+The following parameters are required:
+
+### `f`
+
+Use this parameter to specify the response format. The parameter can have `json` , `geojson`  or `pjson`  as arguments.
+
+**Example:** Specify response formant as JSON.
+
+-   ` f=json` 
+
+**Note:**
+
+-   The `pjson`  value is used for printing the JSON response in a prettified format.
+
+## Optional parameters
+
+The following parameters are optional:
+
+### query
+
+The `query`  parameter queries the dataCollections resource and returns descriptions of variables that are either an exact match or have a similar meaning to the input search string. By default, only exact matches are returned. To return variables with a similar meaning, the `returnSimilarity`  parameter can be used.
+
+**Default Value:**
+
+`false` 
+
+**Example 1:** Single word search
+
+```javascript
+query=physicians
+```
+
+ 
+
+**Example 2:** Multi-word search
+
+```javascript
+query=video streamers
+```
+
+ 
+
+**Example 3:** Search for a concept
+
+```javascript
+query=students with laptops
+```
+
+ 
+
+**Example 4:** Search for a phrase
+
+```javascript
+query=find variables that relate income to healthcare
+```
+
+ 
+
+### returnSimilarity
+
+The `returnSimilarity`  parameter can be used in conjunction with the `query`  parameter to return a similarity score for variables which have semantic similarity to the search string used in the `query`  parameter. If the parameter is set to `true` , variables with a similar meaning to the search string will be returned. If it is set to `false` , only exact matches for the search string will be returned.
+
+**Default Value:**
+
+`false` 
+
+### minSimilarity
+
+Used to specify the minimum semantic similarity score for variables requested in the search string used in the query parameter. Values can range from 0-1.
+
+**Example**
+
+```javascript
+minSimilarity=0.6
+```
+
+ 
+
+### filters
+
+Provides a set of controls to reduce the number of variables being returned by the `enrich`  operation.
+
+### langCode
+
+The `langCode`  parameter sets the language in which results are returned. Supported values are `en-us,fr,ja` .
+
+###  addDerivativeVariables
+
+Optional parameter to specify an array of string values that describe what derivative variables to include in the output. The enumerated list of accepted values are as follows: `percent,index,average,all,*` .
+
+**Example 1:** Return a statistical data collection with the additional variables and associated metadata for percent's, averages and index values
+
+```javascript
+addDerivativeVariables=all
+```
+
+ 
+
+```javascript
+addDerivativeVariables=*
+```
+
+ 
+
+**Example 2:** Return a statistical data collection with the additional variables and associated metadata for index values
+
+```javascript
+addDerivativeVariables=index
+```
+
+ 
+
+### outFields
+
+The list of fields to be returned in the response. Relevant fields include: `ID,alias,vintage` .
+
+###  suppressNullValues
+
+Optional parameter to return only values that are not NULL in the output response. Adding the optional `suppressNullValues`  parameter to any statistical data collections discovery method will reduce the size of the output that is returned.
+
+**Default Value:**
+
+`false` 
+
+### token
+
+This parameter is optional for discovery method resources such as dataCollections, these resources are not secured but will accept a token if provided. To specify a token that provides the identity of a user that has the permissions to access the service. The [Security and authentication](https://developers.arcgis.com/rest/enterprise-administration/enterprise/security/) page provides more information about how an access token can be obtained.
+
+**Example** Replace `<yourToken>`  with a valid token.
+
+```javascript
+token=yourToken
+```
+
+ 
+
+## Example usage
+
+**Request example 1**
+
+Return a list of data collections and variables for all countries.
+
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Prettified</TabTitle>
+
+<TabTitle>URL Encoded</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```other
+https://geoenrich.arcgis.com/arcgis/rest/services/World/geoenrichmentserver/Geoenrichment/?f=pjson
+```
+
+ 
+
+</Tab>
+
+<Tab>
+
+```javascript
+https%3A%2F%2Fgeoenrich.arcgis.com%2Farcgis%2Frest%2Fservices%2FWorld%2Fgeoenrichmentserver%2FGeoenrichment%2F%3Ff%3Dpjson
+```
+
+ 
+
+</Tab>
+
+</Tabs>
+
+**Request example 2**
+
+Return a list of data collections for the US data source based on the default hierarchy of census boundaries (2020 census boundaries).
+
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Prettified</TabTitle>
+
+<TabTitle>URL Encoded</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```other
+https://geoenrich.arcgis.com/arcgis/rest/services/World/geoenrichmentserver/Geoenrichment//US?f=pjson
+```
+
+ 
+
+</Tab>
+
+<Tab>
+
+```javascript
+https%3A%2F%2Fgeoenrich.arcgis.com%2Farcgis%2Frest%2Fservices%2FWorld%2Fgeoenrichmentserver%2FGeoenrichment%2F%2FUS%3Ff%3Dpjson
+```
+
+ 
+
+</Tab>
+
+</Tabs>
+
+**Request example 3**
+
+Return a list of data collections for the US based on the 2010 census boundaries.
+
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Prettified</TabTitle>
+
+<TabTitle>URL Encoded</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```other
+https://geoenrich.arcgis.com/arcgis/rest/services/World/geoenrichmentserver/Geoenrichment//US/census?f=pjson
+```
+
+ 
+
+</Tab>
+
+<Tab>
+
+```javascript
+https%3A%2F%2Fgeoenrich.arcgis.com%2Farcgis%2Frest%2Fservices%2FWorld%2Fgeoenrichmentserver%2FGeoenrichment%2F%2FUS%2Fcensus%3Ff%3Dpjson
+```
+
+ 
+
+</Tab>
+
+</Tabs>
+
+**Request example 4**
+
+Use the query parameter to find variables that are exact matches for the input search string of `doctor`  in the US.
+
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Prettified</TabTitle>
+
+<TabTitle>URL Encoded</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```other
+https://geoenrich.arcgis.com/arcgis/rest/services/World/geoenrichmentserver/Geoenrichment/US?query=physician&returnSimilarity=truef=pjson
+```
+
+ 
+
+</Tab>
+
+<Tab>
+
+```javascript
+https%3A%2F%2Fgeoenrich.arcgis.com%2Farcgis%2Frest%2Fservices%2FWorld%2Fgeoenrichmentserver%2FGeoenrichment%2F%2FUS%3Fquery%3Dphysician%26returnSimilarity%3Dtruef%3Dpjson
+```
+
+ 
+
+</Tab>
+
+</Tabs>
+
+**Request example 5**
+
+Use the `query`  parameter to find variables that are either exact matches or have a semantic similarity to the input search string of `physician`  in the US.
+
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Prettified</TabTitle>
+
+<TabTitle>URL Encoded</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```other
+https://geoenrich.arcgis.com/arcgis/rest/services/World/geoenrichmentserver/Geoenrichment//US?query=physician&returnSimilarity=truef=pjson
+```
+
+ 
+
+</Tab>
+
+<Tab>
+
+```javascript
+https%3A%2F%2Fgeoenrich.arcgis.com%2Farcgis%2Frest%2Fservices%2FWorld%2Fgeoenrichmentserver%2FGeoenrichment%2F%2FUS%3Fquery%3Dphysician%26returnSimilarity%3Dtruef%3Dpjson
+```
+
+ 
+
+</Tab>
+
+</Tabs>
+
+## Primary data collections
+
+The following table lists the data collections and countries that are currently available:
+
+<Note type={"note"}>
+
+The primary data collections are used in each country's summary report.
+
+</Note>
+
+<StyledTable headers={"Primary Data Collection Name(s),Country or area,Supported Languages"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+KeyGlobalFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+All
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+KeyWEFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Western Europe 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+KeyUSFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+US
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+KeyCanFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Canada (CA)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+ALFacts
+
+ALSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Albania (AL)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+DZFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Algeria (DZ)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+ADFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Andorra (AD)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+AOFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Angola (AO)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+AIFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Anguilla (AI)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+ARFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Argentina (AR)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+AMFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Armenia (AM)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+AWFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Aruba (AW)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+AUFacts
+
+AUSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Australia (AU)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+ATFacts
+
+ATSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Austria (AT)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+AZFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Azerbaijan (AZ)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+BSFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Bahamas (BS)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+BHFacts
+
+BUSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Bahrain (BH)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+BDFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Bangladesh (BD)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+BBFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Barbados (BB)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+BYFacts
+
+BYSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Belarus (BY)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+BEFacts
+
+BESpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Belgium (BE)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+BZFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Belize (BZ)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+BJFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Benin (BJ)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+BMFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Bermuda (BM)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+BOFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Bolivia (BO)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+BAFacts
+
+BASpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Bosnia and Herzegovina (BA)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+BWFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Botswana (BW)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+BRFacts
+
+BRSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Brazil (BR)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+BNFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Brunei Darussalam
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+BGFacts
+
+BGSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Bulgaria (BG)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+BFFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Burkina Faso (BF)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+BIFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Burundi (BI)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+CVFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Cabo Verde (CV)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+KHFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Cambodia (KH)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+CMFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Cameroon (CM)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+KYFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Cayman Islands (KY)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+CFFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Central African Republic (CF)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+TDFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Chad (TD)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+CLFacts
+
+CLSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Chile (CL)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+CNFacts
+
+CNSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+China (CN)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+COFacts
+
+COSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Colombia (CO)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+CGFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Congo _the_ (CG)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+CRFacts
+
+CRSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Costa Rica (CR)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+CIFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Côte d'Ivoire (CI)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+HRFacts
+
+HRSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Croatia (HR)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+CYFacts
+
+CYSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Cyprus (CY)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+CZFacts
+
+CZSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Czech Republic (CZ)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+DKFacts
+
+DKSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Denmark (DK)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+DOFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Dominican Republic (DO)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+ECFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Ecuador (EC)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+EGFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Egypt (EG)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+SVFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+El Salvador (SV)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+GQFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Equatorial Guinea (GQ)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+EEFacts
+
+EESpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Estonia (EE)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+SZFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Eswatini (SZ)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+ETFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Ethiopia (ET)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+FOFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Faroe Islands (FO)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+FJFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Fiji (FJ)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+FIFacts
+
+FISpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Finland (FI)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+FRFacts
+
+FRSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+France (FR)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+GFFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+French Guiana (GF)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+PFFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+French Polynesia (PF)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+GAFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Gabon (GA)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+GMFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Gambia (GM)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+GEFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Georgia (GE)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+DEFacts
+
+DESpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Germany (DE)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+GHFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Ghana (GH)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+GRFacts
+
+GRSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Greece (GR)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+GLFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Greenland (GL)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+GPFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Guadaloupe (GP)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+GTFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Guatamala (GT)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+GNFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Guinea (GN)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+GWFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Guinea-Bissau (GW)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+GYFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Guyana (GY)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+HNFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Honduras (HN)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+HKFacts
+
+HKSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Hong Kong (HK)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+HUFacts
+
+HUSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Hungary (HU)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+ISFacts
+
+ISSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Iceland (IS)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+INFacts
+
+INSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+India (IN)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+IDFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Indonesia (ID)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+IRFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Iran (IR)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+IEFacts
+
+IESpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Ireland (IE)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+ILFacts
+
+ILSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Israel (IL)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+ITFacts
+
+ITSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Italy (IT)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+JMFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Jamaica (JM)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+JPFacts
+
+JPSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Japan (JP)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+JOFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Jordan (JO)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+KZFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Kazakhstan (KZ)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+KEFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Kenya (KE)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+XKFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Kosovo (XK)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+KWFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Kuwait (KW)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+KGFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Kyrgyzstan (KG)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+LVFacts
+
+LVSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Latvia (LV)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+LBFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Lebanon (LB)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+LSFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Lesotho (LS)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+LRFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Liberia (LR)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+LIFacts
+
+LISpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Liechtenstein (LI)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+LTFacts
+
+LTSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Lithuania (LT)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+LUFacts
+
+LUSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Luxembourg (LU)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+MOFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Macau (MO)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+MKFacts
+
+MKSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Macedonia (MK)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+MGFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Madagascar (MG)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+MWFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Malawi (MW)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+MYFacts
+
+MYSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Malaysia (MY)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+MVFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Maldives (MV)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+MLFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Mali (ML)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+MTFacts
+
+MTSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Malta (MT)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+MQFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Martinique (MQ)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+MRFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Mauritania (MR)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+MUFacts
+
+MUSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Mauritius (MU)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+YTFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Mayotte (YT)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+MXFacts
+
+MXSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Mexico (MX)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+MDFacts
+
+MDSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Moldova (MD)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+MCFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Monaco (MC)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+MNFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Mongolia (MN)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+MEFacts
+
+MESpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Montenegro (ME)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+MSFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Montserrat (MS)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+MAFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Morocco (MA)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+MZFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Mozambique (MZ)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+MMFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Myanmar (MM)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+NAFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Namibia (NA)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+NPFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Nepal (NP)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+NLFacts
+
+NLSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Netherlands (NL)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+NCFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+New Caledonia (NC)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+NZFacts
+
+NZSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+New Zealand (NZ)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+NIFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Nicaragua (NI)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+NEFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Niger (NE)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+NGFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Nigeria (NG)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+NOFacts
+
+NOSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Norway (NO)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+OMFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Oman (OM)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+PKFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Pakistan (PK)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+PAFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Panama (PA)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+PGFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Papua New Guinea (PG)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+PYFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Paraguay (PY)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+PEFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Peru (PE)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+PHFacts
+
+PHSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Philippines (PH)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+PLFacts
+
+PLSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Poland (PL)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+PTFacts
+
+PTSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Portugal (PT)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+PRFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Puerto Rico (PR)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+QAFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Qatar (QA)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+REFacts
+
+RESpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Réunion (RE)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+ROFacts
+
+ROSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Romania (RO)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+RUFacts
+
+RUSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Russia (RU)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+LCFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Saint Lucia (LC)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+SAFacts
+
+SASpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Saudi Arabia (SA)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+SNFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Senegal (SN)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+RSFacts
+
+RSSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Serbia (RS)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+SLFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Sierra Leone (SL)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+SGFacts
+
+SGSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Singapore (SG)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+SKFacts
+
+SKSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Slovakia (SK)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+SIFacts
+
+SISpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Slovenia (SI)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+ZAFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+South Africa (ZA)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+KRFacts
+
+KRSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+South Korea (KR)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+ESFacts
+
+ESSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Spain (ES)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+LKFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Sri Lanka (LK)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+SDFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Sudan (SD)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+SEFacts
+
+SESpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Sweden (SE)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+CHFacts
+
+CHSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Switzerland (CH)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+SYFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Syria (SY)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+TWFacts
+
+TWSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Taiwan (TW)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+TJFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Tajikistan (TJ)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+TZFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Tanzania (TZ)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+THFacts
+
+THSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Thailand (TH)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+TGFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Togo (TG)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+TTFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Trinidad and Tobago (TT)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+TNFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Tunisia (TN)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+TRFacts
+
+TRSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Türkiye (TR)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+TCFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Turks And Caicos Islands (TC)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+UGFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Uganda (UG)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+UAFacts
+
+UASpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Ukraine (UA)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+AEFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+United Arab Emirates (AE)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+GBFacts
+
+GBSpend
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+United Kingdom (GB)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+UYFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Uruguay (UY)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+UZFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Uzbekistan (UZ)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+VEFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Venezuela (VE)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+VNFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Vietnam (VN)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+VIFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Virgin Islands (VI)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+ZMFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Zambia (ZM)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+ZWFacts
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Zimbabwe (ZW)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+English
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>

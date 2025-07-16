@@ -1,0 +1,863 @@
+---
+title: "Register Data Item"
+description: "The registerItem operations registers a newly created data item with the server's data store."
+slug: "registerdataitem"
+url: "/registerdataitem"
+guid: "GUID-6B02580B-2DF9-4D9A-B821-C3E9B6C94DF8"
+migratedTopicMetadata:
+  FTITLE: "registerDataItem"
+  FDESCRIPTION: ""
+  FCHANGES: "Adding data store information from the Data Item helper resource page."
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 -*"
+  CREATED-ON: "05/07/2023 15:27:03"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "27/09/2023 08:45:47"
+  VERSION: "6"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-0EE527D1-F511-4006-A677-93B8DEABE2C0"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /data/registerItem
+  urlSegments:
+    - name: <root>
+      url: /site
+    - name: /data/registerItem
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.1'
+  requiredCapabilities:
+    - name: Access allowed with either the "Security and Infrastructure", "Server", or "Register data stores" privileges, or the Publisher role
+      url: /managing-access-to-the-server-administration-rest-api
+---
+
+## Description
+
+The `registerItem` operation registers a new [data item](/dataitem) with the server's data store by submitting a JSON object that represents the data item and its connection information.
+
+A data item contains all the information required by ArcGIS Server to connect to a folder or database while serving out one or more GIS services. Data items are extensively used while publishing GIS services to ArcGIS Server, as they inform the publishing client (such as ArcGIS Pro) whether the data needs to be explicitly copied to the server or whether it can be referred from the server. ArcGIS Server supports the following types of data items:
+
+- [Enterprise databases](#enterprise-databases)—Each of these data items represents an enterprise database, which can optionally contain an Esri geodatabase.
+- [Big data file shares](#big-data-file-shares)—**Deprecated at 11.4.** Big data file share data items are network-accessible file system folders, Apache Hadoop Distributed File System (HDFS) or Apache Hive stores, or cloud stores that contain one or more datasets. Big data file share items are the inputs to analysis using GeoAnalytics Server.
+- [Cloud stores](#cloud-stores)—Cloud store data items represent a connection to an Amazon or Microsoft Azure store.
+- [Object store](#object-store)—Starting at 11.4, an object store is required as part of the base deployment for ArcGIS Enterprise. Organizations deploying ArcGIS Enterprise using Amazon Web Serivces (AWS) should deploy an object store using Amazon S3. Organizations deploying ArcGIS Enterprise using Microsoft Azure should deploy an object store using Azure Blob Storage.
+- [Raster stores](#raster-stores)—These are network-accessible file system folders or cloud stores that are output stores for raster analysis.
+- File shares—File share data items are network-accessible file system folders that contain one or more datasets.
+
+Before registering the data item, you must [validate](/validatedataitem) it and make sure that it is accessible from all the server nodes in your site.
+
+### Registration requirements
+
+The following sections outline the connection information for each supported data item type.
+
+#### Enterprise databases
+
+For enterprise geodatabases, you must provide the `connectionString` property as part of the `info` JSON object. The connection string consists of information such as the name of the database server, the database name, and the credentials. ArcGIS Server will store the data item's JSON information in its [configuration store](/configstore) as is. As such, it is recommended that you encrypt the credentials before registering an enterprise geodatabase data item by using the encryption scheme in the **Get Database Connection String** tool in the **Publishing Tools** toolbox, which can be found by accessing the HTML view of the Services Directory API and navigating to **System** > **System/PublishingTools** > **Get Database Connection String** > **Submit Job**, or by making a request of the following form:
+
+```markdown
+https://machine.domain.com/webadaptor/rest/services/System/PublishingTools/GPServer/Get%20Database%20Connection%20String/submitJob
+```
+
+The string returned by the Get Database Connection String tool can be used as the value for the `connectionString` property.
+
+To see sample cloud store data item JSON objects, see the [Enterprise database info examples section](#enterprise-database-examples) below.
+
+#### Big data file shares
+
+<Note type="legacy">
+
+GeoAnalytics Server has been retired with the release of ArcGIS Enterprise 11.4. Organizations upgrading to version 11.4 or later will no longer be able to register a Big Data File Share. Organizations upgrading to versions 11.4 or higher will need to delete their Big Data File Share items. For more information, see the [ArcGIS GeoAnalytics Server retirement](https://enterprise.arcgis.com/en/server/latest/deploy/linux/upgrade-arcgis-server-windows-and-linux.htm#ESRI_SECTION1_0034E17F41AD4AACA90622F772D800BE) section in the Upgrade ArcGIS Server documentation.
+
+</Note>
+
+Big data file share data items can be file shares, HDFS, Hive, or cloud data stores that contain input data for GeoAnalytics.
+
+The following items should be taken into consideration while registering a big data file share data item:
+
+- The `connectionType` property represents the type of big data file share item. Possible values are `fileShare`, `hdfs`, `hive`, and `cloudstore`.
+- The `username`  property is optional for HDFS and Hive file shares.
+
+<Note type={"note"}>
+
+A big data file share can be successfully registered only on a server assigned the GeoAnalytics Server server role. The server can be assigned additional server roles in addition to the GeoAnalytics Server server role.
+
+</Note>
+
+Example JSON objects for big data file share data items can be viewed in the API installed help for organizations at version 11.3 or earlier.
+
+
+#### Cloud stores
+
+Cloud store data items represent a connection to an Amazon or Microsoft Azure store. Connection information for the data store item is stored as a JSON string in the `connectionString`.
+
+The following items should be taken into consideration while registering a cloud store data item:
+
+- A valid value for the `objectstore` parameter is required. This property refers to the Amazon S3 bucket, Azure Blob container or Azure Data Lake store, Alibaba OSS bucket or Google cloud container.
+- Folders in an object store property are optional.
+
+To see sample cloud store data item JSON objects, see the [Cloud store examples section](#cloud-store-examples) below.
+
+<Note type="caution">
+
+If you choose to leverage an S3-compatible storage service and configure it for use with ArcGIS Enterprise, it should be done with caution and at your own discretion with the understanding that Esri is unable to guarantee the usability or performance of them, and that no Esri technical support is available to troubleshoot compatibility issues.
+
+</Note>
+
+#### Object store
+
+An object store is part of an ArcGIS Enterprise base deployment that can either be provided by ArcGIS Data Store or provided by Amazon S3 or Azure Blob Storage for organizations that deploy ArcGIS Enterprise using Amazon Web Serivces (AWS) or Microsoft Azure. An organization only supports having one object store registered. Attempting to do any of the following will result in the `registerItem` operation to fail:
+
+- Register a cloud-provided object store when an ArcGIS Data Store object store is already registered
+- Register another cloud-provided object store when a cloud-provided object store is already registered
+- Register an ArcGIS Data Store object store when a cloud-provided object store is already registered
+
+The [Object store examples section](#object-store-examples) below demonstrates all of the required properties to register a cloud-provided object store. The only optional property value is `folder`.
+
+#### Raster stores
+
+Raster store items are network-accessible file system folders or cloud stores that are output stores for raster analysis.
+
+When registering a raster store data item, the `connectionType` value for a raster store data store item can either be specified as a `fileShare` or `dataStore`.
+
+To see sample cloud store data item JSON objects, see the [Raster store info examples section](#raster-store-examples) below.
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `item` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object that represents the data item. Though each data store item type has unique requirements, the general structure of a data store item JSON object includes the following properties:
+
+      - `path`—Defines a unique identifier for each data item when it's registered with ArcGIS Server.
+      - `type`—Describes the type of the data item.
+      - `info`—A JSON object that contains the connection string or file system path to the data item. For more information on the properties included in the `info` JSON object, see the [Info properties](/registerdataitem#info-properties) section below.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`. 
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Info properties
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `path` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The file system path to the data item.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `clientConnectionString` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The connection string for client to connect to shared enterprise database.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `connectionString` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The connection string for ArcGIS Server to connect to enterprise database.
+
+      <Note type={"note"}>
+
+      The connection information for big data file share, cloud store, and raster store data items is encrypted by ArcGIS Server and stored in the `connectionString` property as a JSON string. Encrypted information is denoted by a `{crypt}` prefix.
+
+      </Note>
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `dataStoreConnectionType` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Indicates to ArcGIS Server whether the data item is `shared`, `replicated`, or `server` only.
+
+      If `shared`, the publisher (for example, ArcGIS Pro) and server use the same connection string to the database and point to the same instance of the database.
+
+      If `replicated`, the publisher and server connect to different instances of the database that have the same copies of the data because their replication configurations or administrative scripts keep them in sync.
+
+      If `serverOnly`, the database is entirely managed and owned by ArcGIS Server and cannot be accessed by the publisher directly. This option is primarily used to refer to an ArcGIS Server Managed Database.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `isManaged` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Set to `true` if `dataStoreConnectionType` is set as `server`, indicating that the data store is managed by ArcGIS Server. Otherwise, `isManaged` is set to `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+<Note type={"note"}>
+
+In the following examples, connection information is not encrypted.
+
+</Note>
+
+The following is a sample POST request for the `registerItem` operation that demonstrates registering a big data file share data item, formatted for readability:
+
+```other
+POST /webadaptor/admin/data/registerItem HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+item={
+  "path": "/bigDataFileShares/myFileShare",
+  "type": "bigDataFileShare",
+  "info": {
+    "connectionString": "{\"path\":\"\\\\\\\\myFileShare\\\\data\\\\geoanalytics\"}", //backslashes in path should be double escaped.
+    "connectionType": "fileShare"
+  }
+}&f=pjson
+```
+
+### Enterprise database examples
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Same Database</TabTitle>
+  <TabTitle>Different Databases</TabTitle>
+  <TabTitle>ArcGIS Server only</TabTitle>
+</TabNav>
+
+<Tab>
+
+The example below demonstrates a sample JSON object for an enterprise geodatabase data item that has the publisher and ArcGIS Server using the same database:
+
+```other
+{
+  "path": "/enterpriseDatabases/egdb_shared", //a unique path on the server
+  "type": "egdb", //as this is a database
+  "clientPath": null, //not needed as this is a database
+  "info": {
+    "connectionString": "ENCRYPTED_PASSWORD=00022e686f66464c762b6e2b31732b675a4e35667832547070513d3d2a00;SERVER=dbserver;INSTANCE=sde:sqlserver:dbserver;DBCLIENT=sqlserver;DB_CONNECTION_PROPERTIES=dbserver;DATABASE=vtest;USER=map;VERSION=sde.DEFAULT;AUTHENTICATION_MODE=DBMS", //an encrypted connection string
+    "isManaged": false, //indicates that the database is not fully owned by the server
+    "dataStoreConnectionType": "shared" //indicates that the database is shared with clients
+  }
+}
+```
+
+</Tab>
+
+<Tab>
+
+The example below demonstrates a sample JSON object for an enterprise geodatabase data item that has the publisher and ArcGIS Server using different databases:
+
+```other
+{
+  "path": "/enterpriseDatabases/egdb_replicated", //a unique path on the server
+  "type": "egdb", //as this is a database
+  "clientPath": null, //not needed as this is a database
+  "info": {
+    "clientConnectionString": "ENCRYPTED_PASSWORD=00022e686255754d75395162382f704c726a4d4d6456364b56673d3d2a00;SERVER=dbserver;INSTANCE=sde:sqlserver:dbserver;DBCLIENT=sqlserver;DB_CONNECTION_PROPERTIES=dbserver;DATABASE=vtest;USER=map;VERSION=sde.DEFAULT;AUTHENTICATION_MODE=DBMS", //an encrypted connection string for client to connect the database
+    "connectionString": "ENCRYPTED_PASSWORD=00022e6847686f65752b4f503261623364533032445441544d773d3d2a00;SERVER=dbserver2;INSTANCE=sde:sqlserver:dbserver2;DBCLIENT=sqlserver;DB_CONNECTION_PROPERTIES=dbserver2;DATABASE=map;USER=ags;AUTHENTICATION_MODE=DBMS",//an encrypted connection string for server to connect the database
+    "isManaged": false, //indicates that the database is not fully owned and managed by the server
+    "dataStoreConnectionType": "replicated" //indicates that the publisher and server connect to different instances of the database
+  }
+}
+```
+
+</Tab>
+
+<Tab>
+
+The example below demonstrates a sample JSON object for an enterprise geodatabase data item that is fully owned and managed by ArcGIS Server:
+
+```other
+{
+  "path": "/enterpriseDatabases/egdb_managed", //a unique path on the server
+  "type": "egdb", //as this is a database
+  "clientPath": null, //not needed as this is a database
+  "info": {
+    "connectionString": "ENCRYPTED_PASSWORD=00022e683671383653345a4c4f465743393131343544673045773d3d2a00;SERVER=dbserver;INSTANCE=sde:sqlserver:dbserver;DBCLIENT=sqlserver;DB_CONNECTION_PROPERTIES=dbserver;DATABASE=vtest;USER=map;AUTHENTICATION_MODE=DBMS", //an encrypted connection string for server to connect the database
+    "isManaged": true, //indicates that the database is fully owned and managed by the server
+    "dataStoreConnectionType": "serverOnly" //indicates that the database is not shared with clients
+  }
+}
+```
+
+</Tab>
+
+</Tabs>
+
+### Cloud store examples
+
+#### Amazon S3
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Access Key</TabTitle>
+  <TabTitle>IAM Role</TabTitle>
+  <TabTitle>Private Cloud</TabTitle>
+</TabNav>
+
+<Tab>
+
+  The example below demonstrates a sample JSON object for an Amazon S3 cloud store that uses access key authentication:
+
+  ```other
+  {
+    "path": "/cloudStores/<value>",
+    "type": "cloudStore",
+    "provider": "amazon",
+    "info": {
+      "objectStore": "<bucketName>/<folderName>",
+      "connectionString": "{\"credentialType\":\"accessKey\",\"accessKeyId\":\"<value>\",\"secretAccessKey\":\"<value>\",\"regionEndpointUrl\":\"s3.us-west-2.amazonaws.com\",\"region\":\"us-west-2\",\"defaultEndpointsProtocol\": \"https\"}"
+    }
+  }
+  ```
+
+</Tab>
+
+<Tab>
+
+  The example below demonstrates a sample JSON object for an Amazon S3 cloud store that uses IAM role authentication:
+
+  ```other
+  {
+    "path": "/cloudStores/<value>",
+    "type": "cloudStore",
+    "provider": "amazon",
+    "info": {
+      "objectStore": "<bucketName>/<folderName>",
+      "connectionString": "{\"credentialType\":\"IAMRole\",\"regionEndpointUrl\":\"<myPrivateRegionEndpointUrlinS3>\",\"defaultEndpointsProtocol\":\"https\",\"region\":\"af-south-1\"}"
+    }
+  }
+    ```
+
+</Tab>
+
+<Tab>
+
+  The example below demonstrates a sample JSON object for an Amazon S3 cloud store, that uses access key authentication, with access points for private cloud storage:
+
+  ```other
+  {
+    "path": "/cloudStores/<value>",
+    "type": "cloudStore",
+    "provider": "amazon",
+    "info": {
+      "objectStore": "<bucketName>/<folderName>",
+      "connectionString": "{\"credentialType\":\"accesskey\",\"accessKeyId\":\"<value>\",\"secretAccessKey\":\"<value>\",\"regionEndpointUrl\":\"<myPrivateRegionEndpointUrlinS3>\",\"defaultEndpointsProtocol\": \"https\"}"
+    }
+  }
+  ```
+
+</Tab>
+
+</Tabs>
+
+#### Azure Blob
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Shared Key</TabTitle>
+  <TabTitle>Service Principal</TabTitle>
+  <TabTitle>User-assigned Managed Identity</TabTitle>
+  <TabTitle>Shared Access Signature</TabTitle>
+</TabNav>
+
+<Tab>
+
+  The example below demonstrates a sample JSON object for a public Microsoft Azure cloud store that uses shared key (`accountKey`) authentication:
+
+  ```other
+  {
+    "path": "/cloudStores/<value>",
+    "type": "cloudStore",
+    "provider": "azure",
+    "info": {
+      "objectStore": "<containerName>/<folderName>",
+      "connectionString": "{\"accountKey\":\"<value>\",\"accountName\":\"<value>\",\"defaultEndpointsProtocol\":\"https\",\"accountEndpoint\":\"core.windows.net\",\"credentialType\":\"accessKey\"}"
+    }
+  }
+  ```
+  The example below demonstrates a sample JSON object for a Microsoft Azure cloud store with private endpoint access that uses shared key (`accountKey`) authentication:
+
+  ```other
+  {
+    "path": "/cloudStores/<value>",
+    "type": "cloudStore",
+    "provider": "azure",
+    "info": {
+      "objectStore": "<containerName>/<folderName>",
+      "connectionString": "{\"credentialType\":\"accessKey\",\"accountKey\":\"<value>\",\"regionEndpointUrl\":\"<value>\",\"defaultEndpointsProtocol\":\"https\"}"
+    }
+  }
+  ```
+
+</Tab>
+
+<Tab>
+
+  The example below demonstrates a sample JSON object for a Microsoft Azure cloud store that uses service principal authentication:
+
+  ```other
+  {
+    "path": "/cloudStores/<value>",
+    "type": "cloudStore",
+    "provider": "azure",
+    "info": {
+      "objectStore": "<containerName>/<folderName>",
+      "connectionString": "{\"credentialType\":\"servicePrincipal\",\"tenantId\":\"<value>\",\"clientId\":\"<value>\",\"clientSecret\":\"<value>\",\"authorityHost\":\"login.microsoftonline.com\",\"accountEndpoint\":\"core.windows.net\",\"accountName\":\"<value>\",\"defaultEndpointsProtocol\":\"https\"}"
+    }
+  }
+  ```
+  The example below demonstrates a sample JSON object for a Microsoft Azure cloud store that uses service principal authentication for anonymous access:
+
+  ```other
+
+  {
+    "path": "/cloudStores/Az_accountKey",
+    "type": "cloudStore",
+    "provider": "azure",
+    "info": {
+      "objectStore": "<containerName>/<folderName>",
+      "connectionString": "{\"credentialType\":\"anonymous\",\"accountName\":\"overturemapswestus2\",\"accountEndpoint\":\"blob.core.windows.net\",\"defaultEndpointsProtocol\":\"https\"}"
+    }
+  }
+  ```
+
+</Tab>
+
+<Tab>
+
+The example below demonstrates a sample JSON object for a Microsoft Azure cloud store that uses user-assigned managed identity authentication:
+
+```other
+{
+  "path": "/cloudStores/<value>",
+  "type": "cloudStore",
+  "provider": "azure",
+  "info": {
+    "objectStore": "<containerName>/<folderName>",
+    "connectionString": "{\"credentialType\":\"userAssignedIdentity\",\"managedIdentityClientId\":\"<value>\",\"accountName\":\"<value>\",\"accountEndpoint\":\"core.windows.net\",\"defaultEndpointsProtocol\":\"https\"}"
+  }
+}
+```
+
+</Tab>
+
+<Tab>
+
+The example below demonstrates a sample JSON object for a Microsoft Azure cloud store that uses shared access signature (`sasToken`) authentication:
+
+```other
+{
+  "path": "/cloudStores/<value>",
+  "type": "cloudStore",
+  "provider": "azure",
+  "info": {
+    "objectStore": "<containerName>/<folderName>",
+    "connectionString": "{\"credentialType\":\"sasToken\",\"sasToken\":\"<value>\",\"accountName\":\"<value>\",\"accountEndpoint\":\"core.windows.net\",\"defaultEndpointsProtocol\":\"https\"}"
+  }
+}
+```
+
+</Tab>
+
+</Tabs>
+
+#### Azure Data Lake Gen2
+
+Support for Azure Data Lake Gen2 cloud store data items was added at ArcGIS Enterprise 11.1.
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Shared Key</TabTitle>
+  <TabTitle>Service Principal</TabTitle>
+  <TabTitle>Shared Access Signature</TabTitle>
+</TabNav>
+
+<Tab>
+
+The example below demonstrates a sample JSON object for an Azure Data Lake Gen2 cloud store that uses shared key (`accountKey`) authentication:
+
+```other
+{
+  "path": "/cloudStores/<value>",
+  "type": "cloudStore",
+  "provider": "azureDataLakeStore",
+  "info": {
+    "isManaged": false,
+    "connectionString": "{\"credentialType\":\"accesskey\",\"accountKey\":\"<value>\",\"accountName\":\"<value>\",\"accountEndpoint\":\"core.windows.net\"}",
+    "folder": "<containerName>/<folderName>"
+  }
+}
+```
+
+</Tab>
+
+<Tab>
+
+The example below demonstrates a sample JSON object for an Azure Data Lake Gen2 cloud store that uses service principal authentication:
+
+```other
+{
+  "path": "/cloudStores/<value>",
+  "type": "cloudStore",
+  "provider": "azureDataLakeStore",
+  "info": {
+    "folder": "<containerName>/<folderName>",
+    "connectionString": "{\"credentialType\":\"servicePrincipal\",\"tenantId\":\"<value>\",\"clientId\":\"<value>\",\"clientSecret\":\"<value>\",\"accountEndpoint\":\"core.windows.net\",\"authorityHost\":\"login.microsoftonline.com\",\"accountName\":\"<value>\"}",
+    "isManaged": false
+  }
+}
+```
+
+</Tab>
+
+<Tab>
+
+The example below demonstrates a sample JSON object for an Azure Data Lake Gen2 cloud store that uses shared access signature (`sasToken`) authentication:
+
+```other
+{
+  "path": "/cloudStores/<value>",
+  "type": "cloudStore",
+  "provider": "azureDataLakeStore",
+  "info": {
+    "isManaged": false,
+    "connectionString": "{\"credentialType\":\"sasToken\",\"sasToken\":\"<value>\",\"accountName\":\"<value>\",\"accountEndpoint\":\"core.windows.net\"}",       
+    "folder": "<containerName>/<folderName>"
+  }
+}
+
+```
+
+</Tab>
+
+</Tabs>
+
+#### Google
+
+The example below demonstrates a sample JSON object for a Google cloud store data item:
+
+```other
+{
+  "path": "/cloudStores/<value>",
+  "type": "cloudStore",
+  "provider": "google",
+  "info": {
+    "isManaged": false,
+    "connectionString": "{\"accessKeyId\":\"<value>\",\"secretAccessKey\":\"<value>\",\"regionEndpointUrl\":\"storage.googleapis.com\",\"defaultEndpointsProtocol\":\"https\",\"credentialType\":\"accesskey\"}",
+    "objectStore": "<bucketName>/<folderName>"
+  }
+}
+
+```
+
+#### Alibaba
+
+The example below demonstrates a sample JSON object an Alibaba cloud store data item:
+
+```other
+
+{
+  "path": "/cloudStores/<value>",
+  "type": "cloudStore",
+  "systemManaged": false,
+  "provider": "Alibaba",
+  "info": {
+    "isManaged": false,
+    "connectionString": "{\"accessKeyId\":\"<value>\",\"secretAccessKey\":\"<value>\",\"regionEndpointUrl\":\"oss-us-west-1.aliyuncs.com\",\"defaultEndpointsProtocol\":\"https\",\"credentialType\":\"accesskey\"}",
+    "objectStore": "<bucketName>/<folderName>"
+  }
+}
+
+```
+
+### Object store examples
+
+#### Amazon S3
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Access Key</TabTitle>
+  <TabTitle>IAM Role</TabTitle>
+</TabNav>
+
+<Tab>
+
+The example below demonstrates a sample JSON object for an Amazon S3 cloud-provided object store that uses access key authentication:
+
+```other
+{ 
+  "path": "/cloudStores/<value>",
+  "type": "objectStore",
+  "provider": "amazon",
+  "info": {
+    "isManaged": true,
+    "systemManaged": false,
+    "isManagedData": true,
+    "purposes": [
+      "feature-tile",
+      "scene"
+    ],
+    "connectionString": "{\"accessKeyId\":\"<AccessKeyValue>\",\"secretAccessKey\":\"<SecretValue>\",\"regionEndpointUrl\":\"<RegionURL>\",\"defaultEndpointsProtocol\":\"https\",\"credentialType\":\"accesskey\",\"region\":\"<RegionID>\"}",
+    "objectStore": "<bucketName>/<folder_name>"
+  }
+}
+
+```
+
+</Tab>
+
+<Tab>
+
+The example below demonstrates a sample JSON object for an Amazon S3 cloud-provided object store that uses IAM role authentication:
+
+```other
+{
+  "path": "/cloudStores/<value>",
+  "type": "objectStore",
+  "provider": "amazon",
+  "info": {
+    "isManaged": true,
+    "systemManaged": false,
+    "isManagedData": true,
+    "category": "storage",
+    "purposes": [
+      "feature-tile",
+      "scene"
+    ],
+    "objectStore": "<bucketName>/<folder_name>",
+    "connectionString": "{\"credentialType\":\"IAMRole\",\"regionEndpointUrl\":\"<myPrivateRegionEndpointUrlinS3>\",\"defaultEndpointsProtocol\":\"https\",\"region\":\"us-west-2\"}"
+  }
+}
+
+```
+
+</Tab>
+
+</Tabs>
+
+#### Azure Blob
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Shared Key</TabTitle>
+  <TabTitle>User-assigned Managed Identity</TabTitle>
+</TabNav>
+
+<Tab>
+
+The example below demonstrates a sample JSON object for a Microsoft Azure cloud-provided object store that uses shared key (`accountKey`) authentication:
+
+```other
+{
+  "path": "/cloudStores/<value>", 
+  "type": "objectStore",
+  "provider": "azure",
+  "info": {
+    "isManaged": true,
+    "systemManaged": false,
+    "isManagedData": true,
+    "purposes": [
+      "feature-tile",
+      "scene"
+    ],
+    "objectStore": "<containerName>/<folderName>",
+    "connectionString": "{\"accountKey\":\"<value>\",\"accountName\":\"<value>\",\"defaultEndpointsProtocol\":\"https\",\"accountEndpoint\":\"core.windows.net\",\"credentialType\":\"accessKey\"}"
+  }
+}
+
+```
+
+</Tab>
+
+<Tab>
+
+The example below demonstrates a sample JSON object for a Microsoft Azure cloud-provided object store that uses user-assigned managed identity authentication:
+
+```other
+{ 
+  "path": "/cloudStores/<value>",
+  "type": "objectStore",
+  "provider": "azure",
+  "info": {
+    "isManaged": true,
+    "systemManaged": false,
+    "isManagedData": true,
+    "purposes": [
+      "feature-tile",
+      "scene"
+    ],
+    "objectStore": "<containerName>/<folderName>",
+    "connectionString": "{\"credentialType\":\"userAssignedIdentity\",\"managedIdentityClientId\":\"<value>\",\"accountName\":\"<value>\",\"accountEndpoint\":\"core.windows.net\",\"defaultEndpointsProtocol\":\"https\"}"
+  }
+}
+
+```
+
+</Tab>
+
+</Tabs>
+
+### Raster store examples
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>File Share Connection Type</TabTitle>
+  <TabTitle>Data Store Connection Type</TabTitle>
+</TabNav>
+
+<Tab>
+
+The example below demonstrates a sample JSON object for a raster store data item with a `fileShare` connection type:
+
+```other
+{
+  "path": "/rasterStores/rasterstore_fileshare",
+  "type": "rasterStore",
+  "info": {
+    "connectionString": "{\"path\":\"\\\\\\\\myserver\\\\data\"}", //backslashes in path should be double escaped.
+    "connectionType": "fileShare"
+  }
+}
+```
+
+</Tab>
+
+<Tab>
+
+The example below demonstrates a sample JSON object for a raster store data item with a `dataStore` connection type:
+
+```other
+{
+  "path": "/rasterStores/rasterStoreAzure",
+  "type": "rasterStore",
+  "info": {
+    "connectionString": "{\"path\":\"/cloudStores/AzureTest\"}",
+    "connectionType": "dataStore"
+  }
+}
+```
+
+</Tab>
+
+</Tabs>
+
+
+### File share examples
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Shared Path</TabTitle>
+  <TabTitle>Local Path</TabTitle>
+</TabNav>
+
+<Tab>
+
+The example below demonstrates a sample JSON object for a file share data item where the folder for the publisher and ArcGIS Server use the same shared path:
+
+```other
+{
+  "path": "/fileShares/folder_shared", //a unique path on the server
+  "type": "folder", //as this is a file share
+  "clientPath": null, //not needed as this is a shared folder
+  "info": {
+    "path": "\\\\server\\data\\rest_data", //path to the share
+    "dataStoreConnectionType": "shared" //this is a shared folder
+  }
+}
+```
+
+</Tab>
+
+<Tab>
+
+The example below demonstrates a sample JSON object for a file share data item where the folder for the publisher and ArcGIS Server use local paths:
+
+```other
+{
+  "path": "/fileShares/folder_replicated", //a unique path on the server
+  "type": "folder", //as this is a folder
+  "clientPath": "C:\\data", //the path to the folder from the client
+  "info": {
+    "path": "c:\\data", //the path to the folder from the server
+    "dataStoreConnectionType": "replicated", //indicates that client and server are seeing the same datasets
+    "hostName": "GRID3" //name of the client host
+  }
+}
+```
+
+</Tab>
+
+</Tabs>
+
+
+## JSON Response example
+
+```javascript
+{"status": "success"}
+```

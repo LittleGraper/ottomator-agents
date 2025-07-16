@@ -1,0 +1,399 @@
+---
+title: "Relational Data Store Type"
+description: ""
+slug: "relational-data-store-type"
+url: "/relational-data-store-type"
+guid: "GUID-430F016F-B6FA-4B14-BD6C-3D0689E808A5"
+migratedTopicMetadata:
+  FTITLE: "Relational Data Store Type"
+  FDESCRIPTION: ""
+  FCHANGES: "HTTP-S"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.7 -*"
+  CREATED-ON: "03/07/2018 15:12:45"
+  FAUTHOR: "gkelly"
+  FSTATUS: "Released"
+  MODIFIED-ON: "23/07/2018 16:58:45"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-4F21F439-AE55-4ADE-8477-445F621C5107"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata: {}
+---
+
+## Description
+
+A relational data store type describes the properties ArcGIS Server needs to establish (and maintain) a connection to an instance of database for a given database platform (e.g. Microsoft SQL Server, SAP HANA, Teradata).
+
+A relational data store type differs from a [data item](/dataitem). A data item refers to a specific container of data (e.g. a database instance, a file share, etc.) that has been registered with the server, and is used while publishing and serving out GIS services. A relational data store does not refer to a specific container of data. It simply describes a generic set of connection properties for a particular database platform.
+
+Client applications (such as Insights for ArcGIS) ask the server for the properties of a relational data store type for the purpose of establishing a Relational Database Connection [portal item](DEVSITE/rest/users-groups-and-items/items-and-item-types). The process of creating a Relational Database Connection portal item creates a [Relational Catalog Service](DEVSITE/rest/services-reference/enterprise/relational-catalog-service) on the ArcGIS Server site that was designated as a portal's [hosting server](http://server.arcgis.com/en/portal/latest/administer/windows/configure-hosting-server-for-portal.htm).
+
+Before a relational data store type can be used by client applications, Java Database Connectivity (JDBC) drivers must first be [uploaded](/uploaditem) to a hosting server as a ZIP file, and then [registered](/register-relational-data-store-type). Only administrators can register a relational data store type.
+
+##  JSON Structure 
+
+A relational data store type is described in the server as a JSON object. Only under exceptional circumstances will you ever need to [edit](/edit-relational-data-store-type) the properties of a given relational data store type. The basic structure is as follows:
+
+```javascript
+{
+  "adminDefinedProperties":
+  {
+     "jdbcPoolProperties": {},
+     "excludeSchemas": []
+  },
+  "userDefinedProperties": [],
+  "dialectClass": "",           //Esri-internal. Do not modify.
+  "dialectFactoryClass": ""    //Esri-internal. Do not modify.
+}
+
+```
+
+The `adminDefinedProperties` section is a JSON object that has two properties: `jdbcPoolProperties` and `excludeSchemas`. When a client application (such as Insights for ArcGIS) asks the server for its list of [relational data store types](/relational-data-store-types) (or for the properties of a specific [relational data store type](/relational-datastore-type)), the `adminDefinedProperties` are not returned (they are only visible during an [edit](/edit-relational-data-store-type) operation). The `jdbcPoolProperties` describe the attributes of the JDBC connection pool managed by ArcGIS Server. The `excludeSchemas` is a comma-separated array of strings that identify database schemas where information about tables/views should not be displayed to client applications (regardless whether an authenticated user has been granted permissions to view those entities by the database administrator or not).
+
+The `userDefinedProperties` section is an array of JSON objects. Each JSON object describes a connection parameter.
+
+```javascript
+userDefinedProperties: [
+  {
+    "name": "",  //Attribute name as specified by JDBC connection pool or platform-specific JDBC driver
+    "alias": "", //User-friendly description of "name"
+    "defaultValue": <value>,  //Value matches the "type" specified below. Optional.
+    "type": "string" | "int" | "boolean", 
+    "required": true | false, 
+    "encrypt": true | false
+  }, ... 
+]
+
+```
+
+The `encrypt` property is optional. The default value is false. However, the `password` is always encrypted.
+
+<Note type={"note"}>
+
+The `dialectClass` and `dialectFactoryClass` properties are internal implementation details. They should never be changed.
+
+</Note>
+
+<Note type={"tip"}>
+
+Always perform any changes in a development or staging environment and test thoroughly before deploying to production. When diagnosing issues with a particular relational data store type, Esri Support might ask you to revert to the relational data store type to its default set of properties in order to reproduce the issue with those settings.
+
+</Note>
+
+<Note type={"tip"}>
+
+Before making any edits to a relational data store type, save a backup copy type’s JSON.
+
+</Note>
+
+<Note type={"tip"}>
+
+Always validate JSON before applying any edits. There are many online tools available to do this.
+
+</Note>
+
+<Note type={"tip"}>
+
+After editing a relational data store type, you can test whether the edits are valid by using [Create Service](DEVSITE/rest/users-groups-and-items/create-service-relational-catalog-service) to create an instance of a relational catalog service that points to the edited relational data store type. Successfully listing the new service’s [entities](DEVSITE/rest/services-reference/enterprise/entities) or [fields](DEVSITE/rest/services-reference/enterprise/fields) will verify whether ArcGIS Server was able to establish a connection to the database.
+
+</Note>
+
+<Note type={"caution"}>
+
+Certain edits to a relational data store type can render pre-existing relational catalog services inoperable. It is advised that you only edit a relational data store type if there are no relational catalog services that depend on it. You can verify this by examining the `dependentServices`  property returned by the relational data store type. An empty array indicates no dependent services. For example:
+
+```other
+https://server:port/arcgis/admin/data/relationalDatastoreTypes/esri.sqlserver?f=json
+
+```
+
+</Note>
+
+## Example—Microsoft SQL Server
+
+```javascript
+{  
+  "name":"Microsoft SQL Server",
+  "id":"esri.sqlserver",
+  "adminDefinedProperties":{  
+    "jdbcPoolProperties":{  
+      "factory":"org.apache.tomcat.jdbc.pool.DataSourceFactory",
+      "driverClassName":"com.microsoft.sqlserver.jdbc.SQLServerDriver",
+      "url":"jdbc:sqlserver://",
+      "initialSize":0,
+      "minIdle":0,
+      "timeBetweenEvictionRunsMillis":10000,
+      "minEvictableIdleTimeMillis":20000,
+      "testOnBorrow":true,
+      "validationQuery":"SELECT 1",
+      "connectionProperties":"sendTimeAsDatetime=false"
+    },
+    "excludeSchemas":[  
+      "sys",
+      "INFORMATION_SCHEMA"
+    ]
+  },
+  "userDefinedProperties":[  
+    {  
+      "name":"username",
+      "alias":"User Name",
+      "defaultValue":"",
+      "type":"string",
+      "required":true
+    },
+    {  
+      "name":"password",
+      "alias":"Password",
+      "defaultValue":"",
+      "type":"string",
+      "required":true
+    },
+    {  
+      "name":"serverName",
+      "alias":"Server Name",
+      "defaultValue":"",
+      "type":"string",
+      "required":true
+    },
+    {  
+      "name":"databaseName",
+      "alias":"Database Name",
+      "defaultValue":"",
+      "type":"string",
+      "required":true
+    },
+    {  
+      "name":"instanceName",
+      "alias":"Instance Name",
+      "defaultValue":"",
+      "type":"string",
+      "required":false
+    },
+    {  
+      "name":"portNumber",
+      "alias":"Port Number",
+      "defaultValue":"",
+      "type":"int",
+      "required":false
+    }
+  ],
+  "dialectClass":"com.esri.ads2.dialect.impl.sqlserver.SQLServerSupportImpl",
+  "dialectFactoryClass":"com.esri.ads2.factory.PooledDataSourceDialectFactory"
+}
+```
+
+## Example—SAP Hana
+
+```javascript
+{  
+  "name":"SAP HANA",
+  "id":"esri.hana",
+  "adminDefinedProperties":{  
+    "jdbcPoolProperties":{  
+      "urlSeparator":"/?",
+      "factory":"org.apache.tomcat.jdbc.pool.DataSourceFactory",
+      "driverClassName":"com.sap.db.jdbc.Driver",
+      "url":"jdbc:sap://",
+      "initialSize":0,
+      "minIdle":0,
+      "timeBetweenEvictionRunsMillis":10000,
+      "minEvictableIdleTimeMillis":20000,
+      "testOnBorrow":true,
+      "validationQuery":"SELECT 1 FROM DUMMY"
+    },
+    "excludeSchemas":[  
+      "SYS",
+      "_SYS_REPO",
+      "_SYS_TASK",
+      "SYS_XS_UAA"
+    ]
+  },
+  "userDefinedProperties":[  
+    {  
+      "name":"username",
+      "alias":"User Name",
+      "defaultValue":"",
+      "type":"string",
+      "required":true
+    },
+    {  
+      "name":"password",
+      "alias":"Password",
+      "defaultValue":"",
+      "type":"string",
+      "required":true
+    },
+    {  
+      "name":"serverName",
+      "alias":"Server Name",
+      "defaultValue":"",
+      "type":"string",
+      "required":true
+    },
+    {  
+      "name":"databaseName",
+      "alias":"Database Name",
+      "defaultValue":"",
+      "type":"string",
+      "required":false
+    },
+    {  
+      "name":"portNumber",
+      "alias":"Port Number",
+      "defaultValue":"",
+      "type":"int",
+      "required":true
+    }
+  ],
+  "dialectClass":"com.esri.ads2.dialect.impl.hana.SAPHANASupportImpl",
+  "dialectFactoryClass":"com.esri.ads2.factory.PooledDataSourceDialectFactory"
+}
+
+```
+
+## Example—Teradata 10.5
+
+```javascript
+{  
+  "name":"Teradata",
+  "id":"esri.teradata",
+  "adminDefinedProperties":{  
+    "jdbcPoolProperties":{  
+      "factory":"org.apache.tomcat.jdbc.pool.DataSourceFactory",
+      "driverClassName":"com.teradata.jdbc.TeraDriver",
+      "url":"jdbc:teradata://",
+      "urlSeparator":"/",
+      "initialSize":0,
+      "minIdle":0,
+      "timeBetweenEvictionRunsMillis":10000,
+      "minEvictableIdleTimeMillis":20000,
+      "testOnBorrow":true,
+      "validationQuery":"SELECT 1"
+    },
+    "excludeSchemas":[  
+
+    ]
+  },
+  "userDefinedProperties":[  
+    {  
+      "name":"username",
+      "alias":"User Name",
+      "defaultValue":"",
+      "type":"string",
+      "required":true
+    },
+    {  
+      "name":"password",
+      "alias":"Password",
+      "defaultValue":"",
+      "type":"string",
+      "required":true
+    },
+    {  
+      "name":"serverName",
+      "alias":"Server Name",
+      "defaultValue":"",
+      "type":"string",
+      "required":true
+    },
+    {  
+      "name":"DATABASE",
+      "alias":"Database Name",
+      "defaultValue":"",
+      "type":"string",
+      "required":true
+    },
+    {  
+      "name":"DBS_PORT",
+      "alias":"Port Number",
+      "defaultValue":"",
+      "type":"int",
+      "required":false
+    }
+  ],
+  "dialectClass":"com.esri.ads2.dialect.impl.teradata.TeradataSupportImpl",
+  "dialectFactoryClass":"com.esri.ads2.factory.PooledDataSourceDialectFactory"
+}
+
+```
+
+## Example—Teradata 10.5.1 and later versions
+
+```javascript
+{  
+  "name":"Teradata",
+  "id":"esri.teradata",
+  "adminDefinedProperties":{  
+    "jdbcPoolProperties":{  
+      "factory":"org.apache.tomcat.jdbc.pool.DataSourceFactory",
+      "driverClassName":"com.teradata.jdbc.TeraDriver",
+      "url":"jdbc:teradata://",
+      "urlSeparator":"/",
+      "initialSize":0,
+      "minIdle":0,
+      "timeBetweenEvictionRunsMillis":10000,
+      "minEvictableIdleTimeMillis":20000,
+      "testOnBorrow":true,
+      "validationQuery":"SELECT 1"
+    },
+    "excludeSchemas":[  
+
+    ]
+  },
+  "userDefinedProperties":[  
+    {  
+      "name":"username",
+      "alias":"User Name",
+      "defaultValue":"",
+      "type":"string",
+      "required":true
+    },
+    {  
+      "name":"password",
+      "alias":"Password",
+      "defaultValue":"",
+      "type":"string",
+      "required":true
+    },
+    {  
+      "name":"serverName",
+      "alias":"Server Name",
+      "defaultValue":"",
+      "type":"string",
+      "required":true
+    },
+    {  
+      "name":"DATABASE",
+      "alias":"Database Name",
+      "defaultValue":"",
+      "type":"string",
+      "required":true
+    },
+    {  
+      "name":"DBS_PORT",
+      "alias":"Port Number",
+      "defaultValue":"",
+      "type":"int",
+      "required":false
+    },
+    {  
+      "name":"CHARSET",
+      "alias":"Charset",
+      "defaultValue":"UTF8",
+      "type":"string",
+      "required":false
+    }
+
+  ],
+  "dialectClass":"com.esri.ads2.dialect.impl.teradata.TeradataSupportImpl",
+  "dialectFactoryClass":"com.esri.ads2.factory.PooledDataSourceTeradataFactory"
+}
+
+```

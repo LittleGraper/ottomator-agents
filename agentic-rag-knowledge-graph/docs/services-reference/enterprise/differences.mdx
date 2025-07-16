@@ -1,0 +1,342 @@
+---
+title: "Differences"
+description: "The differences operation allows you to review differences between the current version and the default version."
+slug: "differences"
+url: "/differences"
+guid: "GUID-B8D1D2A4-E990-453C-9476-167BFCBF54B8"
+migratedTopicMetadata:
+  FTITLE: "Differences"
+  FDESCRIPTION: ""
+  FCHANGES: "Conref for ArcGIS Advanced Editing UTE - GDB #12228
+Adding a conref from the version resource topic about the read/edit session requirements."
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "03/08/2023 15:46:24"
+  FAUTHOR: "mjarman"
+  FSTATUS: "Released"
+  MODIFIED-ON: "28/08/2023 05:24:22"
+  VERSION: "8"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "6"
+  ED: "GUID-28C80D27-051F-4FDE-B6B1-DF06940565EF"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/VersionManagementServer/versions/<versionGuid>/differences
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/VersionManagementServer/versions/<versionGuid>/differences
+  methods:
+    - post
+  requiredCapability: ArcGIS Advanced Editing user type extension license
+  versionIntroduced: '10.6'
+---
+
+## Description
+
+The `differences` operation allows you to review the edits that have been made to the current version. The differences, or edits made, in the default version can also be reviewed between two moments. The output will provide the edits performed in each layer and return the changes in the following categories:
+
+-   Inserts—Features that have been created in the version that did not exist when the version was created
+-   Updates—Features that have been updated in the version
+-   Deletes—Features that have been deleted in the version that were present when the version was created
+
+The `differences` operation is supported both synchronously and asynchronously.
+
+<Note type={"note"}>
+
+Organization members must be assigned a license for the [ArcGIS Advanced Editing user type extension](https://enterprise.arcgis.com/en/portal/latest/administer/windows/license-user-type-extensions.htm#ESRI_SECTION1_B75DA80066744473AD5DD1312734654A) to use this operation for ArcGIS Enterprise 11.2 and later.
+
+</Note>
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the output format of the response. The default response format is `html`.
+
+Values: `html` | `json` | `pjson`
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sessionId`
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The client-generated sessionId (GUID).
+
+Syntax : `sessionId = {3F2504E0-4F89-41D3-9A0C-0305E82C3301}` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`fromMoment`
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The moment of the version from which the differences will be obtained. This parameter returns the differences between the specified `fromMoment`  and `moment`  parameter values. This parameter is optional.
+
+- If this parameter is not provided, the `differences` operation returns the edits (inserts, updates, and deletes) at the value of the specified `moment` parameter by default.
+
+- This parameter is only supported on the default version. If this parameter value is provided for a named branch, an error will be returned. The common ancestor moment is automatically used.
+
+Syntax: `fromMoment = <Epoch time in seconds>`
+
+Example: `fromMoment = 1603109596000` 
+
+This parameter was introduced at ArcGIS Enterprise 10.9.
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`moment`
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The moment used for the version to obtain the differences. If this parameter value is not provided, the current branch moment of the version will be used. This parameter is optional.
+
+The input moment must be greater than the version's common ancestor moment. In an edit session with unsaved edits, using a moment larger than the version's current moment will also return differences in the edit session.
+
+Syntax: `moment = <Epoch time in seconds>`
+
+Example: `moment = 1603109606000` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`resultType` 
+(Optional)
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the type of results that will be returned. The default result type is `objectIds`. This parameter is optional.
+
+Values : `objectIds | features` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`layers` 
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The array of layer IDs for which differences will be returned. If no value is provided, the differences for all layers will be returned. This parameter is optional
+
+Syntax: `layers = [<long>]` 
+Example: `layers = [6]` 
+
+This parameter was introduced at ArcGIS Enterprise 10.9.1.
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`async` 
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether the request will be processed asynchronously. If `true`, the request will be processed as an asynchronous job, and a URL will be returned that a client can visit to review the status of the job. The default is `false`.
+
+Values: `true | false` 
+
+This parameter was introduced at ArcGIS Enterprise 10.9.1.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outSR`
+(Optional) 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The output spatial reference.
+
+Syntax: `{wkid=<wkid>}` 
+
+Example: `outSR = {wkid=4326}` 
+
+This parameter was introduced at ArcGIS Enterprise 11.1.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## JSON Response syntax
+
+JSON response (when async = false):
+
+```other
+{
+  "differences" : [
+    {
+      "layerId" : long,
+      "inserts" : [ <objectId> ],
+      "updates" : [ <objectId> ],
+      "deletes" : [ <objectId> ]
+    }
+  ],
+  "features" : [
+    {
+      "layerId" : long,
+      "inserts" : [
+        {
+          "attributes" : {
+            "OBJECTID" : 581,
+            "SUBTYPE" : 3,
+             . . .
+            "SHAPE.STLength()" : 132.5
+          },
+          "geometry" : {
+            "hasZ" : true,
+            "hasM" : true,
+            "paths" : [
+              . . .
+            ]
+          }
+        }
+      ],
+      "updates" : [
+      ],
+      "deletes" : [
+      ]
+    }
+  ],
+  "success" : <true | false>,
+  "error" : { // only if success is false
+    "extendedCode" : <HRESULT>,
+    "message" : "<error message>",
+    "details" : [ <detail> ]
+  }
+}
+
+```
+
+ 
+
+JSON response (when async = true):
+
+```json
+{
+  "statusUrl" : <url>
+}
+
+```
+
+ 
+
+JSON response to the status URL (when pending or in progress):
+
+```json
+{
+  "status" : "<Pending | InProgress>",
+  "submissionTime" : <datetime>,
+  "lastUpdatedTime" : <datetime>
+ }
+
+```
+
+ 
+
+## Example usage
+
+Use the `differences`  operation to review the edits between a named version and the default version.
+
+Request URL and parameters:
+
+`https://myserver.esri.com/server/rest/services/LandUse/VersionManagementServer/versions/24417758-0DBD-4EC3-95B0-467CAA47FC43/differences` 
+
+```javascript
+f=json
+sessionId={638ed440-b81f-406c-bd5d-757c91dbfd70}
+resultType=objectids
+async=false
+
+```
+
+ 
+
+JSON response:
+
+```javascript
+{
+ "differences": [
+  {
+   "layerId": 1,
+   "updates": [
+    21,
+    30
+   ]
+  }
+ ],
+ "success": true
+}
+```
+
+ 

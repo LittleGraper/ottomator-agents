@@ -1,0 +1,171 @@
+---
+title: "Settings"
+description: "The settings operation allows organization administrators to set the number of re-delivery attempts the system will make to deliver a payload to a receiver, as well as set the deactivation policy for service webhooks."
+slug: "webhooks-settings"
+url: "/webhooks-settings"
+guid: "GUID-D4106D49-2E5A-41B5-ABA5-9948C46F17AF"
+migratedTopicMetadata:
+  FTITLE: "Webhooks Settings"
+  FDESCRIPTION: ""
+  FCHANGES: "New resource"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2-*"
+  CREATED-ON: "06/11/2023 17:14:47"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "09/11/2023 19:35:37"
+  VERSION: "1"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-ED15F31A-2622-4534-B50B-DA749C1D4A1A"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /services/webhooks/settings
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /services/webhooks/settings
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '11.2'
+  requiredCapabilities:
+    - name: Access allowed with the "Organization webhooks" privilege
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `settings` operation allows organization administrators to set the number of re-delivery attempts the system will make to deliver a payload to a receiver before the delivery is marked as a failure, as well as set the deactivation policy for service webhooks. The deactivation policy specifies the number of failures (`numberOfFailures`) that can occur over a specific number of days (`daysInPast`) before a service webhook is deactivated. For example, if the policy is set to allow 5 failed attempts over 5 days, if there is 1 failed attempt every day for 5 days, the webhook will deactivate on the fifth day. If 3 failures occur one day, and then 2 failures occur the second day, the webhook would deactivate the second day. If 2 failures occur one day, no failures occur the second day, 2 failures occur the third day, but no failures occur the fourth or fifth day, the webhook will not deactivate. If failures occur the sixth day, that day is treated as the start of the next 5 day period, and if 3 more failed attempts occur within this new window of time the webhook will deactivate.
+
+
+## Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `notificationAttempts` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This value specifies the number of attempts that will be made to deliver the webhook payloads. By default, the payload will attempt to be delivered 3 times. The value for the attempts must be an integer between 1 and 5.
+
+      ```markdown label=Example
+      notificationAttempts=4
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `notificationTimeOutInSeconds` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This value specifies the length of time, in seconds, the system will wait to receive a response from the receiver. By default, the system will wait 10 seconds. The value for the number of seconds the system will wait must be an integer between 1 and 60 seconds.
+
+      ```markdown label=Example
+      notificationAttempts=30
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `notificationElapsedTimeInSeconds` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This value specifies the amount of time, in seconds, between each payload delivery attempt. By default, the system will attempt to deliver another payload after 5 seconds if the previous attempt fails, until the number of attempts specified by the `notificationAttempts` parameter has been reached. The value must be an integer between 1 and 60.
+
+      ```markdown label=Example
+      notificationElapsedTimeInSeconds=30
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `numberOfFailures` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This value specifies the number of failures that can happen over a specific number of days (specified by the `daysInPast` parameter) before the webhook is deactivated. By default, the system will accept 5 failures over a number of days before the webhooks is deactivated. The value must be an integer between 1 and 30.
+
+      ```markdown label=Example
+      numberOfFailures=5
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `daysInPast` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This value specifies the number of days a specific number of failures (specified by the `numberOfFailures` parameter) can occur during before the webhook is deactivated. By default, the system will accept a specific number of failures over the course of 5 days. The value must be an integer between 1 and 30.
+
+      ```markdown label=Example
+      daysInPast=5
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `settings` operation:
+
+```other
+POST /context/admin/services/webhooks/settings HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+notificationAttempts=4&notificationTimeOutInSeconds=30&notificationElapsedTimeInSeconds=30&numberOfFailures=5&daysInPast=5&f=pjson&token=Mb0ORrkLObNO2Q8FZoUCHHzSMzZi0CbhLHNRYMqqa6URG_ojQJF3rNsJAfRB23MyCrLwSmuaHPUo4AEIrUuoH1-4Ot5xh4565FtlQahXAhK2C7Sy0oydZhBwD8KdFSnVlnLr-e9uI5ovSWZ2lGNn9SwoV2MPMzeAh_5r-q-wgwF8DTT_nhuCXJGkMRy-48jjGS2aN5FI18STHZ8RAuKxGasH90SI3C7njZzlGCUrY5m6BDhCMsdpZA14GwNX8Cis
+```
+
+## JSON Response example
+
+```other
+{
+  "notificationAttempts": 4,
+  "notificationTimeOutInSeconds": 30,
+  "notificationElapsedTimeInSeconds": 30,
+  "daysInPast": 5,
+  "numberOfFailures": 5,
+  "status": "success"
+}
+```

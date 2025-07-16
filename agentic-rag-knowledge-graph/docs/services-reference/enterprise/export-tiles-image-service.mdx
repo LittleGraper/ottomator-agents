@@ -1,0 +1,339 @@
+---
+title: "Export Tiles"
+description: "The exportTiles operation is performed as an asynchronous task and allows client applications to download map tiles from the server for offline use."
+slug: "export-tiles-image-service"
+url: "/export-tiles-image-service"
+guid: "GUID-1C58EAE7-CB06-49A2-8D5C-42E5A4767F30"
+migratedTopicMetadata:
+  FTITLE: "Export Tiles (Image Service)"
+  FDESCRIPTION: ""
+  FCHANGES: "ArcMap Changes"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0- *"
+  CREATED-ON: "06/06/2022 12:05:49"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "06/06/2022 12:06:58"
+  VERSION: "8"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-F434B7FF-D1A8-4FCC-85C4-2E15B86B8B51"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /exportTiles
+  urlSegments:
+    - name: Image Service
+      url: /image-service
+    - name: /exportTiles
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: 10.2.1
+---
+
+## Description
+
+The `exportTiles` operation is performed as an asynchronous task and allows client applications to download map tiles from the server for offline use. This operation is performed on an [image service](/image-service) that allows clients to export cache tiles. The result of this operation is an [image service job](/image-service-job). This job response contains reference to the [image service result](/image-service-result) resource that returns the URL to the resulting tile package (.tpk/.tpkx) or a cache raster dataset. For more information on the properties returned in the job response, see [GP Job](/gp-job).
+
+<Note type={"note"}>
+
+Support for tile packages with the file extension of .tpkx was introduced at ArcGIS Enterprise 10.7.
+
+</Note>
+
+The `exportTiles` operation can be enabled in a service by using ArcGIS Pro or the ArcGIS Server Administrative Site Directory. In ArcGIS Pro, make an admin or publisher connection to the server, go to the service properties, and select the option to **Allow Clients to Export Cache Tiles** on the advanced caching page of the Service Editor. You can also specify the maximum number of tiles clients will be allowed to download. The default maximum allowed tile count is 100,000. To enable this capability using the ArcGIS Server Administrative Site Directory, edit the service and set the `exportTilesAllowed` property as `true` and the `maxExportTilesCount` property as `100000`.
+
+<Note type={"note"}>
+
+At 10.2.2, `exportTiles` is supported as an operation of ArcGIS Image Server. The use of the `submitJob` operation from `exportTiles` is deprecated.
+
+</Note>
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`storageFormatType` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Introduced at 10.7. When set to `esriMapCacheStorageModeCompactV2`, the resulting tile package will use the .tpkx file extension. If the value is set to `esriMapCacheStorageModeCompact`, a tile package with the .tpk extension is generated.
+
+Values: `esriMapCacheStorageModeCompactV2` \| `esriMapCacheStorageModeCompact` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`tilePackage` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Allows exporting either a tile package or a cache raster dataset. If the value is `true`, the output will be in tile package format, and if the value is `false`, a cache raster dataset is returned. The default value is `false`.
+
+Values: `true` \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`exportExtent` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The extent (bounding box) of the tile package or the cache dataset to be exported. If the extent does not include a spatial reference, the extent values are assumed to be in the spatial reference of the map. The default value is the full extent of the tiled map service.
+
+Syntax
+
+```javascript
+exportExtent=<xmin>, <ymin>, <xmax>, <ymax>
+```
+
+ 
+
+Example
+
+```javascript
+exportExtent=-104,35.6,-94.32,41
+
+exportExtent={"xmin": -109.55,"ymin": 25.76,"xmax": -86.39,"ymax": 49.94,"spatialReference": {"wkid": 4326}}
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`optimizeTilesForSize` 
+
+(Optional) 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Use this parameter to enable compression of JPEG tiles and reduce the size of the downloaded tile package or the cache raster dataset. Compressing tiles slightly compromises on the quality of tiles but helps reduce the size of the download. Try sample compressions to determine the optimal compression before using this feature.
+
+Values: `true` \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`compressionQuality` 
+
+(Optional) 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This parameter can be used when `optimizeTilesForSize` is `true`. The value must be between 0 and 100.
+
+<Note type={"note"}>
+
+The value cannot be greater than the default compression already set on the original tile. For example, if the default value is 75, the value of `compressionQuality` must be between 0 and 75. A value greater than 75 in this example will attempt to upsample an already compressed tile and will further degrade the quality of tiles.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`exportBy` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The criteria that will be used to select the tile service levels to export. The values can be Level IDs, cache scales, or the resolution (in the case of image services).
+
+Values: `LevelID` \| `Resolution` \| `Scale` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`levels` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the tiled service levels to export. The values should correspond to Level IDs, cache scales, or the resolution as specified in the `exportBy` parameter. The values can be comma-separated values or a range.
+
+<Note type={"note"}>
+
+Make sure tiles are present at the levels where you attempt to export tiles.
+
+</Note>
+
+Example
+
+```javascript
+//Comma-separated example
+levels=1,2,3,4,5,6,7,8,9
+
+//Value range example
+levels=1–4,7–9
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`areaOfInterest` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The `areaOfInterest` polygon allows exporting tiles within the specified polygon areas. This parameter supersedes the `exportExtent` parameter.
+
+Example
+
+```javascript
+{
+  "features": [
+    {
+      "geometry": {
+        "rings": [
+          [
+            [-100,35],
+            [-100,45],
+            [-90,45],
+            [-90,35],
+            [-100,35]
+          ]
+        ],
+        "spatialReference": {
+          "wkid":4326
+        }
+      }
+    }
+  ]
+}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html`.
+
+Values: `html` \| `json` \| `pjson` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+### Example one
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/World_Imagery/ImageServer/exportTiles?tilePackage=true&exportExtent=&optimizeTilesForSize=true&compressionQuality=90&exportBy=levelId&levels=0-7&areaOfInterest=&f=json
+```
+
+ 
+
+### Example two
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/World_Imagery/ImageServer/exportTiles?tilePackage=true&exportExtent=-13051380,4030276,-13037288,4041136&optimizeTilesForSize=true&compressionQuality=60&exportBy=levelId&levels=13-19&areaOfInterest=&f=json
+```
+
+ 
+
+### Example three
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/World_Imagery/ImageServer/exportTiles?tilePackage=true&exportExtent=&optimizeTilesForSize=true&compressionQuality=60&exportBy=levelId&levels=13-19&areaOfInterest={"features":[{"geometry":{"rings":[[[-100,35],[-100,45],[-90,45],[-90,35],[-100,35]]]}}]},"spatialReference":{"wkid":4326}}}]}&f=json
+```
+
+ 
+
+## JSON Response syntax
+
+```json
+{
+  "jobId": "<jobId>",
+  "jobStatus": "<jobStatus>"
+}
+```
+
+ 
+
+## JSON Response example
+
+```json
+{
+  "jobId": "jeeb938cbb2774269a7ca9910df4ee700",
+  "jobStatus": "esriJobSubmitted"
+}
+
+```
+
+ 

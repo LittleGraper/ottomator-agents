@@ -1,0 +1,196 @@
+---
+title: "Dashboard"
+description: "The dashboard resource displays statistics about errors within a Reviewer workspace."
+slug: "rest-dashboard"
+url: "/rest-dashboard"
+guid: "GUID-0D539AF5-CD32-403F-A7FC-786D2DFC8BFA"
+migratedTopicMetadata:
+  FTITLE: "REST: Dashboard"
+  FDESCRIPTION: ""
+  FCHANGES: "adding note for AO10 deprecation per 1258"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9 - *"
+  CREATED-ON: "28/01/2021 17:58:39"
+  FAUTHOR: "igalvan"
+  FSTATUS: "Released"
+  MODIFIED-ON: "12/02/2021 12:26:39"
+  VERSION: "6"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-C10AAD45-0CA1-4F99-AA9B-A624E6BAE447"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /Dashboard
+  urlSegments:
+    - name: <DataReviewerServer-url>
+      url: /rest-data-reviewer-map-service
+    - name: /Dashboard
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '10.1'
+---
+
+import GUID_2552D38B_743E_4F04_B17A_20DFD25517C8_GUID_E6C28557_ADDB_4260_92CF_C8983F9552C4 from "./snippets/GUID-2552D38B-743E-4F04-B17A-20DFD25517C8/_GUID-E6C28557-ADDB-4260-92CF-C8983F9552C4";
+import GUID_2552D38B_743E_4F04_B17A_20DFD25517C8_GUID_5492D5C4_A7A6_4DC8_A922_84958A9EFC03 from "./snippets/GUID-2552D38B-743E-4F04-B17A-20DFD25517C8/_GUID-5492D5C4-A7A6-4DC8-A922-84958A9EFC03";
+
+## Description
+
+<Note>
+The ArcGIS Data Reviewer extension is required to use this resource.
+</Note>
+
+<Note type={"note"}>
+This resource is dependent on the ArcGIS Data Reviewer ArcMap runtime-based server object extension (SOE). ArcGIS Enterprise 10.9.x, part of the ArcGIS 2021 releases, is the last release of ArcGIS Enterprise to support services published from ArcMap.
+
+Consider Data Reviewer capabilities enabled using ArcGIS Pro and integrated in the [Validation service](/validation-server).
+</Note>
+
+The dashboard displays statistics about errors within a Reviewer workspace. The dashboard resource returns statistics for the following:
+
+-   `reviewerResultsBy` —Total counts (summaries or group by) of a value in specific or custom (user-defined) fields in the Reviewer workspace's `REVTABLEMAIN` or `REVBATCHRUNTABLE` tables. These statistics show the number of occurrences of a unique value in a field in a table. Any custom (user-defined) fields set within a Reviewer workspace will display in the `reviewerResultsBy` collection. 
+
+    Default fields include the following:
+
+    -   `BATCHJOBCHECKGROUP` —A group name within a batch job. Batch jobs can contain one or more groups.
+    -   `CHECKTITLE` —The title of a check in a batch job.
+    -   `FEATUREOBJECTCLASS` —The name of the feature or object class in which an error was found.
+    -   `LIFECYCLEPHASE` —Represents the phase of an error.
+    -   `LIFECYCLESTATUS` —Represents the state of an error.
+    -   `SESSIONID` —Reviewer session ID.
+    -   `SEVERITY` —Severity values range from 1-5 and indicate the relative importance of a check. A lower value signifies a check of greater importance.
+    -   `SUBTYPE` —Indicates the subtype of the object and feature classes in which an error was found.
+
+    Custom fields are included in this collection. You can define these fields (called User-Defined Fields), in the Reviewer Session Manager in the ArcGIS Data Reviewer extension for both ArcMap and ArcGIS Pro. All custom fields will have the `isCustomField` attribute set to `true`.
+
+    Use the [`filter`](/rest-filter) operation to refine information retrieved by this resource.
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html`. `Html` returns a list of results while `JSON` returns a collection of name-value pairs of results, IDs, and `isCustomField` Boolean values. `isCustomField` indicates whether a field is user-defined in the Reviewer workspace.
+
+Values: `html` | `json` | `pjson` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+### Example one
+
+The following request demonstrates how to access the dashboard resource:
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/reviewer/MapServer/exts/DataReviewerServer/dashboard?f=json
+```
+
+#### JSON Response example
+
+The response to the above example returns a collection of names, IDs, and `isCustomField` values.
+
+```other
+{
+  "reviewerResultsBy": [
+    {
+      "name": "BATCHJOBCHECKGROUP",
+      "id": "BATCHJOBCHECKGROUP",
+      "isCustomField": false
+    },
+    {
+      "name": "CHECKTITLE",
+      "id": "CHECKTITLE",
+      "isCustomField": false
+    },
+    {
+      "name": "FEATUREOBJECTCLASS",
+      "id": "FEATUREOBJECTCLASS",
+      "isCustomField": false
+    },
+		  {
+      "name": "LIFECYCLEPHASE",
+      "id": "LIFECYCLEPHASE",
+      "isCustomField": false
+    },
+    {
+      "name": "LIFECYCLESTATUS",
+      "id": "LIFECYCLESTATUS",
+      "isCustomField": false
+    },
+    {
+      "name": "SESSIONID",
+      "id": "SESSIONID",
+      "isCustomField": false
+    },
+    {
+      "name": "SEVERITY",
+      "id": "SEVERITY",
+      "isCustomField": false
+    },
+    {
+      "name": "SUBTYPE",
+      "id": "SUBTYPE",
+      "isCustomField": false
+    }
+  ]
+}	
+```
+
+### Example two
+
+The following request demonstrates how to request total county by `severity`  in a reviewer workspace:
+
+```javascript
+https://localhost:6443/arcgis/rest/services/reviewer/MapServer/exts/DataReviewerServer/Dashboard/reviewerResultsBy/SEVERITY?f=pjson 
+```
+
+#### JSON Response example
+
+The response to the above request returns a list, sorted by `severity`.
+
+```other
+{
+  "fieldName": "SEVERITY",
+  "dashboardResults": [
+    {
+      "fieldValue": 1,
+      "count": 30224
+    },
+    {
+      "fieldValue": 2,
+      "count": 509
+    },
+    {
+      "fieldValue": 3,
+      "count": 19969
+    },
+    {
+      "fieldValue": 4,
+      "count": 3
+    },
+    {
+      "fieldValue": 5,
+      "count": 70
+    }
+  ]
+}
+```

@@ -1,0 +1,417 @@
+---
+title: "Duplicate parcels"
+description: "The duplicateParcels operation duplicates parcels to a specified parcel type."
+slug: "duplicateparcels-parcel-fabric-service"
+url: "/duplicateparcels-parcel-fabric-service"
+guid: "GUID-74879E15-AF83-41C1-81C2-655696CA6526"
+migratedTopicMetadata:
+  FTITLE: "DuplicateParcels-parcel-fabric-service"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "14/08/2023 13:50:00"
+  FAUTHOR: "cleslie"
+  FSTATUS: "Released"
+  MODIFIED-ON: "29/09/2023 11:51:55"
+  VERSION: "6"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-E8D2FFEF-1406-4953-9C4A-611BC818E62C"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/ParcelFabricServer/duplicateParcels
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName/ParcelFabricServer/duplicateParcels
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.8'
+  requiredCapability: ArcGIS Advanced Editing
+---
+
+## Description
+
+The `duplicateParcels` operation duplicates parcels to a specified parcel type and subtype. A record is required to duplicate parcels.
+
+If the parcel type [supports the storage of strata parcels](https://pro.arcgis.com/en/pro-app/latest/help/data/parcel-editing/addparceltypes.htm#ESRI_SECTION1_09E068CC75DA4EF3AE08B333F0B85FAC), parcels can be duplicated multiple times vertically to create [strata parcels](https://pro.arcgis.com/en/pro-app/latest/help/data/parcel-editing/createstrataparcels.htm). Strata parcels represent floors both above and below the ground and are also known as condominiums, units, apartments, flats, basements, and vertical parcels. 
+
+After duplicating parcels, run the `build` operation to build the parcel fabric so that the record polygon and parcel count reflects the newly added parcels.
+
+[Learn more about duplicating parcels](https://pro.arcgis.com/en/pro-app/latest/help/data/parcel-editing/duplicate-parcels.htm)
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `gdbVersion` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The name of the geodatabase version (the default is the `DEFAULT` version).
+
+      Syntax
+
+      ```javascript
+      gdbVersion=<version>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sessionId` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The token (GUID) used to lock the version. If the calling client has previously started a service session (editing) and holds an exclusive lock on the specified version, the request will fail if the `sessionId` value is not provided. If the specified version is currently locked by another session, the request will fail if the `sessionId` value is not provided or does not match the `sessionId` value that holds the exclusive lock.
+
+      Syntax
+
+      ```javascript
+      sessionId=<guid>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `parcels` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Introduced at 10.8.
+
+      The parcels that will be duplicated.
+
+      Syntax
+
+      ```javascript
+      parcels=[{"id":"<parcelguid>","layerId":"16"},{...}]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `targetParcelType` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The target parcel type to which to duplicate the parcels.
+
+      Syntax
+
+      ```javascript
+      targetParcelType=<layer id>
+      ```
+
+     </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `targetParcelSubtype` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The target parcel subtype.
+
+      Syntax
+
+      ```javascript
+      targetParcelSubtype=<subtype id>
+
+      //If not using a subtype
+      targetParcelSubtype=0
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `record` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The unique identifier (GUID) of the record. The duplicated parcels will be associated with the specified record.
+
+      Syntax
+
+      ```javascript
+      record=<guid>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `repeatCount` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The number of times the specified parcels will be duplicated. This parameter is generally used to duplicate parcels vertically to create strata parcels.
+
+      Syntax
+
+      ```javascript
+      repeatCount=<long>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `updateField` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.1.
+
+      The field that will be updated incrementally. If the parcel type supports the storage of strata parcels, the `FloorOrder` field can be specified as the `updateField` value. The `FloorOrder` field is updated with the floor number when duplicating parcels vertically. The floor number will start with the numeric value specified for the `startValue` parameter.
+
+      Syntax
+
+      ```javascript
+      updateField=<string>
+      ```
+
+     </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `startValue` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.1.
+
+      The starting floor or level when duplicating parcels to create strata parcels. The start value is populated in the `FloorOrder` fields (polygon and line field) of the first parcel duplicated.
+
+      Syntax
+
+      ```javascript
+      startValue=<long>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow> 
+    <StyledTableCell cellStyle="markdown">
+
+      `incrementValue` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.1.
+
+      The interval at which the value in the `FloorOrder` field will increase. For example, if the increment value is 2, the value in the `FloorOrder` field will increase by two for each duplicated parcel.
+
+      Syntax
+
+      ```javascript
+      incrementValue=<long>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.1.
+      
+      Specifies whether the request will be processed asynchronously. If `true`, the request will be processed as an asynchronous job and a URL that points to a location displaying the status of the job will be returned. The default is `false`. This parameter is optional.
+
+      Values: `true` | `false` 
+
+      Syntax
+
+      ```javascript
+      async=true|false
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the output format of the response. The default response format is `html`.
+
+      Values: `html` | `json` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+This example shows the steps for duplicating a parcel to create two floors of strata parcels using the `duplicateParcels` operation.
+
+<Note type={"note"}>
+
+  The `sessionId`  parameter value must be the same for starting the edit session, performing the edit operation, and stopping the edit session.
+
+</Note>
+
+1.  [Start a service session](/start-reading) on the version.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/VersionManagementServer/versions/E4DAED9D-C859-489B-9053-767A45F1D97C/startReading
+    f=json
+    sessionId={bba242fc-e671-4aa2-83d4-1c013347fa4f}
+    ```
+     
+2.  [Start an edit session](/start-editing) on the version.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/VersionManagementServer/versions/E4DAED9D-C859-489B-9053-767A45F1D97C/startEditing
+    f=json
+    sessionId={bba242fc-e671-4aa2-83d4-1c013347fa4f}
+    ```
+     
+3.  Duplicate a parcel in the tax parcel type to create two additional floors of strata parcels. Increment the floor level by one for each parcel duplicated.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/ParcelFabricServer/duplicateParcels
+    f=json
+    gdbVersion=admin.Version1
+    sessionId={bba242fc-e671-4aa2-83d4-1c013347fa4f}
+    parcels=[{"id":"{5B9C7139-FBE0-4B43-B9BB-092EB98635E6}","layerId":"13"}]
+    targetParcelType=10
+    targetParcelSubtype=0
+    record={78BEE123-4A76-4B6C-9B12-C30786E46B48}
+    repeatCount=2
+    updateField=floororder
+    startValue=1
+    incrementValue=1
+    async=false
+    ```
+     
+4.  If edits are complete, [stop the edit session](/stop-editing).
+
+5.  [Stop](/stop-reading) and release the service session. 
+
+## JSON Response syntax
+
+The following response is returned when `async` is `false`:
+
+```other
+{
+  "exceededTransferLimit: <true | false>,
+  "moment": <datetime>,
+  "error": {  // only if success is false
+    "extendedCode": <HRESULT>,
+    "message": <error message>,
+    "details": [<detail>]
+  },
+  "serviceEdits": {  // only if transfer limit is not exceeded
+    "editedFeatures": {
+      "updates": {
+        "attributes": {...},
+        "geometry": {...}
+      },
+      {
+        "spatialReference": {<spatial reference>}
+      },
+      "id": <layerID>
+    }
+				"editedFeatures": {
+      "adds": {
+        "attributes": {...},
+        "geometry": {...}
+      },
+      {
+        "spatialReference": {<spatial reference>}
+      },
+      "id": <layerID>
+    },
+    "success": <true | false>
+  }
+}
+```
+
+The following response is returned when `async`  is `true` :
+
+```other
+{
+		"statusUrl": <url>
+}
+```
+
+ 

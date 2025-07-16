@@ -1,0 +1,321 @@
+---
+title: "Aggregate Points"
+description: "API reference for the Aggregate Points service available on ArcGIS Online."
+slug: "sa-aggregate-points"
+url: "/spatial-analysis/tasks/sa-aggregate-points"
+redirectFrom:
+  - /sa-aggregate-points
+guid: "GUID-63B960E0-B1E3-4A07-91D9-6AFD287645F6"
+migratedTopicMetadata:
+  FTITLE: "SA Aggregate Points"
+  FDESCRIPTION: "REST API doc"
+  FCHANGES: "Fix typos"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "agol10.2-* : 11.1-*"
+  CREATED-ON: "09/06/2022 05:35:58"
+  FAUTHOR: "aring"
+  FSTATUS: "Released"
+  MODIFIED-ON: "22/08/2022 09:36:23"
+  VERSION: "10"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "6"
+  ED: "GUID-07A2B961-C50E-4F91-9089-3565BFEB1D90"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata: {}
+---
+
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E0E9FDE9_9A98_4EA4_9164_0E878BADF591 from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-E0E9FDE9-9A98-4EA4-9164-0E878BADF591";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_D95DEC58_7F27_491A_AF3D_6E6A3C0A6F2D from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-D95DEC58-7F27-491A-AF3D-6E6A3C0A6F2D";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_EBB8515E_527A_4013_A6EA_AA8EBF549CCF from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-EBB8515E-527A-4013-A6EA-AA8EBF549CCF";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E836F966_C272_43B1_9BF9_55BA03755A13 from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-E836F966-C272-43B1-9BF9-55BA03755A13";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E671F554_89D2_4CAD_B032_525E1CE90C18 from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-E671F554-89D2-4CAD-B032-525E1CE90C18";
+
+![Aggregate Points](../../images/GUID-60C59C66-3038-4D0E-8F6A-EC6C53FEAA02-web.png)
+
+The `Aggregate Points` task works with a layer of point features and a layer of polygon features or bins. It first identifies which points fall within each polygon's area. After identifying this point-in-polygon spatial relationship, statistics for all points in the polygon are calculated and assigned to the area. The most basic statistic is the number of points within the polygon (count), but you can get other statistics as well. 
+
+For example, if the points represent coffee shops and each point has a `TOTAL_SALES` attribute, you can get statistics such as the sum of all sales within the polygon, the minimum or maximum `TOTAL_SALES` value, or the standard deviation of all sales within the polygon. 
+
+## Request URL
+
+```javascript
+http://<analysis url>/AggregatePoints/submitJob
+```
+
+ 
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Description"}>
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+            `pointLayer`
+
+            (Required)
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+            The point features that will be aggregated into polygons in the `polygonLayer` parameter or the specified bins.
+
+            <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E0E9FDE9_9A98_4EA4_9164_0E878BADF591 />
+
+            <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_D95DEC58_7F27_491A_AF3D_6E6A3C0A6F2D />
+        </StyledTableCell>
+    </StyledTableRow>
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+            `polygonLayer`
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+            The polygon features (areas) into which the input points will be aggregated. The `polygonLayer` parameter is required unless a value for the `binType` parameter is specified.
+
+            <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E0E9FDE9_9A98_4EA4_9164_0E878BADF591 />
+       </StyledTableCell>
+    </StyledTableRow>
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+        `keepBoundariesWithNoPoints`
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+        A Boolean value that specifies whether the polygons that have no points within them will be returned in the output. The default is `true`.
+
+        Values: `true` \| `false`
+        </StyledTableCell>
+    </StyledTableRow>
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+        `summaryFields`
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+        A list of field names and statistical summary types that will be calculated for all points within each polygon. The count of points within each polygon is always returned.
+
+        Syntax: `["fieldName summaryType","fieldName summaryType", ...]`
+
+        `fieldName` is one of the numeric or date fields in the input `pointLayer` parameter.
+
+        `summaryType` is one of the following:
+
+        -   `Sum`—Adds the total value of all the points in each polygon. This statistic type is not supported for date fields.
+        -   `Mean`—Calculates the average of all the points in each polygon. This statistic type is not supported for date fields.
+        -   `Min`—Finds the smallest value of all the points in each polygon. This statistic type is supported for date fields.
+        -   `Max`—Finds the largest value of all the points in each polygon. This statistic type is supported for date fields.
+        -   `Stddev`—Finds the standard deviation of all the points in each polygon. This statistic type is not supported for date fields.
+
+        Example: `"summaryFields": ["Annual_Sales Sum", "Annual_Sales Mean"]`
+        </StyledTableCell>
+    </StyledTableRow>
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+        `groupByField`
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+        A field name in the `pointLayer`. Points that have the same value for the `group by` field will have their own counts and summary field statistics.
+
+        You can create statistical groups using an attribute in the analysis layer. For example, if you are aggregating crimes to neighborhood boundaries, you may have a `Crime_type` attribute with five crime types. Each unique crime type forms a group, and the statistics you choose will be calculated for each unique value of `Crime_type`.
+
+        Example: `"groupByField": "Crime_type"`
+        <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_EBB8515E_527A_4013_A6EA_AA8EBF549CCF />
+        </StyledTableCell>
+    </StyledTableRow>
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+        `minorityMajority`
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+            This Boolean parameter is applicable only when a `groupByField` value is specified. If `true`, the minority (least dominant) or the majority (most dominant) attribute values for each group field within each boundary are calculated. Two new fields are added to the `aggregatedLayer` prefixed with `Majority_` and `Minority_`.
+
+            The default is `false`.
+
+            Values: `true` \| `false`
+        </StyledTableCell>
+    </StyledTableRow>
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+        `percentPoints`
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+        This Boolean parameter is applicable only when a `groupByField` value is specified. If `true`, the percentage count of points for each unique `groupByField` value is calculated. A new field is added to the `groupSummary` output table containing the percentages of each attribute value within each group. If `minorityMajority` is `true`, two additional fields are added to the `aggregatedLayer` containing the percentages of the minority and majority attribute values within each group.
+        </StyledTableCell>
+    </StyledTableRow>
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+           `outputName`
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+        <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E836F966_C272_43B1_9BF9_55BA03755A13 />
+        </StyledTableCell>
+    </StyledTableRow>
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+        `context`
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+        <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E671F554_89D2_4CAD_B032_525E1CE90C18 />
+        </StyledTableCell>
+    </StyledTableRow>
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+        `binType`
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+        The type of bin that will be generated and points will be aggregated into. Bin options are as follows:
+        -   `Hexagon`
+        -   `Square`—This is the default.
+
+        Example: `"binType" : "Hexagon"`
+
+        When generating bins, for `Square`, the number and units specified determine the height and length of the square. For `Hexagon`, the number and units specified determine the distance between parallel sides. Either `binType` or `polygonLayer` must be specified. If `binType` is chosen, `binSize` and `binSizeUnit` specifying the size of the bins must be included.
+        </StyledTableCell>
+    </StyledTableRow>
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+        `binSize`
+        (Required if `binType` is used)
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+        The distance used to calculate the size of the bins specified in the `binType` parameter that the `pointLayer` will be aggregated into.
+
+        Example: `"binSize" : 100`
+        </StyledTableCell>
+    </StyledTableRow>
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+        `binSizeUnit`
+        (Required if `binType` is used)
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+        The linear unit to be used with the distance value specified in `binSize`.
+
+        Values: `Meters` \| `Kilometers` \| `Feet` \| `Miles` \| `NauticalMiles` \| `Yards`
+
+        The default is `Meters`.
+
+        Example: `"binSizeUnit" : "Miles"`
+        </StyledTableCell>
+    </StyledTableRow>
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+        `f`
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+        The response format. The default response format is `html`.
+
+        Values: `html` \| `json`
+        </StyledTableCell>
+    </StyledTableRow>
+</StyledTable>
+
+## Response
+When you submit a request, the service assigns a unique job ID for the transaction. 
+
+Syntax:
+
+```javascript
+{
+"jobId": "<unique job identifier>",
+"jobStatus": "<job status>"
+}
+```
+
+After the initial request is submitted, you can use the `jobId` to periodically check the status of the job and messages, as described in [Check job status](/checking-job-status-1). Once the job has successfully completed, you use the `jobId` to retrieve the results. To track the status, you can make a request of the following form:
+
+```javascript
+http://<analysis url>/AggregatePoints/jobs/<jobId>
+```
+
+## Accessing results
+
+When the status of the job request is `esriJobSucceeded`, you can access the results of the analysis by making a request of the following form:
+
+```javascript
+http://<analysis url>/AggregatePoints/jobs/<jobId>/results/<output parameter name>?token=<your token>&f=json
+```
+
+<StyledTable headers={"Parameter,Description"}>
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+        `aggregatedLayer`
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+            `aggregatedLayer` will always contain polygon features. It may have the same number of or fewer polygon features than the input polygon layer, based on the value of `keepPolygonsWithNoPoints`.
+
+             The layer will inherit all the attributes of the input polygon layer and will have a `Point_Count` attribute that is the number of points enclosed by the polygon.
+
+             If a `summaryFields` parameter value is specified in the task request, the layer will have additional attributes for each requested summary. For example, if you request the following:
+
+             `"summaryFields" :["Annual_Sales Sum", "Annual_Sales Mean"]`
+
+             The result polygon features will have two attributes, `Sum_Annual_Sales` and `Mean_Annual_Sales`, to contain the calculated values.
+
+             Request example:
+             ```javascript
+             {"url":"http://<analysis url>/AggregatePoints/jobs/<jobId>/results/aggregatedLayer"}
+             ```
+             The result has properties for parameter name, data type, and value. The contents of `value` depend on the `outputName` parameter value provided in the initial request.
+             - If `outputName` is provided, `value` contains the URL to the feature service layer.
+             ```javascript
+             {
+            "paramName":"aggregatedLayer",
+            "dataType":"GPString",
+            "value":{"url":"<hosted featureservice layer url>"}
+            }
+            ```
+            - If `outputName` is not provided, `value` contains a feature collection.
+            ```javascript
+            {
+            "paramName":"aggregatedLayer",
+            "dataType":"GPString",
+            "value":{"layerDefinition": {}, "featureSet": {}  }
+            }
+            ```
+            See [Feature output](/feature-output-1) for more information about how the result layer or collection is accessed.
+
+        </StyledTableCell>
+    </StyledTableRow>
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+            `groupSummary`
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+            If the `groupByField` parameter is specified, an optional group summary table is created. The group summary table provides the count of points and other summary fields for each group of points for each polygon boundaries in the polygon layer. Tables are a subset of features; that is, they contain attributes but no geometry.
+
+            The output table will have the following fields:
+
+            -   `Join_ID`—The object ID of the input `polygonLayer`.
+            -   `groupByField`
+            -   `Point_Count_<groupByField name>`—The count of points within the group.
+            -   Fields based on the `summaryFields` parameter in the task request. The summary attribute name will be of type `<summary type>_<fieldname>`. For example, if you specify `"summaryFields": ["Annual_Sales Max"]` in the task request, a corresponding `Max_Annual_Sales` attribute will be included in the table to present the maximum annual sales for each group in each polygon area.
+
+            Request example:
+
+            ```javascript
+            {"url":
+            "http://<analysis url>/AggregatePoints/jobs/<jobId>/results/groupSummary
+            "}
+            ```
+            The result has properties for parameter name, data type, and value. The contents of `value` depend on the `outputName` parameter value provided in the initial request.
+             -   If `outputName` is provided, `value` contains the URL to the feature service layer.
+            ```javascript
+            {
+            "paramName":"groupSummary",
+            "dataType":"GPString",
+            "value":{"url":"<hosted featureservice table url>"}
+            }
+            ```
+            - If `outputName` is not provided, `value` contains a feature collection.
+            ```javascript
+            {
+            "paramName":"groupSummary",
+            "dataType":"GPString",
+            "value":{"layerDefinition": {}, "featureSet": {}  }
+            }
+            ```
+            See [Feature output](/feature-output-1) for more information about how the group summary table is accessed.
+
+        </StyledTableCell>
+    </StyledTableRow>
+</StyledTable>

@@ -1,0 +1,214 @@
+---
+title: "Inspect Conflicts"
+description: "The inspectConflicts operation allows the client to annotate conflicts from the conflict set that were obtained during the previous Reconcile operation."
+slug: "inspect-conflicts"
+url: "/inspect-conflicts"
+guid: "GUID-063CE170-D858-4CED-BC28-7D72AF463C1C"
+migratedTopicMetadata:
+  FTITLE: "Inspect Conflicts"
+  FDESCRIPTION: ""
+  FCHANGES: "Conref for ArcGIS Advanced Editing UTE - GDB #12228
+Adding a conref from the version resource topic about the read/edit session requirements."
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "04/08/2023 04:41:47"
+  FAUTHOR: "mjarman"
+  FSTATUS: "Released"
+  MODIFIED-ON: "28/08/2023 05:24:34"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-6CF076DB-9C82-44CF-82D7-525ADDB5868F"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/VersionManagementServer/versions/<versionGuid>/inspectConflicts
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/VersionManagementServer/versions/<versionGuid>/inspectConflicts
+  methods:
+    - post
+  requiredCapability: ArcGIS Advanced Editing user type extension license
+  versionIntroduced: '10.6'
+---
+
+## Description
+
+The `inspectConflicts` operation allows the client to annotate conflicts from the conflict set that were obtained during the previous `Reconcile` operation. Users can mark the conflicts as inspected (reviewed); additionally, a note can be associated with the conflict.
+
+Review the read and edit session requirements for [version resource operations](/version).
+
+<Note type={"note"}>
+
+Organization members must be assigned a license for the [ArcGIS Advanced Editing user type extension](https://enterprise.arcgis.com/en/portal/latest/administer/windows/license-user-type-extensions.htm#ESRI_SECTION1_B75DA80066744473AD5DD1312734654A) to use this operation for ArcGIS Enterprise 11.2 and later.
+
+</Note>
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the output format of the response. The default response format is `html`.
+
+Values: `html` | `json` | `pjson`
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sessionId`
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The client-generated session ID (GUID).
+
+Syntax: `sessionId = {3F2504E0-4F89-41D3-9A0C-0305E82C3301}` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`setInspected`
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether the inspected status for conflicts will be set (`true`). The default boolean value is `true`.
+
+Values: `true | false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`inspectAll`
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether all conflicts will be inspected (`true`). The default boolean value is `false`.
+
+Values: `true` | `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`conflicts`
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the conflicts that will be inspected (removed) from the conflict set.
+
+<Note type={"note"}>
+
+The value for this parameter is ignored if `inspectAll` is set to true.
+
+</Note>
+
+Syntax: 
+```other
+[
+ { 
+   "layerId" : <layerId>,
+   "features" : [ 
+     {
+       "objectId" : <objectId>,
+       "note" : string
+     } 
+   ]
+ }
+]
+```
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## JSON Response syntax
+
+```other
+{
+  "success" : <true | false>,
+  "error" : { // only if success is false
+    "extendedCode" : <HRESULT>,
+    "message" : <error message>,
+    "details" : [ <detail> ]
+  }
+}
+
+```
+
+ 
+
+## Example usage
+
+Set the conflicts detected during reconcile as inspected using the `inspectConflicts`  operation. 
+
+Request URL and parameters:
+
+`https://myserver.esri.com/server/rest/services/LandUse/VersionManagementServer/versions/496C55E1-86EA-4F06-8FC8-8D5BBCBD7761/inspectConflicts`
+
+ 
+
+```javascript
+format=json
+sessionId={E07A8A6F-9412-4049-A9E5-92267019F366}
+setInspected=true
+conflicts=
+[	
+ {		
+  "layerId": 100,
+		"features": [
+			{
+				"objectId": 3738,
+				"note": "Reviewed this conflict"
+			}
+		]
+	}
+]
+```
+
+ 

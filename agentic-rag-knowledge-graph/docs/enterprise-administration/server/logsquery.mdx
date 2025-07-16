@@ -1,0 +1,350 @@
+---
+title: "Query Logs"
+description: "The query operation on the logs resource provides a way to aggregate, filter, and page through logs across the entire server site."
+slug: "logsquery"
+url: "/logsquery"
+guid: "GUID-BBBE54AF-870D-488F-BBA7-94C6E436D314"
+migratedTopicMetadata:
+  FTITLE: "logsQuery"
+  FDESCRIPTION: ""
+  FCHANGES: "Adding privilege requirements"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.8.1 - *"
+  CREATED-ON: "09/06/2020 20:33:33"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "09/06/2020 20:38:33"
+  VERSION: "7"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-FDCDEB95-C1CA-4A16-898E-C2448D24AA7F"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /logs/query
+  urlSegments:
+    - name: <root>
+      url: /site
+    - name: /logs/query
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '10.1'
+  requiredCapabilities:
+    - name: Access allowed with any authorized privilege
+      url: /managing-access-to-the-server-administration-rest-api
+---
+
+## Description
+
+The `query` operation provides a way to aggregate, filter, and page through logs across the entire ArcGIS Server [site](/site).
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `startTime` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The most recent time to query. If the `hasMore` member of the response object is `true`, pass the `endTime` member as the `startTime` parameter for the next request to get the next set of records. Time can be specified in milliseconds since UNIX epoch or as an ArcGIS Server time stamp.
+
+      ```markdown label=Example
+      startTime=1566379810000
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `endTime` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The oldest time to include in the result set. You can use this to limit the query to the last few minutes or hours as needed. 
+
+      <Note type={"note"}>
+
+      If `sinceLastStart` is `true`, the default is all logs since the server was started. Time can be specified in milliseconds since UNIX epoch or as an ArcGIS Server time stamp. 
+
+      </Note>
+
+      ```markdown label=Example
+      endTime=1566423010000
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `level` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Only records with a log level at or more severe than this level are returned. The default value is `WARNING`.
+
+      Values: `SEVERE` | `WARNING` | `INFO` | `FINE` | `VERBOSE` | `DEBUG`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `filterType` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies that the filter `filter` format is JSON. If this operation is being performed within the ArcGIS Server Admin Directory UI, this parameter will automatically be added to the request when executed.
+
+      ```markdown label=Example
+      filterType=json
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `filter` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Filtering provides flexibility and specificity by combining any of the [filter properties](/logsquery#filter-properties), each given as a comma-separated list.
+
+      ```markdown label=Example
+      filter={
+      "codes": [8271, 9003], "processIds": [4392, 9816], "requestIds": ["a1fc28db-4575-4a09-84df-7b313c239e5b", "22d8113a-e229-4e48-8fe4-008a5037fcba"], "services": ["Pro_mapimage.MapServer"], "machines": ["machine.domain.com"]}
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `pageSize` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum number of log records to be returned by this query. The default messages per page is 1000. The limit is 10000 records.
+
+      ```markdown label=Example
+      pageSize=1000
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default value is `html`.
+
+      Values: `html` | `json` | `pjson` | `xml`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Filter properties
+
+<StyledTable headers={"Property,Description"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `codes` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the log codes assigned to server logs. To query all codes, set the value to `[]`.
+
+      ```markdown label=Example
+      //web example
+      8271, 9003
+
+      //scripting example
+      "codes": [8271, 9003]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `processIds` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the machine process IDs to query. To query logs from all process IDs, set the value to `[]`.
+
+      ```markdown label=Example
+      //web example
+      4392, 9816
+
+      //scripting example
+      "processIds": [4392, 9816]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `requestIds` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies an ID assigned to a specific server request.
+
+      ```markdown label=Example
+      //web example
+      a1fc28db-4575-4a09-84df-7b313c239e5b, 22d8113a-e229-4e48-8fe4-008a5037fcba
+
+      //scripting example
+      "requestIds": ["a1fc28db-4575-4a09-84df-7b313c239e5b", "22d8113a-e229-4e48-8fe4-008a5037fcba"]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `component` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the server components delivering the log message. To query logs from all components, set the value to `*`.
+
+      Values: `ADMIN` | `REST` | `SERVER` | `SOAP` | `DATA STORE`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `services` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies whether to query all, none, or a specific service in your site. To query logs from all services, set the value to `*`.
+
+      ```other label=Example
+      //web example
+      Pro_mapimage.MapServer
+
+      //scripting example
+      "services": ["Pro_mapimage.MapServer"]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `machines` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies whether to query all or a specific machine in your server sit. To query logs from all machines, set the value to `*`.
+
+      ```markdown label=Example
+      //web example
+      machine.domain.com
+
+      //scripting example
+      "machines": ["machine.domain.com"]
+      ```
+
+</StyledTableCell>
+</StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample GET request for the `query` operation.
+
+```other
+https://machine.domain.com/webadaptor/admin/logs/query?startTime=1310165288&endTime=1310125087&level=INFO&filterType=json&filter={"codes": [8271, 9003], "processIds": [4392, 9816], "requestIds": ["a1fc28db-4575-4a09-84df-7b313c239e5b", "22d8113a-e229-4e48-8fe4-008a5037fcba"], "services": ["Pro_mapimage.MapServer"], "machines": ["machine.domain.com"]}&pageSize=1000&f=pjson
+```
+
+## JSON Response example
+
+```other
+{
+  "hasMore": true,
+  "startTime": 1310165288,
+  "endTime": 1310125087,
+  "logMessages": [
+    {
+      "type": "INFO",
+      "message": "Service has been successfully created in the server context.",
+      "time": 1311101673947,
+      "source": "Server",
+      "machine": "MACHINE.DOMAIN.COM",
+      "user": "",
+      "code": 8271,
+      "elapsed": "",
+      "process": "4392",
+      "thread": "1",
+      "methodName": "",
+      "requestID": "a1fc28db-4575-4a09-84df-7b313c239e5b"
+    },
+    {
+     	"type": "INFO",
+      "message": "Unable to process request. Service ByRef2/MapServer not found ",
+      "time": 1540338505127,
+      "source": "Rest",
+      "machine": "MACHINE.DOMAIN.COM",
+      "user": "",
+      "code": 9003,
+      "elapsed": "",
+      "process": "9816",
+      "thread": "1",
+      "methodName": "",
+      "requestID": "22d8113a-e229-4e48-8fe4-008a5037fcba"
+    }
+  ]
+}
+```

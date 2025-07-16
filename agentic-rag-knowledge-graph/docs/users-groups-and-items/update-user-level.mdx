@@ -1,0 +1,175 @@
+---
+title: "/updateUserLevel: Update User Level"
+description: "The Update User Level operation (POST only) allows administrators of an organization to update the level of a user."
+slug: "update-user-level"
+url: "/update-user-level"
+guid: "GUID-78538904-4F4D-49EA-996B-278C8C86A0B3"
+migratedTopicMetadata:
+  FTITLE: "Update User Level"
+  FDESCRIPTION: "Allow updating of the user level"
+  FCHANGES: "Title, URL, and example usage changes"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9- *"
+  CREATED-ON: "12/03/2021 12:45:57"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "25/08/2021 10:53:54"
+  VERSION: "5"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-384B33D7-2F6F-4A4F-9142-4E2BA6C25975"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /portals/[portalID]/updateUserLevel
+  urlSegments:
+    - name: '[root]'
+      url: /root
+    - name: /portals/[portalID]/updateUserLevel
+  methods:
+    - post
+  sslOnly: 'no'
+---
+
+## Example usage
+
+The following is a sample ArcGIS Online POST request for the `updateUserLevel` operation:
+
+```markdown
+POST /sharing/rest/portals/0123456789ABCDEF/updateUserLevel HTTP/1.1
+Host: org.arcgis.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+userName=jsmight&level=2&f=pjson
+```
+
+<Note type="deprecated">
+
+This operation is only applicable to ArcGIS Enterprise organizations using a version of Enterprise that is at, or earlier than, 10.6.1.
+
+</Note>
+
+
+## Description
+
+The `updateUserLevel` operatio allows administrators of an organization to update the level of a user. Administrators can leverage two levels of membership when assigning roles and privileges to members, membership levels allow organizations to control access to some ArcGIS capabilities for some members while granting more complete access to other members. Level 1 membership is designed for members who need privileges to view and interact with existing content, while Level 2 membership is for those who contribute, create, and share content and groups, in addition to other tasks.
+
+Maximum user quota of an organization at the given level is checked before allowing the update.
+
+Built-in roles including organization administrator, publisher, and user are assigned as Level 2, members with [custom roles](/roles) can be assigned as Level 1 or Level 2.
+
+Level 1 membership allows for limited capabilities given through a maximum of 9 [privileges](/privileges): 
+* `portal:user:joinGroup`
+* `portal:user:viewOrgGroups`
+* `portal:user:viewOrgItems`
+* `portal:user:viewOrgUsers`
+* `premium:user:geocode`
+* `premium:user:networkanalysis`
+* `premium:user:demographics`
+* `premium:user:elevation`
+* `portal:user:joinNonOrgGroup`
+
+If [updating the role](/update-user-role) of a Level 1 user with a custom role that has more privileges than the nine, additional privileges will be disabled for the user to ensure restriction.
+
+Level 1 users are not allowed to own any content or group which can be reassigned to other users through the [Reassign Item](/reassign-item) and [Reassign Group](/reassign-group) operations before downgrading them. The operation will also fail if the user being updated has got licenses assigned to premium apps that are not allowed at the targeting level.
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `user` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The username whose level to be updated.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `level` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The level of the user to be set.
+
+      Values: `1` (for user with custom role only) | `2` (for user with any built-in or custom role)
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+  </StyledTableCell>
+  <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Response properties
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `success` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Indicates if the operation was successful.
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## JSON Response syntax
+
+```other
+{
+  "success": true
+}
+```
+
+## JSON Response example
+
+Below is a sample success response:
+
+```javascript
+{
+  "success": true
+}
+```
+
+Below is a sample error message:
+
+```javascript
+{
+  "error": {
+    "code": 400,
+    "messageCode": "ORG_1084",
+    "message": "Unable to change user's level. User must not own items or groups.",
+    "details": []
+  }
+}
+```

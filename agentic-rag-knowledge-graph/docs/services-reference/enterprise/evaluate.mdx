@@ -1,0 +1,509 @@
+---
+title: "Evaluate"
+description: "The evaluate operation allows you to evaluate the rules associated with the specified features (using a selection set, geographic extent, or those features modified in a version) and create persisted error features in error tables."
+slug: "evaluate"
+url: "/evaluate"
+guid: "GUID-6B3D3731-E301-47DD-8A16-E1C310008856"
+migratedTopicMetadata:
+  FTITLE: "Evaluate"
+  FDESCRIPTION: "Using the specified version and session ID, validate the specified features and create persistend error features in the GDB_VALIDATION*ERROR tables. "
+  FCHANGES: "geodatabase/issues/12248
+Adding requirement for ArcGIS Advanced Editing UTE to use this operation"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "08/09/2023 10:38:02"
+  FAUTHOR: "mjarman"
+  FSTATUS: "Released"
+  MODIFIED-ON: "22/09/2023 10:33:09"
+  VERSION: "8"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-56C7485B-CF66-486A-9E1D-7D50A77BAD3B"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/ValidationServer/evaluate
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/ValidationServer/evaluate
+  methods:
+    - post
+  requiredCapability: ArcGIS Advanced Editing user type extension license
+  versionIntroduced: '10.7'
+---
+
+
+## Description
+
+The `evaluate` operation allows you to evaluate the rules associated with the specified features (using a selection set, geographic extent, or those features modified in a version) and create persisted error features in error tables.
+
+Evaluation can be performed on the following types of geodatabase rules (specified by the `evaluationType` parameter):
+
+-   Topology rules
+-   Validation and batch calculation attribute rules
+
+<Note type={"note"}>
+
+Organization members must be assigned a license for the [ArcGIS Advanced Editing user type extension](https://enterprise.arcgis.com/en/portal/latest/administer/windows/license-user-type-extensions.htm#ESRI_SECTION1_B75DA80066744473AD5DD1312734654A) to use this operation for ArcGIS Enterprise 11.2 and later.
+
+</Note>
+
+<Note type={"note"}>
+
+An ArcGIS Data Reviewer server extension license is required when datasets contain Data Reviewer-based validation attribute rules.
+
+</Note>
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the output format of the response. The default response format is `html`.
+
+Values: `html` | `json` | `pjson`
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`gdbVersion` 
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the name of the geodatabase version (the default is DEFAULT).
+
+Syntax: `gdbVersion=<version>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sessionId` 
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the token (GUID) used to lock the version. If the calling client is editing a named version, the `sessionId` value must be provided. If the client is editing DEFAULT, the version may not be locked and the `sessionId` value should not be specified.
+
+Syntax: `sessionId=<guid>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`evaluationArea` 
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the envelope of the area to validate. This type of validation does not result in a change to the last evaluation moment in a version.
+
+Example: 
+```other
+{
+  "xmin": -184.45407167254172,
+  "ymin": -56.712479956871164,
+  "xmax": 180.79547851540042,
+  "ymax": 96.3386671168742,
+  "spatialReference": {
+    "wkid": 4326,
+    "latestWkid": 4326
+  }
+}
+```
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`changesInVersion` 
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether the features that have changed in the version will be evaluated (the default is `false` ). This parameter does not apply to the DEFAULT version or when `evaluationType` is `topologyRules`.
+
+When set to `true` , the `evaluationDate`  property for the version is updated. This is listed as a property for a version and can be accessed using the [`version` ](/version) resource and the [`versionInfos` ](/version-infos) operation.
+
+Values: `true` | `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`selection` 
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A set of features that will be evaluated. This is an array of layers (layerId) and features (globalIds or objectIds) to evaluate. 
+
+Selections are not applicable when `evaluationType` is `topologyRules`.
+
+Values:
+
+```other
+[ 
+  {
+    "id" : <layerId1>,
+    "globalIds" : [ "<globalId>" ],
+    "objectIds" : [ <objectId> ]
+  },
+  {
+    "id" : <layerId2>,
+    "globalIds" : [ "<globalId>" ],
+    "objectIds" : [ <objectId> ]
+  }
+]
+```
+
+Example: 
+```other
+ [
+    {
+        "id": 3,
+        "objectIds": [
+            1,
+            3,
+            6,
+            8,
+            9,
+            12,
+            414,
+            415,
+            1215,
+            1216,
+            2415
+        ]
+    }
+]
+ ```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`evaluationType` 
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies an array of evaluation types.
+
+Values: 
+
+```other
+"validationRules" | "calculationRules"| "topologyRules"
+```
+
+Example: 
+
+```javascript
+evaluationType=["calculationRules"]
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnEdits` 
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether features that were edited due to feature evaluation will be returned. Results are organized layer by layer. If `true`, each layer may have edited features returned in an `editedFeatures` object.
+
+The `editedFeatures` object returns full features including the original features before deletion, the original and current features for updates, and the current rows for inserts that may contain implicit changes (for example, as a result of a calculation rule).
+
+The response includes no `editedFeatures` values, and `exceededTransferLimit` set as `true` if the count of edited features to return is more than the `maxRecordCount` value. If clients are using this parameter to maintain a cache, they should invalidate the cache when the `exceededTransferLimit is returned as `true`. If the server encounters an error when generating the list of edits in the response, `exceededTransferLimit is also returned as `true`.
+
+Edited features are returned in the spatial reference of the feature service as defined by the services `spatialReferenceobject`  value or by the `spatialReference` value of the layer extent object.
+
+The default is `false`. It is always set to `true` when evaluating topology rules for a parcel fabric or topology.
+
+Values: `true` | `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`async` 
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether the request will be processed as an asynchronous job. If `true`, a URL is returned that a client can visit to review the status of the job. The default is `false`.
+
+Values: `true` | `false` 
+
+This parameter was introduced at ArcGIS Enterprise 11.2.
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## JSON Response syntax
+
+JSON response (when `async = false`):
+
+```other
+{
+  "moment" : <datetime>,
+  "exceededTransferLimit : <true | false>,
+  "serviceEdits" : [
+    {
+      "id" : <layerId>, 
+      "editedFeatures" :
+        {
+          "adds" : [<currentFeature1>, <currentFeature2>],
+          "updates" : [
+            [<originalFeature3>, <currentFeature3>],
+            [<originalFeature4>, <currentFeature4>]
+          ],
+          "deletes" : [<originalFeature5>, <originalFeature6>]
+        }
+    }
+  ],
+  "evaluationStatistics": { 
+    "rowsEvaluated": <integer>,
+    "elapsedTimeInSec": <integer> 
+    "errorsIdentified": <integer>, 
+    "errorsCleaned": <integer> 
+  },
+  "errorsIdentified" : <integer>,
+  "validatedArea": { // only if evaluationType is topologyRules 
+    "xmin": <double>, 
+    "ymin": <double>, 
+    "xmax": <double>, 
+    "ymax": <double> 
+  },   
+  "success" : <true | false>,
+  "error" : { // only if success is false
+    "extendedCode" : <HRESULT>,
+    "message" : <error message>,
+    "details" : [ <detail> ]
+}
+}
+
+```
+
+JSON response (when `async = true`):
+
+```other
+{
+ "statusUrl" : <url>
+}
+
+```
+ 
+
+JSON response to the statusURL (when pending or in progress):
+
+```other
+{
+  "status" : "<Pending | InProgress>",  
+  "submissionTime" : <datetime>,
+  "lastUpdatedTime" : <datetime>
+}
+
+```
+
+JSON response to the statusURL (when completed):
+
+```other
+{
+  "moment" : <datetime>,
+  "exceededTransferLimit : <true | false>,
+  "serviceEdits" : [
+    {
+      "id" : <layerId>, 
+      "editedFeatures" :
+        {
+          "adds" : [<currentFeature1>, <currentFeature2>],
+          "updates" : [
+            [<originalFeature3>, <currentFeature3>],
+            [<originalFeature4>, <currentFeature4>]
+          ],
+          "deletes" : [<originalFeature5>, <originalFeature6>]
+        }
+    }
+  ],
+   "evaluationStatistics": { 
+    "rowsEvaluated": <integer>,
+    "elapsedTimeInSec": <integer> 
+    "errorsIdentified": <integer>, 
+    "errorsCleaned": <integer> 
+  },
+  "errorsIdentified" : <integer>,
+  "validatedArea": { // only if evaluationType is topologyRules 
+    "xmin": <double>, 
+    "ymin": <double>, 
+    "xmax": <double>, 
+    "ymax": <double> 
+  }, 
+  "status" : "Completed",
+  "submissionTime" : <datetime>,
+  "lastUpdatedTime" : <datetime>,
+  "success" : <true | false>,
+  "error" : {                   // only if success is false
+    "extendedCode" : <HRESULT>,
+    "message" : <error message>,
+    "details" : [ <detail> ]
+  }
+}
+
+```
+ 
+## Example usage
+### Validation attribute rules
+Evaluate the validation rules for the UNADMIN.CAROLINA version using the `evaluate` operation.
+
+Request URL and parameters:
+
+```javascript
+https://myserver.esri.com/server/rest/services/LandUse/ValidationServer/evaluate
+```
+
+```javascript
+f=json
+gdbVersion=UNADMIN.CAROLINA
+sessionID={E55FFA19-406E-46D6-847E-BD512A1F3756}
+evaluationArea=
+{
+  "xmin": -184.45407167254172,
+  "ymin": -56.712479956871164,
+  "xmax": 180.79547851540042,
+  "ymax": 96.3386671168742,
+  "spatialReference": {
+    "wkid": 4326,
+    "latestWkid": 4326
+  }
+}
+changesInVersion=false
+evaluationType=["validationRules"]
+async=false
+returnEdits=true
+```
+
+JSON response (when `async` parameter is `false`)
+
+```javascript
+{
+ "moment": 1558369578880,
+  "evaluationStatistics": {
+   "rowsEvaluated": 209,
+   "elapsedTimeInSeconds": 2
+   "errorsIdentified": 199,
+   "errorsCleared": 6,
+  },
+  "errorsIdentified" : 199,
+  "success": true, 
+  "status": completed,
+  "submissionTime": 1656544895000, 
+  "lastUpdatedTime": 1656544895000
+}
+```
+
+### Topology rules
+Evaluate the topology rules for the ADMIN.CAROLINA version using the `evaluate` operation.
+
+Request URL and parameters:
+
+```javascript
+https://myserver.esri.com/server/rest/services/LandUse/ValidationServer/evaluate
+```
+
+```javascript
+f=json
+gdbVersion=ADMIN.CAROLINA
+sessionID={E55FFA19-406E-46D6-847E-BD512A1F3756}
+evaluationType=["topologyRules"]
+async=false
+returnEdits=false
+```
+
+JSON response (when `async` parameter is `false`)
+
+<Note type={"note"}>
+The JSON response for the `evaluationType` of `topologyRules` will always return `errorsIdentified` as 0.
+</Note>
+
+```javascript
+{
+"moment": 1716902568693,
+"errorsIdentified": 0,
+"validatedArea": {
+  "xmin": 2395498.2275726758,
+  "ymin": 1434986.3027709424,
+  "xmax": 2535087.3847455084,
+  "ymax": 1652601.6014633551
+},
+"success": true
+}
+```

@@ -1,0 +1,465 @@
+---
+title: "Analyze Changes Using LandTrendr"
+description: "The AnalyzeChangesUsingLandTrendr task evaluates changes in pixel values over time using the Landsat based detection of trends in disturbance and recovery (LandTrendr) method and generates a change analysis raster containing the model results."
+slug: "analyze-changes-using-landtrendr"
+url: "/analyze-changes-using-landtrendr"
+restInfoMetadata:
+  apiPath: /System/RasterAnalysisTools/GPServer/AnalyzeChangesUsingLandTrendr
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /System/RasterAnalysisTools/GPServer/AnalyzeChangesUsingLandTrendr
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+---
+
+## Description
+
+The `AnalyzeChangesUsingLandTrendr` task evaluates changes in pixel values over time using the Landsat based detection of trends in disturbance and recovery (LandTrendr) method and generates a change analysis raster containing the model results.
+
+<Note>
+
+You must license your ArcGIS Server as an ArcGIS Image Server to use this resource.
+
+</Note>
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `inputMultidimensionalRaster`
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The portal item ID, image service URL, cloud multidimensional raster dataset or shared multidimensional raster dataset. At least one type of input needs to be provided in the JSON object. If multiple inputs are given, the `itemid` takes priority.
+
+      Syntax: A JSON object describes the input multidimensional raster.
+
+      Example:
+
+      ```other
+      //Portal Item ID
+      inputMultidimensionalRaster={"itemId": <portal item id>} 
+
+      //Image Service URL
+      inputMultidimensionalRaster={“url”: <image service url>}
+
+      //Cloud Raster URI or Shared Data Path
+      inputMultidimensionalRaster={“uri”: <cloud raster uri or shared data path>}
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `outputName`
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Output hosted image service properties. If the hosted image service is already created, the portal item ID or service URL can be provided, and the output path of the multidimensional raster dataset generated in the raster store will be used to update the existing service definition. The service tool can also generate a new hosted image service with the given service properties.
+
+      <Note>
+
+      Set `image,metadata` as image service capabilities to make sure the output image service can be recognized as multidimensional by other raster analysis tools.
+
+      </Note>
+
+      Syntax: String
+
+      Example:
+
+      ```other
+      //Portal Item ID
+      outputName={"itemId": <portal item id>}
+
+      //Image Service URL
+      outputName={“url”: <image service url>}
+
+      //Cloud Raster URI or Shared Data Path
+      outputName={“uri”: <cloud raster uri or shared data path>}
+
+      //Service properties
+      outputName={
+        "serviceProperties": {
+          "name": "Landsat_LandTrendr",
+          "capabilities": "image, metadata"
+        }
+      }
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `processingBand`
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The name of the band to use for segmenting pixel value trajectories over time. Choose the band that will best capture the changes in the feature you want to observe. If no band name is specified and the input is multiband imagery, the first band from the input multiband imagery will be used.
+
+      Syntax: String
+
+      Example:
+
+      ```other
+      processingBand="Band_4"
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `snappingDate`
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The date used to select a slice for each year in the input multidimensional dataset. The slice with the date closest to the snapping date will be selected. This parameter is required if the input dataset contains sub-yearly data, since this tool only processes one slice per year.
+
+      The default is `06-30`, or June 30.
+
+      Syntax: String, in the format of `MM-DD`.
+
+      Example:
+
+      ```other
+      snappingDate="12-31"
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `maxNumSegments`
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum number of segments to be fitted to the time series for each pixel. The default is 5.
+
+      Syntax: Long integer.
+
+      Example:
+
+      ```other
+      maxNumSegments=6
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `vertextCountOvershoot`
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The number of additional vertices beyond `maxNumSegments + 1` that can be used to fit the model during the initial stage of identifying vertices. Later in the modeling process, the number of additional vertices will be reduced to `maxNumSegments + 1`. The default value is 2.
+
+      Syntax: Long integer.
+
+      Example:
+
+      ```other
+      vertexCountOvershoot=2
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `spikeThreshold`
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The threshold to use for dampening anomalies in the pixel value trajectory. The value must range between 0 and 1, where 1 means no dampening. The default is 0.9.
+
+      Syntax: Double
+
+      Example:
+
+      ```other
+      spikeThreshold=0.8
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `recoveryThreshold`
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The recovery threshold value in years. If a segment has a recovery rate that is faster than `1 / recoveryThreshold`, the segment is discarded and not included in the time series model. The value must range between 0 and 1. The default is 0.25.
+
+      Syntax: Double
+
+      Example:
+
+      ```other
+      recoveryThreshold=0.3
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `preventOneYearRecovery`
+      
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies whether segments that exhibit a one-year recovery will be excluded. When set to `false`, segments that exhibit a one-year recovery will be counted as segments. When set to `true`, segments that exhibit a one-year recovery will not be counted and will be excluded from the model results. This is the default.
+
+      Values: `true` | `false`    
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `increasingRecoveryTrend`
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies whether recovery from change is represented by an increasing (positive) trend. When set to `false`, recovery from change is represented by a decreasing (negative) trend. When set to `true`, recovery from change is represented by an increasing trend. This is the default.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `minNumObservations`
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The minimum number of valid observations required to perform fitting. The number of years in the input multidimensional dataset must be equal to or greater than this value. The default is 6.
+
+      Syntax: Long
+
+      Example:
+
+      ```other
+      minNumObservations=6
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `bestModelProportion`
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The best model proportion value. During the model selection process, the tool will calculate the p-value for each model and select a model that has the most vertices while maintaining the smallest (most significant) p-value based on this proportion value. A value of 1 means the model has the lowest p-value but may not have a high number of vertices. The default is 1.25.
+
+      Syntax: Double
+
+      Example:
+
+      ```other
+      bestModelProportion=1.0
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `pvalueThreshold`
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The p-value threshold to be reached for a model to be selected. After the vertices are detected in the initial stage of the model fitting, the tool will fit each segment and calculate the p-value to determine the significance of the model. On the next iteration, the model will decrease the number of segments by one and recalculate the p-value. This will continue and, if the p-value is smaller than the value specified in this parameter, the model will be selected and the tool will stop searching for a better model. If no such model is selected, the tool will select a model with a p-value smaller than the lowest p-value × best model proportion value. The default is 0.01.
+
+      Syntax: Double
+
+      Example:
+
+      ```other
+      pvalueThreshold=0.01
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `outputOtherBands`
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies whether other bands will be included in the segmentation process. When set to `true`, the segmentation and vertices information from the initial segmentation band specified in the `processingBand` parameter will also be fitted to the remaining bands in the multiband images. The model results will include the segmentation band first, and then the remaining bands. When set to `false`, only the band specified in the `processingBand` parameter will be segmented and generated in the model results.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `context`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Contains additional settings that affect task execution. This task has the following settings:
+
+      * [Extent](/extent-ra) (`extent`)—A bounding box that defines the analysis area.
+      * [Output Spatial Reference](/output-spatial-reference) (`outSR`)—The output raster will be projected into the output spatial reference.
+      * [Snap Raster](/snap-raster) (`snapRaster`)—The output raster will have its cells aligned with the specified snap raster.
+      * [Cell Size](/cell-size) (`cellSize`)—The output raster will have the resolution specified by cell size.
+      * [Parallel Processing Factor](/parallel-processing-factor) (`parallelProcessingFactor`)—The specified number or percentage of processes will be used for the analysis.
+
+      Example:
+
+      ```other
+      context={"cellSize": "20", "parallelProcessingFactor": "4"}
+      
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Response
+
+When you submit a request, the task assigns a unique job ID for the transaction.
+
+Syntax:
+
+```other
+{ "jobId": "<unique job identifier>", "jobStatus": "<job status>" }
+
+```
+
+After the initial request is submitted, you can use the `jobId` to periodically check the status of the job and messages, as described in [Checking job status](/checking-job-status). Once the job has successfully completed, use the `jobId` to retrieve the results. To track the status, you can make a request of the following form:
+
+```other
+https://<analysis-url>/AnalyzeChangesUsingLandTrendr/jobs/<jobId>
+
+```
+
+## Accessing results
+
+When the status of the job request is `esriJobSucceded`, you can access the results of the analysis by making a request of the following form:
+
+```other
+https://<raster analysis url>/AnalyzeChangesUsingLandTrendr/jobs/<jobId>/results/outputAnalysisRaster?token=<your token>&f=json
+
+```
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `outputMultidimensionalRaster`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The output multidimensional raster `itemId` and URL
+
+      Example:
+
+      ```other
+      {"url": "http://<raster analysis url>/AnalyzeChangesUsingLandTrendr/jobs/<jobId>/results/outputLandTrendrAnalysisRaster"}
+
+      ```
+
+      The result has properties for parameter name, data type, and value. The content of the value is always the output raster dataset's `itemId` and image service URL.
+
+      ```other
+      {
+        "paramName": "outputLandTrendrAnalysisRaster",
+        "dataType": "GPString",
+        "value": {
+          "itemId": "c267610d0feb4370bf38cc6e2c4ac261",
+          "url": "https://<server name>/arcgis/rest/services/Hosted/<service name>/ImageServer"
+        }
+      }
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>

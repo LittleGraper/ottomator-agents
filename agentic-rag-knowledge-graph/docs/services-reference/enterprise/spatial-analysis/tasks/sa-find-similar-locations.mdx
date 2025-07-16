@@ -1,0 +1,242 @@
+---
+title: "Find Similar Locations"
+description: "This is an API reference for the Find Similar Locations service on ArcGIS Online."
+slug: "sa-find-similar-locations"
+url: "/spatial-analysis/tasks/sa-find-similar-locations"
+redirectFrom:
+  - /sa-find-similar-locations
+guid: "GUID-A37EA213-6A88-4824-BC6E-693417491C41"
+migratedTopicMetadata:
+  FTITLE: "SA Find Similar Locations"
+  FDESCRIPTION: ""
+  FCHANGES: "changing availablity statement of the parameter criteriaFields"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "agol23.R03 :11.2 - *"
+  CREATED-ON: "20/09/2023 14:45:04"
+  FAUTHOR: "hasefaw"
+  FSTATUS: "Released"
+  MODIFIED-ON: "27/09/2023 04:58:10"
+  VERSION: "12"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "9"
+  ED: "GUID-9776CE24-0B05-41A8-A559-C5FAD4893477"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata: {}
+---
+
+import GUID_62BD26E4_CB46_46AB_BBE7_CB696CA383FC_GUID_1C348DD9_6CF5_4614_9090_50D37FFF5B1C from "../../snippets/GUID-62BD26E4-CB46-46AB-BBE7-CB696CA383FC/_GUID-1C348DD9-6CF5-4614-9090-50D37FFF5B1C";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E0E9FDE9_9A98_4EA4_9164_0E878BADF591 from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-E0E9FDE9-9A98-4EA4-9164-0E878BADF591";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_D95DEC58_7F27_491A_AF3D_6E6A3C0A6F2D from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-D95DEC58-7F27-491A-AF3D-6E6A3C0A6F2D";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_928AC1BC_8FA0_441D_A17F_FEC4323A459C from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-928AC1BC-8FA0-441D-A17F-FEC4323A459C";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E671F554_89D2_4CAD_B032_525E1CE90C18 from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-E671F554-89D2-4CAD-B032-525E1CE90C18";
+
+![Find Similar Locations](../../images/GUID-6262A84E-9087-4E48-930E-E9B89FECC836-web.png)
+
+The `FindSimilarLocations` task measures the similarity of candidate locations to one or more reference locations.
+
+Based on criteria you specify, `FindSimilarLocations` can answer questions such as the following:
+
+-   Which of your stores are most similar to your top performers with regard to customer profiles?
+-   Based on characteristics of villages hardest hit by the disease, which other villages are high risk?
+
+To answer questions such as these, you provide the reference locations (the `inputLayer` parameter), the candidate locations (the `searchLayer` parameter), and the fields representing the criteria you want to match. For example, the `inputLayer` value might be a layer containing your top performing stores or the villages hardest hit by the disease. The `searchLayer` value contains the candidate locations to search. This might be all of your stores or all other villages. Finally, you supply a list of fields to use for measuring similarity. The `FindSimilarLocations` task will rank all of the candidate locations by how closely they match the reference locations across all of the fields you selected.
+
+## Request URL
+
+```javascript
+http://<analysis url>/FindSimilarLocations/submitJob
+```
+
+## Limits
+
+<GUID_62BD26E4_CB46_46AB_BBE7_CB696CA383FC_GUID_1C348DD9_6CF5_4614_9090_50D37FFF5B1C />
+
+## Request parameters
+<StyledTable headers={"Parameter,Description"}>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `inputLayer`
+
+         (Required)
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         A layer containing one or more reference locations that will be evaluated for similarity with the `searchLayer` features. For example, the `inputLayer` value might contain your top performing stores or the villages hardest hit by a disease.
+
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E0E9FDE9_9A98_4EA4_9164_0E878BADF591 />
+
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_D95DEC58_7F27_491A_AF3D_6E6A3C0A6F2D />
+
+         It is not uncommon for the `inputLayer` and `searchLayer` values to be the same feature service. For example, the feature service contains locations of all stores, one of which is your top performing store. To rank the remaining stores from most to least similar to your top performing store, you can provide a filter for both the `inputLayer` and the `searchLayer` parameters. The filter for the `inputLayer` parameter would select the top performing store, and the filter on the `searchLayer` parameter would select all stores except for the top performing store. You can also use the optional `inputQuery` parameter to specify reference locations.
+
+         If there is more than one reference location, similarity will be based on averages for the fields you specify in the `analysisFields` parameter. For example, if there are two reference locations and you are interested in matching population, the task will identify candidate locations in the `searchLayer` value with populations that are most similar to the average population for both reference locations. If the values for the reference locations are 100 and 102, for example, the task will identify candidate locations with populations near 101. Consequently, you should use fields for the reference locations fields that have similar values. If, for example, the population values for one reference location is 100 and the other is 100,000, the tool will identify candidate locations with population values near the average of those two values: 50,050. Keep in mind that this averaged value is nothing like the population for either of the reference locations.
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `searchLayer`
+
+         (Required)
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The layer containing candidate locations that will be evaluated using the reference locations.
+
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E0E9FDE9_9A98_4EA4_9164_0E878BADF591 />
+
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_D95DEC58_7F27_491A_AF3D_6E6A3C0A6F2D />
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `analysisFields`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         A list of fields whose values will be used to determine similarity. They must be numeric fields and the fields must exist on both the `inputLayer` and `searchLayer` values. The task will find features in the `searchLayer` value that have field values closest to those of the features in the `inputLayer` value. Either an `analysisFields` or `criteriaFields` value must be provided.
+
+         Examples:
+         -   `"analysisFields":["value"]` (single analysis field)
+         -   `"analysisFields":["pop2010", "pop10_sqmi", "pop2012", "med_age", "households"]` (multiple analysis fields)
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `inputQuery`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         When the `inputLayer` and `searchLayer` values are the same feature service, this parameter allows you to input a query on the `inputLayer` value to specify which features are the reference locations. The reference locations specified by this query will not be analyzed as candidates. The syntax of `inputQuery` is the same as a filter.
+
+         Examples:
+         -   `"inputQuery":"age_10_14 = 1"]` (for numeric field)
+         -   `"inputQuery":"color = 'Green'"]` (for text field)
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `numberOfResults`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The number of ranked candidate locations output to the `similarResultLayer` value. If `numberOfResults` is not specified or set to zero, all candidate locations will be ranked and output.
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `criteriaFields`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The fields in the `inputLayer` value that correspond to the fields in the `searchLayer` value that will be used to determine similarity. All fields must be numeric fields. The task will rank the features in the `searchLayer` value based on the similarity of their field values to the corresponding field values in the `inputLayer` value. Either an `analysisFields` or `criteriaFields` value must be provided.
+
+         This parameter is available in ArcGIS Enterprise 11.2 or higher.
+
+         Examples:
+         -   `[{"referenceField":"population", "candidateField":"pop"}]` (single criteria field)
+         -   `[{"referenceField":"population", "candidateField":" pop"}, {"referenceField":"age", "candidateField":"age"},{"referenceField":"edu", "candidateField":"education"}]` (multiple criteria field)
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `outputName`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_928AC1BC_8FA0_441D_A17F_FEC4323A459C />
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `context`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E671F554_89D2_4CAD_B032_525E1CE90C18 />
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `f`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The response format. The default response format is `html`.
+
+         Values: `html` \| `json`
+      </StyledTableCell>
+   </StyledTableRow>
+</StyledTable>
+## Response
+When you submit a request, the service assigns a unique job ID for the transaction.
+Syntax:
+```javascript
+{
+"jobId": "<unique job identifier>",
+"jobStatus": "<job status>"
+}
+```
+After the initial request is submitted, you can use the `jobId` value to periodically check the status of the job and messages as described in [Check job status](/checking-job-status-1). Once the job has successfully completed, you use the `jobId` value to retrieve the results. To track the status, you can make a request in the following form:
+```javascript
+http://<analysis url>/FindSimilarLocations/jobs/<jobId>
+```
+## Access results
+When the status of the job request is `esriJobSucceeded`, you can access the results of the analysis by making a request in the following form:
+```javascript
+http://<analysis url>/FindSimilarLocations/jobs/<jobId>/results/<output parameter name>?token=<your token>&f=json
+```
+<StyledTable headers={"Parameter,Description"}>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `similarResultLayer`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         A layer that contains features from the `inputLayer` and `searchLayer` values. The number of features from `searchLayer` is based on the value of the `numberOfResults` parameter. Fields added to the `similarResultLayer` value include all the fields from the `searchLayer` value and the following:
+         -   `MATCH_ID`—The feature ID of the input reference location. For candidate features, this field will contain null.
+         -   `CAND_ID`—The feature ID of the input candidate location. For reference features, this field will contain null.
+         -   `SIMRANK`—The similarity rank. This field contains the rank for candidate locations, where 1 equals the candidate location most similar to the reference locations. It contains zero for reference locations.
+         -   `SIMINDEX`—Quantifies how similar a candidate is compared to the reference locations. If a candidate location matches a reference location exactly, the value is zero. The larger the value, the more dissimilar a candidate is to the reference locations.
+
+         Request example:
+         ```javascript
+         {"url": "http://<analysis url>/FindSimilarLocations/jobs/<jobId>/results/similarResultLayer"}
+         ```
+         The result has properties for parameter name, data type, and value. The contents of `value` depend on the `outputName` value provided in the initial request.
+         -   If the `outputName` value was provided, `value` contains the URL to the feature service layer.
+         ```javascript
+         {
+        "paramName":"similarResultLayer",
+        "dataType":"GPString",
+        "value":{"url":"<hosted featureservice layer url>"}
+        }
+         ```
+         -   If `outputName` was not provided, `value` contains a feature collection.
+         ```javascript
+         {
+         "paramName":"similarResultLayer",
+         "dataType":"GPString",
+         "value":{"layerDefinition": {}, "featureSet": {}}
+         }
+         ```
+         See [Feature Output ](/feature-output-1) for more information about how the result layer or collection is accessed.
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `processInfo`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         Contains strings that summarize the task result. These strings are used for reporting by the Find Similar Locations tool in Map Viewer Classic in ArcGIS Online . You can create custom reports for your application using these strings. There are four parts in the returned JSON:
+         -   `messageCode`—The serial number for each unique message.
+         -   `message`—Text that may contain parameters (in `${paramsName}` format) that must be replaced by values.
+         -   `params`—A dictionary of the keys and values to be inserted into `${paramsName}` in the message.
+         -   `style`—The style used to format the report produced by the Find Similar Locations tool in Map Viewer Classic.
+
+         Example:
+         ```javascript
+         {
+        "messageCode" : "SS_84507",
+        "message" : ["Attribute", "Min", "Max", "SD", "Mean","Input"],
+        "params" : {},
+        "style" : "<table><tr><th></th><th></th><th></th><th></th><th></th><th></th></tr>" ,,
+        }
+         ```
+      </StyledTableCell>
+   </StyledTableRow>
+</StyledTable>

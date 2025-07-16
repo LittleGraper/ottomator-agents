@@ -1,0 +1,121 @@
+---
+title: "Move a File or Folder"
+description: "Enables an administrator or a notebook author to relocate a file or folder within their workspace."
+slug: "move"
+url: "/move"
+restInfoMetadata:
+  apiPath: /dataaccess/<userName>/move
+
+  urlSegments:
+    - name: <root>
+      url: /notebook-server-administration-root
+    - name: /dataaccess/<userName>/move
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '11.4'
+  requiredCapability: 'Administrator or Create and Edit'
+---
+
+
+## Description
+
+The `move` operation enables an administrator or a notebook author to relocate a file or folder within their workspace. Additionally, administrators have the privilege to transfer a file or folder between user workspaces. This action is permitted only when there are no active notebook containers open for the user whose file or folder is being relocated.
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+        `source`
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+        The name of the file or folder to be moved should be specified. To move the file or folder from a specific folder path, prepend the name with a relative path to the `/arcgis/home` folder, as shown in the example below
+
+        </StyledTableCell>
+    </StyledTableRow>
+
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+        `target`
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+        Desired output name for file or folder. To move the file or folder to a specific folder path, prefix the name with a relative path to `/arcgis/home` folder as shown in example below.
+
+        </StyledTableCell>
+    </StyledTableRow>
+
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+        `targetUsername`
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+        The `targetUsername` refers to the recipient of the moved file or folder. In cases involving non-administrators, the `targetUsername` must match the user initiating the move operation.
+        </StyledTableCell>
+    </StyledTableRow>
+
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+        `f` 
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+        The response format. The default response format is `html` .
+        Values: `html`  \| `json`  \| `pjson` 
+        </StyledTableCell>
+    </StyledTableRow>
+
+</StyledTable>
+
+## Example usages
+
+### Example one: same user workspace
+
+Below is a sample request URL and parameters for the `move` operation within the same users workspace:
+
+
+```
+HTTP POST
+https://notebookserver.domain.com/arcgis/admin/dataaccess/gis_joe/move
+targetUsername=gis_joe
+source = csv_folder
+target = mydata/csv_folder
+f=json
+```
+
+### Example two: move between workspaces
+
+Below is a sample request URL and parameters for the `move` operation between user workspaces (allowed only for an administrator):
+
+```
+HTTP POST
+https://notebookserver.domain.com/arcgis/admin/dataaccess/gis_joe/move
+targetUsername=gis_jane
+source = csvdata1/7000Points.csv
+target = csvdata/7000Points.csv
+f=json
+```
+
+
+## JSON Response syntax
+```
+{"status": "<success | failure>"}
+
+```
+## JSON Response example
+### Example 1:
+```
+{"status":"success"}
+```
+
+### Example 2 - Error when source user has one or more active containers: 
+```
+{
+    "error": {
+        "code": 500,
+        "message": "Failed to move user workspace. The user has actively running containers.",
+        "details": null
+    }
+}
+```

@@ -1,0 +1,377 @@
+---
+title: "/allDatasets/publishLayers: Publish Layers"
+description: "Publishes or syncs all of the datasets in a given data store to a server."
+slug: "publish-layers"
+url: "/publish-layers"
+guid: "GUID-77D10E93-F6E5-420E-A8F8-3AB712A4CEA9"
+migratedTopicMetadata:
+  FTITLE: "Publish layers"
+  FDESCRIPTION: ""
+  FCHANGES: "Changes to publish layers workflow and introducing preferred time zones"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1-*"
+  CREATED-ON: "10/05/2023 14:18:53"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "27/09/2023 08:47:25"
+  VERSION: "5"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-ABC8B72B-4F6D-41BC-B23E-85E1523D453F"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /portals/[portalID]/datastores/allDatasets/publishLayers
+  urlSegments:
+    - name: '[root]'
+      url: /root
+    - name: /portals/[portalID]/datastores/allDatasets/publishLayers
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.7'
+---
+
+## Example usage
+
+The following is a sample ArcGIS Enterprise POST request for the `publishLayers` operation, which demonstrates performing an initial bulk publish:
+
+<Note type={"note"}>
+
+The example below sets preferred time zone information for published layers. This functionality was introduced at ArcGIS Enterprise 11.1. Earlier versions of ArcGIS Enterprise will not be able to set time zone information.
+
+</Note>
+
+```markdown
+POST /webadaptor/sharing/rest/portals/0123456789ABCDEF/datastores/allDatasets/publishLayers HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+datastoreId=55d87f404a7e420bb969ccb70254bfec&templateSvcConfig={"type":"MapServer","capabilities":"Map,Query,Data","properties":{"datesInUnknownTimeZone":false,"dateFieldsTimezoneID":"Pacific Standard Time","dateFieldsRespectsDayLightSavingTime":true},"extensions": [{"typeName": "FeatureServer","capabilities":"Query","enabled":"true","properties":{"maxRecordCount":"4000"}}]}&portalFolderId=f26efae67a7644499d43a6251e7df613&serverId=9sQswqEpB31ymiCD&serverFolder=TestFolder&f=pjson
+```
+
+## Description
+
+The `publishLayers` operation publishes one map layer item and one feature layer item for each accessible dataset (tables and feature classes) from a database data store item.
+
+<Note type={"note"}>
+
+If any of the feature classes or tables have related tables, separate feature and map image layers are created for each related table. If the data store item accesses an enterprise geodatabase, each feature class or table that contains metadata results in a feature layer that contains metadata.
+
+</Note>
+
+When this operation is first called, it performs an initial bulk publish, which produces layers that reflect the database's current datasets. However, if the database is updated, or if changes need to be made to the template service configuration, additional calls to the `publishLayers` operation will synchronize all published layers. For more information on performing an initial bulk publish or synchronizing published layers, see the [Initial bulk publishing](/publish-layers#initial-bulk-publishing) and [Synchronization](/publish-layers#synchronization) sections below.
+
+Bulk published layers are only accessible to the user who published them. However, the user (or organization administrator) can choose to share these layers within the organization or with the public.
+
+<Note type={"note"}>
+
+Feature layers published by this operation are map services with the feature service extension enabled. If bulk published feature layers are shared within the organization or the public, the associated map image layers will also need to be shared with the same user sets to ensure that the feature layers are usable. As well, bulk published feature layers do not have editing or sync enabled. These capabilities can be enabled in ArcGIS Server Manager if necessary.
+
+</Note>
+
+### Additional considerations
+
+The following information should be taken into consideration before performing the `publishLayers` operation:
+
+- Only the owner of the data store item can perform the `publishLayers` operation.
+- The data store item owner must be assigned a role that includes the **Publish server-based layers** and **Create feature layers in bulk from a data store** privileges to perform bulk publishing.
+- Bulk publishing from a cloud data warehouse is not supported.
+- Data is published using default renderers and scales.
+- Map services on the federated server use shared instances.
+
+For additional requirements and considerations, see the [Publish layers in bulk from a user-managed data store](https://enterprise.arcgis.com/en/portal/latest/use/bulk-publish-arcgis-server-feature-layers.htm) in the Portal for ArcGIS publication.
+
+## Initial bulk publishing
+
+When the `publishLayers` operation is called to publish layers from a database for the first time, it is referred to as the initial bulk publish. When calling the operation for the first time, the following parameters are required to be included in the request:
+
+- `datastoreId` 
+- `templateSvcConfig` 
+- `portalFolderId` 
+- `serverId` 
+- `serverFolder` 
+
+After the initial bulk publish, the system will remember the submitted values for the `templateSvcConfig`, `portalFolderId`, `serverId`, and `serverFolder` parameters. This information will be stored with the data store item in the Enterprise portal. The template configuration will also be available as a resource in the Sharing API directory, which can be located using the following URL path:
+
+```markdown
+https://machine.domain.com/webadaptor/sharing/rest/ content/items/<database item ID>/resources/templateServiceConfiguration.json
+```
+
+## Synchronization
+
+After the initial bulk publish, the data store item owner may choose to perform additional calls to `publishLayers` to synchronize layers with the database, or to apply changes to all published layers. The following sections outline specific changes that may require additional calls to the `publishLayers` operation.
+
+<Note type={"note"}>
+
+Any combination of the following synchronization scenarios can be addressed within a single `publishLayers` request. See the [Additional example usages](/publish-layers#additional-example-usages) section for more information.
+
+</Note>
+
+###  Tables were added to, or deleted from, the database
+
+If tables have been added to, or removed from, the database since the initial bulk publishing took place, making an additional call to the `publishLayers` operation will synchronize the previously published layers by adding layers for newer tables and deleting layers for tables that are no longer a part of the database. When synchronizing tables, only the `datastoreId` parameter needs to be included in the request. All other parameters (such as `templateSvcConfig` and `portalFolderId`) are remembered by the system from the initial bulk publishing call.
+
+###  Table fields are updated
+
+If a table's fields are updated after the initial bulk publish call, their associated layers may not function as expected. In these instances, performing a synchronization will ensures that each layer is checked to see if there have been any schema changes and, if there has, refresh the map document powering the service. When synchronizing schema, only the `datastoreId` parameter needs to be included in the request. All other parameters (such as `templateSvcConfig` and `portalFolderId`) are remembered by the system from the initial bulk publishing call.
+
+###  Table metadata was updated
+
+If the title, snippet, description, min and max scale, extent, tags, credits, and access constraints metadata properties have changed, synchronizing bulk published layers can copy the updated metadata properties to the table's corresponding layer item. When synchronizing metadata properties, the `publishLayers` request will need to include the `datastoreId` and `syncItemInfo`, set as `true`, in the request.
+
+<Note type={"note"}>
+
+Item metadata can be edited directly in Enterprise portal. Synchronizing metadata for bulk published layers in the Sharing API directory will overwrite any previously made edits from Enterprise portal.
+
+</Note>
+
+###  Service configuration changes
+
+During the initial bulk publish, layers were created that used a specific template service configuration (set with the `templateSvcConfig` parameter). After publishing, changes to the template service configuration, such as specifying different capabilities or specifying a preferred time zone, can be made and applied to all published layers. When synchronizing template service configuration changes, the `publishLayers` request must include the `templateSvcConfig` parameter, with the new service configuration JSON, and the `applySvcConfigChanges` parameter. Once completed, the new service configuration will be stored with the data store item as a resource in the Sharing API directory.
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `datastoreId` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The `itemId` of the data store you want to publish or sync the datasets from.
+
+      Example
+
+      ```markdown
+      datastoreId=55d87f404a7e420bb969ccb70254bfec
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `templateSvcConfig` 
+
+      (Required; Optional after initial call)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object defining the template for service configurations, such as setting specific capabilities or service properties, used during bulk publishing. At 11.1, preferred time zone information can be included as part of a service's properties. This parameter only supports configuring map services with the feature service extension enabled. After the initial bulk publish, this parameter can be used to specify a new template for published layers that can be applied to pre-existing or new layers.
+
+      Example
+
+      ```markdown
+      templateSvcConfig={
+        "serviceName": null,
+        "type": "MapServer",
+        "capabilities": "Map",
+        "extensions": [
+          {
+            "typeName": "FeatureServer",
+            "capabilities":"Query",
+            "enabled":"true",
+            "properties": {
+              "maxRecordCount":"3500"
+            }
+          }
+        ]
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `portalFolderId` 
+
+      (Required; Optional after initial call)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The folder to which the datasets will be published. This parameter is not required after the initial call.
+
+      Example
+
+      ```markdown
+      portalFolderId=f26efae67a7644499d43a6251e7df613
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serverId` 
+
+      (Required; Optional after initial call)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The `serverId` to which the datasets will be published. This parameter is not required after the initial call.
+
+      Example
+
+      ```markdown
+      serverId=9sQswqEpB31ymiCD
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serverFolder` 
+
+      (Required; Optional after initial call)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The name of the server folder. This parameter is not required after the initial call.
+
+      Example
+
+      ```markdown
+      serverFolder=TestFolder
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `syncItemInfo` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies if layer item properties should be updated using the source dataset's metadata. When set to `true`, layer item properties will be updated with new values for the dataset's title, snippet, description, min and max scale, extent, credits, and access constraints metadata properties. The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `applySvcConfigChanges` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.1. Specifies if changes made to the template service configuration JSON should be applied to previously published layers. When set to `true`, previously published layers will be updated to reflect the newest service configuration, which could include changes to the service's capabilities or properties.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Value: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Additional example usages
+
+The examples in this section demonstrate different synchronizations that can be performed using the `publishLayers` operation.
+
+
+### Example one: synchronizing tables and schema
+
+The following example demonstrates a POST request for `publishLayers` that demonstrates synchronizing tables and schema after the initial bulk publish:
+
+```markdown
+POST /webadaptor/sharing/rest/portals/0123456789ABCDEF/datastores/allDatasets/publishLayers HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+datastoreId=55d87f404a7e420bb969ccb70254bfec&f=pjson
+```
+
+### Example two: synchronizing tables, schema, and metadata
+
+The following example demonstrates a POST request for `publishLayers` that demonstrates synchronizing tables, schema, and item metadata:
+
+```markdown
+POST /webadaptor/sharing/rest/portals/0123456789ABCDEF/datastores/allDatasets/publishLayers HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+datastoreId=55d87f404a7e420bb969ccb70254bfec&syncItemInfo=true&f=pjson
+```
+
+### Example three: synchronizing tables, schema, and updating all layers
+
+The following example demonstrates a POST request for `publishLayers` that demonstrates synchronizing tables and schema, and updating all published layers to include preferred time zone information.
+
+```markdown
+POST /webadaptor/sharing/rest/portals/0123456789ABCDEF/datastores/allDatasets/publishLayers HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+datastoreId=55d87f404a7e420bb969ccb70254bfec&templateSvcConfig={"type": "MapServer","capabilities": "Map,Query,Data","properties":{"datesInUnknownTimeZone": false,"dateFieldsTimezoneID": "Pacific Standard Time","dateFieldsRespectsDayLightSavingTime": true,"preferredTimeZoneID": "Pacific Standard Time","preferredTimeZoneRespectsDayLightSavingTime": true},"extensions": [{"typeName": "FeatureServer","capabilities": "Query,Create","enabled": "true","properties": {"maxRecordCount": "4000"}}]}&applySvcConfigChanges=true&f=pjson
+```
+
+## JSON Response example
+
+The `publishLayers` operation is performed asynchronously. If the request is successful, users will receive a success response that returns a `jobType` and a `jobId`: 
+
+```other
+{
+  "success": true,
+  "datastoreId": "42d41b6663c14e8699dc630ccaf87ca6",
+  "serverId": "nxlsPtE4opGe8KeN",
+  "jobType": "publishAllDatasets",
+  "jobId": "jdf92dcb90f39472495d92c84b9c0e240"
+}
+```
+
+Users can make a GET request using the `jobType` and `jobID` returned in the success response to the [status](/status) operation to see the current state of their request:
+
+```markdown
+https://machine.domain.com/webadaptor/sharing/rest/content/users/admin/items/<datastoreId>/status?jobType=publishAllDatasets&jobID=<jobID>&f=pjson
+```
+
+The `status` operation has three possible values it can return: `partial`, `completed`, or `failed`. If successful (`completed`), the following message is returned:
+
+```other
+{
+  "status": "completed",
+  "statusMessage": "completed",
+  "itemId": "42d41b6663c14e8699dc630ccaf87ca6"
+}
+```

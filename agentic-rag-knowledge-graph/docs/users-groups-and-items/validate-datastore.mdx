@@ -1,0 +1,181 @@
+---
+title: "/validate: Validate Data Store"
+description: "Ensures that an ArcGIS Server is able to successfully access a specified datastore."
+slug: "validate-datastore"
+url: "/validate-datastore"
+guid: "GUID-62547583-89C0-4B0B-A945-2AAD837DFCA9"
+migratedTopicMetadata:
+  FTITLE: "Validate datastore"
+  FDESCRIPTION: ""
+  FCHANGES: "Sanitizing URLs"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1-*"
+  CREATED-ON: "18/04/2023 08:23:39"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "18/04/2023 13:39:43"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-9793AD95-CD6A-464A-AAE6-14DDE958EC48"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /portals/[portalID]/datastores/validate
+  urlSegments:
+    - name: '[root]'
+      url: /root
+    - name: /portals/[portalID]/datastores/validate
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: 10.7.1
+---
+
+## Example usage
+
+The following is a sample ArcGIS Enterprise request URL for the `validate` operation using the `datastore` and `serverId` parameters:
+
+```other
+https://machine.domain.com/webadaptor/sharing/rest/portals/0123456789ABCDEF/datastores/validate?datastore={"path":"/enterpriseDatabases/explorationDB","type":"egdb","info":{"dataStoreConnectionType":"shared","isManaged":false,"connectionString":"SERVER=expDB.acme.com;INSTANCE=sde:postgresql:expDB.acme.com,9876;DBCLIENT=postgresql;DB_CONNECTION_PROPERTIES=machine.domain.com,9876;DATABASE=db2;USER=thatUser;VERSION=sde.DEFAULT;AUTHENTICATION_MODE=DBMS;ENCRYPTED_PASSWORD=00022e686e3264"}}&serverId=9sQswqEpB31ymiCD&f=pjson
+```
+
+The following is a sample ArcGIS Enterprise POST request for the `validate` operation using the `datastoreId` and `serverId` parameters:
+
+```markdown
+POST /webadaptor/sharing/rest/portals/0123456789ABCDEF/datastores/validate HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+datastoreId=55d87f404a7e420bb969ccb70254bfec&serverId=9sQswqEpB31ymiCD&f=pjson
+
+```
+
+## Description
+
+The `validate` operation ensures that your ArcGIS Server can connect and use the datasets stored within a given data store. While this operation can be called before or after the data store has been [registered](/add-to-server) with your server, it is recommended that the `validate` operation is performed beforehand. A data store can be validated by using either its `datastoreId` or the JSON for an unregistered data store. The `serverId` can be found on the [Servers](DEVSITE/rest/enterprise-administration/portal/servers) resource page.
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `datastoreId` 
+
+      (Optional; Required if `datastore` is not used)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The `itemId` of an existing data store item.
+
+      Example
+
+      ```markdown
+      datastoreId=55d87f404a7e420bb969ccb70254bfec
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `datastore` 
+
+      (Optional; Required if `datastoreId` is not used)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The JSON of a data store not already registered to your portal.
+
+      Example
+
+      ```other
+      datastore={
+        "path": "/<datastore path>/<data store>",
+        "type": "egdb",
+        "info": {
+          "dataStoreConnectionType": "shared",
+          "isManaged": false,
+          "connectionString": "SERVER=<server information>;INSTANCE=<instance>;
+          DBCLIENT=postgresql;DB_CONNECTION_PROPERTIES=<database property information>;
+          DATABASE=db2;USER=thatUser;VERSION=sde.DEFAULT;AUTHENTICATION_MODE=DBMS;
+          ENCRYPTED_PASSWORD=<password>"
+        }
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serverId` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The `serverId` you want to validate the data store against.
+
+      Example
+
+      ```markdown
+      serverId=9sQswqEpB31ymiCD
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Value: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## JSON Response examples
+
+If either of the requests above is successful, `validate` will return the following success message: 
+
+```other
+{"status": "success"}
+```
+
+If the operation fails, `validate` will return an error similar to the message below:
+
+```other
+{
+  "machines": [
+    {
+      "machine": <machine name>,
+      "status": "error",
+      "dataItems": [
+        {
+          "dataItem": "<dataItem information>",
+          "path": <datastore path>,
+          "validationState": "FAILED",
+          "message": <descriptive error message>
+        }
+      ]
+    }
+  ]
+}
+```

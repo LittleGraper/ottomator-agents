@@ -1,0 +1,176 @@
+{/*Shared snippet for point_barriers OR barriers */} 
+
+import BearingAttributes from "../../snippets/shared-attributes/_BearingBrTolNavLat.mdx"
+
+
+import ParamMetadata from "../../../components/param-metatdata" 
+
+<ParamMetadata types={[{name:"locations",link:"../routing-data-types#locations"},{name:"feature",link:"../routing-data-types#feature"}]} />
+
+
+{/* <If c="requestType == 'job'">
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+</If>
+
+<If c="requestType == 'direct'">
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+</If> */}
+
+Specify one or more points that will act as temporary restrictions or represent additional time or distance that may be required to travel on the underlying streets. For example, a point barrier can be used to represent a fallen tree along a street or a time delay spent at a railroad crossing. 
+
+When specifying point barriers, you can set properties for each, such as its name or barrier type.
+
+<details>
+  <If c="requestType == 'job'">
+
+ <summary><span class="font-sm text-color-link">Show attributes for `point_barriers`</span></summary>
+
+ #### Attributes for point_barriers
+ </If>
+
+ <If c="requestType == 'direct'">
+
+ <summary><span class="font-sm text-color-link">Show attributes for `barriers`</span></summary>
+
+ #### Attributes for barriers
+ </If>
+
+- <p class="space-x-2"><span class="font-bold">Name</span><span class="font-sm text-color-3">string</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The name of the barrier.
+
+<If c="requestType == 'direct'">
+- <p class="space-x-2"><span class="font-bold">ObjectID</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The object ID of the barrier. `ObjectID` is a unique identifier for the barrier. If you want to maintain a relationship between the input and output, set `preserveObjectID` to `true` . The `ObjectID` value of the input barrier is included in the output barrier (as the `ObjectID` field) and can be used to join additional information from analysis outputs to the attribute of the barriers. If the `ObjectID` value is not specified, a unique ID is automatically generated in the output.
+</If>
+
+<If c="publication=='services-reference/enterprise && requestType== direct'">
+<Note type="{Note}">
+
+  You can specify a network location using `SourceID`, `SourceOID`, `PosAlong`, and `SideOfEdge` described below. If the network location is not provided, the solver will derive it from the input geometry
+  
+  </Note>
+
+- <p class="space-x-2"><span class="font-bold">SourceID</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The numeric identifier of the network dataset source feature class on which the input point is located.
+
+- <p class="space-x-2"><span class="font-bold">SourceOID</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The object ID of the feature in the source on which the input point is located. 
+
+- <p class="space-x-2"><span class="font-bold">PosAlong</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The position along the digitized direction of the source line feature. This value is stored as a ratio. This attribute is null if the network location references a junction.
+
+- <p class="space-x-2"><span class="font-bold">SideOfEdge</span><span class="font-sm text-color-3">int enum</span></p>
+
+   **Allowed values:** `1`, `2`
+
+   The side of the edge in relation to the digitized direction of the line feature.
+
+   This attribute is limited to a domain of two values:
+
+   - `1`: Right Side
+   - `2`: Left Side
+</If>
+
+<If c="requestType == 'job'">
+
+- <p class="space-x-2"><span class="font-bold">CurbApproach</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+    Allowed values: `0`, `1`, `2`
+
+    Specify the direction of traffic that is affected by the barrier. The field value is specified as one of the following integers:
+
+    - `0`: Either side of vehicle. The barrier affects travel over the edge in both directions.
+    - `1`: Right side of vehicle. Vehicles are only affected if the barrier is on their right side during the approach. Vehicles that traverse the same edge but approach the barrier on their left side are not affected by the barrier.
+    - `2`: Vehicles are only affected if the barrier is on their left side during the approach. Vehicles that traverse the same edge but approach the barrier on their right side are not affected by the barrier.
+
+    Because junctions are points and don't have a side, barriers on junctions affect all vehicles regardless of the curb approach.
+
+</If>
+
+- <p class="space-x-2"><span class="font-bold">BarrierType</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+  Allowed values: `0`, `2`
+
+  Specify whether the point barrier restricts travel completely or adds time or distance when it is crossed.
+
+  The value for this attribute is specified as one of the following integers:
+
+  - `0`: Restriction. Prohibits travel through the barrier. The barrier is referred to as a restriction point barrier since it acts as a restriction. 
+
+    ![Two maps demonstrate how a restriction point barrier affects a route analysis.](../../images/Point_Barriers.png)
+
+    _The first map shows the shortest path between two stops without any restriction point barriers. The second map has a road that is blocked by a fallen tree, so the shortest path between the same points is longer._
+
+  <If c="requestType == 'direct'"> 
+  - `2`: Added Cost. Traveling through the barrier increases the travel time or distance by the amount specified in the `Attr_[Cost]` attributes. This barrier type is referred to as an added cost point barrier.
+  </If>
+
+  <If c="requestType == 'job'">
+  - `2`: Added Cost. Traveling through the barrier increases the travel time or distance by the amount specified in the `Additional_Time`, `Additional_Distance`, or `AdditionalCost` attribute. This barrier type is referred to as an added cost point barrier.
+  </If>
+
+    ![Two maps demonstrate how added cost point barriers affect a route analysis.](../../images/nac_barriers_apoint.png)
+
+    _The map on the left shows the shortest path between two stops without any added cost point barrier. For the map on the right, the travel time from stop one to stop two would be the same whether going around the north end of the block or the south end; however, since crossing railroad tracks incurs a time penalty (modeled with added cost point barriers), the route with only one railroad crossing is chosen. The cost of crossing the barrier is added to the accumulated travel time of the resulting route._
+
+- <p class="space-x-2"><span class="font-bold">FullEdge</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+  Allowed values: `0`, `1`
+
+  Specify how the restriction point barriers are applied to the edge elements during the analysis
+
+  - `0`:False—Permits travel on the edge up to the barrier but not through it.
+  - `1`:True—Restricts travel anywhere on the associated edge.
+
+<If c="requestType == 'direct'">
+
+- <p class="space-x-2"><span class="font-bold">Attr_[Cost]</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+  Indicates how the cost (time or distance) is added when the barrier is traversed. This attribute is applicable only for added cost point barriers. The attribute value must be greater than or equal to zero.
+
+</If>
+
+<If c="requestType == 'job'">
+
+- <p class="space-x-2"><span class="font-bold">Additional_Time</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+  <If c={props.lmd}>
+  The added travel time when the barrier is traversed. This attribute is applicable only for added-cost barriers. The attribute value must be greater than or equal to zero, and its units are the same as those specified in the [`time_units`](#time_units) parameter.
+  </If>
+
+  The added travel time when the barrier is traversed. This attribute is applicable only for added-cost barriers. The attribute value must be greater than or equal to zero, and its units are the same as those specified in the [`measurement_units`](#measurement_units) parameter.
+
+- <p class="space-x-2"><span class="font-bold">Additional_Distance</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+  <If c={props.lmd}>
+  The added distance when the barrier is traversed. This attribute is applicable only for added-cost barriers. The attribute value must be greater than or equal to zero, and its units are the same as those specified in the [`distance_units`](#distance_units) parameter.
+  </If>
+
+  The added distance when the barrier is traversed. This attribute is applicable only for added-cost barriers. The attribute value must be greater than or equal to zero, and its units are the same as those specified in the [`measurement_units`](#measurement_units) parameter.
+
+- <p class="space-x-2"><span class="font-bold">AdditionalCost</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+  The added cost when the barrier is traversed. This attribute is applicable only for added-cost barriers. The attribute value must be greater than or equal to zero.
+
+<BearingAttributes />
+
+</If>
+
+</details>
+
+<If c="requestType == 'job'">
+<details>
+
+    <summary><span class="font-sm text-color-link">Show example</span></summary>
+
+This example shows how to use an added cost point barrier to model a five-minute delay at a railroad crossing. The `BarrierType` attribute is used to specify that the point barrier is of type added cost and the `Attr_TravelTime` attribute is used to specify the delay in minutes.
+
+<CodeBlock language="json" source="../../code-samples/shared/examples/input/point_barriers.json" maxLines={20} expandable/>
+
+</details>
+</If>

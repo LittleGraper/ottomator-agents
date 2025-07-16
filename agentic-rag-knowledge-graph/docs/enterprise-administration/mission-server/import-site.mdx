@@ -1,0 +1,173 @@
+---
+title: "Import Site"
+description: "The importSite imports a pre-existing site configuration into the currently running site."
+slug: "import-site"
+url: "/import-site"
+guid: "GUID-8686A2D1-F8C1-49F7-BF8C-AF2991E617C9"
+migratedTopicMetadata:
+  FTITLE: "Import Site"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.8.1 - *"
+  CREATED-ON: "24/09/2019 18:24:00"
+  FAUTHOR: "ithoman"
+  FSTATUS: "Released"
+  MODIFIED-ON: "01/06/2020 15:51:48"
+  VERSION: "1"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "7"
+  ED: "GUID-659864B0-157A-47F5-B2A3-804BBF926DBB"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /importSite
+  urlSegments:
+    - name: <admin-root>
+      url: /admin-site-root
+    - name: /importSite
+  methods:
+    - post
+  sslOnly: 'yes'
+  versionIntroduced: '10.8'
+  requiredCapability: Administrator
+---
+
+## Description
+
+<Note type={"caution"}>
+
+This administrative operation is not available when accessed through a Web Adaptor. This operation should be accessed using a direct URL to one of the GIS servers on the site.
+
+</Note>
+
+This operation imports a site configuration into the currently running site. Importing a site means replacing all site configurations (including GIS services, security configurations, and so on) of the currently running site with those contained in the site configuration file you supply as input. The input site configuration file can be obtained through the [exportSite](/export-site) operation.
+
+This operation will restore all information included in the backup, as noted in exportSite. When it is complete, this operation returns a report as the response. You should review this report and fix any problems it lists to ensure your site is fully functioning again.
+
+The `importSite`  operation lets you restore your site from a backup that you created using the exportSite operation. Note that the `importSite`  operation uses the server directory paths from the exported configuration. Therefore, these paths must be available for the `importSite`  operation to complete successfully.
+
+<Note type={"caution"}>
+
+This operation is computationally expensive and can run for a long duration. Manual intervention may be required at the end of this operation to address any highlighted problems. Since this operation changes the site configuration completely, it is highly recommended that you do not access GIS services and administer the site while this operation is running.
+
+</Note>
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`location` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A file path to an exported configuration or an ID referencing the stored configuration on the server.
+
+Example
+
+```javascript
+location=i5fad5582-80bc-4155-a21c-62f326354aba
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` .
+
+Values: `html`  \| `json` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+Below is a sample POST request for `importSite` :
+
+```javascript
+POST /arcgis/admin/importSite HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+location=i5fad5582-80bc-4155-a21c-62f326354aba&f=json
+```
+
+ 
+
+## JSON Response example
+
+The response highlights the server's failure to start a service during the import operation. 	For demonstration purposes, a service's input data path was edited to point to a non-existent 	file before exporting the site. The same exported configuration file was supplied as input 	to the `importSite`  operation. `importSite`  completes and the response warns that a 	service could not be started during the `importSite`  operation because of a bad 	file path. Using this information you should be able to fix the issue by editing the data 	path of the service and starting it again.
+
+```javascript
+{
+  "status": "success",
+  "result": [
+    {
+      "source": "SITE",
+      "messages": [
+        {
+          "level": "INFO",
+          "message": "This operation completed in 1.52 mins"
+        }
+      ]
+    },
+    {
+      "source": "SERVICES",
+      "messages": [
+        {
+          "level": "WARNING",
+          "message": "SampleWorldCities.MapServer=Startup state of service 'SampleWorldCities.MapServer' 
+            on machine 'MSCONFIG.ESRI.COM' was FAILED. Can not open file path/to/data/WorldCities.ms. 
+            The system cannot find the file specified. Probable cause: The file is inaccessible to Server.\n",
+          "details": {
+            "service": "SampleWorldCities.MapServer",
+            "state": "FAILED",
+            "message": "",
+            "machines": [
+              {
+                "machine": "MSCONFIG.ESRI.COM",
+                "state": "FAILED",
+                "reports": [
+                  {
+                    "state": "FAILED",
+                    "message": " Can not open file path/to/data/WorldCities.ms.
+                      The system cannot find the file specified. Probable cause: The file is inaccessible to Server."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+ 

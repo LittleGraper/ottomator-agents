@@ -1,0 +1,207 @@
+---
+title: "Register Item (Data Stores)"
+description: "The registerItem operation registers a new data item (for example, geodatabases, cloud shares, and file shares) with a data store."
+slug: "register-data-store-item"
+url: "/register-data-store-item"
+guid: "GUID-C67076B6-B8E4-48D9-B770-C79531CAE520"
+migratedTopicMetadata:
+  FTITLE: "Register Data Store Item"
+  FDESCRIPTION: ""
+  FCHANGES: "Fixing spelling error"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1-*"
+  CREATED-ON: "30/03/2023 17:08:41"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "18/04/2023 13:39:10"
+  VERSION: "6"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-2C115178-5CA6-473A-8A17-0486AE480726"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /data/registerItem
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /data/registerItem
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed with the "Update" privilege, or the Publisher role
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `registerItem` operation registers a new data item (for example, geodatabases, cloud shares, and file shares) with a data store. Before registering the data item, you must [validate](/validate-data-item) it and ensure that it is accessible.
+
+<Note type={"caution"}>
+
+If you are registering a folder that uses a new path, several system and utility services must be restarted. To avoid disruption, consider registering this folder during off-peak hours. Additionally, data store items can be registered while [configuring your organization](/configure).
+
+</Note>
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `item` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The JSON representation of the data item.
+
+      Starting with ArcGIS Enterprise on Kubernetes 10.9.1, you must provide the file server host name and path on the file server as part of registering new folder paths in a deployment. This workflow is recommended for registering new folder paths.
+
+      To register these folder paths, the following user-defined information must be provided:
+
+      - `clientPath`: Either a drive or shared location where source data can be accessed and published by clients, such as ArcGIS Pro. If the `clientPath` value is a drive location, the `hostName` property must be included as well.
+      - `fileServerHost`: The machine name where shared data is stored and can be accessed through an NFS path.
+      - `filerServerPath`: An NFS path on the host machine where shared data can be accessed across the organization.
+
+      ```other label=Examples
+      //Shared location
+      item={
+        "clientPath": "\\\\sample_server\\SharedPath\\Data",
+        "type": "folder",
+        "info": {
+          "fileServerHost": "nfsHost.domain.com",
+          "fileServerType": "nfs",
+          "fileServerPath": "/SharedPath/Data"
+        }
+      }
+
+      //Drive location
+      item={
+        "clientPath": "C:\\data",
+        "type": "folder",
+        "info": {
+          "fileServerHost": "nfsHost.domain.com",
+          "fileServerType": "nfs",
+          "fileServerPath": "/data",
+          "hostName": "yourclienthost.domain.com"
+        }
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `options` 
+
+      (Optional; required for new file share locations)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.0. A JSON array of additional properties used during registration. Currently, only the `allowServicesRestart` property is supported. Adding a new file share location requires the pods for all system and utility services to restart, as well as restarting the shared pods for map and tile services. Affected services will be unavailable during this time and may take some time before they are once again available. By setting `allowServicesRestart` to `true`, administrators are acknowledging that registering a new file share location will disrupt their organization. Not providing `allowServicesRestart`, or setting it to `false`, will cause the registration of the new file share location to fail.
+
+      <Note type={"note"}>
+
+      This parameter is not required if you are registering an extension of a previously registered path with the organization:
+
+      ```other label=Examples
+      //Example one: a new path. Requires allowServicesRestart to be set to true and services will restart
+      /myshare/folder1
+
+      //Example two: an extension to the path (above) that was previously registered.
+      Does not require allowServicesRestart to be set to true, and services will not restart
+
+      /myshare/folder1/subfolder2/subfolder3
+
+      ```
+
+      </Note>
+
+      ```markdown label=Example
+      options={"allowServicesRestart": true}
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.0. This parameter specifies whether the operation will run synchronously or asynchronously. If `false`, the operation is run synchronously. If `true`, the operation is run asynchronously and the response returns a JSON object containing job information that can be used to track the job's status. The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `registerItem` operation:
+
+```other
+POST /context/admin/data/registerItem HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+item={
+  "clientPath": "\\\\sample_server\\SharedPath\\Data",
+  "type": "folder",
+  "info": {
+    "fileServerHost": "nfsHost.domain.com",
+    "fileServerType": "nfs",
+    "fileServerPath": "/SharedPath/Data"
+  }
+}&options={"allowServicesRestart": true}&async=false&f=pjson&token=uH1XErH8KruWpIAJId4WJ1tfR0xuolWt4bz5S58vYqk5qpbDhGnpbbysmiVDyqDf70tr6i0n4qYCql7eZa_PiKgnA2-1ccEB2O4rkymYoc0-R4WnYrO_t_7Rm9qKzVLN7oFDmJpqmCt55mKz3WyQkumnK2MmBYmgYmU2DycSPyKL4BJx0gr1UHmfqeWA7I52zBsgV8FiND6e_AhjzktIwF8iifMg96Hm0KAGztgsdSDQF0tvLj7doyxTQFWuGRik
+
+```
+
+## JSON Response examples
+
+If `async` is `false`, the following response is returned:
+
+```other
+{"status": "success"}
+```
+
+If `async` is `true`, the following response is returned. The value returned for `jobsUrl` can be used to access the job resource to track a job's status after it's been submitted. For more information, see the [Job resource topic](/job).
+
+```other
+{
+  "jobsUrl": "https://organization.domain.com/context/admin/jobs/ja2ca1a35-881c-400c-a49a-b26883002d6c",
+  "jobID": "ja2ca1a35-881c-400c-a49a-b26883002d6c",
+  "jobStatus": "SUBMITTED"
+}
+```

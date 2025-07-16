@@ -1,0 +1,106 @@
+---
+title: "Status (Data Store Volumes)"
+description: "This resource returns the real-time status of a system-managed object, spatiotemporal, or relational data store and its deployments."
+slug: "data-store-volumes-status"
+url: "/data-store-volumes-status"
+restInfoMetadata:
+  apiPath: /data/<datastoreID>/config/volumes/status
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /data/<datastoreID>/config/volumes/status
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '11.3'
+  requiredCapabilities:
+    - name: Access allowed only with the Publisher role
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `status` resource returns the real-time status and events for the PersistentVolumeClaim (PVC) for a system-managed object, spatiotemporal, or relational data store from within the last 60 minutes, including the events from any [volume expansions](/edit-data-store-volumes) being performed on the pods pertaining to the PVC.
+
+This resource only returns events from a volume expansion until either a new volume expansion occurs or 60 minutes have passed. If another volume expansion is performed, the `status` resource will update to show the events of the most recent volume expansion. After that point, information for previous volume expansions can be found in the logs. After 60 minutes, the `status` resource will no longer include volume expansion events.
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample request URL used to access the `status` resource:
+
+```markdown
+https://organization.domain.com/context/admin/data/2eca8ba5-ad4e-4798-bbe5-ea27db7e04e84/config/volumes/status?f=pjson
+
+```
+
+## JSON Response example
+
+```other
+{
+  "datastoreId": "2eca8ba5-ad4e-4798-bbe5-ea27db7e04e84",
+  "datastoreType": "objectStore",
+  "deployments": [
+    {
+      "type": "ObjectStore",
+      "name": "arcgis-object-store-xxxxx-xxxxx",
+      "mode": "Mixed",
+      "volumes": [
+        {
+          "spec": {
+            "accessModes": [ "ReadWriteOnce"],
+            "resources": {
+              "limits": {},
+              "requests": {
+                "storage": "32Gi"
+              }
+            },
+            "storageClassName": "arcgis-storage-default",
+            "volumeMode": "Filesystem"
+          },
+          "kind": "PersistentVolumeClaim",
+          "purpose": "data-volume",
+          "persistentVolumeClaims": [
+            {
+              "name": "data-volume-arcgis-object-store-xxxxx-xxxxx",
+              "requestedCapacity": "32Gi",
+              "actualCapacity": "32Gi"
+            },
+            {
+              "name": "data-volume-arcgis-object-store-xxxxx-xxxxx",
+              "requestedCapacity": "32Gi",
+              "actualCapacity": "32Gi"
+            },
+            {
+              "name": "data-volume-arcgis-object-store-xxxxx-xxxxx",
+              "requestedCapacity": "32Gi",
+              "actualCapacity": "32Gi"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+```

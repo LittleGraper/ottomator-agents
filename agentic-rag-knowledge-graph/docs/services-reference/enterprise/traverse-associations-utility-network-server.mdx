@@ -1,0 +1,432 @@
+---
+title: "Traverse"
+description: "The traverse  operation on the associations resource allows you to extract and obtain useful information from the associations table in a utility network."
+slug: "traverse-associations-utility-network-server"
+url: "/traverse-associations-utility-network-server"
+guid: "GUID-837DBAA1-BD30-4143-AF03-A26F3CAD9A7C"
+migratedTopicMetadata:
+  FTITLE: "traverse (Associations - Utility Network Server)"
+  FDESCRIPTION: ""
+  FCHANGES: "Add percentAlong to JSON response usage example"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9 -*"
+  CREATED-ON: "10/02/2021 15:04:43"
+  FAUTHOR: "jderose"
+  FSTATUS: "Released"
+  MODIFIED-ON: "10/02/2021 15:06:32"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-DCFF0728-5629-425D-B377-E7C75838492E"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/UtilityNetworkServer/associations/traverse
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/UtilityNetworkServer/associations/traverse
+  methods: 
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapability: Requires the ArcGIS Advanced Editing user type extension license
+---
+
+## Description
+
+The `traverse` operation allows you to obtain and extract useful information from the associations table in a utility network. 
+
+The `type` parameter is used to provide the following predefined traversal types:
+
+-   dirtyAreaExpansion—Returns associations and objects that have been modified and are marked as dirty. Completes a downward traversal, followed by an ascending traversal, with an exit filter on the first spatial feature in each direction.
+-   firstContainers—Completes an ascending traversal on containment associations, with an exit filter on the first spatial feature.
+-   spatialParents—Completes an ascending traversal on all association types, with an exit filter on the first spatial feature.
+-   topContainers—Completes an ascending traversal to return associations and objects with no exit filter.
+-   errorsNotModified—Completes a downward traversal to return associations in error, with an exit filter on the first spatial feature.
+-   modifiedObjects—Completes a downward traversal to return associations that are dirty, with an exit filter on the first spatial feature.
+
+To create a custom traversal the `direction`, `dirtyStatusFilter`, `errorStatusFilter`, `stopAtFirstSpatial`, and `maxDepth` parameters can be used. When a traversal type is specified using the `type` parameter other than the default `unspecified`, these parameters are ignored.
+
+<Note type={"note"}>
+
+Associations are not traversed from spatial features to nonspatial objects and back to spatial features when the exit filter is placed on the first spatial feature.
+
+</Note>
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html`.
+
+```
+f=html | json | pjson
+```
+
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`gdbVersion` 
+
+(Optional)  
+
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the name of the geodatabase version. The default is `sde.Default`.
+
+Syntax: `gdbVersion=<version>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`moment`
+
+(Optional)  
+
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the session moment. The default is the version's current moment. This should only be specified when you do not want to use the current moment.
+
+Syntax: `moment=<Epoch time in milliseconds>` 
+
+Example: `moment=1651505446` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`type`
+
+(Optional)  
+
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the type of traversal to perform. The default value is "unspecified".
+
+```
+type=unspecified | dirtyAreaExpansion |  firstContainers | spatialParents |  topContainers | errorsNotModified |  modifiedObjects
+``` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`direction` 
+
+(Optional)  
+
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the direction of the association traversal. The default is `descending`.
+
+```
+direction=ascending | descending 
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`dirtyStatusFilter` 
+
+(Optional)  
+
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether to filter based on the dirty status of the association. The default is `none`. 
+
+<Note type={"note"}>
+
+When `dirtyStatusFilter` and `errorStatusFilter` are specified together, the filters are combined using an AND expression.
+
+</Note>
+
+```
+dirtyStatusFilter=none | dirty | notDirty
+``` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`errorStatusFilter` 
+
+(Optional)  
+
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether to filter associations based on the error code. The default is `none`.
+
+```
+errorStatusFilter=none | inError | notInError
+``` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`stopAtFirstSpatial`
+
+(Optional)  
+
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Boolean parameter specifying whether to stop the traversal of associations from nonspatial object to feature when a spatial feature is encountered. The traversal will stop at the feature and will not traverse to the next nonspatial object. The default is `true`.
+
+```
+stopAtFirstSpatial=true | false
+```
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`maxDepth`
+
+(Optional)  
+
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies how many hops through the association graph are allowed in either the ascending or descending direction. The default is `MAX_INT`.
+
+Syntax: `maxDepth=<integer>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`elements` 
+
+(Optional)  
+
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The feature or object elements for which the association traversal is initiated.
+
+Syntax: 
+
+```json
+[ 
+  {
+    “networkSourceId” : <long>,
+    “globalId” : <guid>,
+    “terminalId” : <long>   // optional
+  }
+]
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## JSON Response syntax
+
+```json
+{
+   "associations":[
+      {
+         "globalId":<guid>,
+         "fromNetworkSourceId":<long>,
+         "fromGlobalId":<guid>,
+         "fromTerminalId":<long>,
+         "toNetworkSourceId":<long>,
+         "toGlobalId":<guid>,
+         "toTerminalId":<long>,
+         "percentAlong": <double>,
+         "associationType":"connectivity" | "attachment" | "containment" | "junctionEdgeFromConnectivity" | "junctionMidspanConnectivity" | "junctionEdgeToConnectivity",
+         "status":<long>,
+         "errorCode":<long>,
+         "errorMessage"<string>,
+         "isContentVisible":<boolean>
+      }
+   ],
+   "objects":[
+      {
+         "sourceId":<long>,
+         "globalId":<guid>
+      }
+   ],
+  “success” : <boolean>, 
+  “error” : {                   // only if success is false 
+    “extendedCode” : <HRESULT>, 
+    “message” : <string>, 
+    “details” : [ <string> ] 
+} 
+} 
+
+```
+
+ 
+
+## Example usage
+
+Request URL and parameters:
+
+https&#x3A;//myserver.esri.com/server/rest/services/LandUse/UtilityNetworkServer/associations/traverse
+
+```json
+direction=ascending
+stopAtFirstSpatial=false
+elements=[{"networkSourceId":19,"globalId":"{AE323515-8E6F-4CC2-B9A8-1DB963E769AB}"}]
+
+```
+
+ 
+
+```javascript
+{
+	"associations": [
+		{
+			"globalId": "{FC70F615-60E2-4898-B65C-CF3BB0C6A933}",
+			"fromNetworkSourceId": 4,
+			"fromGlobalId": "{38429E9F-E585-4B20-BBD6-A7111E45C3AD}",
+			"fromTerminalId": -1,
+			"toNetworkSourceId": 16,
+			"toGlobalId": "{0C75A4A0-7FCD-4078-90F3-9E1B124DD564}",
+			"toTerminalId": -1,
+			"associationType": "containment",
+			"status": 0,
+			"errorCode": 0,
+			"errorMessage": "",
+			"isContentVisible": true		
+},
+		{
+			"globalId": "{ABE73E74-B107-4527-967E-9283E5E12784}",
+			"fromNetworkSourceId": 4,
+			"fromGlobalId": "{B7E78E04-0E67-4287-88AE-08A4D135FA67}",
+			"fromTerminalId": -1,
+			"toNetworkSourceId": 19,
+			"toGlobalId": "{AE323515-8E6F-4CC2-B9A8-1DB963E769AB}",
+			"toTerminalId": -1,
+			"associationType": "containment",
+			"status": 0,
+			"errorCode": 0,
+			"errorMessage": "",
+			"isContentVisible": true
+		},
+		{
+			"globalId": "{EB0D71A6-7F4C-4521-A111-70B493141264}",
+			"fromNetworkSourceId": 16,
+			"fromGlobalId": "{0C75A4A0-7FCD-4078-90F3-9E1B124DD564}",
+			"fromTerminalId": 1,
+			"toNetworkSourceId": 19,
+			"toGlobalId": "{AE323515-8E6F-4CC2-B9A8-1DB963E769AB}",
+			"toTerminalId": 1,
+			"associationType": "connectivity",
+			"status": 0,
+			"errorCode": 0,
+			"errorMessage": "",
+			"isContentVisible": true
+		}
+	],
+	"objects": [
+		{
+			"sourceId": 16,
+			"globalId": "{0C75A4A0-7FCD-4078-90F3-9E1B124DD564}"
+		},
+		{
+			"sourceId": 4,
+			"globalId": "{AE323515-8E6F-4CC2-B9A8-1DB963E769AB}"
+		},
+		{
+			"sourceId": 4,
+			"globalId": "{B7E78E04-0E67-4287-88AE-08A4D135FA67}"
+		},
+		{
+			"sourceId": 4,
+			"globalId": "{38429E9F-E585-4B20-BBD6-A7111E45C3AD}"
+		}
+	],
+	"success": true
+}
+	
+```
+
+ 

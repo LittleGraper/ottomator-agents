@@ -1,0 +1,137 @@
+---
+title: "/canRecycle: Can Recycle Item"
+description: "Can Recycle Item  is used to determine whether an item is supported by the recycle bin."
+slug: "can-recycle-item"
+url: "/can-recycle-item"
+restInfoMetadata:
+  apiPath: /content/users/[userName]/items/[itemID]/canRecycle
+  urlSegments:
+    - name: <root>
+      url: /root
+    - name: /content/users/[userName]/items/[itemID]/canRecycle
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: 'ArcGIS Online June 2024'
+---
+
+## Example Usage
+
+URL for Can Recycle Item
+
+```markdown
+https://org.arcgis.com/sharing/rest/content/users/jsmith/items/b512083cd1b64e2da1d3f66dbb135956/canRecycle?f=json
+```
+## Description
+
+The `canRecycle` operation indicates whether an item is supported by the recycle bin or not. This operation is only supported in ArcGIS Online organizations.
+
+If the returned response from `canRecycle` is `true`, this means that the item is supported by the recycle bin. A `false` response is returned if an item is either [not supported](https://doc.arcgis.com/en/arcgis-online/reference/faq.htm#ESRI_QUESTIONANSWER_60A4B4E5F0994E8DB4A999818B19ED1D) by the recycle bin or the item cannot be recycled due to dependencies. The error response will show a list of `offendingItems` that are dependent on the item that the user is trying to recycle. `canRecycle` will return `false` until all dependent items on the `offendingItems` list are recycled or permanently deleted.
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `[Common Parameters]` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      For a complete listing, see [Common parameters](/common-parameters). 
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Response Properties
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `itemID` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The ID of the queried item.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `success` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Indicates if the operation was successful.
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## JSON Response syntax
+
+```other
+{
+  "itemId": "<item id>",
+  "success": true | false
+}          
+``` 
+
+## JSON Response example
+
+Item is supported by the recycle bin:
+
+```other
+{
+  "itemId": "e03f626be86946f997c29d6dfc7a9666",
+  "success": true
+}          
+```
+
+Item is not supported by the recycle bin:
+
+```other
+{
+  "itemId": "a34c2e6711494e62b3b8d7452d4d6235",
+  "success": false,
+  "error": {
+    "code": 400,
+    "messageCode": "CONT_0298",
+    "message": "Unable to recycle item a34c2e6711494e62b3b8d7452d4d6235. Item is part of an unsupported relationship type or item type.",
+    "offendingItems": [
+      
+    ]
+  }
+}     
+```
+
+Item cannot be recycled due to dependencies:
+
+```other
+{
+  "itemId": "a34c2e6711494e62b3b8d7452d4d6235",
+  "error": {
+    "code": 400,
+    "messageCode": "CONT_00481",
+    "message": "Unable to delete item. This service item has a related Service item",
+    "offendingItems": [
+        {
+            "itemId": "e03f626be86946f997c29d6dfc7a9666",
+            "title": "Countries_WFS",
+            "type": "WFS"
+        },
+        {
+            "itemId": "ea433f31f1bd4d6787cf6a82b0a8a7a5",
+            "title": "WorldMap_OGC",
+            "type": "OGCFeatureServer"
+        }      
+    ]
+  },
+  "success": false  
+}      
+``` 

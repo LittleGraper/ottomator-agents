@@ -1,0 +1,954 @@
+---
+title: /FindClosestFacilities
+uid: closestFacility-service-job
+description: "Find directions using the global route service available with ArcGIS Location Services."
+context:
+    requestType: "job"
+---
+import CFServiceDesc from "../../shared/routing/snippets/_closestFacility-service.mdx"
+import Incidents from "../../shared/routing/snippets/request-parameters/_CF-incidents.mdx"
+import Facilities from "../../shared/routing/snippets/request-parameters/_CF-facilities.mdx"
+import Cutoff from "../../shared/routing/snippets/request-parameters/_CF-defaultCutoff.mdx"
+import FacilityCount from "../../shared/routing/snippets/request-parameters/_CF-TargetFacilityCount.mdx"
+import TravelDirection from "../../shared/routing/snippets/request-parameters/_CF-TravelDirection.mdx"
+import Impedance from "../../shared/routing/snippets/request-parameters/_Impedance-JDR-OnE.mdx"
+import Tokens from "../../shared/routing/snippets/request-parameters/_Token.mdx"
+import ResponseFormat from "../../shared/routing/snippets/request-parameters/_ResponseFormat.mdx"
+import MeasurementUnits from "../../shared/routing/snippets/request-parameters/_MeasurementUnits-JR-OnE.mdx"
+import AttributeParameterValues from "../../shared/routing/snippets/request-parameters/_AttributeParameterValues-JDR-OnE.mdx"
+import TravelModes from "../../shared/routing/snippets/request-parameters/_TravelMode.mdx"
+import AnalysisRegion from "../../shared/routing/snippets/request-parameters/_AnalysisRegion-JR-OnE.mdx"
+import Context from "../../shared/routing/snippets/request-parameters/_Context.mdx"
+import DirectionsLanguage from "../../shared/routing/snippets/request-parameters/_DirectionsLanguage-JDR-OnE.mdx"
+import DistanceUnits from "../../shared/routing/snippets/request-parameters/_DistanceUnits.mdx"
+import LineBarriers from "../../shared/routing/snippets/request-parameters/_LineBarriers.mdx"
+import LocateSettings from "../../shared/routing/snippets/request-parameters/_LocateSettings.mdx"
+import OutputFormat from "../../shared/routing/snippets/request-parameters/_OutputFormat-JR-OnE.mdx"
+import PointBarriers from "../../shared/routing/snippets/request-parameters/_PointBarriers.mdx"
+import PolygonBarriers from "../../shared/routing/snippets/request-parameters/_PolygonBarriers.mdx"
+import SaveOutputNALayer from "../../shared/routing/snippets/request-parameters/_SaveOutputNALayer-JR-OnE.mdx"
+import SaveRouteData from "../../shared/routing/snippets/request-parameters/_SaveRouteData-JR-OnE.mdx"
+import TimeUnits from "../../shared/routing/snippets/request-parameters/_TimeUnits.mdx"
+import DirectionsStyleName from "../../shared/routing/snippets/request-parameters/_DirectionsStyleName-JDR-OnE.mdx"
+import DirectionsDistanceUnits from "../../shared/routing/snippets/request-parameters/_DirectionsDistanceUnits-JDR-OnE.mdx"
+import UseTimeWindows from "../../shared/routing/snippets/request-parameters/_UseTimeWindows-JDR-OnE.mdx"
+import PopulateDirectionsCF from "../../shared/routing/snippets/request-parameters/_PopulateDirections-JDR-OnE.mdx"
+import UTurnAtJunctions from "../../shared/routing/snippets/request-parameters/_UTurnAtJunctions.mdx"
+import UseHierarchy from "../../shared/routing/snippets/request-parameters/_UseHierarchy-JDR-OnE.mdx"
+import Restrictions from "../../shared/routing/snippets/request-parameters/_Restrictions-JDR-OnE.mdx"
+import RtLineSimplificationTol from "../../shared/routing/snippets/request-parameters/_RouteLineSimplificationTolerance-JR-OnE.mdx"
+import Overrides from "../../shared/routing/snippets/request-parameters/_Overrides-JDR-OnE.mdx"
+import RouteShape from "../../shared/routing/snippets/request-parameters/_RouteShape-JR-OnE.mdx"
+import DistanceImpedance from "../../shared/routing/snippets/request-parameters/_DistanceImpedance-JR-OnE.mdx"
+import TimeImpedance from "../../shared/routing/snippets/request-parameters/_TimeImpedance-JR-OnE.mdx"
+import IgnoreInvalidLocations from "../../shared/routing/snippets/request-parameters/_IgnoreInvalidLocations-JDR-OnE.mdx"
+import TimeOfDay from "../../shared/routing/snippets/request-parameters/_TimeOfDay-JR-OnE.mdx"
+import TimeZoneForTimeOfDay from "../../shared/routing/snippets/request-parameters/_TimeZoneForTimeOfDay-JR-OnE.mdx"
+import LineBarrier from "../../shared/routing/snippets/request-parameters/_LineBarriers.mdx"
+import PolygonBarrier from "../../shared/routing/snippets/request-parameters/_PolygonBarriers.mdx"
+import PointBarrier from "../../shared/routing/snippets/request-parameters/_PointBarriers.mdx"
+import CFUsageLimits from "../../shared/routing/snippets/request-parameters/_CF-UsageLimits.mdx"
+import ConfigureLimits from "../../shared/routing/snippets/request-parameters/_configureLimits.mdx"
+
+import OutputCF from "../../shared/routing/snippets/output-parameters/_CF-outputCFandFacilities.mdx"
+import OutputIncidents from "../../shared/routing/snippets/output-parameters/_CF-outputIncidents.mdx"
+import OutputRoutes from "../../shared/routing/snippets/output-parameters/_CF-outputRoutes.mdx"
+import Directions from "../../shared/routing/snippets/output-parameters/_outputDirections.mdx"
+import DirectionLines from "../../shared/routing/snippets/output-parameters/_outputDirectionLines.mdx"
+import DirectionPoints from "../../shared/routing/snippets/output-parameters/_outputDirectionPoints.mdx"
+import SolveSucceeded from "../../shared/routing/snippets/output-parameters/_SolveSucceeded.mdx"
+import UsageCost from "../../shared/routing/snippets/output-parameters/_UsageCost.mdx"
+
+import SharedContent from "../../shared/content/_required-params"
+import ParamMetadata from "../../shared/components/param-metatdata" 
+
+<CodeSwitcher>
+<CodeBlock language="curl" label="GET">{`GET  https://logistics.arcgis.com/arcgis/rest/services/World/ClosestFacility/GPServer/FindClosestFacilities/submitJob`}</CodeBlock>
+<CodeBlock language="curl" label="POST">{`POST https://logistics.arcgis.com/arcgis/rest/services/World/ClosestFacility/GPServer/FindClosestFacilities/submitJob`}</CodeBlock>
+</CodeSwitcher>
+
+<CFServiceDesc />
+
+## Parameters
+
+<StyledTable headers="Name, Required, Type, Default, Description">
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[f](#f)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown"></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The request response format, either `json` or `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[token](#token)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    An access token with the [required privileges](#token).
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[incidents](#incidents)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">feature</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+   One or more locations from which the nearby locations are searched. 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[facilities](#facilities)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">feature</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+   One or more locations that are searched for when finding the closest location.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[travel_modes](#travel_modes)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">object</StyledTableCell>
+    <StyledTableCell cellStyle="markdown"> 
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The mode of transportation for the analysis provided as a JSON object.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[locate_settings](#locate_settings)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">object</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Determines how input data are located.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[number_of_facilities_to_find](#number_of_facilities_to_find)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">integer</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The number of closest facilities to find per incident.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[cutoff](#cutoff)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">number</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `null`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The travel time or travel distance value at which to stop searching for facilities for a given incident.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[travel_direction](#travel_direction)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `Incident To Facility`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Search for the closest facility as measured from the incident to the facility or from the facility to the incident.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[measurement_units](#measurement_units)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `Minutes`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Units that should be used to report the total travel time or travel distance for the output routes.
+    </StyledTableCell>
+  </StyledTableRow>  
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[analysis_region](#analysis_region)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Region in which to perform the analysis. 
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[time_of_day](#time_of_day)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">datetime</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The time and date to depart from or arrive at incidents or facilities.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[time_zone_for_time_of_day](#time_zone_for_time_of_day)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `Geographically Local`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The time zone or zones of the `time_of_day` parameter.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[time_of_day_usage](#time_of_day_usage)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `Start Time`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Specifies whether the `time_of_day` parameter value represents the arrival or departure time for the routes. 
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[uturn_at_junctions](#uturn_at_junctions)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `Allowed only at Intersections and Dead Ends`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Restricts or allows a route to make U-turns at junctions.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[point_barriers](#point_barriers)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">feature</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      One or more points that act as temporary restrictions, additional time, or distance.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[line_barriers](#line_barriers)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">feature</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      One ore more lines that prohibit travel anywhere the lines intersect the streets.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[polygon_barriers](#polygon_barriers)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">feature</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Polygons that either prohibit travel or proportionately scale the time or distance required to travel on the streets.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[use_hierarchy](#use_hierarchy)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Hierarchy used when finding the shortest paths.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[restrictions](#restrictions)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">[string]</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The restrictions that should be honored by the service.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[attribute_parameter_values](#attribute_parameter_values)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">table</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Additional values required by an attribute or restriction.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[time_impedance](#time_impedance)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Time-based impedance.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[distance_impedance](#distance_impedance)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `Miles`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Distance-based impedance.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[impedance](#impedance)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Type of impedance.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[route_shape](#route_shape)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `True Shape`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The type of route features that are output by the service. 
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[route_line_simplification_tolerance](#route_line_simplification_tolerance)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">number</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `10`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Simplification level for the route geometry returned by the service.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[populate_directions](#populate_directions)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Generates the driving directions for each route.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[directions_language](#directions_language)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `en`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The language used when generating driving directions.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[directions_distance_units](#directions_distance_units)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `Miles`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Units for displaying travel distance in the driving directions. 
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[directions_style_name](#directions_style_name)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `NA Desktop`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The formatting style for the directions. Used if`populate_directions=true`.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[save_route_data](#save_route_data)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Route data will be saved as a .zip file.
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[save_output_network_analysis_layer](#save_output_network_analysis_layer)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Save the analysis settings as a network analysis layer file.
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[output_format](#output_format)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `Feature Set`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Format in which the output features will be returned.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[context](#context)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">object</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Additional settings that affect task operation
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[overrides](#overrides)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      For internal use only.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[ignore_invalid_locations](#ignore_invalid_locations)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Ignores invalid input locations.
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Required parameters
+
+<Box>
+
+### f
+
+<SharedContent f/>
+
+</Box>
+
+<Box>
+
+### token
+
+<SharedContent token alpPrivileges="premium:user:networkanalysis:routing or premium:user:networkanalysis:optimizedrouting" agoPrivileges="premium:user:networkanalysis"/>
+
+</Box>
+
+<Box>
+
+### incidents
+
+<Incidents />
+
+</Box>
+
+<Box>
+
+### facilities
+
+<Facilities />
+
+</Box>
+
+## Optional parameters
+
+<Box>
+
+### travel_modes
+
+<TravelModes />
+
+</Box>
+
+<Box>
+
+### locate_Settings
+
+<LocateSettings CF/>
+
+</Box>
+
+<Box>
+
+### number_of_facilities_to_find
+
+<FacilityCount />
+
+</Box>
+
+<Box>
+
+### cutoff
+
+<Cutoff />
+
+</Box>
+
+<Box>
+
+### travel_direction
+
+<TravelDirection />
+
+</Box>
+
+<Box>
+
+### measurement_units
+
+<MeasurementUnits closestFacility />
+
+</Box>
+
+<Box>
+
+### analysis_region
+
+<AnalysisRegion />
+
+</Box>
+
+<Box>
+
+### time_of_day
+
+<TimeOfDay closestFacility />
+
+</Box>
+
+<Box>
+
+### time_zone_for_time_of_day
+
+<TimeZoneForTimeOfDay />
+
+</Box>
+
+<Box>
+
+### time_of_day_usage
+
+<ParamMetadata types={[{name:"string"}]}  defaultValue="Start Time" />
+
+**Allowed values:** `Start Time`, `End Time`
+
+Specify whether the `time_of_day` parameter value represents the arrival or departure time for the routes. The parameter can be specified using the following values:
+
+-   `Start Time`—When this value is specified, the service finds the best route considering the `time_of_day` parameter value as the departure time from the facility or incident.
+-   `End Time`—When this value is specified, the service considers the `time_of_day` parameter value as the arrival time at the facility or incident. This value is useful if you want to know what time to depart from a location so you arrive at the destination at the time specified in `time_of_day` .
+
+The parameter value is ignored if the `time_of_day` parameter has a `null` value.
+
+</Box>
+
+<Box>
+
+### uturn_at_junctions
+
+<UTurnAtJunctions />
+
+</Box>
+
+<Box>
+
+### point_barriers
+
+<PointBarrier />
+
+</Box>
+
+<Box>
+
+### line_barriers
+
+<LineBarrier />
+
+</Box>
+
+<Box>
+
+### polygon_barriers
+
+<PolygonBarrier />
+
+</Box>
+
+<Box>
+
+### use_hierarchy
+
+<UseHierarchy />
+
+</Box>
+
+<Box>
+
+### restrictions
+
+<Restrictions />
+
+</Box>
+
+<Box>
+
+### attribute_parameter_values
+
+<AttributeParameterValues />
+
+</Box>
+
+<Box>
+
+### time_impedance
+
+<TimeImpedance />
+
+</Box>
+
+<Box>
+
+### distance_impedance
+
+<DistanceImpedance />
+
+</Box>
+
+<Box>
+
+### impedance
+
+<Impedance />
+
+</Box>
+
+<Box>
+
+### route_shape
+
+<RouteShape />
+
+</Box>
+
+<Box>
+
+### route_line_simplification_tolerance
+
+<RtLineSimplificationTol />
+
+</Box>
+
+<Box>
+
+### populate_directions
+
+<PopulateDirectionsCF closestFacility />
+
+</Box>
+
+<Box>
+
+### directions_language
+
+<DirectionsLanguage />
+
+</Box>
+
+<Box>
+
+### directions_distance_units
+
+<DirectionsDistanceUnits />
+
+</Box>
+
+<Box>
+
+### directions_style_name
+
+<DirectionsStyleName />
+
+</Box>
+
+<Box>
+
+### save_route_data
+
+<SaveRouteData />
+
+</Box>
+
+<Box>
+
+### save_output_network_analysis_layer
+
+<SaveOutputNALayer />
+
+</Box>
+
+<Box>
+
+### output_format
+
+<OutputFormat />
+
+</Box>
+
+<Box>
+
+### context
+
+<Context />
+
+</Box>
+
+<Box>
+
+### overrides
+
+<Overrides />
+
+</Box>
+
+<Box>
+
+### ignore_invalid_locations
+
+<IgnoreInvalidLocations />
+
+</Box>
+
+## Response details 
+
+{/* Go to [Response types](xref:///routing-types/#routes-result) for an example of the JSON response object. */}
+
+Upon successful completion, the service returns the best route and travel directions between the incident and the chosen facility and the status indicating whether the analysis was successful using the following response objects:
+
+<Box>
+
+### output_closest_facilities and output_facilities
+
+<OutputCF /> 
+
+</Box>
+
+<Box>
+
+### output_incidents
+
+<OutputIncidents />
+
+</Box>
+
+<Box>
+
+### output_routes
+
+<OutputRoutes />
+
+</Box>
+
+<Box>
+
+### output_directions
+
+<Directions closestFacility />
+
+</Box>
+
+<Box>
+
+### output_direction_lines
+
+<DirectionLines />
+
+</Box>
+
+<Box>
+
+### output_direction_points
+
+<DirectionPoints />
+
+</Box>
+
+<Box>
+
+### usage_cost
+
+<UsageCost />
+
+</Box>
+
+<Box>
+
+### solve_succeeded
+
+<SolveSucceeded />
+
+</Box>
+
+## Examples
+
+<Note type={"mapping-guide"}>
+
+To build client application [see API reference examples](DEVSITE/documentation/mapping-and-location-services/routing-and-directions/closest-facility-routing/#job-find-closest-fire-stations)
+
+</Note>
+
+<Note type={"caution"}>
+
+If you copy and paste the request URL from the examples into a web browser, you need to replace `<yourToken>`  with a valid token. See [Security and authentication](DEVSITE/documentation/security-and-authentication/) to learn more.
+
+</Note>
+
+<Box>
+
+### Find the closest fire stations
+
+In this example, you will find the two fire stations that can provide the quickest response to a fire at a given address. You will also generate routes and driving directions for the firefighters.
+
+<MoreInfo>
+All the fire stations in the neighborhood are specified as the `facilities` parameter, and the location of the fire is specified as the `incidents` parameter. To include the name of the fire station in the driving directions, specify the name as the attribute of the facilities. For `facilities` and `incidents`, the geometries are in the default spatial reference, WGS84. So the `spatialReference` property is not required.
+
+Because you want to model the fire engines traveling from the stations to the location of the fire, you specify `Facility to Incident` as the value for the `travel_direction` parameter. You need to find the two closest fire stations within three minutes of the fire, so specify 2 as the value for the `number_of_facilities_to_find` parameter and 3 as the value for the `cutoff` parameter. You need to calculate the best routes that account for the current traffic conditions, so specify the current time as the `time_of_day` parameter and specify `Start Time` as the `time_of_day_usage` parameter.
+</MoreInfo>
+
+<Tabs>
+<TabNav slot="tab-nav">
+  <TabTitle is-active>1. Submit job</TabTitle>
+  <TabTitle>2. Check job status</TabTitle>
+  <TabTitle>3. Get output_closest_facilities</TabTitle>
+  <TabTitle>4. Get output_routes</TabTitle>
+</TabNav>
+
+<Tab is-active>
+
+**Request**
+
+<If c="publication=='rest/online'">
+<CodeSwitcher>
+  <CodeBlock language="http" source="../../shared/routing/code-samples/responseExample/job/CF_submit_job_online.http" group="HTTP" maxLines={20} expandable/>
+</CodeSwitcher>
+</If>
+
+**Response (JSON)**
+
+<CodeBlock language="json" source="../../shared/routing/code-samples/responseExample/job/CF_submit_job_response.json" maxLines={20} expandable/>
+
+</Tab>
+
+<Tab>
+
+The job ID obtained from the response of the first request can be queried periodically to determine the status of the job.
+
+**Request**
+
+<CodeSwitcher>
+  <CodeBlock language="http" source="../../shared/routing/code-samples/responseExample/job/CF_query_job_status.http" group="HTTP" maxLines={20} expandable/>
+</CodeSwitcher>
+
+**Response (JSON)**
+
+<CodeBlock language="json" source="../../shared/routing/code-samples/responseExample/job/CF_query_job_status_response.json" maxLines={20} expandable/>
+
+</Tab>
+
+<Tab>
+
+Because the job succeeded, a request can be made to return the facilities that are closest to the incidents. The output parameter used to retrieve these results is `output_closest_facilities` .
+
+**Request**
+
+<CodeSwitcher>
+  <CodeBlock language="http" source="../../shared/routing/code-samples/responseExample/job/CF_output_closest_facility.http" group="HTTP" maxLines={20} expandable/>
+</CodeSwitcher>
+
+**Response (JSON)**
+
+<CodeBlock language="json" source="../../shared/routing/code-samples/responseExample/job/CF_output_closest_facility_response.json" maxLines={20} expandable/>
+
+</Tab>
+
+<Tab>
+
+`output_routes` includes routes from two of the three fire stations to the fire incident since the two fire stations are closest to the fire incident based on the travel time. The name of the fire station and the incident name are used to construct the Name attribute for each route.
+
+**Request**
+
+<CodeSwitcher>
+  <CodeBlock language="http" source="../../shared/routing/code-samples/responseExample/job/CF_output_routes.http" group="HTTP" maxLines={20} expandable/>
+</CodeSwitcher>
+
+**Response (JSON)**
+
+<Note>
+Because the response is quite verbose, the repeated elements within the response are abbreviated for clarity.
+</Note>
+
+<CodeBlock language="json" source="../../shared/routing/code-samples/responseExample/job/CF_output_routes_response.json" maxLines={20} expandable/>
+
+</Tab>
+
+</Tabs>
+
+</Box>
+
+## Service limits
+
+<If c="publication=='rest/online'">
+
+<Note type={"note"}> 
+
+The service works in all the supported countries as listed in the [data coverage page](/network-coverage). One or more countries are grouped together to form an analysis region. The service can determine the best region to use based on the location of the inputs; otherwise, you can use a parameter to specify a region. The service does not support requests that span more than one region. Consequently, the service will only generate results for inputs that fall within one region. 
+
+</Note>
+
+</If>
+
+<CFUsageLimits />
+
+
+

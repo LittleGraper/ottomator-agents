@@ -1,0 +1,208 @@
+---
+title: "Merge Multidimensional Rasters"
+description: "The MergeMultidimensionalRasters task combines multiple multidimensional raster datasets spatially or across variables and dimensions."
+slug: "merge-multidimensional-rasters"
+url: "/merge-multidimensional-rasters"
+restInfoMetadata:
+  apiPath: /System/RasterAnalysisTools/GPServer/MergeMultidimensionalRasters
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /System/RasterAnalysisTools/GPServer/MergeMultidimensionalRasters
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+---
+
+![Merge Multidimensional Rasters diagram](./images/merge-multidimensional-rasters.png)
+
+## Description
+
+The `MergeMultidimensionalRasters` task combines multiple multidimensional raster datasets spatially or across variables and dimensions.
+
+<Note>
+
+You must license your ArcGIS Server as an ArcGIS Image Server to use this resource.
+
+</Note>
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `inputMultidimensionalRasters`
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The list of input multidimensional image service layers to combine. This can be specified as a list of Portal Item IDs, Image Service URLs, cloud multidimensional raster datasets or shared multidimensional raster datasets.
+
+      Syntax: The JSON object describes the input multidimensional rasters. At least one type of input must be provided in the JSON object. If multiple inputs are given, the itemIds takes priority.
+
+      Example:
+
+      ```other
+      {"itemIds": [<portal item id>, <portal item id>, <portal item id>]} 
+      {"urls": [<image service url>, <image service url>, <image service url>]}
+      {"uris": [<cloud raster uri or shared data path>, <cloud raster uri or shared data path>]}
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `outputName`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The output image service name that will be created.
+
+      If the image service already exists, the portal item ID or service URL can be provided and the output path of the raster dataset generated in the raster store will be used to update the existing service definition. Otherwise, a new image service will be created.
+
+      The output hosted image service is stored in the raster store and shared on the image hosting ArcGIS Image Server or the raster analysis ArcGIS Image Server, depending on your configuration.
+
+      Syntax: A JSON object describes the name of the output or the output raster.
+
+      Example:
+
+      ```other
+      //Image Service URL example
+      {"url": <image service URL>}
+
+      //Shared Data Path example
+      {"uri": <cloud raster URI or shared data path>}
+
+      //Item ID example
+      {"itemID": <portal item id>}
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `resolveOverlapMethod`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the method used to handle overlapping pixels when merging rasters spatially or dimensionally.
+
+      * `FIRST`—The pixel value in the overlapping areas will be the value from the first raster in the list of input rasters. This is the default.
+      * `LAST`—The pixel value in the overlapping areas will be the value from the last raster in the list of input rasters.
+      * `MIN`—The pixel value in the overlapping areas will be the minimum value of the overlapping pixels.
+      * `MAX`—The pixel value in the overlapping areas will be the maximum value of the overlapping pixels.
+      * `MEAN`—The pixel value in the overlapping areas will be the average of the overlapping pixels.
+      * `SUM`—The pixel value in the overlapping areas will be the total sum of the overlapping pixels.
+
+      Syntax: String.
+
+      Example:
+
+      ```other
+      resolveOverlapMethod="MAX"
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `context`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Contains additional settings that affect task execution. This task has the following settings:
+
+      * [Extent](/extent-ra) (`extent`)—A bounding box that defines the analysis area.
+      * [Output Spatial Reference](/output-spatial-reference) (`outSR`)—The output raster will be projected into the output spatial reference.
+      * [Snap Raster](/snap-raster) (`snapRaster`)—The output raster will have its cells aligned with the specified snap raster.
+      * [Cell Size](/cell-size) (`cellSize`)—The output raster will have the resolution specified by cell size.
+      * [Parallel Processing Factor](/parallel-processing-factor) (`parallelProcessingFactor`)—The specified number or percentage of processes will be used for the analysis.
+
+      Example:
+
+      ```other
+      context={"cellSize": "20", "parallelProcessingFactor": "4"}
+      
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Response
+
+When you submit a request, the task assigns a unique job ID for the transaction.
+
+Syntax:
+
+```other
+{ "jobId": "<unique job identifier>", "jobStatus": "<job status>" }
+
+```
+
+After the initial request is submitted, you can use the `jobId` to periodically check the status of the job and messages, as described in [Checking job status](/checking-job-status). Once the job has successfully completed, use the `jobId` to retrieve the results. To track the status, you can make a request of the following form:
+
+```other
+https://<analysis-url>/MergeMultidimensionalRasters/jobs/<jobId>
+
+```
+
+When the status of the job request is `esriJobSucceeded`, you can access the results of the analysis by making a request of the following form:
+
+```other
+http://<raster analysis url>/MergeMultidimensionalRasters/jobs/<jobId>/results/ outputMultidimensionalRaster?token=<your token>&f=json
+
+```
+
+## Example usage
+
+Below is a sample request URL for `MergeMultidimensionalRasters`:
+
+```other
+https://services.myserver.com/arcgis/rest/services/System/RasterAnalysisTools/ImageServer/MergeMultidimensionalRasters/submitJob
+
+```
+
+## JSON Response example
+
+The response returns the `outputRaster` output parameter, which has properties for parameter name, data type, and value. The content of `value` is always the output raster dataset `itemId` and the image service URL.
+
+```other
+{
+  "paramName": "outputMultidimensionalRaster",
+  "dataType": "GPString",
+  "value": {
+    "itemId": "c267610d0feb4370bf38cc6e2c4ac261", 
+    "url": "https://services.myserver.com/arcgis/rest/services/Hosted/<service name>/ImageServer"
+  }
+}
+
+```

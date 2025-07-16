@@ -1,0 +1,112 @@
+import ParamMetadata from "../../../components/param-metatdata" 
+
+<ParamMetadata types={[{name:"feature",link:"../routing-data-types#feature"}]} />
+
+{/* <p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p> */}
+
+Specify the rest periods, or breaks, for the routes in a given fleet routing problem. A break is associated with exactly one route, and it can be taken after completing an order, while en route to an order, or prior to servicing an order. It has a start time and a duration, for which the driver may or may not be paid. There are three options for establishing when a break begins: using a time window, a maximum travel time, or a maximum work time.
+
+-   Time window break—To set up a time window break, enter two time-of-day values to delimit a time range in which the break should begin. The `TimeWindowStart` and `TimeWindowEnd` attributes hold the bounding time-of-day values. The duration, or service time, of the break is independent of the time window and, therefore, can extend beyond the end of the time window. For instance, if the time window for an hour-long break spans from 10:00 a.m. to 10:15 a.m., the break should start after 10:00 a.m. but before 10:15 a.m. If it starts at 10:10 a.m., the break will end at 11:10 a.m.
+-   Maximum travel time break—With this kind of break, you specify how long a person can drive before the break is required. (Note that only travel time is limited, not other times such as wait and service times.) If you enter four hours into the first break's `MaxTravelTimeBetweenBreaks` property, for example, the driver will receive a break before the accumulated travel time from the start of the route exceeds four hours. For any subsequent breaks, the travel time is accumulated from the previous break. So if you have a second break with a `MaxTravelTimeBetweenBreaks` value of two hours, the second break will be taken before two hours of travel time have been accumulated from the previous break, not from the start depot. A route's final maximum travel time break not only limits the amount of accumulated travel time from the previous break or start of the route but also limits the travel time from the final break to the end depot. This is true even if there is only one break. The fleet routing service is designed this way to prevent a route from taking all its breaks and then traveling for an extended period without taking another break. In the last example, `MaxTravelTimeBetweenBreaks` was set to two hours. If this is the route's final break, the route must be able to reach the end depot within two hours of travel time from the final break; otherwise, the service will return an error.
+-   Maximum work time break—This break specifies how long a person can work before a break is required. Unlike maximum travel time breaks, which can accumulate travel time from the end of the last break, maximum work time breaks always accumulate work time from the beginning of the route, including any service time at the start depot. Note that this break limits the accumulated work time, which includes travel time and all service times; it excludes wait time, however.
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for breaks</span></summary>
+
+ #### Attributes for breaks
+
+-   <p class="space-x-2"><span class="font-bold">RouteName</span><span class="font-sm text-color-3">string (length: 1024)</span></p>
+
+    The name of the route that the break applies to. Although a break is assigned to exactly one route, many breaks can be assigned to the same route. This attribute is a foreign key to the `Name`  attribute in the `routes`  parameter, so the values must match. The attribute cannot have a null value. 
+
+-   <p class="space-x-2"><span class="font-bold">Precedence</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#6d29cc]">default:1</span></p> 
+
+    Specify the values to sequence the breaks of a given route. Breaks with a precedence value of 1 occur before those with a value of 2, and so on. All breaks must have a precedence value, regardless of whether they are time window, maximum travel time, or maximum work time breaks.
+
+-   <p class="space-x-2"><span class="font-bold">ServiceTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:60</span></p>
+
+    The duration of the break. The units for this attribute value are specified by the `time_units`  parameter. This attribute can't contain a null value. 
+
+-   <p class="space-x-2"><span class="font-bold">TimeWindowStart</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a><span class="font-bold text-[#6d29cc]">default:null</span></p>
+
+    The starting time of the break's time window. Specifying this attribute indicates that the service should consider the breaks as time window breaks. The attribute value is specified as a numeric value representing the milliseconds since midnight, January 1, 1970. 
+
+    If this attribute is null and the `TimeWindowEnd` attribute has a valid time-of-day value, the break is allowed to start anytime before the `TimeWindowEnd` value.
+
+-   <p class="space-x-2"><span class="font-bold">TimeWindowEnd</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a><span class="font-bold text-[#6d29cc]">default:null</span></p>
+
+    The ending time of the break's time window. Specifying this attribute indicates that the service should consider the breaks as time window breaks. The attribute value is specified as a numeric value representing the milliseconds since midnight, January 1, 1970. 
+
+    If this attribute is null and the `TimeWindowStart`  attribute has a valid time-of-day value, the break is allowed to start anytime after the `TimeWindowStart`  value.
+
+    For both the `TimeWindowStart` and `TimeWindowEnd` attributes, the time zone is specified by the `time_zone_usage_for_time_fields` parameter. If the parameter is set to `GEO_LOCAL` , the time is in the time zone where the route's depot is located. This is useful if your routes span multiple time zones but they all break at a consistent time (for example, 12:00 p.m. in the depot's time zone). If the parameter is set to `UTC`, the time is based on UTC time. This is useful if you don't know the time zone of an individual route's depot but know the absolute time for each break (for example, the break starts an hour from now).
+
+    <Note type={"caution"}>
+
+    If either the `TimeWindowStart`  or the `TimeWindowEnd`  attribute has values, the `MaxTravelTimeBetweenBreaks`  and `MaxCumulWorkTime`  attributes must be null; moreover, all other breaks must have null values for the `MaxTravelTimeBetweenBreaks`  and `MaxCumulWorkTime`  attributes for the request to succeed. The service will also return an error if a route has multiple breaks with overlapping time windows.
+
+    </Note>
+
+-   <p class="space-x-2"><span class="font-bold">MaxViolationTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:null</span></p>
+
+    The maximum allowable violation time for a time window break. A time window is considered violated if the arrival time falls outside of the time range. The units for this attribute value are specified by the `time_units` parameter.
+
+    A zero value indicates the time window cannot be violated; that is, the time window is hard. A nonzero value specifies the maximum amount of lateness; for example, the break can begin up to 30 minutes beyond the end of its time window, but the lateness is penalized as per the `time_window_factor` parameter. A null value indicates that there is no limit on the allowable violation time.
+
+    <Note type={"caution"}>
+
+    For the request to succeed, if `MaxTravelTimeBetweenBreaks` or `MaxCumulWorkTime` has a value, `MaxViolationTime` must be null.
+
+    </Note>
+
+-   <p class="space-x-2"><span class="font-bold">MaxTravelTimeBetweenBreaks</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:null</span></p>   
+
+    The maximum amount of travel time that can be accumulated before the break is taken. Specifying this attribute indicates that the service should consider the breaks as travel time breaks. The travel time is accumulated either from the end of the previous break or, if a break has not yet been taken, from the start of the route. If this is the route's final break, this attribute also indicates the maximum travel time that can be accumulated from the final break to the end depot.
+
+    The `MaxTravelTimeBetweenBreaks`  attribute is designed to limit how long a person can drive until a break is required. For instance, if the `time_units`  parameter is set to `Minutes` , and `MaxTravelTimeBetweenBreaks`  has a value of 120, the driver will get a break after two hours of driving. To assign a second break after two more hours of driving, the second break's `MaxTravelTimeBetweenBreaks`  attribute value should be 120.
+
+    The units for this attribute value are specified by the `time_units` parameter. 
+
+    <Note type={"caution"}>
+
+    For the request to succeed, if the `MaxTravelTimeBetweenBreaks`  attribute has a value, the `TimeWindowStart`, `TimeWindowEnd`, `MaxViolationTime`, and `MaxCumulWorkTime` attributes must be `null`.
+
+    </Note>
+
+-   <p class="space-x-2"><span class="font-bold">MaxCumulWorkTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:null</span></p>     
+
+    The maximum amount of work time that can be accumulated before the break is taken. Specifying this attribute indicates that the service should consider the breaks as work time breaks. Work time is always accumulated from the beginning of the route. Work time is the sum of travel time and service times at orders, depots, and breaks. Note, however, that this excludes wait time, which is the time a route (or driver) spends waiting at an order or depot for a time window to begin.
+
+    The `MaxCumulWorkTime` attribute is designed to limit how long a person can work until a break is required. For instance, if the `time_units` parameter is set to `Minutes`, the `MaxCumulWorkTime` attribute has a value of `120`, and the `ServiceTime` attribute has a value of `15`, the driver will get a 15-minute break after two hours of work. If a second break is needed after three more hours of work, you would specify `315` (five hours and 15 minutes) as the second break's `MaxCumulWorkTime` value. This number includes the `MaxCumulWorkTime` and `ServiceTime` values of the preceding break, along with the three additional hours of work time before granting the second break. To avoid taking maximum work time breaks prematurely, remember that they accumulate work time from the beginning of the route and that work time includes the service time at previously visited depots, orders, and breaks.
+
+    The units for this attribute value are specified by the `time_units` parameter. 
+
+    <Note type={"caution"}>
+
+    For the request to succeed, if the `MaxCumulWorkTime`  attribute has a value, the `TimeWindowStart` , `TimeWindowEnd` , `MaxViolationTime` , and `MaxTravelTimeBetweenBreaks`  attributes must be `null` .
+
+    </Note>
+
+-   <p class="space-x-2"><span class="font-bold">IsPaid</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#6d29cc]">default:1</span></p> 
+
+    Specifies whether the break is paid or unpaid. The attribute value is specified as an integer with possible values being 0 or 1. A value of `1` indicates that the time spent at the break is included in the route cost computation and overtime determination. A value of `0` indicates otherwise. 
+
+-   <p class="space-x-2"><span class="font-bold">Sequence</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#6d29cc]">default:null</span></p>    
+
+    Indicates the relative sequence of the break on its route. The attribute values must be positive and unique for each route but need not start from 1 or be contiguous. In the service output, the `Sequence` attribute of the `out_stops` parameter contains the sequence value of the break on its route. This attribute can have `null` values specifying that the break can be placed anywhere along the route.
+
+</details>
+
+**Example**
+
+This example shows how to specify time-window-based breaks by specifying the values for the `TimeWindowStart` and the `TimeWindowEnd` attributes. The input fleet routing problem requires that each of three routes have one 30-minute paid break between 12:30 p.m. and 1:30 p.m. The break time window is rigid, so the break has to start between 12:30 p.m. and 1:30 p.m. and cannot start after 1:30 p.m.
+
+You need to specify one break for each route, so you have a total of three features. Specify the appropriate milliseconds since January 1, 1970, for 12:30 p.m. Pacific time on April 23, 2013, as the value for the `TimeWindowStart` attribute and the appropriate milliseconds since January 1, 1970, for 1:30 p.m. on April 23, 2013, as the value for the `TimeWindowEnd` attribute. Because the break time window is rigid, specify a value of `0` for the `MaxViolationTime` attribute. Because the break duration is 30 minutes, specify a value of 30 for the `ServiceTime` attribute assuming the `time_units` parameter is set to `Minutes`. For each break, only specify the attribute values required to model the input scenario. The other attribute values are not specified because their default values are adequate in this scenario.
+
+<Note type={"note"}>
+
+Unlike the `depots`  and `orders`  parameters, the `spatialReference` and `geometry` properties are not required when specifying the `breaks`  parameter. 
+
+</Note>
+
+<CodeBlock language="json" source="../../code-samples/vrp/examples/inputs/breaks_ex.json" group="json" maxLines={20} expandable/>

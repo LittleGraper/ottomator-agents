@@ -1,0 +1,150 @@
+---
+title: "Multidimensional definitions"
+description: "Learn about multidimensional definitions."
+slug: "multidimensional-definition"
+url: "/multidimensional-definition"
+---
+
+## Overview
+
+Image services support multidimensional data. Information related to variables, dimensions are available in the [Multidimensional Info](/multidimensional-info) resource.
+
+Multidimensional data maybe filtered by the variable names and dimension values. A dimensional definition defines a filter for one variable and one dimension. A multidimensional definiton is an array of dimensional definition objects.
+
+A `multidimensionalDefinition` parameter is supported by the [Query](/query-image-service) operation, and is part of [mosaic rule](/mosaic-rules) objects, which is used by many operations such as, [Export Image](/export-image), [Identify](/identify-image-service), and [Get Samples](/get-samples).
+
+### Dimensional Definition
+
+A dimensional slice can be a single value, such as the temperature at a particular time. The variables that have such dimensions maybe filtered by any of the following:
+
+* Get three slices: 
+  ```markdown
+  "values": [t1, t2, t3]
+  ```
+* Get all slices between t1 and t2 (inclusive): "values":[[t1,t2]]
+  ```markdown
+  "values":[[t1,t2]]
+  ```
+* Get all slices between t1 and t2 (inclusive) and all slices between t3 and t4 (inclusive):
+  ```markdown
+  "values":[[t1,t2], [t3,t4]]
+  ```
+
+A dimensional slice can be an array of two values that defines lower and upper bound, which is not common. For example, average salinity can be measured between a period of time. The variables that have such dimensions maybe filtered by any of the following:
+
+* Get one slice whose start of measurement is t1 and end of measurement is t2. If nothing meets both conditions, no slice is filtered: 
+  ```markdown
+  "values": [[t1, t2]]
+  ```
+* Get all slices whose start of measurement is on or after t1 OR end of measurement is on or before t2:
+  ```markdown
+  "values": [[t1, t2]],"isSlice":false
+  ```
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Syntax</TabTitle>
+  <TabTitle>Example 1</TabTitle>
+  <TabTitle>Example 2</TabTitle>
+  <TabTitle>Example 3</TabTitle>
+  <TabTitle>Example 4</TabTitle>
+</TabNav>
+
+<Tab>
+
+  ```markdown
+  {
+    "variableName": "<variableName>", 
+    "dimensionName": "<dimensionName>", 
+    "values": [<value1>, <value2>, ...],//each element can be a single value, or an array of two values (lower and upper bound).
+    "isSlice": <true | false> //default is true. 
+  }
+  ```
+</Tab>
+
+<Tab>
+
+In the example below, `Sanlity` is a variable and `StdZ` (depth) is its dimension, each dimensional slice represent the sanlity at a particular depth. The following example filters out `Sanlity` that has a StdZ of -10, -2, or 0 meters:
+
+  ```markdown
+  {
+    "variableName": "Salinity",
+    "dimensionName": "StdZ",
+    "values": [-10,-2,0]
+  }
+  ```
+</Tab>
+
+<Tab>
+
+In the example below, `Sanlity` is a variable and `StdZ` (depth) is its dimension, each dimensional slice represent the sanlity at a particular depth. The following example filters out `Sanlity` that has is between -10 to -5 meters (inclusive) or between -2 to 0 (inclusive) meters:
+
+  ```markdown
+  {
+    "variableName": "Salinity",
+    "dimensionName": "StdZ",
+    "values": [[-10,-5],[-2,0]]
+  }
+  ```
+</Tab>
+
+<Tab>
+
+In the example below, `avgSanlity` is a variable and `StdTime` is its dimension, each dimensional slice represent the average sanlity measured over a period of time—defined by two fields: `StdTime` and `StdTime_Max`, specifying a time in Unix format. The following example filters the data using multiple `StdTime` slices: the first slice is average salinity between July 24/2014 6:00 (1406181600000) to 6:10 GMT (1406182200000), the second slice is average salinity between July 24/2014 18:00 (1406224800000) to 18:10 GMT (1406225400000).
+
+  ```markdown
+  {
+    "variableName": "AvgSalinity",
+    "dimensionName": "StdTime",
+    "values": [[1406181600000,1406182200000],[1406224800000,1406225400000]]
+  }
+  ```
+</Tab>
+
+<Tab>
+
+In the example below, `avgSanlity` is a variable and `StdTime` is its dimension, each dimensional slice represent the average sanlity measured over a period of time—defined by two fields: `StdTime` and `StdTime_Max`, specifying a time in Unix format. The following example filters the data using multiple `StdTime` ranges: that are either overlap with July 24/2014 6:00 (1406181600000) to 6:10 GMT (1406182200000), or overlap with July 24/2014 18:00 (1406224800000) to 18:10 GMT (1406225400000). 
+
+  ```markdown
+  {
+    "variableName": "AvgSalinity",
+    "dimensionName": "StdZ",
+    "values": [[1406181600000,1406182200000],[1406224800000,1406225400000]],
+    "isSlice": false
+  }
+  ```
+</Tab>
+
+</Tabs>
+
+### Multidimensional Definition
+
+A multiple dimensional service can have multiple variables and multiple dimensions. Multiple dimensional defintions are usually used to filter data. A multidimensional definition (multidimensionalDefinition) is an array of dimensional definitions.
+
+Multiple definitions are consolidated by server into one single where clause. The consolidation rule is:
+
+* For the same `variableName` but different `dimensionName`, it uses the `AND` operator to connect to meet all dimension conditions for the same variable.
+* For different `variableName`, it uses the `OR` operator to connect any variable that meets their dimension conditions.
+
+The following mosaic rule object contains a multidimensional filter that filters a particular slice of Salinity data by time and z.
+
+```other label=Example
+{
+  "mosaicMethod": "esriMosaicNorthwest",
+  "ascending": true,
+  "mosaicOperation": "MT_FIRST",
+  "multidimensionalDefinition": [
+    {
+      "variableName": "Salinity",
+      "dimensionName": "StdZ",
+      "values": [-10]
+     },
+     {
+      "variableName": "Salinity",
+      "dimensionName": "StdTime",
+      "values": [1406182200000]
+    }
+  ]
+}
+```

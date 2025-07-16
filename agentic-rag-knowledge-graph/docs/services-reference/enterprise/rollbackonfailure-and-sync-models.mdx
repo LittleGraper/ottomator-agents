@@ -1,0 +1,139 @@
+---
+title: "Rollback On Failure and Sync Model"
+description: "This topic describes the RollbackOnFailure  and syncModel  parameters."
+slug: "rollbackonfailure-and-sync-models"
+url: "/rollbackonfailure-and-sync-models"
+guid: "GUID-F2704A58-27A0-4469-B1E8-303740A5A995"
+migratedTopicMetadata:
+  FTITLE: "RollbackOnFailure and Sync Models"
+  FDESCRIPTION: ""
+  FCHANGES: "https://devtopia.esri.com/WebGIS/arcgis-rest-api-documentation/issues/251"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.5.1 - *"
+  CREATED-ON: "24/02/2020 10:21:31"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "19/03/2020 13:35:35"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-20F87352-EA42-40FE-BEFA-22FDB1E3C33E"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata: {}
+---
+
+## SyncModel
+
+The `syncModel`  parameter defines how layers can be synced. When creating a replica, clients can choose one of the following sync models by setting the `syncModel`  parameter:
+
+-   `perReplica` —Layers within a replica cannot be synchronized independently. Each `synchronizeReplica`  operation applies to all the layers in the replica.
+-   `perLayer` —Layers within a replica can be synchronized independently. A chosen subset of the layers within a replica can be synchronized when running the `synchronizeReplica`  operation.
+
+The feature service’s `syncCapabilities`  property describes the supported sync models. 
+
+```other
+"syncCapabilities": {
+  "supportsPerLayerSync": true,
+  "supportsPerReplicaSync": true,
+}
+```
+
+ 
+
+For example, if `supportsPerLayerSync`  is `true`  and `supportsPerReplicaSync`  is `false` , you can choose only a `perLayer`  sync model when running the Create Replica operation. If `supportsPerLayerSync`  is not provided, it's `false`  by default. If `supportsPerReplicaSync`  is not provided, it's `true`  by default.
+
+## RollbackOnFailure
+
+When synchronizing, clients can set the `rollbackOnFailure`  parameter. `RollbackOnFailure`  determines the behavior when there are errors while importing edits on the server during synchronization. This only applies in cases where clients are uploading edits to the server.
+
+`RollbackOnFailure`  can be set as follows:
+
+-   `true` —If an error occurs while importing edits on the server, all edits are rolled back (not applied), and the operation returns an error in the response. Use this setting when the edits are such that you either want all or none applied.
+-   `false` —If an error occurs while importing an edit on the server, the import process skips the edit and continues. All edits that were skipped are returned in the results with information describing why they were skipped. 
+
+The feature service’s `syncCapabilities`  property determines if the [synchronizeReplica](/synchronize-replica) operation's `rollbackOnFailure`  parameter is supported.
+
+```other
+"syncCapabilities": {
+  "supportsRollbackOnFailure": <true | false>
+}
+```
+
+ 
+
+If the `supportsRollbackOnFailure`  property is `true` , you can set the `rollbackOnFailure`  parameter to `true`  or `false`  when running the [synchronizeReplica](/synchronize-replica) operation. If the `supportsRollbackOnFailure`  property is `false` , the [synchronizeReplica](/synchronize-replica) operation does not support the parameter. 
+
+When `supportsRollbackOnFailure`  is `false`  and only a `perLayer`  sync model is supported (`supportsPerLayerSync`  set as `true`  and `supportsPerReplicaSync`  set as `false` ), [synchronizeReplica](/synchronize-replica) always applies the `false` `rollbackOnFailure`  behavior above.
+
+When `supportsRollbackOnFailure`  is `false`  and only a `perReplica`  sync model is supported (`supportsPerLayerSync`  set as `false`  and `supportsPerReplicaSync`  set as `true` ), [synchronizeReplica](/synchronize-replica) always applies the `true` `rollbackOnFailure`  behavior above.
+
+For information on how to handle errors during sync, see [Error handling with sync operations](/error-handling-with-sync-operations).
+
+## Supported rollbackOnFailure behavior and sync models
+
+The following table lists the supported `syncModel`  and `rollbackOnFailure`  behavior with ArcGIS Server:
+
+<StyledTable headers={"Data source,rollbackOnFailure,PerLayer syncModel,PerReplica syncModel"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Nonversioned data
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+False
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Yes
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+No
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Versioned data
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+True
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+No
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Yes
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>

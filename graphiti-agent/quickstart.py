@@ -48,7 +48,8 @@ load_dotenv()
 # Make sure Neo4j Desktop is running with a local DBMS started
 neo4j_uri = os.environ.get('NEO4J_URI', 'bolt://localhost:7687')
 neo4j_user = os.environ.get('NEO4J_USER', 'neo4j')
-neo4j_password = os.environ.get('NEO4J_PASSWORD', 'password')
+neo4j_password = os.environ.get('NEO4J_PASSWORD', '88888888')
+neo4j_database = os.environ.get('NEO4J_DATABASE', 'neo4j')
 
 if not neo4j_uri or not neo4j_user or not neo4j_password:
     raise ValueError('NEO4J_URI, NEO4J_USER, and NEO4J_PASSWORD must be set')
@@ -154,7 +155,7 @@ async def main():
             print('---')
 
         #################################################
-        # CENTER NODE SEARCH
+        # CENTER NODE SEARCH 
         #################################################
         # For more contextually relevant results, you can
         # use a center node to rerank search results based

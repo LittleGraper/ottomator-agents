@@ -1,0 +1,115 @@
+---
+title: "Add Credentials"
+description: "The services connection operation updates the credentials for a cloud service."
+slug: "service-connection"
+url: "/service-connection"
+guid: "GUID-3C48E39E-02AE-430B-AE9D-5ED242C986A5"
+migratedTopicMetadata:
+  FTITLE: "Service Connection"
+  FDESCRIPTION: ""
+  FCHANGES: "Changes for cloud-native"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2-*"
+  CREATED-ON: "02/11/2023 09:12:06"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "09/11/2023 19:35:00"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-562873C7-E6D1-481A-9D6A-53CF64DFF30D"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /cloud/services/<serviceID>/credential/add
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /cloud/services/<serviceID>/credential/add
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '11.2'
+  requiredCapabilities:
+    - name: Access allowed only with the default administrator role
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `credential/add` operation updates the credentials for a cloud service. Its a security best practice to rotate credentials at regular intervals if the cloud service utilizes key-based authentication models. To update credentials, the request needs to include the `credential` information for the service, which is returned by the [Services](/cloud-services) resource.
+
+Once submitted, the request will return a job ID. The HTML view returns a link that can be used to access the job page for the request. Otherwise, to access the `job` resource you can make a request of the following form:
+
+```markdown
+https://organization.domain.com/context/admin/jobs/<jobID>
+```
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `credential` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The updated connection information. The current connection information can be retrieved from the [Services](/cloud-services) resource and modified with the updated credentials.
+
+      ```other label=Examples
+      //Amazon S3
+      credential={"type":"ACCESS-KEY","secret":{"secret_key":"<secret_key>","access_key":"<access_key>"}}
+
+      //Azure Blob Storage
+      credential={"type":"STORAGE-ACCOUNT-KEY","secret":{"storageAccountName":"<account_name>","storageAccountKey":"<account_key>"}}
+
+      //Google Cloud Storage
+      credential={"type":"HMAC-KEYS","secret":{"secretKey":"<secret_key>","accessKey":"<access_key>"}}
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `credential/add` operation:
+
+```other
+POST /context/admin/clouds/services/eg7hrelq6b/credential/add HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+credential={"type":"STORAGE-ACCOUNT-KEY","secret": {"storageAccountName": "{crypt}R68p/cvTUo1LmRcgXJ5U07WKv936mnCe","storageAccountKey": "{crypt}xxxxxxxxxxxxxxxxVC5M"}}&f=pjson&token=m7zGSezM7znt6ZuIwr827imJxOTSDsjYujVdd7SiAQLYG1HmesG8EbSnTwCbiekEh0QwRdmeyp1hP63M60TPrdZQ2NzIg5G7qFaQh40MdiOCfh60-6oPKC2MNoqwdVDZ3srzreVZb66QofWXws8GMrKWkgP45A-2an5crKvReUo-pwvkzm68W87Q0yPJFA2Kww39UnMYNw-5qd2-Bt04VmkrqKI-lCbA-jFZY_UGzeGzNqnBGrjKuVB_q17HogMw
+```
+
+## JSON Response example
+
+```other
+{
+  "cloudCredentialRotationJobId": j876ae6e7-27d9-4b2d-b8ab-d07e2433e2c1",
+  "message": "A cloud credentials rotation job is in-progress"
+}
+```

@@ -1,0 +1,358 @@
+---
+title: "Available"
+description: "If updates are available for an organization, this operation returns a version manifest containing either the patch or full release information."
+slug: "check-available-updates"
+url: "/check-available-updates"
+guid: "GUID-037E6001-5080-46FD-841C-D6660EC796D8"
+migratedTopicMetadata:
+  FTITLE: "Check Available Updates"
+  FDESCRIPTION: ""
+  FCHANGES: "Removing grafana"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2-*"
+  CREATED-ON: "06/11/2023 13:21:43"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "09/11/2023 19:36:22"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-68003B5B-F585-4E49-9A5D-FAEBC55DEA86"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /system/upgrades/available
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /system/upgrades/available
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed with either "Security and infrastructure" or "Servers" privileges
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `available` operation returns the version manifest, a cumulative list of release and patch versions that have been made available to an ArcGIS Enterprise organization. The version manifest is a JSON array of version objects, with each object containing the following properties:
+
+- A `newLicensesRequired` binary property (`true` or `false`) specifying if the patch or release requires new licenses.
+- The `releaseBuild` number for the update.
+- A `description` of the update that outlines the changes being applied to the deployment.
+- The `update` type (`release` or `patch`).
+- The `version` number of the deployment, which reflects whether the patch or release is applied.
+- A `url` address that represents the external link pointing to the detailed information about the patch. This link is not valid for release upgrades.
+- The `previousBuild` number for the update.
+- Any `releaseNotes` information included with the update.
+- The `build` number for the update.
+- The `previousVersion` number that the patch or release builds on.
+- The `name` of the patch or release.
+- A `containers` JSON array that specifies the name, image, and checksum value of affected containers.
+- A unique `id` value associated with each patch or release.
+- The `released` date of the patch or release, represented in milliseconds from epoch (Unix time).
+
+<Note type={"note"}>
+
+Once installed, the version object for a patch or release no longer appears in the `available` operation. If a [rollback](/rollback) is performed, the uninstalled patch is again included in the `available` operation and request.
+
+</Note>
+
+When performing an [upgrade](/upgrade), the ID associated with a patch or upgrade is passed through as the input value for the `versionManifest` parameter.
+
+<Note type={"note"}>
+
+When representing the current and future versions of the deployment, the version and build numbers are combined. For example, if the version of the deployment is 10.9.0, and the build is 505, the current version is returned as 10.9.0.505. The version number is updated with each installed release, while the build number is updated with each update (either patch or release) that is installed. This representation is returned through the HTML view of the API, as well as in the upgrade job messages retained by the `currentVersion` and `upgrades` resources.
+
+</Note>
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `available` operation:
+
+```other
+POST /context/admin/system/upgrades/available HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+f=pjson&token=HRozb6bnTL6gfA-SJO-IxhfLgJrioK1KJdMLWmCE5HjHWz9U3fOiFv3-HkgPZqsLljTkk2WDENGt5fjho5s39e_mZL5At60UvJPoNnC5O2sv2HTlumG7TsYfbtnokpWmS6-lf8XoQpSKusZwmxIkEMP-yE0Wxrj8o9sWKi29J-pxzkoCDhoUfdLt6NnBWxhESpegh8BzNcEruqxuDQD-JRmaTsbRDaBHTQTePMzQePhXl7KcEG9Cfkw2sa7P1W1e
+
+```
+
+## JSON Response example
+
+The response example below demonstrates a version manifest returned by the `available` operation when patches and releases are available to be installed:
+
+```other
+{
+  "patches": [
+    {
+      "newLicensesRequired": false,
+      "releaseBuild": "1089",
+      "description": "",
+      "type": "patch",
+      "version": "10.9.0",
+      "url": "https://support.esri.com/download/7443",
+      "previousBuild": "1089",
+      "releaseNotes": "",
+      "build": "1090",
+      "previousVersion": "10.9.0",
+      "name": "Overview Patch for ArcGIS Enterprise",
+      "containers": [
+        {
+          "image": "enterprise-admin:dev-stable-1089",
+          "name": "ENTERPRISE_ADMIN_API",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "help:dev-stable-1089",
+          "name": "HELP",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "enterprise-admin-tools:dev-stable-1089",
+          "name": "ADMIN_TOOLS",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "arcgis-nginx-web:dev-stable-1089",
+          "name": "WEB_PROXY",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        }
+      ],
+      "id": "pat_345432_1090",
+      "released": 1618540600000
+    }
+  ],
+  "releases": [
+    {
+      "newLicensesRequired": false,
+      "description": "",
+      "type": "release",
+      "version": "10.9.0",
+      "url": "https://support.esri.com/download/7443",
+      "releaseNotes": "",
+      "build": 3000,
+      "previousVersion": "10.9.0",
+      "name": "ArcGIS Enterprise on Kubernetes 10.9.0",
+      "containers": [
+        {
+          "image": "enterprise-admin:dev-stable-1089",
+          "name": "ENTERPRISE_ADMIN_API",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "arcgis-postgresql:dev-stable-1089",
+          "name": "STORE_POSTGRES",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "arcgis-minio:dev-stable-1089",
+          "name": "STORE_MINIO",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "relational-datastore:dev-stable-1089",
+          "name": "STORE_RELATIONAL",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "arcgis-elasticsearch:dev-stable-1089",
+          "name": "STORE_SBDS",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "arcgis-ignite:dev-stable-1089",
+          "name": "STORE_IGNITE",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "sharing:dev-stable-1089",
+          "name": "PORTAL_SHARING_API",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "home:dev-stable-1089",
+          "name": "PORTAL_HOME_APP",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "manager:dev-stable-1089",
+          "name": "MANAGER_APP",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "jsapi:dev-stable-1089",
+          "name": "PORTAL_JSAPI",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "catalog-server:dev-stable-1089",
+          "name": "CATALOG_SERVER",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "config-factory-server:dev-stable-1089",
+          "name": "CONFIG_FACTORY_SERVER",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "map-server:dev-stable-1089",
+          "name": "MAP_SERVER",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "geocode-server:dev-stable-1089",
+          "name": "GEOCODE_SERVER",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "geometry-server:dev-stable-1089",
+          "name": "GEOMETRY_SERVER",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "image-server:dev-stable-1089",
+          "name": "IMAGE_SERVER",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "gp-proxy-server:dev-stable-1089",
+          "name": "GPPROXY_SERVER",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "gp-server:dev-stable-1089",
+          "name": "GP_SERVER",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "sds-feature-server:dev-stable-1089",
+          "name": "SDS_FEATURE_SERVER",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "tile-server:dev-stable-1089",
+          "name": "TILE_SERVER",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "arcgis-prometheus:dev-stable-1089",
+          "name": "PROMETHEUS",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "arcgis-kibana:dev-stable-1089",
+          "name": "KIBANA",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "arcgis-filebeat:dev-stable-1089",
+          "name": "FILEBEAT",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "enterprise-rabbitmq:dev-stable-1089",
+          "name": "RABBITMQ",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "help:dev-stable-1089",
+          "name": "HELP",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "enterprise-admin-tools:dev-stable-1089",
+          "name": "ADMIN_TOOLS",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "enterprise-admin-tools:dev-stable-1089",
+          "name": "UPGRADER",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "portal-content-template:dev-stable-1089",
+          "name": "PORTAL_CONTENT_TEMPLATE",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "postgres-upgrade-tools:dev-stable-1089",
+          "name": "POSTGRES_UPGRADER",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "arcgis-ingress-controller:dev-stable-1089",
+          "name": "INGRESS_CONTROLLER",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "apps:dev-stable-1089",
+          "name": "PORTAL_APPS",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "arcgis-busybox:dev-stable-1089",
+          "name": "BUSYBOX",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "arcgis-disaster-recovery:dev-stable-1089",
+          "name": "DISASTER_RECOVERY",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "arcgis-nginx-web:dev-stable-1089",
+          "name": "WEB_PROXY",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "web-style:dev-stable-1089",
+          "name": "PORTAL_WEB_STYLE_APP",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        }
+      ],
+      "id": "rel_234567_3000",
+      "previousReleaseBuild": "1089",
+      "released": 1618540600000
+		}
+  ]
+}
+```
+
+The following response is returned when no patch or release is available to install:
+
+```other
+{
+  "patches": [],
+  "releases": []
+}
+```

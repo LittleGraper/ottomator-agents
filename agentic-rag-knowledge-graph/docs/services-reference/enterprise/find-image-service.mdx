@@ -1,0 +1,325 @@
+---
+title: "Find (Image Service)"
+description: "The find operation locates all images that contain toGeometry and sort them accordingly."
+slug: "find-image-service"
+url: "/find-image-service"
+guid: "GUID-A4170A4B-07B3-4429-8AE9-5C4BE77A3C1C"
+migratedTopicMetadata:
+  FTITLE: "Find (Image Service)"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "14/09/2023 08:36:45"
+  FAUTHOR: "jswain"
+  FSTATUS: "Released"
+  MODIFIED-ON: "29/09/2023 09:22:43"
+  VERSION: "1"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "16"
+  ED: "GUID-539F00D2-A0A3-4FA3-B854-C53A581EFA63"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /find
+  urlSegments:
+    - name: <imageservice-url>
+      url: /image-service
+    - name: /find
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '11.2'
+  requiredCapability: Catalog
+---
+
+import GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_9B5D5783_E386_45F7_8EA8_88843A1BB484 from "./snippets/GUID-512E1710-163F-43F9-8ABC-FA35AE6DD5DF/_GUID-9B5D5783-E386-45F7-8EA8-88843A1BB484";
+
+## Description
+
+The `find` operation locates all images that contain `toGeometry` and sort them accordingly. For example, in the image inspection workflow, in most cases, `fromGeometry` is the viewing camera position, and `toGeometry` is the target point (where user clicked on the map). The images found are sorted in ascending order based on the angle between the vector from viewing camera position to target point, and that from the image camera GPS location to the target point, plus distance between the image center and the target point.
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`rasterId` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The object ID of the raster item. This ID is obtained using the find operation. It is the "id" value of the find operation.
+
+Example
+
+```javascript
+"id":12,
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`fromGeometry` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A point geometry that defines the from location. The structure of the geometry is the same as the structure of the [JSON geometry objects](/geometry-objects). The image inspection workflow, the from location is usually the viewing camera location.
+
+Example
+
+```javascript
+fromGeometry={"x":495428.9389,"y":3768341.5466,"z":851.3407}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`toGeometry` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A point geometry that defines the to location. The structure of the geometry is the same as the structure of the [JSON geometry objects](/geometry-objects). The image inspection workflow, the to location is usually the viewing camera location.
+
+Example
+
+```javascript
+toGeometry={"x":495393.0991,"y":3768363.7228,"z":825.8077}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`inSR` 
+
+(optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The spatial reference of the `toGeometry` . The spatial reference can be specified as either a well-known ID or as a [spatial reference JSON object](/geometry-objects). If `inSR`  is not specified, the geometry is assumed to be in the spatial reference of the service.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`objectIds` 
+
+(optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The object IDs of the raster catalog to be queried.
+
+Syntax
+
+```javascript
+objectIds=<objectId1>,<objectId2>
+```
+
+ 
+
+Example
+
+```javascript
+objectIds=37, 462
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`where` 
+
+(optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A where clause for the query filter. Any legal SQL where clause operating on the fields in the raster catalog is allowed.
+
+Example
+
+```javascript
+where=POP2000 > 350000
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`maxCount` 
+
+(optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the maximum count of the returned images.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_9B5D5783_E386_45F7_8EA8_88843A1BB484 />
+
+Values: `html`  \| `json`  \| `pjson` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+The following is a sample request URL for the find operation that will find the closet image that can view the specified `toGeometry` :
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/BrewertonTank_cloud/ImageServer/find?fromGeometry={"x":495428.9389,"y":3768341.5466,"z":851.3407}&toGeometry={"x":495393.0991,"y":3768363.7228,"z":825.8077}&inSR=&objectIds=&where=&maxCount=1&f=html
+```
+
+ 
+
+## JSON Response syntax
+
+```json
+{
+  "images": [
+    {
+      "id": <objectId>,
+      "uri": uri,
+      "acquisitionDate": <time>, //epoch time in millisecond
+      "cameraID": <value>,
+      "center": <centerPoint>
+    },
+    "perspectiveCenter": {
+      "x": <long>, //number
+      "y": <long>, //number
+      "z": <long>, //number
+    },
+    "orientation": {
+      "omega": <long>, //number
+      "phi": <long>, //number
+      "kappa": <long>, //number
+      "clockwise": <Boolean>
+    },
+    "make": <value>,
+    "model": <value>,
+    "focalLength": <long>, //number
+    "pixelSize": <long>, //number
+    "rows": <Int>, //number
+    "cols": <Int> //number
+  ]
+}
+```
+
+ 
+
+## JSON Response example
+
+```json
+{
+  "images": [
+    {
+      "id": 2,
+      "uri": "/vsis3/ortho-maker/BrewertonTank/BrewertonTank/DJI_0707.JPG",
+      "acquisitionDate": 1498639972000,
+      "cameraID": "ae79b3d7b6066db1cb57a9240cad530c_Unknown",
+      "center": {
+        "x": 407346.69986255,
+        "y": 4787426.66231584,
+        "z": 88.08833,
+        "spatialReference": {
+          "wkid": 32618,
+          "latestWkid": 32618,
+          "vcsWkid": 115700,
+          "latestVcsWkid": 115700
+        }
+      },
+      "perspectiveCenter": {
+        "x": 407306.5742,
+        "y": 4787327.8029,
+        "z": 146.1573
+      },
+      "orientation": {
+        "omega": 61.77050665236553,
+        "phi": -20.728491367643706,
+        "kappa": -11.411313741503262,
+        "clockwise": true
+      },
+      "make": "DJI",
+      "model": "FC6310",
+      "focalLength": 8.8493596,
+      "pixelSize": 0.0024000000000000002,
+      "rows": 3078,
+      "cols": 5472
+    }
+  ]
+}
+```
+
+ 

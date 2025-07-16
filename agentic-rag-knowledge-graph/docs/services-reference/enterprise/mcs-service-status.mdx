@@ -1,0 +1,137 @@
+---
+title: "MCS Service Status"
+description: "The mcsServiceStatus operation is used to discover if the map service is ready for use and the cataloging process is complete."
+slug: "mcs-service-status"
+url: "/mcs-service-status"
+restInfoMetadata:
+  apiPath: /<serviceName>/MapServer/exts/MaritimeChartService/MapServer/mcsServiceStatus
+
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/MapServer/exts/MaritimeChartService/MapServer/mcsServiceStatus
+
+  methods:
+    - post
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapability: Maritime Chart Service 
+---
+
+import GUID_352B231F_97FB_4EC7_9BF3_FF3AE8732BFF_GUID_E1846737_750B_49EF_8811_77AEB29A0884 from "./snippets/GUID-352B231F-97FB-4EC7-9BF3-FF3AE8732BFF/_GUID-E1846737-750B-49EF-8811-77AEB29A0884";
+import GUID_352B231F_97FB_4EC7_9BF3_FF3AE8732BFF_GUID_65CB945B_3B13_4E4F_A845_64316D75C206 from "./snippets/GUID-352B231F-97FB-4EC7-9BF3-FF3AE8732BFF/_GUID-65CB945B-3B13-4E4F-A845-64316D75C206";
+
+## Description
+
+<GUID_352B231F_97FB_4EC7_9BF3_FF3AE8732BFF_GUID_E1846737_750B_49EF_8811_77AEB29A0884 />
+
+The `mcsServiceStatus` operation is used to discover if the map service is ready for use and the cataloging process is complete. When a map service with Maritime Chart Service enabled is started, it will review the contents of the datasets folder. When processing the S-57 or S-63 datasets in this location the Maritime Chart Service’s supported operations will be limited. This is when the mcsServiceStatus will be set to cataloging.  
+
+Depending on your implementation, the cataloging state is a way to know if you should allow users to connect to the service. When the datasets folder has been analyzed and the S-57 and S-63 datasets have been processed and senc files created, the `mcsServiceStatus` will be set to ready. This is when all supported operations are ready for use. 
+
+The datasets folder location is set in the Maritime Chart Service configuration properties under datasetsDirectory.
+
+[Learn more about configuring Maritime Chart Service properties](https://enterprise.arcgis.com/en/maritime/latest/chart-service/windows/setting-maritime-chart-service-properties.htm)
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`format (f)`
+
+<GUID_352B231F_97FB_4EC7_9BF3_FF3AE8732BFF_GUID_65CB945B_3B13_4E4F_A845_64316D75C206 />
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the response format. The default response format is `html`.
+
+Values: `json`|`html`
+
+Syntax: 
+
+```json
+f=json 
+```
+
+
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+The following is an example of the `mcsServiceStatus` operation. The response is in PJSON format.
+
+```html
+https://nsdemo.esri.com/arcgis/rest/services/SampleWorldCities/MapServer/exts/MaritimeChartService/MapServer/mcsServiceStatus?f=pjson 
+```
+
+
+
+## JSON Response syntax
+
+The following is the syntax of a response:
+
+```json
+{ 
+ "state": <state>, 
+ "pid": <pid>, 
+ "description": "<description>" 
+} 
+```
+
+
+
+## JSON Response examples
+
+The following are response examples for `None`, `Cataloging`, and `Ready` states.
+
+### JSON Response example - None state
+
+The following is the syntax of a response for `None`. When in the `None` state, something is wrong with your configuration and it is recommended that you verify your configuration settings under the Maritime Chart Service configuration properties in ArcGIS Server Manager. 
+
+```json
+{ 
+ "state": 0, 
+ "pid": 11936, 
+ "description": "None" 
+} 
+```
+
+
+
+### JSON Response example - Cataloging state
+
+The following is the syntax of a response for `Cataloging`. When in the `Cataloging` state, the service is processing the information in the datasets folder. During this time, the following operations are not supported: `Find`, `identifyDatasets` (where `full` is set to `true`), and `queryDatasets`. Many other operations might only return partial results. It is best to limit use when in this state. 
+
+```json
+{ 
+ "state": 1, 
+ "pid": 11936, 
+ "description": "Cataloging" 
+}
+``` 
+
+
+
+### JSON Response example - Ready state
+
+The following is the syntax of a response for `Ready`. When in the `Ready` state, the service is done processing the contents of the datasets folder and is ready for use. All supported operations are available. 
+
+```json
+{ 
+ "state": 2, 
+ "pid": 11936, 
+ "description": "Ready" 
+}
+```

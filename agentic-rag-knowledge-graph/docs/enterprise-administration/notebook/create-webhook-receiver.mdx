@@ -1,0 +1,176 @@
+---
+title: "Create a Webhook Receiver"
+description: "Provides detailed information about a specific webhook receiver identified by its Id."
+slug: "create-webhook-receiver"
+url: "/create-webhook-receiver"
+restInfoMetadata:
+  apiPath: /notebooks/webhookReceivers/create
+  urlSegments:
+    - name: <root>
+      url: /notebook-server-administration-root
+    - name: /notebooks/webhookReceivers/create
+  methods:
+    - post
+  requiredCapability: 'Administrator'  
+  sslOnly: 'no'
+  versionIntroduced: '11.4'
+---
+
+## Description
+
+The create webhook receiver operation enables administrators to create a service webhook receiver within ArcGIS Notebook Server. Webhooks, including those for asynchronous geoprocessing services, feature services, or any generic webhook, can initiate a notebook run in response to specific events. This is accomplished by sending a request to the webhook receiver URL:
+
+```https://<notebookserver.domain.com>/<notebooks_webcontext>/rest/events/webhooks/<webhook_receiver_id>```
+
+To ensure security, the webhook event request must include a signature header that was predefined for the webhook receiver. Additionally, it should contain a secret value represented as a Hash Message Authentication Code (HMAC), generated using the SHA-256 hashing function and encoded in Base64 format.
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+
+            `name`
+
+            `(Required)`
+
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+
+            The name of the webhook receiver (string).
+
+        </StyledTableCell>
+    </StyledTableRow>
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+
+            `itemId`
+
+            `(Required)`
+
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+
+            The portal item ID of the notebook you want to execute using webhook receiver.
+
+        </StyledTableCell>
+    </StyledTableRow>    
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+
+            `secret`
+
+            `(Required)`
+
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+
+            A secret key used to encrypt webhook payload. It has to be 32 characters long.
+
+        </StyledTableCell>
+    </StyledTableRow>
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+
+            `signatureHeaders`
+
+            `(Required)`
+
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+
+            A comma separated list of headers which will be checked for encrypted payload. 
+            
+            ```other
+            Example: x-esrihook-signature, x-hub-signature-256
+            ```
+
+        </StyledTableCell>
+    </StyledTableRow>
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+
+            `apiToken`
+
+            `(Required)`
+
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+
+           The app token with privileges to access the notebook item and createNotebook/createAdvancedNotebook privileges, and any other GIS capabilities in the notebook.
+
+        </StyledTableCell>
+    </StyledTableRow>
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+
+            `parameters`
+
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+
+            Parameter json to be injected directly into the notebook as input parameters. 
+
+        </StyledTableCell>
+    </StyledTableRow>
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+
+            `f`
+
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+
+            The response format. The default is `html`.
+
+
+            Values: `html` | `json` | `pjson`
+
+        </StyledTableCell>
+    </StyledTableRow>
+</StyledTable>
+
+<br></br>
+
+<Note>
+The name, itemId, secret, signatureHeaders, apiToken parameters must be sent as form parameters for REST API calls.
+</Note>
+
+
+## JSON Response syntax
+
+```other
+{
+    "webhookReceiver": {
+        "itemId": <item_id>,
+        "signatureHeaders": <comma separated list of headers>,
+        "apiToken": "",
+        "name": <webhook receiver name>,
+        "disabled": true|false,
+        "id": <webhook_receiver_id>,
+        "secret": <secret_key>,
+        "username": <user_name>,
+        "url": "<URL for sending request to the webhook receiver>"
+    },
+    "status": "success"
+}
+```
+
+## JSON Response example
+
+```other
+{
+    "webhookReceiver": {
+        "itemId": "e045a267621441f5a27ddd36e94890aa",
+        "signatureHeaders": "x-esrihook-signature,x-hub-signature-256,
+        "apiToken": "",
+        "name": "test",
+        "disabled": false,
+        "id": "b50dec7a-e271-4235-8a04-7785c91eaa6d",
+        "secret": "9f8b47c2e4a748d3b58e2a17ad8f2e4b",
+        "username": "portaladmin",
+        "url": "https://mymachine.esri.com/notebooks/rest/events/webhooks/b50dec7a-e271-4235-8a04-7785c91eaa6d"
+    },
+    "status": "success"
+}
+```

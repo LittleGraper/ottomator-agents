@@ -1,0 +1,242 @@
+---
+title: "Apply least squares adjustment"
+uid: pf-apply-by-lsa
+description: "The applyLeastSquaresAdjustment operation applies the results of a least-squares adjustment to parcel fabric feature classes."
+slug: "applylsa-parcel-fabric-service"
+url: "/applylsa-parcel-fabric-service"
+guid: "GUID-1CDEF826-3342-48C2-BF4B-F8234C6BB64F"
+migratedTopicMetadata:
+  FTITLE: "ApplyLSA-parcel-fabric-service"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "11/08/2023 15:49:32"
+  FAUTHOR: "cleslie"
+  FSTATUS: "Released"
+  MODIFIED-ON: "14/09/2023 11:30:03"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-61023695-D0FE-4073-B78B-F4934B875791"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/ParcelFabricServer/applyLeastSquaresAdjustment
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/ParcelFabricServer/applyLeastSquaresAdjustment
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.8.1'
+  requiredCapability: ArcGIS Advanced Editing
+---
+
+## Description
+
+The `applyLeastSquaresAdjustment` operation applies the results of a least-squares adjustment to parcel fabric feature classes. Least-squares adjustment results stored in the [AdjustmentLines and AdjustmentPoints](https://pro.arcgis.com/en/pro-app/latest/help/data/parcel-editing/aboutparcelfabricschema.htm#ESRI_SECTION1_6EB3CF258BD74761A931156ECED379AF) feature classes are applied to the corresponding parcel line, connection line, and parcel fabric point feature classes. 
+
+Use [`analyzeByLeastSquaresAdjustment` ](/analyzebylsa-parcel-fabric-service) to run a least-squares analysis on parcels and store the results in the [adjustment feature classes](https://pro.arcgis.com/en/pro-app/latest/help/data/parcel-editing/createaparcelfabric.htm#ESRI_SECTION1_3B1CB11D63894BF0ACE8AB8A89E7EE7E). 
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `gdbVersion` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Ingroduced at 10.8.1.
+
+      The name of the geodatabase version (the default is the `DEFAULT` version).
+
+      Syntax
+
+      ```javascript
+      gdbVersion=<version>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sessionId`
+
+      (Required) 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.1.
+
+      The token (GUID) used to lock the version. If the calling client is editing a named version, the session ID is required. If the specified version is currently locked by another session, the request will fail if the session ID is not provided or does not match the session ID that holds the exclusive lock. If the client is editing the default version, the session ID is not required.
+
+      Syntax
+
+      ```javascript
+      sessionId=<guid>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `movementTolerance` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.1.
+
+      The minimum allowable coordinate shift when updating parcel fabric points. If the distance between the adjustment point and the parcel fabric point is greater than the specified tolerance, the parcel fabric point is updated to the location of the adjustment point. The default tolerance is 0.05 meters or 0.164 feet.
+
+      Syntax
+
+      ```javascript
+      movementTolerance=<long>
+      ```
+    </StyledTableCell>  
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `updateAttributes` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      
+      Introduced at 10.8.1.
+
+      Specifies whether attribute fields in the parcel fabric Points feature class will be updated with statistical metadata. The `XY Uncertainty`, `Error Ellipse Semi Major`, `Error Ellipse Semi Minor`, and `Error Ellipse Direction` fields will be updated with the values stored in the same fields in the `AdjustmentPoints` feature class.
+
+      Syntax
+
+      ```javascript
+      UpdateAttributes=<boolean>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+ 
+      `async` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.1.
+      
+      Specifies whether the request will be processed asynchronously. If `true`, the request will be processed as an asynchronous job and a URL is returned that points to a location displaying the status of the job. The default is `false`.
+
+      Values: `true` | `false` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response is `html`.
+
+      Values: `html` | `json` | `pjson` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+This example shows the steps for applying the results of a least squares analysis using the `applyLeastSquaresAdjustment` operation.
+
+<Note type={"note"}>
+
+The `sessionId` parameter value must be the same for starting the edit session, performing the edit operation, and stopping the edit session.
+
+</Note>
+
+1.  [Start a service session](/start-reading) on the version.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/VersionManagementServer/versions/E4DAED9D-C859-489B-9053-767A45F1D97C/startReading
+    f=json
+    sessionId={493b57b1-5998-495e-87a8-ec4dcc342168}
+    ```
+     
+2.  [Start an edit session](/start-editing) on the version.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/VersionManagementServer/versions/E4DAED9D-C859-489B-9053-767A45F1D97C/startEditing
+    f=json
+    sessionId={493b57b1-5998-495e-87a8-ec4dcc342168}
+    ```
+     
+3.  Apply the results of a least squares analysis using the `applyLeastSquaresAdjustment` operation.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/ParcelFabricServer/applyLeastSquaresAdjustment
+    f=json
+    gdbVersion=admin.Version1
+    sessionId={493b57b1-5998-495e-87a8-ec4dcc342168}
+    movementTolerance=0.05
+    updateAttributes=true
+    async=true
+    ```
+  
+4.  When edits are complete, [stop the edit session](/stop-editing).
+
+5.  [Stop](/stop-reading) and release the service session. 
+
+## JSON Response syntax
+
+The following is the response syntax when `async` is `true`:
+
+```other
+{
+  "statusUrl": <url>,
+  "success": <true | false>
+}
+```
+
+## JSON Response example
+
+The following is an example response when `async` is `true`: 
+
+```other
+{
+  "statusUrl": "https://machine.domain.com/server/rest/services/Polk/ParcelFabricServer/jobs/jfc327579ac0a4b49bd9ee6a2af93680b",
+  "success": true
+}
+```
+
+ 

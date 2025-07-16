@@ -1,0 +1,483 @@
+---
+title: "Submit a job"
+uid: "gp-submit-job"
+description: "The submitJob  operation is performed on an asynchronous geoprocessing task resource."
+slug: "submit-gp-job"
+url: "/submit-gp-job"
+guid: "GUID-65A29264-07E1-423C-99E9-D44B88E9EFE0"
+migratedTopicMetadata:
+  FTITLE: "Submit GP Job"
+  FDESCRIPTION: "Submit job info, with all syntax and samples for input parameters."
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0- *"
+  CREATED-ON: "21/12/2022 18:09:12"
+  FAUTHOR: "ssuo"
+  FSTATUS: "Released"
+  MODIFIED-ON: "08/02/2023 16:41:52"
+  VERSION: "16"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "7"
+  ED: "GUID-7B68195F-DD5D-462C-B643-605801542DDE"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /submitJob
+  urlSegments:
+    - name: <task-url>
+      url: /gp-task
+    - name: /submitJob
+  methods:
+    - get
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '9.3'
+  relatedResources:
+    - name: Task
+      url: /gp-task
+    - name: Jobs
+      url: /gp-job
+    - name: Execute a task
+      url: /execute-gp-task
+---
+
+## Description
+
+The `submitJob` operation is performed on an asynchronous [`task`](/gp-task) resource. The result of this operation is a [`Jobs`](/gp-job) resource. You can provide arguments to the `submitJob` operation as query parameters defined in the parameters table below.
+
+To run a synchronous geoprocessing service task, see [Execute a task ](/execute-gp-task).
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Description"}>
+<StyledTableRow>
+<StyledTableCell cellStyle="markdown">
+
+`<gpParameter1>, <gpParameter2>, ...`
+
+(Optional)
+
+</StyledTableCell>
+<StyledTableCell cellStyle="markdown">
+
+The various input parameters accepted by the corresponding geoprocessing task. These parameters are listed in the `parameters` property of the JSON representation associated with the [geoprocessing task resource](/gp-task).
+
+The valid values for the input parameters are dependent on the data type of the parameter. These values are discussed in more detail in [Geoprocessing services data types](/gp-data-types).
+
+</StyledTableCell>
+</StyledTableRow>
+<StyledTableRow>
+<StyledTableCell cellStyle="markdown">
+
+`context`
+
+(Optional)
+
+</StyledTableCell>
+<StyledTableCell cellStyle="markdown">
+
+Added at 10.6.1. The context of the service can be specified. Currently, `context` supports `outSR`, `processSR`, and `extent`. The `outSR` property is the spatial reference of the output geometries. The `processSR` property is the spatial reference that the model will use to perform geometry operations.
+
+The spatial reference can be specified as either a well-known ID or a [spatial reference JSON object](/geometry-objects). If the `outSR` value is not specified, the output geometries are in the spatial reference of the input geometries. If `processSR` is specified and `outSR` is not specified, the output geometries are in the spatial reference of the process spatial reference. For more information, see [Using spatial references](/using-spatial-references).
+
+`extent` will only process features that overlap the specified extent. The output features will have an extent that is the same or larger than the `extent` value. 
+
+</StyledTableCell>
+</StyledTableRow>
+<StyledTableRow>
+<StyledTableCell cellStyle="markdown">
+
+`returnTrueCurves`
+
+(Optional)
+
+</StyledTableCell>
+<StyledTableCell cellStyle="markdown">
+
+Added at 10.5. If `true`, true curves will be returned in the results if the features have curves. The default is `false`.
+
+<Note type={"note"}>
+
+The `geojson` output format does not support curves. Do not use `f` as `geojson` and `returnTrueCurves` as `true` in combination.
+
+</Note>
+
+Values: `true` | `false`
+
+Default: `false`
+
+</StyledTableCell>
+</StyledTableRow>
+<StyledTableRow>
+<StyledTableCell cellStyle="markdown">
+
+`simplifyFeatures`
+
+(Optional)
+
+</StyledTableCell>
+<StyledTableCell cellStyle="markdown">
+
+Added at 11.4, there is an option to maintain the original geometry without simplifying it by setting this option to `false`. Simplifying return features can siginificantly reduce the size of the response while fulfiling the accuracy needs for most analysis, espeically for complex and large geometries.
+
+Values: `true` | `false`
+
+Default: `true`
+
+</StyledTableCell>
+</StyledTableRow>
+<StyledTableRow>
+<StyledTableCell cellStyle="markdown">
+
+`f`
+
+(Optional)
+
+</StyledTableCell>
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html`. Support for `geojson` was added at 10.5.
+
+Values: `html` | `json` | `kmz` | `geojson`
+
+Default: `html`
+
+</StyledTableCell>
+</StyledTableRow>
+</StyledTable>
+
+## Input parameters
+
+Learn more about the syntax and examples of supported input [data types](/gp-data-types). For the `output_feature_service_name` parameter, see the last section.
+
+## GET request example usage
+
+With the `submitJob` operation, the majority of the parameters that you include in a request are dependent on the input parameter types of the geoprocessing task you are submitting. You must encode the URL if the client you are using does not encode a request automatically.
+
+### Example 1: Submit a job
+
+Submit a job to the `ERGByChemical` task. 
+
+Submit a request with values for the `Incident_Point` parameter and HTML return type. There is no need to provide other parameters if you want to use the default value.
+
+```markdown
+https://machine.domain.com/webadaptor/rest/services/PublicSafety/EMModels/GPServer/ERGByChemical/submitJob?Incident_Point={"features":[{"geometry":{"x":-104.44,"y":34.83},"attributes":{"Id":43,"Name":"Incident"}}]}&f=html
+```
+
+ 
+
+### Example 2: Request a different output spatial reference
+
+Submit a job to the task similar to Example 1 but request that the output spatial reference be Web Mercator (102100) on 10.6 or earlier:
+
+Adding `env:outSR` to the request with value 102100.
+
+```markdown
+https://machine.domain.com/webadaptor/rest/services/PublicSafety/EMModels/GPServer/ERGByChemical/submitJob?Incident_Point={"features":[{"geometry":{"x":-104.44,"y":34.83},"attributes":{"Id":43,"Name":"Incident"}}]}&env:outSR=102100&f=html
+```
+
+ 
+
+### Example 3: Request a processing extent
+
+Submit a job to a geoprocessing task but request that the extent have `xmin` 7,602,115, `ymin` 660,605, `xmax` 7,619,050, and `ymax` 676,100 with the extent in spatial reference in NAD 1983 State Plane Oregon North (WKID 102726, feet).
+
+The value of the `input` parameter is `points`, and the `context` has a value as above.
+
+```markdown
+https://machine.domain.com/webadaptor/rest/services/ServiceName/GPServer/TaskName/submitJob?input=points&context={extent:{"xmin":7602115,"ymin":660605,"xmax":7619050,"ymax":676100,spatialReference:{"wkid":102726}}}
+```
+
+
+ 
+
+## JSON response
+
+The response of the `submitJob` operation is the [`Jobs`](/gp-job) resource.
+
+## Output feature service name
+
+Providing a value to the output feature service name parameter will enable your federated asynchronous geoprocessing service to generate a hosted feature service for all of your feature and table results. To learn more about how to publish a geoprocessing service with this parameter, see [Use web tools with an output feature service](https://pro.arcgis.com/en/pro-app/latest/help/analysis/geoprocessing/share-analysis/use-web-tools-with-output-feature-class.htm).
+
+JSON schema for the `esri_out_feature_service_name` parameter. Some properties will not have any effect in an earlier version of ArcGIS Enterprise.
+
+<Note>
+
+Only provide the `"overwrite"` as `true` when you want to overwrite an existing hosted feature service.
+
+</Note>
+
+```json
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "JSON Schema for esri_out_feature_service_name",
+    "description": "The JSON schema for the output feature service name parameter. Before ArcGIS Enterprise 11, only a string, which is the name of the desired output feature service name, is valid. Starting at ArcGIS Enterprise 11, new properties allow the overwrite of an output feature service.",
+    "type": [
+        "string",
+        "object"
+    ],
+    "properties": {
+        "serviceProperties": {
+            "description": "Provide a name to create a new output feature service. Use a service URL or the name of a service to specify an existing hosted feature service to be overwritten.",
+            "type": "object",
+            "properties": {
+                "serviceUrl": {
+                    "description": "The URL of a hosted feature service which will be overwritten.",
+                    "type": "string",
+                    "format": "uri"
+                },
+                "name": {
+                    "description": "The name of a hosted feature service when creating a new output feature service. You can also use the name to specify a hosted feature service to be overwritten, but this is not recommended",
+                    "type": "string"
+                }
+            }
+        },
+        "itemProperties": {
+            "desciption": "Specify whether you want to overwrite an existing hosted feature service, along with the portal item metadata.",
+            "type": "object",
+            "properties": {
+                "overwrite": {
+                    "description": "Whether you want to overwrite an existing hosted feature service.",
+                    "type": "boolean"
+                },
+                "itemId": {
+                    "description": "The itemId of the hosted feature service to be overwritten. This is recommended to specify an existing hosted feature service.",
+                    "type": "string"
+                },
+                "tags": {
+                    "description": "Tags to be added for the new or overwritten hosted feature service in addition to default tags.",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "Description of the new or overwritten hosted feature service.",
+                    "type": "string"
+                },
+                "snippet": {
+                    "description": "Snippet of the new or overwritten hosted feature service",
+                    "type": "string"
+                },
+                "newFeatureServiceOnOverwriteFail":{
+                    "description": "Whether to try reprojecting the result into the spatial reference of the existing hosted feature service during overwrite.",
+                    "type": "boolean"
+                }
+            }
+        }
+    }
+}
+```
+
+### Example 1: Request an output feature service as the result using a string
+
+This example specify the `output_requests_hosted_featureservice` as the name of the output feature service.
+
+```markdown
+https://machine.domain.com/webadaptor/rest/services/ServiceName/GPServer/TaskName/submitJob?in_features={"url":"https://sampleserver6.arcgisonline.com/arcgis/rest/services/LocalGovernment/CitizenRequests/FeatureServer/0"}&buffer_distance_or_field={"distance":10,"units":"esriMiles"}&line_side=FULL&line_end_type=ROUND&method=PLANAR&esri_out_feature_service_name=output_requests_hosted_featureservice&f=json
+```
+
+### Example 2: Request an output feature service as the result using a JSON object
+
+This example uses a JSON object when creating a new output feature service. Only `name` of the `serviceProperties`, and `tags`, `description`, and `snippet` for the `itemProperties` are available if you want to specify them.
+
+The sample JSON used in the following request is 
+
+```json
+{
+  "serviceProperties":{
+    "name":"output_requests_hosted_featureservice"
+  },
+  "itemProperties":{
+    "tags":"resultTag",
+    "description":"demo description",
+    "snippet":"demo snippet"
+  }
+}
+```
+
+A similar request as example 1 but using the JSON object above instead for the `esri_out_feature_service_name` parameter. You may need to manually encode the request if your client does not encode it.
+
+```markdown
+https://machine.domain.com/webadaptor/rest/services/ServiceName/GPServer/TaskName/submitJob?in_features={"url":"https://sampleserver6.arcgisonline.com/arcgis/rest/services/LocalGovernment/CitizenRequests/FeatureServer/0"}&buffer_distance_or_field={"distance":10,"units":"esriMiles"}&line_side=FULL&line_end_type=ROUND&method=PLANAR&esri_out_feature_service_name={"serviceProperties":{"name":"output_requests_hosted_featureservice"},"itemProperties":{"tags":"resultTag","description":"demo description","snippet":"demo snippet"}}&f=json
+```
+
+### Overwrite an output feature service
+
+Starting with ArcGIS Enterprise 11.0, you can overwrite an output feature service when you submit a job.
+
+To overwrite an existing hosted feature service, the user running the web tool must be the owner of that hosted feature service or a user assigned an administrator role. This requirement is in addition to all other prerequisites when using the output feature service. To learn more about the prerequisites, see [Use web tools with an output feature service](https://pro.arcgis.com/en/pro-app/latest/help/analysis/geoprocessing/share-analysis/use-web-tools-with-output-feature-class.htm). Use the `name`, `serviceURL`, or `itemID` property of the hosted feature service to specify the hosted feature service to overwrite. If the existing hosted feature service contains critical information, back up the data, as the overwrite process will delete all existing layers of the hosted feature layer. When possible, use `serviceURL` or `itemID`, because they provide the most accurate identification of a hosted feature service. Using a name to identify a hosted feature service may not provide an exact match in some circumstances.
+
+Sample JSON to use an `itemID` to overwrite an output feature service.
+
+```json
+{    
+  "itemProperties":  {        
+    "itemId": "52d34e7598e7484188228xxxxxx",
+    "overwrite": true
+  }
+}
+```
+
+ 
+
+Sample JSON to use a `serviceURL` to overwrite an output feature service.
+
+```json
+{
+  "serviceProperties": {
+    "serviceUrl": "https://machine.domain.com/webadaptor/rest/services/Hosted/FeatureServiceName/FeatureServer"
+  },
+  "itemProperties": {
+    "overwrite": true
+  }
+}
+```
+
+ 
+
+Sample JSON to use a `name` to overwrite an output feature service.
+
+```json
+{
+  "serviceProperties": {
+    "name": "currentfeatureservicename"
+  },
+  "itemProperties": {
+    "overwrite": true
+  }
+}
+```
+
+ 
+
+In addition, you can specify the tags, description, and snippet of the new service. The new description and snippet will overwrite the existing descriptions and snippets of the hosted feature service, and the new tags will merge with existing tags.
+
+Sample JSON to overwrite an output feature service with tags, description, and snippet.
+
+```json
+{
+  "itemProperties": {
+    "itemId": "52d34e7598e7484188228xxxxxx",
+    "overwrite": true,
+    "tags": "a, b, c",
+    "description": "custom description",
+    "snippet": "custom snippet"
+  }
+}
+```
+
+ 
+
+You can also set an additional property when submitting a job with the output feature service parameter. For example, the geoprocessing result's spatial reference may differ from the hosted feature service you want to overwrite, or there may be temporary issues with the data store. In these cases, the overwrite will fail, resulting in a failed geoprocessing service run. However, you can use the `newFeatureServiceOnOverwriteFail` property to keep the geoprocessing result, especially after a long run. If the overwrite fails, an incrementing number will be appended to the current hosted feature service name, for example, `currentname_1`. These new hosted feature services will have the new spatial reference from the latest geoprocessing result.
+
+Sample JSON using the `newFeatureServiceOnOverwriteFail` property to overwrite an output feature service with an extra attempt.
+
+```json
+{
+  "itemProperties": {
+    "itemId": "52d34e7598e7484188228xxxxxx",
+    "overwrite": true,
+    "newFeatureServiceOnOverwriteFail": true
+  }
+}
+```
+
+## Output image service
+
+With ArcGIS Enterprise 11.4 and later, you can use the `esri_out_image_service` parameter to generate shared instance image services for all of your raster results for your asynchronous geoprocessing services, regardless if they are on a federated or a stand-alone server. To learn more about output image service, see [Use an output image service](https://pro.arcgis.com/en/pro-app/latest/help/analysis/geoprocessing/share-analysis/use-web-tools-with-output-image-service.htm).
+
+The JSON schema for the `esri_out_image_service` parameter.
+
+```json
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "JSON Schema for esri_out_image service",
+    "description": "The JSON schema for the output image service parameter.",
+    "type": [
+        "string",
+        "object"
+    ],
+    "properties": {
+        "serviceProperties": {
+            "description": "Specify the prefix for your result.",
+            "type": "object",
+            "properties": {
+                "prefix": {
+                    "description": "The prefix of your output image services.",
+                    "type": "string"
+                },
+                "format":{
+                    "description": "The format of the image service data source. This property only applies when the output is in memory. Default is crf.",
+                    "type": "string",
+                    "enum": ["crf", "tif"]
+                },
+                "folder":{
+                    "description": "The folder of your image service in the server directory. If this folder does not exist, it will be created.",
+                    "type": "string"
+                }
+            },
+            "required": ["prefix"]
+        },
+        "itemProperties": {
+            "description": "The metadata for the portal item of your web imagery layers, and the metadata of your image services.",
+            "type": "object",
+            "properties": {
+                "tags": {
+                    "description": "New tags of the new web imagery layer item and the image service.",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "New description of the new web imagery layer item and the image service.",
+                    "type": "string"
+                },
+                "snippet": {
+                    "description": "New snippet of the new web imagery layer item and the image service.",
+                    "type": "string"
+                },
+                "folder": {
+                    "description": "The folder of new web imagery layer item. If this folder does not exist, it will be created.",
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
+```
+
+### Example 1: Provide a prefix in string format
+
+This example requests an output image service as a result by providing a prefix in string format.
+
+```markdown
+https://machine.domain.com/webadaptor/rest/services/ServiceName/GPServer/TaskName/submitJob?inputRaster=choice1&esri_out_image_service=testing
+```
+
+### Example 2: Provide a JSON object
+
+This example requests an output image service as the result using a JSON object with optional properties specification.
+
+The sample JSON used in the following request.
+
+```json
+{
+  "serviceProperties":{
+    "prefix": "testing",
+    "format": "tif",
+    "folder": "all_image_services"
+  },
+  "itemProperties":{
+    "tags": "resultTag",
+    "description": "demo description",
+    "snippet": "demo snippet",
+    "folder": "analyst_testing"
+  }
+}
+```
+
+A similar request as example 1 but using the JSON object above instead for the `esri_out_image_service_name` parameter. You may need to manually encode the request if your client does not encode it.
+
+```markdown
+https://machine.domain.com/webadaptor/rest/services/ServiceName/GPServer/TaskName/submitJob?inputRaster=choice1&esri_out_image_service={"serviceProperties":{"prefix":"testing","format":"tif","folder":"all_image_services"},"itemProperties":{"tags":"resultTag","description":"demo description","snippet":"demo snippet","folder":"analyst_testing"}}&f=json
+```

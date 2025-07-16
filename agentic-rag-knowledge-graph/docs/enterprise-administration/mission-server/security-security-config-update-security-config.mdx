@@ -1,0 +1,187 @@
+---
+title: "Update Security Configuration"
+description: "The update operation updates the security configuration of your server site."
+slug: "security-security-config-update-security-config"
+url: "/security-security-config-update-security-config"
+guid: "GUID-2DD01CD3-76B1-40A5-91AA-96E4934B6AA8"
+migratedTopicMetadata:
+  FTITLE: "Security - Security Config - Update Security Config"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.8.1 - *"
+  CREATED-ON: "24/09/2019 18:44:03"
+  FAUTHOR: "ithoman"
+  FSTATUS: "Released"
+  MODIFIED-ON: "01/06/2020 15:52:36"
+  VERSION: "1"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "7"
+  ED: "GUID-6271D689-BA28-4CBD-9B57-FBA915B35471"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /update
+  urlSegments:
+    - name: <securityconfig-url>
+      url: /security-security-config
+    - name: /update
+  methods:
+    - post
+  sslOnly: 'yes'
+  versionIntroduced: '10.8'
+  requiredCapability: Administrator
+---
+
+## Description
+
+This operation updates the [security configuration](/security-security-config), including TLS protocols and cipher suites, for your  ArcGIS Mission Server site. 
+
+This operation causes the SOAP and REST service endpoints to be redeployed (with the new configuration) on every server machine in the site. If the authentication tier is `GIS_SERVER` , the ArcGIS token service is started on all server machines. 
+
+When the authentication occurs at the Web Adaptor, the server does not participate in authenticating the user.
+
+If you updated the communication protocol as part of this operation, it takes the ArcGIS Web Adaptor 1 minute to recognize changes to the communication protocol of your site.
+
+<Note type={"note"}>
+
+The `userStoreConfig`  and `roleStoreConfig`  properties in the JSON representation are not required for this operation. 
+
+</Note>
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`securityConfig` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The JSON object representing the security configuration .
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`httpsProtocols` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The TLS protocols  ArcGIS Mission Server will use. `TLSv1.2`  is enabled by default. You can also enable `TLSv1`  and `TLSv1.1` . Values must be separated by commas.
+
+<Note type={"note"}>
+
+Ensure that the web server hosting your ArcGIS Web Adaptor can fully communicate over the protocols you're enabling. If you're using a Java Web Adaptor, the web server hosting the ArcGIS Web Adaptor must be using Java 8 or later.
+
+</Note>
+
+Example
+
+```javascript
+httpsProtocols=TLSv1,TLSv1.1,TLSv1.2
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`cipherSuites` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The cipher suites  ArcGIS Mission Server will use. By default, all of the below options are enabled. Values must be separated by commas. The following are valid options: 
+
+-   `TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256` 
+-   `TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256` 
+-   `TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA` 
+-   `TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA` 
+-   `TLS_RSA_WITH_AES_128_GCM_SHA256` 
+-   `TLS_RSA_WITH_AES_128_CBC_SHA256` 
+-   `TLS_RSA_WITH_AES_128_CBC_SHA` 
+-   `TLS_RSA_WITH_3DES_EDE_CBC_SHA` 
+
+Example
+
+```javascript
+cipherSuites=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` . 
+
+Values: `html`  \| `json`  \| `pjson` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+Below is a sample POST request for `update` , formatted for readability:
+
+```javascript
+POST /webadaptor/admin/security/config/update HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+securityConfig={
+  "Protocol": "HTTP_AND_HTTPS",
+  "authenticationTier": "GIS_SERVER",
+  "allowDirectAccess": "true",
+  "HSTSEnabled": "false",
+  "virtualDirsSecurityEnabled": "false",
+  "allowedAdminAccessIPs": ""
+}&httpsProtocols=TLSv1,TLSv1.1,TLSv1.2&cipherSuites=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA&f=json
+```
+
+ 
+
+## JSON Response example
+
+```javascript
+{"status": "success"}
+```
+
+ 

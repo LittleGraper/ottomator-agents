@@ -1,0 +1,101 @@
+---
+title: "Web Hooks - Security (Feature Service)"
+description: "To ensure that a secret key is used by the webhook receiver."
+slug: "web-hooks-security-feature-service"
+url: "/web-hooks-security-feature-service"
+guid: "GUID-FB8CB499-E5AF-4A28-8DE7-3A28874C2E9B"
+migratedTopicMetadata:
+  FTITLE: "Web Hooks - Security (Feature Service)"
+  FDESCRIPTION: "The topic is about webhooks security (registration/subcription)"
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "agol8.2 : 10.8-*"
+  CREATED-ON: "21/07/2020 09:30:32"
+  FAUTHOR: "eidolyantes"
+  FSTATUS: "Released"
+  MODIFIED-ON: "23/07/2020 15:11:35"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-35DB5DA3-F6DB-47D9-B941-709223477EE8"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /Webhooks
+  urlSegments:
+    - name: <WebHooks-url>
+      url: /web-hooks-feature-service
+    - name: /Webhooks
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: June, 2020
+---
+
+## Description
+
+Web hooks requires some step to ensure a completely secure channel between the receiver and the sender (feature server).
+
+## Security
+
+Webhooks Registration/Subscription
+
+The first step to secure the feature service webhooks REST API is to make use of the existing feature service authentication token. When setting up a new webhooks, the standard authentication admin/service owner token needs to be provided in the create webhook admin call.
+
+To ensure the integrity of the feature service webhooks:
+
+1.  Identity confirmation: Needs to be sure the feature service sends the webhook call to the right registered receiver(s) by using receiver identity confirmation, and payload signatures.
+2.  Skinny Payload: Avoid sending any sensitive information and use notification only with small payload. 
+
+Indentity Confirmation
+
+To ensure that a webhook receiver is intended to receive webhooks from a feature server and that the hooks are really from the feature server, the following checks are used:
+
+-   Webhook Receiver: The receiver needs to use a `secret key`  when registering with a feature server webhook event to be sure the feature service sends the webhooks call correctly to the right registered receiver.
+
+    If the `secret key`  is specified for a webhook, all feature server payload calls to the receiver will contains a signature hash value. The signature starts with `sha256=`  and uses the receiver `secret key`  to compute the hash of the webhook payload body.
+
+    Below is an example of the response header:
+
+    `x-esriHook-Signature = "sha256=x0mYd8hz2goCTfcNAaMqENy2BFgJJfJOb4PdvTffpwg="` 
+-   Challenge-Response Checks (CRCs): To verify a receiver is the owner of the webhook URL, the feature service in the initial registration of the webhook will perform a Challenge-Response Check (CRCs). So, implementing client-side CRC response logic is a fundamental first step in receiving server webhooks payload. When a CRC is sent from the feature server, it will make a `GET`  request to the receiver with `crc_token`  parameter. When that request is received, the webhook receiver needs to build an encrypted `response_token`  based on the `crc_token`  parameter and receiver secret key.
+
+    Below is an example of the receiver `response_token` :
+
+    `{"response_token": "sha256=x0mYd8hz2goCTfcNAaMqENy2BFgJJfJOb4PdvTffpwg="` 
+
+Skinny Payload Approach
+
+One way to increase message notification security is to minimize the payload information to the webhook URL. Under this approach, the hook acts more like a "notification" telling the receiver to make the necessary API calls to obtain the changes. The benefit of this design is that the receiver must make an authenticated API call to obtain the feature service data, so access can be regulated via normal feature service query API. 
+
+## Example usage: Immediate Webhook Confirmation
+
+As shown in figure 1 below, A CRC will be sent when the receiver registers the webhook URL, so implementing CRC response code is a fundamental first step.
+
+The server can further trigger a CRC on a regular basis (hourly/daily). The receiver can also trigger a CRC if needed by making a `GET`  request with the webhook id. Triggering a CRC is useful as the client/receiver develops webhook application.
+
+The `crc_token`  should be expected to change for each incoming CRC request and should be used as the message in the calculation, where the client/receiver secret is the key.
+
+If the response is not returned within 5 seconds or becomes invalid, events will cease to be sent to the registered webhook receiver.
+
+The CRC request will occur:
+
+-   When a webhook URL is registered.
+-   In addition to CRC check during webhook registration, server might need to regularly validate the client/receiver webhook URL with different CRC token (every hour, etc.).
+-   Receiver can manually trigger a CRC by making a `GET`  request with a webhook Id. This would allow the client/receiver on manually triggering the CRC as the client adds support to webhooks.
+
+Response requirements
+
+-   A base64 encoded HMAC SHA256 hash created from the `crc_token`  and the client secret key.
+-   Valid `response_token`  in JSON format.
+-   Latency less than 5 seconds.
+-   200 HTTP response code.
+
+![](./images/GUID-635A1374-6928-4C59-B698-916015449E65-web.png)
+
+## Example usage: Delayed Webhook Confirmation
+
+![](./images/GUID-FB48E270-A07C-49A4-A279-A6FB537D62F6-web.png)

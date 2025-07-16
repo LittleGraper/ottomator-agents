@@ -1,0 +1,158 @@
+---
+title: "Installed"
+description: "This resource returns a cumulative list of installed patches or full release upgrades."
+slug: "check-installed-updates"
+url: "/check-installed-updates"
+guid: "GUID-94ED934E-625E-4BE4-B337-41B094085AB4"
+migratedTopicMetadata:
+  FTITLE: "Check Installed Updates"
+  FDESCRIPTION: ""
+  FCHANGES: "Documenting the installed operation for Endeavour"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9-*"
+  CREATED-ON: "29/09/2020 09:36:39"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "04/10/2021 10:30:54"
+  VERSION: "1"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "23"
+  ED: "GUID-2ABF4410-F55E-448D-9420-29EDBF6A323E"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /system/upgrades/installed
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /system/upgrades/installed
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed with either "Security and infrastructure" or "Servers" privileges
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `installed` operation returns a cumulative list of patches and releases that are installed in the deployment.
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Response properties
+
+| Properties | Details |
+| ---------- | ------- |
+| `newLicensesRequired` | A binary property (`true` or `false`) specifying if the patch or release required new licenses. |
+| `releaseBuild` | The release number of the update. |
+| `description` | An update description that outlines the changes applied to the deployment. |
+| `update` | The update type (`release` or `patch`). |
+| `version` | The version number of the deployment if the patch or release is applied. |
+| `url` | The address that represents the external link pointing to the detailed information about the patch. This link is not valid for release upgrades. | 
+| `previousBuild` | The previous build number of the update. |
+| `releaseNotes` | The notes included with the update. |
+| `build` | The build number of the update. |
+| `previousVersion` | The version number that the patch or release builds on. |
+| `name` | The name of the patch or release. |
+| `containers` | A JSON array that specifies the name, image, and checksum value of affected containers. |
+| `id` | The unique ID associated with each patch or release. |
+| `released` | The date of release of the patch or release, represented in milliseconds from epoch (Unix time). |
+
+
+## Example usage
+
+The following is a sample POST request for the `installed` operation:
+
+```other
+POST /context/admin/system/upgrades/installed HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+f=pjson&token=HRozb6bnTL6gfA-SJO-IxhfLgJrioK1KJdMLWmCE5HjHWz9U3fOiFv3-HkgPZqsLljTkk2WDENGt5fjho5s39e_mZL5At60UvJPoNnC5O2sv2HTlumG7TsYfbtnokpWmS6-lf8XoQpSKusZwmxIkEMP-yE0Wxrj8o9sWKi29J-pxzkoCDhoUfdLt6NnBWxhESpegh8BzNcEruqxuDQD-JRmaTsbRDaBHTQTePMzQePhXl7KcEG9Cfkw2sa7P1W1e
+
+```
+
+## JSON Response example
+
+The response example below demonstrates a deployment with an installed patch:
+
+<Note type={"note"}>
+
+When representing the current version of the deployment, the version and build numbers are combined. For example, if the deployment version is 10.9.0, and the build number is 505, the current version is returned as 10.9.0.505. The version number is updated with each installed release, while the build number is updated with each update (either patch or release) that is installed. This representation is returned through the HTML view of the API, as well as in the upgrade job messages retained by the `currentVersion` and `upgrades` resources.
+
+</Note>
+
+```other
+{
+  "updates": [
+    {
+      "newLicensesRequired": false,
+      "releaseBuild": "1089",
+      "description": "",
+      "type": "patch",
+      "version": "10.9.0",
+      "url": "https://support.esri.com/download/7443",
+      "previousBuild": "1089",
+      "releaseNotes": "",
+      "build": "1090",
+      "previousVersion": "10.9.0",
+      "name": "Overview Patch for ArcGIS Enterprise",
+      "containers": [
+        {
+          "image": "enterprise-admin:dev-stable-1089",
+          "name": "ENTERPRISE_ADMIN_API",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "help:dev-stable-1089",
+          "name": "HELP",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "enterprise-admin-tools:dev-stable-1089",
+          "name": "ADMIN_TOOLS",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "arcgis-nginx-web:dev-stable-1089",
+          "name": "WEB_PROXY",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        }
+      ],
+      "id": "pat_345432_1090",
+      "released": 1618540600000
+    }
+  ]
+}
+```
+
+The following response demonstrates a deployment with no installed patch or release:
+
+```other
+{"updates": []}
+```

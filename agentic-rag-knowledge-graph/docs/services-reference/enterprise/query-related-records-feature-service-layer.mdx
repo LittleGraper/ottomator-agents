@@ -1,0 +1,796 @@
+---
+title: "Query Related Records (Map Service/Layer)"
+description: "queryRelatedRecords operation returns one or more feature sets grouped by source layer / table object IDs."
+slug: "query-related-records-feature-service-layer"
+url: "/query-related-records-feature-service-layer"
+guid: "GUID-C316A326-81A9-4BA9-8BCB-EADE12E50F1B"
+migratedTopicMetadata:
+  FTITLE: "Query Related Records (Feature Service-Layer)"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.3-*"
+  CREATED-ON: "30/11/2023 10:30:19"
+  FAUTHOR: "thoque"
+  FSTATUS: "Draft"
+  MODIFIED-ON: "30/11/2023 11:34:09"
+  VERSION: "6"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-B309B37F-2BFA-408F-AE5D-0FBD680A2814"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /queryRelatedRecords
+  urlSegments:
+    - name: <layer-url>
+      url: /layer-table
+    - name: /queryRelatedRecords
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.0'
+  requiredCapability: Data
+---
+
+## Description
+
+The query related records operation is performed on a [layer / table resource](/layer-table). The result of this operation is one or more featuresets grouped by source layer / table object IDs. Each featureset contains [Feature objects](/feature-object) including the values for the fields requested by the user. For related layers, if you request geometry information, the geometry of each feature is also returned in the featureset. For related tables, the featureset does not include geometries.
+
+Also, each featureset contains an array of field information objects for fields requested in `outFields`  parameter. See [ Layer/Table](/layer-table) for details on fields.
+
+<Note type={"note"}>
+
+All parameters related to geometry will be ignored when querying related tables. 
+
+</Note>
+
+You can provide arguments to the query related records operation as query parameters defined in the parameters table below.
+
+<Note type={"note"}>
+
+The domain's member is not included in field information objects returned with the response.
+
+</Note>
+
+## New at 11.3
+
+-   This operation introduces two new parameters i.e. `resultRecordCount`  and `resultOffset`  to support pagination for map services query related records results. Support for pagination is indicated when the layer-level `supportsQueryRelatedPagination`  property, under `advancedQueryCapabilities` , is `true` .
+-   Map services now support the `orderBy`  and `returnCountOnly`  parameters. Support for these parameters is indicated when the layer-level `supportsAdvancedQueryRelated`  property, under `advancedQueryCapabilities` , is `true` .
+
+## New in 10.5
+
+-   The feature service layer Query operation supports the `returnTrueCurves`  and `historicMoment`  parameters.
+
+## New in 10.1
+
+-   Support for `returnZ`  and `returnM`  was added for layers. Default value for `returnZ`  and `returnM` is false.
+-   Support for `gdbVersion`  parameter was added. Use this parameter to specify the geodatabase version to query.
+-   `geometryPrecision`  parameter was introduced. This option can be used to specify the number of decimal places in the response geometries returned by the query operation.
+-   JSON response contains an optional property `exceededTransferLimit` . This property will be true only if the number of records exceeds the maximum number configured by the server administrator.
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`objectIds` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The object IDs of this layer/table to be queried. Records related to these object IDs will be queried.
+
+Syntax
+
+```javascript
+objectIds=<objectId1>, <objectId2>
+```
+
+ 
+
+Example
+
+```javascript
+objectIds=37, 462
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`relationshipId` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The ID of the relationship to be queried. The `relationships`  that this layer/table participates in are included in the [ Layer / Table Resource response](/layer-table). Records in tables/layers corresponding to the related table/layer of the relationship are queried.
+
+Example
+
+```javascript
+relationshipId=4
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outFields` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The list of fields from the related table/layer to be included in the returned featureset. This list is a comma delimited list of field names. If you specify the shape field in the list of return fields, it is ignored. To request geometry, set `returnGeometry`  to `true` . You can also specify the wildcard "\*" as the value of this parameter. In this case, the results will include all the field values. 
+
+Example
+
+```javascript
+outFields=AREANAME,ST,POP2000
+
+//wildcard usage
+outFields=*
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`definitionExpression` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The definition expression to be applied to the related table/layer. From the list of records that are related to the specified `objectIds` , only those records that conform to this expression will be returned. 
+
+Example
+
+```javascript
+definitionExpression=POP2000 > 100000
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnGeometry` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , the featureset includes the geometry associated with each feature. The default is `true` .
+
+<Note type={"note"}>
+
+This parameter only applies to related layers. It will be ignored for related tables.
+
+</Note>
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`maxAllowableOffset` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This option was added at 10.0. This option can be used to specify the `maxAllowableOffset`  to be used for generalizing geometries returned by the `query related records`  operation. The `maxAllowableOffset`  is in the units of the `outSR` . If `outSR`  is not specified, the `maxAllowableOffset`  is assumed to be in the unit of the spatial reference of the map.
+
+Example
+
+```javascript
+maxAllowableOffset=2
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geometryPrecision` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This option was added at 10.1. This option can be used to specify the number of decimal places in the response geometries returned by the `queryRelatedRecords`  operation. This applies to X and Y values only (not m- or z-values).
+
+Example
+
+```javascript
+geometryPrecision=3
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`historicMoment` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This option was added at 10.5 and works with ArcGIS Enterprise services only. The historic moment to query. This parameter applies only if the `supportsQueryWithHistoricMoment`  property of the layers being queried is set to `true` . This setting is provided in the layer resource. If `historicMoment`  is not specified, the query will apply to the current features. 
+
+Syntax
+
+```javascript
+historicMoment=<Epoch time in milliseconds>
+```
+
+ 
+
+Example
+
+```javascript
+historicMoment=1199145600000
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outSR` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The spatial reference of the returned geometry. The spatial reference can be specified as either a well-known ID or as a [spatial reference json object](/geometry-objects). If `outSR`  is not specified, the geometry is returned in the spatial reference of the map.
+
+<Note type={"note"}>
+
+This parameter only applies to related layers. It will be ignored for related tables.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnZ` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This option was added at 10.1. If `true` , Z values will be included in the results if the features have Z values. Otherwise, Z values are not returned. The default is `false` .
+
+<Note type={"note"}>
+
+This parameter only applies if `returnGeometry`  is `true` .
+
+</Note>
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnM` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This option was added at 10.1. If `true` , M values will be included in the results if the features have M values. Otherwise, M values are not returned. The default is `false` .
+
+<Note type={"note"}>
+
+This parameter only applies if `returnGeometry`  is `true` .
+
+</Note>
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnTrueCurves` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This option was added at 10.5. Optional parameter that is `false`  by default. When set to `true` , returns true curves in output geometries; otherwise, curves are converted to densified polylines or polygons. 
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`gdbVersion` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This option was added at 10.1. GeoDatabase version to query. This parameter applies only if `hasVersionedData`  of the property of the service and `isDataVersioned`  property of the layer(s) queried are `true` . If this is not specified, query will apply to published map's version.
+
+Syntax
+
+```javascript
+gdbVersion=<geodatabase version>
+```
+
+ 
+
+Example
+
+```javascript
+gdbVersion=sde.USER1
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`resultRecordCount` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This option can be used for fetching query results up to the `resultRecordCount`  specified. When `resultOffset`  is specified but this parameter is not, the map service defaults it to `maxRecordCount` . The maximum value for this parameter is the value of the layer's `maxRecordcount` `resultOffset`  property.
+
+<Note type={"note"}>
+
+This parameter only applies if `supportsQueryRelatedPagination`  is `true` .
+
+</Note>
+
+Example
+
+```javascript
+//Will fetch up to 10 records
+resultRecordCount=10
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`resultOffset` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This option can be used for fetching query results by skipping the specified number of records and starting from the next record (that is, `resultOffset`  + 1th), and to fetch records that are beyond the `maxRecordCount` . The default is 0.
+
+<Note type={"note"}>
+
+This parameter only applies if `supportsQueryRelatedPagination`  is `true` .
+
+</Note>
+
+Example
+
+```javascript
+//If maxRecordCount is set to 1000, this will return the query results in range of 1001 to 1100.
+resultOffset=1000
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`orderByFields` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This parameter is used to request a list of the related records based on the field order. This list is a comma delimited list of field names.
+
+When `resultRecordCount`  or `resultOffset`  is specified, the ObjectID field gets used by default when this parameter is left blank.
+
+<Note type={"note"}>
+
+This parameter only applies if `supportsAdvancedQueryRelated`  is `true` .
+
+</Note>
+
+Syntax
+
+```javascript
+orderByFields=<fieldName1>,<fieldName2>
+```
+
+ 
+
+Example
+
+```javascript
+orderByFields=TOWNSHIP,RANGE
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnCountOnly` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , returns the count of the related records for each object ID. The default is `false` . This parameter is only applicable if `supportsAdvancedQueryRelated`  is `true` .
+
+<Note type={"note"}>
+
+If included in the request, this parameter will overwrite all other parameters and responses. 
+
+</Note>
+
+Values: `true`  \| `false` 
+
+Example
+
+```javascript
+returnCountOnly=true
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` .
+
+Values: `html`  \| `json`  \| `pjson` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+```javascript
+https://sampleserver3.arcgisonline.com/ArcGIS/rest/services/Petroleum/KSPetro/MapServer/0/queryRelatedRecords?objectIds=3,4,5&relationshipId=2&returnGeometry=true&outFields=*&f=html
+```
+
+ 
+
+## Example one
+
+The following is a sample request URL for the `queryRelatedRecords`  operation, which requests to skip the first two records and return the next four records where the objectId is greater than 3:
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/RelationshipOID_test/MapServer/3/queryRelatedRecords?objectIds=&relationshipId=1&outFields=*&definitionExpression=ObjectID>3&returnGeometry=true&resultOffset=2&resultRecordCount=4&f=html
+```
+
+ 
+
+## Example two
+
+The following is a sample request URL for the `queryRelatedRecords`  operation, which will return the related records count for each specified objectId where `TOWNSHIP`  is the value for `orderByField` :
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/KSPetro/MapServer/1/queryRelatedRecords?objectIds=70,71,62&relationshipId=1&outFields=*&orderByFields=TOWNSHIP&returnCountOnly=true&f=html
+```
+
+ 
+
+## JSON Response syntax
+
+```other
+{
+  "geometryType": "<geometryType>", //if records include geometry
+  "spatialReference": <spatialReference>, //if records include geometry
+  "hasZ": <true|false>, //added in 10.1
+  "hasM": <true|false>, //added in 10.1
+  "fields": [
+    {
+      "name": "<fieldName1>",
+      "type": "<fieldType1>",
+      "alias": "<fieldAlias1>",
+      "length": "<length1>"
+    },
+    {
+      "name": "<fieldName2>",
+      "type": "<fieldType2>",
+      "alias": "<fieldAlias2>",
+      "length": "<length2>"
+    }
+  ],
+  "relatedRecordGroups": [
+    {
+      "objectId": <objectId1>,
+      "relatedRecords": [ //features may include geometry for related layers only
+        <relatedFeature11>,
+        <relatedFeature12>
+      ]
+    },
+    {
+      "objectId": <objectId2>,
+      "relatedRecords": [
+        <relatedFeature21>,
+        <relatedFeature22>
+      ]
+    }
+  ]
+}
+```
+
+ 
+
+## JSON Response examples
+
+```other
+{
+  "geometryType": "esriGeometryPolygon",
+  "spatialReference": {
+    "wkid": 4267
+  },
+  "fields": [
+    {
+      "name": "OBJECTID",
+      "type": "esriFieldTypeOID",
+      "alias": "OBJECTID"
+    },
+    {
+      "name": "FIELD_KID",
+      "type": "esriFieldTypeString",
+      "alias": "FIELD_KID",
+      "length": 25
+    },
+    {
+      "name": "APPROXACRE",
+      "type": "esriFieldTypeDouble",
+      "alias": "APPROXACRE"
+    },
+    {
+      "name": "FIELD_NAME",
+      "type": "esriFieldTypeString",
+      "alias": "FIELD_NAME",
+      "length": 150
+    }
+  ],
+  "relatedRecordGroups": [
+    {
+      "objectId": 3,
+      "relatedRecords": [
+        {
+          "attributes": {
+            "OBJECTID": 5540,
+            "FIELD_KID": "1000147595",
+            "APPROXACRE": 95929,
+            "FIELD_NAME": "LOST SPRINGS",
+          },
+          "geometry": {
+            "rings": [
+              [
+                [
+                  -96.929599633999942,
+                  38.52426809800005
+                ],
+                [
+                  -96.929602437999961,
+                  38.522448437000037
+                ],
+                [
+                  -96.92959118999994,
+                  38.529723252000053
+                ],
+                [
+                  -96.929594022999936,
+                  38.527905578000059
+                ],
+                [
+                  -96.929596839999988,
+                  38.526087119000067
+                ],
+                [
+                  -96.929599633999942,
+                  38.52426809800005
+                ]
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+ 
+
+```javascript
+{
+  "geometryType": "esriGeometryPolygon",
+  "spatialReference": {
+    "wkid": 4267
+  },
+  "fields": [
+    {
+      "name": "OBJECTID",
+      "type": "esriFieldTypeOID",
+      "alias": "OBJECTID"
+    },
+    {
+      "name": "FIELD_KID",
+      "type": "esriFieldTypeString",
+      "alias": "FIELD_KID",
+      "length": 25
+    },
+    {
+      "name": "APPROXACRE",
+      "type": "esriFieldTypeDouble",
+      "alias": "APPROXACRE"
+    },
+    {
+      "name": "FIELD_NAME",
+      "type": "esriFieldTypeString",
+      "alias": "FIELD_NAME",
+      "length": 150
+    }
+  ],
+  "relatedRecordGroups": [
+    {
+      "objectId": 3,
+      "relatedRecords": [
+        {
+          "attributes": {
+            "OBJECTID": 5540,
+            "FIELD_KID": "1000147595",
+            "APPROXACRE": 95929,
+            "FIELD_NAME": "LOST SPRINGS",
+          },
+          "geometry": {
+            "rings": [
+              [
+                [
+                  -96.929599633999942,
+                  38.52426809800005
+                ],
+                [
+                  -96.929602437999961,
+                  38.522448437000037
+                ],
+                [
+                  -96.92959118999994,
+                  38.529723252000053
+                ],
+                [
+                  -96.929594022999936,
+                  38.527905578000059
+                ],
+                [
+                  -96.929596839999988,
+                  38.526087119000067
+                ],
+                [
+                  -96.929599633999942,
+                  38.52426809800005
+                ]
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+ 

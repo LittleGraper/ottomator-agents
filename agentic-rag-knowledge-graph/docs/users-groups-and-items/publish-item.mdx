@@ -1,0 +1,1734 @@
+---
+title: "/publish: Publish Item"
+description: "Publishes a hosted service based on an existing source item."
+slug: "publish-item"
+url: "/publish-item"
+guid: "GUID-5D304AAA-34AA-4DB7-9867-BE4B7D0E2188"
+migratedTopicMetadata:
+  FTITLE: "Publish Item"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0- *"
+  CREATED-ON: "31/05/2023 09:37:04"
+  FAUTHOR: "svennapoosa"
+  FSTATUS: "Released"
+  MODIFIED-ON: "27/09/2023 10:27:15"
+  VERSION: "16"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-42CA5A10-76FA-44A5-8779-7C67A0C5C175"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /content/users/[userName]/publish
+  urlSegments:
+    - name: '[root]'
+      url: /root
+    - name: /content/users/[userName]/publish
+  methods: []
+  sslOnly: 'no'
+---
+
+## Example usage
+
+The following is a sample ArcGIS Online request URL used to publish a shapefile:
+
+```markdown
+https://www.arcgis.com/sharing/rest/content/users/jsmith/publish
+```
+
+Below is a sample ArcGIS Enterprise POST request used to demonstrate how to publish a shapefile:
+
+```markdown
+POST /webadaptor/sharing/rest/content/users/jSmith/publish HTTP/1.1
+Host: machine.domain.com
+Content-Type: multipart/form-data; boundary=----boundary
+Content-Length: []
+
+------boundary
+Content-Disposition: form-data; name="itemid"
+
+345313e619df46f387f9ededbe15ac56
+------boundary
+Content-Disposition: form-data; name="file"; filename=""
+Content-Type: application/octet-stream
+
+------boundary
+Content-Disposition: form-data; name="filetype"
+
+shapefile
+------boundary
+Content-Disposition: form-data; name="publishParameters"
+
+{"name":"Streets Service"}
+------boundary
+Content-Disposition: form-data; name="buildInitialCache"
+
+false
+------boundary
+Content-Disposition: form-data; name="outputType"
+
+------boundary
+Content-Disposition: form-data; name="f"
+
+json
+------boundary--
+``` 
+
+## Description
+
+Publishes a hosted service based on an existing source item. Prior to publishing, items must be added using [Add Item](/add-item).
+
+Publishers can create feature services as well as tiled map services. Feature services can be created using input files of type `csv`, `excel`, `shapefile`, `serviceDefinition`, `geojson`, `sqliteGeodatabase`, `featureCollection`, and `fileGeodatabase`.
+
+-   CSV and Microsoft Excel files (`.xls`, `.xlsx`) that contain location fields (for example, address fields or x,y fields) are spatially enabled during the process of publishing.
+-   Shapefiles and file geodatabases should be packaged as `.zip` files.
+-   Tiled map services can be created from service definition (`.sd`) files, tile packages, and existing feature services.
+-   Service definitions are authored in ArcGIS Pro and contain both the cartographic definition for a map and its packaged data together with the definition of the geoservice to be created.
+-   Vector tile packages (`.vtpk`) are created from a map (or a basemap) with the Create Vector Tile Package tool in ArcGIS Pro.
+-   Use the [Analyze](/analyze) operation to generate the default publishing parameters for CSV files and Microsoft Excel files.
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `itemID` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The ID of the item to be published.
+
+      Example:
+
+      ```markdown
+      itemId=345313e619df46f387f9ededbe15ac56
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `file` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The file to be uploaded. If uploading a file, the request must be a multipart request pursuant to [IETF RFC1867](https://www.ietf.org/rfc/rfc1867.txt).
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `text` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The text in the file to be published.
+
+      <Note type={"note"}>
+
+      This parameter is only applicable to CSV, Microsoft Excel, and feature collection types.
+
+      </Note>
+
+      Syntax:
+
+      ```markdown
+      text=<text_in_file>
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `fileType` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Item type.
+
+      <Note type={"note"}>
+
+      `imageCollection` applies to ArcGIS Enterprise portal only.
+
+      </Note>
+
+      Values: `serviceDefinition` \| `shapefile` \| `csv` \| `excel` \| `tilePackage` \| `featureService` \| `featureCollection` \| `fileGeodatabase` \| `geojson` \| `scenepackage` \| `vectortilepackage` \| `imageCollection` \| `mapService` \| `sqliteGeodatabase`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `publishParameters` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object describing the service to be created as part of the publish operation. The appropriate value for publish parameters depends on the file type being published. For more information, see individual publisher parameter sections below.
+
+      <Note type={"note"}>
+
+      The `publishParameters` properties are optional when publishing a service definition (`.sd`), vector tile package (`.vtpk`), or tile package (`.tpk`) file.
+
+      </Note>
+
+      Example:
+
+      ```markdown
+      publishParameters={"name":"Streets"}
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `outputType` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      If the user do not provide an `outputType`, the default is a feature service.
+
+      Example:
+
+      ```markdown
+      outputType=Tiles
+      ``` 
+
+      Values: `Tiles` | `3DTilesService` | `3DTilesPackage`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `deleteSourceItemUponCompletion` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      If `true`, the source item will be deleted when publishing is complete. Used when overwriting hosted feature services published from a cloud drive (for example, Google Drive, Dropbox, and OneDrive) to prevent duplicate source item relates to the service.
+
+      Values: `true` \| `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `itemIdToCreate` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      New at ArcGIS Enteprise 10.8.1. The item ID of the item. The item ID must not exist and must be 32 alphanumeric values.
+
+      <Note type={"note"}>
+
+      `itemIdToCreate` applies to ArcGIS Enterprise Portal only.
+
+      </Note>
+
+      Example:
+
+      ```markdown
+      itemIdToCreate=832157e321df46f721f9ededbe34ac58
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `json`.
+
+      Values: `html` \| `json` \| `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## CSV publish parameters JSON properties
+
+The `publishParameters` JSON object used to publish a CSV file is described below.
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `type` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Indicates a CSV file.
+
+      Example:
+
+      ```markdown
+      "type": "csv"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `name` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Name of the service to be created. The same name is reused as the name for the single layer within the service if the `layerInfo` parameter is not provided.
+
+      Example:
+
+      ```markdown
+      "name": "Offices"
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `locationType` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the data contained in the CSV or Excel file. If set as `coordinates`, the CSV or Excel data contains x,y information. If set as `address`, the CSV or Excel data contains address fields that will be geocoded to a single point. If set as `lookup`, the CSV or Excel data contains fields that can be mapped to well-known sets of geographies. If set to `none`, the CSV or Excel data contains no spatial content, and data will be loaded and subsequently queried as tabular data. 
+
+      <Note type={"note"}>
+
+      Based on this parameter, additional parameters will be required. For example, when specifying coordinates as the `locationType`, the latitude and longitude fields below will need to be specified.
+
+      </Note>
+
+      Values: `coordinates` \| `address` \| `lookup` \| `none`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `latitudeFieldName` 
+
+      (Required if `locationType` is `coordinates`)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the name of the field that contains the y-coordinate.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `longitudeFieldName` 
+
+      (Required if `locationType` is `coordinates`)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the name of the field that contains the x-coordinate.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `coordinateFieldType` 
+
+      (Optional, used when `locationType` is `coordinates`)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the type of coordinates that contain location information. The default value is `LatitudeAndLongitude`.
+
+      Values: `LatitudeAndLongitude` \| `MGRS` \| `USNG`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `coordinateFieldName` 
+
+      (Optional, used when `locationType` is `coordinates`)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Indicates the name of the field that contains the coordinates specified in `coordinateFieldType`.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `addressTemplate` 
+
+      (Required if `locationType` is `address`)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A string value that defines the address to find based on CSV or Excel field values.
+
+      Example:
+
+      ```markdown
+      "addressTemplate": "{Address} {City}, {State} {Zip}"
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `lookupType` 
+
+      (Required if `locationType` is `lookup`)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The type of place to look up.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `lookupFields` 
+
+      (Required if `locationType` is `lookup`)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object with name value pairs that define the fields used to look up the location. 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `geocodeServiceUrl` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The URL of the geocode service that supports batch geocoding.
+
+      Example:
+
+      ```markdown
+      "geocodeServiceUrl": "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer",
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sourceCountry` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The two-character country code associated with the geocoding service.
+
+      Example:
+
+      ```markdown
+      "sourceCountry": "us"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sourceLocale` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The locale used for the geocoding service source.
+
+      Example:
+
+      ```markdown
+      "sourceLocale": "en"
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `addressFields` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object indicates the location fields mapping to the corresponding field names in the input dataset that contains spatial information for batch geocoding.
+
+      Example:
+
+      ```markdown
+      {
+        "Address": "Street",
+        "City": "City",
+        "Region": "State",
+        "Postal": "Zip"
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `standardizedFieldNames` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object indicates the standardized field names mapping in the geocode service given the country selected.
+
+      Example:
+
+      ```markdown
+      {
+        "Address": "Street",
+        "City": "City",
+        "Region": "State",
+        "Postal": "ZIP",
+        "PostalExt": "ZIP4",
+        "CountryCode": "Country"
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `layerInfo` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object that provides additional information about the dataset. The JSON format resembles the `layerDescriptor` used in publishing feature services to an on-premises spatial data server or ArcGIS Server. All parameters except fields are optional.
+
+      Certain parameters such as `geometryType` and `extent` can be implied or calculated from the dataset.
+
+      The `objectId` field is used as the name of the primary key column. If this field is a noneditable integer, the primary key is also made an autoincrementing column. If no `objectId` field is specified, an autoincrementing column named `FID` is used.
+
+      ```markdown
+      { 
+        "id": <id>,
+        "name": "<layer name>", 
+        "type": "<type>",
+        "displayField": "<displayField>",
+        "description": "<description>",
+        "copyrightText": "<copyright text>",
+        "defaultVisibility": true,
+        "minScale": <number>, 
+        "maxScale": <number>, 
+        "extent": {<extent JSON with spatial ref>}, 
+        "drawingInfo": {<drawing info JSON>}, 
+        "allowGeometryUpdates": true,
+        "hasAttachments": false, 
+        "htmlPopupType": "<popup type>",
+        "globalIdField": "<name of the global Id field>",
+        "objectIdField": "<name of object Id field>", 
+        "typeIdField": "<type Id field>", 
+        "fields": [<array of field JSON objects>], 
+        "indexes": [<array of indexes>],
+        "types": [<array of type JSON objects>], 
+        "templates": [<array of type JSON objects>], 
+        "supportedQueryFormats": "JSON, geoJSON",
+        "hasStaticData": false,
+        "maxRecordCount": <max num of records returned for a query>,
+        "standardMaxRecordCount": <max num of records returned when resultType is standard>,
+        "tileMaxRecordCount": <max num of records returned when resultType is tile>,
+        "maxRecordCountFactor": <multiplier applies to all 3 types of max record count>,
+        "capabilities": "<service layer capabilities>"
+      }
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `description` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A description for the published dataset.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `maxRecordCount` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A double value indicating any constraints enforced on query operations. The default is -1 or `int.MaxValue` indicating no constraint.
+
+      Example:
+
+      ```markdown
+      "maxRecordCount": 2000
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `copyrightText` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Copyright information associated with the dataset.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `columnNames` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      An array of column names, overridden if `layerInfo` fields is specified. If `columnNames` are omitted, the field names are inferred from the first line in the source CSV file.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `columnDelimiter` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A delimiter between data fields in each row of text. The default is the comma character (`,`).
+
+      Example:
+
+      ```markdown
+      "columnDelimiter": ","
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sourceSR` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Spatial reference of the input coordinates. The default is WKID 4326.
+
+      Example:
+
+      ```markdown
+      {
+        "wkid": 4326,
+        "latestWkid": 4326
+      }
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `targetSR` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Target spatial reference of the coordinates as stored in the database. The default is WKID 102100.
+
+      Example:
+
+      ```markdown
+      {
+        "wkid": 102100,
+        "latestWkid": 3857
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `editorTrackingInfo` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object that specifies editor tracking information.
+
+      Example:
+
+      ```markdown
+      {
+        "enableEditorTracking": false,
+        "enableOwnershipAccessControl": false,
+        "allowOthersToQuery": true,
+        "allowOthersToUpdate": true,
+        "allowOthersToDelete": false,
+        "allowAnonymousToUpdate": true,
+        "allowAnonymousToDelete": true
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `candidateFieldsType` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the locator output fields. By default, only the location information (`GeometryOnly`) is included in the hosted feature layer. If set as `Minimal`, the CSV contains additional fields (location, status, score, match_addr, and addr_type) that describe the location and how well it matches the information in the location service. If set as `AllFields`, the CSV includes all available locator output fields in the hosted feature layer.
+
+      Values: `GeometryOnly` \| `Minimal` \|`AllFields` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `dateFieldsTimeReference` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object that specifies the data time zone information.
+
+      Example:
+
+      ```markdown
+      {
+        "timeZone": "Pacific Standard Time"
+      }
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+### CSV publish parameters example
+
+A sample `publishParameters` JSON object for a CSV file is as follows:
+
+```markdown
+{
+  "type": "csv",
+  "name": "Offices",
+  "sourceUrl": "",
+  "locationType": "address",
+  "maxRecordCount": 2000,
+  "geocodeServiceUrl": "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer",
+  "sourceCountry": "us",
+  "sourceLocale": "en",
+  "addressFields": {
+    "Address": "Street",
+    "City": "City",
+    "Region": "State",
+    "Postal": "Zip"
+  },
+  "standardizedFieldNames": {
+    "Address": "Street",
+    "City": "City",
+    "Region": "State",
+    "Postal": "ZIP",
+    "PostalExt": "ZIP4",
+    "CountryCode": "Country"
+  },
+  "columnDelimiter": ",",
+  "qualifier": "\"",
+  "targetSR": {
+    "wkid": 102100,
+    "latestWkid": 3857
+  },
+  "editorTrackingInfo": {
+    "enableEditorTracking": false,
+    "enableOwnershipAccessControl": false,
+    "allowOthersToQuery": true,
+    "allowOthersToUpdate": true,
+    "allowOthersToDelete": false,
+    "allowAnonymousToUpdate": true,
+    "allowAnonymousToDelete": true
+  },
+  "layerInfo": {
+    "currentVersion": 10.8,
+    "id": 0,
+    "name": "",
+    "type": "Table",
+    "displayField": "",
+    "description": "",
+    "copyrightText": "",
+    "defaultVisibility": true,
+    "relationships": [],
+    "isDataVersioned": false,
+    "supportsCalculate": true,
+    "supportsTruncate": false,
+    "supportsAttachmentsByUploadId": true,
+    "supportsRollbackOnFailureParameter": true,
+    "supportsStatistics": true,
+    "supportsAdvancedQueries": true,
+    "supportsValidateSql": true,
+    "supportsCoordinatesQuantization": true,
+    "supportsApplyEditsWithGlobalIds": false,
+    "advancedQueryCapabilities": {
+      "supportsPagination": true,
+      "supportsPaginationOnAggregatedQueries": true,
+      "supportsQueryRelatedPagination": true,
+      "supportsQueryWithDistance": true,
+      "supportsReturningQueryExtent": true,
+      "supportsStatistics": true,
+      "supportsOrderBy": true,
+      "supportsDistinct": true,
+      "supportsQueryWithResultType": true,
+      "supportsSqlExpression": true,
+      "supportsAdvancedQueryRelated": true,
+      "supportsReturningGeometryCentroid": false,
+      "supportsQueryWithDatumTransformation": true
+    },
+    "useStandardizedQueries": false,
+    "geometryType": "esriGeometryPoint",
+    "drawingInfo": {
+      "renderer": {
+        "type": "simple",
+        "symbol": {
+          "type": "esriPMS",
+          "url": "RedSphere.png",
+          "imageData": "iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABGdBTUEAALGPASUVORK5CYII=",
+          "contentType": "image/png",
+          "width": 15,
+          "height": 15
+        }
+      }
+    },
+    "allowGeometryUpdates": true,
+    "hasAttachments": false,
+    "htmlPopupType": "",
+    "hasM": false,
+    "hasZ": false,
+    "globalIdField": "",
+    "typeIdField": "",
+    "fields": [
+      {
+        "name": "Name",
+        "type": "esriFieldTypeString",
+        "alias": "Name",
+        "sqlType": "sqlTypeNVarchar",
+        "length": 256,
+        "nullable": true,
+        "editable": true,
+        "domain": null,
+        "defaultValue": null,
+        "locationType": "unknown"
+      },
+      {
+        "name": "Street",
+        "type": "esriFieldTypeString",
+        "alias": "Street",
+        "sqlType": "sqlTypeNVarchar",
+        "length": 256,
+        "nullable": true,
+        "editable": true,
+        "domain": null,
+        "defaultValue": null,
+        "locationType": "Address"
+      },
+      {
+        "name": "City",
+        "type": "esriFieldTypeString",
+        "alias": "City",
+        "sqlType": "sqlTypeNVarchar",
+        "length": 256,
+        "nullable": true,
+        "editable": true,
+        "domain": null,
+        "defaultValue": null,
+        "locationType": "City"
+      },
+      {
+        "name": "State",
+        "type": "esriFieldTypeString",
+        "alias": "State",
+        "sqlType": "sqlTypeNVarchar",
+        "length": 256,
+        "nullable": true,
+        "editable": true,
+        "domain": null,
+        "defaultValue": null,
+        "locationType": "Region"
+      },
+      {
+        "name": "Zip",
+        "type": "esriFieldTypeString",
+        "alias": "Zip",
+        "sqlType": "sqlTypeNVarchar",
+        "length": 256,
+        "nullable": true,
+        "editable": true,
+        "domain": null,
+        "defaultValue": null,
+        "locationType": "Postal"
+      }
+    ],
+    "indexes": [],
+    "types": [],
+    "templates": [
+      {
+        "name": "New Feature",
+        "description": "",
+        "drawingTool": "esriFeatureEditToolPoint",
+        "prototype": {
+          "attributes": {
+            "Name": null,
+            "Street": null,
+            "City": null,
+            "State": null,
+            "Zip": null
+          }
+        }
+      }
+    ],
+    "supportedQueryFormats": "JSON, geoJSON",
+    "hasStaticData": false,
+    "maxRecordCount": -1,
+    "standardMaxRecordCount": 32000,
+    "tileMaxRecordCount": 8000,
+    "maxRecordCountFactor": 1,
+    "capabilities": "Querys"
+  },
+  "sourceCountryHint": "",
+  "hasStaticData": true,
+  "persistErrorRecordsForReview": true,
+  "candidateFieldsType": "Minimal",
+  "dateFieldsTimeReference": {
+    "timeZone": "Pacific Standard Time"
+  }
+}
+``` 
+
+## Excel publish parameters JSON properties
+
+The `publishParameters` JSON object used to publish an Excel file is described below.
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `type` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Indicates an Excel file.
+
+      Example:
+
+      ```markdown
+      "type": "excel"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `name` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Name of the service to be created.
+
+      Example:
+
+      ```markdown
+      "name": "Offices",
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `description` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A description for the published dataset.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `maxRecordCount` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A double value indicating any constraints enforced on query operations. The default is -1 or `int.MaxValue` indicating no constraint.
+
+      Example:
+
+      ```markdown
+      "maxRecordCount": 2000
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sourceSR` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Spatial reference of the input coordinates. The default is WKID 4326.
+
+      Example:
+
+      ```markdown
+      {
+        "wkid": 4326,
+        "latestWkid": 4326
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `targetSR` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Target spatial reference of the coordinates as stored in the database. The default is WKID 102100.
+
+      Example:
+
+      ```markdown
+      {
+        "wkid": 102100,
+        "latestWkid": 3857
+      }
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `editorTrackingInfo` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object that specifies editor tracking information.
+
+      Example:
+
+      ```markdown
+      {
+        "enableEditorTracking": false,
+        "enableOwnershipAccessControl": false,
+        "allowOthersToQuery": true,
+        "allowOthersToUpdate": true,
+        "allowOthersToDelete": false,
+        "allowAnonymousToUpdate": true,
+        "allowAnonymousToDelete": true
+      }
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `hasAttachments` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Indicates if the service has attachments.
+
+      Values: `true` \| `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `layerInfo` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object specifies service capabilities.
+
+      Example:
+
+      ```markdown
+      {
+        "capabilities": "Query"
+      }
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `layers` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      An array of JSON objects that provides additional information about each sheet of the Excel file.
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+### Excel publish parameters example
+
+A sample `publishParameters` JSON object for an Excel file is as follows:
+
+```markdown
+{
+  "type": "excel",
+  "name": "Offices",
+  "sourceUrl": "",
+  "maxRecordCount": 2000,
+  "sourceSR": {
+    "wkid": 4326,
+    "latestWkid": 4326
+  },
+  "targetSR": {
+    "wkid": 102100,
+    "latestWkid": 3857
+  },
+  "editorTrackingInfo": {
+    "enableEditorTracking": false,
+    "enableOwnershipAccessControl": false,
+    "allowOthersToQuery": true,
+    "allowOthersToUpdate": true,
+    "allowOthersToDelete": false,
+    "allowAnonymousToUpdate": true,
+    "allowAnonymousToDelete": true
+  },
+  "hasAttachments": false,
+  "capabilities": "Create,Delete,Query,Update,Editing",
+  "layers": [
+    {
+      "currentVersion": 10.8,
+      "id": 0,
+      "name": "Offices",
+      "type": "Table",
+      "displayField": "",
+      "description": "",
+      "copyrightText": "",
+      "locationType": "address",
+      "geocodeServiceUrl": "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer",
+      "sourceLocale": "en",
+      "sourceCountry": "us",
+      "addressFields": {
+        "Address": "Street",
+        "City": "City",
+        "Region": "State",
+        "Postal": "Zip"
+      },
+      "standardizedFieldNames": {
+        "Address": "Street",
+        "City": "City",
+        "Region": "State",
+        "Postal": "ZIP",
+        "PostalExt": "ZIP4",
+        "CountryCode": "Country"
+      },
+      "excelSheetId": 0,
+      "defaultVisibility": true,
+      "relationships": [],
+      "isDataVersioned": false,
+      "supportsCalculate": true,
+      "supportsTruncate": false,
+      "supportsAttachmentsByUploadId": true,
+      "supportsRollbackOnFailureParameter": true,
+      "supportsStatistics": true,
+      "supportsAdvancedQueries": true,
+      "supportsValidateSql": true,
+      "supportsCoordinatesQuantization": true,
+      "supportsApplyEditsWithGlobalIds": false,
+      "advancedQueryCapabilities": {
+        "supportsPagination": true,
+        "supportsPaginationOnAggregatedQueries": true,
+        "supportsQueryRelatedPagination": true,
+        "supportsQueryWithDistance": true,
+        "supportsReturningQueryExtent": true,
+        "supportsStatistics": true,
+        "supportsOrderBy": true,
+        "supportsDistinct": true,
+        "supportsQueryWithResultType": true,
+        "supportsSqlExpression": true,
+        "supportsAdvancedQueryRelated": true,
+        "supportsReturningGeometryCentroid": false,
+        "supportsQueryWithDatumTransformation": true
+      },
+      "useStandardizedQueries": false,
+      "allowGeometryUpdates": true,
+      "hasAttachments": false,
+      "htmlPopupType": "",
+      "hasM": false,
+      "hasZ": false,
+      "globalIdField": "",
+      "typeIdField": "",
+      "fields": [
+        {
+          "name": "Name",
+          "type": "esriFieldTypeString",
+          "alias": "Name",
+          "sqlType": "sqlTypeOther",
+          "length": 256,
+          "nullable": true,
+          "editable": true,
+          "domain": null,
+          "defaultValue": null,
+          "locationType": "unknown"
+        },
+        {
+          "name": "Street",
+          "type": "esriFieldTypeString",
+          "alias": "Street",
+          "sqlType": "sqlTypeOther",
+          "length": 256,
+          "nullable": true,
+          "editable": true,
+          "domain": null,
+          "defaultValue": null,
+          "locationType": "Address"
+        },
+        {
+          "name": "City",
+          "type": "esriFieldTypeString",
+          "alias": "City",
+          "sqlType": "sqlTypeOther",
+          "length": 256,
+          "nullable": true,
+          "editable": true,
+          "domain": null,
+          "defaultValue": null,
+          "locationType": "City"
+        },
+        {
+          "name": "State",
+          "type": "esriFieldTypeString",
+          "alias": "State",
+          "sqlType": "sqlTypeOther",
+          "length": 256,
+          "nullable": true,
+          "editable": true,
+          "domain": null,
+          "defaultValue": null,
+          "locationType": "Region"
+        },
+        {
+          "name": "Zip",
+          "type": "esriFieldTypeString",
+          "alias": "Zip",
+          "sqlType": "sqlTypeOther",
+          "length": 256,
+          "nullable": true,
+          "editable": true,
+          "domain": null,
+          "defaultValue": null,
+          "locationType": "Postal"
+        }
+      ],
+      "indexes": [],
+      "types": [],
+      "templates": [],
+      "supportedQueryFormats": "JSON, geoJSON",
+      "hasStaticData": false,
+      "maxRecordCount": -1,
+      "standardMaxRecordCount": 32000,
+      "tileMaxRecordCount": 8000,
+      "maxRecordCountFactor": 1,
+      "capabilities": "",
+      "dateFieldsTimeReference": {
+        "timeZone": "Pacific Standard Time"
+      }
+    }
+  ],
+  "hasStaticData": true,
+  "layerInfo": {
+    "capabilities": "Query"
+  }
+}
+``` 
+
+## Shapefile, feature collections, and file geodatabases publish parameters JSON properties
+
+The `publishParameters` JSON object used to publish shapefiles, feature collections, and file geodatabases is described below.
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `name` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Name of the published service. The same name is reused as the name for the single layer within the service if the `layerInfo` parameter is not provided.
+
+      Example:
+
+      ```markdown
+      "name": "Name of published result"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `description` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A user-friendly description for the published dataset. The same description is reused for the single layer within the service if the `layerInfo` parameter is not provided.
+
+      Example:
+
+      ```markdown
+      "description": "test description"
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `maxRecordCount` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A double value indicating any constraints enforced on query operations. The default is -1 or `int.MaxValue` indicating no constraint.
+
+      Example:
+
+      ```markdown
+      "maxRecordCount": 500
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `copyrightText` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Copyright information associated with the dataset.
+
+      Example:
+
+      ```markdown
+      "copyrightText": "test copyright"
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `layerInfo` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object that provides additional information about the dataset. The JSON format resembles the `layerDescriptor` used in publishing feature services to an on-premises spatial data server or ArcGIS Server.
+
+      Example:
+
+      ```markdown
+      {
+        "name": "<layer name>",  
+        "type": "Feature Layer", 
+        "description": "<description>", 
+        "copyrightText": "<copyright text>", 
+        "geometryType": "<geometry type>", 
+        "minScale": <number>, 
+        "maxScale": <number>, 
+        "extent": {<extent JSON with spatial ref>}, 
+        "drawingInfo": {<drawing info JSON>}, 
+        "hasAttachments": false, 
+        "htmlPopupType": "<popup type>", 
+        "objectIdField": "<object Id field>", 
+        "globalIdField": "", 
+        "typeIdField": "<type Id field>", 
+        "fields": [<array of field JSON objects>], 
+        "types": [<array of type JSON objects>], 
+        "templates": [<array of type JSON objects>], 
+        "capabilities": "<Query and/or Editing, comma separated>"
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `targetSR` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Target spatial reference of the geometries as stored in the database. The default is WKID 102100.
+
+      Example:
+
+      ```markdown
+      "targetSR": {"wkid": 4326}
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+### Shapefile, feature collections, and file geodatabases publish parameters example
+
+A sample `publishParameters` JSON object for publishing shapefiles, feature collections, and file geodatabases is as follows:
+
+```markdown
+{
+  "name": "Name of published result",
+  "description": "test description",
+  "maxRecordCount": 500,
+  "copyrightText": "test copyright",
+  "targetSR": {"wkid": 4326},
+  "layerInfo": {
+    "name": "States From File", 
+    "type": "Feature Layer", 
+    "geometryType": "esri GeometryPolygon", 
+    "minScale": 0, 
+    "maxScale": 0,
+    "drawingInfo": {
+      "renderer": {
+        "type": "simple", 
+        "symbol": {
+          "type": "esriSFS",
+          "style": "esriSFSSolid",
+          "color": [115,76,0,255],
+          "outline": {
+            "type": "esriSLS",
+            "style": "esriSLSSolid",
+            "color": [110,110,110,255],
+            "width": 1
+          }
+        }
+      },
+      "transparency": 0, 
+      "labelingInfo": null
+    }, 
+    "htmlPopupType": "esriServerHTMLPopupTypeNone", 
+    "fields": [], 
+    "capabilities": "Query,Editing"
+  }
+}
+``` 
+
+## Response properties
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `type` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The resulting item is a feature service, map service, or vector tile service URL item.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serviceURL` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The URL to the hosted feature, map service, or vector tile service.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `size` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The approximate size required for the service.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `jobId` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The job ID of the publishing process. All publishing operations are executed asynchronously. The caller is supposed to hold on to the job ID and check for job status. The status can be checked using [Status](/status) passing in `jobType` as a query parameter, for example, `jobType` set as `publish`.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serviceItemId` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The ID of the new service item.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `preserveEditUsersAndTimestamps` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The `preserveEditUsersAndTimestamps` parameter allows the user to preserve editor tracking info of the users and time stamps while publishing online.
+
+      <Note type={"note"}>
+
+      The default is not to preserve editor tracking info.
+
+      </Note>
+
+      Example:
+
+      ```markdown
+      {
+        "editorTrackingInfo": {
+          "enableEditorTracking": true
+          "preserveEditUsersAndTimeStamps": true
+        }
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+### Response properties from publishing a tile service from an existing feature service
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `type` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The resulting item is a map service URL item.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serviceURL` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The URL to the hosted feature or map service.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `jobId` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The job ID of the publishing process. All publishing operations are executed asynchronously. The caller is supposed to hold on to the job ID and check for job status. The status can be checked using [Status](/status) passing in `jobType` as a query parameter, for example, `jobType` set as `publish`.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serviceItemId` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The ID of the new service item.
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Additional example usage
+
+### Vector tile package
+
+Below is a sample ArcGIS Enterprise POST request used to demonstrate how to publish a vector tile package:
+
+```javascript
+POST /webadaptor/sharing/rest/content/users/jSmith/publish HTTP/1.1
+Host: machine.domain.com
+Content-Type: multipart/form-data; boundary=----boundary
+Content-Length: []
+
+------boundary
+Content-Disposition: form-data; name="itemid"
+
+345313e619df46f387f9ededbe15ac56
+------boundary
+Content-Disposition: form-data; name="file"; filename=""
+Content-Type: application/octet-stream
+
+------boundary
+Content-Disposition: form-data; name="filetype"
+
+vectorTilePackage
+------boundary
+Content-Disposition: form-data; name="publishParameters"
+
+{"name":"SampleBasemap","maxRecordCount":2000}
+------boundary
+Content-Disposition: form-data; name="buildInitialCache"
+
+true
+------boundary
+Content-Disposition: form-data; name="outputType"
+
+VectorTiles
+------boundary
+Content-Disposition: form-data; name="f"
+
+json
+------boundary--
+``` 
+
+## JSON Response syntax
+
+```other
+{
+  "services": [
+    {
+      "type": "<type of service>",
+      "serviceurl": "<url to hosted service>",
+      "size": <size of service>,
+      "jobId": "<job id>",
+      "serviceItemId": "<new item id>"
+    }
+  ]
+}
+``` 
+
+## JSON Response example
+
+```other
+{
+  "services": [
+    {
+      "type": "Feature Service",
+      "serviceurl": "https://www.arcgis.com/fa019fbbfbb845d08cc9f0acde6dd8af/arcgis/rest/services/Streets_Service/FeatureServer",
+      "size": 2656729,
+      "jobId": "ff07c87a-dccd-46b4-9597-446dcda248ff",
+      "serviceItemId": "2e39b0b9550a40709f02a697cd9fc4fb"
+    }
+  ]
+}
+```
+
+ 

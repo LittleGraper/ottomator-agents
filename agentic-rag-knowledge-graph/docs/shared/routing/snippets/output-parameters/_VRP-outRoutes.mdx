@@ -1,0 +1,156 @@
+import Stats from "../../snippets/shared-attributes/_Status.mdx"
+import SnapXYZ from "../../snippets/shared-attributes/_SnapXYZ-DistToNet.mdx"
+import NetworkLocation from "../../snippets/shared-attributes/_NetworkLocationFields.mdx"
+
+import ParamMetadata from "../../../components/param-metatdata" 
+
+<ParamMetadata types={[{name:"feature",link:"../routing-data-types#feature"}]} />
+
+{/* <p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p> */}
+
+Provides access to the drivers, vehicles, and route paths of a vehicle routing problem analysis. 
+
+The `populate_route_lines`  and `route_line_simplification_tolerance`  parameters highly influence the shape of the output routes.
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for out routes</span></summary>
+
+-   <p class="space-x-2"><span class="font-bold">Name</span><span class="font-sm text-color-3">string (length: 500)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The name of the route. The values for this field are copied from the `Name` field on the input routes.
+
+-   <p class="space-x-2"><span class="font-bold">ViolatedConstraints</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    This field is deprecated and replaced by the four individual fields `ViolatedConstraint_1` through `ViolatedConstraint_4`. The descriptions of the violations can be seen in ViolationConstraints\_#.
+
+-   <p class="space-x-2"><span class="font-bold">ViolatedConstraint_1 through ViolatedConstraint_4</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    These fields contain a summary of violated constraints and are set after a solve operation. Each field will contain one violation. If an order has more than one violation, the next ViolatedConstraint_# field will be used.
+
+    -   `MaxOrderCount exceeded`(0)—The preassigned orders cannot be assigned to the route since assigning the orders would exceed the maximum number of orders that can be assigned to the route as specified by the route's `MaxOrderCount` field value.
+    -   `Capacities exceeded`(1)—The preassigned orders cannot be assigned to the route since assigning the orders would exceed the total route capacity as specified by the route's `Capacities`  field value.
+    -   `MaxTotalTime exceeded`(2)—The travel time from the start depot to the end depot plus the service and wait times at both depots and any break exceeds the total time for the route as specified by the route's `MaxTotalTime` field value.
+    -   `MaxTotalTravelTime exceeded`(3)—The travel time from the start depot to the end depot exceeds the total travel time for the route as specified by the route's `MaxTotalTravelTime`  field value.
+    -   `MaxTotalDistance exceeded`(4)—The travel distance from the start depot to the end depot exceeds the total travel distance for the route as specified by the route's `MaxTotalDistance`  field value.
+    -   `Hard time window`(5)—There is a hard time window violation on the start depot, end depot, or break associated with the route.
+    -   `Unmatched specialty`(6)—The specialties required by an order are not found on the target route.
+    -   `Hard route zone`(7)—An order that was preassigned to the route does not fall within a hard route zone.
+    -   `Order pair MaxTransitTime exceeded`(8)—There is an order pair preassigned to the route, and assigning the orders in the order pair would exceed the maximum transit time for the order pair as specified by the order pair's `MaxTransitTime`  field value.
+    -   `Order pair violation`(9)—An order belongs to an order pair and cannot be assigned to the preassigned route.
+    -   `Unreachable`(10)—A preassigned order is located on a network element that cannot be reached by the route.
+    -   `Cannot insert required break`(11)—A break for the route has a null sequence value in the presence of preassigned orders, and the break cannot be inserted anywhere without introducing other violations.
+    -   `Cannot insert required renewal`(12)—A route exceeds its capacity and needs to visit a route renewal; however, the associated route renewal has a null sequence value in the presence of preassigned orders and cannot be inserted anywhere without introducing other violations.
+    -   `MaxTravelTimeBetweenBreaks exceeded`(13)—The solver was unable to insert a break within the time specified by the break's `MaxTravelTimeBetweenBreaks` field. This is often caused by preassigning a sequence to a break such that it cannot be reached within the maximum travel time.
+    -   `Break MaxCumulWorkTime exceeded`(14)—The solver was unable to insert a break within the time specified by the break's `MaxCumulWorkTime` field. This is often caused by preassigning a sequence to a break such that it cannot be reached within the maximum work time.
+    -   `InboundArriveTime or OutboundDepartTime order violation`(15)—The order couldn't be serviced within the inbound arrive time or outbound depart time constraints. This violation occurs when all the routes' `LatestStartTime` field values precede the `InboundArriveTime` values or none of the routes can reach a depot before the order's `OutboundDepartTime` value. 
+    -   `Cannot anchor first/last`(16)—The order has an Anchor first or Anchor last assignment rule, but the solver was not able to honor this constraint. This violation occurs when the number of Anchor first orders or the number of Anchor last orders is greater than the number of available routes.
+
+-   <p class="space-x-2"><span class="font-bold"> OrderCount</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The number of orders assigned to the route.
+
+-   <p class="space-x-2"><span class="font-bold">TotalCost</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The total operating cost of the route, which is the sum of the following field values: `FixedCost`, `RegularTimeCost`, `OvertimeCost`, and `DistanceCost` .
+
+-   <p class="space-x-2"><span class="font-bold">RegularTimeCost</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The cost of regular work time, excluding any unpaid breaks.
+
+-   <p class="space-x-2"><span class="font-bold">OvertimeCost</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p> 
+
+    The cost of overtime work, excluding any unpaid breaks. 
+
+-   <p class="space-x-2"><span class="font-bold">DistanceCost</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The distance cost component obtained by multiplying the `TotalDistance` and `CostPerUnitDistance` field values. 
+
+-   <p class="space-x-2"><span class="font-bold">TotalTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p> 
+
+    The total route duration. This includes travel times as well as service and wait times at orders, depots, and breaks. The `TotalTime`  value is the sum of the following attribute fields: 
+
+    -   `StartDepotServiceTime` 
+    -   `EndDepotServiceTime` 
+    -   `TotalOrderServiceTime` 
+    -   `TotalBreakServiceTime` 
+    -   `TotalRenewalServiceTime` 
+    -   `TotalWaitTime` 
+    -   `TotalTravelTime` 
+
+    The value is in the units specified by the [`time_units`](#time_units) parameter.
+
+-   <p class="space-x-2"><span class="font-bold">TotalOrderServiceTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p> 
+
+    The total service time spent at all orders on the route.
+
+    The value is in the units specified by the [`time_units`](#time_units) parameter.
+
+-   <p class="space-x-2"><span class="font-bold">TotalBreakServiceTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p> 
+
+    The total service time spent at all breaks on the route. 
+
+    The value is in the units specified by the [`time_units`](#time_units) parameter.
+
+-   <p class="space-x-2"><span class="font-bold">TotalTravelTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p> 
+
+    The total travel time for the route.
+
+    The value is in the units specified by the [`time_units`](#time_units) parameter.
+
+-   <p class="space-x-2"><span class="font-bold">TotalDistance</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p> 
+
+    The total travel distance for the route.
+
+    The value is in the units specified by the [`distance_units`](#distance_units) parameter.
+
+-   <p class="space-x-2"><span class="font-bold">StartTime</span><span class="font-sm text-color-3">date</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a></p> 
+
+    The starting time of the route. The route may start before the beginning of its start depot's time window, in which case there is a wait time at the starting depot. The time of day value for this attribute is in the time zone in which the starting depot is located.
+
+-   <p class="space-x-2"><span class="font-bold">EndTime</span><span class="font-sm text-color-3">date</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a></p> 
+
+    The ending time of the route. The route ends upon completion of service at the ending depot. The time of day value for this attribute is in the time zone in which the ending depot is located.
+
+-   <p class="space-x-2"><span class="font-bold">StartTimeUTC</span><span class="font-sm text-color-3">date</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a></p> 
+
+    The start time of the route in coordinated universal time (UTC).
+
+-   <p class="space-x-2"><span class="font-bold">EndTimeUTC</span><span class="font-sm text-color-3">date</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a></p> 
+
+    The end time of the route in coordinated universal time (UTC).
+
+-   <p class="space-x-2"><span class="font-bold">TotalWaitTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p> 
+
+    The total wait time at all orders, depots, and breaks on the route.
+
+    The value is in the units specified by the [`time_units`](#time_units) parameter.
+
+-   <p class="space-x-2"><span class="font-bold">TotalViolationTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p> 
+
+    The total violation time at all orders and breaks on the route.
+
+    The value is in the units specified by the [`time_units`](#time_units) parameter.
+
+-   <p class="space-x-2"><span class="font-bold">RenewalCount</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    For a route with renewals, this is equal to the number of visits to depots for the purpose of renewing a vehicle, that is, loading or unloading a vehicle.
+
+-   <p class="space-x-2"><span class="font-bold">TotalRenewalServiceTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p> 
+
+    For a route with renewals, this is the total service time spent at all renewal visits on the route.
+
+    The value is in the units specified by the [`time_units`](#time_units) parameter.
+
+</details>
+
+**Example:**
+
+The following shows an example of the `out_routes` parameter.
+
+<Note type={"note"}>
+
+Because the response is quite verbose, the repeated elements within the response are abbreviated for clarity.
+
+</Note>
+
+<CodeBlock language="json" source="../../code-samples/vrp/examples/outputs/outRoutes.json" group="json" maxLines={20} expandable/>

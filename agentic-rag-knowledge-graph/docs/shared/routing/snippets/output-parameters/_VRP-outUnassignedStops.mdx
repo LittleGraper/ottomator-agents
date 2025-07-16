@@ -1,0 +1,71 @@
+import Stats from "../../snippets/shared-attributes/_Status.mdx"
+import ParamMetadata from "../../../components/param-metatdata" 
+
+<ParamMetadata types={[{name:"feature",link:"../routing-data-types#feature"}]} />
+
+{/* <p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p> */}
+
+Provides access to the orders that couldn't be visited by any routes. You can also determine why the orders couldn't be visited and make the necessary changes to correct the problem.
+
+<Note type={"note"}>
+
+When the `populate_stop_shapes`  parameter is set to `true`, the `out_stops` parameter returns features with geometries. Otherwise features are returned only with attributes.
+
+</Note>
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for out unassigned stops</span></summary>
+
+-   <p class="space-x-2"><span class="font-bold">Name</span><span class="font-sm text-color-3">string (length: 500)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The name of the stop. The value of this field is the same as the `Name` field from input orders, depots, or breaks. You can use the `StopType` field to determine whether the `Name` field value refers to a depot, an order, or a break.
+
+-   <p class="space-x-2"><span class="font-bold">StopType</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    Indicates whether the stop represents a depot, an order, or a break. The field value is an integer that can be interpreted in the following ways: 
+
+    -   `0` —The stop is an order
+    -   `1` —The stop is a depot
+    -   `2` —The stop is a break
+
+-   <p class="space-x-2"><span class="font-bold">ViolatedConstraints</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    This field is deprecated and replaced by the four individual fields `ViolatedConstraint_1` through `ViolatedConstraint_4`. The descriptions of the violations can be seen in ViolationConstraints\_#.
+
+-   <p class="space-x-2"><span class="font-bold">ViolatedConstraint_1 through ViolatedConstraint_4</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    These fields contain a summary of violated constraints and are set after a solve operation. Each field will contain one violation. If an order has more than one violation, the next ViolatedConstraint_# field will be used.
+
+    -   `MaxOrderCount exceeded`(0)—The preassigned orders cannot be assigned to the route since assigning the orders would exceed the maximum number of orders that can be assigned to the route as specified by the route's `MaxOrderCount` field value.
+    -   `Capacities exceeded`(1)—The preassigned orders cannot be assigned to the route since assigning the orders would exceed the total route capacity as specified by the route's `Capacities`  field value.
+    -   `MaxTotalTime exceeded`(2)—The travel time from the start depot to the end depot plus the service and wait times at both depots and any break exceeds the total time for the route as specified by the route's `MaxTotalTime` field value.
+    -   `MaxTotalTravelTime exceeded`(3)—The travel time from the start depot to the end depot exceeds the total travel time for the route as specified by the route's `MaxTotalTravelTime`  field value.
+    -   `MaxTotalDistance exceeded`(4)—The travel distance from the start depot to the end depot exceeds the total travel distance for the route as specified by the route's `MaxTotalDistance`  field value.
+    -   `Hard time window`(5)—There is a hard time window violation on the start depot, end depot, or break associated with the route.
+    -   `Unmatched specialty`(6)—The specialties required by an order are not found on the target route.
+    -   `Hard route zone`(7)—An order that was preassigned to the route does not fall within a hard route zone.
+    -   `Order pair MaxTransitTime exceeded`(8)—There is an order pair preassigned to the route, and assigning the orders in the order pair would exceed the maximum transit time for the order pair as specified by the order pair's `MaxTransitTime`  field value.
+    -   `Order pair violation`(9)—An order belongs to an order pair and cannot be assigned to the preassigned route.
+    -   `Unreachable`(10)—A preassigned order is located on a network element that cannot be reached by the route.
+    -   `Cannot insert required break`(11)—A break for the route has a null sequence value in the presence of preassigned orders, and the break cannot be inserted anywhere without introducing other violations.
+    -   `Cannot insert required renewal`(12)—A route exceeds its capacity and needs to visit a route renewal; however, the associated route renewal has a null sequence value in the presence of preassigned orders and cannot be inserted anywhere without introducing other violations.
+    -   `MaxTravelTimeBetweenBreaks exceeded`(13)—The solver was unable to insert a break within the time specified by the break's `MaxTravelTimeBetweenBreaks` field. This is often caused by preassigning a sequence to a break such that it cannot be reached within the maximum travel time.
+    -   `Break MaxCumulWorkTime exceeded`(14)—The solver was unable to insert a break within the time specified by the break's `MaxCumulWorkTime` field. This is often caused by preassigning a sequence to a break such that it cannot be reached within the maximum work time.
+    -   `InboundArriveTime or OutboundDepartTime order violation`(15)—The order couldn't be serviced within the inbound arrive time or outbound depart time constraints. This violation occurs when all the routes' `LatestStartTime` field values precede the `InboundArriveTime` values or none of the routes can reach a depot before the order's `OutboundDepartTime` value. 
+    -   `Cannot anchor first/last`(16)—The order has an Anchor first or Anchor last assignment rule, but the solver was not able to honor this constraint. This violation occurs when the number of Anchor first orders or the number of Anchor last orders is greater than the number of available routes.
+
+<Stats />
+
+</details>
+
+**Example:**
+
+The following shows an example of the `out_unassigned_stops` parameter. 
+
+<Note type={"note"}>
+
+Because the response is quite verbose, the repeated elements within the response are abbreviated for clarity.
+
+</Note>
+
+<CodeBlock language="json" source="../../code-samples/vrp/examples/outputs/outUnassignedStops.json" group="json" maxLines={20} expandable/>

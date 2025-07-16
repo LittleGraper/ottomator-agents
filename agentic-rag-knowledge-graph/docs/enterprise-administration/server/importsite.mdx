@@ -1,0 +1,253 @@
+---
+title: "Import Site"
+description: "The importSite  operation imports an existing site configuration into the currently running site."
+slug: "importsite"
+url: "/importsite"
+guid: "GUID-8CBB705C-DFCB-4DE5-9364-C8EA6EACBD61"
+migratedTopicMetadata:
+  FTITLE: "importSite"
+  FDESCRIPTION: ""
+  FCHANGES: "Adding in the validate parameter, new at 11.1. "
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1-*"
+  CREATED-ON: "20/01/2023 12:52:36"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "16/02/2023 21:39:34"
+  VERSION: "8"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "7"
+  ED: "GUID-8E6EB2C2-6165-4640-9166-1560E311B122"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /importSite
+  urlSegments:
+    - name: <root>
+      url: /site
+    - name: /importSite
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.2'
+  requiredCapabilities:
+    - name: Access allowed only with the default administrator role
+      url: /managing-access-to-the-server-administration-rest-api
+---
+
+## Description
+
+<Note type={"caution"}>
+
+This administrative operation is not available when accessed through a web adaptor. Access this operation using a direct URL to one of the GIS servers on the site.
+
+</Note>
+
+The `importSite` operation imports a site configuration into the currently running site. Importing a site means replacing all site configurations (including GIS services, security configurations, and so on) of the currently running site with those contained in the site configuration file. The site configuration file can be obtained through the [Export Site](/exportsite) operation, which writes the information to either a file location accessible to ArcGIS Server or to a directory where you can download the configuration file.
+
+The `importSite` operation also restores a site from a backup that was created using the `exportSite` operation. The `importSite` operation uses the server directory paths from the exported configuration. These paths must be available for the `importSite` operation to complete successfully.
+
+This operation will restore all information included in the backup, as described in [Export Site](/exportsite). Once the import is complete, this operation returns a report that should be reviewed. Fix any problems listed in the report to ensure that the site functions as expected.
+
+<Note type={"caution"}>
+
+This operation is computationally intensive and may run for a long duration. Manual intervention may be required at the end of this operation to address any highlighted problems. Since this operation changes the site configuration completely, it is recommended that no GIS services are accessed and that no administrative operations or functions are performed on the site while the operation is running.
+
+</Note>
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `location` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The file path to an exported configuration or an ID referencing the stored configuration on the server.
+
+      ```markdown label=Example
+      location=i5fad5582-80bc-4155-a21c-62f326354aba
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `validate` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at ArcGIS Enterprise 11.1. This parameter validates the file path specified in the `location` parameter, ensuring that it is accessible before performing the `importSite` operation. If set to `true`, the path will be validated, and the operation will return either a success response or an error message. The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `restartWebServer` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at ArcGIS Enterprise 11.3. This parameter specifies whether the server should restart once the operation completes. It's recommended to enable the server to restart (`true`) if this operation is called multiple times between restarts. The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `importSite` operation that demonstrates validating the file location:
+
+```other
+POST /arcgis/admin/importSite HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+location=\\server\share\backup\Jan-15-2023_11-50-33.agssite&validate=true&f=pjson
+```
+
+## JSON Response examples
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Without validation</TabTitle>
+  <TabTitle>With validation</TabTitle>
+  <TabTitle>Restart enabled</TabTitle>
+</TabNav>
+
+  <Tab>
+
+    The response below highlights the server's failure to start a service during the `importSite` operation. For demonstration purposes, a service's input data path was edited to point to a nonexistent file before exporting the site. The same exported configuration file was supplied as input 	to the `importSite` operation. When `importSite` completes, the response warns that a service could not be started during the `importSite` operation because the file could not be found. This information can be used to fix the issue by editing the data path of the service and running it again.
+
+    ```javascript
+    {
+      "status": "success",
+      "result": [
+        {
+          "source": "SITE",
+          "messages": [
+            {
+              "level": "INFO",
+              "message": "This operation completed in 1.52 mins"
+            }
+          ]
+        },
+        {
+          "source": "SERVICES",
+          "messages": [
+            {
+              "level": "WARNING",
+              "message": "SampleWorldCities.MapServer=Startup state of service 'SampleWorldCities.MapServer' 
+                on machine 'MSCONFIG.ESRI.COM' was FAILED. Can not open file path/to/data/WorldCities.ms. 
+                The system cannot find the file specified. Probable cause: The file is inaccessible to Server.\n",
+              "details": {
+                "service": "SampleWorldCities.MapServer",
+                "state": "FAILED",
+                "message": "",
+                "machines": [
+                  {
+                    "machine": "MSCONFIG.ESRI.COM",
+                    "state": "FAILED",
+                    "reports": [
+                      {
+                        "state": "FAILED",
+                        "message": " Can not open file path/to/data/WorldCities.ms.
+                          The system cannot find the file specified. Probable cause: The file is inaccessible to Server."
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+    ```
+  </Tab>
+
+  <Tab>
+
+    The sample response below is for a request that had the `validate` parameter set to `true`. This example demonstrates a success response, meaning that the path was accessible to ArcGIS Server:
+
+    ```javascript
+    {
+      "status": "success"
+    }
+    ```
+
+    The sample response below is for a request that had the `validate` parameter set to `true`. This example demonstrates a failure, meaning that the path was not accessible to ArcGIS Server:
+
+    ```javascript
+    {
+      "status": "error",
+      "messages": ["Unable to read from \\server\share\backup\Jan-15-2023_11-50-33.agssite. Verify the location is accessible and the service account running Portal for ArcGIS can read from it."],
+      "code": 500
+    }
+    ```
+  </Tab>
+
+  <Tab>
+
+    The sample response below is for a request that had the `restartWebServer` parameter set to `true`.
+
+    ```javascript
+    {
+      "status": "success",
+      "result": [
+        {
+          "source": "SITE",
+          "messages": [
+            {
+              "level": "INFO",
+              "message": "Import operation completed in '00hr:05min:38sec'."
+            }
+          ]
+        },
+        {
+          "source": "SECURITY",
+          "messages": [
+            {
+              "level": "INFO",
+              "message": "Configuration options pertaining to HTTPS were changed during the import operation and the Server is restarting. The site should become available shortly."
+            }
+          ]
+        }
+      ],
+      "recheckAfterSeconds": 20
+    }
+    ```
+  </Tab>
+
+</Tabs>

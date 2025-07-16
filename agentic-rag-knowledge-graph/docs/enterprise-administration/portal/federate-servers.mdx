@@ -1,0 +1,170 @@
+---
+title: "Federate Servers"
+description: "The federate operation federates an ArcGIS Server with Portal for ArcGIS."
+slug: "federate-servers"
+url: "/federate-servers"
+guid: "GUID-AB54E524-084F-4EFF-85FE-38C664937044"
+migratedTopicMetadata:
+  FTITLE: "Federate Servers"
+  FDESCRIPTION: ""
+  FCHANGES: "Implementing REST API style changes"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.8 - *"
+  CREATED-ON: "13/08/2019 12:41:31"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "06/11/2019 00:49:04"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "10"
+  ED: "GUID-06C91688-4C73-4227-8678-404EA29F2F05"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /federation/servers/federate
+  urlSegments:
+    - name: <root>
+      url: /portal-administration-root
+    - name: /federation/servers/federate
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.4'
+  requiredCapabilities:
+    - name: Access allowed with the "Servers" privilege
+      url: /privileges-for-portal-admin-api
+---
+
+## Description
+
+The `federate` operation enables an ArcGIS Server to be federated with an organization.
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `url` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The URL of the GIS server used by external users when accessing the ArcGIS Server site. If the site includes the Web Adaptor, the URL includes the Web Adaptor address. If you've [added ArcGIS Server to your organization's reverse proxy server](https://enterprise.arcgis.com/en/server/latest/deploy/linux/using-a-reverse-proxy-server-with-arcgis-server.htm), the URL is the reverse proxy server address.
+
+      Note that the federation operation will perform a validation check to determine if the provided URL is accessible from the server site. If the resulting validation check fails, a warning will be generated in the logs. However, federation will not fail if the URL is not validated, as the URL may not be accessible from the server site, such as is the case when the server site is behind a firewall.
+
+      ```markdown label=Example
+      //Fully qualified machine name
+      url=https://machine.domain.com/arcgis
+
+      //URL includes Web Adaptor address
+      url=https://machine.domain.com/gis
+
+      //URL is the reverse proxy server address
+      url=https://reverseproxy.domain.com/myorg
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `adminUrl` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The URL used for accessing ArcGIS Server when performing administrative operations on the internal network. If you federate with a multimachine site or [highly available GIS Server](https://enterprise.arcgis.com/en/portal/latest/administer/windows/configure-highly-available-system.htm#GUID-6F6DD35F-9F5A-420C-9BBA-320EC12DBEAC), use the Web Adaptor or load balancer URL in this field instead. The `adminUrl` must be a URL that the portal can use to communicate with all servers in the site, even when one of them is unavailable. If you use a Web Adaptor for this URL, ensure that you have [enabled administrative access to the server](https://enterprise.arcgis.com/en/server/latest/install/windows/arcgis-web-adaptor-link.htm) through the Web Adaptor.
+
+      ```markdown label=Example
+      adminUrl=https://gisserver.domain.com:6443/arcgis
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `username` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The username of the primary site administrator account that was used to initially log in to ArcGIS Server Manager and administer the server. If this account is disabled, you'll need to [re-enable](https://enterprise.arcgis.com/en/server/latest/administer/linux/disabling-the-primary-site-administrator-account.htm#ESRI_SECTION1_D0DA66BCDDCD4712A04EE1567207EF3E) it.
+
+      ```markdown label=Example
+      username=administrator
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `password` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The password of the primary site administrator account.
+
+      ```markdown label=Example
+      password=adminpassword
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response value is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `federate` operation:
+
+```markdown
+POST /webadaptor/portaladmin/federation/servers/federate HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+url=https://machine.domain.com/gis&adminUrl=https://machine.domain.com:6443/arcgis&username=administrator&password=adminpassword&f=json
+
+```
+
+## Response values
+
+Possible `status` responses include:
+
+- `success` 
+- `success with warnings`
+- `failure` 
+- `undetermined` 
+
+## JSON Response syntax
+
+```javascript
+{
+  "status": "success",
+  "serverId": "iSoD09CM73g0tmu9",
+  "messages": "..."
+}
+```

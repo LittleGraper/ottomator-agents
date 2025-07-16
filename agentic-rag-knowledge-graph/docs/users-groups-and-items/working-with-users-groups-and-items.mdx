@@ -1,0 +1,94 @@
+---
+title: "ArcGIS Portal Directory REST API"
+description: "ArcGIS Online is Esri's Software as a Service offering that represents GIS as a service. ArcGIS Enterprise is software technology from Esri that customers can deploy either on-premises or in the cloud. Both products allow users and organizations to author and share maps and data through a portal that supports users, groups, and sharing."
+slug: "working-with-users-groups-and-items"
+url: "/working-with-users-groups-and-items"
+guid: "GUID-CE15EFF6-6260-4418-99DA-E6101DA0BAFD"
+migratedTopicMetadata:
+  FTITLE: "Working with users groups and items"
+  FDESCRIPTION: ""
+  FCHANGES: "Updating title to match developer's site consistency"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9.1 - *"
+  CREATED-ON: "10/04/2023 15:27:27"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "21/04/2023 11:28:58"
+  VERSION: "9"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-BE5A644C-04B4-4652-87AA-A4AF480D5958"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata: {}
+---
+
+## Introduction to the Sharing API
+
+The Portal Directory API, also called the Sharing API, is the component of the ArcGIS APIs that offers resources for working with users, groups, and content in an organization. The root URL for the Sharing API's child resources and operations is different between ArcGIS Online and ArcGIS Enterprise implementations. The examples below demonstrate a generic structure for the root URL for ArcGIS Online and ArcGIS Enterprise, which are used throughout this publication as placeholders for an organization's specific URL.
+
+Example root URL for ArcGIS Online
+
+```markdown
+https://org.arcgis.com/sharing/rest
+```
+
+Example root URL for ArcGIS Enterprise
+
+```markdown
+https://machine.domain.com/webadaptor/sharing/rest
+```
+
+The Sharing API, when used in conjunction with other ArcGIS APIs, allows developers to build web, device, and desktop applications that support sharing and collaboration using web maps. Organizational developers can also use these APIs to build custom applications for their users. Aspects of the portal-specific resources of the Sharing API are integrated into the object models of the web and device client APIs. 
+
+<Note type={"note"}>
+
+Users not directly interacting with our administrative or REST APIs (for example, using scripts or having a web application firewall configured) may encounter query limitations. In instances where a query string exceeds 2048 characters in length, the query should be submitted as a POST request.
+
+</Note>
+
+## Concepts
+
+The following concepts are important to understand before first working with the Sharing API.
+
+### Portals
+
+ArcGIS Online and ArcGIS Enterprise organizations have a portal that allows users to create, upload, publish, and share content over the web. The front-facing portal interface for each organization is powered by the back-end infrastructure of the Sharing API. Portals support various types of items, including the following:
+
+- Maps—Web maps that can be displayed on all supported platforms (web, mobile, and desktop) 
+- Layers—Feature, map, and image services that can be added as layers in web maps 
+- Applications—Web and mobile applications whose content is provided by web maps 
+- Tools—Geocoding, routing, and other task-based services that can be used by applications 
+- Data files—Files that can be uploaded, stored, and downloaded, and in certain cases, activated to create services (map layers)
+
+Portal items can be kept private to the users that created them, shared with other users in specific groups, shared through distributed or partnered collaboration, or made public and accessible to everyone.
+
+Users will see the version of the portal and Sharing API that corresponds with their organization, including other users and created groups, as well as items that belong to the organization that have been shared with, or made accessible to, the accessing user. Various aspects of the portal's look and feel can be customized by an organization administrator.
+
+### User types, roles, and privileges
+
+The ability for organization members to access and work with content depends on the privileges they have been assigned. A member's assigned user type determines the privileges that can be granted to users through their default or custom role. ArcGIS Online and ArcGIS Enterprise have default roles that can be assigned to users when they join an organization that define the set of privileges for each member. For example, users assigned the predefined administrator role can add new users to their organization, set up distributed collaborations, customize the look and feel of the front-facing portal, and have access to all content in the organization. Custom roles allow a more fine-grained approach to roles assigned in the organization. For example, a user can be assigned a custom administrator role that gives them most administrator privileges except for the ability to manage the organization's security and infrastructure.
+
+### Hosted services
+
+Hosted services are REST-based geospatial services that are hosted in ArcGIS Online or ArcGIS Enterprise. Hosted services support the [ArcGIS Services Directory API](DEVSITE/rest/services-reference/enterprise/get-started-with-the-services-directory) and appear similar to any other ArcGIS Server service to consumers. A hosted service (as well as any external ArcGIS Server service that is registered with ArcGIS Online or a portal) is represented by an item of the appropriate service type, for example, a map service or feature service, the portal. In both cases, the item in the portal representing the service contains the URL to the service endpoint. In the case of hosted services, the item represents the service, and deleting it will delete the service. In the case of external services, the portal item represents a link to the service.
+
+## API
+
+The API for working with portals can be used either anonymously or with authentication. Anonymous users see an anonymous view of the portal. Authenticated users of the REST API see the view of the portal that applies to the authenticated user.
+
+The REST API is organized around resources and their child operations and resources.
+
+The [Portal Self](/portal-self) resource represents the view of the portal exposed to the accessing user. It includes the ID of the organization that this view of the portal belongs to if the accessing user is a member of an organization. If the accessing user is not a member of an organization, the default view of the portal is returned. The Portal resource includes information on the name and logo for the portal, the groups containing the featured content for the portal, and other customizable aspects of the portal for an organization.
+
+[Users](/user) and [Groups](/group) are community resources that are organized under the [\[Community Root\]](/community-root) resource.
+
+Content resources are modeled under the [\[Content Root\]](/content-root) resource. Every piece of content has a unique item ID and is addressable through an [Item](/publish-item) resource with a unique URL based on that ID. Access to this resource is governed by the sharing rules. Every piece of content is also modeled as a [User Item](/user-item-link) under the [User Content](/user-content) resource for the owning user. This resource is accessible only by the owner and allows users to organize their items into personal folders to help with management of their item collections. These resources are not shared or visible to others. The [Group Content](/group-content) resource represents the content that has been shared with a group and is accessible by members of the group.
+
+### API versioning
+
+The ArcGIS REST API evolves such that the input parameters and the JSON responses are version compatible. The API follows the same versioning philosophy as ArcGIS Server. The root REST resource for the portal exposes the portal's version as a response property.

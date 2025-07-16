@@ -1,0 +1,219 @@
+---
+title: "Query Report Data"
+description: "The data operation allows you to query usage report data from the entire server site."
+slug: "queryreportdata"
+url: "/queryreportdata"
+guid: "GUID-114C57C5-66EB-4EE7-AD0F-EFA6FC185275"
+migratedTopicMetadata:
+  FTITLE: "queryReportData"
+  FDESCRIPTION: ""
+  FCHANGES: "Adding privilege requirements"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.8.1 - *"
+  CREATED-ON: "09/06/2020 20:53:13"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "09/06/2020 20:55:39"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-BB5734A6-EDED-41E2-AEC6-BA21AF7C8C24"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /usagereports/<usageReport>/data
+  urlSegments:
+    - name: <root>
+      url: /site
+    - name: /usagereports/<usageReport>/data
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '10.3'
+  requiredCapabilities:
+    - name: Access allowed with either the "Update", "Delete", "Security and Infrastructure", or "Servers" privileges
+      url: /managing-access-to-the-server-administration-rest-api
+  
+---
+
+## Description
+
+The `data` operation retrieves server usage data for the report. This operation aggregates and filters server usage statistics for the entire ArcGIS Server site. The report data is aggregated in a time slice, which is obtained by dividing up the time duration by the default (or specified) `aggregationInterval` parameter in the report. Each time slice is represented by a timestamp, which represents the ending period of that time slice.
+
+In the JSON response, the queried data is returned for each metric-resource URI combination in a query. In the report-data section, the queried data is represented as an array of numerical values. A response of `null` indicates that data is not available or requests were not logged for that metric in the corresponding time-slice.
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Description"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `filter` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The report data can be filtered by the machine where the data is generated. The filter accepts a comma separated list of machine names; `*` represents all machines.
+
+      ```markdown label=Example
+      // filters for the specified machines
+      {"machines": ["WIN-85VQ4T2LR5N", "WIN-239486728937"]}
+
+      // no filtering; all machines are accepted
+      {"machines": "*"} 
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json` | `csv` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample GET request for the `data` operation:
+
+```markdown
+https://machine.domain.com/webadaptor/admin/usagereports/1394810360738/data?filter={"machines":"*"}&f=pjson
+```
+
+ 
+
+## JSON Response example
+
+<Note type={"note"}>
+
+A response of `null`  indicates that data is not available or requests were not logged for that metric in the corresponding time-slice.
+
+</Note>
+
+```other
+{
+"report": {
+  "reportname": "Sample World Cities",
+  "metadata": "This is a random test String that could contain report metadata in any format",
+  "time-slices": [
+    1387454987624,
+    1387469387624,
+    1387483787624
+  ],
+  "report-data": [
+    [
+      {
+        "resourceURI": "services/SampleWorldCities.MapServer",
+        "metric-type": "RequestCount",
+        "data": [
+          10,
+          20,
+          33
+        ]
+      },
+      {
+        "resourceURI": "services/SampleWorldCities.MapServer",
+        "metric-type": "RequestsFailed",
+        "data": [
+          0,
+          1,
+          2
+        ]
+      },
+      {
+        "resourceURI": "services/System",
+        "metric-type": "RequestCount",
+        "data": [
+          100,
+          200,
+          300
+        ]
+      },
+      {
+        "resourceURI": "services/System",
+        "metric-type": "RequestsFailed",
+        "data": [
+          11,
+          22,
+          33
+        ]
+      }
+    ],
+    [
+      {
+        "resourceURI": "services/System/CachingTools.GPServer",
+        "metric-type": "RequestAvgResponseTime",
+        "data": [
+          1.1,
+          1.2,
+          1.3
+        ]
+      },
+      {
+        "resourceURI": "services/System/CachingTools.GPServer",
+        "metric-type": "RequestsTimedOut",
+        "data": [
+          9,
+          8,
+          7
+        ]
+      }
+    ]
+  ]
+}
+}
+```
+
+ 
+
+JSON response example for a report with two queries
+
+<Note type={"note"}>
+
+A response of `null`  indicates that data is not available or requests were not logged for that metric in the corresponding time-slice.
+
+</Note>
+
+```other
+{
+  "reportname": "Sample Report",
+  "since": "LAST_WEEK",
+  "queries": [
+    {
+      "resourceURIs": [
+        "services/SampleWorldCities.MapServer",
+        "services/System"
+      ],
+      "metrics": [
+        "RequestCount",
+        "RequestsFailed"
+      ]
+    },
+    {
+      "resourceURIs": ["services/System/CachingTools.GPServer"],
+      "metrics": [
+        "RequestAvgResponseTime",
+        "RequestsTimedOut"
+      ]
+    }
+  ],
+  "metadata": "This is a random test String that could contain report metadata in any format"
+}
+```
+
+ 

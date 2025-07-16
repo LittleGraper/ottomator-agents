@@ -1,0 +1,413 @@
+---
+title: "Change Parcel Type"
+description: "The changeParcelType operation changes the parcel type and subtype of the specified parcels."
+slug: "changeparceltype-parce-fabric-server"
+url: "/changeparceltype-parce-fabric-server"
+guid: "GUID-057A8707-4B41-41F2-B865-9FB04371316F"
+migratedTopicMetadata:
+  FTITLE: "ChangeParcelType-parce-fabric-server"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "14/08/2023 10:28:17"
+  FAUTHOR: "cleslie"
+  FSTATUS: "Released"
+  MODIFIED-ON: "29/09/2023 11:51:49"
+  VERSION: "6"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-12500E21-BBB6-407D-984C-693BD542BDD2"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/ParcelFabricServer/changeParcelType
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/ParcelFabricServer/changeParcelType
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.8'
+  requiredCapability: ArcGIS Advanced Editing
+---
+
+## Description
+
+The `changeParcelType` operation changes the parcel type and subtype of the specified parcels. The parcel geometries are removed from the original parcel type and subtype and transferred to the specified parcel type and subtype. 
+
+When parcels are changed to different parcel types, the associated record information is not updated and history is not tracked.
+
+[Learn more about changing a parcel type](https://pro.arcgis.com/en/pro-app/latest/help/data/parcel-editing/changeparceltype.htm)
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `gdbVersion` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The name of the geodatabase version (the default is the `DEFAULT` version).
+
+      Syntax
+
+      ```javascript
+      gdbVersion=<version>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sessionId` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The token (GUID) used to lock the version. If the calling client is editing a named version, the `sessionId` value is required. If the specified version is currently locked by another session, the request will fail if the `sessionId` value is not provided or does not match the `sessionId`  value that holds the exclusive lock. If the client is editing the default version, the `sessionId` value is not required.
+
+      Syntax
+
+      ```javascript
+      sessionId=<guid>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `parcels` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The parcels that will be changed.
+
+      Syntax
+
+      ```javascript
+      parcels=[{"id":"<parcelguid>","layerId":"16"},{...}]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `targetParcelType` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The target parcel type.
+
+      Syntax
+
+      ```javascript
+      targetParcelType=<layer id>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `targetParcelSubtype` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The target parcel subtype. 
+
+      Syntax
+
+      ```javascript
+      targetParcelSubType=<subtype id> or 0(for no subtype)
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.1.
+      
+      Specifies whether the request will be processed as an asynchronous job and a URL will be returned that points to a location displaying the status of the job. See the topic regarding [asynchronous](HTTP://RESOURCES.ARCGIS.COM/EN/HELP/ARCGIS-REST-API/02R3/02R3000000RT000000.HTM) usage for more information. The default is `false`.
+
+      Values: `true` | `false` 
+
+      Syntax
+
+      ```javascript
+      async=true|false
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the output format of the response. The default response format is `html`.
+
+      Values: `html` | `json` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+This example shows the steps for changing the parcel type of the specified parcel using the `changeParcelType` operation.
+
+<Note type={"note"}>
+
+  The `sessionId` parameter value must be the same for starting the edit session, performing the edit operation, and stopping the edit session.
+
+</Note>
+
+1.  [Start a service session](/start-reading) on the version.
+
+    Request URL and parameters:
+
+    `https://machine.domain.com/server/rest/services/CountyFabric/VersionManagementServer/versions/E4DAED9D-C859-489B-9053-767A45F1D97C/startReading` 
+
+    ```javascript
+    f=json
+    sessionId={609F870E-D37E-468A-91C8-E404CA1B2893}
+    ```
+     
+2.  [Start an edit session](/start-editing) on the version.
+
+    Request URL and parameters:
+
+    `https://machine.domain.com/server/rest/services/CountyFabric/VersionManagementServer/versions/E4DAED9D-C859-489B-9053-767A45F1D97C/startEditing` 
+
+    ```javascript
+    f=json
+    sessionId={609F870E-D37E-468A-91C8-E404CA1B2893}
+    ```
+     
+3.  Change the parcel type of the specified parcel. No subtype is used.
+
+    Request URL and parameters:
+
+    `https://machine.domain.com/server/rest/services/CountyFabric/ParcelFabricServer/changeParcelType` 
+
+    ```javascript
+    f=json
+    gdbVersion=admin.Version1
+    sessionId={609F870E-D37E-468A-91C8-E404CA1B2893}
+    parcels=[{"id":"{5557DBE3-814C-4795-873F-31D0FC5FE8D6}","layerId":"16"}]
+    record={67D9858E-B4D8-4C12-84C9-685EBA04B741}
+    targetParcelType=16
+    targetParcelSubtype=0
+    async=false
+    ```
+     
+4.  If edits are complete, [stop the edit session](/stop-editing).
+
+5.  [Stop](/stop-reading) and release the service session. 
+
+## JSON Response syntax
+
+The following response is returned when `async` is `false`:
+
+```other
+{
+  "exceededTransferLimit": <true | false>,
+  "moment": <datetime>,
+  "error": {  // only if success is false
+    "extendedCode": <HRESULT>,
+    "message": <error message>,
+    "details": [<detail>]
+  },
+  "serviceEdits": {  // only if transfer limit is not exceeded
+    "editedFeatures": {
+      "deletes": {
+        "attributes": {},
+        "geometry": {}
+      },
+      "adds": {
+        "attributes": {},
+        "geometry": {}
+      },
+      {
+        "spatialReference": {<spatial reference>}
+      },
+      "id" : <layerID>
+    }
+  },
+  "success": <true | false>
+}
+``` 
+
+The following response is returned when `async` is `true`:
+
+```other
+{
+		"statusUrl": <url>
+}
+``` 
+
+## JSON Response example
+
+The following is a response example when `async` is `false`:
+
+```javascript
+{
+  "moment": 1570226366327,
+  "exceededTransferLimit": false,
+  "serviceEdits": [
+    {
+      "id": 2,
+      "editedFeatures": {
+        "spatialReference": {
+          "wkt": "PROJCS[\"User_Defined_Transverse_Mercator\",GEOGCS[\"GCS_User_Defined\",DATUM[\"D_User_Defined\",SPHEROID[\"User_Defined_Spheroid\",6378285.48,298.2641653866821]],PRIMEM[\"Greenwich\",0.0],UNIT
+                 [\"Degree\",0.0174532925199433]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"False_Easting\",262000.0009333333],PARAMETER[\"False_Northing\",0.0],PARAMETER[\"Central_Meridian\",-87.55],
+                 PARAMETER[\"Scale_Factor\",1.0],PARAMETER[\"Latitude_Of_Origin\",43.26666666666667],UNIT[\"Foot_US\",0.3048006096012192]]",
+          "xyTolerance": 0.0032808333333333331,
+          "zTolerance": 0.001,
+          "mTolerance": 0.001,
+          "falseX": -18187000,
+          "falseY": -48539200,
+          "xyUnits": 3048.00609601219276,
+          "falseZ": -100000,
+          "zUnits": 10000,
+          "falseM": -100000,
+          "mUnits": 10000
+        },
+        "adds": [
+          {
+            "attributes": {
+              "ObjectID": 129607,
+              "IsRetired": 1,
+              "Shape__Area": 36539.00962924771,
+              "Shape__Length": 770.920374162495136
+            },
+            "geometry": {
+              "rings": [
+                [
+                  [204062.347066827118, 179762.833532989025],
+                  [204062.347066827118, 179980.178242653608],
+                  [204230.462544243783, 179980.178242653608],
+                  [204230.462544243783, 179762.833532989025],
+                  [204062.347066827118, 179762.833532989025]
+                ]
+              ]
+            }
+          },
+          {
+            "attributes": {
+              "ObjectID": 129608,
+              "IsRetired": 1,
+              "Shape__Area": 520.603541464089972,
+              "Shape__Length": 340.22832216322422
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": 22,
+      "editedFeatures": {
+        "spatialReference": {
+          "wkt": "PROJCS[\"User_Defined_Transverse_Mercator\",GEOGCS[\"GCS_User_Defined\",DATUM[\"D_User_Defined\",SPHEROID[\"User_Defined_Spheroid\",6378285.48,298.2641653866821]],PRIMEM[\"Greenwich
+          \",0.0],UNIT[\"Degree\",0.0174532925199433]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"False_Easting\",262000.0009333333],PARAMETER[\"False_Northing\",0.0],PARAMETER
+          [\"Central_Meridian\",-87.55],PARAMETER[\"Scale_Factor\",1.0],PARAMETER[\"Latitude_Of_Origin\",43.26666666666667],UNIT[\"Foot_US\",0.3048006096012192]]",
+        "xyTolerance": 0.0032808333333333331,
+        "zTolerance": 0.001,
+        "mTolerance": 0.001,
+        "falseX": -18187000,
+        "falseY": -48539200,
+        "xyUnits": 3048.00609601219276,
+        "falseZ": -100000,
+        "zUnits": 10000,
+        "falseM": -100000,"mUnits": 10000
+      },
+      "adds": [
+        {
+          "attributes": {
+            "objectid": 7,
+            "name": "59024350970",
+            "parcelsubtype": null,
+            "createdbyrecord": "{7C149CD4-285E-4197-980B-177E8CBBE30D}",
+            "retiredbyrecord": null,
+            "statedarea": 35773.0,
+            "statedareaunit": null,
+            "calculatedarea": null,
+            "miscloseratio": 100000.0,
+            "misclosedistance": 0.0,
+            "isseed": 0,
+            "created_user": "admin",
+            "create_date": 1570226370000,
+            "last_edited_user": "admin",
+            "last_edited_date": 1570226370000,
+            "globalid": "{ADEB6B4F-FF83-47FD-BDF5-C150B6F024F0}",
+            "modifydate": 1440004271000,
+            "Shape__Area": 35773.08418850592,
+            "Shape__Length": 762.458523272954722
+          },
+          "geometry": {
+            "hasZ": true,
+            "rings": [
+              [
+                [204230.449420914054, 179977.073918156326, 0],
+                [204229.33065674454, 179762.846656322479, 0],
+                [204062.360190160573, 179765.937857486308, 0],
+                [204063.478954330087, 179980.165119320154, 0],
+                [204230.449420914054, 179977.073918156326, 0]
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "success": true
+}
+```
+
+ 

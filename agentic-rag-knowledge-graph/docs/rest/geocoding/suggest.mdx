@@ -1,0 +1,1706 @@
+---
+title: "/suggest"
+description: "Use the suggestions API to obtain character-by-character autocomplete suggestions for typed search input."
+slug: "suggest"
+url: "/suggest"
+guid: "GUID-95F0369A-A047-468E-97EC-6C91EC4DBC25"
+migratedTopicMetadata:
+  FTITLE: "geocoding-suggest"
+  FDESCRIPTION: ""
+  FCHANGES: "September 2024 geocoding update"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "agol 24.R02"
+  CREATED-ON: "10/09/2024 14:03:44"
+  FAUTHOR: "mchaffin"
+  FSTATUS: "Draft"
+  MODIFIED-ON: "16/09/2024 16:22:53"
+  VERSION: "36"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-75D47C71-BC06-42A4-92C8-A21A229E943A"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+--- 
+
+import ParamMetadata from "../../shared/components/param-metatdata"
+import SharedParams from "../../shared/content/_required-params"
+
+<div class="calcite-tabs-hide-borders">
+<Tabs>
+<TabNav slot="tab-nav">
+  <TabTitle is-active>Standard</TabTitle>
+  <TabTitle>Enhanced</TabTitle>
+</TabNav>
+
+<Tab is-active> 
+<div style={{height:"15px"}}></div>
+
+<CodeBlock language="curl" label="GET">{`GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest`}</CodeBlock>
+
+</Tab>
+
+<Tab>
+<div style={{height:"15px"}}></div>
+
+<CodeBlock language="curl" label="GET">{`GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest`}</CodeBlock>
+
+</Tab>
+</Tabs>
+</div>
+
+The `/suggest` request autocompletes input text and return place names and addresses. For example, you can search for "New Y", "Dodgers S", and "Cali" to get a list of suggested place names that match.
+
+<MoreInfo>
+
+The ArcGIS Geocoding service includes a method that allows character-by-character autocomplete suggestions to be generated for user input in a client application. This capability facilitates the interactive search user experience by reducing the number of characters that need to be typed before a suggested match is obtained. The idea is that a client application can provide a list of suggestions that is updated with each character entered by a user until the place they are looking for is returned in the list.
+
+For example, if a user wants to find 27488 Stanford Ave, Bowden, North Dakota, they need to type only `27488 stanfo` , and the address they are looking for is returned as an item in the suggestion list. Or if they are looking for a Disney park but don't know the proper name or address, they can find it using `suggest` .
+
+![Suggest an address.](./images/GUID-9A754AFE-8154-46C3-8A31-3566963F971E-web.png)
+
+Most of the search types that can be made with the [`findAddressCandidates` ](/find-address-candidates) operation can also be made with suggestions. Specifically, the following types of searches are supported by the `suggest`  operation:
+
+-   Street addresses (including street name) 
+
+    -   `27488 Stanford Ave, Bowden, North Dakota` 
+    -   `380 New York St, Redlands, CA
+        92373` 
+-   Street intersections
+
+    -   ` New York St and W Redlands Blvd, Redlands, CA` 
+    -   ` Jacques Veltmanstraat & Pieter Calandlaan, Amsterdam, NLD` 
+-   Points of interest (POI) by name
+
+    -   `Disneyland` 
+    -   `Starbucks` 
+    -   `Mount Everest` 
+-   POI by type 
+
+    -   `amusement park` 
+    -   `coffee` 
+    -   `gas station` 
+-   Administrative place-names, such as city, county, state, province, or country names 
+
+    -   `Seattle` 
+    -   `State of Mahārāshtra` 
+    -   `Liechtenstein` 
+-   Postal codes
+
+    -   `92591` 
+    -   `TW9 1DN` 
+
+Additionally, the `suggest`  operation uses the same proximity algorithm as the [`findAddressCandidates` ](/find-address-candidates) operation. 
+
+In broad terms, the suggestions engine compares tokens in the input text with indexed terms for each address and place in the service, and returns the closest matches. The input parameters included in the request affect the results. For instance, including the `location`  parameter in the request influences the results to favor places near the defined location. 
+
+The suggestions functionality is accessed through the following URL:
+
+`https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?<parameters>` 
+
+The `suggest`  method is intended to be used by a client application to provide a list of suggested matches as a user enters text in a search box. With each character that the user enters in the search box, the list of suggestions will update, until one of the suggestions matches what the user is looking for. 
+
+When the user selects a suggestion, the `text`  and `magicKey`  values for that suggestion can be passed with a [`findAddressCandidates` ](/find-address-candidates) request as the values for the `SingleLine`  and `magicKey`  input parameters, respectively:
+
+`https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?SingleLine="<text1>"&magicKey="<magicKey1>"&f=json` 
+
+<Note type={"note"}>
+
+The same parameters and values used in the `suggest`  request should also be included in the corresponding [`findAddressCandidates` ](/find-address-candidates) request. This includes `location` , `searchExtent` , `category` , and `countryCode` . 
+
+</Note>
+
+
+</MoreInfo>
+
+{/* <!-- ## Access the services
+
+To access the geocoding service you need the following:
+
+1.  An [ArcGIS Location Platform](https://location.arcgis.com/sign-up/) account or [ArcGIS Online](https://www.esri.com/en-us/arcgis/products/arcgis-online/trial) account.
+2.  An [access token](DEVSITE/documentation/glossary/access-token/) (API key or OAuth 2.0) with the appropriate privilege.
+
+<Note type={"note"}>
+
+If you have an [ArcGIS Online](https://www.esri.com/en-us/arcgis/products/arcgis-online/trial) account the `premium:user:geocode`  privilege is required for `suggest`  requests.
+
+If you have an [ArcGIS Location Platform](https://location.arcgis.com/sign-up/) account the `premium:user:geocode:temporary`  privilege is required for `suggest`  requests.
+
+</Note>
+
+<Note type={"tip"}>
+
+To learn how to get an API key or to use OAuth 2.0, see [Security and authentication](DEVSITE/documentation/mapping-apis-and-services/security/) in the [Mapping APIs and location services](DEVSITE/documentation/mapping-apis-and-services/) guide.
+
+</Note>
+
+## Request URL
+
+<Box>
+
+`https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?<PARAMETERS>` 
+
+</Box>
+
+For more information about constructing a request, including how to choose which endpoint to use, refer to the [Geocoding service](DEVSITE/documentation/mapping-and-location-services/geocoding/) overview.
+
+<Note type={"note"}>
+
+URL encoding is enforced by ArcGIS Online and the ArcGIS Geocoding service. Ensure the request URLs sent to the service are properly encoded and patterned after the examples in this topic. 
+
+</Note>
+
+<Note type={"note"}>
+
+The REST request URL must include `HTTPS` . Requests with `HTTP`  are not supported.
+
+</Note> --> */}
+
+## Query parameters
+
+<StyledTable headers="Name, Required, Type, Default, Description">
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[f](#f)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The request response format, either `json` or `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[token](#token)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    An access token with the [required privileges](#token).
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[text](#text)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The input text.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[location](#location)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string | [point](DEVSITE/rest/services-reference/enterprise/geometry-objects/#point)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The origin point used to favor geocoding candidates based on their proximity to the location.
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[category](#category)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The place or address type that can be used to filter results.
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[searchExtent](#searchextent)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">[envelope](DEVSITE/rest/services-reference/enterprise/geometry-objects/#envelope)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The set of bounding box coordinates that limits the search area. 
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[maxSuggestions](#maxsuggestions)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">number</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The maximum number of suggestions to be returned in a response.
+    </StyledTableCell>
+  </StyledTableRow> 
+
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[countryCode](#countrycode)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    Limits the returned suggestions to a specific country. 
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[sourceCountry](#sourcecountry)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    Limits the candidates returned to the specified country or countries.
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow anchor="link-to-me">
+    <StyledTableCell cellStyle="code">[preferredLabelValues](#preferredlabelvalues)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     Returns specified address component values included in output fields.
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow anchor="link-to-me">
+    <StyledTableCell cellStyle="code">[returnCollections](#returncollections)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+        `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     Prevents collections from being returned in the response.
+    </StyledTableCell>
+  </StyledTableRow> 
+</StyledTable>
+
+## Required parameters 
+
+<Box>
+
+### f
+
+<SharedParams f/>
+
+</Box>
+
+<Box>
+
+### token
+
+<SharedParams token alpPrivileges={"premium:user:geocode:temporary or premium:user:geocode:stored"} agoPrivileges={"premium:user:geocode or premium:user:geocode:stored"}/>
+
+</Box>
+
+<Box>
+
+### text
+
+<ParamMetadata types={[{name:"string"}]} />
+
+The input text entered by a user, which is used by the `suggest`  operation to generate a list of possible matches.
+
+Example
+
+```javascript
+text=starbu
+```
+</Box>
+ 
+## Optional parameters
+
+<Box>
+
+### location
+
+<ParamMetadata types={[{name:"string"},{name:"point", link:"DEVSITE/rest/services-reference/enterprise/geometry-objects/#point"}]} />
+
+Defines an origin point that is used to prefer or boost geocoding candidates based on their proximity to the location. Candidates near the location are prioritized relative to those farther away. This is useful in mobile applications in which a user wants to search for places in the vicinity of their current GPS location, or in mapping applications in which users want to search for places near the center of the map.
+
+The location can be represented with a simple comma-separated syntax (x,y), or as a [JSON point object](DEVSITE/rest/services-reference/enterprise/geometry-objects/#point). If the comma-separated syntax is used, the spatial reference of the coordinates must be WGS84; otherwise, the spatial reference of the point coordinates can be defined in the JSON object.
+
+<Note type={"note"}>
+
+The `distance`  parameter is deprecated and no longer recognized by the ArcGIS Geocoding service. 
+
+</Note>
+
+Example using simple syntax (WGS84)
+
+```javascript
+location=-117.196,34.056
+```
+
+ JSON example with a spatial reference
+
+```javascript
+location=
+{
+    "x": -13046165.572,
+    "y": 4036389.847,
+    "spatialReference": {
+        "wkid": 102100
+    }
+}
+```
+
+</Box>
+
+<Box>
+
+### category
+
+<ParamMetadata types={[{name:"string"}]} />
+
+A place or address type that can be used to filter `suggest`  results. The parameter supports input of single-category values or multiple comma-separated values. The `category`  parameter must be passed in a request with the `text`  parameter. See [Category filtering](/category-filtering) for details about the `category`  parameter.
+
+<Note type={"note"}>
+
+If more than one value is specified for the parameter, the values must be separated by a comma, with no spaces after the comma.
+
+</Note>
+
+Example of category filtering with a single category
+
+```javascript
+category=Address
+```
+
+ Example of category filtering with multiple categories
+
+```javascript
+category=Address,Postal
+```
+
+</Box>
+<Box>
+
+### searchExtent
+
+<ParamMetadata types={[{name:"envelope", link:"DEVSITE/rest/services-reference/enterprise/geometry-objects/#envelope"}]} />
+
+A set of bounding box coordinates that limit the search area for suggestions to a specific region. This is especially useful for applications in which a user will search for places and addresses within the current map extent.
+
+You can specify the spatial reference of the `searchExtent`  coordinates, which is necessary if the map spatial reference is different than that of the ArcGIS Geocoding service; otherwise, the spatial reference of the coordinates is assumed to be the same as that of the ArcGIS Geocoding service. 
+
+The input can either be a comma-separated list of coordinates defining the bounding box or a [JSON envelope object](DEVSITE/rest/services-reference/enterprise/geometry-objects/#envelope). The spatial reference of the bounding box coordinates can be included if an envelope object is used.
+
+Example without a spatial reference
+
+```javascript
+searchExtent=-104,35.6,-94.32,41
+```
+
+ Example with a spatial reference
+
+```javascript
+searchExtent=
+{
+    "xmin": -13052769,
+    "ymin": 3951172,
+    "xmax": -13019630,
+    "ymax": 3978490,
+    "spatialReference": {
+        "wkid": 3395
+    }
+}
+```
+
+</Box>
+<Box>
+    
+### maxSuggestions
+
+<ParamMetadata types={[{name:"number"}]} />
+
+The maximum number of suggestions returned by a `suggest`  response, up to the maximum number allowed by the service. Currently, the ArcGIS Geocoding service allows up to 15 suggestions to be returned. If `maxSuggestions`  is not included in the `suggest`  request, the default value is 5.
+
+Example
+
+```javascript
+maxSuggestions=10
+```
+
+</Box>
+<Box>
+#### countryCode
+
+<ParamMetadata types={[{name:"string"}]} />
+
+Limits the returned suggestions to values in a particular country. Valid two- and three-character country code values for each country are available in [Data coverage](/geocode-coverage).
+
+<Note type={"note"}>
+
+When the `countryCode`  parameter is specified in a `suggest`  request, the corresponding [`findAddressCandidates` ](/find-address-candidates) request must also include the `countryCode`  parameter with the same value.
+
+</Note>
+
+Example
+
+```javascript
+countryCode=USA
+```
+</Box>
+<Box> 
+
+### sourceCountry
+
+<ParamMetadata types={[{name:"string"}]} />
+
+Similar to `countryCode` , the `sourceCountry`  parameter limits the suggestions to the specified country or countries. For example, if `sourceCountry=USA`  is included in the request, it is assumed that the address is in the United States, so only matching U.S. addresses are returned. Using this parameter prevents potential unexpected results in other countries for ambiguous searches. 
+
+Acceptable values include two- and three-character country codes. You can specify multiple country codes to limit results to more than one country.
+
+A list of supported countries and codes is available in [Data coverage](/geocode-coverage).
+
+<Note type={"note"}>
+
+If both `countryCode`  and `sourceCountry`  are included in a `suggest`  request, and the country values are different, the `countryCode`  value takes priority over `sourceCountry` . 
+
+</Note>
+
+<Note type={"note"}>
+
+If more than one value is specified for the parameter, the values must be separated by a comma, with no spaces after the comma.
+
+</Note>
+
+Example: Single country
+
+```javascript
+sourceCountry=USA
+```
+
+ Example: Multiple countries
+
+```javascript
+sourceCountry=FRA,DEU,ESP
+```
+
+</Box>
+<Box>
+
+### preferredLabelValues
+
+<ParamMetadata types={[{name:"string"}]} />
+
+The `preferredLabelValues`  parameter allows simple configuration of suggestion labels returned in a response from the ArcGIS Geocoding service by specifying which address component values should be included in the label. If the parameter is blank or excluded from a request, default address formats are used. 
+
+A particular address may have multiple city names associated with it. In the United States, for example, all addresses have a ZIP Code (postal code) assigned to them. Each ZIP Code has one or more associated locality names, which are known as postal cities. There is always one primary postal city value for each ZIP Code. ZIP Codes typically have no set boundaries, and the primary postal city name for the ZIP Code that is assigned to an address may be different than the name of the local city where the address is located. 
+
+<Note type={"note"}>
+
+ In the context of the `preferredLabelValues`  parameter, the name of the city whose boundary an address is within is referred to as the local city; the postal city is the name assigned to the postal code of the address.
+
+</Note>
+
+For addresses in the United States, the ArcGIS Geocoding service includes the primary postal city in suggestion labels by default. As an example, postal code 45420 in Ohio has the primary postal city value Dayton. Addresses in the neighboring city of Kettering are also assigned this postal code. It means that the default suggestion label for addresses with postal code 45420—even those within the city of Kettering—will include Dayton as the city. To illustrate, if a user types `2109 E Dorothy Ln, OH, 45420` , the default suggestion returned in the response is **2109 E Dorothy Ln, Dayton, OH, 45420**, even though the address is within the Kettering city limits. 
+
+Some organizations may prefer to include the local city name in the response instead of the postal city. The `preferredLabelValues`  parameter can be used for this purpose. For the previous example, if `preferredLabelValues=localCity`  is included in the request, the returned suggestion is **2109 E Dorothy Ln, Kettering, Ohio, 45420**. As you can see, Kettering is now included in the label instead of Dayton.
+
+See the following table for supported parameter values.
+
+<StyledTable headers={"Parameter value,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+postalCity
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Include the primary postal city value in suggestions. This is the primary name assigned to the postal code of the address. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+localCity
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Include the primary local city name in suggestions. This is the name of the city boundary that the address is within, and may be different than the postal city. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+Additional details:
+
+-   A request can only include one value for the parameter. In other words, a request with `preferredLabelValues=matchedCity,postalCity`  is invalid.
+-   The `preferredLabelValues`  parameter affects the suggestion labels initially returned as you begin typing an address, before any city information is entered. As the city name is entered, the returned suggestion will include the city that matches the input even if it is different than the name corresponding to the `preferredLabelValues`  parameter passed in the request. The idea is for suggestions to reflect the user input as much as possible, and this takes precedence over the `preferredLabelValues`  parameter.
+
+Example: Include local city name in suggestion
+
+```javascript
+preferredLabelValues=localCity
+```
+
+<Note type={"note"}>
+
+The functionality of the `preferredLabelValues`  parameter is limited by the data sources used to produce the ArcGIS Geocoding service. Not all addresses have postal city and local city values assigned to them. If the `preferredLabelValues`  parameter is used and the output labels don't correspond to expectations in some cases, it is likely because the expected values aren't included in the source data for the addresses. 
+
+</Note>
+
+</Box>
+<Box>
+
+### returnCollections
+
+<ParamMetadata types={[{name:"boolean"}]} defaultValue="true"/>
+
+The `returnCollections`  parameter can be used to prevent [collections](/suggest#iscollection) from being returned in `suggest`  responses. The default value is `true` , which means that collections are included in suggest responses by default.
+
+Example: Disable collections in suggest responses
+
+```javascript
+returnCollections=false
+```
+
+</Box>
+
+
+## Response status 
+
+<StyledTable headers="Status, Meaning, Description, Schema">
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">200</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[OK](https://datatracker.ietf.org/doc/html/rfc7231#section-6.3.1)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     A successful response for a `/reverseGeocode` request.
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     Inline
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">400</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[Bad request](https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    Invalid query parameters. Learn more in [Service output](xref:///geocoding-service-output/#error-code-400).
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     [Error](#response-details)
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">403</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[Forbidden](https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.3)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     The required paramter `token` is valid but does not have permission to access the service. Learn more in [Service output](xref:///geocoding-service-output/#error-code-403).
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     [Error](#response-details)
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">5XX</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">Unknown</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     An error occured on the server. Learn more in [Service output](xref:///geocoding-service-output/#error-code-500).
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     [Error](#response-details)
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+Go to [Service output](xref:///geocoding-service-output/#error-codes) for extended codes.
+
+## Response details 
+
+<CodeSwitcher displayMode="tabs">
+  <CodeBlock language="json" group="200 OK" source="./code/suggest-response.json" section="200" />
+  <CodeBlock language="json" group="No results" source="./code/suggest-response.json" section="noresponse" />
+  <CodeBlock language="json" group="Error" source="./code/error-response.json"/>
+</CodeSwitcher>  
+
+Go to [Service output](xref:///geocoding-service-output/#suggest-output) for more details about suggest responses.
+
+
+## Examples 
+
+<Box>
+
+### Get suggestions using `location` 
+
+As with the [`findAddressCandidates` ](/find-address-candidates#proximity-searches) method, `suggest`  allows location values to be passed with the request to prioritize places that are closest to the specified location. 
+
+By using the `location`  parameter, you can define an area of influence for your searches. The `location`  value represents the center point of the area, which spans a radius of 50,000 meters. Features closest to the input location show up higher in the list of suggestions. Results that are within the area of influence receive a greater boost than those outside the area. 
+
+To see how the use of proximity influences `suggest`  results, consider the following example. If the map location is in Las Vegas, and a user types `Treas`  in a search box, the returned suggestions are all related to Treasure Island Hotel and Casino in Las Vegas. 
+
+<MoreInfo>
+
+It is important to note that proximity search does not filter out results that are far from the input location—it is intended to influence the sort order of results so the most locationally relevant matches are returned first. For instance, if your location is in Seattle and you type `Mount Ver` , the first suggestion in the list is Mount Vernon, Washington, United States. The second is Mount Vernon, Westchester County, New York, United States. So even though Mount Vernon in New York is far from Seattle, it is still returned because it is the second most relevant candidate based on its distance from the location and its rank. To limit suggestions to a specific area, use the [`searchExtent` ](/suggest#searchextent) parameter.
+
+If the user enters the same text in the search box but is zoomed out to an extent for which proximity search is not used, and the `location`  parameter is not passed in the `suggest`  request, only admin places whose names begin with `Treas`  are returned in the suggestions list.
+</MoreInfo>
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+  GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=treas&location=-115.172783,36.114789&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=treas&location=-115.172783%2C36.114789&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+```json
+{
+ "suggestions": [
+  {
+   "text": "Treasure Island, 3300 Las Vegas Blvd S, Las Vegas, NV, 89109, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MTA3NTQwMDYjbG5nPTQyI3BsPTEwMDk3NzM3I2ZhPTExNzk2NDgjbGJzPTE0OjcyNDc0OTA1I2xuPVdvcmxk",
+   "isCollection": false
+  },
+  {
+   "text": "Treasure Island Wedding Chapels, 3300 Las Vegas Blvd S, Las Vegas, NV, 89109, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MTA4MDA0MTEjbG5nPTQyI3BsPTEwMTU5NDMzI2ZhPTIwOTcxNTIjbGJzPTE0OjcyNDc1MDc2I2xuPVdvcmxk",
+   "isCollection": false
+  },
+  {
+   "text": "Treasure Island Pool, 3300 Las Vegas Blvd S, Las Vegas, NV, 89109, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MTA4MDA0MTEjbG5nPTQyI3BsPTEwMTU5NTg5I2ZhPTIwOTcxNTIjbGJzPTE0OjcyNDc1MDM0I2xuPVdvcmxk",
+   "isCollection": false
+  },
+  {
+   "text": "Treasure Island Wedding Chapel, 3300 Las Vegas Blvd S, Las Vegas, NV, 89109, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MTA3NTQwMDYjbG5nPTQyI3BsPTEwMDk3ODI4I2ZhPTY1NTM2I2xicz0xNDo3MjQ3NTA3NSNsbj1Xb3JsZA==",
+   "isCollection": false
+  },
+  {
+   "text": "Treasure Island At The Mirage, 3300 Las Vegas Blvd S, Las Vegas, NV, 89109, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MTA4MDA0MTEjbG5nPTQyI3BsPTEwMTU4NTA3I2ZhPTIwOTcxNTIjbGJzPTE0OjcyNDc0OTIyI2xuPVdvcmxk",
+   "isCollection": false
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+
+#### Get suggestions without location 
+
+It is important to note that proximity search does not filter out results that are far from the input location—it is intended to influence the sort order of results so the most locationally relevant matches are returned first. For instance, if your location is in Seattle and you type `Mount Ver` , the first suggestion in the list is Mount Vernon, Washington, United States. The second is Mount Vernon, Westchester County, New York, United States. So even though Mount Vernon in New York is far from Seattle, it is still returned because it is the second most relevant candidate based on its distance from the location and its rank. To limit suggestions to a specific area, use the [`searchExtent` ](/suggest#searchextent) parameter.
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+  GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=treas&f=pjson&token=<ACCESS_TOKEN>
+```
+
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=treas&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+```json
+{
+ "suggestions": [
+  {
+   "text": "Treasure County, MT, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MTA0NDQ5NTQjbG5nPTQyI3BsPTk4MjQzODUjbGJzPTE0OjcyNDc0NTc1I2xuPVdvcmxk",
+   "isCollection": false
+  },
+  {
+   "text": "Treas, Banteay Meanchey, KHM",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9NjIxNjc1NzkjbG5nPTQyI3BsPTgwNzg0MjgzI2xicz0xNDo3MjQ3MzkwNiNsbj1Xb3JsZA==",
+   "isCollection": false
+  },
+  {
+   "text": "Treasure Island, FL, USA",
+   "magicKey": "dHA9NCN0dj00Yjg3MGE5MSNubT1UcmVhc3VyZSBJc2xhbmQsIEZMLCBVU0EjbG5nPTQyI2xuPVdvcmxk",
+   "isCollection": false
+  },
+  {
+   "text": "Treascon, Portarlington, Laois, IRL",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9NjA2MDc0MzAjbG5nPTQyI3BsPTc3NDMyNzUyI2xicz0xNDo3MjQ3MzkzOSNsbj1Xb3JsZA==",
+   "isCollection": false
+  },
+  {
+   "text": "Treascon, Portarlington, Offaly, IRL",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9NjA2NjI5MzYjbG5nPTQyI3BsPTc3NDY3ODQyI2xicz0xNDo3MjQ3MzkzOSNsbj1Xb3JsZA==",
+   "isCollection": false
+  }
+ ]
+}
+
+```
+
+</Tab>
+
+</Tabs>
+</Box>
+<Box>
+
+### Limit suggestions to a specified area
+
+Unlike the `location`  parameter, the `searchExtent`  parameter filters out suggestions for places that are outside of the specified area. To confine suggestions to a localized area, such as the current map extent, you can use `searchExtent`  to define a bounding rectangle to search within. Bounding rectangle coordinates can be entered as a simple comma-separated string in the format &lt;lower left corner>,&lt;upper right corner>. If this simple format is used, the coordinates must be in the default spatial reference of the geocode service, which is WGS84.
+
+To see how `searchExtent`  affects suggestions, consider the following example. Assume that a user of your application has zoomed the map to the extent of Kansas City, Missouri, and enters `Main St`  in the search box. If the map extent is passed as the `searchExtent`  parameter in a suggest request, only suggestions beginning with Main St in Kansas City are returned. 
+
+#### Get suggestions using searchExtent 
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+  GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=main st&category=&searchExtent=-94.602026,39.083630,-94.570151,39.109774&location=&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=main%20st&category=&searchExtent=-94.602026%2C39.083630%2C-94.570151%2C39.109774&location=&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+```json
+{
+ "suggestions": [
+  {
+   "text": "Main St, Kansas City, MO, 64108, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9OTkxNTk3MCNsbmc9NDIjbGJzPTEwOTo5MjM0ODAzNSNsbj1Xb3JsZA==",
+   "isCollection": false
+  },
+  {
+   "text": "Main St, Kansas City, MO, 64106, USA",
+   "magicKey": "dHA9NCN0dj00Yjg3MGE5MSNubT1NYWluIFN0LCBLYW5zYXMgQ2l0eSwgTU8sIDY0MTA2LCBVU0Ejc3o9LTk0LjU4NjA4ODQ5OTk5OTk4ODozOS4wOTY3MDIwMDAwMDAwMDE7LTk0LjYwMjAyNTk5OTk5OTk5NTozOS4wODM2Mjk5OTk5OTk5OTk6LTk0LjU3MDE1MDk5OTk5OTk5NjozOS4xMDk3NzQwMDAwMDAwMDIjbG5nPTQyI2xuPVdvcmxk",
+   "isCollection": false
+  },
+  {
+   "text": "Main St, Kansas City, MO, 64105, USA",
+   "magicKey": "dHA9NCN0dj00Yjg3MGE5MSNubT1NYWluIFN0LCBLYW5zYXMgQ2l0eSwgTU8sIDY0MTA1LCBVU0Ejc3o9LTk0LjU4NjA4ODQ5OTk5OTk4ODozOS4wOTY3MDIwMDAwMDAwMDE7LTk0LjYwMjAyNTk5OTk5OTk5NTozOS4wODM2Mjk5OTk5OTk5OTk6LTk0LjU3MDE1MDk5OTk5OTk5NjozOS4xMDk3NzQwMDAwMDAwMDIjbG5nPTQyI2xuPVdvcmxk",
+   "isCollection": false
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+
+#### Get suggestions using searchExtent with a JSON envelope object
+
+You can specify a spatial reference for `searchExtent` , which is necessary if your map uses a different spatial reference than the geocode service. For example, the default ArcGIS.com basemaps use a Web Mercator spatial reference (WKID = 102100), with coordinates in meters. The `searchExtent`  must be passed as a [JSON envelope object](DEVSITE/rest/services-reference/enterprise/geometry-objects/#envelope) if the coordinates are in a spatial reference other than WGS84. The following request URL uses the previous example of Main St in Kansas City, but specifies the bounding rectangle with Web Mercator coordinates. 
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+  GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=main st&searchExtent={"xmin":-10531043,"ymin":4733652,"xmax":-10527501,"ymax":4737408,"spatialReference":{"wkid":102100}}&outSR=102100&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+{/* 
+```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=main%20st&searchExtent=%7B%22xmin%22%3A-10531043%2C%22ymin%22%3A4733652%2C%22xmax%22%3A-10527501%2C%22ymax%22%3A4737408%2C%22spatialReference%22%3A%7B%22wkid%22%3A102100%7D%7D&outSR=102100&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+```json
+{
+ "suggestions": [
+  {
+   "text": "Main St, Kansas City, MO, 64108, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9OTkxNTk3MCNsbmc9NDIjbGJzPTEwOTo5MjM0ODAzNSNsbj1Xb3JsZA==",
+   "isCollection": false
+  },
+  {
+   "text": "Main St, Kansas City, MO, 64106, USA",
+   "magicKey": "dHA9NCN0dj00Yjg3MGE5MSNubT1NYWluIFN0LCBLYW5zYXMgQ2l0eSwgTU8sIDY0MTA2LCBVU0Ejc3o9LTk0LjU4NjA1OTY4MjUxNzIxNzozOS4wOTY2ODEzNjU5NzUwNzM7LTk0LjYwMTk2ODg0NjE5ODk3MjozOS4wODM1ODg1NjY5MjkwNTk6LTk0LjU3MDE1MDUxODgzNTQ2MjozOS4xMDk3NzQxNjUwMjEwODYjbG5nPTQyI2xuPVdvcmxk",
+   "isCollection": false
+  },
+  {
+   "text": "Main St, Kansas City, MO, 64105, USA",
+   "magicKey": "dHA9NCN0dj00Yjg3MGE5MSNubT1NYWluIFN0LCBLYW5zYXMgQ2l0eSwgTU8sIDY0MTA1LCBVU0Ejc3o9LTk0LjU4NjA1OTY4MjUxNzIxNzozOS4wOTY2ODEzNjU5NzUwNzM7LTk0LjYwMTk2ODg0NjE5ODk3MjozOS4wODM1ODg1NjY5MjkwNTk6LTk0LjU3MDE1MDUxODgzNTQ2MjozOS4xMDk3NzQxNjUwMjEwODYjbG5nPTQyI2xuPVdvcmxk",
+   "isCollection": false
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+</Box>
+<Box>
+
+### Utilize the isCollection property
+
+The `isCollection`  property is a Boolean flag that indicates the type of suggestion item returned by a `suggest`  request. When `isCollection = true` , the suggestion item represents a general search term for a POI type or a common place-name corresponding to multiple locations, such as Hotel, Clothing Store, or McDonald's. When `isCollection = false` , the suggestion item represents the name of a discrete address or place, such as Paris, France, Disneyland, or 380 New York St, Redlands, CA. 
+
+In general, when a suggestion `text`  and `magicKey`  pair for which `isCollection = true`  is sent in a [`findAddressCandidates` ](/find-address-candidates) request, multiple candidates are returned with the same name (Starbucks) or category (Coffee Shop); typically, all of the candidates are equally relevant to the user's search. When `isCollection = false` , there may be one or more candidates returned; if there are multiple candidates, the first one is usually the best match and the most relevant to the search. 
+
+Consider the following example. A user of a mapping application is zoomed in to the extent of Sydney, Australia, and types `coffee`  in a search box. 
+
+#### Get the isCollection property
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+  GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=coffee&location=151.229129,-33.879741&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+{/* 
+```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=coffee&location=151.229129%2C-33.879741&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+```json
+{
+ "suggestions": [
+  {
+   "text": "Coffee Shop",
+   "magicKey": "dHA9MiN0dj00Yjg3MGE5MSNubT1Db2ZmZWUgU2hvcCNzej0xNTEuMjI5MTI5Oi0zMy44Nzk3NDEwMDAwMDAwMDMjY3M9NzAjbG49V29ybGQ=",
+   "isCollection": true
+  },
+  {
+   "text": "Coffee Tea & Me, 87C Macleay Street, Elizabeth Bay, Sydney, New South Wales, 2011, AUS",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MzY3OTgzMjIjbG5nPTQyI3BsPTM3NzA2MDg1I2ZhPTIwOTcxNTIjbGJzPTE0OjE5MDc5ODIwI2xuPVdvcmxk",
+   "isCollection": false
+  },
+  {
+   "text": "Coffee Pros, 144-150 Liverpool Street, East Sydney, Sydney, New South Wales, 2010, AUS",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MzY3OTQ4MjgjbG5nPTQyI3BsPTM3Njk3NzA1I2ZhPTExNzk2NDgjbGJzPTE0OjE5MDc4MDIyI2xuPVdvcmxk",
+   "isCollection": false
+  },
+  {
+   "text": "Coffee Tea & Me, 224 Oxford Street, Bondi Junction, Sydney, New South Wales, 2022, AUS",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MzY3ODQ1MTUjbG5nPTQyI3BsPTM3NjY3OTI4I2ZhPTM4NjY2MjQjbGJzPTE0OjE5MDc5ODIwI2xuPVdvcmxk",
+   "isCollection": false
+  },
+  {
+   "text": "Coffee In A Cone Food, 481 Crown Street, Surry Hills, Sydney, New South Wales, 2010, AUS",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MzY4MzcxODIjbG5nPTQyI3BsPTM3ODA4NTYzI2ZhPTQ1ODc1MjAjbGJzPTE0OjE5MDc1NDAzI2xuPVdvcmxk",
+   "isCollection": false
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+</Box>
+<Box>
+
+### Using a suggest result when `isCollection=true`
+
+It is important to note that proximity search does not filter out results that are far from the input location—it is intended to influence the sort order of results so the most locationally relevant matches are returned first. For instance, if your location is in Seattle and you type `Mount Ver` , the first suggestion in the list is Mount Vernon, Washington, United States. The second is Mount Vernon, Westchester County, New York, United States. So even though Mount Vernon in New York is far from Seattle, it is still returned because it is the second most relevant candidate based on its distance from the location and its rank. To limit suggestions to a specific area, use the [`searchExtent` ](/suggest#searchextent) parameter.
+
+In this example, note that `isCollection = true`  for the first suggestion item `Coffee Shop` . The `text`  and `magicKey`  for this item correspond to a search for places of POI category `Coffee Shop`  within approximately 5,000 meters of a location in Sydney, Australia. The `text`  and `magicKey`  combinations of the rest of the items, for which `isCollection = false` , represent the names of coffee shops that are within 5,000 meters of the location.
+
+When the `text`  and `magicKey`  combination of the item for which `isCollection = true`  is sent to the ArcGIS Geocoding service in a [`findAddressCandidates` ](/find-address-candidates) request, with `maxLocations = 10` , several coffee shops are returned.
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+  GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=Coffee Shop&magicKey=dHA9MiN0dj00Yjg3MGE5MSNubT1Db2ZmZWUgU2hvcCNzej0xNTEuMjI5MTI5Oi0zMy44Nzk3NDEwMDAwMDAwMDMjY3M9NzAjbG49V29ybGQ=&maxLocations=10&outFields=Match_addr,Place_addr,Type&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=Coffee%20Shop&magicKey=dHA9MiN0dj00Yjg3MGE5MSNubT1Db2ZmZWUgU2hvcCNzej0xNTEuMjI5MTI5Oi0zMy44Nzk3NDEwMDAwMDAwMDMjY3M9NzAjbG49V29ybGQ=&maxLocations=10&outFields=Match_addr%2CPlace_addr%2CType&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+**findAddressCandidates  JSON response**
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Scramble & Bean",
+   "location": {
+    "x": 151.2284146,
+    "y": -33.8752326
+   },
+   "score": 100,
+   "attributes": {
+    "Match_addr": "Scramble & Bean",
+    "Type": "Coffee Shop",
+    "Place_addr": "13-19 Waratah Street, Rushcutters Bay, Sydney, New South Wales, 2011"
+   },
+   "extent": {
+    "xmin": 151.2234146,
+    "ymin": -33.8802326,
+    "xmax": 151.2334146,
+    "ymax": -33.8702326
+   }
+  },
+  {
+   "address": "Bayswater Bru",
+   "location": {
+    "x": 151.22344,
+    "y": -33.87525
+   },
+   "score": 100,
+   "attributes": {
+    "Match_addr": "Bayswater Bru",
+    "Type": "Coffee Shop",
+    "Place_addr": "17 Bayswater Road, Kings Cross, Sydney, New South Wales, 2011"
+   },
+   "extent": {
+    "xmin": 151.21844,
+    "ymin": -33.88025,
+    "xmax": 151.22844,
+    "ymax": -33.87025
+   }
+  }
+ ]
+}
+```
+
+</Tab>
+</Tabs>
+
+A developer can use the `isCollection`  property to properly handle cases such as this in their application. Specifically, for cases in which `isCollection = true` , the `maxLocations`  parameter should be included in the corresponding [`findAddressCandidates` ](/find-address-candidates) request and set to `5`  or greater. Often, there are more than 5 or even 10 matches for such cases, so consider implementing pagination in the application to show the user more results. For cases in which `isCollection = false` , the `maxLocations`  parameter should be set to `1` . 
+
+</Box>
+
+<Box>
+
+### Use a suggest result when `isCollection=false` 
+
+It is important to note that if `maxLocations=10`  had not been explicitly passed in the [`findAddressCandidates` ](/find-address-candidates) request, up to 50 candidates would have been returned, because the [`findAddressCandidates` ](/find-address-candidates) operation returns all matching candidates (up to the maximum allowed by the service) in the absence of the `maxLocations`  parameter. Also note that the JSON response shown here has been truncated to preserve space.
+
+If the `text`  and `magicKey`  combination of any of the items for which `isCollection = false`  are passed in a [`findAddressCandidates` ](/find-address-candidates) request, in most cases only a single candidate is returned.
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+  GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=Coffee Tea & Me, 87 Macleay St, Elizabeth Bay, Sydney, New South Wales, 2011, AUS&magicKey=dHA9MCN0dj00Yjg3MGE5MSNsb2M9MzY3OTgzMjIjbG5nPTQyI3BsPTM3NzA2MDg1I2ZhPTIwOTcxNTIjbGJzPTE0OjE5MDc5ODIwI2xuPVdvcmxk&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+{/* 
+```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=Coffee%20Tea%20%26%20Me%2C%2087%20Macleay%20St%2C%20Elizabeth%20Bay%2C%20Sydney%2C%20New%20South%20Wales%2C%202011%2C%20AUS&magicKey=dHA9MCN0dj00Yjg3MGE5MSNsb2M9MzY3OTgzMjIjbG5nPTQyI3BsPTM3NzA2MDg1I2ZhPTIwOTcxNTIjbGJzPTE0OjE5MDc5ODIwI2xuPVdvcmxk&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+**findAddressCandidates  JSON response**
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Coffee Tea & Me",
+   "location": {
+    "x": 151.2253078,
+    "y": -33.8711299
+   },
+   "score": 100,
+   "attributes": {
+    
+   },
+   "extent": {
+    "xmin": 151.2203078,
+    "ymin": -33.8761299,
+    "xmax": 151.2303078,
+    "ymax": -33.8661299
+   }
+  }
+ ]
+}
+
+```
+
+
+</Tab>
+</Tabs>
+ 
+A developer can use the `isCollection`  property to properly handle cases such as this in their application. Specifically, for cases in which `isCollection = true` , the `maxLocations`  parameter should be included in the corresponding [`findAddressCandidates` ](/find-address-candidates) request and set to `5`  or greater. Often, there are more than 5 or even 10 matches for such cases, so consider implementing pagination in the application to show the user more results. For cases in which `isCollection = false` , the `maxLocations`  parameter should be set to `1` . 
+
+</Box>
+<Box>
+
+### Disable collections
+
+If collections are not needed for your application, you can use the `returnCollections`  parameter to prevent them from being returned in `suggest`  responses. Specifically, if `returnCollections=false`  is included in a `suggest`  request, only suggestion items with `isCollection = false`  are returned in the response. Collections are returned by default for `suggest` , so `returnCollections=false`  must be included in the `suggest`  request to disable this feature. 
+
+#### Disable collections by using returnCollections=false
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http
+  GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=w&location=-77.043,38.91&returnCollections=false&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=w&location=-77.043,38.91&returnCollections=false&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+```json
+{
+ "suggestions": [
+  {
+   "text": "Washington Monument, 2 15th St NW, Washington, DC, 20006, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MzEwNzk3NyNsbmc9NDIjcGw9MzYzMjY1NiNmYT02NTUzNiNsYnM9MTQ6NzYxNDgzNDYjbG49V29ybGQ=",
+   "isCollection": false
+  },
+  {
+   "text": "Washington, DC, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MzEwMTk0MiNsbmc9NDIjcGw9MzYyMjE0NyNsYnM9MTQ6NzYxNDUxODMjbG49V29ybGQ=",
+   "isCollection": false
+  },
+  {
+   "text": "Walt Disney World, Disneys Hollywood Studios Access Rd, Kissimmee, FL, 34747, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MzQ1NDQyMiNsbmc9NDIjcGw9MzgwNjM5MSNsYnM9MTQ6NzU3NDk3MjcjbG49V29ybGQ=",
+   "isCollection": false
+  },
+  {
+   "text": "Winter Park Resort, Winter Park Dr, Winter Park, CO, 80482, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MjYxMjg0OCNsbmc9NDIjcGw9MzAxNzc5MyNsYnM9MTQ6NzY4MzE5MDQjbG49V29ybGQ=",
+   "isCollection": false
+  },
+  {
+   "text": "Wrocław, Dolnośląskie, POL",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9NzAyNjY1MzAjbG5nPTEzNCNwbD05MDUxMjc5OSNsYnM9MTQ6NzcwNDMyNjYjbG49V29ybGQ=",
+   "isCollection": false
+  }
+ ]
+}
+
+```
+
+
+</Tab>
+</Tabs>
+
+{/* As you can see, the suggestions returned for this request (with `returnCollections=false` ) all represent specific, individual places.  */}
+
+#### Enable collections by using returnCollections=true 
+
+By contrast, when `returnCollections=true`  for the same request, the top suggestion is collection "Whole Foods", which is a supermarket chain.  
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+  GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=w&location=-77.043,38.91&returnCollections=true&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+{/* 
+```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=w&location=-77.043,38.91&returnCollections=true&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+```json
+{
+ "suggestions": [
+  {
+   "text": "Whole Foods",
+   "magicKey": "dHA9MSN0dj00Yjg3MGE5MSNubT1XaG9sZSBGb29kcyNzej0tNzcuMDQzMDAwMDAwMDAwMDA2OjM4LjkwOTk5OTk5OTk5OTk5NyNjcz0xMjYjbG49V29ybGQ=",
+   "isCollection": true
+  },
+  {
+   "text": "Washington Monument, 2 15th St NW, Washington, DC, 20006, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MzEwNzk3NyNsbmc9NDIjcGw9MzYzMjY1NiNmYT02NTUzNiNsYnM9MTQ6NzYxNDgzNDYjbG49V29ybGQ=",
+   "isCollection": false
+  },
+  {
+   "text": "Washington, DC, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MzEwMTk0MiNsbmc9NDIjcGw9MzYyMjE0NyNsYnM9MTQ6NzYxNDUxODMjbG49V29ybGQ=",
+   "isCollection": false
+  },
+  {
+   "text": "Waterfall",
+   "magicKey": "dHA9MiN0dj00Yjg3MGE5MSNubT1XYXRlcmZhbGwjc3o9LTc3LjA0MzAwMDAwMDAwMDAwNjozOC45MDk5OTk5OTk5OTk5OTcjY3M9MzE5I2xuPVdvcmxk",
+   "isCollection": true
+  },
+  {
+   "text": "Wine and liquor",
+   "magicKey": "dHA9MiN0dj00Yjg3MGE5MSNubT1XaW5lIGFuZCBsaXF1b3Ijc3o9LTc3LjA0MzAwMDAwMDAwMDAwNjozOC45MDk5OTk5OTk5OTk5OTcjY3M9MzY2I2xuPVdvcmxk",
+   "isCollection": true
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+</Box>
+<Box>
+
+### Specify the number of suggestions
+
+Depending on the use cases of your application, the default number of suggestions returned by a `suggest`  request (5) may be too few, or too many. You can use the `maxSuggestions`  parameter to choose the amount of suggestions that works for you.
+
+{/* #### Example
+
+Choosing the number of suggestions to return with `maxSuggestions`  (with input text `esri` )  */}
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+  GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=esri&maxSuggestions=8&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+{/* 
+```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=esri&maxSuggestions=8&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+```json
+{
+ "suggestions": [
+  {
+   "text": "Esri, 380 New York St, Redlands, CA, 92373, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MTg5NjQ2MCNsbmc9NDIjcGw9MTIzMTY4NiNmYT02NTUzNiNsYnM9MTQ6MjYzNDI1MDEjbG49V29ybGQ=",
+   "isCollection": false
+  },
+  {
+   "text": "Esri Australia Pty. Ltd. – Brisbane Office, 111 Elizabeth Street, Level 3, Brisbane, Queensland, 4000, AUS",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MzcxOTAxODkjbG5nPTQyI3BsPTM4MTczMzk5I2ZhPTY1NTM3I2xicz0xNDoyNjM0MjUwNyNsbj1Xb3JsZA==",
+   "isCollection": false
+  },
+  {
+   "text": "Esri Canada Ltd., 12 Concorde Place, Suite 900, Toronto, ON, M3C 3R8, CAN",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MjA3NDM5NzYjbG5nPTQyI3BsPTE4OTg3MTExI2ZhPTY1NTM3I2xicz0xNDoyNjM0MjU0MiNsbj1Xb3JsZA==",
+   "isCollection": false
+  },
+  {
+   "text": "Esri Chile S.A., Apoquindo 6550, Las Condes, Santiago, 7560903, CHL",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9NDI3MTcxODUjbG5nPTE1OSNwbD00NDI5ODYzMCNmYT02NTUzNyNsYnM9MTQ6MjYzNDI1NDUjbG49V29ybGQ=",
+   "isCollection": false
+  },
+  {
+   "text": "Esri Deutschland GmbH, Ring Straße 7, 85402, Kranzberg, Bayern, DEU",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MjQwNDY4MTQjbG5nPTU3I3BsPTIzMzU1MTM4I2ZhPTY1NTM2I2xicz0xNDoyNjM0MjU1NSNsbj1Xb3JsZA==",
+   "isCollection": false
+  },
+  {
+   "text": "Esri España Soluciones Geoespaciales S.L., Paseo de la Castellana 91, 28046, Madrid, ESP",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9NTAzODgyOTQjbG5nPTE1OSNwbD01MDIwODMwMyNmYT02NTUzNiNsYnM9MTQ6MjYzNDI1NTkjbG49V29ybGQ=",
+   "isCollection": false
+  },
+  {
+   "text": "Esri Finland Oy, Bertel Jungin Aukio 3, 02600, Espoo, FIN",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9NTA3NzM3NDQjbG5nPTUwI3BsPTUwNTc0NzU2I2ZhPTY1NTM2I2xicz0xNDoyNjM0MjU2MSNsbj1Xb3JsZA==",
+   "isCollection": false
+  },
+  {
+   "text": "Esri Indonesia, Jalan TB Simatupang 1, Pasar Minggu, DKI Jakarta, 12560, IDN",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9NTI4NjAxMjgjbG5nPTgxI3BsPTUzMDgyMzQ1I2ZhPTY1NTM3I2xicz0xNDoyNjM0MjU3NSNsbj1Xb3JsZA==",
+   "isCollection": false
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+</Box>
+<Box>
+
+### Limit suggestions by country
+
+By default, the ArcGIS Geocoding service returns suggestions from any relevant country based on the input text, unless the `location`  or `searchExtent`  parameters are used. These parameters do not strictly filter by country, however. To do so, the `countryCode`  parameter should be used. It allows you to limit the suggestions to one or more specific countries. 
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+  GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=esri&countryCode=IDN&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=esri&countryCode=IDN&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+```json
+{
+ "suggestions": [
+  {
+   "text": "Esri Indonesia, Jalan TB Simatupang 1, Pasar Minggu, DKI Jakarta, 12560, IDN",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9NTI4NjAxMjgjbG5nPTgxI3BsPTUzMDgyMzQ1I2ZhPTY1NTM3I2xicz0xNDoyNjM0MjU3NSNsbj1Xb3JsZA==",
+   "isCollection": false
+  },
+  {
+   "text": "Esri Villa's, Desa Bangujiwo, Kasihan, Yogyakarta, 55184, IDN",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9NTU2MzM3NzUjbG5nPTgxI3BsPTU3OTc1NzU1I2xicz0xNDoyNjM0MjY3MSNsbj1Xb3JsZA==",
+   "isCollection": false
+  },
+  {
+   "text": "Esri Wedding Organizer, Jl. Kerenceng, Cidahu, Jawa Barat, 43358, IDN",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9NTM0OTM1OTMjbG5nPTgxI3BsPTU0MTIxMzMzI2xicz0xNDoyNjM0MjY3MyNsbj1Xb3JsZA==",
+   "isCollection": false
+  },
+  {
+   "text": "Esri Indonesia Branch Balikpapan, Jalan Jendral Sudirman 7, Balikpapan, East Kalimantan, 76114, IDN",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9NTI4NjAxMzAjbG5nPTgxI3BsPTUzMDgyMzQ3I2ZhPTY1NTM3I2xicz0xNDoyNjM0MjU3NiNsbj1Xb3JsZA==",
+   "isCollection": false
+  },
+  {
+   "text": "Esri Indonesia Branch Pekanbaru, Jalan Todak 18, Marpoyan Damai, Riau, 28124, IDN",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9NTUxNjY5MzQjbG5nPTgxI3BsPTU3MTI0MTM1I2ZhPTY1NTM2I2xicz0xNDoyNjM0MjU3NyNsbj1Xb3JsZA==",
+   "isCollection": false
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+</Box>
+<Box>
+
+### Filter categories
+
+The `suggest`  operation supports filtering searches by category values, which represent address and place types. By including the `category`  parameter in a `suggest`  request, you can avoid false positive matches to unexpected place and address types due to ambiguous searches. 
+
+For example, a user may type `Bear`  in a search box, expecting the service to return Bear Mountain ski resort as a suggestion. However, there are many populated places in the world with Bear in their name, and this is reflected in the suggestions.
+
+#### Get suggestions for "Bear" without category 
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+    GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=bear&category=&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=bear&category=&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+```json
+{
+ "suggestions": [
+  {
+   "text": "Bearsden, Dunbartonshire, Scotland, GBR",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MjMyMTY3MjUjbG5nPTQyI3BsPTIyMjM4MzUwI2xicz0xNDoxMjI5MzE2OCNsbj1Xb3JsZA==",
+   "isCollection": false
+  },
+  {
+   "text": "Bear Lake County, ID, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9NDkyODczNiNsbmc9NDIjcGw9NTQ3NjE5MCNsYnM9MTQ6MTIyODc4MTkjbG49V29ybGQ=",
+   "isCollection": false
+  },
+  {
+   "text": "Bear, DE, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MzAzOTE1OCNsbmc9NDIjcGw9MzU2NzkxMiNsYnM9MTQ6MTIyODU1NzcjbG49V29ybGQ=",
+   "isCollection": false
+  },
+  {
+   "text": "Bear Valley Springs, CA, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MTI3OTY5NyNsbmc9NDIjcGw9OTcyMzIwI2xicz0xNDoxMjI4OTU1MyNsbj1Xb3JsZA==",
+   "isCollection": false
+  },
+  {
+   "text": "Bear Creek, AL, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MTQzODc0I2xuZz00MiNwbD00MjE0MyNsYnM9MTQ6MTIyODYzMTkjbG49V29ybGQ=",
+   "isCollection": false
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+
+See [Category filtering](/category-filtering) for details.
+
+The solution for this case is to pass the `category`  parameter in the request. By including `category=Ski Resort`  in the request, all places that are not ski resorts are bypassed by the search, and only ski resorts whose names begin with Bear are returned.
+
+#### Get suggestions for "Bear" with category=Ski Resort 
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+  GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=bear&category=Ski Resort&f=pjson&token=<ACCESS_TOKEN>
+```
+
+</Tab>
+<Tab>
+{/* 
+```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=bear&category=Ski%20Resort&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+
+```json
+{
+ "suggestions": [
+  {
+   "text": "Bear Mountain, 43101 Goldmine Dr, Big Bear Lake, CA, 92315, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MTU4NjMwNiNsbmc9NDIjcGw9MTExOTM1MCNmYT02NTUzNiNsYnM9MTQ6MTIyODgxMTMjbG49V29ybGQ=",
+   "isCollection": false
+  },
+  {
+   "text": "Bear Valley Alpine Ski Company Main Office, Arnold, CA, 95223, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MTIwNzAxOCNsbmc9NDIjcGw9OTQ4NTA1I2xicz0xNDoxMjI4OTM5MCNsbj1Xb3JsZA==",
+   "isCollection": false
+  },
+  {
+   "text": "Beartooth Basin Summer Ski Area, US Highway 212, Cody, WY, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MjAyMTAxMzgjbG5nPTQyI3BsPTE4MzM5MDk3I2xicz0xNDoxMjI5MzQ0MCNsbj1Xb3JsZA==",
+   "isCollection": false
+  },
+  {
+   "text": "Beartown Ski Area, 285 Beartown Rd, West Chazy, NY, 12992, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MTE2MTExNzQjbG5nPTQyI3BsPTExMDA3NDYxI2ZhPTY1NTM2I2xicz0xNDoxMjI5MzU3NCNsbj1Xb3JsZA==",
+   "isCollection": false
+  }
+ ]
+}
+
+```
+
+
+</Tab>
+</Tabs>
+
+See [Category filtering](/category-filtering) for details.
+
+</Box>
+<Box>
+
+### Use the `preferredLabelValues` parameter with suggest
+
+The `preferredLabelValues`  parameter allows limited customization of output values in suggestions. Refer to the parameter [overview](/suggest#preferredlabelvalues) for details about its functionality; this section includes examples showing how it can be used.
+
+The `preferredLabelValues`  parameter can be used to override the default city name returned in address labels for a `suggest`  transaction. The default values are based on country addressing conventions and data availability. United States addresses returned by the ArcGIS Geocoding service include the primary city name assigned to the postal code that is associated with the address; this is known as the postal city name. Sometimes the postal city name is different than the name of the city whose boundaries the address is within. For instance, one of the postal codes used in the city of Merriam, Kansas is 66202. The primary name assigned to postal code 66202 is Mission, which is a separate city adjacent to the city of Merriam. When addresses with postal code 66202 are returned in suggestions by the ArcGIS Geocoding service, the suggestion labels include Mission as the city name by default.
+
+The following examples illustrate how to use the `preferredLabelValues`  parameter to modify the city name used in suggestions for address `9001 W 62nd St`  in Merriam, Kansas. 
+
+Without the parameter, Mission is included in suggestions as the city name (refer to the top suggestion in the response for this example):
+
+#### Return suggestions without using preferredLabelValues
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+  GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=9001 W 62nd St&preferredLabelValues=&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=9001%20W%2062nd%20St&preferredLabelValues=&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+```json
+{
+ "suggestions": [
+  {
+   "text": "9001 W 62nd St, Mission, KS, 66202, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9Njg5MDM5MSNsbmc9NDIjZmE9NjU1MzYjaG49OTAwMSNsYnM9MTA5Ojc1MzQxNjE0I2xuPVdvcmxk",
+   "isCollection": false
+  },
+  {
+   "text": "9001 W 62nd St, Indianapolis, IN, 46278, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9NTk2MDA4NyNsbmc9NDIjaG49OTAwMSNsYnM9MTA5Ojc1MzQxNjE0I2xuPVdvcmxk",
+   "isCollection": false
+  },
+  {
+   "text": "9001 W 62nd St S, Monroe, IA, 50170, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9NjQwMDE0NSNsbmc9NDIjaG49OTAwMSNsYnM9MTA5Ojc1MzQxNjE2I2xuPVdvcmxk",
+   "isCollection": false
+  },
+  {
+   "text": "9001 62nd St S, Cottage Grove, MN, 55016, USA",
+   "magicKey": "dHA9NCN0dj00Yjg3MGE5MSNubT05MDAxIDYybmQgU3QgUywgQ290dGFnZSBHcm92ZSwgTU4sIDU1MDE2LCBVU0EjbG5nPTQyI2xuPVdvcmxk",
+   "isCollection": false
+  },
+  {
+   "text": "9001 62nd St, Newaygo, MI, 49337, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9ODY3MTQ3NCNsbmc9NDIjaG49OTAwMSNsYnM9MTA5Ojg1NzI5NDI5I2xuPVdvcmxk",
+   "isCollection": false
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+
+The `preferredLabelValues`  parameter can be used to return a more suitable city name for this address in suggestions. Pass `preferredLabelValues=localCity`  in the `suggest`  request to return Merriam as the city name in suggestions (refer to the top suggestion in the response for this example):
+
+#### Return suggestions using preferredLabelValues=localCity 
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+  GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=9001 W 62nd St&preferredLabelValues=localCity&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=9001%20W%2062nd%20St&preferredLabelValues=localCity&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+```json
+{
+ "suggestions": [
+  {
+   "text": "9001 W 62nd St, Merriam, KS, 66202, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9Njg5MDM5MSNsbmc9NDIjZmE9NjU1MzYjaG49OTAwMSNsYnM9MTA5Ojc1MzQxNjE0I2xuPVdvcmxk",
+   "isCollection": false
+  },
+  {
+   "text": "9001 W 62nd St, Indianapolis, IN, 46278, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9NTk2MDA4NyNsbmc9NDIjaG49OTAwMSNsYnM9MTA5Ojc1MzQxNjE0I2xuPVdvcmxk",
+   "isCollection": false
+  },
+  {
+   "text": "9001 W 62nd St S, Fairview, IA, 50170, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9NjQwMDE0NSNsbmc9NDIjaG49OTAwMSNsYnM9MTA5Ojc1MzQxNjE2I2xuPVdvcmxk",
+   "isCollection": false
+  },
+  {
+   "text": "9001 62nd St S, Cottage Grove, MN, 55016, USA",
+   "magicKey": "dHA9NCN0dj00Yjg3MGE5MSNubT05MDAxIDYybmQgU3QgUywgQ290dGFnZSBHcm92ZSwgTU4sIDU1MDE2LCBVU0EjbG5nPTQyI2xuPVdvcmxk",
+   "isCollection": false
+  },
+  {
+   "text": "9001 62nd St, Croton, MI, 49337, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9ODY3MTQ3NCNsbmc9NDIjaG49OTAwMSNsYnM9MTA5Ojg1NzI5NDI5I2xuPVdvcmxk",
+   "isCollection": false
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+
+However, if you start typing `Mission`  as the city name for the same input, like this—`9001 W 62nd St Mi` —also with `preferredLabelValues=localCity` , postal city name Mission is used in suggestions instead of local city name Merriam, even though `localCity`  is specified in the request. This is because `suggest`  is designed to return suggestions that reflect the user's input as closely as possible. In this case, the user input may override the `preferredLabelValues`  parameter (refer to the top suggestion in the response for this example).
+
+#### Return suggestions using preferredLabelValues=localCity
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+  GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?f=pjson&text=9001 W 62nd St Mi&preferredLabelValues=localCity&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+{/* 
+```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?f=pjson&text=9001%20W%2062nd%20St%20Mi&preferredLabelValues=localCity&f=pjson&token=<ACCESS_TOKEN>
+``` */}
+
+
+```json
+{
+ "suggestions": [
+  {
+   "text": "9001 W 62nd St, Mission, KS, 66202, USA",
+   "magicKey": "dHA9NCN0dj00Yjg3MGE5MSNubT05MDAxIFcgNjJuZCBTdCwgTWlzc2lvbiwgS1MsIDY2MjAyLCBVU0EjbG5nPTQyI2xuPVdvcmxk",
+   "isCollection": false
+  },
+  {
+   "text": "9001 62nd St, Croton, MI, 49337, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9ODY3MTQ3NCNsbmc9NDIjaG49OTAwMSNsYnM9MTA5Ojg1NzI5NDI5OzI6NDQwOTExMTQjbG49V29ybGQ=",
+   "isCollection": false
+  },
+  {
+   "text": "9001 62nd St, Geneva, MI, 49090, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9ODc0Mzc4NSNsbmc9NDIjaG49OTAwMSNsYnM9MTA5Ojg1NzI5NDI5OzI6NDQwOTExMTQjbG49V29ybGQ=",
+   "isCollection": false
+  },
+  {
+   "text": "9001 62nd St S, Cottage Grove, MN, 55016, USA",
+   "magicKey": "dHA9NCN0dj00Yjg3MGE5MSNubT05MDAxIDYybmQgU3QgUywgQ290dGFnZSBHcm92ZSwgTU4sIDU1MDE2LCBVU0EjbG5nPTQyI2xuPVdvcmxk",
+   "isCollection": false
+  },
+  {
+   "text": "9001 62nd St NW, Minot, ND, 58703, USA",
+   "magicKey": "dHA9MCN0dj00Yjg3MGE5MSNsb2M9MTMxNjg2MTAjbG5nPTQyI2huPTkwMDEjbGJzPTEwOTo4NTcyOTQzMzs5OjQ3Njk3Njg1I2xuPVdvcmxk",
+   "isCollection": false
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+When the `preferredLabelValues`  parameter is used for `suggest` , it should also be used in the corresponding `findAddressCandidates`  request when the user selects a suggestion. If you take the top suggestion from the previous example—with city name Mission in the label—and pass it to `findAddressCandidates`  with `preferredLabelValues=localCity`  included in the request, the resulting response will include Merriam as the city name in labels instead of Mission. This is because `findAddressCandidates`  always honors the `preferredLabelValues`  parameter, unlike `suggest` , for which matching the user input is prioritized:
+
+#### Use findAddressCandidates with magicKey when preferredLabelValues=localCity
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+  GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?outFields=Match_addr,City&f=pjson&singleline=9001 W 62nd St, Mission, KS, 66202, USA&magicKey=dHA9NCN0dj00Yjg3MGE5MSNubT05MDAxIFcgNjJuZCBTdCwgTWlzc2lvbiwgS1MsIDY2MjAyLCBVU0EjbG5nPTQyI2xuPVdvcmxk&preferredLabelValues=localCity&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?outFields=Match_addr,City&f=pjson&singleline=9001%20W%2062nd%20St%2C%20Mission%2C%20KS%2C%2066202%2C%20USA&magicKey=dHA9NCN0dj00Yjg3MGE5MSNubT05MDAxIFcgNjJuZCBTdCwgTWlzc2lvbiwgS1MsIDY2MjAyLCBVU0EjbG5nPTQyI2xuPVdvcmxk&preferredLabelValues=localCity&token=<ACCESS_TOKEN>
+``` */}
+
+**findAddressCandidates  JSON response**
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "9001 W 62nd St, Merriam, Kansas, 66202",
+   "location": {
+    "x": -94.689894642071,
+    "y": 39.01691560122
+   },
+   "score": 100,
+   "attributes": {
+    "Match_addr": "9001 W 62nd St, Merriam, Kansas, 66202",
+    "City": "Merriam"
+   },
+   "extent": {
+    "xmin": -94.690894642071,
+    "ymin": 39.01591560122,
+    "xmax": -94.688894642071,
+    "ymax": 39.01791560122
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+
+Refer to the [findAddressCandidates](/find-address-candidates)  topic for more information about how the `preferredLabelValues`  parameter can be used with that operation.
+
+</Box>

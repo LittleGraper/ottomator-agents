@@ -1,0 +1,512 @@
+---
+title: "Export"
+description: "The export operation exports organization logs based on either query or search parameters."
+slug: "export-logs"
+url: "/export-logs"
+guid: "GUID-10867A48-FD53-4535-9270-284D336B4F9B"
+migratedTopicMetadata:
+  FTITLE: "Export Logs"
+  FDESCRIPTION: ""
+  FCHANGES: "New topic"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0-*"
+  CREATED-ON: "21/06/2022 12:27:09"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "07/08/2022 21:21:50"
+  VERSION: "1"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "10"
+  ED: "GUID-74731654-D535-4729-8E93-6EFA2B4593D1"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /logs/export
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /logs/export
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '11.0'
+  requiredCapabilities:
+    - name: Access allowed with either the "Manage Licenses", "Links to organization-specific group", "Delete", "Security and infrastructure", or "Servers" privileges, or the Publisher role
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `export` operation exports organization logs based on either query or search parameters. Using the [query filter parameters](/export-logs#query-parameters), you can aggregate and filter through logs for your deployment. Using the [search parameters](/export-logs#search-parameters), you can search for specific log records. Once completed, a `.zip` file of the exported logs is uploaded to the [uploads](/uploaded-item) directory, which can be [downloaded](/download-uploaded-item) from the URL provided with the success response. If necessary, the `export` operation can be invoked multiple times to acquire additional logs.
+
+
+##  Request parameters
+
+The table below describes the parameters applicable to both query and search requests. For the query and search parameters, see the [Query parameters](/export-logs#query-parameters) and [Search parameters](/export-logs#search-parameters) sections below.
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `num` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum number of results returned by this operation. The default number of results per page is 1,000. The limit for number of results returned is 10,000 logs.
+
+      ```markdown label=Example
+      num=1000
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `stackTraces` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A binary that specifies whether stack traces of exceptions will be included with the returned logs. The default is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+### Query parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `logLevel` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The base log level for the logs being queried. Only logs at the same level or at a level with higher severity will be returned. The default level is the [log level currently set](/log-settings) for the organization.
+
+      Values: `SEVERE` | `WARNING` | `INFO` | `FINE` | `VERBOSE` | `DEBUG`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `startTime` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The most recent time used to query logs, formatted as either a time stamp (`yyyy-mm-ddThh:mm:ss` ) or milliseconds from epoch. The default is the current time.
+
+      ```other label=Example
+      //Timestamp
+      startTime=2020-08-01T15:17:20
+
+      //Milliseconds
+      startTime=1597072460000
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `endTime` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The oldest time used to query logs, formatted as either a time stamp (`yyyy-mm-ddThh:mm:ss` ) or milliseconds from epoch. The default is kept blank.
+
+      ```other label=Example
+      //Timestamp
+      endTime=2020-08-01T15:14:20
+
+      //Milliseconds
+      endTime=1597072520000
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `logCode` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The log codes assigned to the logs. When specified, the query will return logs associated with those codes.
+
+      ```markdown label=Example
+      logCode=202010,1251
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `users` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The username of a user in the organization to further filter log results.
+
+      ```markdown label=Example
+      users=user1
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `requestIDs` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      An ID assigned to a specific server event.
+
+      ```markdown label=Example
+      requestIDs=a1fc28db-4575-4a09-84df-7b313c239e5b,22d8113a-e229-4e48-8fe4-008a5037fcba
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serviceTypes` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The service type of a service in the organization to further filter query results.
+
+      <Note type={"note"}>
+
+      Currently, `MapServer`, `GPServer`, and `FeatureServer` are the supported service types.
+
+      </Note>
+
+      ```markdown label=Example
+      serviceTypes=MapServer
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `source` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The source of the logged events.
+
+      ```markdown label=Examples
+      //Sharing API as source
+      source=Sharing
+
+      //Service in folder as source
+      source=Folder/CommercialDamageAssessment.FeatureServer
+
+      //Enterprise Admin as source
+      source=Enterprise Admin
+
+      //REST Catalog as source
+      source=Rest Catalog
+
+      //SOAP Catalog as source
+      source=Soap Catalog
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+### Search parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `searchQuery` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The search terms used to query your organization's logs. This parameter supports keywords (for example, completed) and phrases (for example, completed successfully). For accepted query types and examples, see the [Supported queries](/export-logs#supported-queries) section below.
+
+      <Note type={"note"}>
+
+      To include special characters in a search term, the special character must be escaped with a backslash (for example, successful\\!) unless the search query is enclosed in quotes for an exact match search (for example, "successful!"). Wildcard values (?, \*, ^, and +) are not supported search values. If a wildcard is used, the search fails and returns an error message.
+
+      </Note>
+
+      ```markdown label=Example
+      searchQuery=(“Updated Kubernetes Secret” AND logCode:1312) AND NOT logLevel:VERBOSE OR elapsed:[1.45195 TO 2.43]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sortBy` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the way in which search results are sorted. Sorting by `bestMatch` returns the results that best match the `searchQuery` values. Sorting by `time` sorts the search results by the time information recorded in the log's time stamp, the order of which is determined by the `sortOrder` parameter. The default value is `bestMatch`.
+
+      Values: `bestMatch` | `time`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sortOrder` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The sort order for the results, either descending or ascending, in relation to the `sortBy` value. The default is `desc`. This parameter is ignored if `sortBy` is set to `bestMatch`.
+
+      Values: `desc` | `asc`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Supported queries
+
+The sections below outline the supported query ties for `searchQuery`. The `export` operation supports the following query types:
+
+- [Full-text search](/export-logs#full-text-query)
+- [Exact match search](/export-logs#exact-match-query)
+- [Field-based search](/export-logs#field-based-query)
+- [Boolean queries](/export-logs#boolean-queries)
+- [Range queries](/export-logs#range-queries)
+- [Grouping queries](/export-logs#grouping-queries)
+
+
+### Full-text query
+
+Full-text queries return all logs that match any of the search terms.
+
+In this example, log records that contain, in some capacity, the words completed or successfully are returned:
+
+```markdown label=Example
+searchQuery=completed successfully
+```
+
+### Exact match query
+
+Exact match queries search for a phrase, contained within doubt quotes, that allows exact matches of the search terms to be returned.
+
+In this example, an exact match query is used to find log records that exactly match the success response for creating an organization:
+
+```markdown label=Example
+searchQuery="The process to create a new organization has completed successfully."
+```
+
+### Field-based query
+
+Field-based queries allow `searchQuery` values to be searched against a single log field using the field name, followed by a colon (:), and the search term. If no field indicator is used, all default fields are searched. The default log fields for `searchQuery` are as follows:
+
+- `msg` 
+- `source` 
+- `className` 
+- `username` 
+- `stackTraces` 
+- `serviceTypes` 
+- `logLevel` 
+- `logCode` 
+
+In this example, a field-based query is used to search for a log record that has `ArcSOCGISServiceClient` as the `className` value:
+
+```markdown label=Example
+searchQuery=className: ArcSOCGISServiceClient
+```
+
+### Boolean queries
+
+Using Boolean operators in `searchQuery` allows you to combine terms through logic operators. ArcGIS Enterprise Administrator API supports `AND`, `OR`, and `NOT` as Boolean operators. Operators must be in all caps.
+
+#### AND
+
+The `AND` operator performs matching when both terms exist in either the given or default fields. This is equivalent to an intersection using sets.
+
+In this example, the `AND` operator is used to search for a log record that contains the phrase `"Updated Kubernetes Secret"` and the `username` administrator:
+
+```markdown label=Example
+searchQuery="Updated Kubernetes Secret" AND username:administrator
+```
+
+<Note type={"note"}>
+
+The example above demonstrates a specific search. You do not need to combine field-based and Boolean queries.
+
+</Note>
+
+#### OR
+
+The `OR` operator links two terms and returns a match if either term exists in the log records. This is equivalent to a union using sets.
+
+In this example, the `OR` operator is used to search for a log record that contains the phrase `"GP Server"` or has the `logCode` 1312:
+
+Example
+
+```markdown label=Example
+searchQuery="GP Server" OR logCode:1312
+```
+
+#### NOT
+
+The `NOT` operator excludes items that contain the term after `NOT`. This is equivalent to a differencing using sets.
+
+In this example, the `NOT` operator is used to search for a log record that contains the phrase `"Updated Kubernetes Secret"` that belongs to any `logLevel` other than `VERBOSE`:
+
+<Note type={"note"}>
+
+The `NOT` operator cannot be used with only a single term.
+
+</Note>
+
+```markdown label=Example
+searchQuery="Updated Kubernetes Secret" AND NOT logLevel:VERBOSE
+```
+
+### Range queries
+
+Using range queries allows `searchQuery` to match single or multiple field values between lower and upper boundaries, exclusively for numerical fields (for example, `logCodes` and `timestamps`). 
+
+Range queries can be inclusive or exclusive of the upper and lower bounds. Range requests that are inclusive of their bounds use brackets: \[ ]. Exclusive range requests use braces: {'{'} {'}'}.
+
+```markdown label=Example
+searchQuery=elapsed: [1.4195 TO 2.43]
+```
+
+### Grouping queries
+
+Grouping allows queries by grouping subqueries within parenthesis to combine clauses and any of the other query types.
+
+In this example, grouping is used in combination with exact match, Boolean, field-based, and range queries to find all log records with the phrase `"Updated Kubernetes Secret"` and a `logCode` of 1312 that either belong to a `logLevel` other than `VERBOSE` or have elapsed between 1.45195 to 2.43:
+
+```markdown label=Example
+searchQuery=(“Updated Kubernetes Secret” AND logCode:1312) AND NOT logLevel:VERBOSE OR elapsed:[1.45195 TO 2.43]
+```
+
+## Example usage
+
+The following is a sample POST request for the `export` operation that demonstrates using query filter parameters (`logLevel`, `startTime`, `endTime`, `users`, and `source`):
+
+```other
+POST /context/admin/logs/export HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+logLevel=DEBUG&startTime=2020-08-09T22:45:06&endTime=2020-08-09T22:45:00&logCode=&users=jSmith&requestIDs=&serviceTypes=&source=Enterprise Admin&searchQuery=&sortBy=bestMatch&sortOrder=desc&num=1000&stackTraces=false&f=html&token=7O7EKYp0WhTLZLku7vilWPky53qD8mz-vweu9YyLMAPqlno0-85wDdjBe8w_rsl2jmlAph2Fp6-BQ4boFqidGIT4cR0vWpj2kgEmICN2gukc0M2PLP2rjBKwUhef__TtAvWDIbHzaPMGtL1HjRaim4rG-7jjjjzxMprn0eRsI_tbbOT6JmPF4Y4PqLHIQbp8ZcOFl_bSVBFqU2MtNIo4BPCaRZqDxcTxy9C0EJhljkoWnA-GCbV_E8kPcPqeGf1M
+```
+
+The following is a sample POST request for the `export` operation that demonstrates using search parameters (`searchQuery`, `sortBy`, and `sortOrder`):
+
+```other
+POST /context/admin/logs/export HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+logLevel=DEBUG&startTime=&endTime=&logCode=&users=&requestIDs=&serviceTypes=&source=&searchQuery="Completed Successfully"&sortBy=bestMatch&sortOrder=desc&num=1000&stackTraces=false&f=html&token=7O7EKYp0WhTLZLku7vilWPky53qD8mz-vweu9YyLMAPqlno0-85wDdjBe8w_rsl2jmlAph2Fp6-BQ4boFqidGIT4cR0vWpj2kgEmICN2gukc0M2PLP2rjBKwUhef__TtAvWDIbHzaPMGtL1HjRaim4rG-7jjjjzxMprn0eRsI_tbbOT6JmPF4Y4PqLHIQbp8ZcOFl_bSVBFqU2MtNIo4BPCaRZqDxcTxy9C0EJhljkoWnA-GCbV_E8kPcPqeGf1M
+```
+
+## JSON Response examples
+
+The following response is returned when the job request is submitted. The value returned for `jobsUrl` can be used to access the `job` resource to poll a [job's status](/job) after it has been submitted.
+
+```other
+{
+  "jobsUrl": "https://organization.domain.com/context/admin/jobs/j1fad73a1-ea33-45e8-b2f4-a665aaeeed69",
+  "jobid": "j1fad73a1-ea33-45e8-b2f4-a665aaeeed69",
+  "status": "SUBMITTED"
+}
+```
+
+Once `status` returns as `COMPLETED`, the `job` resource returns the following response. The value returned for `result` can be used to access the uploaded `.zip` file and [download](/download-uploaded-item) the exported logs.
+
+```other
+{
+  "result": {"URL": "https://organization.domain.com/context/admin/uploads/9d3f618c-e23f-4fed-8856-2a277a908e0d"},
+  "updatedtime": 1654240807010,
+  "jobid": "j423b3cfd-3ce6-4ee7-84b5-aed574ec57c9",
+  "resource": {"name":"Logs"}
+  "requestID": "6e767d21-1421-4fef-b8d1-d2148e9a71e6",
+  "name": "exportLogs",
+  "endtime": 1654240807012,
+  "starttime": 1654240803053,
+  "operationURI": "/arcgis/admin/logs/export",
+  "status": "COMPLETED",
+  "username": "Administrator"
+}
+```

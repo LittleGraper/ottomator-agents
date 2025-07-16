@@ -1,0 +1,101 @@
+---
+title: "Sync-enabled feature services"
+description: "Feature services have a capability called sync."
+slug: "sync-enabled-feature-services"
+url: "/sync-enabled-feature-services"
+guid: "GUID-A81C0E98-7A12-43F0-BF75-7080D352A25C"
+migratedTopicMetadata:
+  FTITLE: "Sync-enabled feature services"
+  FDESCRIPTION: ""
+  FCHANGES: "Edited capability requirements for read-only and editable data"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.2.1 - *"
+  CREATED-ON: "28/03/2018 13:58:22"
+  FAUTHOR: "sscott"
+  FSTATUS: "Released"
+  MODIFIED-ON: "20/06/2018 17:04:53"
+  VERSION: "5"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "7"
+  ED: "GUID-1FFC5129-9F77-417D-89DD-3AF6350B84B3"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata: {}
+---
+
+Feature services have a capability called Sync.
+
+`"capabilities": "Create,Delete,Query,Sync,Update,Uploads,Editing"` 
+
+When the Sync capability is listed, the feature service is sync-enabled, and all layers and tables in the service can be used in sync workflows. If the Sync capability is not listed, the service cannot be used in sync workflows. 
+
+Feature service capabilities define the operations that are allowed when working with a feature service. The following two configurations are supported for feature services that participate in offline map use:
+
+-   Read-only data—If clients will only query the data they download from the feature service while offline, set the Query and Sync capabilities on the feature service. With this configuration, data cannot be synchronized back to the service.
+-   Editable data—If clients will edit the data when offline and synchronize changes with the feature service when they have connectivity, set Query and Sync with any combination of Create, Delete, and Update capabilities on the feature service.
+
+Any other configuration will return an error when you download or synchronize the data.
+
+To enable the Sync capability on feature services created with ArcGIS Server, you need to [ prepare your geodatabase in advance](https://enterprise.arcgis.com/en/server/latest/publish-services/windows/author-feature-services.htm). An option to enable sync by editing item properties is also provided in Portal for ArcGIS and ArcGIS.com for hosted feature services.
+
+For sync-enabled feature services, an additional `syncCapabilities`  property describing the following supported features is provided:
+
+-   Synchronization direction
+-   Layer-level sync
+-   [Asynchronous operation](/asynchronous-operations)
+-   Registration of existing data
+-   Rollback on failure
+
+If `supportsRegisteringExistingData`  is `true` , the [`createReplica` ](/create-replica) operation has a `replicaOptions`  parameter that supports registering existing data. This allows a replica to be created based on an existing replica. [Example 3](/sync-workflow-examples#workflow-example-3-setting-up-sync-on-multiple-clients-by-a-sharing-a-replica) in the workflow examples describes a workflow where this option is used.
+
+If `supportsSyncDirectionControl`  is `true` , the service will allow control of data sync direction. The default is bidirectional. Other directions are upload, download, and snapshot. 
+
+If `supportsPerLayerSync`  is `true` , layers can be synchronized independently, and the service will accept a value of `perLayer`  for the sync model during the `createReplica`  operation. If `supportsPerLayerSync`  is `false` , the only sync model supported is `perReplica` . 
+
+If `supportsPerReplicaSync`  is `true` , the layers can be synchronized together, and the service will accept a value of `perReplica`  for the sync model during the `createReplica`  operation. If `supportsPerReplicaSync`  is `false` , the only sync model supported is `perLayer` . 
+
+If `supportsAsync`  is `true` , the service can execute sync operations [asynchronously](/asynchronous-operations).
+
+If `supportsRollbackOnFailure`  is `true` , the `rollbackOnFailure`  parameter can be set to `true`  or `false`  when running the [`synchronizeReplica` ](/synchronize-replica) operation. If `supportsRollbackOnFailure`  is `false` , the `synchronizeReplica`  operation does not support the parameter.
+
+## JSON syntax for feature service properties related to Sync
+
+```javascript
+{
+  "currentVersion": <currentVersion>,
+  "syncCapabilities" : {
+    "supportsRegisteringExistingData" : <true | false>,
+    "supportsSyncDirectionControl" : <true | false>,
+    "supportsPerLayerSync" : <true | false>,
+    "supportsPerReplicaSync" : <true | false>,
+    "supportsRollbackOnFailure" : <true | false>,
+    "supportsAsync" : <true | false>,
+  }
+...
+}
+```
+
+ 
+
+## JSON response example
+
+```javascript
+{
+  "currentVersion": 10.21,
+  "syncCapabilities":{
+    "supportsRegisteringExistingData": true,
+    "supportsSyncDirectionControl": true,
+    "supportsPerLayerSync": true,
+    "supportsPerReplicaSync" : false,
+    "supportsRollbackOnFailure" : false,
+    "supportsAsync": true
+    }
+...
+}
+```
+
+ 

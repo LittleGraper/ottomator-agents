@@ -1,0 +1,1484 @@
+---
+title: "Query Related Records (Feature Service)"
+description: "The query operation returns a list of feature sets grouped by source layer and table object IDs"
+slug: "query-related-records-feature-service"
+url: "/query-related-records-feature-service"
+guid: "GUID-8CA41FB4-6225-42A6-92A9-20B0B4AC9462"
+migratedTopicMetadata:
+  FTITLE: "Query Related Records (Feature Service)"
+  FDESCRIPTION: "FOr 10.5 Release"
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.3 - *"
+  CREATED-ON: "30/11/2023 11:30:27"
+  FAUTHOR: "thoque"
+  FSTATUS: "To be reviewed"
+  MODIFIED-ON: "30/11/2023 11:32:35"
+  VERSION: "12"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-C0F31C74-8C22-4836-95EF-9D68B096DED1"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/FeatureServer/<layerId>/queryRelatedRecords
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/FeatureServer/<layerId>/queryRelatedRecords
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.0'
+  requiredCapability: Query
+---
+
+## Description
+
+The `queryRelatedRecords`  operation is performed on a [ feature service layer resource](/layer-feature-service). The result of this operation are feature sets grouped by source layer and table object IDs. Each feature set contains [ Feature objects](/feature-object) including the values for the fields requested by the user. For related layers, if you request geometry information, the geometry of each feature is also returned in the feature set. For related tables, the feature set does not include geometries.
+
+All parameters related to geometry are ignored when querying related tables.
+
+<Note type={"note"}>
+
+The `exceededTransferLimit`  property is now included in the JSON response when paging through a query result with the `resultOffset`  and `resultRecordCount`  parameters. When `exceededTransferLimit`  is `true` , it indicates there are more query results, and you can continue to page through the results. When `exceededTransferLimit`  is `false` , it indicates that you have reached the end of the query results.
+
+When the `resultOffset`  and `resultRecordCount`  parameters are not used, the `exceededTransferLimit`  property may also be included in the query results. In this case, the property will be true only if the number of records exceeds the maximum number configured by the server administrator.
+
+</Note>
+
+## New at 11.2
+
+-   This operation now supports pagination for non-hosted feature services that reference enterprise geodatabase data. Support for pagination is indicated when the layer-level `supportsQueryRelatedPagination`  property, under `advancedQueryCapabilities` , is `true` .
+-   Hosted and non-hosted feature services now support the `orderBy`  and `returnCountOnly`  parameters. Support for these parameters is indicated when the layer-level `supportsAdvancedQueryRelated`  property, under `advancedQueryCapabilities` , is `true` .
+
+## New at 11.1
+
+Starting at ArcGIS Enterprise 11.1, qualifying hosted feature services now support pagination with the `queryRelatedRecords`  operation. Support for pagination is indicated when the layer-level `supportsQueryRelatedPagination`  property, under `advancedQueryCapabilities` , is `true` .
+
+## New at 10.9
+
+A new parameter, `timeReferenceUnknownClient` , has been added at 10.9. Setting `timeReferenceUnknownClient`  as `true`  indicates that the client is capable of working with date field data values that are not in UTC. For more information on this parameter, see the [Request parameters](/query-related-records-feature-service-layer#GUID-B0639AB4-599A-4105-9014-93A5CFC416B1) table below.
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`objectIds` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The object IDs of the layer or table to be queried. Records related to these object IDs will be queried.
+
+Syntax
+
+```javascript
+objectIds=<objectId1>, <objectId2>
+```
+
+ 
+
+Example
+
+```javascript
+objectIds=37, 462
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`relationshipId` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The ID of the relationship to be queried. The relationships in which this layer or table participates are included in the [ Feature Service Layer resource response](/layer-feature-service). Records in tables or layers corresponding to the related table or layer of the relationship are queried.
+
+Example
+
+```javascript
+relationship=4
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outFields` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The list of fields from the related table or layer to be included in the returned feature set. This list is a comma delimited list of field names. If you specify the shape field in the list of return fields, it is ignored. To request geometry, set `returnGeometry`  to `true` . You can also specify the wildcard (\*) as the value of this parameter. In this case, the results will include all the field values.
+
+Example
+
+```javascript
+outFields=AREANAME,ST,POP2000
+
+//wildcare usage
+outFields=*
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`definitionExpression` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Related records returned by the `queryRelatedRecords`  operation can be further limited by setting a definition expression. The definition expression refers to the related table and is applied on top of the result set.
+
+Example
+
+```javascript
+definitionExpression=POP2000 > 100000
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnGeometry` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , the feature set includes the geometry associated with each feature. The default is `true` . This parameter only applies to related layers. It is ignored for related tables. If the `outFields`  parameter is set to the wildcard (\*), it implicitly implies that `returnGeometry=true` , and setting `returnGeometry`  to `false`  has no effect. 
+
+Values: `true | false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`maxAllowableOffset` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This option can be used to specify the `maxAllowableOffset`  to be used for generalizing geometries returned by the `query`  operation. `maxAllowableOffset`  is in the units of `outSR` . If `outSR`  is not specified, `maxAllowableOffset`  is assumed to be in the unit of the spatial reference of the map.
+
+Example
+
+```javascript
+maxAllowableOffset=2
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geometryPrecision` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This option can be used to specify the number of decimal places in the response geometries returned by the `query`  operation. This applies to X and Y values only (not m- or z-values).
+
+Example
+
+```javascript
+geometryPrecision=3
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`resultOffset` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This option can be used for fetching query results by skipping the specified number of records and starting from the next record (that is, `resultOffset`  + 1th), and to fetch records that are beyond the `maxRecordCount` . The default is 0.
+
+<Note type={"note"}>
+
+This parameter only applies if `supportsQueryRelatedPagination`  is `true` .
+
+</Note>
+
+Example
+
+```javascript
+//If maxRecordCount is set to 1000, this will return the query results in range of 1001 to 1100.
+resultOffset=1000
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`resultRecordCount` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This option can be used for fetching query results up to the `resultRecordCount`  specified. When `resultOffset`  is specified but this parameter is not, the map service defaults it to `maxRecordCount` . The maximum value for this parameter is the value of the layer's `maxRecordcount` `resultOffset`  property.
+
+<Note type={"note"}>
+
+This parameter only applies if `supportsQueryRelatedPagination`  is `true` .
+
+</Note>
+
+Example
+
+```javascript
+//Will fetch up to 10 records
+resultRecordCount=10
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outSR` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The spatial reference of the returned geometry. The spatial reference can be specified as either a well-known ID or a [spatial reference json object](/geometry-objects). If `outSR`  is not specified, the geometry is returned in the spatial reference of the map. This parameter only applies to related layers. It is ignored for related tables.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`gdbVersion` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The geodatabase version to query. This parameter applies only if the `isDataVersioned`  property of the layer queried is `true` . If this is not specified, query will apply to the published map’s version.
+
+Syntax
+
+```javascript
+gdbVersion=<version>
+```
+
+ 
+
+Example
+
+```javascript
+gdbVersion=SDE.DEFAULT
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`historicMoment` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This option works with ArcGIS Server services only. The historic moment to query. This parameter applies only if the `supportsQueryWithHistoricMoment`  property of the layers being queried is set to `true` . This setting is provided in the layer resource. If `historicMoment`  is not specified, the query will apply to the current features.
+
+Syntax
+
+```javascript
+histrociMoment=<Epoch time in milliseconds>
+```
+
+ 
+
+Example
+
+```javascript
+historicMoment=1199145600000
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnZ` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , z-values are included in the results if the features have z-values. Otherwise, z-values are not returned. The default is `false` . This parameter only applies if `returnGeometry`  is `true` .
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnM` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , m-values are included in the results if the features have m-values. Otherwise, m-values are not returned. The default is `false` . This parameter only applies if `returnGeometry`  is `true` .
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnTrueCurves` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+When set to `true` , it returns true curves in output geometries; otherwise, curves are converted to densified polylines or polygons. The default value is `false` .
+
+Values: `true`  \| `false` 
+
+Example
+
+```javascript
+trueCurveClient=true
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`orderByFields` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This parameter is used to request a list of the related records based on the field order. This list is a comma delimited list of field names.
+
+<Note type={"note"}>
+
+This parameter only applies if `supportsAdvancedQueryRelated`  is `true` .
+
+</Note>
+
+Syntax
+
+```javascript
+orderByFields=<fieldName1>,<fieldName2>
+```
+
+ 
+
+Example
+
+```javascript
+orderByFields=TOWNSHIP,RANGE
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnCountOnly` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , returns the count of the related records for each object ID. The default is `false` . This parameter is only applicable if `supportsAdvancedQueryRelated`  is `true` .
+
+<Note type={"note"}>
+
+If included in the request, this parameter will overwrite all other parameters and responses. 
+
+</Note>
+
+Values: `true`  \| `false` 
+
+Example
+
+```javascript
+returnCountOnly=true
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`datumTransformation` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Introduced at 10.8. This parameter applies a datum transformation while projecting geometries in the results when `outSR`  is different than the layer's spatial reference. When specifying transformations, you need to think about which datum transformation best projects the layer (not the feature service) to the `outSR`  and `sourceSpatialReference`  property in the layer resource report. For a list of valid datum transformation ID values ad well-known text strings, see [Using spatial references](/using-spatial-references). For more information on datum transformations, please see the transformation parameter in the [Project](/project) operation.
+
+Syntax
+
+```javascript
+//Syntax to apply a simple transformation
+datumTransformation=<wkid>
+
+//Syntax to apply a simple transformation
+datumTransformation={"wkt": "<WKT>"}
+
+//Syntax to apply a composite transformation
+datumTransformation={"geoTransforms":[{"wkid":<id>,"forward":<true|false>},{"wkt":"<WKT>","forward":<true|false>}]}
+```
+
+ 
+
+Example
+
+```javascript
+//Applies a simple tranformation
+datumTransformation=1623
+
+//Applies a composite transformation
+datumTransformation={
+  "geoTransforms":[
+    {
+      "wkid":1088,
+      "transformForward": true
+    },
+    {
+      "wkit": "GEOGTRAN[\"S_JTSK_To_WGS_1984_1\",GEOGCS[\"GCS_S_JTSK\",DATUM[\"D_S_JTSK\",SPHEROID[\"Bessel_1841\",6377397.155,299.1528128]],
+        PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_
+        1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],METHOD[\"Position_Vector\"],
+        PARAMETER[\"X_Axis_Translation\",570.8],PARAMETER[\"Y_Axis_Translation\",85.7],PARAMETER[\"Z_Axis_Translation\",462.8],
+        PARAMETER[\"X_Axis_Rotation\",4.998],PARAMETER[\"Y_Axis_Rotation\",1.587],PARAMETER[\"Z_Axis_Rotation\",5.261],
+        PARAMETER[\"Scale_Difference\",3.56]]",
+      "transformForward":false
+    }
+  ]
+}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`timeReferenceUnknownClient` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Setting `timeReferenceUnknownClient`  as `true`  indicates that the client is capable of working with data values that are not in UTC. If its not set to `true` , and the service layer's `datesInUnknownTimeZone`  property is `true` , then an error is returned. The default is `false` 
+
+Its possible to define a service's time zone of date fields as unknown. Setting the time zone as unknown means that date values will be returned as-is from the database, rather than as date values in UTC. Non-hosted feature services can be set to use an unknown time zone using ArcGIS Server Manager. Setting the time zones to unknown also sets the `datesInUnknownTimeZone`  layer property as `true` . Currently, hosted feature services do not support this setting. This setting does not apply to editor tracking date fields which are stored and returned in UTC even when the time zone is set to unknown.
+
+Most clients released prior to ArcGIS Enterprise 10.9 will not be able to work with feature services that have an unknown time setting. The `timeReferenceUnknownClient`  parameter prevents these clients from working with the service in order to avoid problems.. Setting this parameter to `true`  indicates that the client is capable of working with unknown date values that are not in UTC.
+
+<Note type={"note"}>
+
+ArcGIS Pro 2.7 or newer can work with these feature services.
+
+</Note>
+
+Value: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` .
+
+Values: `html`  \| `json` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+-   Example one
+-   Example two
+-   Example three
+-   Example four
+
+### Example one
+
+The following is a sample request URL for the `queryRelatedRecords`  operation, which will query the related records as defined by relationship ID 2 that are related to the specified objectIds in layer 0:
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/Petroleum/KSPetro/FeatureServer/0/queryRelatedRecords?objectIds=3,4,5&relationshipId=2&returnGeometry=true&outFields=*&f=html
+```
+
+ 
+
+### Example two
+
+The following is a sample request URL for the `queryRelatedRecords`  operation, which requests to skip the first two records and return the next four records where the objectId is greater than 3:
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/RelationshipOID_test/FeatureServer/3/queryRelatedRecords?objectIds=&relationshipId=1&outFields=*&definitionExpression=ObjectID>3&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&resultOffset=2&resultRecordCount=4&f=html
+```
+
+ 
+
+### Example three
+
+The following is a sample request URL for the `queryRelatedRecords`  operation, which will return the related records count for each specified objectId where `TOWNSHIP`  is the value for `orderByField` :
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/KSPetro/FeatureServer/1/queryRelatedRecords?objectIds=7028,7029,71,6263,166,72,69,7126,6080,7522,335&relationshipId=1&outFields=OBJECTID&definitionExpression=&orderByFields=TOWNSHIP&returnCountOnly=true&returnGeometry=false&maxAllowableOffset=&geometryPrecision=&outSR=&resultOffset=&resultRecordCount=&f=html&token=
+```
+
+ 
+
+### Example four
+
+The following is a sample request URL for the `queryRelatedRecords`  operation, which will return the related records for each specified objectId where `TOWNSHIP`  is the value for both the `outField`  and `orderByField` :
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/Kansas_Petro_Data/FeatureServer/1/queryRelatedRecords?objectIds=7028,7029&relationshipId=1&outFields=TOWNSHIP&definitionExpression=1=1&orderByFields=TOWNSHIP&returnCountOnly=false&returnGeometry=false&maxAllowableOffset=&geometryPrecision=&outSR=&resultOffset=&resultRecordCount=&f=html&token=
+```
+
+ 
+
+## JSON Response syntax
+
+```other
+{
+  "geometryType": "<geometryType>", //if records include geometry
+  "spatialReference": <spatialReference>, //if records include geometry
+  "hasZ": <true|false>,
+  "hasM": <true|false>,
+  "fields": [
+    {
+      "name": "<fieldName1>",
+      "type": "<fieldType1>",
+      "alias": "<fieldAlias1>",
+      "length": "<length1>"
+    },
+    {
+      "name": "<fieldName2>",
+      "type": "<fieldType2>",
+      "alias": "<fieldAlias2>",
+      "length": "<length2>"
+    }
+  ],
+  "relatedRecordGroups": [
+    {
+      "objectId": <objectId1>,
+      "relatedRecords": [ //features may include geometry for related layers only
+        <relatedFeature11>, <relatedFeature12>
+      ]
+    },
+    {
+      "objectId": <objectId2>,
+      "relatedRecords": [
+        <relatedFeature21>, <relatedFeature22>
+      ]  
+    }
+  ]
+}
+```
+
+ 
+
+## JSON Response example
+
+-   Example one
+-   Example two
+-   Example three
+
+## JSON Response example
+
+### Example one
+
+The following is a sample response returned by the `queryRelatedRecords`  operation:
+
+```other
+{
+  "geometryType": "esriGeometryPolygon",
+  "spatialReference": {
+    "wkid": 4267
+  },
+  "fields": [
+    {
+      "name": "OBJECTID", 
+      "type": "esriFieldTypeOID", 
+      "alias": "OBJECTID"
+    }, 
+    {
+      "name": "FIELD_KID", 
+      "type": "esriFieldTypeString", 
+      "alias": "FIELD_KID", 
+      "length": 25
+    }, 
+    {
+      "name": "APPROXACRE", 
+      "type": "esriFieldTypeDouble", 
+      "alias": "APPROXACRE"
+    }, 
+    {
+      "name": "FIELD_NAME", 
+      "type": "esriFieldTypeString", 
+      "alias": "FIELD_NAME", 
+      "length": 150
+    } 
+  ],
+  "relatedRecordGroups": [
+    {
+      "objectId": 3,
+      "relatedRecords": [
+        {
+          "attributes": {
+            "OBJECTID": 5540,
+            "FIELD_KID": "1000147595",
+            "APPROXACRE": 95929,
+            "FIELD_NAME": "LOST SPRINGS",
+          },
+          "geometry": {
+            "rings": [
+              [
+                [
+                  -96.929599633999942,
+                  38.52426809800005
+                ],
+                [
+                  -96.929602437999961,
+                  38.522448437000037
+                ],
+                [
+                  -96.92959118999994,
+                  38.529723252000053
+                ],
+                [
+                  -96.929594022999936,
+                  38.527905578000059
+                ],
+                [
+                  -96.929596839999988,
+                  38.526087119000067
+                ],
+                [
+                  -96.929599633999942,
+                  38.52426809800005
+                ]
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+ 
+
+### Example two
+
+The example below demonstrates a response that is returned when the request has the `objectIds`  parameter set as `7028,7029` , the `relationshipId`  parameter is set as `1` , the `outFields`  parameter is set as `TOWNSHIPS,RANGE` , the `orderByFields`  parameter is set as `TOWNSHIP,RANGE` , the `returnCountryOnly`  parameter is set as `false` , and `returnGeometry`  is set as `false` :
+
+```other
+{
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 33
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24,
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 34
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  }, 
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24, 
+      "RANGE": 35
+    }
+  },
+  {
+    "attributes": {
+      "TOWNSHIP": 24,
+      "RANGE": 35
+    }
+  }
+}
+```
+
+ 
+
+### Example three
+
+The response example below demonstrates a response that is returned when the request has the `objectIds`  parameter set as `7028,7029` , the `relationshipId`  parameter set as `1` , the `returnCountyOnly`  parameter is set as `true` , and the `returnGeometry`  parameter is set as `false` :
+
+```other
+{
+  "relatedRecordGroups": [
+    {
+      "objectId": 7028, 
+      "count": 10218
+    }, 
+    {
+      "objectId": 7029, 
+      "count": 3304
+    }
+  ]
+}
+```
+
+ 

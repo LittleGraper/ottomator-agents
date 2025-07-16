@@ -1,0 +1,189 @@
+---
+title: "Edit Machine"
+description: "The edit operation updates a server machine's configuration."
+slug: "editmachine"
+url: "/editmachine"
+guid: "GUID-2FC02FD8-973F-4E5D-B5A9-46C729792358"
+migratedTopicMetadata:
+  FTITLE: "editMachine"
+  FDESCRIPTION: ""
+  FCHANGES: "Adding privilege requirements"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.8.1 - *"
+  CREATED-ON: "09/06/2020 09:23:26"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "09/06/2020 11:12:14"
+  VERSION: "9"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-D23EF271-DA11-47A9-8530-4E7858D5DD4C"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /machines/<machine>/edit
+  urlSegments:
+    - name: <root>
+      url: /site
+    - name: /machines/<machine>/edit
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.1'
+  requiredCapabilities:
+    - name: Access allowed with the "Security and Infrastructure" privilege
+      url: /managing-access-to-the-server-administration-rest-api
+---
+
+## Description
+
+This `edit` operation makes changes to the configuration of the specified server machine in an ArcGIS Server site.
+
+<Note type={"caution"}>
+
+Editing the machine configuration causes the machine to be restarted. It's recommended that you perform this operation during low usage.
+
+</Note>
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Description"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `adminURL` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The URL where the Administrator API is running on the server machine. 
+
+      <Note type={"caution"}>
+
+      It is recommended that you keep the default URL.
+
+      </Note>
+
+      ```markdown label=Example
+      adminURL=https://machine:6443/arcgis/admin
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `webServerMaxHeapSize` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This property defines the maximum file size (in MB) that the web server's Java process can send to ArcGIS Server. The default value is -1 MB, meaning the web server will use one-fourth of the available system memory as the maximum heap size.
+
+      If you are observing a server performance impact and you have additional system memory, you can increase the heap size of the web server by updating this value from the default of -1 MB to an appropriate value. Note that doing so will potentially increase the amount of memory assigned to ArcGIS Server processes by your operating system.
+
+      If you have a multiple-machine site, this property should be identical on each of your machines.
+
+      ```markdown label=Example
+      webServerMaxHeapSize=-1
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `webServerCertificateAlias` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The alias of the web server SSL certificate.
+
+      ```markdown label=Example
+      webServerCertificateAlias=server1
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `socMaxHeapSize` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This property defines the maximum file size (in MB) that an individual ArcSOC process can send to the ArcGIS Server internal web server. The default value is 64 MB. You may choose to increase this property if you are experiencing performance impacts in your services, for example, if a service is failing to pass a very large JSON file to the server site. If you only want to change the maximum heap size for a specific service, you can do so by specifying the `javaHeapSize` framework property in the [Edit Service](/editservice) operation.
+
+      If you have a multiple-machine site, this property should be identical on each of your machines.
+
+      ```markdown label=Example
+      socMaxHeapSize=64
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `underMaintenance` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This property is a flag you can use to designate the machine as being under maintenance (by you, not by the ArcGIS Server site itself). The default value is `false`. When set to `true`, this causes the machine to fail its regular health check report. ArcGIS Web Adaptor will not send service requests to any machine with this flag set to `true`.
+
+      A machine under maintenance will still honor administrative changes and publishing events made to the site through other ArcGIS Server machines. You can implement similar logic in your third-party load balancer or reverse proxy server to avoid forwarding service requests to machines that fail the health check. This allows you to make changes to the machine (such as updating its OS) without causing service requests to fail. When you are done performing maintenance on the machine, change this property back to `false` .
+
+      <Note type={"note"}>
+
+      The join-site command line utility includes an optional flag to place the new machine under maintenance as soon as it's joined to the site.
+
+      </Note>
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `edit` operation:
+
+```markdown
+POST /webadaptor/admin/machines/MACHINE.DOMAIN.COM/edit HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+adminURL=https://SERVER1.DOMAIN.COM:port/arcgis/admin&webServerMaxHeapSize=-1&webServerCertificateAlias=server1&socMaxHeapSize=64&underMaintenance=false&f=json
+
+```
+
+## JSON Response example
+
+```other
+{"status": "success"}
+```

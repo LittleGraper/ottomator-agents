@@ -1,0 +1,239 @@
+---
+title: "Create (Volumes Configurations)"
+description: "The create operation is used to configure PersistentVolumeClaim (PVC) volume templates."
+slug: "create-volume-configurations"
+url: "/create-volume-configurations"
+guid: "GUID-60987DA4-58CB-4BA8-9917-5F79ECC03CE1"
+migratedTopicMetadata:
+  FTITLE: "Create Volume Configurations"
+  FDESCRIPTION: ""
+  FCHANGES: "New operation"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2-*"
+  CREATED-ON: "06/11/2023 17:11:55"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "12/11/2023 11:22:40"
+  VERSION: "1"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "6"
+  ED: "GUID-D1D16AF2-1E65-44A0-83A4-03CA2820145D"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /system/volumes/configurations/create
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /system/volumes/configurations/create
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '11.2'
+  requiredCapabilities:
+    - name: Access allowed with the "Security and infrastructure" privileges
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `create` operation is used to configure PersistentVolumeClaim (PVC) volume templates that are used to create on-demand volumes for each pod associated with a specific deployment.
+
+Administrators will need to define the `name` of the volume and define the properties in the `spec` JSON object. For more information on the configurable properties and their accepted values, see the [Spec properties](/create-volume-configurations#spec-properties) section below.
+
+To configure a GIS service to use a configure PVC template, the template's ID (which is returned by the [Configurations](/volumes-configurations) resource) and purpose will need to be added to a deployment's JSON. For more information, see the [Edit Deployment](/edit-deployment) documentation.
+
+<Note type={"tip"}>
+
+For organizations that run ArcGIS Enterprise on Kubernetes from a cloud environment, PVC volume templates should be configured at the node pool level.
+
+</Note>
+
+### Ephemeral volumes
+
+At ArcGIS Enterprise 11.2 on Kubernetes, the `create` operation can be used to create PVC volume templates that will generate multiple ephemeral volumes on-demand for the pods of a deployment. Each pod is then able to use its own ephemeral volume, providing each pod with its own resources to draw from. Once the pods are deleted, and the ephemeral volumes are no longer needed, the volumes are also removed.
+
+Ephemeral volumes are ideal for services, such as raster analytics, that do not need to have access to persisted data, but rather perform large analysis jobs that need to load data to a temporary space for processing.
+
+Ephemeral volumes are not useful for cases where data needs to be read by all pods of a particular service or deployment. For those cases, administrators should consider [creating persistent volumes](/create-volumes).
+
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `volumeJson` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The JSON object that specifies the volume's configuration information. The `name` property and [`spec` JSON object](/create-volume-configurations#spec-properties) will need to be updated. All other information should not be modified.
+
+      ```other label=Example
+      volumeJson={
+        "name": "ephemeral-test",
+        "type": "PVC_TEMPLATE",
+        "spec": {
+          "storageClassName": "managed-premium",
+          "resources": {"requests": {"storage": "8Gi"}},
+          "accessModes": ["ReadWriteOnce"],
+          "volumeMode": "Filesystem",
+          "volumeName": "example-name",
+          "labels": {
+            "label1": "value1",
+            "label2": "value2"
+          }
+        }
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Spec properties
+
+<Note type={"note"}>
+
+The following table outlines some of the configurable properties that can be included in the `spec` JSON object, specifically those that apply to the PVC volumes ArcGIS Enterprise on Kubernetes supports. However, the `spec` JSON object is open to support other properties that are unspecified in this documentation. Prior to creating PVC volume templates, reference the [Kubernetes documentation on volumes](https://kubernetes.io/docs/concepts/storage/volumes/) for more detailed information, additional spec properties, and any potential updates made to those areas.
+
+</Note>
+
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `accesModes` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies how the volume can be mounted. This property accepts the following values:
+
+      - `ReadWriteOnce`: The volume can be mounted as read-write to one node. The volume is accessible to all pods scheduled to, and running on, that node.
+      - `ReadOnlyMany`: The volume can be mounted as read-only to multiple nodes.
+      - `ReadWriteMany`: The volume can be mounted as read-write to many nodes.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `resources` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the amount of storage the pods can request from the volume.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `storageClassName` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Reflects the name of a defined `StorageClass` that the PVC volume is connection to.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `volumeMode` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the volume type. This property accepts the following values:
+
+      - `Filesystem`: The volume is mounted in the pod as a directory in the pod's file system.
+      - `Block`: The volume is inserted as a raw data block into the pod.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `volumeName` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the name of the associated PV that the PVC will refer and bind to.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `labels` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Lists labels that match with the associated PV's labels.
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `create` operation:
+
+```other
+POST /context/admin/system/volumes/configurations/create HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+volumeJson={
+  "name": "ephemeral-test",
+  "type": "PVC_TEMPLATE",
+  "spec": {
+    "storageClassName": "managed-premium",
+    "resources": {"requests": {"storage": "8Gi"}},
+    "accessModes": ["ReadWriteOnce"],
+    "volumeMode": "Filesystem",
+    "volumeName": "example-name",
+    "labels": {
+      "label1": "value1",
+      "label2": "value2"
+    }
+  },
+  "revision": 1
+}&f=pjson&token= 08_b0sXFBn7UYUmkEwXNiaKY6frp0GZGyxY6JJdEGWenjP0u_rXvr6EGGCwEsiZbcn-Nbhk7B9itJSDGJAOeY1RYFDJp68R6WaU243A7HNMDFzbduAiuonrKStg9AxnhD8xU8gebu0PNJXMPTHO_dCby8v86fiTW_-xsR-yyWrspjdiu8q2rt4qPB0by1Q3jL6I6J540dFNDvP-yfvlrmLRUEvXRQfORXqxKbJrOazLOTnWD5ZWjJNDwQ800vkQK
+```
+
+## JSON Response example
+
+```other
+{"status": "success"}
+```

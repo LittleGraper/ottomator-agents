@@ -1,0 +1,369 @@
+---
+title: "Create Service"
+description: "The createSerivice operation creates a GIS service in a folder by submitting a JSON representation of the service."
+slug: "create-service"
+url: "/create-service"
+guid: "GUID-964D5440-7D7C-4772-9124-84D35F8C875C"
+migratedTopicMetadata:
+  FTITLE: "Create Service"
+  FDESCRIPTION: ""
+  FCHANGES: "Chaging supported hpaVersion"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2-*"
+  CREATED-ON: "31/10/2023 16:29:14"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "09/11/2023 19:34:00"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-C213E7A5-52DE-46C8-88A3-6424D680E86A"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /services/createService
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /services/createService
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed with either the "Update", "Delete", or "Security and infrastructure" privileges, or the Publisher role
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `createService` operation creates a GIS service in a folder (either the root folder or a designated subfolder) by submitting a JSON representation of the service or by uploading a service definition.
+
+A service's JSON representation contains the following four sections:
+
+- Service Description Properties—Common properties that are shared by all service types. Typically, they identify a specific service.
+- Service Framework Properties—Properties targeting the framework that hosts the GIS service. They define the life cycle and load balancing of the service.
+- Service Type Properties—Properties targeting the core service type as identified by the server administrator. Since these properties are associated with a server object, they vary across the service types.
+- Extension Properties—Properties that represent the extensions that are enabled on the service.
+
+### Scaling in ArcGIS Enterprise on Kubernetes
+
+When creating a service, you can set manual scaling or autoscaling using the `serviceScalingSpec` parameter. Introduced at ArcGIS Enterprise on Kubernetes 10.9.1, autoscaling allows administrators to configure and deploy systems that respond to unexpected performance demands with minimal intervention and overhead. The ArcGIS Enterprise on Kubernetes autoscaling feature uses [horizontal pod autoscaling](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/), which, in response to an increase in resource use, deploys more pods according to the values set by the administrator.
+
+When a specific CPU utilization threshold (`averageUtilization`) is crossed, ArcGIS Enterprise on Kubernetes will scale the number of pods up to the maximum (`max`) values set in the [`replicas`](/create-service#GUID-7A9AB32E-6ABE-4804-B87E-CD675C8F4D4D) JSON object. When utilization drops, and the additional resources are no longer needed, the system scales itself down to no lower than the minimum (`min`) value set in the `replicas` JSON object. For more information about how to set manual or autoscaling for a service, see the [Service scaling properties](/create-service#service-scaling-properties) section below.
+
+<Note type={"note"}>
+
+Values set for the `replicas` and `resources` JSON objects will be used in place of the default values set for the deployment's microservices. Once set, it is recommended that, when needed, scaling properties are updated using the [Edit](/edit-scaling).
+
+</Note>
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serviceJson` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The JSON representation of the service.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `inputUploadId` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      <Note type={"caution"}>
+
+      This parameter is currently not supported for general use.
+
+      </Note>
+
+      The upload ID for a service definition that contains information about service properties, capabilities, and the service type.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serviceScalingSpec` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The service scaling properties, represented as a JSON object. For information about the editable properties for the `serviceScalingSpec` parameter, see the Service scaling properties section below.
+
+      ```markdown label=Example
+      serviceScalingSpec={
+        "scalingSpec": [
+          {
+            "deploymentType": "MapServer",
+            "replicas": {
+              "min": 2,
+              "max": 2,
+              "scalingMode": "manual"
+            },
+            "resources": {
+              "memoryMin": "1.25Gi",
+              "memoryMax": "2.5Gi",
+              "cpuMin": "0.225",
+              "cpuMax": "3"
+            }
+          }
+        ]
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+### Service scaling properties
+
+The following properties can be modified for the `serviceScalingSpec` parameter:
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `replicas` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The number of replicas for the service. The default value for `manual` scaling for `min` and `max` is 1. For manual scaling, both the `min` and `max` values must be the same.
+
+      ```markdown label=Example
+      "replicas": {
+        "min": 3,
+        "max": 3,
+        "scalingMode": "manual"
+      },
+      ```
+
+      For organizations using ArcGIS Enterprise 11.2 on Kubernetes or later versions, version 2 (v2) of the autoscaling feature can be enabled by passing in the JSON object below and modifying the `min`, `max`, `scalingMode`, and `averageUtilization` values.
+
+      <Note type={"legacy"}>
+
+      Prior to 11.2, the beta version of v2 autoscaling (v2beta2) could be enabled and be used to configure advanced scaling settings. At Kubernetes v1.26, [v2beta2 is no longer supported](https://kubernetes.io/blog/2022/11/18/upcoming-changes-in-kubernetes-1-26/#removal-of-the-v2beta2-horizontalpodautoscaler-api). Organizations that are upgrading to v1.26, and are using a deployment of ArcGIS Enterprise on Kubernetes at 11.2 or higher, must update their HPA configurations from `autoscaling/v2beta2` to `autoscaling/v2`.
+
+      </Note>
+
+      Autoscaling can be enabled by adjusting the `scalingMode` value to `auto`. The `averageUtilization` value will act as the CPU utilization threshold for autoscaling. If the threshold is crossed, ArcGIS Enterprise on Kubernetes scales up to the number of pods specified by the `max` value, and will return to no lower than the default pod level (the value set for `min`) once utilization decreases.
+
+      ```markdown label=Example
+      "replicas": {
+        "min": 1,
+        "max": 10,
+        "scalingMode": "auto",
+        "autoscaling": {
+          "hpaSpec": {
+            "metrics": [
+              {
+                "resource": {
+                  "name": "cpu",
+                  "target": {
+                    "averageUtilization": "65",
+                    "type": "Utilization"
+                  }
+                },
+                "type": "Resource"
+              }
+            ],
+            "hpaVersion": "autoscaling/v2"
+          }
+        }
+      },
+      ```
+
+      Organizations using ArcGIS Enterprise on Kubernetes 10.9.1 can enable version 1 of the autoscaling feature by passing in the JSON object below and modifying the `min`, `max`, `scalingMode`, and `targetCPUUtilizationPercentage` values:
+
+      ```markdown label=Example
+      "replicas": {
+        "min": 1,
+        "max": 5,
+        "scalingMode": "auto",
+        "autoscaling": {
+          "hpaSpec": {
+            "targetCPUUtilizationPercentage": 50
+          },
+          "hpaVersion": "autoscaling/v1"
+        }
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `resources` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The minimum and maximum resource allocations for the service, including the minimum memory (`memoryMin`) and minimum CPU (`cpuMin`) resources required for the service to start.
+
+      ```markdown label=Example
+      "resources": {
+        "memoryMin": "500Mi",
+        "memoryMax": "2Gi",
+        "cpuMin": "0.125",
+        "cpuMax": "2"
+      },
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `createService` operation, formatted for readability:
+
+```other
+POST /context/admin/services/createService HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+serviceJson={
+  "serviceName": "FireWeatherWatch",
+  "type": "MapServer",
+  "description": "",
+  "capabilities": "Map,Query,Data",
+  "provider": "ArcObjects",
+  "clusterName": "default",
+  "minInstancesPerNode": 1,
+  "maxInstancesPerNode": 1,
+  "instancesPerContainer": 1,
+  "maxWaitTime": 60,
+  "maxStartupTime": 300,
+  "maxIdleTime": 180,
+  "maxUsageTime": 600,
+  "loadBalancing": "ROUND_ROBIN",
+  "isolationLevel": "HIGH",
+  "configuredState": "STARTED",
+  "recycleInterval": 24,
+  "recycleStartTime": "00:00",
+  "keepAliveInterval": -1,
+  "private": false,
+  "isDefault": false,
+  "maxUploadFileSize": 0,
+  "allowedUploadFileTypes": "",
+  "properties": {
+    "useLocalCacheDir": "true",
+    "outputDir": "${arcgisoutput}",
+    "cacheDir": "${arcgiscache}",
+    "maxScale": "4000",
+    "filePath": "/arcgis/framework/etc/data/FireWatch/FireWeatherWatch.msd",
+    "maxRecordCount": "1000",
+    "supportedImageReturnTypes": "MIME+URL",
+    "clientCachingAllowed": "true",
+    "isCached": "false",
+    "virtualOutputDir": "/rest/directories/arcgisoutput",
+    "maxExportTilesCount": "100000",
+    "ignoreCache": "false",
+    "exportTilesAllowed": "false",
+    "cacheOnDemand": "false",
+    "minScale": "295000000"
+  },
+  "extensions": [
+    {
+      "typeName": "WMSServer",
+      "capabilities": "GetCapabilities,GetFeatureInfo,GetLegendGraphic,GetMap,GetSchemaExtension,GetStyles",
+      "enabled": "true",
+      "maxUploadFileSize": 0,
+      "allowedUploadFileTypes": "",
+      "properties": {
+        "name": "FireWeatherWatch",
+        "title": "WMS"
+      }
+    },
+    {
+      "typeName": "KmlServer",
+      "capabilities": "SingleImage,SeparateImages,Vectors",
+      "enabled": "true",
+      "maxUploadFileSize": 0,
+      "allowedUploadFileTypes": "",
+      "properties": {
+        "compatibilityMode": "GoogleEarth",
+        "useDefaultSnippets": "true",
+        "featureLimit": "1000000",
+        "minRefreshPeriod": "30",
+        "imageSize": "1024",
+        "dpi": "96"
+      }
+    },
+    {
+      "typeName": "FeatureServer",
+      "capabilities": "Create,Query,Update,Delete,Uploads",
+      "enabled": "false",
+      "maxUploadFileSize": 0,
+      "allowedUploadFileTypes": "",
+      "properties": {}
+    }
+  ],
+  "frameworkProperties": {},
+  "datasets": []
+}&inputUploadId=&serviceScalingSpec={
+  "scalingSpec": [
+    {
+      "deploymentType": "MapServer",
+      "replicas": {
+        "min": 2,
+        "max": 2,
+        "scalingMode": "manual"
+      },
+      "resources": {
+        "memoryMin": "1.25Gi",
+        "memoryMax": "2.5Gi",
+        "cpuMin": "0.225",
+        "cpuMax": "3"
+      }
+    }
+  ]
+}&f=pjson&token=Mb0ORrkLObNO2Q8FZoUCHHzSMzZi0CbhLHNRYMqqa6URG_ojQJF3rNsJAfRB23MyCrLwSmuaHPUo4AEIrUuoH1-4Ot5xh4565FtlQahXAhK2C7Sy0oydZhBwD8KdFSnVlnLr-e9uI5ovSWZ2lGNn9SwoV2MPMzeAh_5r-q-wgwF8DTT_nhuCXJGkMRy-48jjGS2aN5FI18STHZ8RAuKxGasH90SI3C7njZzlGCUrY5m6BDhCMsdpZA14GwNX8Cis
+
+```
+
+## JSON Response example
+
+```other
+{"status": "success"}
+```

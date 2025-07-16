@@ -1,0 +1,839 @@
+---
+title: "Write Errors"
+description: "Use the required parameters to write a features as a result or write a missing feature."
+slug: "write-errors"
+url: "/write-errors"
+restInfoMetadata:
+  apiPath: /<serviceName>/ValidationServer/writeErrors
+  urlSegments: 
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/ValidationServer/writeErrors
+  methods:
+    - post
+  versionIntroduced: '11.3'
+---
+
+## Description
+The `writeErrors` operation writes an error result or a missing feature result to the GDB_Validation*Errors tables using the specified version and session ID. The only supported category parameter values are `featureErrors` or `missingFeatureErrors`. The number of new errors written into the table along with the moment is returned. All other values will result in a NO-OP and create a JSON error response.
+
+<Note>
+An ArcGIS Data Reviewer server extension license is required when the category is `featureErrors` or `missingFeatureErrors`.
+</Note>
+
+[Learn more about enabling visual review for branch versions](https://enterprise.arcgis.com/en/data-reviewer/latest/help/enable-or-disable-visual-review.htm)
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+An optional parameter to specify the output format of the response. The default is `html`.
+
+Values: `html` | `json`
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`category` 
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The `featureErrors` category parameter writes errors for features in a layer similar to the [Browse Features](https://pro.arcgis.com/en/pro-app/latest/help/data/validating-data/browse-features.htm) visual review tool. The `missingFeatureErrors` category parameter writes errors for missing features in a layer, similar to the [Flag Missing Features](https://pro.arcgis.com/en/pro-app/latest/help/data/validating-data/flag-missing-features.htm) visual review tool.
+
+<Note>
+The `missingFeatureErrors` parameter can have two missing feature errors with the same x and y coordinates if they have different error messages.
+</Note>
+
+Values: `featureErrors` | `missingFeatureErrors`
+
+Example: `category`=`featureErrors`
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`gdbVersion`
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This parameter specifies the name of the geodatabase version where `default` is `DEFAULT`.
+
+```js
+Syntax: `gdbVersion=<version>`
+```
+
+```js
+Example: gdbVersion=SDE.DEFAULT
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sessionID`
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This parameter specifies the token (guid) used to lock the version. If the calling client edits a named version, the `sessionId` must be provided. If the client edits `DEFAULT`, the version may not be locked and the `sessionId` should not be specified.
+
+```js
+Example: sessionID={E81C2E2D-C6A7-40CB-BF61-FB499E53DD1D}
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`errors` 
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This parameter represents a `JSON` array of layers and errors to add to the appropriate validation error table (`GDB_ValidationPointErrors`, `GDB_ValidationPolygonErrors`, or `GDB_ValidationLineErrors`), depending on the geometry type of the source layer.
+
+The following is a list of acceptable values:
+
+-   `id` —This required property represents the `id` of the layer.
+
+-   `errorFeatures` —This required property represents a `JSON` array of errors for the specified layer grouped by `errorType`.
+
+-   `errorType` —This required property represents the error type that best describes the errors in the data. The following are the supported error type values: `missingFeature` | `addFeature` | `changeSubType` | `deleteFeature` | `moveFeature` | `reshapeArea` | `reshapeLine` | `custom`
+
+<Note>
+The `custom` error type is introduced in the ArcGIS Enterprise 11.4 release.
+</Note>
+
+<Note>
+Only `missingFeature` is a valid error type if the category is specified as `missingFeatureErrors`.
+</Note>
+
+-   `geometries` —This is a required property when the `category` is set as `missingFeatureErrors` to indicate the location of missing features. This is an array of geometries that correspond to the specified layer. Point geometries are supported as error geometries starting at ArcGIS Enterprise 11.3. Point, line, and polygon geometries are supported as error geometries at the 11.4 release.
+
+<Note>
+The coordinates must be entered in WGS 1984 decimal degrees since the error tables have a defined spatial reference of WGS 1984.
+</Note>
+
+-   `objectIds` —An array of feature Object IDs from the specified layer. The feature geometry will be stored as an error in the corresponding GDB_Validation*Errors tables for the specified layer and error type. This is only valid when the `category` parameter is set as `featureErrors`.
+
+-   `objectIdSketchGeometryPairs` —An array of feature Object IDs and corresponding user sketched geometries from the specified layer. The sketched geometry will be stored as an error in the corresponding GDB_Validation*Errors tables for the specified layer and error type. The property is only valid when the `category` is set as `featureErrors`.
+
+<Note>
+This property is introduced in the 11.4 release to the `errors` parameter to allow users to store partial geometries as errors for existing features in the specified layer.
+
+Users will have the ability to store entire feature geometries as errors by passing `objectIds` array or store partial geometries by passing `objectIdSketchGeometryPairs`.
+
+`ObjectIds` or `objectIdSketchGeometryPairs` are required properties when the `category` is set as `featureErrors`.
+</Note>
+
+-   `errorMessage` —This optional property represents the error description of the errors for the specified layer and error type. If the user does not specify any value, the default description is the error type's string.
+
+<Note>
+The `errorMessage` property is mandatory when using the `custom` error type.
+</Note>
+
+-   `severity` —This optional property represents the severity of errors for the specified layer and error type. The default severity value is 3.
+
+Syntax:
+
+```js
+[
+    {
+        "id" : <layerId>,
+        "errorFeatures" : [
+			{
+				"errorType" : <value>,
+				"objectIds" : [<objectId>],
+				"errorMessage" : <value>,
+				"severity" : <value>
+			},
+			{
+				"errorType" : <value>,
+				"objectIdSketchGeometryPairs": [
+					{
+						"objectId": <objectId>,
+						"geometry": {<geometry>}
+					},
+					{
+						"objectId": <objectId>,
+						"geometry": {<geometry>}
+					}
+				],
+				"errorMessage" : <value>,
+				"severity" : <value>
+			}
+        ]
+
+    },
+    {
+        "id" : <layerId2>,
+        "errorFeatures" : [
+			{
+				"errorType" : <value>,
+				"objectIds" : [<objectId>],
+				"errorMessage" : <value>,
+				"severity" : <value>
+            }
+        ]
+    }
+]
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnEdits` 
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This Boolean property specifies whether to return modified features. Returned results are organized in a layer-by-layer fashion. If `returnEdits` is set to `true`, then each layer may have edited features returned in an `editedFeatures` object.
+
+The `editedFeatures` object returns full features including the original and current features for updates; and the current rows for inserts.
+
+If the count of edited features to return is more than the `maxRecordCount` value the response will not include `editedFeatures` values and `exceededTransferLimit` will return as `true`. If clients are using this parameter to maintain a cache, they should invalidate the cache when `exceedTransferLimit` is returned as `true`. If the server encounters an error when generating the list of edits in the response, `exceedTransferLimit` is also returned as `true`.
+
+Edited features are returned in the spatial reference of the feature service as defined by the services `spatialReferenceObject`.
+
+The default value for this parameter is `false`.
+
+Values: `true` | `false`
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## JSON Request Examples
+
+### Example one: featureErrors request at 11.3
+The following is a sample POST request for the `writeErrors` operation when the category is set to `featureErrors`.
+
+```js
+[
+	{
+		"id": 0,
+		"errorFeatures": [
+			{
+				"errorType": "addFeature",
+				"objectIds": [1,2],
+				"errorMessage": "Add Feature",
+				"severity": 3
+			},
+			{
+				"errorType": "deleteFeature",
+				"objectIds": [3,4,5],
+				"errorMessage": "Delete Feature",
+				"severity": 2
+			},
+			{
+				"errorType": "moveFeature",
+				"objectIds": [6,7],
+				"errorMessage": "Move Feature",
+				"severity": 3
+			},
+			{
+				"errorType": "reshapeLine",
+				"objectIds": [8],
+				"errorMessage": "Reshape Line",
+				"severity": 5
+			},
+			{
+				"errorType": "reshapeArea",
+				"objectIds": [9,10],
+				"errorMessage": "Reshape Area",
+				"severity": 5
+			},
+			{
+				"errorType": "changeSubtype",
+				"objectIds": [11,12,13],
+				"errorMessage": "Change Subtype",
+				"severity": 3
+			}
+		]
+	},
+	{
+		"id": 1,
+		"errorFeatures": [
+			{
+				"errorType": "addFeature",
+				"objectIds": [8304,8305],
+				"errorMessage": "Add Feature",
+				"severity": 3
+			}
+		]
+	}
+]
+```
+
+### Example two: featureErrors request at 11.4
+The following is a sample POST request for the `writeErrors` operation when the category is set to `featureErrors` and `objectIdSketchGeometryPairs` is utilized.
+```js
+[
+    {
+        "id" : 0,
+        "errorFeatures" : [
+			{
+				"errorType" : "addFeature",
+				"objectIds" : [14,15],
+				"errorMessage" : "Add to these features",
+				"severity" : 2
+			},
+			{
+				"errorType" : "moveFeature",
+				"objectIdSketchGeometryPairs": [
+					{
+						"objectId": 16,
+						"geometry": {"x":-88.17808016299995,"y":41.74971413500003}
+					},
+					{
+						"objectId": 17,
+						"geometry": {"paths": [[[-97.06138, 32.837],[-97.06133, 33.836],[-98.2, 34.834],[-97, 40]]]}
+					}
+				],
+				"errorMessage" : "Move Feature",
+				"severity" : 1
+			}
+        ]
+
+    },
+    {
+        "id" : 1,
+        "errorFeatures" : [
+			{
+				"errorType" : "reshapeLine",
+				"objectIds" : [8302],
+				"errorMessage" : "Reshape this feature to match reference imagery",
+				"severity" : 2
+            }
+        ]
+    }
+]
+```
+
+### Example three: missingFeatureErrors request at 11.3
+The following is a sample POST request for the `writeErrors` operation when the category is set to `missingFeatureErrors`.
+
+```js
+[
+   {
+      "id":0,
+      "errorFeatures":[
+         {
+            "errorType":"missingFeature",
+            "geometries":[{"x":-143.501, "y":57.043}, {"x":-72.865, "y":-37.486}],
+            "errorMessage":"Missing Feature",
+            "severity":1
+         }
+      ]
+   },
+   {
+      "id":1,
+      "errorFeatures":[
+         {
+            "errorType":"missingFeature",
+            "geometries" : [{"x":-118.152, "y":33.801}],
+            "errorMessage" : "Missing address point",
+            "severity" : 5         
+         }
+      ]
+   }
+]
+```
+
+### Example four: missingFeatureErrors request at 11.4
+The following is a sample POST request for the `writeErrors` operation when the category is set to `missingFeatureErrors` and line and polygon error geometries are specified.
+
+```js
+[
+	{
+        "id": 0,
+        "errorFeatures": [
+           {
+                "errorType": "missingFeature",
+				"geometries": [{"paths": [[[-96.06238, 31.837],[-96.06133, 32.836],[-97.2, 33.834],[-96, 39]]]}],
+                "errorMessage": "Missing Fence",
+                "severity": 3
+           }
+        ]
+    },
+	{
+        "id": 1,
+        "errorFeatures": [
+           {
+                "errorType": "missingFeature",
+				"geometries": [{"rings":[[[-96.02, 31],[-97, 33],[-95, 35],[-96, 31]]]}],
+                "errorMessage": "Missing Building Footprint",
+                "severity": 3
+           }
+        ]
+    }
+]
+```
+
+## JSON Response Examples
+
+### Example one: featureErrors response at 11.3
+The following is a sample response returned when `returnEdits` is set as `false` (default).
+
+```js
+{
+	"moment": 1726164981839,
+	"writeErrorResults": [
+		{
+			"id": 0,
+			"errorLayerId": 4,
+			"errors": [
+				{
+					"objectId": 1,
+					"globalId": "{93992544-3642-461F-976F-9D364D73ECBD}",
+					"errorType": "addFeature",
+					"success": true
+				},
+				{
+					...
+				},
+				{
+					"objectId": 13,
+					"globalId": "{DB91BFFC-6BD0-42E5-9A42-87F0B7A138D0}",
+					"errorType": "changeSubType",
+					"success": true
+				}
+			]
+		},
+		{
+			"id": 1,
+			"errorLayerId": 5,
+			"errors": [
+				{
+					"objectId": 1,
+					"globalId": "{BE820BF7-8C3D-4ACC-A8DE-F16A78A39812}",
+					"errorType": "addFeature",
+					"success": true
+				},
+				{
+					"objectId": 2,
+					"globalId": "{524F7E74-DCD4-483E-83ED-892F0C49104D}",
+					"errorType": "addFeature",
+					"success": true
+				}
+			]
+		}
+	],
+	"success": true
+}
+```
+
+### Example two: featureErrors response at 11.4
+The following is a sample response returned when `returnEdits` is set as `true` starting at the 11.4 release. The `serviceEdits` section provides details for  the new errors created in the Error Layer table and documents the changes made to the fields in the applicable feature class.
+
+<Note>
+The `errorLayerId` position has changed in the response from the 11.3 release.
+</Note>
+
+```js
+{
+	"moment": 1726166556679,
+	"writeErrorResults": [
+		{
+			"id": 0,
+			"errors": [
+				{
+					"objectId": 14,
+					"globalId": "{83C6637C-42BB-4E97-B90B-FA8969B0FBAA}",
+					"errorType": "addFeature",
+					"errorLayerId": 4,
+					"success": true
+				},
+				{
+					...
+				},
+				{
+					"objectId": 26,
+					"globalId": "{66439462-2FBF-435F-86AB-5C8B36AC10DD}",
+					"errorType": "changeSubType",
+					"errorLayerId": 4,
+					"success": true
+				}
+			]
+		},
+		{
+			"id": 1,
+			"errors": [
+				{
+					"objectId": 3,
+					"globalId": "{33136B86-FF75-4E1B-9AE1-6F7962EDF08A}",
+					"errorType": "addFeature",
+					"errorLayerId": 5,
+					"success": true
+				},
+				{
+					"objectId": 4,
+					"globalId": "{6447F984-B6F8-4DA6-B939-2CF53494F257}",
+					"errorType": "addFeature",
+					"errorLayerId": 5,
+					"success": true
+				}
+			]
+		}
+	],
+	"exceededTransferLimit": false,
+	"serviceEdits": [
+		{
+			"id": 0,
+			"editedFeatures": {
+				"spatialReference": {
+					...
+				},
+				"updates": [
+					[
+						{
+							"attributes": {
+								"objectid": 1,
+									...
+								"lasteditor": "Esri",
+								"globalid": "{51A88277-5E89-4174-BE28-94FA13BE246A}",
+									...
+								"last_edited_user": null,
+								"last_edited_date": null,
+								"validationstatus": 2
+							},
+							"geometry": {
+								"x": 1020101.5865028277,
+								"y": 1836530.9599222243
+							}
+						},
+						{
+							"attributes": {
+								"objectid": 1,
+									...
+								"lasteditor": "Esri",
+								"globalid": "{51A88277-5E89-4174-BE28-94FA13BE246A}",
+									...
+								"last_edited_user": "admin",
+								"last_edited_date": 1726166556000,
+								"validationstatus": 3
+							},
+							"geometry": {
+								"x": 1020101.5865028277,
+								"y": 1836530.9599222243
+							}
+						}
+					],
+					[
+						...
+					],
+					[
+						{
+							"attributes": {
+								"objectid": 13,
+									...
+								"lasteditor": "Esri",
+								"globalid": "{2F4F06A5-373D-4BF1-8C92-582BFFDE2ECF}",
+									...
+								"last_edited_user": null,
+								"last_edited_date": null,
+								"validationstatus": 2
+							},
+							"geometry": {
+								"x": 1022297.5380656384,
+								"y": 1825868.8163023294
+							}
+						},
+						{
+							"attributes": {
+								"objectid": 13,
+									...
+								"lasteditor": "Esri",
+								"globalid": "{2F4F06A5-373D-4BF1-8C92-582BFFDE2ECF}",
+									...
+								"last_edited_user": "admin",
+								"last_edited_date": 1726166556000,
+								"validationstatus": 3
+							},
+							"geometry": {
+								"x": 1022297.5380656384,
+								"y": 1825868.8163023294
+							}
+						}
+					]
+				]
+			}
+		},
+		{
+			"id": 5,
+			"editedFeatures": {
+				"spatialReference": {
+					...
+				},
+				"adds": [
+					{
+						"attributes": {
+							"objectid": 3,
+							"featureclassid": 40,
+							"featureobjectid": 8305,
+							"featureglobalid": "{9C0D5E65-667E-469B-912F-FC3D7B5D36AD}",
+							"errornumber": 1001,
+							"errormessage": "Browse Features Error",
+							"ruletype": 2,
+							"rulename": "Browse Features Rule",
+							"ruleid": 1,
+							"ruledescription": "Add Feature",
+							"severity": 3,
+							"isexception": 0,
+							"errorstatus": 1,
+							"errorphase": 2,
+							"correctionnotes": null,
+							"correctiontechnician": null,
+							"verificationnotes": null,
+							"verificationtechnician": null,
+							"creationdate": 1726166556000,
+							"creator": "admin",
+							"lastupdate": 1726166556000,
+							"updatedby": "admin",
+							"globalid": "{33136B86-FF75-4E1B-9AE1-6F7962EDF08A}",
+							"category": 11,
+							"correctiondate": null,
+							"verificationdate": null,
+							"Shape__Length": 0.0016649158592712986
+						},
+						"geometry": {
+							"hasZ": true,
+							"hasM": true,
+							"paths": [
+								[
+									[
+										1033758.7708041441,
+										1874256.0280146194,
+										0,
+										null
+									],
+									[
+										1033903.5565376978,
+										1874688.99406907,
+										0,
+										null
+									],
+									[
+										1034002.340798491,
+										1874695.4504524512,
+										0,
+										null
+									]
+								]
+							]
+						}
+					},
+					{
+						"attributes": {
+							"objectid": 4,
+							"featureclassid": 40,
+							"featureobjectid": 8304,
+							"featureglobalid": "{46C7B30E-88F0-4360-97BD-6439D7C92C85}",
+								...
+						},
+						"geometry": {
+							...
+						}
+					}
+				]
+			}
+		},
+		{
+			"id": 4,
+			"editedFeatures": {
+				"spatialReference": {
+					...
+				},
+				"adds": [
+					{
+						"attributes": {
+							"objectid": 14,
+							"featureclassid": 41,
+							"featureobjectid": 1,
+							"featureglobalid": "{51A88277-5E89-4174-BE28-94FA13BE246A}",
+							"errornumber": 1001,
+							"errormessage": "Browse Features Error",
+							"ruletype": 2,
+							"rulename": "Browse Features Rule",
+							"ruleid": 3,
+							"ruledescription": "Add Feature",
+							"severity": 3,
+							"isexception": 0,
+							"errorstatus": 1,
+							"errorphase": 2,
+							"correctionnotes": null,
+							"correctiontechnician": null,
+							"verificationnotes": null,
+							"verificationtechnician": null,
+							"creationdate": 1726166556000,
+							"creator": "admin",
+							"lastupdate": 1726166556000,
+							"updatedby": "admin",
+							"globalid": "{83C6637C-42BB-4E97-B90B-FA8969B0FBAA}",
+							"category": 11,
+							"correctiondate": null,
+							"verificationdate": null
+						},
+						"geometry": {
+							"x": 1020101.5864849248,
+							"y": 1836530.9601007195,
+							"z": 0,
+							"m": null
+						}
+					},
+					{
+						...
+					},
+					{
+						"attributes": {
+							"objectid": 26,
+							"featureclassid": 41,
+							"featureobjectid": 13,
+							"featureglobalid": "{2F4F06A5-373D-4BF1-8C92-582BFFDE2ECF}",
+								...
+						},
+						"geometry": {
+							...
+						}
+					}
+				]
+			}
+		},
+		{
+			"id": 1,
+			"editedFeatures": {
+				"spatialReference": {
+					...
+				},
+				"updates": [
+					[
+						{
+							"attributes": {
+								"objectid": 8304,
+								"lasteditor": "Esri",
+								"globalid": "{46C7B30E-88F0-4360-97BD-6439D7C92C85}",
+								"last_edited_user": "User1",
+								"last_edited_date": 1602016428000,
+								"validationstatus": 2,
+								"Shape__Length": 1035.2113882192219
+							},
+							"geometry": {
+								"paths": [
+									[
+										...
+									]
+								]
+							}
+						},
+						{
+							"attributes": {
+								"objectid": 8304,
+									...
+								"lasteditor": "Esri",
+								"globalid": "{46C7B30E-88F0-4360-97BD-6439D7C92C85}",
+									...
+								"last_edited_user": "admin",
+								"last_edited_date": 1726166556000,
+								"validationstatus": 3,
+								"Shape__Length": 1035.2113882192219
+							},
+							"geometry": {
+								"paths": [
+									[
+										...
+									]
+								]
+							}
+						}
+					],
+					[
+						{
+							"attributes": {
+								"objectid": 8305,
+								"lasteditor": "Esri",
+								"globalid": "{9C0D5E65-667E-469B-912F-FC3D7B5D36AD}",
+								"last_edited_user": "User1",
+								"last_edited_date": 1602016428000,
+								"validationstatus": 2,
+								"Shape__Length": 555.5283024199092
+							},
+							"geometry": {
+								"paths": [
+									[
+									...
+									]
+								]
+							}
+						},
+						{
+							"attributes": {
+								"objectid": 8305,
+								"lasteditor": "Esri",
+								"globalid": "{9C0D5E65-667E-469B-912F-FC3D7B5D36AD}",
+								"last_edited_user": "admin",
+								"last_edited_date": 1726166556000,
+								"validationstatus": 3,
+								"Shape__Length": 555.5283024199092
+							},
+							"geometry": {
+								"paths": [
+									[
+										...
+									]
+								]
+							}
+						}
+					]
+				]
+			}
+		}
+	],
+	"success": true
+}
+```

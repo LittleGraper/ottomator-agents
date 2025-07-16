@@ -1,0 +1,159 @@
+---
+title: "Edit (Data Store Configuration)"
+description: "This operation allows you to update the resource allocation for a relational data store."
+slug: "update-datastore-configuration"
+url: "/update-datastore-configuration"
+guid: "GUID-E2DDFE4A-828C-4049-8C63-F4CDBAA985F7"
+migratedTopicMetadata:
+  FTITLE: "Update Datastore Configuration"
+  FDESCRIPTION: ""
+  FCHANGES: "New Product"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9-*"
+  CREATED-ON: "13/08/2020 17:06:44"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "16/11/2021 11:21:45"
+  VERSION: "1"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "9"
+  ED: "GUID-0D7BC41E-6282-4EF1-AF64-1231FFA1713B"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /data/<datastoreID>/config/edit
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /data/<datastoreID>/config/edit
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: 10.9.1
+  requiredCapabilities:
+    - name: Access allowed only with the Publisher role
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `edit` operation updates the resource allocation (`cpuMin`, `cpuMax`, `memoryMin`, and `memoryMax`) for only the relational data store. Once complete, the updates will be reflected on the `config`  resource page.
+
+<Note type={"note"}>
+
+The organization will be set to read-only mode while updates complete. It's recommended that you perform this operation during system maintenance periods. Upon completion, the organization will be reverted to a read-write state. Updates made using this operation will be applied to both the primary and standby relational data stores.
+
+</Note>
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `config` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object containing the currently configured resource allocation for the relational data store. Currently, this operation only supports updating the values for `cpuMin`, `cpuMax`, `memMax`, and `memMin`.
+
+      <Note type={"note"}>
+
+      The value for `numOfStandby` must always be 1. As well, this property must be included in the JSON object.
+
+      </Note>
+
+      ```markdown label=Example
+      config={
+        "deployment": {
+          "numOfStandby": 1,
+          "resources": {
+            "cpuMin": "1",
+            "cpuMax": "5",
+            "memMax": "8Gi",
+            "memMin": "2Gi"
+          }
+        }
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      This parameter specifies whether the operation will run synchronously or asynchronously. If `false`, the operation is run synchronously. If `true`, the operation is run asynchronously and the response returns a JSON object containing job information that can be used to track the job's status. The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `edit` operation, formatted for readability:
+
+```other
+POST /context/admin/admin/data/b15a6a4d41324cf9a1f0375ab46a4da3/config/edit HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+config={
+  "deployment": {
+    "numOfStandby": 1,
+    "resources": {
+      "cpuMin": "1",
+      "cpuMax": "5",
+      "memMax": "8Gi",
+      "memMin": "2Gi"
+    }
+  }
+}&async=false&f=pjson&token=B4SGXu8PifZbfOJxpbr-i3X66FvpOuDtp4UdaBqmodRHAxxI-El280UH26TsC9YBct-6TJ_6wYH8iJB39SCwJIB6Vl8_DXmhvROZxjWMk_boLq6J-hurAvVdsOwYLlE7uy7j5t7lpQBAOqvnXS1lxGCy1vwnr3OPLoKmOWY8S8dxP1ZNrRx_SlTSfshlnMP7yoYIArLIylO0Gga9gcyDa3DYsDeTKU8uKbkUQ6LEwo93g1cU9zAxFnxhlBdHw-9U
+
+```
+
+## JSON Response example
+
+If `async` is `false`, the following response is returned:
+
+```other
+{"status": "success"}
+```
+
+If `async` is `true`, the following response is returned. The value returned for `jobsUrl` can be used to access the job resource to track a job's status after it's been submitted. For more information, see the [Job](/job) resource topic.
+
+```other
+{
+  "jobsUrl": "https://organization.domain.com/context/admin/jobs/ja2ca1a35-881c-400c-a49a-b26883002d6c",
+  "jobID": "ja2ca1a35-881c-400c-a49a-b26883002d6c",
+  "jobStatus": "SUBMITTED"
+}
+```

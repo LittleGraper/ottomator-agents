@@ -1,0 +1,433 @@
+---
+title: "Build"
+description: "The build operation creates parcels from polygons or lines by creating missing parcel features."
+slug: "build-parcel-fabric-server"
+url: "/build-parcel-fabric-server"
+guid: "GUID-CB0F7526-B23A-474D-B2CA-228B42AF1220"
+migratedTopicMetadata:
+  FTITLE: "Build-parcel-fabric-server"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 -  *"
+  CREATED-ON: "14/08/2023 10:22:19"
+  FAUTHOR: "cleslie"
+  FSTATUS: "Released"
+  MODIFIED-ON: "29/09/2023 11:52:01"
+  VERSION: "5"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-7F6C02DA-803E-4BDF-BB72-49E449ECE1D8"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/ParcelFabricServer/build
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/ParcelFabricServer/build
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.8'
+  requiredCapability: ArcGIS Advanced Editing
+---
+
+## Description
+
+The `build` operation creates parcels from polygons or lines by creating missing parcel features. When building parcels from lines, polygons and points are created. When building parcels from polygons, lines and points are created. Additionally, the following data is updated:
+
+-   Parcel features are all associated to their appropriate [records](https://pro.arcgis.com/en/pro-app/latest/help/data/parcel-editing/createaparcelfabric.htm#ESRI_SECTION1_47DC227D991742D8AB2F20AE07B944E6), and [record polygons](https://pro.arcgis.com/en/pro-app/latest/help/data/parcel-editing/createparcelfabricrecords.htm#ESRI_SECTION2_EFFD0C4F38E34332923220D459521A30) are updated.
+-   If the newly built parcels replace existing parcels, existing parcels are retired as historic and parcel lineage is maintained.
+-   The `Parcel Count` field on the Records feature class is updated with the number of parcels associated to each record.
+-   If the `COGO Accuracy` field on the Records feature class has an accuracy value, it will be transferred to the `COGO Accuracy` field of all the lines associated with the record.
+
+The `build` operation can build parcels in the active record, in a specified extent, or in the entire extent of the parcel fabric.
+
+Learn more about building parcels from [polygons](https://pro.arcgis.com/en/pro-app/latest/help/data/parcel-editing/buildparcelsfrompolygons.htm) and [lines](https://pro.arcgis.com/en/pro-app/latest/help/data/parcel-editing/buildparcelsfromlines.htm).
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `gdbVersion`
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The name of the geodatabase version (the default is the `DEFAULT` version).
+
+      Syntax
+
+      ```javascript
+      gdbVersion=<version>
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sessionId`
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The token (GUID) used to lock the version. If the calling client is editing a named version, the `sessionId` value is required. If the specified version is currently locked by another session, the request will fail if the `sessionId`  value is not provided or does not match the `sessionId`  value that holds the exclusive lock. If the client is editing the default version, the `sessionId`  value is not required.
+
+      Syntax
+
+      ```javascript
+      sessionId=<guid>
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `buildExtent` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The envelope of the extent that will be built. The default extent is the entire extent of the parcel fabric dataset. If no record or extent is provided, the entire extent of the parcel fabric dataset will be built.
+
+      Syntax
+
+      ```javascript
+      {"xmin":<X min>,"ymin":<y min>, "xmax": <x max>, "ymax": <y max>, "spatialReference": <wkt of spatial reference>}
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      Specifies whether the request will be processed as an asynchronous job and a URL will be returned that points to a location displaying the status of the job. See the topic regarding [ asynchronous](HTTP://RESOURCES.ARCGIS.COM/EN/HELP/ARCGIS-REST-API/02R3/02R3000000RT000000.HTM) usage for more information. The default is `false`.
+
+      Values: `true` | `false` 
+
+      Syntax
+
+      ```javascript
+      async=true|false
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `record` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+      
+      The unique identifier (GUID) of the record. If a value is provided, only parcels associated with the record will be built, regardless of the build extent.
+
+      Syntax
+
+      ```javascript
+      record=<guid>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the output format of the response. The default response format is `html` .
+
+      Values: `html` | `json` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+This example shows the steps for building parcels in a specified record using the `build` operation.
+
+<Note type={"note"}>
+
+  The `sessionId` parameter value must be the same for starting the edit session, performing the edit operation and stopping the edit session.
+
+</Note>
+
+1.  [Start a service session](/start-reading) on the version.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/VersionManagementServer/versions/E4DAED9D-C859-489B-9053-767A45F1D97C/startReading
+    f=json
+    sessionId={b1559398-83e6-46ba-99f4-45e6c8012e14}
+    ```
+     
+2.  [Start an edit session](/start-editing) on the version.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/VersionManagementServer/versions/E4DAED9D-C859-489B-9053-767A45F1D97C/startEditing
+    f=json
+    sessionId={b1559398-83e6-46ba-99f4-45e6c8012e14}
+    ```
+     
+3.  Build parcels in a specified record using the `build` operation.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/ParcelFabricServer/build
+    f=json
+    gdbVersion=admin.Version1
+    sessionId={b1559398-83e6-46ba-99f4-45e6c8012e14}
+    async=false
+    record={4767898A-3670-4EE3-B1E2-A89D8930DDBC}
+    ```
+     
+4.  If edits are complete, [stop the edit session](/stop-editing).
+
+5.  [Stop](/stop-reading) and release the service session. 
+
+## JSON Response syntax
+
+The following response is returned when `async` is `false`:
+
+```other
+{
+  "exceededTransferLimit": <true | false>,
+  "moment": <datetime>,
+  "success": <true | false>,
+  "error": {  // only if success is false 
+    "extendedCode": <HRESULT>,
+    "message": <error message>,
+    "details": [<detail>]
+  }
+  "serviceEdits": [  // only if transfer limit is not exceeded
+    {
+      "id": <layerId>,
+      "editedFeatures": {
+        "adds": [<currentFeature1>, <currentFeature2>],
+        "updates" : [[<originalFeature3>, <currentFeature3>],[<originalFeature4>, <currentFeature4>]],
+        "deletes" : [<originalFeature5>, <originalFeature6>]
+      }
+    }
+  ]
+}
+```
+
+The following response is returned when `async`  is `true` :
+
+```other
+{
+		"statusUrl": <url>
+}
+```
+
+The following response to the status URL is returned when pending:
+
+```other
+{
+  "moment": <datetime>,
+  "status": "<esriJobSubmitted>",
+  "success": <true | false>,
+  "error": {  // only if success is false
+    "extendedCode": <HRESULT>,
+    "message": <error message>,
+    "details": [ <detail> ]
+  }
+}
+```
+
+The following response to the status URL is returned when processing:
+
+```javascript
+{
+  "messages": [
+    "description": <description>,
+    "type": <esriJobMessageTypeInformative>],
+    "moment": <datetime>,
+    "percentComplete": <integer>,
+    "progressMessage: <progress message>,
+    "status": <esriJobExecuting>,
+    "success": <true | false>,
+    "error": {  // only if success is false
+      "extendedCode": <HRESULT>,
+      "message": <error message>,
+      "details": [ <detail> ]
+    }
+  ]
+}
+``` 
+
+The following response to the status URL is returned when processing is complete:
+
+```javascript
+{
+  "exceededTransferLimit=True,
+  "messages":[
+    {
+      "description": <description>,
+      "type": <esriJobMessageTypeInformative>
+    }
+  ],
+  "moment": <datetime>,
+  "percentComplete": <integer>,
+  "progressMessage": <progress message>,
+  "status": <esriJobSucceeded>,
+  "success": <true | false>,
+  "error": {  // only if success is false
+    "extendedCode": <HRESULT>,
+    "message": <error message>,
+    "details": [ <detail> ]
+  }
+}
+``` 
+
+## JSON Response example
+
+JSON response:
+
+```javascript
+{
+		"moment": 1569365485953,
+		"exceededTransferLimit": false
+		"serviceEdits": [
+    {
+      "id": 1,
+      "editedFeatures": {
+        "spatialReference": {
+          "wkt": "PROJCS[\"User_Defined_Transverse_Mercator\",GEOGCS[\"GCS_User_Defined\",DATUM[\"D_User_Defined\",SPHEROID[\"User_Defined_Spheroid\",6378285.48,298.2641653866821]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"False_Easting\",262000.0009333333],PARAMETER[\"False_Northing\",0.0],PARAMETER[\"Central_Meridian\",-87.55],PARAMETER[\"Scale_Factor\",1.0],PARAMETER[\"Latitude_Of_Origin\",43.26666666666667],UNIT[\"Foot_US\",0.3048006096012192]]",
+          "xyTolerance": 0.0032808333333333331,
+          "zTolerance": 0.001,
+          "mTolerance": 0.001,
+          "falseX": -18187000,
+          "falseY": -48539200,
+          "xyUnits": 3048.00609601219276,
+          "falseZ": -100000,
+          "zUnits": 10000,
+          "falseM": -100000,
+          "mUnits": 10000
+        },
+        "updates": [
+          [
+            {
+              "attributes": {
+                "objectid": 1331,
+                "name": "Doc #2063445",
+                "recordtype": null,
+                "recordeddate": 1538611200000,
+                "cogoaccuracy": 1,
+                "created_user": "GIS",
+                "create_date": 1560290226000,
+                "last_edited_user": "GIS",
+                "last_edited_date": 1560290226000,
+                "globalid": "{4767898A-3670-4EE3-B1E2-A89D8930DDBC}",
+                "description": "Craftsman Condominium No. 2",
+                "surveyor": "Dennis VanSluys",
+                "company": "D&H",
+                "surveydate": 1525305600000,
+                "truemidbrg": null,
+                "createdby": "GUNDEKJG",
+                "modifiedby": "GUNDEKJG",
+                "modifydate": 1543918261000,
+                "originalfeatureoid": 270188,
+                "Shape__Area": 10439.9230835287344,
+                "Shape__Length": 413.999032878564265
+              },
+              "geometry": {
+                "hasZ": true,
+                "rings": [
+                  [
+                    [ 156525.355526827276, 173709.828250572085, 0 ],
+                    [ 156525.8830848299, 173589.829474821687, 0 ],
+                    [ 156438.883586913347, 173589.621798068285, 0 ],
+                    [ 156438.356356997043, 173709.620573818684, 0 ],
+                    [ 156525.355526827276, 173709.828250572085, 0 ]
+                  ]
+                ]
+              }
+            },
+            {
+              "attributes": {
+                "objectid": 1331,
+                "name": "Doc #2063445",
+                "recordtype": null,
+                "recordeddate": 1538611200000,
+                "cogoaccuracy": 1,
+                "created_user": "GIS",
+                "create_date": 1560290226000,
+                "last_edited_user": "admin",
+                "last_edited_date": 1569365497000,
+                "globalid": "{4767898A-3670-4EE3-B1E2-A89D8930DDBC}",
+                "description": "Craftsman Condominium No. 2",
+                "surveyor": "Dennis VanSluys",
+                "company": "D&H",
+                "surveydate": 1525305600000,
+                "truemidbrg": null,
+                "createdby": "GUNDEKJG",
+                "modifiedby": "GUNDEKJG",
+                "modifydate": 1543918261000,
+                "originalfeatureoid": 270188,
+                "Shape__Area": 10439.9230833723886,
+                "Shape__Length": 413.999032876170133
+              },
+              "geometry": {
+                "hasZ": true,
+                "rings": [
+                  [
+                    [ 156525.8830848299, 173589.829474821687, 0 ],
+                    [ 156438.883586913347, 173589.621798068285, 0 ],
+                    [ 156438.356356997043, 173709.620573818684, 0 ],
+                    [ 156525.355526827276, 173709.828250572085, 0 ],
+                    [ 156525.8830848299, 173589.829474821687, 0 ]
+                  ]
+                ]
+              }
+            }
+          ]
+        ]
+      }
+    }
+  ],
+  "success": true
+}
+```
+
+ 

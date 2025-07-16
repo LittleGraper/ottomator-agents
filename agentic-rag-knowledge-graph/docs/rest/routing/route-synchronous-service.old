@@ -1,0 +1,5014 @@
+---
+title: "/solve (old)" 
+description: "Use the global route service available with ArcGIS Location Services."
+uid: "route-direct"
+slug: "route-synchronous-service"
+url: "/routing/route-synchronous-service"
+guid: "GUID-5EDC1A32-E69A-4F18-AB78-DD096AB55BF3"
+migratedTopicMetadata:
+  FTITLE: "Route Synchronous Service"
+  FDESCRIPTION: "Concepts for using the route service"
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "agol March 2023 -*"
+  CREATED-ON: "21/03/2023 14:58:36"
+  FAUTHOR: "pchopra"
+  FSTATUS: "Released"
+  MODIFIED-ON: "17/04/2023 13:12:23"
+  VERSION: "27"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-EEF93D96-3238-48A1-AA11-606A6508F679"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: "VUSERGROUPARCGISONLINEDOC"
+restInfoMetadata: {}
+productSupportNotes:
+  platform:
+    checked: true
+  online:
+    checked: true
+  enterprise: 
+    checked: false
+---
+
+import SharedContent from "../shared/content/_request-page"
+
+<CodeSwitcher>
+<CodeBlock language="curl" label="GET">{`GET  https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World/solve`}</CodeBlock>
+<CodeBlock language="curl" label="POST">{`POST https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World/solve`}</CodeBlock>
+</CodeSwitcher> 
+
+The `/solve` request finds the best path from an origin to a destination for an individual or single vehicle. It takes into consideration many different data parameters in the street network such as speed limit, number of lanes, and time of day. It can also take into consideration other real-time data such as road conditions, accidents, and other barriers.
+
+<MoreInfo>
+The Route service can be used to find the best way to get from one location to another or to visit several locations. The best route can be the quickest route for a given time of day considering the traffic conditions during that time, or it can be the shortest route that minimizes the travel distance. The Route service can also find the best route that visits each stop during permitted time windows you specify. If you have more than two stops to visit, the best route can be determined for the fixed order of locations you specify. This is called a simple route. Alternatively, the Route service can determine the best sequence in which to visit the locations (the traveling salesman problem). This is called an optimized route.
+
+See the Get directions and route tutorial to learn more about how to get directions and calculate an optimal route between two or more places using direct request.
+
+Note
+The service works in all the supported countries as listed in the data coverage page. One or more countries are grouped together to form an analysis region. The service can determine the best region to use based on the location of the inputs; otherwise, you can use a parameter to specify a region. The service does not support requests that span more than one region. Consequently, the service will only generate results for inputs that fall within one region.
+The Route service supports direct request and job request. You can choose a request type based on the size of the problem you are trying to solve.
+
+To learn more about the job request, see Job request documentation.
+
+You can make a direct request to the Route service using the following form:
+
+</MoreInfo>
+
+## Parameters 
+
+<StyledTable headers="Name, Required, Type, Default, Description">
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[f](#f)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown"></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The request response format, either `json` or `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[token](#token)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    An access token with the [required privileges](#token).
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[stops](#stops)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+   Two or more locations between which the route is generated.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[travelMode](#travelmode)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">object</StyledTableCell>
+    <StyledTableCell cellStyle="markdown"> 
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The mode of transportation for the analysis provided as a JSON object.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[startTime](#starttime)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The time at which travel begins from the input stops.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[startTimeIsUTC](#starttimeisutc)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The time zone or zones of the `startTime` parameter.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[timeWindowsAreUTC](#timewindowsareutc)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The time, either coordinated universal time (UTC) or geographically local time, for the `TimeWindowStart` and `TimeWindowEnd` attributes. 
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[findBestSequence]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Reorders stops to find an optimized route.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[preserveFirstStop]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Preserves the first stop while reordering others. Required if `findBestSequence` is set to `true`. 
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[useTimeWindows]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[restrictUTurns]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `esriNFSBAtDeadEndsAndIntersections`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Restricts or allows a route to make U-turns at junctions.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[useHierarchy]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[impedanceAttributeName]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `TravelTime`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The type of impedence, such as `Minutes` or `Miles`.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[accumulateAttributeName]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `Miles` `Kilometers`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Accumulates values other than the value set in the `impedence` parameter.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[restrictionAttributeNames]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The restrictions that should be honored by the service.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[attributeParameterValues]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Additional values required by an attribute or restriction.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[barriers]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      One or more points that act as temporary restrictions, additional time, or distance.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[polylineBarriers]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      One ore more lines that prohibit travel anywhere the lines intersect the streets.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[polygonBarriers]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Polygons that either prohibit travel or proportionately scale the time or distance required to travel on the streets.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnDirections]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Generates the driving directions for each route.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[directionsLanguage]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `en`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The language used when generating driving directions.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[directionsOutputType]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `esriDOTStandard`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The content and length of the driving directions. Required if `returnDirections=true`.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[directionsStyleName]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `NADesktop`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The formatting style for the directions. Required if `returnDirections=true`.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[directionsLengthUnits]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `esriNAUMiles`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The units to display the travel distance in driving directions. Required if `returnDirections=true`.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnRoutes]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Returns routes.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[directionsTimeAttributeName]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `TravelTime`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      A time-based impedance attribute to display the duration of a maneuver.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[outputLines]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `esriNAOutputLineTrueShape`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The type of route features that are returned.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnStops]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Returns stops.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnBarriers]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Returns barriers.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnPolylineBarriers]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Returns polyline barriers.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnPolygonBarriers]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Returns polygon barriers.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnTraversedEdges]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Returns traversed edges.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnTraversedJunctions]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Returns transversed junctions.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnTraversedTurns]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Returns traversed turns.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[ignoreInvalidLocations]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Ignores invalid input locations.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[outSR]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The spatial reference of output geometries.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[outputGeometryPrecision]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `10`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Simplifies route geometry.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[outputGeometryPrecisionUnits]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `esriMeters`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The units for the value in the `outputGeometryPrecision` parameter.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[geometryPrecision]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The number of decimal places in the response geometries. Applies to x and y values only.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[geometryPrecisionM]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The number of decimal places in the response geometries. Applies to m-values only.
+    </StyledTableCell>
+  </StyledTableRow>
+  {/* <StyledTableRow>
+    <StyledTableCell cellStyle="code">[overrides]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow> */}
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[preserveObjectID]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Preserves the object IDs from input locations when the input locations are returned as output.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnEmptyResults]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Returns empty results instead of the error property when a request fails.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[locateSettings]()</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">object</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Determines how input data are located.
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Required parameters
+
+<Box>
+
+### f
+
+<SharedContent f/>
+
+</Box>
+
+<Box>
+
+### token
+
+<SharedContent token alpPrivileges="premium:user:networkanalysis:routing or premium:user:networkanalysis:optimizedrouting" agoPrivileges="premium:user:networkanalysis"/>
+
+</Box>
+
+<Box>
+
+### stops
+
+{/* <div class="param-metadata">
+  <ChipGroup isInLine>[`locations`](#locatons) | [`feature`](syntax-examples-for-stops)<Chip value="required" color="gray" size="small" /></ChipGroup>
+</div> */}
+
+<SharedContent metaData typeLabel={"locations | features"} required />
+
+The `locations` or `feature` the output route or routes are required to visit. 
+
+You can use a simple comma- and semicolon-based syntax if you are passing the input locations using their longitude and latitude values in the WGS84 coordinate system and don't need to pass additional fields for each location.
+
+#### Locations
+
+Simple syntax for stops
+
+```other
+stops=x1,y1; x2, y2; ...; xn, yn
+```
+
+Example using simple syntax
+
+```other
+stops=-117.1957,34.0564; -117.184,34.0546
+```
+
+The `stops`  parameter can be specified using a JSON structure that references a set of point features. The property is optional; however, the JSON structure must specify either the `url`  or `features`  property: 
+
+-   `url` —Specify a REST query request to any ArcGIS Server feature, map, or geoprocessing service that returns a JSON feature set. 
+
+    The JSON structure can include the following property: 
+
+    -   `doNotLocateOnRestrictedElements`  (optional)—Specify whether the restricted network elements will be considered when finding network locations. The default is `true` .
+-   `features` —Specify an array of features. 
+
+    Each feature in the `features`  array represents a stop and contains the following properties:
+
+    -   `geometry` —Specify the input point geometry containing `x`  and `y`  properties along with the `spatialReference`  property. If the `spatialReference`  property is defined for the entire JSON, you don't need to define this property for each geometry. Doing so reduces the size of the input JSON if the input has many features and improves performance. This property is not required if the coordinates are in the default spatial reference, WGS84. If the coordinates are in a different spatial reference, you must specify the spatial reference's well-known ID (WKID). See [Using spatial references](DEVSITE/rest/services-reference/enterprise/using-spatial-references.htm) to look up WKID values.
+
+        <Note type={"tip"}>
+
+        It is recommended that you explicitly specify the `spatialReference`  value, and specify it for the entire JSON rather than each individual geometry. 
+
+        </Note>
+    -   `attributes` —Specify each attribute as a key-value pair in which the key is the name of a given field, and the value is the attribute value for the corresponding field.
+
+    The JSON structure can include the following property:
+
+    -   `doNotLocateOnRestrictedElements`  (optional)—Specify whether the restricted network elements will be considered when finding network locations. The default is `true` .
+
+#### Attributes for stops
+
+When specifying the stops using JSON structure, you can specify additional properties for stops, such as their names, using attributes. The `stops`  parameter can be specified with the following attributes: 
+
+-   `Name` 
+
+    The name of the stop. The name is used in the driving directions. If the name is not specified, a unique name prefixed with Location is automatically generated in the output stops, routes, and directions.
+-   `ObjectID` 
+
+    The object ID of the stop. `ObjectID`  is a unique identifier for the stop. If you want to maintain a relationship between input and output, set `preserveObjectID`  to `true` , and the `ObjectID`  value of the input stop is included in the output routes (as the `StopID`  field). The `ObjectID`  value is also included in the output stops (as the `ObjectID`  field) and can be used to join additional information from the analysis outputs to the attribute of the stops. If the `ObjectID`  value is not specified, a unique ID is automatically generated in the output.
+-   `TimeWindowStart` 
+
+    The earliest time the stop can be visited. By specifying a start and end time for a stop's time window, you are defining when a route should visit the stop. When the travel mode for the analysis uses an impedance attribute that is time based, by specifying time-window values the analysis will find a solution that minimizes overall travel and reaches the stop within the prescribed time window. 
+
+    The value is specified as an integer that represents the number of milliseconds since epoch (January 1, 1970).
+
+    This value can be specified either in UTC or local time, depending on the value given for the `timeWindowsAreUTC`  parameter.
+
+    If you specify this attribute, you also need to specify the `TimeWindowEnd`  attribute. 
+-   `TimeWindowEnd` 
+
+    The latest time the stop can be visited. By specifying a start and end time for a stop's time window, you are defining when a route will visit the stop. When the travel mode for the analysis uses an impedance attribute that is time based, specifying time-window values will cause the analysis to find a solution that minimizes overall travel and reaches the stop within the prescribed time window. 
+
+    Together, the `TimeWindowStart`  and `TimeWindowEnd`  attributes make up the time window within which a route can visit the stop. As with `TimeWindowStart` , the `TimeWindowEnd`  value is specified as an integer that represents the number of milliseconds since epoch (January 1, 1970) and is interpreted as UTC or local time, depending on the value specified for the `timeWindowsAreUTC`  parameter.
+
+    The time window specified using the `TimeWindowStart`  and `TimeWindowEnd`  attributes is not considered a hard constraint by the service. That is, the service doesn't fail if the stop cannot be visited during the time window; instead, the service tries to find a route that visits the stop during its time window, but if time-window violations are inevitable, the service tries to find a solution that minimizes the time-window violation time for all stops in the problem. 
+
+    If a route has to arrive early at the stop, a wait time is added to the total travel time of the route. Similarly, if the route arrives late at the stop, a violation time is added to the total travel time of the route. For example, If the time window on the stop is set as 10:00 AM to 11:00 AM and the earliest a route can reach the stop is 11:25 AM, a violation of 25 minutes is added to the total travel time.
+-   `RouteName` 
+
+    The name of the route to which the stop is assigned. Assigning the same route name to different stops causes those stops to be grouped together and visited by the same route. You can generate many routes in a single solve by assigning unique route names to different groups of stops. 
+
+    For example, if you want to find two distinct routes—a route with four stops and another with six stops—set `RouteName`  to `Route1`  for each of the four stops and `Route2`  for each of the six stops. The service will produce two distinct routes and driving directions for each group of stops in a single request.
+
+    If `RouteName`  is not specified for any stops, all stops belong to the same route. If `RouteName`  is not specified for some stops, those stops are treated as unassigned and are not included in any route.
+
+    <Note type={"note"}>
+
+    The grouping is based entirely on the provided input, and no attempt is made by the service to group stops in any optimal manner. If you want to determine the optimal grouping of stops into routes, use the [fleet routing](/vehicle-routing-problem-service) service instead.
+
+    </Note>
+-   `Sequence` 
+
+    If the `findBestSequence`  parameter is set to `false` , the output routes will visit the stops in the order you specify with this attribute. In a group of stops that have the same `RouteName`  value, the sequence number should be greater than 0 but not greater than the total number of stops. Also, the sequence number should not be duplicated. 
+-   `CurbApproach` 
+
+    Specify the direction a vehicle may arrive at and depart from the stop. 
+
+    One of the integers listed in the Coded value column in the following table must be specified as a value of this attribute. The values in the Setting column are the descriptive names for `CurbApproach`  attribute values that you may have seen when using the ArcGIS Network Analyst extension software.
+
+    <StyledTable headers={"Setting,Coded value,Description"}>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Either side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    0
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    The vehicle can approach and depart the stop in either direction, so a U-turn is allowed at the stop. This is the default value. This setting can be chosen if it is possible and desirable for a vehicle to turn around at the stop. This decision may depend on the width of the road and the amount of traffic or whether the stop has a parking lot where vehicles can pull in and turn around.
+
+    ![Either side of vehicle ](../../shared/routing/images/CurbApproach_EitherSide.png)
+
+    _All arrival and departure combinations are allowed with the Either side of vehicle curb approach._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Right side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    1
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches and departs the stop, the stop must be on the right side of the vehicle. A U-turn is prohibited. This is typically used for vehicles such as buses that must arrive with the bus stop on the right side.
+
+    ![Right side of vehicle ](../../shared/routing/images/CurbApproach_RightSide.png)
+
+    _The allowed arrival and departure combination for the Right side of vehicle curb approach is shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Left side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    2
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches and departs the stop, the stop must be on the left side of the vehicle. A U-turn is prohibited. This is typically used for vehicles such as buses that must arrive with the bus stop on the left side.
+
+    ![Left side of vehicle ](../../shared/routing/images/CurbApproach_LeftSide.png)
+
+    _The allowed arrival and departure combination for the Left side of vehicle curb approach is shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    No U-Turn
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    3
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches the stop, the stop can be on either side of the vehicle; however, when it departs, the vehicle must continue in the same direction it arrived. A U-turn is prohibited.
+
+    ![No U-turns ](../../shared/routing/images/CurbApproach_NoU-Turns.png)
+
+    _The allowed arrival and departure combinations for the No U-Turn curb approach are shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    </StyledTable>
+
+    The `CurbApproach`  attribute is designed to work with both types of national driving standards: right-hand traffic (United States) and left-hand traffic (United Kingdom). First, consider an incident on the left side of a vehicle. It is always on the left side regardless of whether the vehicle travels on the left or right half of the road. What may change with national driving standards is your decision to approach an incident from one of two directions, that is, so it ends up on the right or left side of the vehicle. For example, if you want to arrive at an incident and not have a lane of traffic between the vehicle and the incident, choose 1 (Right side of vehicle) in the United States and 2 (Left side of vehicle) in the United Kingdom.
+
+    <ColumnLayout layout={2}>
+
+    <Column>
+
+    <Figure>
+
+    ![Right side of vehicle with right-hand traffic](../../shared/routing/images/CurbApproach_RightSide.png)
+
+    <Caption>
+
+    _With right-hand traffic, the curb approach that leaves the vehicle closest to the stop is Right side of vehicle._
+
+    </Caption>
+
+    </Figure>
+
+    </Column>
+
+    <Column>
+
+    <Figure>
+
+    ![Left side of vehicle with left-hand traffic ](../../shared/routing/images/CurbApproach_LeftSideDriving.png)
+
+    <Caption>
+
+    _With left-hand traffic, the curb approach that leaves the vehicle closest to the stop is Left side of vehicle._
+
+    </Caption>
+
+    </Figure>
+
+    </Column>
+
+    </ColumnLayout>
+
+-   `Attr_[Cost]` 
+
+    This field specifies how much additional time spent or distance traveled can occur at the stop. The value for this attribute is included in the total travel time or distance for the route and is also displayed in driving directions as service time.
+
+    To determine the units of the field, refer to the units of the network cost attribute specified in the field name. For instance, if there is a `TravelTime`  cost attribute that has a unit of minutes, `Attr_TravelTime`  will be in minutes.
+
+    A zero or null value indicates that the stop requires no service time or extra distance traveled. The default value is 0.
+
+    You can add time to a stop to represent how long it takes to make a delivery, install equipment, or perform another task at the stop. Similarly, adding extra distance may be useful to account for a long driveway or other road that isn't represented by the network dataset.
+
+    If you have multiple network cost attributes, there will be multiple `Attr_[Cost]`  fields. Consequently, you may have more than one time- or distance-based `Attr_[Cost]`  field. The field values you provide are only referenced if the cost attribute referred to in the field name is used in the analysis, for instance, to minimize or accumulate time or distance.
+
+    `Attr_[Cost]`  is only referenced if cost is used in the analysis as impedance or accumulate attribute.
+
+    See the list of [cost attributes](/route-synchronous-service#impedanceattributename) supported by the service.
+
+    For example, when a time-based cost attribute `TravelTime`  is used, it specifies the amount of time for cars, in minutes, that will be spent at the stop when the route visits it. This attribute can be used to model the time required to provide some kind of service while you are at the stop. It can also be used to specify some additional time required to reach the actual location on the street from where the route starts or time required to reach the actual destination location from the location on the street where the route ends. The value for this attribute is included in the total travel time for the route and is also displayed in driving directions as service time. A zero or null value indicates that the stop requires no service time.
+
+    For example, suppose you are finding the best route through three stops. Suppose it requires 2 minutes to walk to the street location from where the route starts, you need to spend 10 minutes at Stop 2, and it takes 5 minutes to walk from the street location to the destination. The `Attr_TravelTime`  attribute should be given values of 2, 10, and 5 for Stop 1, Stop 2, and Stop 3, respectively. If it takes 10 minutes to travel from Stop 1 to Stop 2 and 10 minutes to travel from Stop 2 to Stop 3, the total travel time to reach Stop 3 is displayed as 37 minutes (2 + 10 + 10 + 10 + 5), even though there is only 20 minutes of traveling to reach Stop 3. 
+
+    However, when a distance-based cost attribute like `Miles`  is used, it specifies the distance in miles that will be added when calculating total distance of the route. Generally the locations of the stops are not exactly on the streets but are set back somewhat from the road. The `Attr_Miles`  attribute can be used to model the distance between the actual stop location and its location on the street if it is important to include that distance in the total travel distance. `Attr_Miles`  is only referenced if `Miles`  is used in the analysis as impedance or accumulate attribute.
+-   `LocationType` 
+
+    Specifies the stop type. The field value is specified as one of the following integers (use the numeric code, not the name in the parentheses): 
+
+    -   0 (Stop)—A location that the route will visit. This is the default.
+    -   1 (Waypoint)—A location that the route will travel through without making a stop. Waypoints can be used to force the route to take a specific path (to go through the waypoint) without being considered an actual stop. Waypoints do not appear in directions.
+    -   2 (Break)—A location where the route stops for the driver to take a break. 
+-   `Bearing` 
+
+    The direction in which a point is moving. The units are degrees and are measured clockwise from true north. This field is used in conjunction with the `BearingTol`  field. 
+
+    Bearing data is usually sent automatically from a mobile device equipped with a GPS receiver. Try to include bearing data if you are loading an input location that is moving, such as a pedestrian or a vehicle. 
+
+    Using this field tends to prevent adding locations to the wrong edges, which can occur when a vehicle is near an intersection or an overpass, for example. Bearing also helps the tool determine on which side of the street the point is. 
+
+    [Learn more about bearing and bearing tolerance](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/bearing-and-bearing-tolerance.htm)
+-   `BearingTol` 
+
+    The bearing tolerance value creates a range of acceptable bearing values when locating moving points on an edge using the `Bearing`  field. If the `Bearing`  field value is within the range of acceptable values that are generated from the bearing tolerance on an edge, the point can be added as a network location there; otherwise, the closest point on the next-nearest edge is evaluated. 
+
+    The units are in degrees, and the default value is 30. Values must be greater than 0 and less than 180. A value of 30 means that when Network Analyst attempts to add a network location on an edge, a range of acceptable bearing values is generated 15 degrees to either side of the edge (left and right) and in both digitized directions of the edge. 
+
+    [Learn more about bearing and bearing tolerance](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/bearing-and-bearing-tolerance.htm)
+-   `NavLatency` 
+
+    This field is only used in the solve process if the `Bearing`  and `BearingTol`  fields also have values; however, entering a `NavLatency`  field value is optional, even when values are present in `Bearing`  and `BearingTol` . `NavLatency`  indicates how much cost is expected to elapse from the moment GPS information is sent from a moving vehicle to a server and the moment the processed route is received by the vehicle's navigation device. 
+
+    The units of `NavLatency`  are the same as the units of the impedance attribute.
+
+#### Syntax examples for stops
+
+The following is the syntax for specifying stops using JSON structure for features:
+
+```other
+{
+  "spatialReference": {
+    "wkid": <wkid>,
+    "latestWkid": <wkid>
+  },
+  "features": [
+    {
+      "geometry": {
+        "x": <x>,
+        "y": <y>,
+      },
+      "attributes": {
+        "<field1>": <value11>,
+        "<field2>": <value12>
+      }
+    },
+    {
+      "geometry": {
+        "x": <x>,
+        "y": <y>,
+      },
+      "attributes": {
+        "<field1>": <value21>,
+        "<field2>": <value22>
+      }
+    }
+  ],
+  "doNotLocateOnRestrictedElements": true | false
+}
+```
+
+ 
+
+The following is the syntax for specifying stops using a URL returning a JSON response:
+
+```other
+{
+  "url": "<url>"
+  "doNotLocateOnRestrictedElements": true | false
+}
+```
+
+ 
+
+#### Examples for stops
+
+Example one: Specifying stop geometries and attributes using JSON structure
+
+This example shows how to specify the `Name`  attribute for each stop and group four stops into two routes, Route A and Route B, using the `RouteName`  attribute. 
+
+```other
+{ 
+  "spatialReference": {
+    "wkid": 4326
+  },
+  "features": [
+    {
+      "geometry": {
+        "x": -122.4079,
+        "y": 37.78356
+      },
+      "attributes": {
+        "Name": "From",
+        "RouteName": "Route A"
+      }
+    },
+    {
+      "geometry": {
+        "x": -122.404,
+        "y": 37.782
+      },
+      "attributes": {
+        "Name": "To",
+        "RouteName": "Route A"
+      }
+    },
+    {
+      "geometry": {
+        "x": -122.4095,
+        "y": 37.78379
+      },
+      "attributes": {
+        "Name": "From",
+        "RouteName": "Route B"
+      }
+    },
+    {
+      "geometry": {
+        "x": -122.480,
+        "y": 37.734
+      },
+      "attributes": {
+        "Name": "To",
+        "RouteName": "Route B"
+      }
+    }
+  ]
+}
+```
+
+ 
+
+Example two: Specifying stop geometries in the Web Mercator spatial reference using JSON structure
+
+```other
+{
+  "spatialReference": {
+    "wkid": 102100
+      },
+  "features": [
+    {
+      "geometry": {
+        "x": -13635398.9398,
+        "y": 4544699.034400001,
+        
+      },
+      "attributes": {"Name": "Home"}
+    },
+    {
+      "geometry": {
+        "x": -13632733.3441,
+        "y": 4547651.028300002,
+        
+      },
+      "attributes": {"Name": "Office"}
+    }
+  ]
+}
+```
+
+ 
+
+Example three: Specifying stops using a URL
+
+The URL makes a query for a few features from a map service. A URL querying features from a feature service can also be specified.
+
+```other
+{
+    "url": "https://sampleserver3.arcgisonline.com/ArcGIS/rest/services/Network/USA/MapServer/1/query?where=1%3D1&outFields=Name,RouteName&f=json"
+}
+```
+
+</Box>
+
+## Optional parameters
+
+<Box>
+
+### travelMode
+
+<SharedContent metaData typeLabel="object" optional default="See retrieveTravelModes"/>
+
+{/* _Value_: JSON object  */}
+
+Travel modes are managed in ArcGIS Online and can be configured by the administrator of your organization to better reflect the organization's workflows. 
+
+[Learn more about travel modes](https://doc.arcgis.com/en/arcgis-online/reference/travel-modes.htm)
+
+The value for the `travelMode`  parameter is the JSON object containing the settings for a travel mode supported by your organization. To get the supported travel modes, run the `retrieveTravelModes`  service.
+
+You can make a request to retrieve travel modes using the following form:
+
+```javascript
+https://route.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World/retrieveTravelModes?f=json&token=
+
+```
+
+<Note type={"note"}>
+
+If you copy the URL above into a web browser, an invalid token error message will appear. You must replace `<yourToken>`  with a valid token. See [Security and authentication](https://developers.arcgis.com/documentation/mapping-apis-and-services/security/) to learn how to generate one. 
+
+</Note>
+
+The response below is returned by the `retrieveTravelModes`  service.
+
+<Note type={"note"}>
+
+Because the response is quite verbose, the elements in the response are abbreviated for clarity.
+
+</Note>
+
+```other
+{
+  "currentVersion": 10.8,
+  "defaultTravelMode": "FEgifRtFndKNcJMJ",
+  "supportedTravelModes": [
+    {
+      "attributeParameterValues": [
+        {
+          "parameterName": "Restriction Usage",
+          "attributeName": "Avoid Private Roads",
+          "value": "AVOID_MEDIUM"
+        },
+        {
+          "parameterName": "Restriction Usage",
+          "attributeName": "Walking",
+          "value": "PROHIBITED"
+        },
+        {
+          "parameterName": "Restriction Usage",
+          "attributeName": "Preferred for Pedestrians",
+          "value": "PREFER_LOW"
+        },
+        {
+          "parameterName": "Walking Speed (km/h)",
+          "attributeName": "WalkTime",
+          "value": 5
+        },
+        {
+          "parameterName": "Restriction Usage",
+          "attributeName": "Avoid Roads Unsuitable for Pedestrians",
+          "value": "AVOID_HIGH"
+        }
+      ],
+      "description": "Follows paths and roads that allow pedestrian traffic and finds
+                     solutions that optimize travel time. The walking speed is set to
+                     5 kilometers per hour.",
+      "impedanceAttributeName": "WalkTime",
+      "simplificationToleranceUnits": "esriMeters",
+      "uturnAtJunctions": "esriNFSBAllowBacktrack",
+      "restrictionAttributeNames": [
+        "Avoid Private Roads",
+        "Avoid Roads Unsuitable for Pedestrians",
+        "Preferred for Pedestrians",
+        "Walking"
+      ],
+      "useHierarchy": false,
+      "simplificationTolerance": 2,
+      "timeAttributeName": "WalkTime",
+      "distanceAttributeName": "Kilometers",
+      "type": "WALK",
+      "id": "caFAgoThrvUpkFBW",
+      "name": "Walking Time"
+    },
+    {
+      "attributeParameterValues": [
+        {
+          "parameterName": "Restriction Usage",
+          "attributeName": "Avoid Unpaved Roads",
+          "value": "AVOID_HIGH"
+        },
+        {
+          "parameterName": "Restriction Usage",
+          "attributeName": "Avoid Private Roads",
+          "value": "AVOID_MEDIUM"
+        },
+        {
+          "parameterName": "Restriction Usage",
+          "attributeName": "Driving an Automobile",
+          "value": "PROHIBITED"
+        },
+        {
+          "parameterName": "Restriction Usage",
+          "attributeName": "Through Traffic Prohibited",
+          "value": "AVOID_HIGH"
+        },
+        {
+          "parameterName": "Vehicle Maximum Speed (km/h)",
+          "attributeName": "TravelTime",
+          "value": 0
+        },
+        {
+          "parameterName": "Restriction Usage",
+          "attributeName": "Roads Under Construction Prohibited",
+          "value": "PROHIBITED"
+        },
+        {
+          "parameterName": "Restriction Usage",
+          "attributeName": "Avoid Gates",
+          "value": "AVOID_MEDIUM"
+        },
+        {
+          "parameterName": "Restriction Usage",
+          "attributeName": "Avoid Express Lanes",
+          "value": "PROHIBITED"
+        },
+        {
+          "parameterName": "Restriction Usage",
+          "attributeName": "Avoid Carpool Roads",
+          "value": "PROHIBITED"
+        }
+      ],
+      "description": "Models the movement of cars and other similar small automobiles,
+                      such as pickup trucks, and finds solutions that optimize travel
+                      time. Travel obeys one-way roads, avoids illegal turns, and
+                      follows other rules that are specific to cars. When you specify
+                      a start time, dynamic travel speeds based on traffic are used
+                      where it is available.",
+      "impedanceAttributeName": "TravelTime",
+      "simplificationToleranceUnits": "esriMeters",
+      "uturnAtJunctions": "esriNFSBAtDeadEndsAndIntersections",
+      "restrictionAttributeNames": [
+        "Avoid Unpaved Roads",
+        "Avoid Private Roads",
+        "Driving an Automobile",
+        "Through Traffic Prohibited",
+        "Roads Under Construction Prohibited",
+        "Avoid Gates",
+        "Avoid Express Lanes",
+        "Avoid Carpool Roads"
+      ],
+      "useHierarchy": true,
+      "simplificationTolerance": 10,
+      "timeAttributeName": "TravelTime",
+      "distanceAttributeName": "Kilometers",
+      "type": "AUTOMOBILE",
+      "id": "FEgifRtFndKNcJMJ",
+      "name": "Driving Time"
+    }
+  ]
+}
+```
+
+ 
+
+From the JSON above, to pass `Walking Time`  as the travel mode, use the following JSON as the value for the `travelMode`  parameter:
+
+```other
+travelMode={"attributeParameterValues": [{"parameterName": "Restriction Usage","attributeName": "Walking","value": "PROHIBITED"},{"parameterName": "Restriction Usage","attributeName": "Preferred for Pedestrians","value": "PREFER_LOW"},{"parameterName": "Walking Speed (km/h)","attributeName": "WalkTime","value": 5}],"description": "Follows paths and roads that allow pedestrian traffic and finds solutions that optimize travel time. The walking speed is set to 5 kilometers per hour.","impedanceAttributeName": "WalkTime","simplificationToleranceUnits": "esriMeters","uturnAtJunctions": "esriNFSBAllowBacktrack","restrictionAttributeNames": ["Preferred for Pedestrians","Walking"],"useHierarchy": false,"simplificationTolerance": 2,"timeAttributeName": "WalkTime","distanceAttributeName": "Miles","type": "WALK","id": "caFAgoThrvUpkFBW","name": "Walking Time"}
+```
+
+ 
+
+<Note type={"caution"}>
+
+When the `travelMode`  parameter is set, you are choosing a travel mode configured in your organization, and the service automatically overrides the values of other parameters with values that model the chosen travel mode. The following parameters are overridden: `impedanceAttributeName` , `attributeParameterValues` , `restrictUturns` , `useHierarchy` , `outputGeometryPrecision` , `outputGeometryPrecisionUnits` , `restrictionAttributeNames` , and `directionsTimeAttributeName` . 
+
+If you don't set the `travelMode`  parameter, the service honors the default or user-defined values for the parameters that would otherwise be overridden, so you can create your own travel mode.
+
+</Note>
+
+</Box>
+
+<Box>
+
+### startTime
+
+<SharedContent metaData typeLabel="number" optional/>
+
+Indicate the time at which travel begins from the input stops. You can also specify a value of `now` , to set the depart time to the current time.
+
+Specifying a time of day results in more accurate estimations of travel times because the travel times account for the traffic conditions that are applicable for that date and time. 
+
+To use traffic in the analysis, set `impedanceAttributeName`  to `TravelTime` , and assign a value to `startTime` . 
+
+The `startTime`  value represents the target start time or arrive time of the routes in the analysis. The time is specified as Unix time (milliseconds since midnight, January 1, 1970). 
+
+If a value of `now`  is passed to `startTime`  parameter, the travel begins at current time. This will also override `startTimeIsUTC`  parameter value to be `true` . When `startTime`  is `now`  and `startTimeIsUTC`  is `true` , the travel will begin or end at input locations at current time regardless of the time zone the input locations belong to. 
+
+If a time of day is not passed in, the service uses static road speeds based on average historical speeds or posted speed limits. It uses posted speeds in areas where historical traffic information isn't available.
+
+When the service is using ArcGIS StreetMap Premium data, it can support two kinds of traffic: live and typical. 
+
+If the `startTime`  specified is within 4 hours of the current time, live traffic will be used where available. Live traffic retrieves speeds based on phone probe records, sensors, and other data sources and reflects the current travel speeds and predicts speeds for the near future. If the `startTime`  specified is earlier than 4 hours or later than 4 hours from the current time, or the road does not have live traffic, typical traffic speeds will be used. Typical speeds are based on historical traffic patterns. The travel time data is aggregated in 15 minute intervals per day of week based on multiple years worth of data. So a road may have a different travel time at Monday at 8 am, Monday at 8:15 am, or Tuesday at 8 am. Since the variance is just at the day of week and time of day, the travel time is the same on a road for any Monday at 8 am, regardless of the month or year.
+
+If your goal is to model typical travel conditions and avoid large variances from the average due to live traffic, it is recommended that you use a date from the past to ensure that it doesn't coincide with the 4-hour window from the current time. As an extreme example, you can even use dates from 1990.
+
+[ArcGIS Online Directions and Routing Services Coverage](http://links.esri.com/arcgis-online-data-coverage-map-for-directions-and-routes) shows the countries Esri currently provides traffic data for.
+
+#### Typical traffic
+
+To ensure the task uses typical traffic in locations where it is available, choose a time and day of the week; then convert the day of the week to one of the following dates from 1990:
+
+-   Monday—1/1/1990
+-   Tuesday—1/2/1990
+-   Wednesday—1/3/1990
+-   Thursday—1/4/1990
+-   Friday—1/5/1990
+-   Saturday—1/6/1990
+-   Sunday—1/7/1990
+
+Set the time and date as UNIX time in milliseconds. For example, to solve for 1:03 p.m. on Thursdays, set the time and date to 1:03 p.m., January 4, 1990, and convert to milliseconds (`631458180000` ). Although the dates representing days of the week are from 1990, typical traffic is calculated from recent traffic trends—usually over the last two years worth of data.
+
+#### Live traffic
+
+To use live traffic when and where it is available, choose a time and date and convert to UNIX time.
+
+Esri saves live traffic data for 4 hours and references predictive data extending 4 hours into the future. If the time and date you specify for this parameter is outside the 8-hour time window, or the travel time in the analysis continues past the predictive data window, the task returns to typical traffic speeds.
+
+#### Examples for startTime
+
+Example one: 13:03, January 4, 1990. Typical traffic on Thursdays at 1:03 p.m.
+
+```javascript
+"startTime": 631458180000
+```
+
+ 
+
+Example two: 17:00, January 7, 1990. Typical traffic on Sundays at 5:00 p.m.
+
+```javascript
+"startTime": 631731600000
+```
+
+ 
+
+Example three: Specify value of now. The analysis will begin at current time and live traffic speeds are referenced in the analysis.
+
+```javascript
+"startTime": now
+```
+
+ 
+
+Example 4: 10:20, March 18, 2015. If the current time is between 6:20 a.m., March 18, 2015, and 2:20 p.m., March 18, 2015, live traffic speeds are referenced in the analysis; otherwise, typical traffic speeds are referenced.
+
+```javascript
+"startTime": 1426674000000
+```
+</Box>
+
+<Box>
+
+### startTimeIsUTC
+
+<SharedContent metaData typeLabel="boolean" optional default="false"/>
+
+#### False (use geographically local time zones)
+
+The `startTime`  value refers to the time zone in which the first stop of each route is located. The start time uses the time zone that is geographically local to the first stop.
+
+The following image illustrates setting the value to `false`  (geographically local). Setting `startTime`  to 9:00 a.m., January 4, 1990 (`631443600000`  milliseconds) and `startTimeIsUTC`  to `false` , and submitting a valid request causes the drive times for points in the eastern time zone to start at 9:00 a.m. (2:00 p.m. UTC). 
+
+![startTime set to false](../../shared/routing/images/TimeZoneForTimeOfDay_GeoLocal.png)
+
+_Input: `startTime`  is 9:00 a.m.,January 4, 1990 (631443600000 milliseconds), and `startTimeIsUTC`  is set to `false` ._
+
+#### True (use UTC)
+
+The `startTime`  value refers to coordinated universal time (UTC). The start times for all points are simultaneous, regardless of time zones.
+
+The following image illustrates setting the value to `true`  (UTC). Setting `startTime`  to 9:00 a.m., January 4, 1990 (`631443600000`  milliseconds) and `startTimeIsUTC`  to `true`  causes the start time for points in the eastern time zone to be 4:00 a.m. eastern time and 3:00 a.m. central time for those in the central time zone.
+
+![startTime set to true](../../shared/routing/images/TimeZoneForTimeOfDay_utc.png)
+
+_Input: `startTime`  is 9:00 a.m., 4 Jan. 1990 (631443600000 milliseconds), and `startTimeIsUTC`  is set to `true` ._
+
+</Box>
+
+<Box>
+
+### timeWindowsAreUTC
+
+<SharedContent metaData typeLabel="boolean" optional/>
+
+Specify whether the `TimeWindowStart`  and `TimeWindowEnd`  attribute values on stops are specified in UTC or geographically local time. The possible values for this parameter are `true`  or `false` .
+
+See the [startTimeIsUTC](/route-synchronous-service#starttimeisutc)  section for an explanation of UTC versus local time.
+
+<Note type={"note"}>
+
+The service does not allow the combination of `timeWindowsAreUTC=true`  and `startTimeIsUTC=false` . An error is produced if this combination is used. 
+
+</Note>
+
+</Box>
+
+<Box>
+
+### findBestSequence
+
+<SharedContent metaData typeLabel="boolean" optional default="false"/>
+
+Use this parameter to specify whether the service will reorder stops to find the optimized route. If the parameter value is `false` , the service returns a route that visits stops in the order you define. If the parameter value is `true` , the service finds the best order to visit the stops. The service will account for a variety of variables so that the total travel distance or travel time for the route is minimized. You can preserve the origin and the destination stops while allowing the service to reorder intermediary stops by setting the `preserveFirstStop`  and `preserveLastStop`  parameters. 
+
+The default value for this parameter is `false` .
+
+<Note type={"caution"}>
+
+A `true`  parameter value causes the service to switch from solving a shortest-path problem to solving a traveling salesperson problem (TSP). Solving a TSP is a computer-intensive operation and incurs additional service credits per route.
+
+</Note>
+
+</Box>
+
+<Box>
+
+### preserveFirstStop
+
+<SharedContent metaData typeLabel="boolean" optional default="true"/>
+
+Use this parameter to indicate whether the service will keep the first stop fixed when reordering the stops. The possible parameter values are `true`  or `false` . This parameter is applicable only if the `findBestSequence`  parameter value is `true` .
+
+The default value is `true` .
+
+</Box>
+
+<Box>
+
+### preserveLastStop
+
+<SharedContent metaData typeLabel="boolean" optional default="true"/>
+
+Use this parameter to indicate whether the service will keep the last stop fixed when reordering the stops. The possible parameter values are `true`  or `false` . This parameter is applicable only if the `findBestSequence`  parameter value is `true` .
+
+The default value is `true` .
+
+</Box>
+
+<Box>
+
+### useTimeWindows
+
+<SharedContent metaData typeLabel="boolean" optional default="false"/>
+
+Use this parameter to indicate whether the service will consider time windows specified on the stops when finding the best route. The possible parameter values are `true`  or `false` . The time windows are specified on stops using the `TimeWindowStart`  and `TimeWindowEnd`  attributes.
+
+The default value is `false` .
+
+</Box>
+
+<Box>
+
+### restrictUTurns
+
+<SharedContent metaData typeLabel="string" optional default="esriNFSBAllowBacktrack"/>
+
+Use this parameter to restrict or permit the route from making U-turns at junctions.
+
+<Note type={"caution"}>
+
+The value of this parameter, regardless of whether you use the default or explicitly set a value, is overridden when you pass in `travelMode` . 
+
+</Note>
+
+To understand the available parameter values, a junction is a point where only two streets intersect each other. If three or more streets intersect at a point, it is called as an intersection. A cul-de-sac is a dead-end. This parameter can have the following values:
+
+<StyledTable headers={"Parameter value,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`esriNFSBAllowBacktrack` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+U-turns are permitted everywhere. Permitting U-turns implies that the vehicle can turn around at a junction and double back on the same street. 
+
+![U-turns permitted](../../shared/routing/images/U-TurnsAtJunctions_Allowed.png)
+
+_U-turns are permitted at junctions with any number of adjacent streets._
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`esriNFSBAtDeadEndsAndIntersections` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+U-turns are prohibited at junctions where exactly two adjacent streets meet. 
+
+![U-turns permitted only at intersections and dead-ends](../../shared/routing/images/U-TurnsAtJunctions_IntersectAndDeadEnds.png)
+
+_U-turns are permitted only at intersections or dead ends._
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`esriNFSBAtDeadEndsOnly` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+U-turns are prohibited at all junctions and intersections and are permitted only at dead ends. 
+
+![U-turns permitted only at dead-ends](../../shared/routing/images/U-TurnsAtJunctions_DeadEnds.png)
+
+_U-turns are permitted only at dead ends._
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`esriNFSBNoBacktrack` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+U-turns are prohibited at all junctions, intersections, and dead-ends. Even when this parameter value is chosen, a route can still make U-turns at stops. To prohibit U-turns at a stop, you can set its `CurbApproach`  property to the appropriate value (3).
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+The default value is `esriNFSBAllowBacktrack` 
+
+</Box>
+
+<Box>
+
+### useHierarchy
+
+<SharedContent metaData typeLabel="boolean" optional default="true"/>
+
+Specify whether hierarchy will be used when finding the shortest paths.
+
+<Note type={"note"}>
+
+The value of this parameter, regardless of whether you use the default or explicitly set a value, is overridden when you pass in `travelMode` . 
+
+</Note>
+
+-   `true` —Use hierarchy when travelling between stops. When hierarchy is used, the service prefers higher-order streets (such as freeways) to lower-order streets (such as local roads) and can be used to simulate the driver preference of traveling on freeways instead of local roads even if that means a longer trip. This is especially true when finding routes to faraway locations, because drivers on long-distance trips tend to prefer traveling on freeways where stops, intersections, and turns can be avoided. Using hierarchy is computationally faster, especially for long-distance routes, since the service can determine the best route from a relatively smaller subset of streets.
+-   `false` —Do not use hierarchy when travelling between stops. When hierarchy is not used, the service considers all the streets and doesn't prefer higher-order streets when finding the route. This is often used when finding short-distance routes within a city.
+
+The default value is `true` 
+
+<Note type={"note"}>
+
+The service automatically reverts to using hierarchy if the straight-line distance between the stops is greater than 50 miles (80.46 kilometers), even if you have specified to find the route without using hierarchy.
+
+</Note>
+
+</Box>
+
+<Box>
+
+### impedanceAttributeName
+
+<SharedContent metaData typeLabel="string" optional/>
+
+Specify the impedance.
+
+<Note type={"note"}>
+
+The value of this parameter, regardless of whether you use the default or explicitly set a value, is overridden when you pass in `travelMode` . 
+
+</Note>
+
+Impedance is a value that quantifies travel along the transportation network. Travel distance is an example of impedance; it quantifies the length of walkways and road segments. Similarly, drive time—the typical time it takes to drive a car along a road segment—is an example of impedance. Drive times may vary by type of vehicle—for instance, the time it takes for a truck to travel along a path tends to be longer than a car—so there can be many impedance values representing travel times for different vehicle types. Impedance values may also vary with time; live and typical traffic reference dynamic impedance values. Each walkway and road segment stores at least one impedance value. When performing a network analysis, the impedance values are used to calculate the best results, such as finding the shortest route—the route that minimizes impedance—between two points.
+
+The `impedanceAttributeName`  parameter can be specified using the following values:
+
+-   **TravelTime**—Historical and live traffic data is used. This option is good for modeling the time it takes automobiles to travel along roads at a specific time of day using live traffic speed data where available. When using **TravelTime**, you can optionally set the TravelTime::Vehicle Maximum Speed (km/h) attribute parameter to specify the physical limitation of the speed the vehicle is capable of traveling.
+-   **Minutes**—Live traffic data is not used, but historical average speeds for automobiles data is used.
+-   **TruckTravelTime**—Historical and live traffic data is used, but the speed is capped at the posted truck speed limit. This is good for modeling the time it takes for the trucks to travel along roads at a specific time. When using **TruckTravelTime**, you can optionally set the TruckTravelTime::Vehicle Maximum Speed (km/h) attribute parameter to specify the physical limitation of the speed the truck is capable of traveling.
+-   **TruckMinutes**—Live traffic data is not used, but the smaller of the historical average speeds for automobiles and the posted speed limits for trucks are used.
+-   **WalkTime**—The default is a speed of 5 km/hr on all roads and paths, but this can be configured through the WalkTime::Walking Speed (km/h) attribute parameter.
+-   **Miles**—Length measurements along roads are stored in miles and can be used for performing analysis based on shortest distance.
+-   **Kilometers**—Length measurements along roads are stored in kilometers and can be used for performing analysis based on shortest distance.
+
+</Box>
+
+<Box>
+
+### accumulateAttributeNames
+
+<SharedContent metaData typeLabel="string" optional/>
+
+Use this parameter to specify whether the service will accumulate values other than the value specified for `impedanceAttributeName` . For example, if `impedanceAttributeName`  is set to `TravelTime` , the total travel time for the route will be calculated by the service. However, if you also want to calculate the total distance of the route in miles, you can specify `Miles`  as the value for the `accumulateAttributeNames`  parameter.
+
+Specify the parameter value as a comma-separated list of names. The parameter values are the same as the `impedanceAttributeName`  parameter. For example, `accumulateAttributeNames=Miles,Kilometers`  indicates that the total cost of the route will also be calculated in miles and kilometers. 
+
+<Note type={"note"}>
+
+The values specified for the `accumulateAttributeNames`  parameter are for reference only. The service always uses `impedanceAttributeName`  to find the best routes.
+
+</Note>
+
+</Box>
+
+<Box>
+
+### restrictionAttributeNames
+
+<SharedContent metaData typeLabel="string" optional/>
+
+Use this parameter to specify the restrictions that will be honored by the service. A restriction represents a driving preference or requirement. In most cases, restrictions cause roads or pathways to be prohibited, but they can also cause them to be avoided or preferred. For instance, using the `Avoid Toll  Roads`  restriction will result in a route that will include toll roads only when it is required to travel on toll roads to visit a stop. Use `Height Restriction`  to route around clearances that are lower than the height of the vehicle. If the vehicle is carrying corrosive materials, you can use the `Any Hazmat Prohibited`  restriction to prevent hauling the materials along roads where it is marked as illegal to do so.
+
+<Note type={"note"}>
+
+The value of this parameter, regardless of whether you use the default or explicitly set a value, is overridden when you pass in `travelMode` . 
+
+</Note>
+
+This parameter value is specified as a comma-separated list of restriction names. A value of none indicates that no restrictions will be used when finding the shortest paths. 
+
+<Note type={"note"}>
+
+Some restrictions are supported only in certain countries. If you specify restriction names that are not available in the country where the input points are located, the service ignores the invalid restrictions and returns warning messages indicating the names for the restrictions that were not considered when performing the analysis. 
+
+</Note>
+
+<Note type={"note"}>
+
+You may need to specify an additional value, the restriction attribute parameter, for a restriction to get the intended results. This value must be associated with the restriction name and a restriction parameter using `attributeParameterValues` .
+
+</Note>
+
+The `restrictionAttributeNames`  parameter can be specified using the following values: 
+
+-   Any Hazmat Prohibited—The results will not include roads where transporting any kind of hazardous material is prohibited. 
+-   Avoid Carpool Roads—The results will avoid roads that are designated exclusively for car pool (high-occupancy) vehicles. 
+-   Avoid Express Lanes—The results will avoid roads designated as express lanes. 
+-   Avoid Ferries—The results will avoid ferries. 
+-   Avoid Gates—The results will avoid roads where there are gates, such as keyed access or guard-controlled entryways.
+-   Avoid Limited Access Roads—The results will avoid roads that are limited-access highways.
+-   Avoid Private Roads—The results will avoid roads that are not publicly owned and maintained.
+-   Avoid Roads Unsuitable for Pedestrians—The results will avoid roads that are unsuitable for pedestrians.
+-   Avoid Stairways—The results will avoid all stairways on a pedestrian-suitable route.
+-   Avoid Toll Roads—The results will avoid all toll roads for automobiles.
+-   Avoid Toll Roads for Trucks—The results will avoid all toll roads for trucks.
+-   Avoid Truck Restricted Roads—The results will avoid roads where trucks are not allowed, except when making deliveries.
+-   Avoid Unpaved Roads—The results will avoid roads that are not paved (for example, dirt, gravel, and so on). 
+-   Axle Count Restriction—The results will not include roads where trucks with the specified number of axles are prohibited. The number of axles can be specified using the Number of Axles restriction parameter.
+-   Driving a Bus—The results will not include roads where buses are prohibited. Using this restriction will also ensure that the results will honor one-way streets. 
+-   Driving a Taxi—The results will not include roads where taxis are prohibited. Using this restriction will also ensure that the results will honor one-way streets. 
+-   Driving a Truck—The results will not include roads where trucks are prohibited. Using this restriction will also ensure that the results will honor one-way streets. 
+-   Driving an Automobile—The results will not include roads where automobiles are prohibited. Using this restriction will also ensure that the results will honor one-way streets. 
+-   Driving an Emergency Vehicle—The results will not include roads where emergency vehicles are prohibited. Using this restriction will also ensure that the results will honor one-way streets.
+-   Height Restriction—The results will not include roads where the vehicle height exceeds the maximum allowed height for the road. The vehicle height can be specified using the Vehicle Height (meters) restriction parameter. 
+-   Kingpin to Rear Axle Length Restriction—The results will not include roads where the vehicle length exceeds the maximum allowed kingpin to rear axle for all trucks on the road. The length between the vehicle kingpin and the rear axle can be specified using the Vehicle Kingpin to Rear Axle Length (meters) restriction parameter. 
+-   Length Restriction—The results will not include roads where the vehicle length exceeds the maximum allowed length for the road. The vehicle length can be specified using the Vehicle Length (meters) restriction parameter. 
+-   Preferred for Pedestrians—The results will use preferred routes suitable for pedestrian navigation. 
+-   Riding a Motorcycle—The results will not include roads where motorcycles are prohibited. Using this restriction will also ensure that the results will honor one-way streets.
+-   Roads Under Construction Prohibited—The results will not include roads that are under construction.
+-   Semi or Tractor with One or More Trailers Prohibited—The results will not include roads where semis or tractors with one or more trailers are prohibited. 
+-   Single Axle Vehicles Prohibited—The results will not include roads where vehicles with single axles are prohibited.
+-   Tandem Axle Vehicles Prohibited—The results will not include roads where vehicles with tandem axles are prohibited.
+-   Through Traffic Prohibited—The results will not include roads where through traffic (nonlocal traffic) is prohibited.
+-   Truck with Trailers Restriction—The results will not include roads where trucks with the specified number of trailers on the truck are prohibited. The number of trailers on the truck can be specified using the Number of Trailers on Truck restriction parameter.
+-   Use Preferred Hazmat Routes—The results will prefer roads that are designated for transporting hazardous materials. 
+-   Use Preferred Truck Routes—The results will prefer roads that are designated as truck routes, such as roads that are part of the national network as specified by the National Surface Transportation Assistance Act in the United States, or roads that are designated as truck routes by the state or province, or roads that are preferred by truckers when driving in an area.
+-   Walking—The results will not include roads where pedestrians are prohibited.
+-   Weight Restriction—The results will not include roads where the vehicle weight exceeds the maximum allowed weight for the road. The vehicle weight can be specified using the Vehicle Weight (kilograms) restriction parameter.
+-   Weight per Axle Restriction—The results will not include roads where the vehicle weight per axle exceeds the maximum allowed weight per axle for the road. The vehicle weight per axle can be specified using the Vehicle Weight per Axle (kilograms) restriction parameter.
+-   Width Restriction—The results will not include roads where the vehicle width exceeds the maximum allowed width for the road. The vehicle width can be specified using the Vehicle Width (meters) restriction parameter.
+
+The `Driving a Delivery Vehicle`  restriction attribute is no longer available. The service will ignore this restriction since it is invalid. To achieve similar results, use the `Driving a Truck`  restriction attribute along with the `Avoid Truck Restricted Roads`  restriction attribute.
+
+The `restrictionAttributeName`  parameter value is specified as a list of restriction names. A value of `null`  indicates that no restrictions will be used when finding the best route, but only when `travelMode`  is set to `null` . 
+
+</Box>
+
+<Box>
+
+### attributeParameterValues
+
+<SharedContent metaData typeLabel="string" optional/>
+
+Use this parameter to specify additional values required by an attribute or restriction, such as to specify whether the restriction prohibits, avoids, or prefers travel on restricted roads. If the restriction is meant to avoid or prefer roads, you can further specify the degree to which they are avoided or preferred using this parameter. For example, you can choose to never use toll roads, avoid them as much as possible, or prefer them.
+
+<Note type={"note"}>
+
+The value of this parameter, regardless of whether you use the default or explicitly set a value, is overridden when you pass in `travelMode` . 
+
+</Note>
+
+This parameter value is specified as an array of objects each having the following properties:
+
+-   `attributeName` —The name of the restriction.
+-   `parameterName` —The name of the parameter associated with the restriction. A restriction can have one or more `parameterName`  properties.
+-   `value` —The value for `parameterName` .
+
+Most attribute parameters are related to the restriction attributes in `restrictionAttributeNames` . Each restriction has at least one attribute parameter named `Restriction Usage` , which specifies whether the restriction prohibits, avoids, or prefers travel on the roads associated with the restriction and the degree to which the roads are avoided or preferred. The `Restriction Usage`  parameter can be assigned any of the following string values or their equivalent numeric values in the parentheses:
+
+-   `Prohibited`  (`-1` )—Travel on the roads that have the restriction is prohibited.
+-   `Avoid_High`  (`5` )—It is very unlikely the service will include in the route the roads that are associated with the restriction.
+-   `Avoid_Medium`  (`2` )—It is unlikely the service will include in the route the roads that are associated with the restriction.
+-   `Avoid_Low`  (`1.3` )—It is somewhat unlikely the service will include in the route the roads that are associated with the restriction.
+-   `Prefer_Low`  (`0.8` )—It is somewhat likely the service will include in the route the roads that are associated with the restriction.
+-   `Prefer_Medium` (`0.5` )—It is likely the service will include in the route the roads that are associated with the restriction.
+-   `Prefer_High`  (`0.2` )—It is very likely the service will include in the route the roads that are associated with the restriction.
+
+<Note type={"note"}>
+
+The `restrictionAttributeNames`  parameter is associated with `attributeParameterValues` . The restriction attribute's parameter value is specified as part of `attributeParameterValues` . Each restriction has at least one parameter named `Restriction Usage` , which specifies whether travel on roads that have the restriction is prohibited, should be avoided, or should be preferred. For the latter two options, it also specifies the degree to which the roads are avoided or preferred.
+
+</Note>
+
+The following table lists the attribute parameter names and the default parameter values.
+
+<Note type={"tip"}>
+
+To use the default value for a restriction, `attributeName` , `parameterName`  and `value`  do not need to be specified as part of the `attributeParameterValues`  parameter.
+
+</Note>
+
+<StyledTable headers={"Restriction name,Restriction parameter name,Restriction parameter default value"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Any Hazmat Prohibited
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Carpool Roads
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Express Lanes
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Ferries
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_Medium
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Gates
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_Medium
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Limited Access Roads
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_Medium
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Private Roads
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_Medium
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Roads Unsuitable for Pedestrians
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_High
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Stairways
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_High
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Toll Roads
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_Medium
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Toll Roads for Trucks
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_Medium
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Truck Restricted Roads
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_High
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Unpaved Roads
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_High
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Axle Count Restriction
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Number of Axles
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Driving a Bus
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Driving a Taxi
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Driving a Truck
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Driving an Automobile
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Driving an Emergency Vehicle
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Height Restriction
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Vehicle Height (meters)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Kingpin to Rear Axle Length Restriction
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Vehicle Kingpin to Rear Axle Length (meters)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Length Restriction
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Vehicle Length (meters)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Preferred for Pedestrians
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prefer_Low
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Riding a Motorcycle
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Roads Under Construction Prohibited
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Semi or Tractor with One or More Trailers Prohibited
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Single Axle Vehicles Prohibited
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Tandem Axle Vehicles Prohibited
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Through Traffic Prohibited
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_High
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Truck with Trailers Restriction
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Number of Trailers on Truck
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Use Preferred Hazmat Routes
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prefer_Medium
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Use Preferred Truck Routes
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prefer_High
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Walking
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+WalkTime
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Walking Speed (km/h)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+5
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Weight Restriction
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Vehicle Weight (kilograms)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Weight per Axle Restriction
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Vehicle Weight per Axle (kilograms)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Width Restriction
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Vehicle Width (meters)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+#### Syntax example for attributeParameterValues
+
+```other
+[
+    {
+        "attributeName": "<attribute1>",
+        "parameterName": "<parameter1>",
+        "value": "<value1>"
+    },
+    {
+        "attributeName": "<attribute2>",
+        "parameterName": "<parameter2>",
+        "value": "<value2>"
+    }
+]
+```
+
+ 
+
+#### Example for attributeParameterValues
+
+This example shows how to specify the height and weight of the vehicle for use with the height and weight restrictions, respectively, along with a high preference to include the designated truck routes. This results in a route that does not include roads where the clearance under overpasses or through tunnels is less than the vehicle height. The route will also not include roads with load-limited bridges or local roads that prohibit heavy vehicles if the vehicle weight exceeds the maximum permissible weight. However, the route will include as many roads as possible that are designated as preferred truck routes. 
+
+The `Restriction Usage`  parameter for `Height Restriction`  and `Weight Restriction`  are not specified, as the default value of `Prohibit`  will be used for these restriction parameters. 
+
+```other
+attributeParameterValues=
+[
+    {
+        "attributeName": "Height Restriction",
+        "parameterName": "Vehicle Height (meters)",
+        "value": 4.12
+    },
+    {
+        "attributeName": "Weight Restriction",
+        "parameterName": "Vehicle Weight (kilograms)",
+        "value": 36287
+    },
+    {
+        "attributeName": "Use Preferred Truck Routes",
+        "parameterName": "Restriction Usage",
+        "value": "Prefer_High"
+    }
+]
+```
+
+</Box>
+
+<Box>
+
+### barriers
+
+<SharedContent metaData typeLabel="location | object" optional/>
+
+Use this parameter to specify one or more points that will act as temporary restrictions or represent additional time or distance that may be required to travel on the underlying streets. For example, a point barrier can be used to represent a fallen tree along a street or a time delay spent at a railroad crossing.
+
+<Note type={"note"}>
+
+The service imposes a maximum limit of 250 point barriers. If this limit is exceeded, the response returns an error message.
+
+</Note>
+
+You can use a simple comma- and semicolon-based syntax if you are passing the point barrier locations using their longitude and latitude values in the WGS84 coordinate system and don't need to pass additional fields for each location.
+
+Simple syntax for barriers
+
+```other
+barriers=x1,y1; x2, y2; ...; xn, yn
+```
+
+ 
+
+Example using simple syntax
+
+```other
+barriers=-117.1957,34.0564; -117.184,34.0546
+```
+
+ 
+
+You can specify barrier geometries as well as attributes using a more comprehensive JSON structure that references a set of features. The property is optional; however, the JSON structure must specify either the `url`  or `features`  property: 
+
+-   `url` —Specify a REST query request to any ArcGIS Server feature, map, or geoprocessing service that returns a JSON feature set. 
+
+    The JSON structure can include the following property: 
+
+    -   `doNotLocateOnRestrictedElements`  (optional)—Specify whether the restricted network elements will be considered when finding network locations. The default is `true` .
+-   `features` —Specify an array of features. 
+
+    Each feature in this array represents a point barrier and contains the following fields:
+
+    -   `geometry` —Specify the input point geometry containing `x`  and `y`  properties along with the `spatialReference`  property. If the `spatialReference`  property is defined for the entire JSON, you don't need to define this property for each geometry. Doing so reduces the size of the input JSON if the input has many features and improves performance. This property is not required if the coordinates are in the default spatial reference, WGS84. If the coordinates are in a different spatial reference, you must specify the spatial reference's well-known ID (WKID). See [Using spatial references](DEVSITE/rest/services-reference/enterprise/using-spatial-references) to look up WKID values.
+
+        <Note type={"tip"}>
+
+        It is recommended that you explicitly specify the `spatialReference`  value, and specify it for the entire JSON rather than each individual geometry. 
+
+        </Note>
+    -   `attributes` —Specify each attribute as a key-value pair in which the key is the name of a given field, and the value is the attribute value for the corresponding field.
+
+    The JSON structure can include the following property:
+
+    -   `doNotLocateOnRestrictedElements`  (optional)—Specify whether the restricted network elements will be considered when finding network locations. The default is `true` .
+
+#### Attribute for barriers
+
+When specifying the `barriers`  parameter using JSON structure, you can specify additional information about barriers—such as the barrier type—using attributes. The `barriers`  parameter can be specified with the following attributes:
+
+`Name` 
+
+The name of the barrier.
+
+`ObjectID` 
+
+The object ID of the barrier. `ObjectID`  is a unique identifier for the barrier. If you want to maintain a relationship between the input and output, set `preserveObjectID`  to `true` . The `ObjectID`  value of the input barrier is included in the output barrier (as the `ObjectID`  field) and can be used to join additional information from analysis outputs to the attribute of the barriers. If the `ObjectID`  value is not specified, a unique ID is automatically generated in the output.
+
+`BarrierType` 
+
+Specifies whether the point barrier restricts travel completely or adds time or distance when it is crossed. The value for this attribute is specified as one of the following integers (use the numeric code, not the name in parentheses):
+
+-   0 (Restriction)—Prohibits travel through the barrier. The barrier is referred to as a restriction point barrier since it acts as a restriction.
+
+    ![Two maps demonstrate how a restriction point barrier affects a route analysis.](../../shared/routing/images/Point_Barriers.png)
+
+    _The first map shows the shortest path between two stops without any restriction point barriers. The second map has a road that is blocked by a fallen tree, so the shortest path between the same points is longer._
+-   2 (Added Cost)—Traveling through the barrier increases the travel time or distance by the amount specified in the `Attr_TravelTime` , `Attr_Miles` , `Attr_Kilometers` , `Attr_Minutes` , `Attr_WalkTime` , `Attr_TruckMinutes` , and `Attr_TruckTravelTime`  attributes. This barrier type is referred to as an added cost point barrier.
+
+    ![Two maps demonstrate how added cost point barriers affect a route analysis.](../../shared/routing/images/nac_barriers_apoint.png)
+
+    _The first map shows the shortest path between two stops without any added cost point barrier. For the second map, the travel time from stop 1 to stop 2 is the same whether going around the north end of the block or the south end; however, since crossing railroad tracks incurs a time penalty (modeled with added cost point barriers), the route with only one railroad crossing is chosen. The cost of crossing the barrier is added to the accumulated travel time of the resulting route._
+
+<Note type={"note"}>
+
+There is no point barrier type with a value of 1 for the `BarrierType`  attribute.
+
+</Note>
+
+`FullEdge` 
+
+Specifies how the restriction point barriers are applied to the edge elements during the analysis. The field value is specified as one of the following integers (use the numeric code, not the name in parentheses): 
+
+-   0 (False)—Permits travel on the edge up to the barrier but not through it. This is the default value.
+-   1 (True)—Restricts travel anywhere on the associated edge.
+
+`Attr_[Cost]` 
+
+Indicates how the cost (time or distance) is added when the barrier is traversed. This attribute is applicable only for added cost point barriers. The attribute value must be greater than or equal to zero.
+
+`Attr_[Cost]`  is only referenced when the cost attribute referred to in the field name is used in the analysis as impedance or accumulate attribute.
+
+See the [list of cost attributes](/route-synchronous-service#accumulateattributenames) supported by the service.
+
+#### Syntax examples for barriers
+
+Syntax for specifying barriers using JSON structure for features 
+
+```other
+{
+  "spatialReference": {
+    "wkid": <wkid>,
+    "latestWkid": <wkid>
+  },
+  "features": [
+    {
+      "geometry": {
+        "x": <x>,
+        "y": <y>
+      },
+      "attributes": {
+        "<field1>": <value11>,
+        "<field2>": <value12>
+      }
+    },
+    {
+      "geometry": {
+        "x": <x>,
+        "y": <y>
+      },
+      "attributes": {
+        "<field1>": <value21>,
+        "<field2>": <value22>
+      }
+    }
+  ],
+  "doNotLocateOnRestrictedElements": true | false
+}
+
+
+```
+
+ 
+
+Syntax for specifying barriers using a URL to a JSON response
+
+```other
+{
+  "url": "<url>"
+  "doNotLocateOnRestrictedElements": true | false
+}
+```
+
+ 
+
+#### Examples for barriers
+
+Example 1: Specify an added cost point barrier using JSON structure
+
+This example shows how to use an added cost point barrier to model a five-minute delay at a railroad crossing. The `BarrierType`  attribute is used to specify that the point barrier is of type added cost and the `Attr_TravelTime`  attribute is used to specify the delay in minutes. 
+
+```other
+{
+  "spatialReference": {
+    "wkid": 4326
+  },
+  "features": [
+    {
+      "geometry": {
+        "x": -122.053461,
+        "y": 37.541479
+      },
+      "attributes": {
+        "Name": "Haley St rail road crossing",
+        "BarrierType": 2,
+        "Attr_TravelTime": 5
+      }
+    }
+  ]
+}
+
+```
+
+ 
+
+Example 2: Specify a restriction point barrier using a URL
+
+The URL makes a query for a few features from a map service. A URL querying features from a feature service can also be specified.
+
+```javascript
+{
+    "url": "https://sampleserver3.arcgisonline.com/ArcGIS/rest/services/Network/USA/MapServer/0/query?where=1%3D1&returnGeometry=true&f=json"
+}
+```
+
+</Box>
+
+<Box>
+
+### polylineBarriers
+
+<SharedContent metaData typeLabel="object" optional/>
+
+Use this parameter to specify one or more lines that prohibit travel anywhere the lines intersect the streets. For example, a parade or protest that blocks traffic across several street segments can be modeled with a line barrier. A line barrier can also quickly fence off several roads from being traversed, thereby channeling possible routes away from undesirable parts of the street network.
+
+![Two maps demonstrate how a line barrier affects finding a route between two stops.](../../shared/routing/images/Polyline_Barriers.png)
+
+_The first map displays the shortest path between two stops. The second map shows the shortest path when several streets are blocked by a polyline barrier._
+
+You can specify polyline barrier geometries as well as attributes using a JSON structure that references a set of features. The property is optional; however, the JSON structure must specify either the `url`  or `features`  property: 
+
+-   `url` —Specify a REST query request to any ArcGIS Server feature, map, or geoprocessing service that returns a JSON feature set. 
+
+    The JSON structure can include the following property: 
+
+    -   `doNotLocateOnRestrictedElements`  (optional)—Specify whether the restricted network elements will be considered when finding network locations. The default is `true` .
+-   `features` —Specify an array of features. 
+
+    Each feature in this array represents a polyline barrier and contains the following fields:
+
+    -   `geometry` —Specify the input point geometry containing `x`  and `y`  properties along with the `spatialReference`  property. If the `spatialReference`  property is defined for the entire JSON, you don't need to define this property for each geometry. Doing so reduces the size of the input JSON if the input has many features and improves performance. This property is not required if the coordinates are in the default spatial reference, WGS84. If the coordinates are in a different spatial reference, you must specify the spatial reference's well-known ID (WKID). See [Using spatial references](DEVSITE/rest/services-reference/enterprise/using-spatial-references) to look up WKID values.
+
+        <Note type={"tip"}>
+
+        It is recommended that you explicitly specify the `spatialReference`  value, and specify it for the entire JSON rather than each individual geometry. 
+
+        </Note>
+    -   `attributes` —Specify each attribute as a key-value pair in which the key is the name of a given field, and the value is the attribute value for the corresponding field.
+
+    The JSON structure can include the following property:
+
+    -   `doNotLocateOnRestrictedElements`  (optional)—Specify whether the restricted network elements will be considered when finding network locations. The default is `true` .
+
+#### Attributes for polylineBarriers
+
+When specifying the `polylineBarriers`  parameter using JSON structure, the parameter can be specified with the following attribute:
+
+`Name` 
+
+The name of the barrier.
+
+`ObjectID` 
+
+The object ID of the line barrier. `ObjectID`  is a unique identifier for the line barrier. If you want to maintain a relationship between the input and output, set `preserveObjectID`  to `true` . The `ObjectID`  value of the input line barrier is included in the output line barrier (as the `ObjectID`  field) and can be used to join additional information from analysis outputs to the attribute of the line barriers. If the `ObjectID`  value is not specified, a unique ID is automatically generated in the output.
+
+#### Syntax examples for polylineBarriers
+
+Syntax for specifying polyline barriers using JSON structure for features
+
+```other
+{
+  "spatialReference": {
+    "wkid": <wkid>,
+    "latestWkid": <wkid>
+  },
+  "features": [
+    {
+      "geometry": {
+        "paths": [
+          [
+            [<x11>,<y11>],
+            [<x12>,<y12>]
+          ],
+          [
+            [<x21>,<y21>],
+            [<x22>,<y22>]
+          ]
+        ],
+      },
+      "attributes": {
+        "<field1>": <value11>,
+        "<field2>": <value12>
+      }
+    },
+    {
+      "geometry": {
+        "paths": [
+          [
+            [<x11>,<y11>],
+            [<x12>,<y12>]
+          ],
+          [
+            [<x21>,<y21>],
+            [<x22>,<y22>]
+          ]
+        ]
+      },
+      "attributes": {
+        "<field1>": <value21>,
+        "<field2>": <value22>
+      }
+    }
+  ],
+  "doNotLocateOnRestrictedElements": true | false
+}
+
+
+```
+
+ 
+
+Syntax for specifying polyline barriers using a URL returning a JSON response
+
+```other
+{
+  "url": "<url>"
+  "doNotLocateOnRestrictedElements": true | false
+}
+```
+
+ 
+
+#### Examples for polylineBarriers
+
+Example 1: Specify polyline barriers using JSON structure
+
+This example shows how to add two lines as polyline barriers to restrict travel on the streets intersected by the lines. Barrier 1 is a single-part line feature composed of two points. Barrier 2 is a two-part line feature. The first part is composed of three points, and the second part is composed of two points. 
+
+```other
+{
+  "spatialReference": {
+    "wkid": 102100
+  },
+  "features": [
+    {
+      "geometry": {
+        "paths": [
+          [
+            [-10804823.397,3873688.372],
+            [-10804811.152,3873025.945]
+          ]
+        ]
+      },
+      "attributes": {
+        "Name": "Barrier 1"
+      }
+    },
+    {
+      "geometry": {
+        "paths": [
+          [
+            [-10804823.397,3873688.372],
+            [-10804807.813,3873290.911],
+            [-10804811.152,3873025.945]
+          ],
+          [
+            [-10805032.678,3863358.76],
+            [-10805001.508,3862829.281]
+          ]
+        ]
+      },
+      "attributes": {
+        "Name": "Barrier 2"
+      }
+    }
+  ]
+}
+
+
+```
+
+ 
+
+Example 2: Specify a polyline barrier using a URL
+
+The URL makes a query for a few features from a map service. A URL querying features from a feature service can also be specified.
+
+```javascript
+{
+    "url": "https://sampleserver3.arcgisonline.com/ArcGIS/rest/services/Network/USA/MapServer/6/query?where=1%3D1&returnGeometry=true&f=json"
+}
+```
+
+</Box>
+
+<Box>
+
+### polygonBarriers
+
+<SharedContent metaData typeLabel="object" optional/>
+
+Use this parameter to specify polygons that either completely restrict travel or proportionately scale the time or distance required to travel on the streets intersected by the polygons.
+
+You can specify polygon barrier geometries as well as attributes using a JSON structure that references a set of features. The property is optional; however, the JSON structure must specify either the `url`  or `features`  property: 
+
+-   `url` —Specify a REST query request to any ArcGIS Server feature, map, or geoprocessing service that returns a JSON feature set. 
+
+    The JSON structure can include the following property: 
+
+    -   `doNotLocateOnRestrictedElements`  (optional)—Specify whether the restricted network elements will be considered when finding network locations. The default is `true` .
+-   `features` —Specify an array of features. 
+
+    Each feature in this array represents a polygon barrier and contains the following fields:
+
+    -   `geometry` —Specify the input point geometry containing `x`  and `y`  properties along with the `spatialReference`  property. If the `spatialReference`  property is defined for the entire JSON, you don't need to define this property for each geometry. Doing so reduces the size of the input JSON if the input has many features and improves performance. This property is not required if the coordinates are in the default spatial reference, WGS84. If the coordinates are in a different spatial reference, you must specify the spatial reference's well-known ID (WKID). See [Using spatial references](DEVSITE/rest/services-reference/enterprise/using-spatial-references) to look up WKID values.
+
+        <Note type={"tip"}>
+
+        It is recommended that you explicitly specify the `spatialReference`  value, and specify it for the entire JSON rather than each individual geometry. 
+
+        </Note>
+    -   `attributes` —Specify each attribute as a key-value pair in which the key is the name of a given field, and the value is the attribute value for the corresponding field.
+
+    The JSON structure can include the following property:
+
+    -   `doNotLocateOnRestrictedElements`  (optional)—Specify whether the restricted network elements will be considered when finding network locations. The default is `true` .
+
+#### Attributes for polygonBarriers
+
+When specifying the `polygonBarriers`  parameter using JSON structure, you can specify additional information about barriers—such as the barrier type—using attributes. The `polygonBarriers`  parameter can be specified with the following attributes:
+
+`Name` 
+
+The name of the barrier.
+
+`ObjectID` 
+
+The object ID of the polygon barrier. `ObjectID`  is a unique identifier for the polygon barrier. If you want to maintain a relationship between the input and output, set `preserveObjectID`  to `true` . The `ObjectID`  value of the input polygon barrier is included in the output polygon barrier (as the `ObjectID`  field) and can be used to join additional information from analysis outputs to the attribute of the polygon barriers. If the `ObjectID`  value is not specified, a unique ID is automatically generated in the output.
+
+`BarrierType` 
+
+Use this parameter to specify polygons that either completely restrict travel or proportionately scale the time or distance required to travel on the streets intersected by the polygons.
+
+-   0 (Restriction)—Prohibits traveling through any part of the barrier. The barrier is referred to as a restriction polygon barrier since it prohibits traveling on streets intersected by the barrier. One use of this type of barrier is to model floods covering areas of the street that make traveling on those streets impossible.
+
+    This is the default value.
+
+    ![Two maps demonstrate how a restriction polygon barrier affects finding a route between two stops.](../../shared/routing/images/Polygon_Barriers.png)
+
+    _The first map depicts the shortest path between two stops. The second map shows a polygon barrier blocking flooded streets, so the shortest path between the same two stops is different._
+-   1 (Scaled Cost)—Scales the time or distance required to travel the underlying streets by a factor specified using the `Attr_TravelTime` , `Attr_Miles` , `Attr_Kilometers` , `Attr_Minutes` , `Attr_WalkTime` , `Attr_TruckMinutes` , or `Attr_TruckTravelTime`  attributes. If the streets are partially covered by the barrier, the travel time or distance is apportioned and then scaled. For example, a factor of 0.25 means that travel on underlying streets is expected to be four times faster than normal. A factor of 3.0 means that it is expected to take three times longer than normal to travel on underlying streets. This barrier type is referred to as a scaled cost polygon barrier. It can be used to model storms that reduce travel speeds in specific regions, for example. 
+
+    ![Two maps demonstrate how a scaled cost polygon barrier affects finding a route between two stops.](../../shared/routing/images/nac_barriers_spolygon.png)
+
+    _The first map shows a route that goes through inclement weather without regard for the effect that poor road conditions have on travel time. The second map shows a scaled polygon barrier that doubles the travel time of the roads covered by the storm. The route still passes through the southern tip of the storm, since it is quicker to spend more time driving slowly through a small part of the storm rather than driving completely around it. The service uses the modified travel time in calculating the best route, and the modified travel time is reported as the total travel time in the response._
+
+`Attr_[Cost]` 
+
+This is the factor by which the cost of the streets intersected by the barrier is multiplied. This attribute is applicable only for scaled cost barriers. The attribute value must be greater than zero. 
+
+`Attr_[Cost]`  is only referenced when it is used in the analysis as impedance or accumulate attribute.
+
+#### Syntax examples for polygonBarriers
+
+Syntax for specifying polygon barriers using JSON structure for features
+
+```other
+{
+  "spatialReference": {
+    "wkid": <wkid>,
+    "latestWkid": <wkid>
+  },
+  "features": [
+    {
+      "geometry": {
+        "rings": [
+          [
+            [<x11>,<y11>],
+            [<x12>,<y12>],
+            [<x11>,<y11>]
+          ],
+          [
+            [<x21>,<y21>],
+            [<x22>,<y22>],
+            [<x21>,<y21>]
+          ]
+        ]
+      },
+      "attributes": {
+        "<field1>": <value11>,
+        "<field2>": <value12>
+      }
+    },
+    {
+      "geometry": {
+        "rings": [
+          [
+            [<x11>,<y11>],
+            [<x12>,<y12>],
+            [<x11>,<y11>]
+          ],
+          [
+            [<x21>,<y21>],
+            [<x22>,<y22>],
+            [<x21>,<y21>]
+          ]
+        ]
+      },
+      "attributes": {
+        "<field1>": <value21>,
+        "<field2>": <value22>
+      }
+    }
+  ],
+  "doNotLocateOnRestrictedElements": true | false
+}
+```
+
+ 
+
+Syntax for specifying polygon barriers using a URL returning a JSON response
+
+```other
+{
+  "url": "<url>"
+  "doNotLocateOnRestrictedElements": true | false
+}
+```
+
+ 
+
+#### Examples for polygonBarriers
+
+Example 1: Specify a polygon barrier using JSON structure
+
+This example shows how to add two polygons as barriers. The first polygon, Flood zone, is a restriction polygon barrier that prohibits travel on the underlying streets. The polygon is a single-part polygon feature composed of four points. The second polygon, Severe weather zone, is a scaled-cost polygon barrier that reduces the travel time on underlying streets to one-third of the original value. The polygon is a two-part polygon feature. Both parts are composed of four points. 
+
+```other
+{
+  "spatialReference": {
+    "wkid": 4326
+  },
+  "features": [
+    {
+      "geometry": {
+        "rings": [
+          [
+            [-97.0634,32.8442],
+            [-97.0554,32.84],
+            [-97.0558,32.8327],
+            [-97.0638,32.83],
+            [-97.0634,32.8442]
+          ]
+        ]
+      },
+      "attributes": {
+        "Name": "Flood zone",
+        "BarrierType": 0
+      }
+    },
+    {
+      "geometry": {
+        "rings": [
+          [
+            [-97.0803,32.8235],
+            [-97.0776,32.8277],
+            [-97.074,32.8254],
+            [-97.0767,32.8227],
+            [-97.0803,32.8235]
+          ],
+          [
+            [-97.0871,32.8311],
+            [-97.0831,32.8292],
+            [-97.0853,32.8259],
+            [-97.0892,32.8279],
+            [-97.0871,32.8311]
+          ]
+        ]
+      },
+      "attributes": {
+        "Name": "Severe weather zone",
+        "BarrierType": 1,
+        "Attr_TravelTime": 3
+      }
+    }
+  ]
+}
+```
+
+ 
+
+Example 2: Specify a polygon barrier using a URL
+
+The URL makes a query for a few features from a map service. A URL querying features from a feature service can also be specified.
+
+```javascript
+{
+    "url": "https://sampleserver3.arcgisonline.com/ArcGIS/rest/services/Network/USA/MapServer/7/query?where=1%3D1&returnGeometry=true&f=json"
+}
+```
+
+</Box>
+
+<Box>
+
+### returnDirections
+
+<SharedContent metaData typeLabel="boolean" optional default="true"/>
+
+Specify whether the service will generate driving directions for each route.
+
+The default value is `true` .
+
+-   `true` —Generate directions. The directions are configured based on the values for the `directionsLanguage` , `directionsOutputType` , `directionsStyleName` , and `directionsLengthUnits`  parameters. The directions are available in the `directions`  property of the JSON response.
+-   `false` —Don't generate directions.
+
+</Box>
+
+<Box>
+
+### directionsLanguage
+
+<SharedContent metaData typeLabel="string" optional/>
+
+The language that will be used when generating travel directions. 
+
+This parameter applies only when the `returnDirections`  parameter is set to `true` . The service supports generating directions in the following languages: 
+
+-   `ar` —Arabic
+-   `bg` —Bulgarian
+-   `bs` —Bosnian
+-   `ca` —Catalan
+-   `cs` —Czech
+-   `da` —Danish
+-   `de` —German
+-   `el` —Greek
+-   `en` —English
+-   `es` —Spanish
+-   `et` —Estonian
+-   `fi` —Finnish
+-   `fr` —French
+-   `he` —Hebrew
+-   `hr` —Croatian
+-   `hu` —Hungarian
+-   `id` —Indonesian
+-   `it` —Italian
+-   `ja` —Japanese
+-   `ko` —Korean
+-   `lt` —Lithuanian
+-   `lv` —Latvian
+-   `nb` —Norwegian
+-   `nl` —Dutch
+-   `pl` —Polish
+-   `pt-BR` —Portuguese (Brazil)
+-   `pt-PT` —Portuguese (Portugal)
+-   `ro` —Romanian
+-   `ru` —Russian
+-   `sk` —Slovak
+-   `sl` —Slovenian
+-   `sr` —Serbian
+-   `sv` —Swedish
+-   `th` —Thai
+-   `tr` —Turkish
+-   `uk` —Ukrainian
+-   `vi` —Vietnamese
+-   `zh-CN` —Chinese (China)
+-   `zh-HK` —Chinese (Hong Kong) 
+-   `zh-TW` —Chinese (Taiwan) 
+
+The service tries to find an exact match for the specified language including any language localization. If an exact match is not found, it tries to match the language family. If a match is still not found, the service returns the directions using the default language, English. For example, if the directions language is specified as `es-MX`  (Mexican Spanish), the service will return the directions in Spanish as it supports `es`  language code and not `es-MX` .
+
+<Note type={"caution"}>
+
+If a language supports localization, such as Brazilian Portuguese (pt-BR) and European Portuguese (pt-PT), specify the language family and the localization. If you only specify the language family, the service will not match the language family and instead return directions in the default language, English. For example, if the directions language is specified as `pt` , the service will return the directions in the default language, English since it cannot decide if the directions should be returned in `pt-BR`  or `pt-PT` . 
+
+</Note>
+
+</Box>
+
+<Box>
+
+### directionsOutputType
+
+<SharedContent metaData typeLabel="string" optional/>
+
+Define the content and verbosity of the driving directions. This parameter applies only when the `returnDirections`  parameter is set to `true` . This parameter can be specified using the following values: 
+
+-   `esriDOTComplete` —The directions output includes all directions properties.
+-   `esriDOTCompleteNoEvents` —The directions output includes all directions properties except events.
+-   `esriDOTInstructionsOnly` —The directions output includes text instructions, time, length and ETA. The directions do not include geometry.
+-   `esriDOTStandard` —The directions output includes text instructions, time, length, ETA, and geometry. The directions do not include events, new types of strings (street names, signposts information), maneuver type, bearings, or turn angle.
+-   `esriDOTSummaryOnly` —The directions output contains a summary (time and length). Detailed text instructions and geometry are not included.
+-   `esriDOTFeatureSets` —The directions output includes two feature sets: direction points and direction lines. The direction points set contains point features representing the direction maneuvers such as arriving to or departing from a stop, turning left or right, and other events along the route. This feature set also contains the route's turn-by-turn directions. The direction lines set contains line features for each segment of the route. This feature set can be used to visualize the turn-by-turn directions on a map. 
+
+The default value is `esriDOTStandard` .
+
+</Box>
+
+<Box>
+
+### directionsStyleName
+
+<SharedContent metaData typeLabel="string" optional/>
+
+Specify the name of the formatting style for the directions. This parameter can be specified using the following values: 
+
+-   `NA Desktop` —Generates turn-by-turn directions suitable for printing. 
+-   `NA Navigation` —Generates turn-by-turn directions designed for an in-vehicle navigation device.
+-   `NA Campus` —Generates turn-by-turn walking directions designed for pedestrian routes.
+
+The default value is `NA Desktop` .
+
+This parameter applies only when the `returnDirections`  parameter is set to `true` .
+
+</Box>
+
+<Box>
+
+### directionsLengthUnits
+
+<SharedContent metaData typeLabel="string" optional/>
+
+Specify the units for displaying travel distance in the driving directions. This parameter applies only when the `returnDirections`  parameter is set to `true` . This parameter can be specified using the following values: 
+
+-   `esriNAUFeet` 
+-   `esriNAUKilometers` 
+-   `esriNAUMeters` 
+-   `esriNAUMiles` 
+-   `esriNAUNauticalMiles` 
+-   `esriNAUYards` 
+
+The default value is `esriNAUMiles` . 
+
+</Box>
+
+<Box>
+
+### returnRoutes
+
+<SharedContent metaData typeLabel="boolean" optional default="true"/>
+
+Use this parameter to specify whether the service will return routes.
+
+The default value is `true` .
+
+-   `true` —Routes are returned. The routes are available in the `routes`  property of the JSON response. The shape of the routes depends on the value for the `outputLines`  parameter.
+-   `false` —Routes are not returned. 
+
+<Note type={"tip"}>
+
+If you don't want to return routes because the application has to display only the driving directions between the stops, you can set the `returnDirections`  parameter to `true`  and the `returnRoutes`  parameter to `false` . In this case, returning the routes will not provide any additional information and will increase the overall response size.
+
+</Note>
+
+</Box>
+
+<Box>
+
+### directionsTimeAttributeName
+
+<SharedContent metaData typeLabel="string" optional/>
+
+Set the time-based impedance attribute to display the duration of a maneuver, such as "Go northwest on Alvarado St. for 5 minutes." The units for all the time attributes is minutes.
+
+-   `TravelTime` —Travel time for a car
+-   `Minutes` —Travel time for a car without using live traffic data
+-   `TruckTravelTime` —Travel time for a truck
+-   `TruckMinutes` —Travel time for a truck without using live traffic data
+-   `WalkTime` —Travel time for a pedestrian
+
+The default value is `TravelTime` .
+
+</Box>
+
+<Box>
+
+### outputLines
+
+<SharedContent metaData typeLabel="string" optional />
+
+Use this parameter to specify the type of route features that are output by the service. This parameter is applicable only if the `returnRoutes`  parameter is set to `true` . The `outputLines`  parameter can have one of the following values: 
+
+-   `esriNAOutputLineTrueShape` —Return the exact shape of the resulting route that is based on the underlying streets. 
+
+    This is the default value.
+-   `esriNAOutputLineTrueShapeWithMeasure` —Return the exact shape of the resulting route that is based on the underlying streets and include route measurements that keep track of the cumulative travel time or travel distance along the route relative to the first stop. When this value is chosen for the `outputLines`  parameter, each point in the route shape will include an m-value along with an x-value and a y-value. The m-value, also known as the measure value, indicates the accumulated travel time or travel distance at that point along the route. The m-values can be used to determine how far you have traveled from the start of the route or the remaining distance or time left to reach the destination. The m-values are in the same units as the impedance attribute.
+-   `esriNAOutputLineStraight` —Return a straight line between the stops.
+-   `esriNAOutputLineNone` —Do not return any shapes for the routes. This value can be useful when you are only interested in determining the total travel time or travel distance of the route. For example, if the application has calculated the route and after some time it will calculate the estimated time of arrival (ETA) to the destination, you can set the `returnRoutes`  parameter to `true`  and the `outputLines`  parameter to `esriNAOutputLineNone` . The `routes`  property of the JSON response will only contain the total travel time that can be used to determine the ETA. Since the route shape is not returned when using the `esriNAOutputLineNone`  value, the response size will be considerably smaller.
+
+<Note type={"note"}>
+
+When the `outputLines`  parameter is set to `esriNAOutputLineTrueShape`  or `esriNAOutputLineTrueShapeWithMeasure` , the generalization of the route shape can be further controlled using the appropriate values for the `outputGeometryPrecision`  and `outputGeometryPrecisionUnits`  parameters. 
+
+</Note>
+
+<Note type={"note"}>
+
+Regardless of the value you choose for the `outputLines`  parameter, the best route is always determined by minimizing the travel time or the travel distance, never using the Euclidean distance (or as-the-crow-flies distance) between the stops. This means that only the route shapes are different, not the underlying streets that are searched when finding the route.
+
+</Note>
+
+</Box>
+
+<Box>
+
+### returnStops
+
+<SharedContent metaData typeLabel="boolean" optional/>
+
+Use this parameter to specify whether stops will be returned by the service. The possible values for this parameter are `true`  or `false` . A `true`  value indicates that the stops used as input will be returned as part of the `stops`  property in the JSON response. The default value for this parameter is `false` . 
+
+When finding optimized routes, the `returnStops`  property can be set to `true`  to determine the optimal sequence in which the route visits a particular stop by reviewing the `Sequence`  property in the JSON response. If you specified the `stops`  parameter value using a REST query request to any ArcGIS Server feature, map, or geoprocessing service that returns a JSON feature set, you can set the `returnStops`  parameter to `true`  so you can draw the stop locations in the application. You can also set the `returnStops`  property to `true`  to determine whether the stops were successfully located on the street network or had other errors by reviewing the `Status`  property in the JSON response. 
+
+</Box>
+
+<Box>
+
+### returnBarriers
+
+<SharedContent metaData typeLabel="boolean" optional default="false"/>
+
+Specify whether barriers will be returned by the service.
+
+-   `true` —The input point barriers are returned as part of the `barriers`  property in the JSON response.
+-   `false` —Point barriers are not returned. This is the default.
+
+For this parameter to take effect, you must also specify a value for the `barriers`  parameter.
+
+If you specified the `barriers`  parameter value using a REST query request to any ArcGIS Server feature, map, or geoprocessing service that returns a JSON feature set, you can set the `returnBarriers`  parameter to `true`  so you can draw the point barrier locations in the application. You can also set the `returnBarriers`  property to `true`  to see where the barriers were located on the street network or, if they weren't located, understand what the problem was by reviewing the `Status`  property in the JSON response.
+
+</Box>
+
+<Box>
+
+### returnPolylineBarriers
+
+<SharedContent metaData typeLabel="boolean" optional default="false"/>
+
+Specify whether polyline barriers will be returned by the service. 
+
+-   `true` —The input polyline barriers are returned as part of the `polylineBarriers`  property in the JSON response.
+-   `false` —Polyline barriers are not returned. This is the default.
+
+For this parameter to take effect, you must also specify a value for the `polylineBarriers`  parameter.
+
+If you specified the `polylineBarriers`  parameter value using a REST query request to any ArcGIS Server feature, map, or geoprocessing service that returns a JSON feature set, you can set the `returnPolylineBarriers`  parameter to `true`  so you can draw the polyline barrier locations in the application. 
+
+</Box>
+
+<Box>
+
+### returnPolygonBarriers
+
+<SharedContent metaData typeLabel="boolean" optional default="false"/>
+
+Specify whether polygon barriers will be returned by the service. 
+
+-   `true` —The input polygon barriers are returned as part of the `polygonBarriers`  property in the JSON response.
+-   `false` —Polygon barriers are not returned. This is the default.
+
+For this parameter to take effect, you must also specify a value for the `polygonBarriers`  parameter.
+
+If you specified the `polygonBarriers`  parameter value using a REST query request to any ArcGIS Server feature, map, or geoprocessing service that returns a JSON feature set, you can set the `returnPolygonBarriers`  parameter to `true`  so you can draw the polygon barrier locations in the application. 
+
+</Box>
+
+<Box>
+
+### returnTraversedEdges
+
+<SharedContent metaData typeLabel="boolean" optional default="false"/>
+
+Specify whether traversed edges will be returned by the service. 
+
+-   `true` —The traversed edges are returned as part of the JSON response.
+-   `false` —The traversed edges are not returned.
+
+When this parameter is set to `true` , the traversed edges are available in the `traversedEdges`  property of the JSON response.
+
+The default value is `false` 
+
+</Box>
+
+<Box>
+
+### returnTraversedJunctions
+
+<SharedContent metaData typeLabel="boolean" optional default="false"/>
+
+Specify whether traversed junctions will be returned by the service. 
+
+-   `true` —The traversed junctions are returned as part of the JSON response.
+-   `false` —The traversed junctions are not returned.
+
+When this parameter is set to `true` , the traversed junctions are available in the `traversedJunctions`  property of the JSON response.
+
+The default value is `false` 
+
+</Box>
+
+<Box>
+
+### returnTraversedTurns
+
+<SharedContent metaData typeLabel="boolean" optional default="false"/>
+
+Specify whether traversed turns will be returned by the service. 
+
+-   `true` —The traversed turns are returned as part of the JSON response.
+-   `false` —The traversed turns are not returned.
+
+When this parameter is set to `true` , the traversed turns are available in the `traversedTurns`  property of the JSON response.
+
+The default value is `false` 
+
+</Box>
+
+<Box>
+
+### ignoreInvalidLocations
+
+<SharedContent metaData typeLabel="boolean" optional default="true"/>
+
+Specifies whether invalid input locations will be ignored. 
+
+-   `true` —
+
+    Network locations that are unlocated will be ignored and the analysis will run using valid network locations only. The analysis will also continue if locations are on nontraversable elements or have other errors. This is useful if you know the network locations are not all correct, but you want to run the analysis with the network locations that are valid. This is the default.
+-   `false` —
+
+    Invalid locations will not be ignored. Do not run the analysis if there are invalid locations. Correct the invalid locations and rerun the analysis.
+
+The default value is `true` .
+
+</Box>
+
+<Box>
+
+### outSR
+
+<SharedContent metaData typeLabel="number" optional default="false"/>
+
+Use this parameter to specify the spatial reference of the geometries, such as line or point features, returned by the service.
+
+The parameter value can be specified as a well-known ID (WKID) for the spatial reference. See [Using spatial references](DEVSITE/rest/services-reference/enterprise/using-spatial-references) to look up WKID values.
+
+Many of the basemaps provided by ArcGIS Online are in the Web Mercator spatial reference (WKID 102100). Specifying `outSR=102100`  returns the geometries in the Web Mercator spatial reference, which can be drawn on top of the basemaps. 
+
+</Box>
+
+<Box>
+
+### outputGeometryPrecision
+
+<SharedContent metaData typeLabel="number" optional default="10"/>
+
+Use this parameter to specify the simplification level for the route geometry returned by the service. 
+
+<Note type={"caution"}>
+
+The value of this parameter, regardless of whether you use the default or explicitly set a value, is overridden when you pass in `travelMode` . 
+
+</Note>
+
+Simplification maintains critical points on a route, such as turns at intersections, to define the essential shape of the route and removes other points. The simplification distance you specify is the maximum allowable offset that the simplified line can deviate from the original line. Simplifying a line reduces the number of vertices that are part of the route geometry. This reduces the overall response size and also improves the performance for drawing the route shapes in the applications.
+
+The default value for this parameter is 10.
+
+The units are specified using the `outputGeometryPrecisionUnits`  parameter.
+
+</Box>
+
+<Box>
+
+### outputGeometryPrecisionUnits
+
+<SharedContent metaData typeLabel="number" optional/>
+
+Use this parameter to specify the units for the `outputGeometryPrecision`  parameter value. 
+
+<Note type={"caution"}>
+
+The value of this parameter, regardless of whether you use the default or explicitly set a value, is overridden when you pass in `travelMode` . 
+
+</Note>
+
+Specify the value as one of the following: 
+
+-   `esriCentimeters` 
+-   `esriDecimalDegrees` 
+-   `esriDecimeters` 
+-   `esriFeet` 
+-   `esriInches` 
+-   `esriKilometers` 
+-   `esriMeters` 
+-   `esriMiles` 
+-   `esriMillimeters` 
+-   `esriNauticalMiles` 
+-   `esriPoints` 
+-   `esriYards` 
+
+The default value is `esriMeters` .
+
+</Box>
+
+<Box>
+
+### geometryPrecision
+
+<SharedContent metaData typeLabel="number" optional/>
+
+Use this parameter to specify the number of decimal places that will be used in the response geometries returned by the solve operation. This applies to x- and y-values only (not m- or z-values).
+
+```javascript
+geometryPrecision = 3
+```
+
+</Box>
+
+<Box>
+
+### geometryPrecisionM
+
+<SharedContent metaData typeLabel="number" optional/>
+
+Use this parameter to specify the number of decimal places that will be used in the response geometries returned by the solve operation. This applies to m-values only (not x-, y-, or z-values).
+
+```javascript
+geometryPrecisionM = 3
+```
+</Box>
+
+<Box>
+
+### overrides
+
+<SharedContent metaData typeLabel="number" optional/>
+<br/>
+<Note type={"note"}>
+
+This parameter is for internal use only.
+
+</Note>
+
+</Box>
+
+<Box>
+
+### preserveObjectID
+
+<SharedContent metaData typeLabel="boolean" optional default="false"/>
+
+Use this parameter to specify whether the object IDs specified for input locations such as stops or barriers will be preserved when the input locations are returned as output. This can be useful if you want to associate additional attributes with the output locations after the solve operation is successful and need a common key field to do the join.
+
+For example, the input stops are specified as the following JSON representation of a feature set:
+
+```other
+{
+  "spatialReference": {
+    "wkid": 4326
+  },
+  "features": [
+    {
+      "geometry": {
+        "x": -122.473948,
+        "y": 37.7436
+      },
+      "attributes": {
+        "ObjectID": 40,
+        "Name": "Depot"
+      }
+    },
+    {
+      "geometry": {
+        "x": -122.439613,
+        "y": 37.746144
+      },
+      "attributes": {
+        "ObjectID": 20,
+        "Name": "Store 1"
+      }
+    },
+    {
+      "geometry": {
+        "x": -122.488254,
+        "y": 37.754092
+      },
+      "attributes": {
+        "ObjectID": 30,
+        "Name": "Store 2"
+      }
+    },
+    {
+      "geometry": {
+        "x": -122.44915,
+        "y": 37.731837
+      },
+      "attributes": {
+        "ObjectID": 10,
+        "Name": "Store 3"
+      }
+    }
+  ]
+}
+```
+
+ 
+
+If you solve a route and specify `preserveObjectID=false` , the output stops will have object IDs of 1, 2, 3, and 4 even though the input stops have object IDs of 10, 20, 30, and 40. However, if `preserveObjectID=true` , the output stops will have the same object IDs as the inputs: 10, 20, 30, and 40.
+
+<Note type={"note"}>
+
+The order in which the output locations are returned varies based on other parameters specified for the solve operation and should not be relied upon to correlate the output locations with input locations. Preserving the object ID is the best way to achieve this correlation. If the identifier for the input location can not be passed as an `ObjectID`  value, for example, the identifier is not numeric, you can pass the identifier as the `Name`  field and use the `Name`  field on the output locations to correlate the input and output locations.
+
+</Note>
+
+<Note type={"note"}>
+
+When `preserveObjectID=true` , the object ID values must be 1 or greater, must be specified for every feature, and must be unique.
+
+</Note>
+
+</Box>
+
+<Box>
+
+### returnEmptyResults
+
+<SharedContent metaData typeLabel="boolean" optional boolean="false"/>
+
+Specify whether the service will return empty results instead of the error property when the request fails.
+
+-   `true` —The JSON response doesn't contain the error property when the request fails. All errors are returned in the messages property. The response JSON may contain an empty feature set or empty result for the properties you requested.
+-   `false` —The JSON response only contains the error property when the request fails.
+
+The default value is `false` .
+
+Typically when a request fails, the service will return a JSON response that contains the error property. In some cases, you might want to set `returnEmptyResults`  to `true`  so it always returns properties you requested instead of returning an error response to help handle the response in a more consistent way. 
+
+Even if the request fails, when you set `returnEmptyResults = true`  and `returnStops = true` , you can return stops to investigate why some of them failed to locate.
+
+### locateSettings
+
+<SharedContent metaData typeLabel="object" optional/>
+
+Use this parameter to specify settings that affect how inputs are located, such as the maximum search distance to use when locating the inputs on the network or the network sources being used for locating.
+
+[Learn more about locating inputs](https://pro.arcgis.com/en/pro-app/3.2/help/analysis/networks/locating-analysis-inputs.htm)
+
+The parameter value is specified as a JSON object. The JSON object allows you to specify a locator JSON for all input feature in the analysis, or you can specify an override for a particular input. The override allows you to have different settings for each analysis input. 					When specifying the `locateSettings`  JSON, you must provide all the properties including `tolerance` , `toleranceUnits` , `sources` , and `allowAutoRelocate`  in the default locator JSON object. If you need to provide a different locator JSON for a particular input class, you must include the overrides property for that input. The property name must match the input parameter name. The locator JSON for a particular input doesn't need to include all the properties; you only need to include the properties that are different from the default locator JSON properties.
+
+The default value is as follows:
+
+```javascript
+{
+  "default": {
+    "tolerance": 20000,
+    "toleranceUnits": "esriMeters",
+    "allowAutoRelocate": true,
+    "sources": [
+      {
+        "name": "main.Routing_Streets"
+      }
+    ]
+  }
+}
+```
+
+ 
+
+The locator JSON object has following properties:
+
+-   `tolerance`  and `toleranceUnits` —Allows you to control the maximum search distance when locating inputs. If no valid network location is found within this distance, the input features will be considered unlocated. A small search tolerance decreases the likelihood of locating on the wrong street but increases the likelihood of not finding any valid network location. The `toleranceUnits`  parameter value can be specified as one of the following values:
+
+    -   `esriCentimeters` 
+    -   `esriDecimalDegrees` 
+    -   `esriDecimeters` 
+    -   `esriFeet` 
+    -   `esriInches` 
+    -   `esriIntFeet` 
+    -   `esriIntInches` 
+    -   `esriIntMiles` 
+    -   `esriIntNauticalMiles` 
+    -   `esriIntYards` 
+    -   `esriKilometers` 
+    -   `esriMeters` 
+    -   `esriMiles` 
+    -   `esriMillimeters` 
+    -   `esriNauticalMiles` 
+    -   `esriYards` 
+-   `sources` — Allows you to control which network source can be used for locating. For example, you can configure the analysis to locate inputs on streets but not on sidewalks. The list of possible sources on which to locate is specific to the network dataset this service references. Only the sources that are present in the sources array are used for locating. Sources is specified as an array of objects each having the following property:
+
+    -   `name` —The name of the network source feature class that can be used for locating inputs
+-   `allowAutoRelocate` —Allows you to control whether inputs with existing network location fields can be automatically relocated when solving to ensure valid, routable location fields for the analysis. If the value is `true` , points located on restricted network elements and points affected by barriers will be relocated to the closest routable location. If the value is `false` , network location fields will be used as is even if the points are unreachable, and this may cause the solve to fail. Even if the value is `false` , inputs with no location fields or incomplete location fields will be located during the solve operation.
+
+<Note type={"note"}>
+
+Currently, you can't specify different source names for the `sources`  array. Also, `allowAutoRelocate`  is always set to `true`  since the service does not support location fields. 
+
+</Note>
+
+#### Syntax for locateSettings
+
+Syntax for specifying `locateSettings`  using JSON structure
+
+<Note type={"note"}>
+
+Polyline barriers and polygon barriers doesn't support the `tolerance`  and `toleranceUnits`  properties.
+
+</Note>
+
+```javascript
+{
+  "default": {
+    "tolerance": <value>,
+    "toleranceUnits": "<unit>",
+    "allowAutoRelocate": true | false,
+    "sources": [
+      {
+        "name": "<sourceName>"            
+      }
+    ]
+  },
+  "overrides": {
+    "stops": {
+      "tolerance": <value>,
+      "toleranceUnits": "<unit>",
+      "allowAutoRelocate": true | false,             
+      "sources": [
+        {
+          "name": "<sourceName>"               
+        }
+      ]
+    },
+    "barriers": {
+      "tolerance": <value>,
+      "toleranceUnits": "<unit>",
+      "allowAutoRelocate": true | false,             
+      "sources": [
+        {
+          "name": "<sourceName>"                
+        }
+      ]
+    },
+    "polylineBarriers": {
+      "allowAutoRelocate": true | false,       
+      "sources": [
+        {
+          "name": "<sourceName>"               
+        }
+      ]
+    },
+    "polygonBarriers": {
+      "allowAutoRelocate": true | false,  
+      "sources": [
+        {
+          "name": "<sourceName>"                
+        }
+      ]
+    }
+  }
+}
+```
+
+ 
+
+#### Example for locateSettings
+
+Example 1: Specify default locate settings using JSON structure
+
+This example shows how to specify locate settings so inputs are located within 500 meters of the specified location. A small search tolerance like this can be valuable if you are solving using a walking travel mode and don't want inputs to be located farther than 500 meters from the original point location.
+
+```javascript
+{
+  "default": {
+    "tolerance": 500,
+    "toleranceUnits": "esriMeters",
+    "allowAutoRelocate": true,
+    "sources": [
+      {
+        "name": "main.Routing_Streets"
+      }
+    ]
+  }
+}
+```
+
+</Box>
+ 
+
+## Response status
+
+<StyledTable headers="Status, Meaning, Description, Schema">
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">200</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[OK](https://datatracker.ietf.org/doc/html/rfc7231#section-6.3.1)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     A successful response for a `/solve` request.
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     Inline
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow anchor="link-to-me">
+    <StyledTableCell cellStyle="code">400</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[Bad request](https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    Invalid query parameters
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     [Error](xref:///routing-types/#error)
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow anchor="link-to-me">
+    <StyledTableCell cellStyle="code">401</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[Unauthorized](https://datatracker.ietf.org/doc/html/rfc7235#section-3.1)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     Authentication error. An access token is missing, invalid, or expired.
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     [Error](xref:///routing-types/#error)
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow anchor="link-to-me">
+    <StyledTableCell cellStyle="code">403</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[Forbidden](https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.3)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     The required paramter `token` is valid but does not have permission to access the service.
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     [Error](xref:///routing-types/#error)
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow anchor="link-to-me">
+    <StyledTableCell cellStyle="code">5XX</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">Unknown</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     An unknown error occured on the server 
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     [Error](xref:///routing-types/#error)
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+Go to [Error codes](xref:///routing-error-codes) for extended codes.
+
+## Response details 
+
+**Status code**: 200 
+
+<StyledTable headers="Name, Type, Required, Restrictions, Description">
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">directions</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[[SolveRoutesResults]](xref:///routing-types/#routes-results)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">none</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    The result returned from using the `/solve` request.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">routes</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[routes](xref:///routing-types/#routes)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="markdown"></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">stops</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[stops](xref:///routing-types/#stops)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="markdown"></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">barriers</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[barriers](xref:///routing-types/#barriers)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="markdown"></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">traversedEdges</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[traversedEdges](xref:///routing-types/#traversededges)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="markdown"></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">traversedJunctions</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[traversedJunctions](xref:///routing-types/#traversedjunctions)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="markdown"></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">traversedTurns</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[traversedTurns](xref:///routing-types/#traversedturns)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="markdown"></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+##  Examples 
+
+<Box>
+
+### Find a route and directions 
+
+<Tabs>
+<TabNav slot="tab-nav">
+  <TabTitle is-active>Request</TabTitle>
+  <TabTitle>Response</TabTitle>
+</TabNav>
+<Tab is-active>
+
+```http
+GET https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World/solve?stops=-122.4079,37.78356;-122.404,37.782&f=json&token=<ACCESS_TOKEN>
+```
+
+</Tab>
+<Tab>
+```json expandable
+{
+    "directions": [
+        {
+            "routeId": 1,
+            "routeName": "Location 1 - Location 2",
+            "summary": {
+                "totalLength": 0.547181119992593,
+                "totalTime": 0.916666666666667,
+                "totalDriveTime": 0.932502535171807,
+                "envelope": {
+                    "xmin": -122.408067,
+                    "ymin": 37.7820000000001,
+                    "xmax": -122.402715,
+                    "ymax": 37.785718,
+                    "spatialReference": {
+                        "wkid": 4326
+                    }
+                }
+            },
+            "features": [
+                {
+                    "attributes": {
+                        "length": 0,
+                        "time": 0,
+                        "text": "Start at Location 1",
+                        "ETA": -2209161600000,
+                        "maneuverType": "esriDMTDepart"
+                    },
+                    "compressedGeometry": "+1m91-6fki2+202vh+0+0"
+                },
+                {
+                    "attributes": {
+                        "length": 0.0250344870524692,
+                        "time": 0.0426480025053024,
+                        "text": "Go northwest on 5Th St toward Market St/Cyril Magnin St",
+                        "ETA": -2209161600000,
+                        "maneuverType": "esriDMTStraight"
+                    },
+                    "compressedGeometry": "+1m91-6fki2+202vh-h+f"
+                },
+                {
+                    "attributes": {
+                        "length": 0.168514039307211,
+                        "time": 0.287470433861017,
+                        "text": "Turn right on Market St",
+                        "ETA": -2209161597441,
+                        "maneuverType": "esriDMTTurnRight"
+                    },
+                    "compressedGeometry": "+1m91-6fkij+20300+3p+2v"
+                },
+                {
+                    "attributes": {
+                        "length": 0.24456036107712,
+                        "time": 0.415655565448105,
+                        "text": "Bear right on 4th St",
+                        "ETA": -2209161580193,
+                        "maneuverType": "esriDMTBearRight"
+                    },
+                    "compressedGeometry": "+1m91-6fkeq+2032v+7-1+7-4+2q-2b+28-1o"
+                },
+                {
+                    "attributes": {
+                        "length": 0.109072232555793,
+                        "time": 0.186728533357382,
+                        "text": "Turn right on Howard St",
+                        "ETA": -2209161555254,
+                        "maneuverType": "esriDMTTurnRight"
+                    },
+                    "compressedGeometry": "+1m91-6fk9a+202un-2e-1u"
+                },
+                {
+                    "attributes": {
+                        "length": 0,
+                        "time": 0,
+                        "text": "Finish at Location 2, on the left",
+                        "ETA": -2209161544050,
+                        "maneuverType": "esriDMTStop"
+                    },
+                    "compressedGeometry": "+1m91-6fkbo+202sp+0+0"
+                }
+            ]
+        }
+    ],
+    "routes": {
+        "spatialReference": {
+            "wkid": 4326
+        },
+        "features": [
+            {
+                "attributes": {
+                    "ObjectID": 1,
+                    "Name": "Location 1 - Location 2",
+                    "FirstStopID": 1,
+                    "LastStopID": 2,
+                    "StopCount": 2,
+                    "Total_Time": 0.932502535171807,
+                    "TotalWait_Time": 0,
+                    "TotalViolation_Time": 0,
+                    "StartTime": -2209161600000,
+                    "EndTime": -2209161544050,
+                    "Shape_Length": 0.00900541548002667
+                },
+                "geometry": {
+                    "paths": [
+                        [
+                            [
+                                -122.407752312,
+                                37.7837382120001
+                            ],
+                            [
+                                -122.408067,
+                                37.7839990000001
+                            ],
+                            [
+                                -122.407574,
+                                37.784392
+                            ],
+                            [
+                                -122.407333,
+                                37.7845800000001
+                            ],
+                            [
+                                -122.406309,
+                                37.785401
+                            ],
+                            [
+                                -122.405982003,
+                                37.785652998
+                            ],
+                            [
+                                -122.405982,
+                                37.785653
+                            ],
+                            [
+                                -122.405883,
+                                37.785718
+                            ],
+                            [
+                                -122.405821,
+                                37.7857070000001
+                            ],
+                            [
+                                -122.405764,
+                                37.785693
+                            ],
+                            [
+                                -122.405705,
+                                37.785668
+                            ],
+                            [
+                                -122.405626,
+                                37.7856180000001
+                            ],
+                            [
+                                -122.40523,
+                                37.7853030000001
+                            ],
+                            [
+                                -122.405085,
+                                37.7851810000001
+                            ],
+                            [
+                                -122.405084995,
+                                37.7851809960001
+                            ],
+                            [
+                                -122.405085,
+                                37.7851810000001
+                            ],
+                            [
+                                -122.404784,
+                                37.7849380000001
+                            ],
+                            [
+                                -122.404271,
+                                37.784501
+                            ],
+                            [
+                                -122.404239,
+                                37.784477
+                            ],
+                            [
+                                -122.4042,
+                                37.7844470000001
+                            ],
+                            [
+                                -122.404006,
+                                37.7842830000001
+                            ],
+                            [
+                                -122.403736,
+                                37.7840660000001
+                            ],
+                            [
+                                -122.403736,
+                                37.7840660000001
+                            ],
+                            [
+                                -122.403736,
+                                37.7840660000001
+                            ],
+                            [
+                                -122.403184,
+                                37.7836300000001
+                            ],
+                            [
+                                -122.402715,
+                                37.783265
+                            ],
+                            [
+                                -122.403146,
+                                37.782924
+                            ],
+                            [
+                                -122.404116347,
+                                37.7821449080001
+                            ]
+                        ]
+                    ]
+                }
+            }
+        ]
+    },
+    "messages": []
+}
+```
+
+</Tab>
+</Tabs>
+ 
+</Box>
+
+<Box>
+
+### Find a stop-optimized route and directions 
+
+<Tabs>
+<TabNav slot="tab-nav">
+  <TabTitle is-active>Request</TabTitle>
+  <TabTitle>Response</TabTitle>
+</TabNav>
+<Tab is-active>
+
+```http
+GET https://route.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World/solve?
+stops={"features":[{"geometry":{"x":-122.473948,"y":37.7436},
+"attributes":{"Name":"Office","Attr_TravelTime":0}},{"geometry":{"x":-122.439613,"y":37.746144},
+"attributes":{"Name":"Store 1","Attr_TravelTime":25}},{"geometry":{"x":-122.488254,"y":37.754092},
+"attributes":{"Name":"Store 2","Attr_TravelTime":20}},{"geometry":{"x":-122.44915,"y":37.731837},
+"attributes":{"Name":"Store 3","Attr_TravelTime":30}},{"geometry":{"x":-122.46441,"y":37.774756},
+"attributes":{"Name":"Store 4","Attr_TravelTime":25}},{"geometry":{"x":-122.426896,"y":37.769352},
+"attributes":{"Name":"Store 5","Attr_TravelTime":20}},{"geometry":{"x":-122.473948,"y":37.7436},
+"attributes":{"Name":"Office","Attr_TravelTime":0}}]}&findBestSequence=true&preserverFirstStop=true&
+preserveLastStop=true&returnStops=true&returnDirections=true&returnRoutes=true&f=json&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+```json
+{
+    "messages": [],
+    "routes": {
+        "fieldAliases": {
+            "ObjectID": "ObjectID",
+            "Name": "Name",
+            "FirstStopID": "FirstStopID",
+            "LastStopID": "LastStopID",
+            "StopCount": "StopCount",
+            "Total_TravelTime": "Total_TravelTime",
+            "Total_Kilometers": "Total_Kilometers",
+            "Total_Miles": "Total_Miles",
+            "Shape_Length": "Shape_Length"
+        },
+        "geometryType": "esriGeometryPolyline",
+        "spatialReference": {
+            "wkid": 4326,
+            "latestWkid": 4326
+        },
+        "features": [
+            {
+                "attributes": {
+                    "ObjectID": 1,
+                    "Name": "Office - Office",
+                    "FirstStopID": 1,
+                    "LastStopID": 7,
+                    "StopCount": 7,
+                    "Total_TravelTime": 166.7642667101709,
+                    "Total_Kilometers": 21.571809695124163,
+                    "Total_Miles": 13.404101108976198,
+                    "Shape_Length": 0.22159550698709607
+                },
+                "geometry": {
+                    "paths": [
+                        [
+                            [
+                                -122.42682704453244,
+                                37.76926852812011
+                            ],
+                            [
+                                -122.42690999979664,
+                                37.7691999997802
+                            ],
+                            [
+                                -122.42893999988104,
+                                37.76761000020139
+                            ],
+                            [
+                                -122.43101000001144,
+                                37.76597999967731
+                            ],
+....
+.... additional points that make up the route
+....
+                        ]
+                    ]
+                }
+            }
+        ]
+    },
+    "stops": {
+        "fieldAliases": {
+            "ObjectID": "ObjectID",
+            "Name": "Name",
+            "RouteName": "RouteName",
+            "Sequence": "Sequence",
+            "TimeWindowStart": "TimeWindowStart",
+            "TimeWindowEnd": "TimeWindowEnd",
+            "ArriveCurbApproach": "ArriveCurbApproach",
+            "DepartCurbApproach": "DepartCurbApproach",
+            "SourceID": "SourceID",
+            "SourceOID": "SourceOID",
+            "PosAlong": "PosAlong",
+            "SideOfEdge": "SideOfEdge",
+            "CurbApproach": "CurbApproach",
+            "Status": "Status",
+            "Attr_Minutes": "Attr_Minutes",
+            "Attr_Kilometers": "Attr_Kilometers",
+            "Attr_Miles": "Attr_Miles",
+            "Attr_TravelTime": "Attr_TravelTime",
+            "Cumul_TravelTime": "Cumul_TravelTime",
+            "Cumul_Kilometers": "Cumul_Kilometers",
+            "Cumul_Miles": "Cumul_Miles"
+        },
+        "geometryType": "esriGeometryPoint",
+        "spatialReference": {
+            "wkid": 4326,
+            "latestWkid": 4326
+        },
+        "features": [
+            {
+                "attributes": {
+                    "ObjectID": 1,
+                    "Name": "Office",
+                    "RouteName": null,
+                    "Sequence": 1,
+                    "TimeWindowStart": null,
+                    "TimeWindowEnd": null,
+                    "ArriveCurbApproach": null,
+                    "DepartCurbApproach": 2,
+                    "SourceID": 1,
+                    "SourceOID": 6057289,
+                    "PosAlong": 0.7479231000293187,
+                    "SideOfEdge": 1,
+                    "CurbApproach": 0,
+                    "Status": 0,
+                    "Attr_Minutes": 0,
+                    "Attr_Kilometers": 0,
+                    "Attr_Miles": 0,
+                    "Attr_TravelTime": 0,
+                    "Cumul_TravelTime": 0,
+                    "Cumul_Kilometers": 0,
+                    "Cumul_Miles": 0
+                },
+                "geometry": {
+                    "x": -122.47394799980032,
+                    "y": 37.74360000004003
+                }
+            },
+            {
+                "attributes": {
+                    "ObjectID": 2,
+                    "Name": "Store 1",
+                    "RouteName": null,
+                    "Sequence": 5,
+                    "TimeWindowStart": null,
+                    "TimeWindowEnd": null,
+                    "ArriveCurbApproach": 2,
+                    "DepartCurbApproach": 1,
+                    "SourceID": 1,
+                    "SourceOID": 6058993,
+                    "PosAlong": 0,
+                    "SideOfEdge": 1,
+                    "CurbApproach": 0,
+                    "Status": 0,
+                    "Attr_Minutes": 0,
+                    "Attr_Kilometers": 0,
+                    "Attr_Miles": 0,
+                    "Attr_TravelTime": 25,
+                    "Cumul_TravelTime": 122.1073557516816,
+                    "Cumul_Kilometers": 14.855087613527838,
+                    "Cumul_Miles": 9.230523501207848
+                },
+                "geometry": {
+                    "x": -122.43961300013979,
+                    "y": 37.74614400044533
+                }
+            },
+            {
+                "attributes": {
+                    "ObjectID": 3,
+                    "Name": "Store 2",
+                    "RouteName": null,
+                    "Sequence": 2,
+                    "TimeWindowStart": null,
+                    "TimeWindowEnd": null,
+                    "ArriveCurbApproach": 1,
+                    "DepartCurbApproach": 1,
+                    "SourceID": 1,
+                    "SourceOID": 6056930,
+                    "PosAlong": 0.3870876537475072,
+                    "SideOfEdge": 2,
+                    "CurbApproach": 0,
+                    "Status": 0,
+                    "Attr_Minutes": 0,
+                    "Attr_Kilometers": 0,
+                    "Attr_Miles": 0,
+                    "Attr_TravelTime": 20,
+                    "Cumul_TravelTime": 25.46532328028302,
+                    "Cumul_Kilometers": 2.4554877802810324,
+                    "Cumul_Miles": 1.52576936955743
+                },
+                "geometry": {
+                    "x": -122.48825400032183,
+                    "y": 37.75409200004583
+                }
+            },
+            {
+                "attributes": {
+                    "ObjectID": 4,
+                    "Name": "Store 3",
+                    "RouteName": null,
+                    "Sequence": 6,
+                    "TimeWindowStart": null,
+                    "TimeWindowEnd": null,
+                    "ArriveCurbApproach": 2,
+                    "DepartCurbApproach": 1,
+                    "SourceID": 1,
+                    "SourceOID": 6058654,
+                    "PosAlong": 0.8931750056079824,
+                    "SideOfEdge": 1,
+                    "CurbApproach": 0,
+                    "Status": 0,
+                    "Attr_Minutes": 0,
+                    "Attr_Kilometers": 0,
+                    "Attr_Miles": 0,
+                    "Attr_TravelTime": 30,
+                    "Cumul_TravelTime": 159.1825995596363,
+                    "Cumul_Kilometers": 18.14720876135387,
+                    "Cumul_Miles": 11.276152743822255
+                },
+                "geometry": {
+                    "x": -122.44915000017232,
+                    "y": 37.731836999877714
+                }
+            },
+            {
+                "attributes": {
+                    "ObjectID": 5,
+                    "Name": "Store 4",
+                    "RouteName": null,
+                    "Sequence": 3,
+                    "TimeWindowStart": null,
+                    "TimeWindowEnd": null,
+                    "ArriveCurbApproach": 1,
+                    "DepartCurbApproach": 2,
+                    "SourceID": 1,
+                    "SourceOID": 6060672,
+                    "PosAlong": 0.9164482334734284,
+                    "SideOfEdge": 2,
+                    "CurbApproach": 0,
+                    "Status": 0,
+                    "Attr_Minutes": 0,
+                    "Attr_Kilometers": 0,
+                    "Attr_Miles": 0,
+                    "Attr_TravelTime": 25,
+                    "Cumul_TravelTime": 58.847849986326096,
+                    "Cumul_Kilometers": 6.972770720865237,
+                    "Cumul_Miles": 4.332678856021607
+                },
+                "geometry": {
+                    "x": -122.46440999972168,
+                    "y": 37.77475599968966
+                }
+            },
+            {
+                "attributes": {
+                    "ObjectID": 6,
+                    "Name": "Store 5",
+                    "RouteName": null,
+                    "Sequence": 4,
+                    "TimeWindowStart": null,
+                    "TimeWindowEnd": null,
+                    "ArriveCurbApproach": 1,
+                    "DepartCurbApproach": 1,
+                    "SourceID": 1,
+                    "SourceOID": 6060280,
+                    "PosAlong": 0.17236409016281176,
+                    "SideOfEdge": 1,
+                    "CurbApproach": 0,
+                    "Status": 0,
+                    "Attr_Minutes": 0,
+                    "Attr_Kilometers": 0,
+                    "Attr_Miles": 0,
+                    "Attr_TravelTime": 20,
+                    "Cumul_TravelTime": 88.95703248414763,
+                    "Cumul_Kilometers": 11.590492481272001,
+                    "Cumul_Miles": 7.20199813170584
+                },
+                "geometry": {
+                    "x": -122.4268960000503,
+                    "y": 37.76935199959513
+                }
+            },
+            {
+                "attributes": {
+                    "ObjectID": 7,
+                    "Name": "Office",
+                    "RouteName": null,
+                    "Sequence": 7,
+                    "TimeWindowStart": null,
+                    "TimeWindowEnd": null,
+                    "ArriveCurbApproach": 2,
+                    "DepartCurbApproach": null,
+                    "SourceID": 1,
+                    "SourceOID": 6057289,
+                    "PosAlong": 0.7479231000293187,
+                    "SideOfEdge": 1,
+                    "CurbApproach": 0,
+                    "Status": 0,
+                    "Attr_Minutes": 0,
+                    "Attr_Kilometers": 0,
+                    "Attr_Miles": 0,
+                    "Attr_TravelTime": 0,
+                    "Cumul_TravelTime": 166.7642667101709,
+                    "Cumul_Kilometers": 21.571809695124163,
+                    "Cumul_Miles": 13.404101108976198
+                },
+                "geometry": {
+                    "x": -122.47394799980032,
+                    "y": 37.74360000004003
+                }
+            }
+        ]
+    },
+    "directions": [
+        {
+            "routeId": 1,
+            "routeName": "Office - Office",
+            "summary": {
+                "totalLength": 21.57180969512416,
+                "totalTime": 166.76426670514047,
+                "totalDriveTime": 46.76426671017089,
+                "envelope": {
+                    "xmin": -122.48903999969622,
+                    "ymin": 37.730019999723254,
+                    "xmax": -122.4248599996892,
+                    "ymax": 37.77475599968966,
+                    "spatialReference": {
+                        "wkid": 4326,
+                        "latestWkid": 4326
+                    }
+                }
+            },
+            "features": [
+                {
+                    "attributes": {
+                        "length": 0,
+                        "time": 0,
+                        "text": "Start at Office",
+                        "ETA": -2209161600000,
+                        "maneuverType": "esriDMTDepart"
+                    },
+                    "compressedGeometry": "+1m91-6fo4e+200pr+0+0"
+                },
+                {
+                    "attributes": {
+                        "length": 0.9799885036711242,
+                        "time": 2.077699263283507,
+                        "text": "Go north on 17TH AVE toward SANTIAGO ST",
+                        "ETA": -2209161600000,
+                        "maneuverType": "esriDMTStraight"
+                    },
+                    "compressedGeometry": "+1m91-6fo4e+200pr-d+5k-l+9m"
+                },
+                {
+                    "attributes": {
+                        "length": 1.22776430511923,
+                        "time": 2.830765986178278,
+                        "text": "Turn left on ORTEGA ST",
+                        "ETA": -2209161600000,
+                        "maneuverType": "esriDMTTurnLeft"
+                    },
+                    "compressedGeometry": "+1m91-6fo5g+20195-7e-a-7e-8-5i-9-3n-5"
+                },
+                {
+                    "attributes": {
+                        "length": 0.24773497149067822,
+                        "time": 0.5568580308212338,
+                        "text": "Turn right on 30TH AVE",
+                        "ETA": -2209161600000,
+                        "maneuverType": "esriDMTTurnRight"
+                    },
+                    "compressedGeometry": "+1m91-6fotl+20185-9+3s"
+                },
+                {
+                    "attributes": {
+                        "length": 0,
+                        "time": 20,
+                        "text": "Arrive at Store 2, on the right",
+                        "ETA": -2209161600000,
+                        "maneuverType": "esriDMTStop"
+                    },
+                    "compressedGeometry": "+1m91-6fotu+201c1+0+0"
+                },
+                {
+                    "attributes": {
+                        "length": 0,
+                        "time": 0,
+                        "text": "Depart Store 2",
+                        "ETA": -2209161600000,
+                        "maneuverType": "esriDMTDepart"
+                    },
+                    "compressedGeometry": "+1m91-6fotu+201c1+0+0"
+                },
+....
+.... additional direction messages
+....
+            ]
+        }
+    ]
+}
+```
+</Tab>
+</Tabs>
+ 
+</Box>
+
+<Box>
+
+### Find the best route that avoids an area with flooding 
+
+Some areas may be temporarily inaccessible due to flooding or other events. If you want to find a route that avoids these areas, you can pass in the areas as `polygonBarriers` . The service will determine the streets that intersect the specified area and restrict travel on those streets when finding the best route. 
+
+<Tabs>
+<TabNav slot="tab-nav">
+  <TabTitle is-active>Request</TabTitle>
+  <TabTitle>Response</TabTitle>
+</TabNav>
+<Tab is-active>
+
+```http
+GET https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World/solve?
+stops=-96.436378,42.499344;-96.364166,42.459969&
+polygonBarriers=
+{"features":
+  [{"geometry":
+    {"rings":[[[-96.382,42.49],[-96.391,42.471],[-96.414,42.475],[-96.421,42.491],[-96.401,42.505],[-96.382,42.49]]
+  ]},
+"attributes":{"Name":"Flood zone","BarrierType":0}}]}
+&outSR=102100&directionsOutputType=esriDOTInstructionsOnly&f=json&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+```json
+{
+    "messages": [],
+    "routes": {
+        "fieldAliases": {
+            "ObjectID": "ObjectID",
+            "Name": "Name",
+            "FirstStopID": "FirstStopID",
+            "LastStopID": "LastStopID",
+            "StopCount": "StopCount",
+            "Total_TravelTime": "Total_TravelTime",
+            "Total_Kilometers": "Total_Kilometers",
+            "Total_Miles": "Total_Miles",
+            "Shape_Length": "Shape_Length"
+        },
+        "geometryType": "esriGeometryPolyline",
+        "spatialReference": {
+            "wkid": 102100,
+            "latestWkid": 3857
+        },
+        "features": [
+            {
+                "attributes": {
+                    "ObjectID": 1,
+                    "Name": "Location 1 - Location 2",
+                    "FirstStopID": 1,
+                    "LastStopID": 2,
+                    "StopCount": 2,
+                    "Total_TravelTime": 17.860030858898373,
+                    "Total_Kilometers": 11.422011513266458,
+                    "Total_Miles": 7.0973089117469295,
+                    "Shape_Length": 15436.978718485752
+                },
+                "geometry": {
+                    "paths": [
+                        [
+                            [
+                                -10735247.1458,
+                                5236029.971900001
+                            ],
+                            [
+                                -10735158.5467,
+                                5236034.876699999
+                            ],
+....
+.... additional points that make up the route
+....
+                        ]
+                    ]
+                }
+            }
+        ]
+    },
+    "directions": [
+        {
+            "routeId": 1,
+            "routeName": "Location 1 - Location 2",
+            "summary": {
+                "totalLength": 11.422011513266458,
+                "totalTime": 17.860030856681988,
+                "totalDriveTime": 17.860030858898373,
+                "envelope": {
+                    "xmin": "NaN",
+                    "ymin": "NaN",
+                    "xmax": "NaN",
+                    "ymax": "NaN"
+                }
+            },
+            "features": [
+                {
+                    "attributes": {
+                        "length": 0,
+                        "time": 0,
+                        "text": "Start at Location 1",
+                        "ETA": -2209161600000,
+                        "maneuverType": "esriDMTDepart"
+                    },
+                    "compressedGeometry": ""
+                },
+                {
+                    "attributes": {
+                        "length": 0.06713916712957156,
+                        "time": 0.1325782621714933,
+                        "text": "Go east on W 3RD ST toward JOHN ST",
+                        "ETA": -2209161600000,
+                        "maneuverType": "esriDMTStraight"
+                    },
+                    "compressedGeometry": "",
+                    "strings": [
+                        {
+                            "string": "W 3RD ST",
+                            "stringType": "esriDSTStreetName"
+                        },
+                        {
+                            "string": "JOHN ST",
+                            "stringType": "esriDSTCrossStreet"
+                        }
+                    ]
+                },
+....
+.... additional direction messages
+....
+                {
+                    "attributes": {
+                        "length": 0,
+                        "time": 0,
+                        "text": "Finish at Location 2, on the left",
+                        "ETA": -2209161600000,
+                        "maneuverType": "esriDMTStop"
+                    },
+                    "compressedGeometry": ""
+                }
+            ]
+        }
+    ]
+}
+```
+</Tab>
+</Tabs>
+</Box>
+
+<Box>
+
+### Find  a route in countries not covered by the service
+
+If the first stop is in a country not supported by the service, the request fails with an error message.
+
+<Tabs>
+<TabNav slot="tab-nav">
+  <TabTitle is-active>Request</TabTitle>
+  <TabTitle>Response</TabTitle>
+</TabNav>
+<Tab is-active>
+
+```http
+GET https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World/solve?
+stops=116.39722919900055%2C39.90749657700047%3B121.45805638600052%2C31.22221723400048&f=json&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+```json
+{
+    "error": {
+        "code": 400,
+        "message": "Unable to complete service.",
+        "details": [
+            "The input points are not within the data coverage area."
+        ]
+    }
+}
+```
+</Tab>
+</Tabs>
+</Box>
+
+## Usage limits
+
+The following table lists the limits that apply to this service: 
+
+<StyledTable headers={"Limit description,Limit value"}>
+<StyledTableRow>
+<StyledTableCell cellStyle="markdown">
+
+Maximum number of stops
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+150
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Maximum number of (point) barriers
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+250
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Maximum number of street features intersected by polyline barriers
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+500
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Maximum number of street features intersected by polygon barriers
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2,000
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Maximum straight-line distance for the walking travel mode
+
+(If the straight-line distance between any two stops is greater than the limit shown here, the analysis will fail when `travelMode`  is set to `Walking Time`  or `Walking Distance`  or when `impedanceAttributeName`  is set to `WalkTime` .)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+27 miles (43.45 kilometers)
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Force hierarchy beyond a straight-line distance of
+
+(If the straight-line distance between any two stops is greater than the limit shown here, the analysis uses hierarchy even if `useHierarchy`  is set to `false` .)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+50 miles (80.46 kilometers)
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Maximum time a client can use this route service
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+5 minutes (300 seconds)
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>

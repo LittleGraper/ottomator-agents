@@ -1,0 +1,183 @@
+---
+title: "Merge Layers"
+description: "API reference for the Merge Layers service available on ArcGIS Online."
+slug: "sa-merge-layers"
+url: "/spatial-analysis/tasks/sa-merge-layers"
+redirectFrom:
+  - /sa-merge-layers
+guid: "GUID-E54CA985-AE7B-412B-A33D-1CFB033D1067"
+migratedTopicMetadata:
+  FTITLE: "SA Merge Layers"
+  FDESCRIPTION: "REST API doc"
+  FCHANGES: "context conref"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "agol10.1-*:11.0-*"
+  CREATED-ON: "28/02/2022 16:27:09"
+  FAUTHOR: "sambrose"
+  FSTATUS: "Released"
+  MODIFIED-ON: "24/05/2022 07:53:29"
+  VERSION: "5"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-F9947497-A3BA-4B47-9300-B844A08A5127"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata: {}
+---
+
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E0E9FDE9_9A98_4EA4_9164_0E878BADF591 from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-E0E9FDE9-9A98-4EA4-9164-0E878BADF591";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_D95DEC58_7F27_491A_AF3D_6E6A3C0A6F2D from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-D95DEC58-7F27-491A-AF3D-6E6A3C0A6F2D";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E836F966_C272_43B1_9BF9_55BA03755A13 from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-E836F966-C272-43B1-9BF9-55BA03755A13";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E671F554_89D2_4CAD_B032_525E1CE90C18 from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-E671F554-89D2-4CAD-B032-525E1CE90C18";
+
+![Merge Layers](../../images/GUID-BDDD6517-4EE7-4EEC-AE15-15DD9B709131-web.png)
+
+The Merge Layers task copies features from two layers into a new layer. The layers to be merged must all contain the same feature types (points, lines, or polygons). You can control how the fields from the input layers are joined and copied. 
+
+For example:
+
+-   I have three layers for England, Wales, and Scotland and I want a single layer of Great Britain. 
+-   I have two layers containing parcel information for contiguous townships. I want to join them together into a single layer, keeping only the fields that have the same name and type on the two layers.
+
+## Request URL
+
+```javascript
+http://<analysis url>/MergeLayers/submitJob
+```
+
+## Request Parameters
+<StyledTable headers={"Parameter,Description"}>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `inputLayer`
+
+         (Required)
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The point, line, or polygon features to merge with the `mergeLayer`
+
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E0E9FDE9_9A98_4EA4_9164_0E878BADF591 />
+
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_D95DEC58_7F27_491A_AF3D_6E6A3C0A6F2D />
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `mergeLayer`
+
+         (Required)
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The point, line, or polygon features to merge with the `inputLayer`. The `mergeLayer` must contain the same feature type (point, line, or polygon) as the `inputLayer`.
+
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E0E9FDE9_9A98_4EA4_9164_0E878BADF591 />
+
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_D95DEC58_7F27_491A_AF3D_6E6A3C0A6F2D />
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `mergingAttributes`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         An array of values that describe how fields from the `mergeLayer` are to be modified. By default, all fields from both inputs will be carried across to the output `mergedLayer`.
+
+         If a field exists in one layer but not the other, the output `mergedLayer` will contain both fields. The output field will contain null values for the input features that did not have the field. For example, if the `inputLayer` contains a field named `TYPE` but the `mergeLayer` does not contain `TYPE`, the output will contain `TYPE`, but its values will be null for all the features copied from the `mergeLayer`.
+
+         You can control how fields on the `mergeLayer` are written to the output as follows:
+         -   `Remove`—The field on the `mergeLayer` will be removed from the output `mergedLayer`.
+         -   `Rename`—The field on the `mergeLayer` will be renamed on the output. You cannot rename a field on the `mergeLayer` to a field on the `inputLayer`. If you want to make field names equivalent, use `Match`.
+         -   `Match`—A field on the `mergeLayer` is made equivalent to a field on the `inputLayer`. For example, the `inputLayer` has a field named `CODE` and the `mergeLayer` has a field named `STATUS`. You can match `STATUS` to `CODE`, and the output will contain the `CODE` field with values of the `STATUS` field used for features copied from the `mergeLayer`. Type casting is supported (for example, double to integer, integer to string) except for string to numeric.
+
+         Example:
+         -   `['Temp Remove', 'RiskRate Rename RiskRateJan', 'AirQualityIndex Match AQI']`
+
+         This example performs the following:
+         -   The field named `Temp` on the `mergeLayer` will not appear in the output (removed from the output).
+         -   The field named `RiskRate` on the `mergeLayer` will be renamed to `RiskRateJan` on the output. `RiskRateJan` will contain null values for features copied from the `inputLayer`.
+         -   The field named `AirQualityIndex` on the `mergeLayer` will be matched to the field `AQI` on the `inputLayer`. The output will contain the field `AQI`, and the values of this field will be copied from `AirQualityIndex` for those features copied from the `mergeLayer`.
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `outputName`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E836F966_C272_43B1_9BF9_55BA03755A13 />
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `context`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E671F554_89D2_4CAD_B032_525E1CE90C18 />
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `f`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The response format. The default response format is `html`.
+
+         Values: `html` \| `json`
+      </StyledTableCell>
+   </StyledTableRow>
+</StyledTable>
+
+## Response
+When you submit a request, the service assigns a unique job ID for the transaction.
+Syntax:
+```javascript
+{
+"jobId": "<unique job identifier>",
+"jobStatus": "<job status>"
+}
+```
+After the initial request is submitted you can use the `jobId` to periodically check the status of the job and messages as described in the topic [Check job status](/checking-job-status-1). Once the job has successfully completed, you use the `jobId` to retrive the results. To track the status, you can make a request of the following form:
+```javascript
+http://<analysis url>/MergeLayers/jobs/<jobId>
+```
+## Accessing results
+When the status of the job request is `esriJobSucceeded`, you can access the results of the analysis by making a request of the following form.
+```javascript
+http://<analysis url>/MergeLayers/jobs/<jobId>/results/mergedLayer?token=<your token>&f=json
+```
+<StyledTable headers={"Parameter,Description"}>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `mergedLayer`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The output layer containing the merged features.
+
+         Example:
+         ```javascript
+         {"url":"http://<analysis url>/MergeLayers/jobs/<jobId>/results/mergedLayer"}
+         ```
+         The result has properties for parameter name, data type, and value. The contents of value depends upon the `outputName` parameter provided in the initial request.
+         -   If `outputName` was provided, `value` contains the url to the feature service layer.
+         ```javascript
+         {
+        "paramName":"mergedLayer",
+        "dataType":"GPString",
+        "value":{"url":"<hosted featureservice layer url>"}
+        }
+         ```
+         -   If `outputName` was not provided, `value` contains a feature collection.
+         ```javascript
+         {
+         "paramName":"mergedLayer",
+         "dataType":"GPString",
+         "value":{"layerDefinition": {}, "featureSet": {} }
+         }
+         ```
+         See [Feature Output ](/feature-output-1) for more information about how the result layer or collection is accessed.
+      </StyledTableCell>
+   </StyledTableRow>
+</StyledTable>

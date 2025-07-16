@@ -1,0 +1,1053 @@
+---
+title: "Find"
+description: "This operation returns a find results resource that includes the value, feature ID, field name, layer ID, layer name, geometry, geometry type, and attributes in the form of name-value pairs."
+slug: "find"
+url: "/find"
+guid: "GUID-D88E7A1E-EBBF-4167-8FEA-553876C6CBB6"
+migratedTopicMetadata:
+  FTITLE: "Find"
+  FDESCRIPTION: ""
+  FCHANGES: "Fixing broken links"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9.1 - *"
+  CREATED-ON: "03/09/2021 15:12:01"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "07/10/2021 08:34:53"
+  VERSION: "7"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-14D4AA48-90EA-427F-A698-1907A6135C74"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /find
+  urlSegments:
+    - name: <mapservice-url>
+      url: /map-service
+    - name: /find
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '9.3'
+  requiredCapability: Data
+---
+
+## Description
+
+The `find`  operation is performed on a [map service resource](/map-service). The result of this operation is a find results resource. Each result includes its value, feature ID, field name, layer ID, layer name, geometry, geometry type, and attributes in the form of name-value pairs. 
+
+<Note type={"note"}>
+
+The `find`  operation is not supported on stand-alone tables.
+
+</Note>
+
+You can provide arguments to the `find`  operation as query parameters as defined in the parameters table below.
+
+### New at 10.8
+
+Supports the following new parameters. These parameters are only supported by map services published from ArcGIS Pro.
+
+-   `clipping` —Mask out layers outside of a clip polygon.
+-   `spatialFilter` —Draw or query only features that meet the spatial filter criteria.
+
+<Note type={"note"}>
+
+Check for `supportsClipping`  and `supportsSpatialFilter`  on a map service's root resources before using it.
+
+</Note>
+
+### New at 10.6.1
+
+Supports the following new parameter:
+
+-   `historicMoment` —Query from a given moment in an archive-enabled layer.
+
+### New at 10.5
+
+Enhanced with the following Boolean flags to support returning unformatted values and field names:
+
+-   `returnUnformattedValues` 
+-   `returnFieldName` 
+
+Supports the following new parameters:
+
+-   `datumTransformations` —Provide a desired datum transformation to be applied while features are projected.
+-   `mapRangeValues` —Set values to ranges applicable to all layers with the same ranges in the map service.
+-   `layerRangeValues` —Set range values for specific layers.
+-   `layerParameterValues` —Set values to parameterized filters to specific layers.
+
+<Note type={"note"}>
+
+Simple syntax is not supported as an expected value for the `layerDefs`  parameter starting at 10.5.
+
+</Note>
+
+### New at 10.1
+
+-   Support for dynamic layers was added with the `dynamicLayers`  parameter. If `dynamicLayers`  is used in a `find`  operation request, the `layerDefs`  and `layers`  (`find` ) operation parameters are ignored. Instead, use `definitionExpression` , available within `dynamicLayers` , to specify these values in the `find`  operation. Only those layers that are defined in `dynamicLayers`  are used in the `find`  operation. 
+-   The `gdbVersion`  parameter was introduced. Use this parameter to switch the geodatabase version of the map layer's data source.
+-   The `geometryPrecision`  parameter was introduced. This option can be used to specify the number of decimal places in the response geometries returned by the `identify`  operation.
+-   JSON response contains an optional property, `exceededTransferLimit` . This property will be `true`  only if the number of records exceeds the maximum number configured by the server administrator.
+
+### New at 10.0
+
+Support for `generalizing`  geometries returned by the `find`  operation was added.
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`searchText` 
+
+(Required) 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The search string. This is the text that is searched across the layers and fields the user specifies.
+
+Example
+
+```javascript
+searchText=Los
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`contains` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `false` , the operation searches for an exact match of the `searchText`  string. An exact match is case sensitive. Otherwise, it searches for a value that contains the `searchText`  provided. This search is not case sensitive. The default is `true` .
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`searchFields` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The names of the fields to search. The fields are specified as a comma-separated list of field names. If this parameter is not specified, all fields are searched.
+
+Syntax
+
+```javascript
+//Where fieldName1 and fieldName2 are the field names returned by the 
+searchFields=<fieldName1>,<fieldName2>
+
+```
+
+ 
+
+Example
+
+```javascript
+searchFields=AREANAME,SUB_REGION
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sr` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The well-known ID of the spatial reference of the output geometries. If `sr`  is not specified, the output geometries are returned in the spatial reference of the map.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`layerDefs` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Allows you to filter the features of individual layers in the exported map by specifying definition expressions for those layers. A definition expression for a layer that is published with the service will be always honored.
+
+<Note type={"note"}>
+
+As of 10.5, simple syntax is no longer supported.
+
+</Note>
+
+Syntax
+
+```javascript
+//Where layerId1 and layerId2 are the layer ids returned by the map service resource
+{"<layerId1>": "<layerDef1>", "<layerId2>": "<layerDef2>"}
+
+```
+
+ 
+
+Example
+
+```javascript
+{"0":"POP2000 > 1000000","5":"AREA > 100000"}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`layers` 
+
+(Required) 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The layers on which to perform the `find`  operation. The layers are specified as a comma-separated list of layer IDs.
+
+Syntax
+
+```javascript
+//Where layerId1 and layerId2 are the layer ids returned by the 
+layers=<layerId1>,<layerId2>
+
+```
+
+ 
+
+Example
+
+```javascript
+layers=2,4,7
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnGeometry` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , the `resultset`  includes the geometries associated with each result. The default is `true` .
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`maxAllowableOffset` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This option can be used to specify the `maximum allowable offset`  to be used for generalizing geometries returned by the `find`  operation. The `maxAllowableOffset`  is in the units of the `sr` . If `sr`  is not specified, the `maxAllowableOffset`  is assumed to be in the unit of the spatial reference of the map.
+
+Example
+
+```javascript
+maxAllowableOffset=2
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geometryPrecision` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This option can be used to specify the number of decimal places in the response geometries returned by the `find`  operation. This applies to x- and y-values only (not m- or z-values).
+
+Example
+
+```javascript
+geometryPrecision=3
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`dynamicLayers` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Use the `dynamicLayers`  property either to modify the data source of existing layers in the current map service or to add new layers. The new layer should have its source pointing to one of the registered workspaces that was defined at the time the map service was created. When defining a dynamic layer, the `source`  is required.
+
+Syntax
+
+```javascript
+[
+  {
+    "id": <layerOrTableId>,
+    "source": <layer source>,
+    "definitionExpression": "<definitionExpression>"
+  },
+  {
+    "id": <layerOrTableId>,
+    "source": <layer source>,
+    "definitionExpression": "<definitionExpression>"
+  }
+]
+```
+
+ 
+
+Example
+
+```javascript
+[
+  {
+    "id": 501,
+    "source":
+    {
+      "type": "mapLayer",
+      "mapLayerId": 0
+    }
+  },
+  {
+    "id": 502, //add a new layer from registered workspace
+    "source":
+    {
+      "type": "dataLayer",
+      "dataSource":
+      {
+        "type": "table",
+        "workspaceId": "MAP",
+        "dataSourceName": "MAP.user1.Taxlots"
+      }
+    }
+  },
+  {
+    "id": 503, //change the Version of existing map service layer
+    "source":
+    {
+      "type": "mapLayer",
+      "mapLayerId": 1,
+      "version": "USER1"
+    },
+    "definitionExpression": "neighborhood = 'French Quarter'"
+  }
+]
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnZ` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , z-values will be included in the results if the features have z-values. Otherwise, z-values are not returned. The default is `true` .
+
+<Note type={"note"}>
+
+This parameter only applies if `returnGeometry=true` .
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnM` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , m-values will be included in the results if the features have m-values. Otherwise, m-values are not returned. The default is `false` .
+
+<Note type={"note"}>
+
+This parameter only applies if `returnGeometry=true` .
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`gdbVersion` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Switch map layers to point to an alternate geodatabase version.
+
+Syntax
+
+```javascript
+gdbVersion=<geodatabase version>
+```
+
+ 
+
+Example
+
+```javascript
+gdbVersion=sde.USER1
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnUnformattedValues` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This option was added at 10.5. If `true` , the values in the result will not be formatted; in other words, numbers will be returned as is and dates will be returned as epoch values, and subtype and domain values will be returned as numeric values instead of descriptions. The default value is false, making numbers and dates formatted based on the server's setting.
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnFieldName` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This option was added at 10.5. If `true` , field names will be returned instead of field aliases. The default value is `false` . For layers with joins, fully qualified names will be returned.
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`datumTransformations` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This option was added at 10.5. Use this parameter to apply one or more datum transformations to the map when `sr`  is different than the map service's spatial reference. It is an array of `transformation`  elements. Transformations specified here are used to project features from layers within a map service to `sr` .
+
+<Note type={"note"}>
+
+While specifying transformation, you need to think about which datum transformation is best applicable to project a layer or layers (not the map service) to the `sr` . The `sourceSpatialReference`  property in a layer resource reports which spatial reference features are stored in the source dataset.
+
+</Note>
+
+For a list of valid datum transformation ID values and well-known text strings, see [Using spatial references](/using-spatial-references). For more information on datum transformation, see the `transformation`  parameter in the [Project](/project) operation.
+
+Syntax
+
+```javascript
+//WKID
+datumTransformations=[wkid1, wkid2]
+
+//datum
+datumTransformations=[{<dt1>}, {<dt2>}]
+
+```
+
+ 
+
+Examples
+
+```javascript
+//To apply multiple transformations
+datumTransformations=[1623, 4078]
+
+//To apply multiple transformations including a composite transformation
+datumTransformations=[{"wkid":108889}, {"geoTransforms":[{"wkid":108889,"transformForward":true},{"wkid":1622,"transformForward":false}]}]
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`mapRangeValues` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This option was added at 10.5. It allows you to filter features in the exported map from all layers that are within the specified range instant or extent.
+
+<Note type={"note"}>
+
+Check `rangeInfos`  at the layer resources for the available ranges. Null, representing infinity, is allowed in value-ranges. For example, `[null, 1500]`  means all features with values &lt;=1500 and `[1000, null]`  means all features with values >=1000.
+
+</Note>
+
+Syntax
+
+```javascript
+[
+  {
+    "name": "<rangeName1>",  //range id
+    "value": <value> | [<value1>, <value2>]  //single value or a value-range
+  },
+  {
+    "name": "<rangeName2>",
+    "value": <value> | [<value3>, <value4>]
+  }
+]
+```
+
+ 
+
+Example
+
+```javascript
+[
+  {
+    "name" : "salinity",
+    "value" : 5  //a range instant (or single) value passed
+
+  },
+  {
+    "name" : "elevation",
+    "value" : [1000, 1500] //a range extent is passed
+  }
+]
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`layerRangeValues` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This option was added at 10.5. It allows you to filter features for each individual layer that are within the specified range instant or extent.
+
+<Note type={"note"}>
+
+Check `rangeInfos`  at the layer resources for the available ranges. Null, representing infinity, is allowed in value-ranges. For example, `[null, 1500]`  means all features with values &lt;=1500 and `[1000, null]`  means all features with values >=1000.
+
+</Note>
+
+Syntax
+
+```javascript
+{
+  "<layerId1>": [
+    {
+      "name": "<rangeName1>",  //range id
+      "value": <value> | [<value1>, <value2>]  //single value or a value-range
+    },
+    {
+      "name": "<rangeName2>",
+      "value": <value> | [<value3>, <value4>]
+    }
+  ],
+  "<layerId2>": [
+    {
+      "name": "<rangeName1>",
+      "value": <value> | [<value1>, <value2>]
+
+    }
+  ]
+}
+```
+
+ 
+
+Example
+
+```javascript
+{
+  "0": [
+    {
+      "name": "salinity",
+      "value": 5            //a range instant (or single) value passed
+    },
+    {
+      "name": "elevation",
+      "value": [1000, 1500] //a range extent is passed
+    }
+  ],
+  "1": [
+    {
+      "name": "floor",
+      "value": [null, 5]   //selects features with values <= 5
+    }
+  ]
+}
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`layerParameterValues` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This option was added at 10.5. It allows you to filter the features of individual layers by specifying a value or values to an array of preauthored parameterized filters for those layers. When a value is not specified for any parameter in a request, the default value, which is assigned during authoring time, gets used instead. When a `parameterInfo`  allows multiple values, you must pass them in an array.
+
+<Note type={"note"}>
+
+Check `parameterInfos`  at the layer resources for the available parameterized filters, their default values, and expected data type.
+
+</Note>
+
+Syntax
+
+```javascript
+[
+   {
+     "<layerId1>": {
+       "<parameterName1>": <value>, //when the multipleValues=false in the parameterInfo
+       "<parameterName2">: [<value1> | <value2>]  //when the multipleValues=true in the parameterInfo
+     },
+     "<layerId2>": {
+       "<parameterName3>": <value>
+    }
+  }
+]
+```
+
+ 
+
+Example
+
+```javascript
+[
+   {
+     "0": {
+       "floor": 10,
+       "incidentDate": 1475877014000  //date time value needs to be passed in as epoch value
+     },
+     "1": {
+       "crimeType": ["burglary", "theft"]
+    }
+  }
+]
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`historicMoment` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This option was added at 10.6.1. This is the historic moment to find. This parameter applies only if the layer is archiving enabled and the `supportsQueryWithHistoricMoment`  property is set to `true` . This property is provided in the layer resource. If `historicMoment`  is not specified, the search query will apply to the current features.
+
+Syntax
+
+```javascript
+historicMoment=<Epoch time in milliseconds>
+```
+
+ 
+
+Example
+
+```javascript
+historicMoment=1199145600000
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`clipping` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This parameter was added at 10.8. It allows you to mask out layers outside of the clip polygon in the exported map. Clipping can mask out any layer type, for example, feature layers, raster layers, and TIN layers. Optionally, you can use `excludedLayers`  to exclude layers from being clipped.
+
+<Note type={"note"}>
+
+The `geometry`  parameter must be a [polygon](/geometry-objects/#polygon) or an [envelope](/geometry-objects/#envelope).
+
+</Note>
+
+Syntax
+
+```javascript
+{
+  "geometryType": "<esriGeometryPolygon | esriGeometryEnvelope>",
+  "geometry": {<geometry>},
+  "excludedLayers": [<layerId>, <layerId>] //optional
+}
+```
+
+ 
+
+Example
+
+```javascript
+{
+  "geometryType": "esriGeometryPolygon",
+  "geometry": {
+    "spatialReference": {
+      "wkid": 102008
+    },
+    "rings": [
+      [
+        [-816126, 216280],
+        [-565859, 199948],
+        [-607349, -50318],
+        [-785229, -38842],
+        [-816126, 216280]
+      ]
+    ]
+  },
+  "excludedLayers": [1, 4] //optional
+}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`spatialFilter` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This parameter was added at 10.8. It allows you to filter out features from all features layers based on the input spatial filter. It is similar to `layerDefs` , but instead of using an attribute filter, map service uses a spatial filter to determine which features can be queried.
+
+<Note type={"note"}>
+
+Spatial filters only works against feature layers. When both `clipping`  and `spatialFilter`  are provided, clipping takes precedence and `spatialFilter`  is ignored.
+
+</Note>
+
+Syntax
+
+```javascript
+{
+  "spatialRel": "<esriSpatialRelIntersects | esriSpatialRelContains | esriSpatialRelCrosses | esriSpatialRelEnvelopeIntersects 
+                | esriSpatialRelIndexIntersects | esriSpatialRelOverlaps | esriSpatialRelTouches 
+                | esriSpatialRelWithin | esriSpatialRelRelation>", //default = esriSpatialRelIntersects
+  "geometryType": "<esriGeometryPoint | esriGeometryMultipoint | esriGeometryPolyline | esriGeometryPolygon | esriGeometryEnvelope >",
+  "geometry": { <geometry> }
+}
+```
+
+ 
+
+Example
+
+```javascript
+{
+  "spatialRel" : "esriSpatialRelIntersects",
+  "geometryType" : "esriGeometryPolygon",
+  "geometry": { 
+    "spatialReference": {
+      "wkid": 102008
+    },
+    "rings": [
+      [
+        [-816126, 216280],
+        [-565859, 199948],
+        [-607349, -50318],
+        [-785229, -38842],
+        [-816126, 216280]
+      ]
+    ]
+  }
+}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` .
+
+Values: `html`  \| `json`  \| `pjson` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+Example 1: The `Find`  operation that includes search text and a layer. The response is in HTML format:
+
+```javascript
+https://machine.domain.com/arcgis/rest/services/Specialty/ESRI_StatesCitiesRivers_USA/MapServer/find?searchText=island&contains=true&searchFields=&sr=&layers=0,2&returnGeometry=true
+```
+
+ 
+
+Example 2: The `Find`  operation with `dynamicLayer` :
+
+```javascript
+https://machine.domain.com/arcgis/rest/services/Census/MapServer/find?searchText=Calif&contains=true&searchFields=&sr=&layers=&layerDefs=&returnGeometry=false&maxAllowableOffset=&geometryPrecision=&dynamicLayers=[{"id":501,"source":{"type":"mapLayer","mapLayerId":3}}]&returnZ=false&returnM=false&gdbVersion=&f=html
+```
+
+ 
+
+## JSON Response syntax
+
+```other
+{
+  "results": [
+    {
+      "layerId": <layerId1>,
+      "layerName": "<layerName1>",
+      "displayFieldName": "<displayFieldName1>",
+      "foundFieldName": "<foundFieldName1>",
+      "value": "<value1>",
+      "attributes": {
+        "<fieldName11>": <fieldValue11>,
+        "<fieldName12>": <fieldValue12>
+      },
+      "geometryType": "<geometryType1>",
+      "hasZ": <true|false>, //added in 10.1
+      "hasM": <true|false>, //added in 10.1
+      "geometry": {<geometry1>}
+    },
+    {
+      "layerId": <layerId2>,
+      "layerName": "<layerName2>",
+      "displayFieldName": "<displayFieldName2>",
+      "foundFieldName": "<foundFieldName2>",
+      "value": "<value2>",
+      "attributes": {
+        "<fieldName21>": <fieldValue21>,
+        "<fieldName22>": <fieldValue22>
+      },
+      "geometryType": "<geometryType2>",
+      "hasZ": <true|false>, //added in 10.1
+      "hasM": <true|false>, //added in 10.1
+      "geometry": {<geometry2>}
+    }
+  ]
+}
+```
+
+ 
+
+## JSON Response example
+
+```other
+{
+  "results": [
+    {
+      "layerId": 3,
+      "layerName": "Cities",
+      "displayFieldName": "City Name",
+      "foundFieldName": "City Name",
+      "value": "Joe City",
+      "attributes": {
+        "City Name": "Joe City",
+        "CLASS": "city",
+        "ST": "CA"
+      },
+      "geometryType": "esriGeometryPoint",
+      "geometry": {
+        "x": -118.375,
+        "y": 34.086,
+        "spatialReference": {
+          "wkid": 4326
+        }
+      }
+    },
+    {
+      "layerId": 59,
+      "layerName": "Parcel",
+      "displayFieldName": "NAME",
+      "foundFieldName": "NAME",
+      "value": "Joe's Parcel",
+      "attributes": {
+        "NAME": "Parcel 649",
+        "SUB_REGION": "Pacific",
+        "STATE_ABBR": "CA"
+      },
+      "geometryType": "esriGeometryPolygon",
+      "geometry": {
+        "spatialReference": {
+          "wkid": 4326
+        },
+        "rings": [
+          [
+            [-118.35,32.81],
+            [-118.42.806],
+            [-118.511,32.892],
+            [-118.35,32.81]
+          ]
+        ]
+      }
+    }
+  ]
+}
+```
+
+ 

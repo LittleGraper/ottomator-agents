@@ -1,0 +1,571 @@
+---
+title: "Feature Layer"
+description: "An individual layer resource represents a single feature layer or a non-spatial table in a feature service."
+slug: "feature-layer"
+url: "/feature-layer"
+guid: "GUID-E21CCCC9-F60D-44A4-882B-981D4BC243D7"
+migratedTopicMetadata:
+  FTITLE: "Feature Layer"
+  FDESCRIPTION: ""
+  FCHANGES: "Changes for 11.2"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 -*"
+  CREATED-ON: "24/09/2023 17:46:33"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "28/09/2023 12:29:54"
+  VERSION: "13"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-F2001081-617B-4EEE-9D66-5609F5B1F3BE"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/FeatureServer/<layerId>
+  urlSegments:
+    - name: <adminRoot>
+      url: DEVSITE/rest/services-reference/online/administering-arcgis-online-hosted-services
+    - name: /<serviceName>/FeatureServer/<layerId>
+  methods: []
+  sslOnly: 'no'
+---
+
+## Description
+
+An individual layer resource represents a single feature layer or a non-spatial table in a feature service. A feature layer is a table or view with at least one spatial column. 
+
+For tables, it provides basic information about the table such as its ID, name, fields, types and templates. 
+
+For feature layers, in addition to the table information above, it provides information such as its geometry type, min and max scales, and spatial reference. 
+
+Each type includes information about the type such as the type ID, name, and definition expression. Sub-types also include a default symbol and a list of feature templates. 
+
+Each feature template includes a template name, description and a prototypical feature.
+
+The property [resultType](/query-feature-service-layer#UL_C3A7F8D4E85942EC983931C13B059707)  in the layer metadata object will determine the max record count. The `resultType`  can either be {'{'}none, standard, tile{'}'}.
+
+-   The [resultType](/query-feature-service-layer#UL_C3A7F8D4E85942EC983931C13B059707)  parameter is only supported if the layer metadata returns `supportQueryWithResultType`  is `true`  in the `advancedQueryCapabilitites`  metadata object.
+-   The property [maxRecordCount](/query-feature-service-layer#UL_C3A7F8D4E85942EC983931C13B059707)  is used if the `resultType`  value is `none` . This can be the default server assigned (1000, 2000) or a value that is overwritten by the service owner or admin.
+-   The property [standardMaxRecordCount](/query-feature-service-layer#UL_C3A7F8D4E85942EC983931C13B059707)  is used if the `resultType`  value is `standard` . Example: (`"standardMaxRecordCount": 32000` )
+-   The property [tileMaxRecordCount](/query-feature-service-layer#UL_C3A7F8D4E85942EC983931C13B059707)  is used if the `resultType`  value is `tile` . Example: (`"tileMaxRecordCount": 8000` ).
+-   The layer metadata will also include the [maxRecordCountFactor](/query-feature-service-layer#UL_C3A7F8D4E85942EC983931C13B059707)  property and can be configured from the admin API. The server `maxRecordCount`  for {'{'}standard, tile{'}'} will be the (base \* `maxRecordCountFactor` ). All `maxRecordCount`  will be adjusted with the `maxRecordCountFactor` . 
+
+The property `capabilities`  returns Query, Create, Delete, Update, and Editing capabilities. The Editing capability will be included if Create, Delete or Update is enabled for a Feature Service. 
+
+Note, query and edit operations are not available on a layer in the administrative view.
+
+<Note type={"note"}>
+
+Wait for the operation response and do not attempt concurrent administrative operations.
+
+</Note>
+
+## Response caching for hosted feature service layers in ArcGIS Enterprise
+
+<Note type={"note"}>
+
+At ArcGIS Enterprise 10.9.1, the ability to configure a hosted feature service to provide server-side caching was temporarily removed. Response caching is once again supported with the release of Enterprise 11.0. Organizations using Enterprise version 10.9, 11.0, or higher can cache queries made by services with response caching enabled. Organizations using a 10.9.1 deployment can still use services that support response caching, though queries will not be cached.
+
+</Note>
+
+In ArcGIS Enterprise 10.9, `updateDefinition`  can be used to enable response caching for hosted feature service layers running on the relational data store. Enabling requires that the object store be configured in ArcGIS data store.
+
+<Note type={"note"}>
+
+This is not applicable for ArcGIS Online hosted feature services, as they automatically use response caching.
+
+</Note>
+
+Response caching is a back-end server caching mechanism that significantly increases performance and scalability for data served from hosted feature services on a relational data store. Its ideal for read-only data, or data that changes infrequently. When response caching is enabled, the response from a layer query that uses `resultType` `tile`  or has `cacheHint`  set to `true`  will be cached. When the exact same query is sent again to the service, the cache response is returned as long as the data has not been updated since the cache was created. If the data has been updated, a new cache is created from the updated response. For example, clients that consistently use the same tile requests to draw content will benefit from response caching.
+
+<Note type={"note"}>
+
+Queries which use `current_date` , `current_time` , or `current_timestamp`  are not cached as the responses regularly change over time. In addition. layers with m values that have the access control property `allowOthersToQuery`  as `false`  are also not cached.
+
+</Note>
+
+The option can be turned on for specific service layers as needed. At 10.9, this option can be configured from the REST API and is considered a developer option.
+
+### Enabling response caching
+
+Before response caching can be enabled, the object store must be configured in ArcGIS Data Store. The object store is required as its used to store the responses and maintain the last edit data metadata. For more information on how to configure the object store, see [Use the configuredatastore utility to create a data store](https://enterprise.arcgis.com/en/portal/latest/administer/windows/create-data-store.htm#ESRI_SECTION1_B93F1F95EBD54F6C9E1122AB3500EAB0). Once the object store is configured, the server will need to be restarted to allow hosted feature services to access it. Once restarted, hosted feature services running on the relational data store will include the `"editingInfo": ("lastEditDate": <dateValue>)`  property. For more information on this property, see the [Feature Layer](/layer-feature-service#new-at-109) resource.
+
+Once the object store has been configured, response caching can be enabled on individual hosted feature service layers using the `updateDefinition`  operation, allowing you to control which layers will write response cache content to the object store. This also applies to hosted feature service layer views, where response caching can be enabled or disabled independently on view layers.
+
+The following example input for `updateDefinition`  enables response caching that will expire after one day:
+
+```javascript
+{
+  "layerCache": {
+    "enabled": true, 
+    "expiration": 1
+  }
+}
+```
+
+ 
+
+The `expiration`  property defines the number of days a cache will be stored before it is removed. Once a cache is removed, a new response cache will be created the next time the service is queried. The `updateDefinition`  operation can be used to change or remove the expiration. An expiration value of `0`  means the cache will never expire. The value put for the `expiration`  property must be an integer.
+
+Once `updateDefintion`  has been used to enable response caching, the layers admin resource (`https://myenterprise.esri.com/server/rest/admin/services/Hosted/counties/FeatureServer/0?f=pjson` ) will list the current response caching settings:
+
+```javascript
+"adminLayerInfo": {
+  "layerCache": {
+    "expiration": 1,
+    "enabled": true
+  },
+  ...
+}
+
+```
+
+ 
+
+<Note type={"note"}>
+
+Response caching cannot be enabled on hosted feature service views that are based on a join, or from a spatiotemporal data source in ArcGIS Enterprise 10.9.
+
+</Note>
+
+### Disabling response caching
+
+Response caching can also be disabled on hosted feature layers and hosted feature layers and hosted feature layer views using `updateDefinition` . Disabling response caching will remove all of the layer's cached content from the object store.
+
+The following example input for `updateDefinition`  disables response caching:
+
+```javascript
+{
+  "layerCache": {
+    "enabled": false
+  }
+}
+
+```
+
+ 
+
+Once disabled, the layer resource will include `"supportsQueryWithCacheHint": false` .
+
+## New at 11.4
+
+The layer-level [Add To Definition](/add-to-definition-feature-layer), [Update Definition](/update-definition-feature-layer), and [Delete From Definition](/delete-from-definition-feature-layer) operations can now be used to add, edit, and delete subtypes for hosted feature service layers. Subtype editing is supported when the layer has the `supportsSubtypeEditing` property set as `true`. The following should be taken into consideration when working with subtypes:
+
+- If a subtype has a domain definition on a field that is identical to the domain definition in the layer’s `fields` array, the subtype’s domain definition is replaced with the keyword `inherited`.
+- If a field is added to a layer and the layer has subtypes, the field along with default values and domain will be added to the subtypes definition.
+- If a field is deleted from a layer and the layer has subtypes, the field along with any default values and domain will be deleted from the subtypes definition.
+- If a service has contingent attribute values defined on subtypes, the service will not support deleting the subtype code on which the contingent attribute value is defined. The contingent attribute values must be removed before the subtype code can be deleted.
+
+## New at 11.1
+
+A layer's administrative resource now returns a list of supported options for layer admin operations (`layerAdminOperationsOptions`  property).
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` .
+
+Values: `html`  \| `json` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+Get information about layer 0 in the "WorldService" Feature Service
+
+```javascript
+https://services.myserver.com/OrgID/arcgis/rest/admin/services/WorldService/FeatureServer/0
+```
+
+ 
+
+## JSON Response syntax
+
+```other
+{
+  "id": <layerId>,
+  "name": "<layerName>",
+  "type": "<layerType>",
+  "description": "<description>",
+  "copyrightText": "<copyrightText>",
+  "supportsRollbackOnFailures": <true | false>,
+  "geometryType": "<geometryType>",
+  "minScale": <minScale>,
+  "maxScale": <maxScale>,
+  "extent": <envelope>,
+  "drawingInfo": {
+    "renderer": <renderer>,
+    "transparency": <transparency>,
+    "labelingInfo": <labelingInfo>
+  },
+  },
+  "hasAttachments": <true|false>
+  "htmlPopupType": "<esriServerHTMLPopupTypeNone | esriServerHTMLPopupTypeAsURL | esriServerHTMLPopupTypeAsHTMLText>",
+  "objectIdField": "<objectIdFieldName>",
+  "globalIdField": "<globalIdFieldName>",
+  "displayField": "<displayField>",
+  "typeIdField": "<typeIFieldName>",
+  "fields": [
+    {
+      "name": "<fieldName1>",
+      "type": "<fieldType1>",
+      "alias": "<fieldAlias1>",
+      "length": "<length1>",
+      "editable": "<true | false>",
+      "nullable": "<true | false>",
+      "domain": <domain1>
+    },
+    {
+      "name": "<fieldName2>",
+      "type": "<fieldType2>",
+      "alias": "<fieldAlias1>",
+      "length": "<length2>",
+      "editable": "<true | false>",
+      "nullable": "<true | false>",
+      "domain": <domain2>
+    }
+  ],
+  "types": [
+    {
+      "id": <typeId1>,
+      "name": "<typeName1>",
+      "domains": {
+        "<domainField11>": <domain11>,
+        "<domainField12>": <domain12>
+      },
+      "templates": [
+        {
+          "name": "<templateName11>",
+          "description": "<templateDescription11>",
+          "prototype": <prototypicalFeature11>
+        },
+        {
+          "name": "<templateName12>",
+          "description": "<templateDescription12>",
+          "prototype": <prototypicalFeature12>
+        }
+      ]
+    },
+    {
+      "id": <typeId2>,
+      "name": "<typeName2>",
+      "domains": {
+        "<domainField11>": <domain21>,
+        "<domainField12>": <domain22>
+      },
+      "templates": [
+        {
+          "name": "<templateName21>",
+          "description": "<templateDescription21>",
+          "prototype": <prototypicalFeature21>,
+          "drawingTool": "esriFeatureEditToolNone | esriFeatureEditToolPoint | esriFeatureEditToolLine | esriFeatureEditToolPolygon | esriFeatureEditToolAutoCompletePolygon | 
+	esriFeatureEditToolCircle | esriFeatureEditToolEllipse | esriFeatureEditToolRectangle | esriFeatureEditToolFreehand"
+        },
+        {
+          "name": "<templateName22>",
+          "description": "<templateDescription22>",
+          "prototype": <prototypicalFeature22>,
+          "drawingTool": "esriFeatureEditToolNone | esriFeatureEditToolPoint | esriFeatureEditToolLine | esriFeatureEditToolPolygon | esriFeatureEditToolAutoCompletePolygon | 
+	esriFeatureEditToolCircle | esriFeatureEditToolEllipse | esriFeatureEditToolRectangle | esriFeatureEditToolFreehand"
+        }
+      ]
+    }
+  ],
+  "templates": [
+    {
+      "name": "<templateName1>",
+      "description": "<templateDescription1>",
+      "prototype": <prototypicalFeature1>
+    },
+    {
+      "name": "<templateName2>",
+      "description": "<templateDescription2>",
+      "prototype": "<prototypicalFeature2>"
+    }
+  ],
+  "supportedQueryFormats": "<supportedQueryFormats>",
+  "maxRecordCount": "<maxRecordCount>",
+  "standardMaxRecordCount": "<standardMaxRecordCount>",
+  "tileMaxRecordCount": "<tileMaxRecordCount>",
+  "maxRecordCountFactor": "<maxRecordCountFactor>",
+  "capabilities": "<capabilities>",
+  "supportedFieldTypes": [<fieldytpe1>,<fieldtype2]
+}
+```
+
+ 
+
+## JSON Response example
+
+```other
+{
+  "currentVersion": 10.1, 
+  "id": 0, 
+  "name": "Demo.dbo.WORLDCITIES", 
+  "type": "Feature Layer", 
+  "displayField": "CITY_NAME", 
+  "description": "", 
+  "copyrightText": "", 
+  "supportsRollbackOnFailure": true, 
+  "geometryType": "esriGeometryPoint", 
+  "minScale": 0, 
+  "maxScale": 0, 
+  "extent": {
+    "xmin": -176.151563636, 
+    "ymin": -54.792, 
+    "xmax": 179.221887694, 
+    "ymax": 78.200001124, 
+    "spatialReference": {
+      "wkid": 4326
+    }
+  }, 
+  "drawingInfo": {
+    "renderer": {
+      "type": "simple", 
+      "symbol": {
+        "type": "esriSMS", 
+        "style": "esriSMSCircle", 
+        "color": [
+          0, 
+          166, 
+          116, 
+          255
+        ], 
+        "size": 4, 
+        "angle": 0, 
+        "xoffset": 0, 
+        "yoffset": 0, 
+        "outline": {
+          "color": [
+            0, 
+            0, 
+            0, 
+            255
+          ], 
+          "width": 1
+        }
+      }, 
+      "label": "", 
+      "description": ""
+    }, 
+    "transparency": 0, 
+    "labelingInfo": null
+  }, 
+  },
+  "hasAttachments": false, 
+  "htmlPopupType": "esriServerHTMLPopupTypeAsHTMLText", 
+  "objectIdField": "OBJECTID", 
+  "globalIdField": "", 
+  "typeIdField": "", 
+  "fields": [
+    {
+      "name": "OBJECTID", 
+      "type": "esriFieldTypeInteger", 
+      "alias": "OBJECTID", 
+      "sqlType": "sqlTypeInteger", 
+      "nullable": false, 
+      "editable": false, 
+      "domain": null
+    }, 
+    {
+      "name": "CITY_NAME", 
+      "type": "esriFieldTypeString", 
+      "alias": "CITY_NAME", 
+      "sqlType": "sqlTypeNVarchar", "length": 30, 
+      "nullable": true, 
+      "editable": true, 
+      "domain": null
+    }, 
+    {
+      "name": "GMI_ADMIN", 
+      "type": "esriFieldTypeString", 
+      "alias": "GMI_ADMIN", 
+      "sqlType": "sqlTypeNVarchar", "length": 7, 
+      "nullable": true, 
+      "editable": true, 
+      "domain": null
+    }, 
+    {
+      "name": "ADMIN_NAME", 
+      "type": "esriFieldTypeString", 
+      "alias": "ADMIN_NAME", 
+      "sqlType": "sqlTypeNVarchar", "length": 42, 
+      "nullable": true, 
+      "editable": true, 
+      "domain": null
+    }, 
+    {
+      "name": "FIPS_CNTRY", 
+      "type": "esriFieldTypeString", 
+      "alias": "FIPS_CNTRY", 
+      "sqlType": "sqlTypeNVarchar", "length": 2, 
+      "nullable": true, 
+      "editable": true, 
+      "domain": null
+    }, 
+    {
+      "name": "CNTRY_NAME", 
+      "type": "esriFieldTypeString", 
+      "alias": "CNTRY_NAME", 
+      "sqlType": "sqlTypeNVarchar", "length": 30, 
+      "nullable": true, 
+      "editable": true, 
+      "domain": null
+    }, 
+    {
+      "name": "STATUS", 
+      "type": "esriFieldTypeString", 
+      "alias": "STATUS", 
+      "sqlType": "sqlTypeNVarchar", "length": 50, 
+      "nullable": true, 
+      "editable": true, 
+      "domain": null
+    }, 
+    {
+      "name": "POP_RANK", 
+      "type": "esriFieldTypeInteger", 
+      "alias": "POP_RANK", 
+      "sqlType": "sqlTypeInteger", 
+      "nullable": true, 
+      "editable": true, 
+      "domain": null
+    }, 
+    {
+      "name": "POP_CLASS", 
+      "type": "esriFieldTypeString", 
+      "alias": "POP_CLASS", 
+      "sqlType": "sqlTypeNVarchar", "length": 22, 
+      "nullable": true, 
+      "editable": true, 
+      "domain": null
+    }, 
+    {
+      "name": "PORT_ID", 
+      "type": "esriFieldTypeInteger", 
+      "alias": "PORT_ID", 
+      "sqlType": "sqlTypeInteger", 
+      "nullable": true, 
+      "editable": true, 
+      "domain": null
+    }, 
+    {
+      "name": "LABEL_FLAG", 
+      "type": "esriFieldTypeInteger", 
+      "alias": "LABEL_FLAG", 
+      "sqlType": "sqlTypeInteger", 
+      "nullable": true, 
+      "editable": true, 
+      "domain": null
+    }
+  ], 
+  "types": [], 
+  "templates": [
+    {
+      "name": "Demo.dbo.WORLDCITIES", 
+      "description": "", 
+      "drawingTool": "esriFeatureEditToolPoint", 
+      "prototype": {
+        "attributes": {
+          "LABEL_FLAG": null, 
+          "CITY_NAME": null, 
+          "GMI_ADMIN": null, 
+          "ADMIN_NAME": null, 
+          "FIPS_CNTRY": null, 
+          "CNTRY_NAME": null, 
+          "STATUS": null, 
+          "POP_RANK": null, 
+          "POP_CLASS": null, 
+          "PORT_ID": null
+        }
+      }
+    }
+  ], 
+  "supportedQueryFormats": "JSON", 
+  "maxRecordCount": 1000,
+  "standardMaxRecordCount": 4000,
+  "tileMaxRecordCount": 4000,
+  "maxRecordCountFactor": 1, 
+  "capabilities": "Create,Delete,Query,Update,Editing"
+}
+```
+
+ 
+
+Below is a sample JSON response that demonstrates the `layerAdminOperationOptions`  property returned for a hosted feature service layer at ArcGIS Enterprise 11.1. This property lists the admin operations available for a given hosted feature layer. For example, the response below shows fields listed under `addToDefinition` . This means that the operation can be used to add fields to a layer.
+
+<Note type={"note"}>
+
+Lists returned for hosted feature service view layers may be different.
+
+</Note>
+
+```javascript
+"layerAdminOperationsOptions": {
+  "deleteFromDefinition": [
+    "xssTrustedFields",
+    "fields",
+    "indexes",
+    "relationships",
+    "lodInfoIndexes"
+  ],
+  "addToDefiniton": [
+    "fields",
+    "indexes"
+  ],
+  "updateDefinition": [
+    "name",
+    "displayField",
+    "description",
+    "copyrightText",
+    "editFieldsInfo",
+    "minScale",
+    "maxScale",
+    "fields",
+    "maxRecordCount",
+    "drawingInfo",
+    "types",
+    "templates",
+    "indexes",
+    "defaultVisibility",
+    "hasAttachments",
+    "typeIdField",
+    "timeInfo",
+    "xssTrustedFields",
+    "allowUpdateWithoutMValues",
+    "maxResultWindow",
+    "maxRecordCountFactor",
+    "tableMetadata",
+    "propagateVisibleFields",
+    "hasGeometryProperties",
+    "layerCache",
+    "attachmentProperties",
+    "lodInfos",
+    "lastEditDate",
+    "capabilities",
+    "allowGeometryUpdates",
+    "ownershipBasedAccessControlForFeatures",
+    "definitionQuery"
+  ]
+},
+```
+
+ 

@@ -1,0 +1,394 @@
+---
+title: "Edit (Scaling)"
+description: "The edit operation updates the scaling and resource allocation for an individual service."
+slug: "edit-scaling"
+url: "/edit-scaling"
+guid: "GUID-029B7936-01B9-4D2F-AC27-178CA56445B1"
+migratedTopicMetadata:
+  FTITLE: "Edit Scaling"
+  FDESCRIPTION: ""
+  FCHANGES: "Changing hpaVersion examples"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2-*"
+  CREATED-ON: "31/10/2023 16:27:26"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "09/11/2023 19:33:51"
+  VERSION: "6"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-BF5B2F6C-5521-44C6-9C45-1E84A99EB59A"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /services/<serviceName.serviceType>/scaling/edit
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /services/<ServiceName>.<ServiceType>/scaling/edit
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed with either the "Update", "Delete", or "Security and infrastructure" privileges, or the Publisher role
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `edit` operation updates the scaling (`replicas`, `min`, and `max`) and resource allocation (`cpuMin`, `cpuMax`, `memoryMin`, and `memoryMax`) for an individual service. Changes made using this operation will be reflected in the [deployment resource](/deployment) for the GIS service microservice.
+
+### Scaling in ArcGIS Enterprise on Kubernetes
+
+Either manual scaling or autoscaling can be set for a GIS service microservice using the `serviceScalingSpec` parameter. Introduced at ArcGIS Enterprise on Kubernetes 10.9.1, autoscaling allows administrators to configure and deploy systems that respond to unexpected performance demands with minimal intervention and overhead. The ArcGIS Enterprise on Kubernetes autoscaling feature uses [horizontal pod autoscaling](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/), which, in response to an increase in resource usage, deploys more pods according to the values set by the administrator.
+
+When a specific CPU utilization threshold (`averageUtilization` ) is crossed, ArcGIS Enterprise on Kubernetes scales the number of pods up to the maximum (`max` ) values set in the `replicas` JSON object. When utilization drops, and the additional resources are no longer needed, the system scales itself back down to no lower than the minimum (`min` ) value set in the `replicas`  JSON object. For more information on how to enable autoscaling, see the [Editable properties](#editable-properties) section below.
+
+Though scaling properties can be updated using the [Edit](/edit-deployment-properties) default properties and [Edit](/edit-deployment) deployment operation, to reduce risk of errors it is recommended that changes to scaling information is performed using this operation.
+
+<Note type={"note"}>
+
+When updating the scaling information for a shared instance service, such as a shared instance map service or hosted feature service, the scaling changes are applied to the deployments used to run those services and other shared instance services of a similar type.
+
+</Note>
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serviceScalingSpec` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The service scaling properties, represented as a JSON object.
+
+      ```markdown label=Example
+      serviceScalingSpec={
+        "scalingSpec": [
+          {
+            "deploymentType": "MapServer",
+            "replicas": {
+              "min": 3,
+              "max": 3,
+              "scalingMode": "manual"
+            },
+            "deploymentId": "kui6zmtqzkjrsihh6tegq",
+            "resources": {
+              "memoryMin": "500Mi",
+              "memoryMax": "2Gi",
+              "cpuMin": "0.125",
+              "cpuMax": "2"
+            }
+          }
+        ]
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.9.1. This parameter specifies whether the operation will run synchronously or asynchronously. If `false`, the operation is run synchronously. If `true`, the operation is run asynchronously and the response returns a JSON object containing job information that can be used to track the job's status. The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Scaling properties
+
+The following example demonstrates the `scalingSpec` JSON object of a GIS service microservice:
+
+```other
+{
+  "scalingSpec": [
+    {
+      "deploymentType": "MapServer",
+      "replicas": {
+        "min": 3,
+        "max": 3,
+        "scalingMode": "manual"
+      },
+      "deploymentId": "knftr3em9ezf1rb7tvpym",
+      "resources": {
+        "memoryMin": "500Mi",
+        "memoryMax": "2Gi",
+        "cpuMin": "0.125",
+        "cpuMax": "2"
+      }
+    }
+  ]
+}
+```
+
+The following sections outline the individual properties included in the `scalingSpec` JSON object that can, and cannot, be updated using this operation.
+
+
+### Editable properties
+
+The following properties can be updated using the `edit` operation:
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `replicas` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The number of replicas for the service. The default value for `manual` scaling for `min` and `max` is 1. For manual scaling, both the `min` and `max` values must be the same.
+
+      ```markdown label=Example
+      "replicas": {
+        "min": 3,
+        "max": 3,
+        "scalingMode": "manual"
+      },
+      ```
+
+      For organizations using ArcGIS Enterprise 11.2 on Kubernetes or later versions, version 2 (v2) of the autoscaling feature can be enabled by passing in the JSON object below and modifying the `min`, `max`, `scalingMode`, and `averageUtilization` values.
+
+      <Note type={"legacy"}>
+
+      Prior to 11.2, the beta version of v2 autoscaling (v2beta2) could be enabled and be used to configure advanced scaling settings. At Kubernetes v1.26, [v2beta2 is no longer supported](https://kubernetes.io/blog/2022/11/18/upcoming-changes-in-kubernetes-1-26/#removal-of-the-v2beta2-horizontalpodautoscaler-api). Organizations that are upgrading to v1.26, and are using a deployment of ArcGIS Enterprise on Kubernetes at 11.2 or higher, must update their HPA configurations from `autoscaling/v2beta2` to `autoscaling/v2`.
+
+      </Note>
+
+      Autoscaling can be enabled by adjusting the `scalingMode` value to `auto`. The `averageUtilization` value will act as the CPU utilization threshold for autoscaling. If the threshold is crossed, ArcGIS Enterprise on Kubernetes scales up to the number of pods specified by the `max` value, and will return to no lower than the default pod level (the value set for `min`) once utilization decreases.
+
+      Advanced scaling settings for version 2 of autoscaling, such as scaling behaviors, can also be set with this operation.
+
+      ```other label=Example
+      "replicas": {
+        "min": 1,
+        "max": 10,
+        "scalingMode": "auto",
+        "autoscaling": {
+          "hpaSpec": {
+            "metrics": [
+              {
+                "resource": {
+                  "name": "cpu",
+                  "target": {
+                    "averageUtilization": "65",
+                    "type": "Utilization"
+                  }
+                },
+                "type": "Resource"
+              }
+            ],
+            "behavior": {
+              "scaleDown": {
+                "stabilizationWindowSeconds": 600, //Waits 10 minutes to observe recommendations and goes with an appropriate value for replicas to either scale up or down.
+                "policies": [ //Two policies for scale down behaviors. Allows for staggering or setting limits on the rate of scaling down.
+                  {
+                    "periodSeconds": 180,
+                    "type": "Pods",
+                    "value": 5
+                  },
+                  {
+                    "periodSeconds": 80,
+                    "type": "Percent",
+                    "value": 25
+                  }
+                ]
+              },
+              "scaleUp": {
+                "policies": [ //Two policies for scale up behaviors. Allows for staggering or setting limits on the rate of scaling up.
+                  {
+                    "periodSeconds": 180,
+                    "type": "Pods",
+                    "value": 5
+                  },
+                  {
+                    "periodSeconds": 80,
+                    "type": "Percent",
+                    "value": 25
+                  }
+                ]
+              }
+            },
+            "hpaVersion": "autoscaling/v2"
+          }
+        }
+      },
+      ```
+
+      Organizations using ArcGIS Enterprise on Kubernetes 10.9.1 can enable version 1 of the autoscaling feature by passing in the JSON object below and modifying the `min`, `max`, `scalingMode`, and `targetCPUUtilizationPercentage` values:
+
+      ```other label=Example
+      "replicas": {
+        "min": 1,
+        "max": 5,
+        "scalingMode": "auto",
+        "autoscaling": {
+          "hpaSpec": {
+            "targetCPUUtilizationPercentage": 50
+          },
+          "hpaVersion": "autoscaling/v1"
+        }
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `resources` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The minimum and maximum resource allocations for the microservice, including the minimum memory (`memoryMin`) and minimum CPU (`cpuMin`) resources required for the service to start.
+
+      ```markdown label=Example
+      "resources": {
+        "memoryMin": "500Mi",
+        "memoryMax": "2Gi",
+        "cpuMin": "0.125",
+        "cpuMax": "2"
+      },
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+### Uneditable properties
+
+The following properties cannot be edited but are required to be passed through in the `serviceScalingSpec` object:
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `deploymentType` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The GIS service microservice type.
+
+      Values: `FeatureServer` | `GeometryServer` | `GPServer` | `GPSyncServer` | `MapServer` | `TileServer`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `deploymentId` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The microservice ID.
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `edit` operation that demonstrates autoscaling, formatted for readability:
+
+```other
+POST /context/admin/services/MyService.MapServer/scaling/edit HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+serviceScalingSpec={
+  "scalingSpec": [
+    {
+      "deploymentType": "MapServer",
+      "replicas": {
+        "min": 1,
+        "max": 4,
+        "scalingMode": "auto",
+        "autoscaling": {
+          "hpaSpec": {
+            "metrics": [
+              {
+                "resource": {
+                  "name": "cpu",
+                  "target": {
+                    "averageUtilization": "50",
+                    "type": "Utilization"
+                  }
+                },
+                "type": "Resource"
+              }
+            ],
+            "hpaVersion": "autoscaling/v2"
+          }
+        }
+      },
+      "deploymentId": "kui6zmtqzkjrsihh6tegq",
+      "resources": {
+        "memoryMin": "500Mi",
+        "memoryMax": "2Gi",
+        "cpuMin": "0.125",
+        "cpuMax": "2"
+      }
+    }
+  ]
+}&async=false&f=pjson&token=_2AKqbDf5yQyOBrCXyfoMx3vHLY3z7Hp-ZQ27GJXN9Vqz5og2NnjAZjbHiB6YUnLg3gslmfCkDWgqEtsPmLIXB3gnhkmYD3VzM698NLJnoN4gOlXdn3EXX3UUJGXO4s19-fh8_stvig0ldDffzz6AuAbOWLPlTf0hOmyhxNJi8WckhJMV_VZ1SHNAGrcwdF6hPKoUQHTqcoAqNdsBUglm1VqH2nG8oq1a9JjESkTtDR12Yc-4dlttQPyiDsRVwZu
+
+```
+
+## JSON Response example
+
+If `async` is `false`, the following response is returned once a service's scaling is edited successfully:
+
+```other
+{"status": "success"}
+```
+
+If `async` is `true`, the following response is returned. The value returned for `jobsUrl` can be used to access the job resource to track a job's status after it has been submitted. For more information, see the [Job resource](/job) topic.
+
+```other
+{
+  "jobsUrl": "https://organization.domain.com/context/admin/jobs/ja2ca1a35-881c-400c-a49a-b26883002d6c",
+  "jobID": "ja2ca1a35-881c-400c-a49a-b26883002d6c",
+  "jobStatus": "SUBMITTED"
+}
+```

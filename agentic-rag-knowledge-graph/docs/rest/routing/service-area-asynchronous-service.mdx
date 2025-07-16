@@ -1,0 +1,5382 @@
+---
+title: "/GenerateServiceAreas"
+description: "Find the area that can be reached from the input location within a given travel time or travel distance using the Service area service"
+uid: "service-area-job"
+slug: "service-area-asynchronous-service"
+url: "/routing/service-area-asynchronous-service"
+guid: "GUID-EFCEDD90-FB38-4CD4-9E2B-75F502716C3F"
+migratedTopicMetadata:
+  FTITLE: "Service Area Asynchronous Service"
+  FDESCRIPTION: ""
+  FCHANGES: "Doc result and input operation supported by all job requests
+"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "agol March2023 - *"
+  CREATED-ON: "28/03/2023 11:43:12"
+  FAUTHOR: "pchopra"
+  FSTATUS: "Released"
+  MODIFIED-ON: "17/04/2023 11:28:11"
+  VERSION: "23"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-939232F5-ECA1-49DD-B35A-413AA035AEFD"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: "VUSERGROUPARCGISONLINEDOC"
+restInfoMetadata: {}
+---
+
+With the Service area service, you can find the area that can be reached from the input location within a given travel time or travel distance. A service area is the area that encompasses all streets that can be accessed within a given distance or travel time from one or more locations, referred to as facilities. Service areas are generally used to visualize and measure the accessibility of facilities. For example, a three-minute drive-time polygon around a grocery store can determine which residents can reach the store within three minutes and are thus more likely to shop there. The service can also create multiple concentric service areas around one or more facilities that can show how accessibility changes with an increase in travel time or travel distance. It can be used, for example, to determine how many hospitals are within 5-, 10-, and 15-minute drive times of schools. When creating service areas based on travel times, the service can use traffic data, which can influence the area that can be reached during different times of the day.
+
+<Note type={"note"}>
+
+The service works in all the supported countries as listed in the [data coverage page](/network-coverage). One or more countries are grouped together to form an analysis region. The service can determine the best region to use based on the location of the inputs; otherwise, you can use a parameter to specify a region. The service does not support requests that span more than one region. Consequently, the service will only generate results for inputs that fall within one region. 
+
+</Note>
+
+## Request URL
+
+The Service area service supports [direct request](DEVSITE/documentation/glossary/direct-request/) and [job request](DEVSITE/documentation/glossary/job-request/). You can choose a request type based on the size of the problem you are trying to solve.
+
+To learn more about the direct request, see [Direct request](/service-area-synchronous-service) documentation.
+
+You can make a job request to the Service area service using the following form:
+
+`https://logistics.arcgis.com/arcgis/rest/services/World/ServiceAreas/GPServer/GenerateServiceAreas/submitJob?parameters` 
+
+## Request parameters
+
+The service area request takes the following parameters. The only required parameters are `facilities` , `token` , and `f` . The optional parameters have default values that are used if the parameter is not specified in the request.
+
+<StyledTable headers={"Parameter,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[facilities](/service-area-asynchronous-service#facilities)
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify one or more locations around which service areas are generated.
+
+Syntax:
+
+-   [As a collection of features](/service-area-asynchronous-service#syntax-examples-for-facilities)
+-   [As a feature service URL](/service-area-asynchronous-service#syntax-examples-for-facilities)
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[token](/service-area-asynchronous-service#token)
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Provide the identity of a user who has permissions to access the service.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[f](/service-area-asynchronous-service#f)
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the response format. 
+
+Values: `json` \| `pjson` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[travel_mode](/service-area-asynchronous-service#travel_mode)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the mode of transportation for the analysis.
+
+Value: JSON object
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[break_values](/service-area-asynchronous-service#break_values)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the size and number of service areas to generate for each facility. 
+
+The default values are demonstrated in the following example:
+
+```javascript
+break_values=5 10 15
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[break_units](/service-area-asynchronous-service#break_units)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the units for the `break_values`  parameter. 
+
+The default value is `Minutes` .
+
+Values: `Meters`  \| `Kilometers`  \| `Feet`  \| `Yards`  \| `Miles`  \| `NauticalMiles`  \| `Seconds`  \| `Minutes`  \| `Hours`  \| `Days` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[travel_direction](/service-area-asynchronous-service#travel_direction)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify whether the direction of travel used to generate the service areas is toward or away from the facilities. 
+
+The default value is `Away From Facility` .
+
+Values: `Away From Facility`  \| `Towards Facility` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[time_of_day](/service-area-asynchronous-service#time_of_day)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify whether travel times will use traffic conditions.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[time_zone_for_time_of_day](/service-area-asynchronous-service#time_zone_for_time_of_day)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the time zone of the `time_of_day`  parameter. 
+
+The default value is `Geographically Local` .
+
+Values: `Geographically Local`  \| `UTC` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[use_hierarchy](/service-area-asynchronous-service#use_hierarchy)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify whether hierarchy will be used when generating service areas. 
+
+The default value is `false` .
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[uturn_at_junctions](/service-area-asynchronous-service#uturn_at_junctions)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restrict or permit the analysis to make U-turns at junctions. 
+
+The default value is `Allowed Only at Intersections and Dead Ends` .
+
+Values: `Allowed Only at Intersections and Dead Ends`  \| `Allowed`  \| `Allowed Only at Dead Ends`  \| `Not Allowed` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[polygons_for_multiple_facilities](/service-area-asynchronous-service#polygons_for_multiple_facilities)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify how service areas will be generated when multiple facilities are present. 
+
+The default value is `Overlapping` .
+
+Values: `Overlapping`  \| `Not Overlapping`  \| `Merge by Break Value` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[polygon_overlap_type](/service-area-asynchronous-service#polygon_overlap_type)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify whether multiple service areas around a facility are created as disks or rings. 
+
+The default value is `Rings` .
+
+Values: `Rings`  \| `Disks` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[detailed_polygons](/service-area-asynchronous-service#detailed_polygons)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify whether detailed service areas will be created. 
+
+The default value is `false` .
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[polygon_trim_distance](/service-area-asynchronous-service#polygon_trim_distance)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the distance within which the service areas are trimmed.
+
+The default value is `100 meters` . 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[polygon_simplification_tolerance](/service-area-asynchronous-service#polygon_simplification_tolerance)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify how the service area geometry returned by the service will be simplified.
+
+The default value is `10 meters` .
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[point_barriers](/service-area-asynchronous-service#point_barriers)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify one or more points that act as temporary restrictions or represent additional time or distance that may be required to travel on the underlying streets.
+
+Syntax:
+
+-   [As a collection of features](/service-area-asynchronous-service#syntax-examples-for-point_barriers)
+-   [As a feature service URL](/service-area-asynchronous-service#syntax-examples-for-point_barriers)
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[line_barriers](/service-area-asynchronous-service#line_barriers)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify one or more lines that prohibit travel anywhere the lines intersect the streets.
+
+Syntax:
+
+-   [As a collection of features](/service-area-asynchronous-service#syntax-examples-for-line_barriers)
+-   [As a feature service URL](/service-area-asynchronous-service#syntax-examples-for-line_barriers)
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[polygon_barriers](/service-area-asynchronous-service#polygon_barriers)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify polygons that either prohibit travel or proportionately scale the time or distance required to travel on the streets intersected by the polygons.
+
+Syntax:
+
+-   [As a collection of features](/service-area-asynchronous-service#syntax-examples-for-polygon_barriers)
+-   [As a feature service URL](/service-area-asynchronous-service#syntax-examples-for-polygon_barriers)
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[restrictions](/service-area-asynchronous-service#restrictions)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the restrictions that will be honored by the service.
+
+[See the list](/service-area-asynchronous-service#restrictions) for acceptable values.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[attribute_parameter_values](/service-area-asynchronous-service#attribute_parameter_values)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify additional values required by an attribute or restriction, such as whether the restriction prohibits, avoids, or prefers travel on restricted roads.
+
+[See the list](/service-area-asynchronous-service#attribute_parameter_values) for acceptable values.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[impedance](/service-area-asynchronous-service#impedance)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the impedance.
+
+Values: `TravelTime`  \| `Minutes`  \| `TruckTravelTime`  \| `TruckMinutes`  \| `WalkTime`  \| `Miles`  \| `Kilometers`  .
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[analysis_region](/service-area-asynchronous-service#analysis_region)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the region in which the analysis will be performed.
+
+[See the list](/service-area-asynchronous-service#analysis_region) for acceptable values.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[save_output_network_analysis_layer](/service-area-asynchronous-service#save_output_network_analysis_layer)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify whether the service will save the analysis settings as a network analysis layer file. 
+
+The default value is `false` .
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[overrides](/service-area-asynchronous-service#overrides)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<Note type={"note"}>
+
+This parameter is for internal use only.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[time_impedance](/service-area-asynchronous-service#time_impedance)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the time-based impedance.
+
+The default value is `TravelTime` .
+
+Values: `TravelTime`  \| `Minutes`  \| `TruckTravelTime`  \| `TruckMinutes`  \| `WalkTime` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[distance_impedance](/service-area-asynchronous-service#distance_impedance)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the distance-based impedance.
+
+The default value is `Kilometers` .
+
+Values:`Miles`  \| `Kilometers` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[polygon_detail](/service-area-asynchronous-service#polygon_detail)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the level of detail for the output polygons. 
+
+The default value is `Standard` .
+
+Values: `Standard`  \| `Generalized`  \| `High` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[output_type](/service-area-asynchronous-service#output_type)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the type of output to be generated. 
+
+The default value is `Polygons` .
+
+Values: `Polygons`  \| `Lines`  \| `Polygons and lines` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[output_format](/service-area-asynchronous-service#output_format)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the format in which the output features will be created. 
+
+The default value is `Feature Set` .
+
+Values: `Feature Set`  \| `JSON File`  \| `GeoJSON File` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[env:outSR](/service-area-asynchronous-service#envoutsr)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify the spatial reference of the geometries.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[ignore_invalid_locations](/service-area-asynchronous-service#ignore_invalid_locations)
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify whether invalid input locations will be ignored. 
+
+The default value is `true` .
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[locate_settings](/service-area-asynchronous-service#locate_settings)
+
+ 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specify settings that affect how inputs are located.
+
+Value: JSON object
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Required parameters
+
+### facilities
+
+The input locations around which service areas are generated. 
+
+You can specify facility geometries as well as attributes using a more comprehensive JSON structure that represents a set of features. The property is optional; however, the JSON structure must specify either the `url`  or `features`  property: 
+
+-   `url` —Specify a REST query request to any ArcGIS Server feature, map, or geoprocessing service that returns a JSON feature set. 
+-   `features` —Specify an array of features. 
+
+    Each feature in the `features`  array represents a facility and contains the following properties:
+
+    -   `geometry` —Specify the input point geometry containing `x`  and `y`  properties along with the `spatialReference`  property. If the `spatialReference`  property is defined for the entire JSON, you don't need to define this property for each geometry. Doing so reduces the size of the input JSON if the input has many features and improves performance. This property is not required if the coordinates are in the default spatial reference, WGS84. If the coordinates are in a different spatial reference, you must specify the spatial reference's well-known ID (WKID). See [Using spatial references](DEVSITE/rest/services-reference/enterprise/using-spatial-references) to look up WKID values.
+
+        <Note type={"tip"}>
+
+        It is recommended that you explicitly specify the `spatialReference`  value, and specify it for the entire JSON rather than each individual geometry. 
+
+        </Note>
+    -   `attributes` —Specify each attribute as a key-value pair in which the key is the name of a given field, and the value is the attribute value for the corresponding field.
+
+#### Attributes for facilities
+
+The facilities feature set has an associated attribute table. The fields in the attribute table are described below.
+
+-   `ObjectID` 
+
+    The system-managed ID field.
+-   `Name` 
+
+    The name of the facility. If the name is not specified, a name is automatically generated at solve time.
+
+    All fields from the input facilities are included in the output polygons when the Polygons for Multiple Facilities parameter is set to Overlapping or Not Overlapping. The `ObjectID`  field on the input facilities is transferred to the `FacilityOID`  field on the output polygons. 
+-   `Breaks` 
+
+    Specify the extent of the service area to be calculated on a per facility basis. 
+
+    This attribute allows you to specify a different service area break value for each facility. For example, with two facilities, you can generate 5- and 10-minute service area polygons for one facility and 6-, 9-, and 12-minute polygons for the other facility.
+
+    Separate multiple break values with a space, and specify the numeric values using the dot character as your decimal separator, even if the locale of your computer defines a different decimal separator. For example, the value `5.5 10 15.5`  specifies three break values around a facility. 
+-   `AdditionalTime` 
+
+    The amount of time spent at the facility, which reduces the extent of the service area calculated for the given facility. The default value is 0.
+
+    For example, when calculating service areas that represent fire station response times, `AdditionalTime`  can store the turnout time, which is the time it takes a crew to put on the appropriate protective equipment and exit the fire station, for each fire station. Assume Fire Station 1 has a turnout time of 1 minute and Fire Station 2 has a turnout time of 3 minutes. If a 5-minute service area is calculated for both fire stations, the actual service area for Fire Station 1 is 4 minutes (since 1 of the 5 minutes is required as turnout time). Similarly, Fire Station 2 has a service area of only 2 minutes from the fire station. 
+-   `AdditionalDistance` 
+
+    The extra distance traveled to reach the facility before the service is calculated. This attribute reduces the extent of the service area calculated for the given facility. The default value is 0.
+
+    Generally, the location of a facility, such as a store location, isn't exactly on the street; it is set back somewhat from the road. This attribute value can be used to model the distance between the actual facility location and its location on the street if it is important to include that distance when calculating the service areas for the facility. 
+-   `AdditionalCost` 
+
+    The extra cost spent at the facility, which reduces the extent of the service area calculated for the given facility. The default value is 0. 
+
+    Use this attribute value when the travel mode for the analysis uses an impedance attribute that is neither time based nor distance based The units for the attribute values are interpreted to be in unknown units. 
+-   `CurbApproach` 
+
+    Specifies the direction a vehicle may arrive at and depart from the facility. 
+
+    One of the integers listed in the Coded value column in the following table must be specified as a value of this attribute. The values in the Setting column are the descriptive names for `CurbApproach`  attribute values that you may have seen when using the ArcGIS Network Analyst extension software.
+
+    <StyledTable headers={"Setting,Coded value,Description"}>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Either side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    0
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    The vehicle can approach and depart the facility in either direction, so a U-turn is allowed at the facility. This setting can be chosen if it is possible and desirable for a vehicle to turn around at the facility. This decision may depend on the width of the road and the amount of traffic or whether the facility has a parking lot where vehicles can pull in and turn around.
+
+    ![Either side of vehicle ](../../shared/routing/images/CurbApproach_EitherSide.png)
+
+    _All arrival and departure combinations are allowed with the Either side of vehicle curb approach._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Right side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    1
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches and departs the facility, the facility must be on the right side of the vehicle. A U-turn is prohibited. This is typically used for vehicles such as buses that must arrive with the bus stop on the right-hand side.
+
+    ![Right side of vehicle ](../../shared/routing/images/CurbApproach_RightSide.png)
+
+    _The allowed arrival and departure combination for the Right side of vehicle curb approach is shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Left side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    2
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches and departs the facility, the facility must be on the left side of the vehicle. A U-turn is prohibited. This is typically used for vehicles such as buses that must arrive with the bus stop on the left side.
+
+    ![Left side of vehicle ](../../shared/routing/images/CurbApproach_LeftSide.png)
+
+    _The allowed arrival and departure combination for the Left side of vehicle curb approach is shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    No U-Turn
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    3
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches the facility, the facility can be on either side of the vehicle; however, when it departs, the vehicle must continue in the same direction it arrived. A U-turn is prohibited.
+
+    ![No U-turns ](../../shared/routing/images/CurbApproach_NoU-Turns.png)
+
+    _The allowed arrival and departure combinations for the No U-Turn curb approach are shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    </StyledTable>
+
+    The `CurbApproach`  attribute is designed to work with both types of national driving standards: right-hand traffic (United States) and left-hand traffic (United Kingdom). First, consider an incident on the left side of a vehicle. It is always on the left side regardless of whether the vehicle travels on the left or right half of the road. What may change with national driving standards is your decision to approach an incident from one of two directions, that is, so it ends up on the right or left side of the vehicle. For example, if you want to arrive at an incident and not have a lane of traffic between the vehicle and the incident, choose 1 (Right side of vehicle) in the United States and 2 (Left side of vehicle) in the United Kingdom.
+
+    <ColumnLayout layout={2}>
+
+    <Column>
+
+    <Figure>
+
+    ![Right side of vehicle with right-hand traffic](../../shared/routing/images/CurbApproach_RightSide.png)
+
+    <Caption>
+
+    _With right-hand traffic, the curb approach that leaves the vehicle closest to the facility is Right side of vehicle._
+
+    </Caption>
+
+    </Figure>
+
+    </Column>
+
+    <Column>
+
+    <Figure>
+
+    ![Left side of vehicle with left-hand traffic ](../../shared/routing/images/CurbApproach_LeftSideDriving.png)
+
+    <Caption>
+
+    _With left-hand traffic, the curb approach that leaves the vehicle closest to the facility is Left side of vehicle._
+
+    </Caption>
+
+    </Figure>
+
+    </Column>
+
+    </ColumnLayout>
+-   `Bearing` 
+
+    The direction in which a point is moving. The units are degrees and are measured clockwise from true north. This field is used in conjunction with the `BearingTol`  field. 
+
+    Bearing data is usually sent automatically from a mobile device equipped with a GPS receiver. Try to include bearing data if you are loading an input location that is moving, such as a pedestrian or a vehicle. 
+
+    Using this field tends to prevent adding locations to the wrong edges, which can occur when a vehicle is near an intersection or an overpass, for example. Bearing also helps the tool determine on which side of the street the point is. 
+
+    [Learn more about bearing and bearing tolerance](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/bearing-and-bearing-tolerance.htm)
+-   `BearingTol` 
+
+    The bearing tolerance value creates a range of acceptable bearing values when locating moving points on an edge using the `Bearing`  field. If the `Bearing`  field value is within the range of acceptable values that are generated from the bearing tolerance on an edge, the point can be added as a network location there; otherwise, the closest point on the next-nearest edge is evaluated. 
+
+    The units are in degrees, and the default value is 30. Values must be greater than 0 and less than 180. A value of 30 means that when Network Analyst attempts to add a network location on an edge, a range of acceptable bearing values is generated 15 degrees to either side of the edge (left and right) and in both digitized directions of the edge. 
+
+    [Learn more about bearing and bearing tolerance](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/bearing-and-bearing-tolerance.htm)
+-   `NavLatency` 
+
+    This field is only used in the solve process if the `Bearing`  and `BearingTol`  fields also have values; however, entering a `NavLatency`  field value is optional, even when values are present in `Bearing`  and `BearingTol` . `NavLatency`  indicates how much cost is expected to elapse from the moment GPS information is sent from a moving vehicle to a server and the moment the processed route is received by the vehicle's navigation device. 
+
+    The units of `NavLatency`  are the same as the units of the impedance attribute.
+
+#### Syntax examples for facilities
+
+The following is the syntax for specifying facilities using a JSON structure for features:
+
+```other
+{
+  "spatialReference": {
+    "wkid": <wkid>,
+    "latestWkid": <wkid>
+  },
+  "features": [
+    {
+      "geometry": {
+        "x": <x1>,
+        "y": <y1>
+      },
+      "attributes": {
+        "<field1>": <value1_1>,
+        "<field2>": <value1_2>
+      }
+    },
+    {
+      "geometry": {
+        "x": <x2>,
+        "y": <y2>
+      },
+      "attributes": {
+        "<field1>": <value2_1>,
+        "<field2>": <value2_2>
+      }
+    }
+  ] 
+}
+```
+
+ 
+
+The following is the syntax for specifying facilities with custom attributes using a JSON structure for features:
+
+```other
+{
+  "spatialReference": {
+    "wkid": <wkid>,
+    "latestWkid": <wkid>
+  },
+  "fields": [
+    {
+      "name": <name1>,
+      "type": <esriFieldType>,
+      "alias": <alias1>,
+      "length": <length>
+    },
+    {
+      "name": <name2>,
+      "type": <esriFieldType>,
+      "alias": <alias2>,
+      "length": <length>
+    }
+  ],
+  "features": [
+    {
+      "geometry": {
+        "x": <x1>,
+        "y": <y1>
+      },
+      "attributes": {
+        "<name1>": <value1_1>,
+        "<name2>": <value1_2>
+      }
+    },
+    {
+      "geometry": {
+        "x": <x2>,
+        "y": <y2>
+      },
+      "attributes": {
+        "<name1>": <value2_1>,
+        "<name2>": <value2_2>
+      }
+    }
+  ] 
+}
+```
+
+ 
+
+The following is the syntax for specifying facilities using a URL returning a JSON response:
+
+```other
+{
+  "url": "<url>"
+}
+```
+
+ 
+
+#### Examples for facilities
+
+Example 1: Specify facilities in the spatial reference of the network dataset using a JSON structure. The example shows how to specify names for the facilities using the `Name`  attribute.
+
+```other
+{
+  "features": [
+    {
+      "geometry": {
+        "x": -0.1891,  
+        "y": 51.5254
+      },
+      "attributes": {
+        "Name": "Fire Station 35"                             
+      }
+    },
+    {
+      "geometry": {
+        "x": -0.1744,
+        "y": 51.5353
+      },
+      "attributes": {
+        "Name": "Fire Station 29"
+      }
+    }
+  ]
+}
+```
+
+ 
+
+Example 2: Specify facilities in the Web Mercator spatial reference using a JSON structure
+
+```other
+{
+  "spatialReference": {
+    "wkid": 102100
+  },
+  "features": [
+    {
+      "geometry": {                
+        "x": 2698533.989,
+        "y": 5192521.476
+      },
+      "attributes": {
+        "Name": "123 Main Street" 
+      }
+    },
+    {
+      "geometry": {
+        "x": 2697821.094, 
+        "y": 5191915.261
+      },
+      "attributes": {
+        "Name": "845 Cypress Ave"
+      }
+    }
+  ]
+}
+```
+
+ 
+
+Example 3: Specify facilities with custom fields using a JSON structure
+
+In this example, the facilities include a custom field, `SquareFootage` ; therefore, the field schema must be defined in the `fields`  attribute. The schema of default fields must also be defined whenever a custom field is present, so the schema of the `Name`  field is also defined. The values for the fields are specified in the `features`  attribute. The output service areas will include copies of these input fields as long as `polygons_for_multiple_facilities`  isn't set to `Merge by Break Value` . The facility geometries are in the spatial reference of the network dataset, so the `spatialReference`  attribute isn't required. 
+
+```other
+{
+  "fields": [
+    {
+      "name": "Name",
+      "type": "esriFieldTypeString",
+      "alias": "Square Footage",
+      "length": 128
+    },
+    {
+      "name": "SquareFootage",
+      "type": "esriFieldTypeInteger",
+      "alias": "Square Footage",
+      "length": 10
+    }
+  ],
+  "features": [
+    {
+      "geometry": {
+        "x": -122.253,
+        "y": 37.757
+      },
+      "attributes": {
+        "Name": "SF Store",
+        "SquareFootage": 1800
+      }
+    },
+    {
+      "geometry": {
+        "x": -77.067,
+        "y": 38.907
+      },
+      "attributes": {
+        "Name": "DC Store",
+        "SquareFootage": 1300
+      }
+    }
+  ]
+}
+```
+
+ 
+
+Example 4: Specify facilities using a URL
+
+The URL makes a query for a few features from a map service. A URL querying features from a feature service can also be specified.
+
+```other
+{
+    "url": "https://sampleserver6.arcgisonline.com/arcgis/rest/services/NetworkAnalysis/SanDiego/MapServer/21/query?where=1%3D1&outFields=Name&f=json"
+}
+```
+
+ 
+
+### token
+
+Use this parameter to specify a token that provides the identity of a user that has the permissions to access the service. The [security and authentication](https://developers.arcgis.com/documentation/mapping-apis-and-services/security/) page provides more information about how an access token can be obtained.
+
+```other
+token=<yourToken>
+```
+
+ 
+
+### f
+
+Use this parameter to specify the response format. The parameter can have `json`  or `pjson`  as arguments, for example, `f=json` . The `pjson`  value is used for printing the JSON response in a prettified format. 
+
+## Optional parameters
+
+The following are optional parameters:
+
+### travel_mode
+
+Choose the mode of transportation for the analysis. 
+
+Travel modes are managed in ArcGIS Online and can be configured by the administrator of your organization to better reflect the organization's workflows. 
+
+[Learn more about travel modes](https://doc.arcgis.com/en/arcgis-online/reference/travel-modes.htm)
+
+You must specify the JSON object containing the settings for a travel mode supported by your organization. To get a list of supported travel modes, execute the `GetTravelModes`  tool from the Utilities service.
+
+The value for the `travel_mode`  parameter should be a JSON object representing travel mode settings. When you use the `GetTravelModes`  tool from the [Utilities service](DEVSITE/rest/services-reference/enterprise/gettravelmodes-tool), you get a string representing the travel mode JSON. You need to convert this string to a valid JSON object using your API and then pass the JSON object as the value for the `travel_mode`  parameter.
+
+For example, below is a string representing the Walking Time travel mode as returned by the `GetTravelModes`  tool.
+
+```javascript
+"{\"attributeParameterValues\": [{\"parameterName\": \"Restriction Usage\", \"attributeName\": \"Walking\", \"value\": \"PROHIBITED\"}, {\"parameterName\": \"Restriction Usage\", \"attributeName\": \"Preferred for Pedestrians\", \"value\": \"PREFER_LOW\"}, {\"parameterName\": \"Walking Speed (km/h)\", \"attributeName\": \"WalkTime\", \"value\": 5}], \"description\": \"Follows paths and roads that allow pedestrian traffic and finds solutions that optimize travel time. The walking speed is set to 5 kilometers per hour.\", \"impedanceAttributeName\": \"WalkTime\", \"simplificationToleranceUnits\": \"esriMeters\", \"uturnAtJunctions\": \"esriNFSBAllowBacktrack\", \"restrictionAttributeNames\": [\"Preferred for Pedestrians\", \"Walking\"], \"useHierarchy\": false, \"simplificationTolerance\": 2, \"timeAttributeName\": \"WalkTime\", \"distanceAttributeName\": \"Miles\", \"type\": \"WALK\", \"id\": \"caFAgoThrvUpkFBW\", \"name\": \"Walking Time\"}"
+```
+
+ 
+
+The above value should be converted to a valid JSON object and passed as the value for the `travel_mode`  parameter.
+
+```javascript
+travel_mode={"attributeParameterValues":[{"parameterName":"Restriction Usage","attributeName":"Walking","value":"PROHIBITED"},{"parameterName":"Restriction Usage","attributeName":"Preferred for Pedestrians","value":"PREFER_LOW"},{"parameterName":"Walking Speed (km/h)","attributeName":"WalkTime","value":5}],"description":"Follows paths and roads that allow pedestrian traffic and finds solutions that optimize travel time. The walking speed is set to 5 kilometers per hour.","impedanceAttributeName":"WalkTime","simplificationToleranceUnits":"esriMeters","uturnAtJunctions":"esriNFSBAllowBacktrack","restrictionAttributeNames":["Preferred for Pedestrians","Walking"],"useHierarchy":false,"simplificationTolerance":2,"timeAttributeName":"WalkTime","distanceAttributeName":"Miles","type":"WALK","id":"caFAgoThrvUpkFBW","name":"Walking Time"}
+```
+
+ 
+
+The default value,`Custom` , allows you to configure your own travel mode. When you pass in `Custom` , you can set values for the following parameters: `impedance` , `time_impedance` , `distance_impedance` , `uturn_at_junctions` , `use_hierarchy` , `route_line_simplification_tolerance` , `restrictions` , and `attribute_parameter_values` . You can choose `Custom`  and set the custom travel mode parameters listed above, for example, to model a pedestrian with a fast walking speed or a truck with a given height, weight, and cargo of certain hazardous materials. You can try out different settings to get desired analysis results. Once you have identified the analysis settings, you should work with your organization's administrator and save these settings as part of new or existing travel mode so that everyone in your organization can rerun the analysis with the same settings. 
+
+The default values of the custom travel mode parameters model traveling by car. If you specify the travel mode as `Custom`  or do not provide a value for the `travel_mode`  parameter, the analysis will be similar to using the default `Driving Time`  travel mode.
+
+<Note type={"caution"}>
+
+When the `travel_mode`  parameter is not set to `Custom` , this means you are choosing a travel mode configured by your organization, and the service automatically overrides the values of other parameters with values that model the chosen travel mode. The following parameters are overridden: `impedance` , `time_impedance` , `distance_impedance` , `uturn_at_junctions` , `use_hierarchy` , `route_line_simplification_tolerance` , `restrictions` , and `attribute_parameter_values` . 
+
+</Note>
+
+### break_values
+
+Use this parameter to specify the size and number of service areas to generate for each facility. The units are determined by the `break_units`  parameter. If units are time based, the service areas are generated based on travel time along underlying streets. If units are distance based, the service areas are generated based on travel distances.
+
+<Note type={"caution"}>
+
+The service imposes a limit of 5 hours (300 minutes) for the largest value that can be specified as the `break_values`  parameter when generating time-based service areas and a limit of 300 miles (482.80 kilometers) when generating distance-based service areas. These limits are reduced to 15 minutes and 15 miles (24.14 kilometers), respectively, when generating detailed polygons (`detailed_Polygons`  = `true` ). If the value is exceeded, the response returns an error message. 
+
+</Note>
+
+Multiple area breaks can be specified to create concentric service areas per facility. For instance, to find 2-, 3-, and 5-mile service areas for each facility, specify `break_values=2 3 5` , separating the values with a space, and set `break_units`  to `Miles` .
+
+<Note type={"note"}>
+
+The values should always use a period as the decimal separator, even in countries where a comma is traditionally used. 
+
+</Note>
+
+The default value for this parameter is demonstrated in the example below:
+
+```javascript
+break_values=5 10 15
+```
+
+ 
+
+### break_units
+
+Use this parameter to specify the units for the `break_values`  parameter. The parameter is specified using the following values:
+
+-   `Meters` 
+-   `Kilometers` 
+-   `Feet` 
+-   `Yards` 
+-   `Miles` 
+-   `NauticalMiles` 
+-   `Seconds` 
+-   `Minutes` 
+-   `Hours` 
+-   `Days` 
+
+The default value is `Minutes` .
+
+### travel_direction
+
+Specifies whether the direction of travel used to generate the service area polygons is toward or away from the facilities. 
+
+-   `Away From Facility` —The service area is generated in the direction away from the facilities. 
+-   `Towards Facility` —The service area is created in the direction toward the facilities.
+
+The direction of travel may change the shape of the polygons because impedances on opposite sides of streets may differ or one-way restrictions may exist, such as one-way streets. The direction you should choose depends on the nature of your service area analysis. The service area for a pizza delivery store, for example, should be created away from the facility, whereas the service area of a hospital should be created toward the facility.
+
+The default value for this parameter is `Away From Facility` .
+
+### time_of_day
+
+Specify the time and date to depart from or arrive at facilities. This parameter is ignored when `break_units`  is set to distance units.
+
+To use traffic in the analysis, set `break_units`  to a time-based unit, and assign a value to `time_of_day` . The `time_of_day`  value represents the time at which travel begins, or departs, from the input points. The time is specified as Unix time (milliseconds since midnight, January 1, 1970). 
+
+The interpretation of the parameter value depends on whether travel is toward or away from the facilities as specified by the `travel_direction`  parameter.
+
+-   It represents the departure time if `travel_direction`  is set to `Away From Facility` . This is the default.
+-   It represents the arrival time if `travel_direction`  is set to `Towards Facility` .
+
+If a time of day is not passed in, the service uses static road speeds based on average historical speeds or posted speed limits. It uses posted speeds in areas where historical traffic information isn't available.
+
+<Note type={"note"}>
+
+Traffic is supported only with the driving time impedance or travel mode. 
+
+</Note>
+
+The service support two kinds of traffic: live and typical.
+
+If the `time_Of_day`  specified is within 1 hour of the current time, live traffic will be used where available. Live traffic retrieves speeds based on phone probe records, sensors, and other data sources and reflects the current travel speeds and predicts speeds for the near future. If the `time_Of_day`  specified is earlier than 1 hour or later than 1 hour from the current time, or the road does not have live traffic, typical traffic speeds will be used. Typical speeds are based on historical traffic patterns. The travel time data is aggregated in 15 minute intervals per day of week based on multiple years worth of data. So a road may have a different travel time at Monday at 8 am, Monday at 8:15 am, or Tuesday at 8 am. Since the variance is just at the day of week and time of day, the travel time is the same on a road for any Monday at 8 am, regardless of the month or year.
+
+If your goal is to model typical travel conditions and avoid large variances from the average due to live traffic, it is recommended to use a date from the past to ensure it doesn't coincide with the 1 hour window from the current time. As an extreme example, you can even use dates from 1990.
+
+The [Data Coverage page](http://links.esri.com/arcgis-online-data-coverage-map-for-directions-and-routes) shows the countries Esri currently provides traffic data for.
+
+#### Typical traffic
+
+To ensure the task uses typical traffic in locations where it is available, choose a time and day of the week; then convert the day of the week to one of the following dates from 1990:
+
+-   Monday—1/1/1990
+-   Tuesday—1/2/1990
+-   Wednesday—1/3/1990
+-   Thursday—1/4/1990
+-   Friday—1/5/1990
+-   Saturday—1/6/1990
+-   Sunday—1/7/1990
+
+Set the time and date as UNIX time in milliseconds. For example, to solve for 1:03 p.m. on Thursdays, set the time and date to 1:03 p.m., January 4, 1990, and convert to milliseconds (`631458180000` ). Although the dates representing days of the week are from 1990, typical traffic is calculated from recent traffic trends—usually over the last two years worth of data.
+
+#### Live traffic
+
+To use live traffic when and where it is available, choose a time and date and convert to Unix time.
+
+<Note type={"note"}>
+
+ You need to have a Live Traffic extension and configure your Street Map Premium network dataset to access live traffic.
+
+</Note>
+
+Esri saves live traffic data for 1 hour and references predictive data extending 1 hour into the future. If the time and date you specify for this parameter is outside the 2-hour time window, or the travel time in the analysis continues past the predictive data window, the task falls back to typical traffic speeds.
+
+#### Examples for time_of_day
+
+Example one: 13:03, January 4, 1990. Typical traffic on Thursdays at 1:03 p.m.
+
+```javascript
+"time_Of_day": 631458180000
+```
+
+ 
+
+Example two: 17:00, January 7, 1990. Typical traffic on Sundays at 5:00 p.m.
+
+```javascript
+"time_Of_day": 631731600000
+```
+
+ 
+
+Example four: 10:20, March 18, 2015. If the current time is between 6:20 a.m., March 18, 2015, and 2:20 p.m., March 18, 2015, live traffic speeds are referenced in the analysis; otherwise, typical traffic speeds are referenced.
+
+```javascript
+"time_Of_day": 1426674000000
+```
+
+ 
+
+### time_zone_for_time_of_day
+
+Specify the time zone or zones of the `time_Of_day`  parameter. There are two options: `Geographically Local`  and `UTC` . 
+
+The default value is `Geographically Local` . 				
+
+#### False (use geographically local time zones)
+
+The `timeOfDay`  value refers to the time zone or zones in which the input points are located. This option causes the analysis to have rolling start times across time zones.
+
+The following image illustrates setting the value to `false`  (geographically local). Setting `timeOfDay`  to 9:00 a.m., January 4, 1990 (631443600000 milliseconds) and `timeOfDayIsUTC`  to `false` , and submitting a valid request causes the drive times for points in the eastern time zone to start at 9:00 a.m. and 9:00 a.m. central time for points in the central time zone. (The start times are offset by an hour in real or UTC time.) 
+
+![timeOfDayIsUTC set to false](../../shared/routing/images/TimeZoneForTimeOfDay_GeoLocal.png)
+
+_Input: `timeOfDay`  is 9:00 a.m., January 4, 1990 (631443600000 milliseconds), and `timeOfDayIsUTC`  is set to `false` _
+
+#### True (use UTC)
+
+The `timeOfDay`  value refers to coordinated universal time (UTC). The start times for all points are simultaneous, regardless of time zones.
+
+The following image illustrates setting the value to `true`  (UTC). Setting `timeOfDay`  to 9:00 a.m., January 4, 1990 (631443600000 milliseconds) and `timeOfDayIsUTC`  to `true`  causes the start time for points in the eastern time zone to be 4:00 a.m. eastern time and 3:00 a.m. central time for those in the central time zone.
+
+![timeOfDayIsUTC set to true](../../shared/routing/images/TimeZoneForTimeOfDay_utc.png)
+
+_Input: `timeOfDay`  is 9:00 a.m., January 4, 1990 (631443600000 milliseconds), and `timeOfDayIsUTC`  is set to `true` _
+
+### use_hierarchy
+
+Use this parameter to specify whether hierarchy will be used when generating service areas.
+
+<Note type={"caution"}>
+
+The value of this parameter, regardless of whether you rely on the default or explicitly set a value, is overridden when `travel_mode`  is set to any other value than `Custom` . The default value for `travel_mode`  is `Driving` , so unless you set `travel_mode`  to a different value, this parameter value will be overridden.
+
+</Note>
+
+-   `true` —The service will use hierarchy. When generating hierarchical service areas, the service prefers higher-order streets, such as freeways, to lower-order streets, such as local roads. This means that if a facility is located on a local road (the lowest level in a hierarchy), the service spans out on the local roads in that area, but it tries to step up the hierarchy to secondary and primary roads. Once on secondary and primary roads, the service ignores local roads throughout the rest of the service area. Mainly because of this hierarchical approach, hierarchical service areas are generated much faster compared to nonhierarchical service areas, as the service has to generate service areas from a relatively smaller subset of streets. Hierarchical service areas can be used to simulate the driver preference of traveling on freeways instead of local roads even if that means a longer trip. However, the areas can overlap some lower-order roads that can't be reached within the given travel distance or travel time. Consequently, hierarchical service areas can be less accurate.
+-   `false` —The service will not use hierarchy. This results in service areas that are measured along all the streets, regardless of hierarchy level, and tend to be higher quality compared to their hierarchical counterparts. 
+
+The default value is `false` . 
+
+<Note type={"caution"}>
+
+The service automatically reverts to using hierarchy, even if you have chosen not to use it, when the largest value specified in the `break_values`  parameter equates to a time or distance that is greater than 240 minutes or 240 miles (386.24 kilometers). If the `detailed_polygons`  parameter is set to `true` , the service reverts to using hierarchy if the largest break value is greater than 15 minutes or 15 miles.
+
+</Note>
+
+Some service parameters are not applicable when generating hierarchical service areas.
+
+-   The `polygon_trim_distance`  parameter is ignored and, if specified, results in a warning message in the service response.
+-   Generating detailed service areas, specified using a value of `true`  for the `detailed_polygons`  parameter, is not supported and results in a failed request. 
+
+
+-   The `polygon_trim_distance`  parameter is ignored and, if specified, results in a warning message in the service response.
+-   Generating detailed service areas, specified using a value of `true`  for the `detailed_polygons`  parameter, is not supported and results in a failed request. 
+
+### uturn_at_junctions
+
+Use this parameter to restrict or permit the route from making U-turns at junctions.
+
+<Note type={"note"}>
+
+The value of this parameter, regardless of whether you rely on the default or explicitly set a value, is overridden when `travel_mode`  is set to any other value than `Custom` . The default value for `travel_mode`  is `Driving` , so unless you set `travel_mode`  to a different value, this parameter value will be overridden.
+
+</Note>
+
+To understand the available parameter values, a junction is a point where only two streets intersect each other. If three or more streets intersect at a point, it is called as an intersection. A cul-de-sac is a dead-end. This parameter can have the following values:
+
+<StyledTable headers={"Parameter Value,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Allowed` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+U-turns are permitted everywhere. Permitting U-turns implies that the vehicle can turn around at a junction and double back on the same street. 
+
+![U-turns permitted](../../shared/routing/images/U-TurnsAtJunctions_Allowed.png)
+
+_U-turns are permitted at junctions with any number of adjacent streets._
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Allowed only at Intersections and Dead Ends` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+U-turns are prohibited at junctions where exactly two adjacent streets meet. 
+
+![U-turns permitted only at intersections and dead-ends](../../shared/routing/images/U-TurnsAtJunctions_IntersectAndDeadEnds.png)
+
+_U-turns are permitted only at intersections or dead ends._
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Allowed only at Dead Ends` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+U-turns are prohibited at all junctions and intersections and are permitted only at dead ends. 
+
+![U-turns permitted only at dead-ends](../../shared/routing/images/U-TurnsAtJunctions_DeadEnds.png)
+
+_U-turns are permitted only at dead ends._
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Not Allowed` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+U-turns are prohibited at all junctions, intersections, and dead-ends. Even when this parameter value is chosen, a route can still make U-turns at stops. To prohibit U-turns at a stop, you can set its `CurbApproach`  property to the appropriate value (3).
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+The default value for this parameter is `Allowed only at Intersections and Dead Ends` .
+
+### polygons_for_multiple_facilities
+
+Use this parameter to specify how to generate service areas when multiple facilities are present. The parameter is specified using one of the following values:
+
+-   `Overlapping` —Create individual service areas for each facility. The service areas from different facilities can overlap each other.
+-   `Not Overlapping` —Create individual service areas for each facility such that a service area from one facility cannot overlap service areas from other facilities. With this option, the area inside any given service area is closer to the corresponding facility than any other facility.
+-   `Merge by Break Value` —Join the service areas of different facilities that have the same break value. Unlike the `Overlapping`  and `Not Overlapping`  options, this option does not result in individual service areas for each facility.
+
+The default value for this parameter is `Overlapping` .
+
+### polygon_overlap_type
+
+Use this parameter to specify whether multiple service areas around a facility are created as disks or rings. The parameter is specified using one of the following values:
+
+-   `Rings` —When creating multiple service areas around a facility, do not include the region covered by the smaller service area into the region covered by the larger service area. Use this option if you want to find the area from one break to another. For instance, If you create 5- and 10-minute service areas, the 10-minute service areas will exclude the area under the 5-minute service areas and thus would appear like rings.
+-   `Disks` —When creating multiple service areas around a facility, creates service areas going from the facility to the break. For instance, If you create 5- and 10-minute service areas, the 10-minute service area will include the area under the 5-minute service area.
+
+<Note type={"note"}>
+
+Using either option will produce the same result when only one break value is specified.
+
+</Note>
+
+The default value for this parameter is `Rings` .
+
+### detailed_polygons
+
+Use this parameter to specify the option to create detailed or generalized service areas.
+
+The default value for this parameter is `false` .
+
+<Note type={"note"}>
+
+Use of this parameter is no longer recommended. If you want to generate detailed polygons, set the `polygon_detail`  parameter value to `High` .
+
+</Note>
+
+### polygon_trim_distance
+
+Use this parameter to specify the distance within which the service areas are trimmed. This is useful when finding service areas in places that have very sparse street networks and you don't want the service area to cover large areas where there are no street features.
+
+The parameter is specified as a JSON structure that includes the following properties:
+
+-   `distance` —The trim distance value. A 0 (zero) distance value specifies that the service areas should not be trimmed.
+-   `units` —The units for the trim distance value. 
+
+The property value should be specified as one of the following values: 
+
+-   `esriCentimeters` 
+-   `esriDecimalDegrees` 
+-   `esriDecimeters` 
+-   `esriFeet` 
+-   `esriInches` 
+-   `esriKilometers` 
+-   `esriMeters` 
+-   `esriMiles` 
+-   `esriMillimeters` 
+-   `esriNauticalMiles` 
+-   `esriPoints` 
+-   `esriYards` 
+
+The default value for this parameter is 100 meters. The parameter value is ignored when the `use_hierarchy`  parameter is set to `true` .
+
+#### Syntax example for polygon_trim_distance
+
+```other
+{
+  "distance": <value>,
+  "units": "<unit>"
+}
+```
+
+ 
+
+#### Example for polygon_trim_distance
+
+Example: Specify `polygon_trim_distance`  of 75 meters
+
+```other
+{
+  "distance": 75,
+  "units": "esriMeters"
+}
+```
+
+ 
+
+### polygon_simplification_tolerance
+
+Use this parameter to specify by how much you want to simplify the service area geometry returned by the service.
+
+<Note type={"note"}>
+
+The value of this parameter, regardless of whether you rely on the default or explicitly set a value, is overridden when `travel_mode`  is set to any value other than `Custom` . The default value for `travel_mode`  is `Driving` , so unless you set `travel_mode`  to a different value, this parameter value will be overridden.
+
+</Note>
+
+Simplification maintains critical points of an area to define its essential shape and removes other points. The simplification distance you specify is the maximum allowable offset that the simplified area can deviate from the original area. Simplifying an area reduces the number of points that are used to construct the area and tends to reduce drawing times.
+
+The parameter is specified as a JSON structure that includes the following properties:
+
+-   `distance` —The simplification distance value.
+-   `units` —The units for the simplification distance value. 
+
+    The property value should be specified as one of the following values: 
+
+    -   `esriCentimeters` 
+    -   `esriDecimalDegrees` 
+    -   `esriDecimeters` 
+    -   `esriFeet` 
+    -   `esriInches` 
+    -   `esriKilometers` 
+    -   `esriMeters` 
+    -   `esriMiles` 
+    -   `esriMillimeters` 
+    -   `esriNauticalMiles` 
+    -   `esriPoints` 
+    -   `esriYards` 
+
+The default value for this parameter is 10 meters.
+
+#### Syntax example for polygon_simplification_tolerance
+
+```other
+{
+  "distance": <value>,
+  "units": "<unit>"
+}
+```
+
+ 
+
+#### Example for polygon_simplification_tolerance
+
+Example: Specify `polygon_simplification_tolerance`  of 10 meters
+
+```other
+{
+  "distance": 10,
+  "units": "esriMeters"
+}
+```
+
+ 
+
+### point_barriers
+
+Use this parameter to specify one or more points that will act as temporary restrictions or represent additional time or distance that may be required to travel on the underlying streets. For example, a point barrier can be used to represent a fallen tree along a street or a time delay spent at a railroad crossing.
+
+<Note type={"note"}>
+
+The service imposes a maximum limit of 250 point barriers. If this limit is exceeded, the response returns an error message.
+
+</Note>
+
+You can specify barrier geometries as well as attributes using a more comprehensive JSON structure that references a set of features. The property is optional; however, the JSON structure must specify either the `url`  or `features`  property: 
+
+-   `url` —Specify a REST query request to any ArcGIS Server feature, map, or geoprocessing service that returns a JSON feature set. 
+-   `features` —Specify an array of features. 
+
+    Each feature in this array represents a point barrier and contains the following fields:
+
+    -   `geometry` —Specify the input point geometry containing `x`  and `y`  properties along with the `spatialReference`  property. If the `spatialReference`  property is defined for the entire JSON, you don't need to define this property for each geometry. Doing so reduces the size of the input JSON if the input has many features and improves performance. This property is not required if the coordinates are in the default spatial reference, WGS84. If the coordinates are in a different spatial reference, you must specify the spatial reference's well-known ID (WKID). See [Using spatial references](DEVSITE/rest/services-reference/enterprise/using-spatial-references) to look up WKID values.
+
+        <Note type={"tip"}>
+
+        It is recommended that you explicitly specify the `spatialReference`  value, and specify it for the entire JSON rather than each individual geometry. 
+
+        </Note>
+    -   `attributes` —Specify each attribute as a key-value pair in which the key is the name of a given field, and the value is the attribute value for the corresponding field.
+
+#### Attributes for point_barriers
+
+When specifying point barriers, you can set properties for each, such as its name or barrier type, using the following attributes:
+
+`Name` 
+
+The name of the barrier.
+
+`BarrierType` 
+
+Specifies whether the point barrier restricts travel completely or adds time or distance when it is crossed. The value for this attribute is specified as one of the following integers (use the numeric code, not the name in parentheses):
+
+-   0 (Restriction)—Prohibits travel through the barrier. The barrier is referred to as a restriction point barrier since it acts as a restriction.
+
+    ![Two maps demonstrate how a restriction point barrier affects a route analysis.](../../shared/routing/images/Point_Barriers.png)
+
+    _The first map shows the shortest path between two stops without any restriction point barriers. The second map has a road that is blocked by a fallen tree, so the shortest path between the same points is longer._
+-   2 (Added Cost)—Traveling through the barrier increases the travel time or distance by the amount specified in the `Additional_[Cost]`  attributes. This barrier type is referred to as an added cost point barrier.
+
+    ![Two maps demonstrate how added cost point barriers affect a route analysis.](../../shared/routing/images/nac_barriers_apoint.png)
+
+    _The map on the left shows the shortest path between two stops without any added cost point barrier. For the map on the right, the travel time from stop one to stop two would be the same whether going around the north end of the block or the south end; however, since crossing railroad tracks incurs a time penalty (modeled with added cost point barriers), the route with only one railroad crossing is chosen. The cost of crossing the barrier is added to the accumulated travel time of the resulting route._
+
+`Additional_Time` 
+
+The added travel time when the barrier is traversed. This field is applicable only for added-cost barriers and when the `measurement_units`  parameter is time-based
+
+This field value must be greater than or equal to zero, and its units are the same as those specified in the `measurement_units`  parameter.
+
+`Additional_Distance` 
+
+The added distance when the barrier is traversed. This field is applicable only for added-cost barriers and when the `measurement_units`  parameter is distance-based
+
+The field value must be greater than or equal to zero, and its units are the same as those specified in the `measurement_units`  parameter.
+
+`AdditionalCost` 
+
+The added cost when the barrier is traversed. This field is applicable only for added-cost barriers when the impedance attribute is neither time-based nor distance-based.
+
+`FullEdge` 
+
+Specifies how the restriction point barriers are applied to the edge elements during the analysis. The field value is specified as one of the following integers (use the numeric code, not the name in parentheses): 
+
+-   0 (False)—Permits travel on the edge up to the barrier but not through it. This is the default value.
+-   1 (True)—Restricts travel anywhere on the associated edge.
+
+`CurbApproach` 
+
+Specifies the direction of traffic that is affected by the barrier. The field value is specified as one of the following integers (use the numeric code, not the name in parentheses): 
+
+-   0 (Either side of vehicle)—The barrier affects travel over the edge in both directions.
+-   1 (Right side of vehicle)—Vehicles are only affected if the barrier is on their right side during the approach. Vehicles that traverse the same edge but approach the barrier on their left side are not affected by the barrier. 
+-   2 (Left side of vehicle)—Vehicles are only affected if the barrier is on their left side during the approach. Vehicles that traverse the same edge but approach the barrier on their right side are not affected by the barrier. 
+
+Because junctions are points and don't have a side, barriers on junctions affect all vehicles regardless of the curb approach. 
+
+The `CurbApproach`  attribute works with both types of national driving standards: right-hand traffic (United States) and left-hand traffic (United Kingdom). First, consider a facility on the left side of a vehicle. It is always on the left side regardless of whether the vehicle travels on the left or right half of the road. What may change with national driving standards is your decision to approach a facility from one of two directions, that is, so it ends up on the right or left side of the vehicle. For example, to arrive at a facility and not have a lane of traffic between the vehicle and the facility, choose 1 (Right side of vehicle) in the United States and 2 (Left side of vehicle) in the United Kingdom.
+
+`Bearing` 
+
+The direction in which a point is moving. The units are degrees and are measured clockwise from true north. This field is used in conjunction with the `BearingTol`  field. 
+
+Bearing data is usually sent automatically from a mobile device equipped with a GPS receiver. Try to include bearing data if you are loading an input location that is moving, such as a pedestrian or a vehicle. 
+
+Using this field tends to prevent adding locations to the wrong edges, which can occur when a vehicle is near an intersection or an overpass, for example. Bearing also helps the tool determine on which side of the street the point is. 
+
+[Learn more about bearing and bearing tolerance](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/bearing-and-bearing-tolerance.htm)
+
+`BearingTol` 
+
+The bearing tolerance value creates a range of acceptable bearing values when locating moving points on an edge using the `Bearing`  field. If the `Bearing`  field value is within the range of acceptable values that are generated from the bearing tolerance on an edge, the point can be added as a network location there; otherwise, the closest point on the next-nearest edge is evaluated. 
+
+The units are in degrees, and the default value is 30. Values must be greater than 0 and less than 180. A value of 30 means that when Network Analyst attempts to add a network location on an edge, a range of acceptable bearing values is generated 15 degrees to either side of the edge (left and right) and in both digitized directions of the edge. 
+
+[Learn more about bearing and bearing tolerance](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/bearing-and-bearing-tolerance.htm)
+
+`NavLatency` 
+
+This field is only used in the solve process if the `Bearing`  and `BearingTol`  fields also have values; however, entering a `NavLatency`  field value is optional, even when values are present in `Bearing`  and `BearingTol` . `NavLatency`  indicates how much cost is expected to elapse from the moment GPS information is sent from a moving vehicle to a server and the moment the processed route is received by the vehicle's navigation device. 
+
+The units of `NavLatency`  are the same as the units of the impedance attribute.
+
+#### Syntax examples for point_barriers
+
+Syntax for specifying `point_barriers`  using a JSON structure for features 
+
+```other
+{
+  "spatialReference": {
+    "wkid": <wkid>,
+    "latestWkid": <wkid>
+  },
+  "features": [
+    {
+      "geometry": {
+        "x": <x1>,
+        "y": <y1>
+      },
+      "attributes": {
+        "<field1>": <value11>,
+        "<field2>": <value12>
+      }
+    },
+    {
+      "geometry": {
+        "x": <x2>,
+        "y": <y2>
+      },
+      "attributes": {
+        "<field1>": <value21>,
+        "<field2>": <value22>
+      }
+    }
+  ] 
+}
+```
+
+ 
+
+Syntax for specifying `point_barriers`  using a URL returning a JSON response
+
+```other
+{
+  "url": "<url>"
+}
+```
+
+ 
+
+#### Examples for point_barriers
+
+Example 1: Specifying an added-cost point barrier using JSON structure
+
+This example shows how to use an added-cost point barrier to model a five-minute delay at a railroad crossing. The `BarrierType`  attribute is used to specify the point barrier is added-cost, and the `Additional_Time`  attribute is used to specify the added delay in minutes. 
+
+```other
+{
+  "spatialReference": {
+    "wkid": 4326
+  },
+  "features": [
+    {
+      "geometry": {
+        "x": 37.541479,
+        "y": -122.053461
+      },
+      "attributes": {
+        "Name": "Haley St railroad crossing",
+        "BarrierType": 2,
+        "Additional_Time": 5
+      }
+    }
+  ]
+}
+```
+
+ 
+
+Example 2: Specifying restriction point barriers in the Web Mercator spatial reference using a JSON structure
+
+This example shows how to use a restriction point barrier to model a road that's blocked by a fallen tree. The barrier's geometry is in the Web Mercator spatial reference and not in the spatial reference of the network dataset.
+
+```other
+{
+  "spatialReference": {
+    "wkid": 102100
+  },
+  "features": [
+    {
+      "geometry": {
+        "y": -13635398.9398,
+        "x": 4544699.034400001
+      },
+      "attributes": {
+        "Name": "Fallen tree at 123 Main St", 
+        "BarrierType": 0
+      }
+    }
+  ]
+}
+```
+
+ 
+
+Example 3: Specifying point barriers using a URL
+
+The URL makes a query for a few features from a map service. A URL querying features from a feature service can also be specified.
+
+```other
+{
+  "url": "https://machine.domain.com/webadaptor/rest/services/NetworkAnalysis/SanDiego/MapServer/21/query?where=1%3D1&outFields=Name&f=json"
+}
+```
+
+ 
+
+```javascript
+{
+    "url": "http://sampleserver3.arcgisonline.com/ArcGIS/rest/services/Network/USA/MapServer/0/query?where=1%3D1&returnGeometry=true&f=json"
+}
+```
+
+ 
+
+### line_barriers
+
+Use this parameter to specify one or more lines that prohibit travel anywhere the lines intersect the streets. For example, a parade or protest that blocks traffic across several street segments can be modeled with a line barrier. A line barrier can also quickly fence off several roads from being traversed, thereby channeling possible routes away from undesirable parts of the street network.
+
+![Two maps demonstrate how a line barrier affects finding a route between two stops.](../../shared/routing/images/Polyline_Barriers.png)
+
+_The first map displays the shortest path between two stops. The second map shows the shortest path when several streets are blocked by a polyline barrier._
+
+<Note type={"note"}>
+
+The service imposes a limit on the number of streets you can restrict using the `polylineBarriers`  parameter. While there is no limit on the number of lines you can specify as polyline barriers, the combined number of streets intersected by all the lines should not exceed 500. If the value is exceeded, the response returns an error message.
+
+</Note>
+
+You can specify polyline barrier geometries as well as attributes using a JSON structure that references a set of features. The property is optional; however, the JSON structure must specify either the `url`  or `features`  property: 
+
+-   `url` —Specify a REST query request to any ArcGIS Server feature, map, or geoprocessing service that returns a JSON feature set. 
+-   `features` —Specify an array of features. 
+
+    Each feature in this array represents a polyline barrier and contains the following fields:
+
+    -   `geometry` —Specify the input point geometry containing `x`  and `y`  properties along with the `spatialReference`  property. If the `spatialReference`  property is defined for the entire JSON, you don't need to define this property for each geometry. Doing so reduces the size of the input JSON if the input has many features and improves performance. This property is not required if the coordinates are in the default spatial reference, WGS84. If the coordinates are in a different spatial reference, you must specify the spatial reference's well-known ID (WKID). See [Using spatial references](DEVSITE/rest/services-reference/enterprise/using-spatial-references) to look up WKID values.
+
+        <Note type={"tip"}>
+
+        It is recommended that you explicitly specify the `spatialReference`  value, and specify it for the entire JSON rather than each individual geometry. 
+
+        </Note>
+    -   `attributes` —Specify each attribute as a key-value pair in which the key is the name of a given field, and the value is the attribute value for the corresponding field.
+
+#### Attributes for line_barriers
+
+When specifying the line barriers, you can set name and barrier type properties for each using the following attributes:
+
+-   `Name` 
+
+    The name of the barrier.
+
+#### Syntax examples for line_barriers
+
+Syntax for specifying line barriers using a JSON structure for features
+
+```other
+{
+  "spatialReference": {
+    "wkid": <wkid>,
+    "latestWkid": <wkid>, 
+  },
+  "features": [
+    {
+      "geometry": {
+        "paths": [
+          [
+            [<x11>,<y11>],
+            [<x12>,<y12>]
+          ],
+          [
+            [<x21>,<y21>],
+            [<x22>,<y22>]
+          ]
+        ]
+      },
+      "attributes": {
+        "<field1>": <value11>,
+        "<field2>": <value12>
+      }
+    },
+		  {
+      "geometry": {
+        "paths": [
+          [
+            [<x11>,<y11>],
+            [<x12>,<y12>]
+          ],
+          [
+            [<x21>,<y21>],
+            [<x22>,<y22>]
+        ]
+      },
+      "attributes": {
+        "<field1>": <value21>,
+        "<field2>": <value22>
+      }
+    }
+  ] 
+}
+```
+
+ 
+
+Syntax for specifying line barriers using a URL returning a JSON response
+
+```other
+{
+  "url": "<url>"
+}
+```
+
+ 
+
+#### Examples for line_barriers
+
+Example 1: Specifying line barriers using a JSON structure
+
+The example shows how to add two lines as line barriers to restrict travel on the streets intersected by the lines. Barrier 1 is a single-part line feature made up of two points. Barrier 2 is a two-part line feature whose first part is made up of three points and whose second part is made up of two points.
+
+```other
+{
+  "spatialReference": {
+    "wkid": 102100
+  },
+  "features": [
+    {
+      "geometry": {
+        "paths": [
+          [
+            [-10804823.397,3873688.372],
+            [-10804811.152,3873025.945]
+          ]
+        ]
+      },
+      "attributes": {
+        "Name": "Barrier 1"
+      }
+    },
+    {
+      "geometry": {
+        "paths": [
+          [
+            [-10804823.397,3873688.372],
+            [-10804807.813 3873290.911],
+            [-10804811.152,3873025.945]
+          ],
+          [
+            [-10805032.678,3863358.76],
+            [-10805001.508,3862829.281]
+          ]
+        ]
+      },
+      "attributes": {
+        "Name": "Barrier 2"
+      }
+    }
+  ]
+}
+```
+
+ 
+
+Example 2: Specifying line barriers using URL
+
+The URL makes a query for a few features from a map service. A URL querying features from a feature service can also be specified.
+
+```javascript
+{
+  "url": "http://sampleserver3.arcgisonline.com/ArcGIS/rest/services/Network/USA/MapServer/6/query?where=1%3D1&returnGeometry=true&f=json"
+}
+```
+
+ 
+
+### polygon_barriers
+
+Use this parameter to specify polygons that either completely restrict travel or proportionately scale the time or distance required to travel on the streets intersected by the polygons.
+
+<Note type={"note"}>
+
+The service imposes a limit on the number of streets you can restrict using the `polygonBarriers`  parameter. While there is no limit on the number of polygons you can specify as the polygon barriers, the combined number of streets intersected by all the polygons should not exceed 2,000. If the value is exceeded, the response returns an error message.
+
+</Note>
+
+You can specify polygon barrier geometries as well as attributes using a JSON structure that references a set of features. The JSON structure can be specified as a `url`  or `features`  property:
+
+-   `url` —Specify a REST query request to any ArcGIS Server feature, map, or geoprocessing service that returns a JSON feature set. 
+-   `features` —Specify an array of features. 
+
+    Each feature in this array represents a polygon barrier and contains the following fields:
+
+    -   `geometry` —Specify the input point geometry containing `x`  and `y`  properties along with the `spatialReference`  property. If the `spatialReference`  property is defined for the entire JSON, you don't need to define this property for each geometry. Doing so reduces the size of the input JSON if the input has many features and improves performance. This property is not required if the coordinates are in the default spatial reference, WGS84. If the coordinates are in a different spatial reference, you must specify the spatial reference's well-known ID (WKID). See [Using spatial references](DEVSITE/rest/services-reference/enterprise/using-spatial-references) to look up WKID values.
+
+        <Note type={"tip"}>
+
+        It is recommended that you explicitly specify the `spatialReference`  value, and specify it for the entire JSON rather than each individual geometry. 
+
+        </Note>
+    -   `attributes` —Specify each attribute as a key-value pair in which the key is the name of a given field, and the value is the attribute value for the corresponding field.
+
+#### Attributes for polygon_barriers
+
+When specifying the polygon barriers, you can set properties for each, such as its name or barrier type, using the following attributes:
+
+-   `Name` 
+
+    The name of the barrier.
+-   `BarrierType` 
+
+    Specifies whether the barrier restricts travel completely or scales the cost (such as time or distance) for traveling through it. The field value is specified as one of the following integers (use the numeric code, not the name in parentheses):
+
+    -   0 (Restriction)—Prohibits traveling through any part of the barrier. The barrier is referred to as a restriction polygon barrier since it prohibits traveling on streets intersected by the barrier. One use of this type of barrier is to model floods covering areas of the street that make traveling on those streets impossible.
+
+        This is the default value.
+
+        ![Two maps demonstrate how a restriction polygon barrier affects finding a route between two stops.](../../shared/routing/images/Polygon_Barriers.png)
+
+        _The first map depicts the shortest path between two stops. The second map shows a polygon barrier blocking flooded streets, so the shortest path between the same two stops is different._
+    -   1 (Scaled Cost)—Scales the cost (such as travel time or distance) required to travel the underlying streets by a factor specified using the `ScaledTimeFactor`  or `ScaledDistanceFactor`  field. If the streets are partially covered by the barrier, the travel time or distance is apportioned and then scaled. For example, a factor of 0.25 means that travel on underlying streets is expected to be four times faster than normal. A factor of 3.0 means it is expected to take three times longer than normal to travel on underlying streets. This barrier type is referred to as a scaled-cost polygon barrier. It can be used to model storms that reduce travel speeds in specific regions, for example.
+
+        ![Two maps demonstrate how a scaled cost polygon barrier affects finding a route between two stops.](../../shared/routing/images/nac_barriers_spolygon.png)
+
+        _The first map shows a route that goes through inclement weather without regard for the effect that poor road conditions have on travel time. The second map shows a scaled polygon barrier that doubles the travel time of the roads covered by the storm. The route still passes through the southern tip of the storm since it is quicker to spend more time driving slowly through a small part of the storm rather than driving completely around it. The service uses the modified travel time in calculating the best route, and the modified travel time is reported as the total travel time in the response._
+-   `ScaledTimeFactor` 
+
+    This is the factor by which the travel time of the streets intersected by the barrier is multiplied. The field value must be greater than zero. 
+
+    This field is applicable only for scaled-cost barriers and when the `measurement_units`  parameter is time-based.
+-   `ScaledDistanceFactor` 
+
+    This is the factor by which the distance of the streets intersected by the barrier is multiplied. The field value must be greater than zero.
+
+    This field is applicable only for scaled-cost barriers and when the `measurement_units`  parameter is distance-based.
+-   `ScaledCostFactor` 
+
+    This is the factor by which the cost of the streets intersected by the barrier is multiplied. The field value must be greater than zero. 
+
+    This field is applicable only for scaled-cost barriers when the impedance is neither time-based nor distance-based . 
+
+#### Syntax examples for polygon_barriers
+
+Syntax for specifying polygon barriers using a JSON structure for features
+
+```other
+{
+  "spatialReference": {
+    "wkid": <wkid>,
+    "latestWkid": <wkid>    
+  }
+  "features": [
+    {
+      "geometry": {
+        "rings": [
+          [
+            [<x11>,<y11>],
+            [<x12>,<y12>],
+            [<x11>,<y11>]
+          ],
+          [
+            [<x21>,<y21>],
+            [<x22>,<y22>]
+            [<x21>,<y21>]
+          ]
+        ]
+      },
+      "attributes": {
+        "<field1>": <value11>,
+        "<field2>": <value12>
+      }
+    },
+    {
+      "geometry": {
+        "rings": [
+          [
+            [<x11>,<y11>],
+            [<x12>,<y12>],
+            [<x11>,<y11>]
+          ],
+          [
+            [<x21>,<y21>],
+            [<x22>,<y22>],
+            [<x21>,<y21>]
+          ]
+        ]
+      },
+      "attributes": {
+        "<field1>": <value21>,
+        "<field2>": <value22>
+      }
+    }
+  ]
+}
+```
+
+ 
+
+Syntax for specifying polygon barriers using a URL returning a JSON response
+
+```other
+{
+  "url": "<url>"
+}
+```
+
+ 
+
+#### Examples for polygon_barriers
+
+Example 1: Specifying polygon barriers using a JSON structure.
+
+The example shows how to add two polygons as barriers. The first polygon named `Flood zone`  is a restriction polygon barrier that prohibits travel on the underlying streets. The polygon is a single-part polygon feature made up of four points. The second polygon named `Severe weather zone`  is a scaled-cost polygon barrier that increases the travel time on underlying streets to one third of the original value. The polygon is a two-part polygon feature. Both parts are made up of four points.
+
+```other
+{
+  "spatialReference": {
+    "wkid": 4326
+  },
+  "features": [
+    {
+      "geometry": {
+        "rings": [
+          [
+            [-97.0634,32.8442],
+            [-97.0554,32.84],
+            [-97.0558,32.8327],
+            [-97.0638,32.83],
+            [-97.0634,32.8442]
+          ]
+        ]
+      },
+      "attributes": {
+        "Name": "Flood zone",
+        "BarrierType": 0
+      }
+    },
+    {
+      "geometry": {
+        "rings": [
+          [
+            
+            [-97.0803,32.8235],
+            [-97.0776,32.8277],
+            [-97.074,32.8254],
+            [-97.0767,32.8227],
+            [-97.0803,32.8235]
+          ],
+          [
+            [-97.0871,32.8311],
+            [-97.0831,32.8292],
+            [-97.0853,32.8259],
+            [-97.0892,32.8279],
+            [-97.0871,32.8311]
+            
+          ]
+        ]
+      },
+      "attributes": {
+        "Name": "Severe weather zone",
+        "BarrierType": 1,
+        "ScaledTimeFactor": 3
+      }
+    }
+  ]
+}
+```
+
+ 
+
+Example 2: Specifying a polygon barrier using a URL
+
+The URL makes a query for a few features from a map service. A URL querying features from a feature service can also be specified.
+
+```javascript
+{
+  "url": "http://sampleserver3.arcgisonline.com/ArcGIS/rest/services/Network/USA/MapServer/7/query?where=1%3D1&returnGeometry=true&f=json"
+}
+```
+
+ 
+
+### restrictions
+
+Use this parameter to specify the restrictions that will be honored by the service. A restriction represents a driving preference or requirement. In most cases, restrictions cause roads or pathways to be prohibited, but they can also cause them to be avoided or preferred. For instance, using the `Avoid Toll  Roads`  restriction will result in a route that will include toll roads only when it is required to travel on toll roads to visit a stop. Use `Height Restriction`  to route around clearances that are lower than the height of the vehicle. If the vehicle is carrying corrosive materials, you can use the `Any Hazmat Prohibited`  restriction to prevent hauling the materials along roads where it is marked as illegal to do so.
+
+<Note type={"note"}>
+
+The value of this parameter, regardless of whether you rely on the default or explicitly set a value, is overridden when you pass in `travel_mode` . 
+
+</Note>
+
+<Note type={"note"}>
+
+Some restrictions are supported only in certain countries. If you specify restriction names that are not available in the country where the input points are located, the service ignores the invalid restrictions and returns warning messages indicating the names for the restrictions that were not considered when performing the analysis. 
+
+</Note>
+
+<Note type={"note"}>
+
+You may need to specify an additional value, the restriction attribute parameter, for a restriction to get the intended results. This value must be associated with the restriction name and a restriction parameter using `attributeParameterValues` .
+
+</Note>
+
+This parameter value is specified as a comma-separated list of restriction names. A value of none indicates that no restrictions will be used when finding the shortest paths. 
+
+The service supports the following restriction names: 
+
+-   Any Hazmat Prohibited—The results will not include roads where transporting any kind of hazardous material is prohibited. 
+-   Avoid Carpool Roads—The results will avoid roads that are designated exclusively for car pool (high-occupancy) vehicles. 
+-   Avoid Express Lanes—The results will avoid roads designated as express lanes. 
+-   Avoid Ferries—The results will avoid ferries. 
+-   Avoid Gates—The results will avoid roads where there are gates, such as keyed access or guard-controlled entryways.
+-   Avoid Limited Access Roads—The results will avoid roads that are limited-access highways.
+-   Avoid Private Roads—The results will avoid roads that are not publicly owned and maintained.
+-   Avoid Roads Unsuitable for Pedestrians—The results will avoid roads that are unsuitable for pedestrians.
+-   Avoid Stairways—The results will avoid all stairways on a pedestrian-suitable route.
+-   Avoid Toll Roads—The results will avoid all toll roads for automobiles.
+-   Avoid Toll Roads for Trucks—The results will avoid all toll roads for trucks.
+-   Avoid Truck Restricted Roads—The results will avoid roads where trucks are not allowed, except when making deliveries.
+-   Avoid Unpaved Roads—The results will avoid roads that are not paved (for example, dirt, gravel, and so on). 
+-   Axle Count Restriction—The results will not include roads where trucks with the specified number of axles are prohibited. The number of axles can be specified using the Number of Axles restriction parameter.
+-   Driving a Bus—The results will not include roads where buses are prohibited. Using this restriction will also ensure that the results will honor one-way streets. 
+-   Driving a Taxi—The results will not include roads where taxis are prohibited. Using this restriction will also ensure that the results will honor one-way streets. 
+-   Driving a Truck—The results will not include roads where trucks are prohibited. Using this restriction will also ensure that the results will honor one-way streets. 
+-   Driving an Automobile—The results will not include roads where automobiles are prohibited. Using this restriction will also ensure that the results will honor one-way streets. 
+-   Driving an Emergency Vehicle—The results will not include roads where emergency vehicles are prohibited. Using this restriction will also ensure that the results will honor one-way streets.
+-   Height Restriction—The results will not include roads where the vehicle height exceeds the maximum allowed height for the road. The vehicle height can be specified using the Vehicle Height (meters) restriction parameter. 
+-   Kingpin to Rear Axle Length Restriction—The results will not include roads where the vehicle length exceeds the maximum allowed kingpin to rear axle for all trucks on the road. The length between the vehicle kingpin and the rear axle can be specified using the Vehicle Kingpin to Rear Axle Length (meters) restriction parameter. 
+-   Length Restriction—The results will not include roads where the vehicle length exceeds the maximum allowed length for the road. The vehicle length can be specified using the Vehicle Length (meters) restriction parameter. 
+-   Preferred for Pedestrians—The results will use preferred routes suitable for pedestrian navigation. 
+-   Riding a Motorcycle—The results will not include roads where motorcycles are prohibited. Using this restriction will also ensure that the results will honor one-way streets.
+-   Roads Under Construction Prohibited—The results will not include roads that are under construction.
+-   Semi or Tractor with One or More Trailers Prohibited—The results will not include roads where semis or tractors with one or more trailers are prohibited. 
+-   Single Axle Vehicles Prohibited—The results will not include roads where vehicles with single axles are prohibited.
+-   Tandem Axle Vehicles Prohibited—The results will not include roads where vehicles with tandem axles are prohibited.
+-   Through Traffic Prohibited—The results will not include roads where through traffic (nonlocal traffic) is prohibited.
+-   Truck with Trailers Restriction—The results will not include roads where trucks with the specified number of trailers on the truck are prohibited. The number of trailers on the truck can be specified using the Number of Trailers on Truck restriction parameter.
+-   Use Preferred Hazmat Routes—The results will prefer roads that are designated for transporting hazardous materials. 
+-   Use Preferred Truck Routes—The results will prefer roads that are designated as truck routes, such as roads that are part of the national network as specified by the National Surface Transportation Assistance Act in the United States, or roads that are designated as truck routes by the state or province, or roads that are preferred by truckers when driving in an area.
+-   Walking—The results will not include roads where pedestrians are prohibited.
+-   Weight Restriction—The results will not include roads where the vehicle weight exceeds the maximum allowed weight for the road. The vehicle weight can be specified using the Vehicle Weight (kilograms) restriction parameter.
+-   Weight per Axle Restriction—The results will not include roads where the vehicle weight per axle exceeds the maximum allowed weight per axle for the road. The vehicle weight per axle can be specified using the Vehicle Weight per Axle (kilograms) restriction parameter.
+-   Width Restriction—The results will not include roads where the vehicle width exceeds the maximum allowed width for the road. The vehicle width can be specified using the Vehicle Width (meters) restriction parameter.
+
+<Note type={"note"}>
+
+The `Driving a Delivery Vehicle`  restriction attribute is no longer available. The service will ignore this restriction since it is invalid. To achieve similar results, use the `Driving a Truck`  restriction attribute along with the `Avoid Truck Restricted Roads`  restriction attribute.
+
+</Note>
+
+The restrictions parameter value is specified as a list of restriction names. A value of `null`  indicates that no restrictions should be used when finding the best route, but only when `travel_mode`  is set to `Custom` . 
+
+#### Example for restrictions
+
+```javascript
+restrictions=[Driving a Truck, Height Restriction, Length Restriction]
+```
+
+ 
+
+### attribute_parameter_values
+
+Use this parameter to specify additional values required by an attribute or restriction, such as to specify whether the restriction prohibits, avoids, or prefers travel on restricted roads. If the restriction is meant to avoid or prefer roads, you can further specify the degree to which they are avoided or preferred using this parameter. For example, you can choose to never use toll roads, avoid them as much as possible, or prefer them.
+
+<Note type={"note"}>
+
+The value of this parameter, regardless of whether you rely on the default or explicitly set a value, is overridden when you pass in `travel_mode`  parameter. 
+
+</Note>
+
+You can specify `attribute_parameter_values`  parameter using JSON structure that represents a set of features. The JSON structure can include the following properties:
+
+-   `features` —Specify an array of features. 
+
+    -   `geometry` —Specify the input point geometry containing `x`  and `y`  properties along with the `spatialReference`  property. If the `spatialReference`  property is defined for the entire JSON, you don't need to define this property for each geometry. Doing so reduces the size of the input JSON if the input has many features and improves performance. This property is not required if the coordinates are in the default spatial reference, WGS84. If the coordinates are in a different spatial reference, you must specify the spatial reference's well-known ID (WKID). See [Using spatial references](DEVSITE/rest/services-reference/enterprise/using-spatial-references) to look up WKID values.
+
+        <Note type={"tip"}>
+
+        It is recommended that you explicitly specify the `spatialReference`  value, and specify it for the entire JSON rather than each individual geometry. 
+
+        </Note>
+    -   `attributes` —Specify each attribute as a key-value pair in which the key is the name of a given field, and the value is the attribute value for the corresponding field.
+-   `url` —Specify a REST query request to any ArcGIS Server feature, map, or geoprocessing service that returns a JSON feature set. 
+
+Each feature in the features array represents an attribute parameter and contains the following fields:
+
+-   `attributes` —Specify each attribute as a key-value pair in which the key is the name of a given field, and the value is the attribute value for the corresponding field.
+
+<Note type={"note"}>
+
+The JSON structure for the `attribute_parameter_values`  parameter does not have a `geometry`  property. 
+
+</Note>
+
+#### Attributes for attribute_parameter_values
+
+The `attribute_parameter_values`  parameter can be specified with the following attributes:
+
+-   `AttributeName` —The name of the restriction. 
+-   `ParameterName` —The name of the parameter associated with the restriction. A restriction can have one or more `ParameterName`  values based on its intended use, which implies you may need multiple `attribute_parameter_values`  parameters for a single attribute name.
+-   `ParameterValue` —The value for the `ParameterName`  that is used by the service when evaluating the restriction.
+
+<Note type={"note"}>
+
+In most cases, the `attribute_parameter_values`  parameter is dependent on the `restrictions`  parameter. The `ParameterValue`  specified as part of `attribute_parameter_values`  is applicable only if the restriction name is specified as the value for the `restrictions`  parameter.
+
+</Note>
+
+When specifying the `attribute_parameter_values`  parameter, each restriction (listed as `AttributeName` ) has a `ParameterName`  value, `Restriction Usage` , that specifies whether the restriction prohibits, avoids, or prefers travel on the roads associated with the restriction and the degree to which the roads are avoided or preferred.
+
+The `Restriction Usage` `ParameterName`  can be assigned any of the following string values or their equivalent numeric values listed within the parentheses:
+
+-   `Prohibited`  (`-1` )—Travel on the roads that have the restriction is prohibited.
+-   `Avoid_High`  (`5` )—It is very unlikely the service will include in the route the roads that are associated with the restriction.
+-   `Avoid_Medium`  (`2` )—It is unlikely the service will include in the route the roads that are associated with the restriction.
+-   `Avoid_Low`  (`1.3` )—It is somewhat unlikely the service will include in the route the roads that are associated with the restriction.
+-   `Prefer_Low`  (`0.8` )—It is somewhat likely the service will include in the route the roads that are associated with the restriction.
+-   `Prefer_Medium` (`0.5` )—It is likely the service will include in the route the roads that are associated with the restriction.
+-   `Prefer_High`  (`0.2` )—It is very likely the service will include in the route the roads that are associated with the restriction.
+
+The following table lists the restriction names and the default restriction parameter values for all the restrictions. The default value for the `attribute_parameter_values`  parameter is the JSON structure containing all the rows from the below table.
+
+<Note type={"note"}>
+
+If you want to use the default value for any restriction, `AttributeName` , `ParameterName` , and `ParameterValue`  do not have to be specified as part of the `attribute_parameter_values`  parameter.
+
+</Note>
+
+<StyledTable headers={"Restriction name,Restriction parameter name,Restriction parameter default value"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Any Hazmat Prohibited
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Carpool Roads
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Express Lanes
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Ferries
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_Medium
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Gates
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_Medium
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Limited Access Roads
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_Medium
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Private Roads
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_Medium
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Roads Unsuitable for Pedestrians
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_High
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Stairways
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_High
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Toll Roads
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_Medium
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Toll Roads for Trucks
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_Medium
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Truck Restricted Roads
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_High
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid Unpaved Roads
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_High
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Axle Count Restriction
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Number of Axles
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Driving a Bus
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Driving a Taxi
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Driving a Truck
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Driving an Automobile
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Driving an Emergency Vehicle
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Height Restriction
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Vehicle Height (meters)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Kingpin to Rear Axle Length Restriction
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Vehicle Kingpin to Rear Axle Length (meters)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Length Restriction
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Vehicle Length (meters)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Preferred for Pedestrians
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prefer_Low
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Riding a Motorcycle
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Roads Under Construction Prohibited
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Semi or Tractor with One or More Trailers Prohibited
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Single Axle Vehicles Prohibited
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Tandem Axle Vehicles Prohibited
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Through Traffic Prohibited
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Avoid_High
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Truck with Trailers Restriction
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Number of Trailers on Truck
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Use Preferred Hazmat Routes
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prefer_Medium
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Use Preferred Truck Routes
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prefer_High
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Walking
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+WalkTime
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Walking Speed (km/h)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+5
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Weight Restriction
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Vehicle Weight (kilograms)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Weight per Axle Restriction
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Vehicle Weight per Axle (kilograms)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Width Restriction
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Restriction Usage
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Prohibited
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Vehicle Width (meters)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+0
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+#### Syntax example for attribute_parameter_values
+
+```other
+{
+    "features": [
+        {
+            "attributes": {
+                "<field1>": <value11>,
+                "<field2>": <value12>,
+                "<field3>": <value13>
+
+            }
+        },
+        {
+            "attributes": {
+                "<field1>": <value21>,
+                "<field2>": <value22>,
+                "<field3>": <value13>
+            }
+        }
+    ] 
+}
+```
+
+ 
+
+#### Examples for attribute_parameter_values
+
+This example shows how to specify the height and weight of the vehicle for use with the height and weight restrictions respectively along with a high preference to include designated truck routes. This results in a route that does not include any roads where the clearance under overpasses or through tunnels is less than the vehicle height. The results will also not include any roads with load limited bridges or local roads that prohibit heavy vehicles if the vehicle weight exceeds the maximum permissible weight. However, the route will include as many roads as possible that are designated as preferred truck routes. 
+
+Note that the `Restriction Usage` `ParameterName`  for the `Height Restriction`  and the `Weight Restriction`  restrictions are not specified since we want to use the default value of `PROHIBITED`  for these restriction parameters. 
+
+```other
+attribute_parameter_values=
+{
+    "features": [
+        {
+            "attributes": {
+                "AttributeName": "Height Restriction",
+                "ParameterName": "Vehicle Height (meters)",
+                "ParameterValue": 4.12
+            }
+        },
+        {
+            "attributes": {
+                "AttributeName": "Weight Restriction",
+                "ParameterName": "Vehicle Weight (kilograms)",
+                "ParameterValue": 36287
+            }
+        },
+        {
+            "attributes": {
+                "AttributeName": "Use Preferred Truck Routes",
+                "ParameterName": "Restriction Usage",
+                "ParameterValue": "PREFER_HIGH"
+            }
+        }
+    ]
+}
+```
+
+ 
+
+### impedance
+
+Specify the impedance.
+
+<Note type={"note"}>
+
+The value of this parameter, regardless of whether you rely on the default or explicitly set a value, is overridden when you pass in `travel_mode` . 
+
+</Note>
+
+Impedance is a value that quantifies travel along the transportation network. Travel distance is an example of impedance; it quantifies the length of walkways and road segments. Similarly, drive time—the typical time it takes to drive a car along a road segment—is an example of impedance. Drive times may vary by type of vehicle—for instance, the time it takes for a truck to travel along a path tends to be longer than a car—so there can be many impedance values representing travel times for different vehicle types. Impedance values may also vary with time; live and typical traffic reference dynamic impedance values. Each walkway and road segment stores at least one impedance value. When performing a network analysis, the impedance values are used to calculate the best results, such as finding the shortest route—the route that minimizes impedance—between two points.
+
+The `impedance`  parameter can be specified using the following values:
+
+-   **TravelTime**—Historical and live traffic data is used. This option is good for modeling the time it takes automobiles to travel along roads at a specific time of day using live traffic speed data where available. When using **TravelTime**, you can optionally set the TravelTime::Vehicle Maximum Speed (km/h) attribute parameter to specify the physical limitation of the speed the vehicle is capable of traveling.
+-   **Minutes**—Live traffic data is not used, but historical average speeds for automobiles data is used.
+-   **TruckTravelTime**—Historical and live traffic data is used, but the speed is capped at the posted truck speed limit. This is good for modeling the time it takes for the trucks to travel along roads at a specific time. When using **TruckTravelTime**, you can optionally set the TruckTravelTime::Vehicle Maximum Speed (km/h) attribute parameter to specify the physical limitation of the speed the truck is capable of traveling.
+-   **TruckMinutes**—Live traffic data is not used, but the smaller of the historical average speeds for automobiles and the posted speed limits for trucks are used.
+-   **WalkTime**—The default is a speed of 5 km/hr on all roads and paths, but this can be configured through the WalkTime::Walking Speed (km/h) attribute parameter.
+-   **Miles**—Length measurements along roads are stored in miles and can be used for performing analysis based on shortest distance.
+-   **Kilometers**—Length measurements along roads are stored in kilometers and can be used for performing analysis based on shortest distance.
+
+If you choose a time-based impedance, such as `TravelTime` , `TruckTravelTime` , `Minutes` , `TruckMinutes` , or `WalkTime` , the `measurement_units`  parameter must be set to a time-based value; if you choose a distance-based impedance such as `Miles` , `Kilometers` , the `measurement_units`  must be distance-based.
+
+<Note type={"note"}>
+
+`Drive Time` , `Truck Time` , `Walk Time` , and `Travel Distance`  impedance values are no longer supported and will be removed in a future release. 
+
+</Note>
+
+### analysis_region
+
+Specify the region in which to perform the analysis. If a value is not specified for this parameter, the service will automatically calculate the region name based on the location of the input points. Setting the name of the region is recommended to speed up the analysis. 
+
+To specify a region, use one of the following values:
+
+-    Europe
+-    Japan
+-   Korea
+-    MiddleEastAndAfrica
+-    NorthAmerica
+-    SouthAmerica
+-   SouthAsia
+-   Thailand
+
+<Note type={"note"}>
+
+The following region names are no longer supported and will be removed in future releases. If you specify one of the deprecated region names, the service automatically assigns a supported region name for your region.
+
+-   `Greece`  redirects to `Europe` 
+-   `India`  redirects to `SouthAsia` 
+-   `Oceania`  redirects to `SouthAsia` 
+-   `SouthEastAsia`  redirects to `SouthAsia` 
+-   `Taiwan`  redirects to `SouthAsia` 
+
+</Note>
+
+The [data coverage page](/network-coverage) lists the countries that are grouped into each of these regions.
+
+### save_output_network_analysis_layer
+
+Use this parameter to specify if the service should save the analysis settings as a network analysis layer file. You cannot directly work with this file even when you open the file in an ArcGIS Desktop application like ArcGIS Pro. It is meant to be sent to [Esri Technical Support](https://support.esri.com/en/contact-tech-support) in order to diagnose the quality of results returned from the service. 
+
+-   `true` —Saves network analysis layer file. The file can be downloaded from the URL provided as part of the `output_network_analysis_layer`  parameter. 							
+-   `false` —Don't save network analysis layer file. 
+
+The default value is `false` .
+
+### overrides
+
+<Note type={"note"}>
+
+This parameter is for internal use only.
+
+</Note>
+
+### time_impedance
+
+The time-based impedance value represents the travel time along road segments or on other parts of the transportation network.
+
+-   `Minutes` 
+-   `TravelTime` 
+-   `WalkTime` 
+-   `TruckMinutes` 
+-   `TruckTravelTime` 
+
+<Note type={"note"}>
+
+If the impedance for the travel mode, as specified using the 
+
+`impedance`
+
+  parameter, is time based, the values for the 
+
+`time_impedance`
+
+  and 
+
+`impedance`
+
+  parameters must be identical. Otherwise, the service will return an error.
+
+</Note>
+
+<Note type={"note"}>
+
+This parameter is used for defining a custom travel mode. The value of this parameter is ignored if the `travel_mode`  parameter is not set to `Custom` .
+
+</Note>
+
+<Note type={"note"}>
+
+These value are specific to the services published with the ArcGIS StreetMap Premium data. The values will be different if you are using other data for the analysis.
+
+</Note>
+
+### distance_impedance
+
+The distance-based impedance value represents the travel distance along road segments or on other parts of the transportation network.
+
+-   `Miles` 
+-   `Kilometers` 
+
+<Note type={"note"}>
+
+If the impedance for the travel mode, as specified using the 
+
+`impedance`
+
+  parameter, is distance based, the values for the 
+
+`distance_impedance`
+
+  and 
+
+`impedance`
+
+  parameters must be identical. Otherwise, the service will return an error.
+
+</Note>
+
+<Note type={"note"}>
+
+This parameter is used for defining a custom travel mode. The value of this parameter is ignored if the `travel_mode`  parameter is not set to `Custom` .
+
+</Note>
+
+<Note type={"note"}>
+
+These value are specific to the services published with the ArcGIS StreetMap Premium data. The values will be different if you are using other data for the analysis.
+
+</Note>
+
+### polygon_detail
+
+Specifies the level of detail for the output polygons. 
+
+-   Standard—Polygons will be created with a standard level of detail. Standard polygons are generated quickly and are fairly accurate, but quality deteriorates somewhat as you move toward the borders of the service area polygons. This is the default. 
+-   Generalized—Generalized polygons will be created using the hierarchy present in the network data source to produce results quickly. Generalized polygons are inferior in quality compared to standard or high-precision polygons. 
+-   High—Polygons will be created with the highest level of detail. Holes in the polygon may exist; they represent islands of network elements, such as streets, that couldn't be reached without exceeding the cutoff impedance or due to travel restrictions This option should be used for applications in which precise results are important. 
+
+If your analysis covers an urban area with a grid-like street network, the difference between generalized and standard polygons will be minimal. However, for mountain and rural roads, the standard and detailed polygons may present significantly more accurate results than generalized polygons.
+
+### output_type
+
+Specifies the type of output to be generated. Service area output can be line features representing the roads reachable before the cutoffs are exceeded or the polygon features encompassing these lines (representing the reachable area). 
+
+-   Polygons—The service area output will contain polygons only. This is the default.
+-   Lines—The service area output will contain lines only.
+-   Polygons and lines—The service area output will contain both polygons and lines.
+
+### output_format
+
+Specifies the format in which the output features will be returned. 
+
+-   **Feature Set**—The output features will be returned as feature classes and tables. This is the default. 
+-   **JSON File**—The output features will be returned as a compressed file containing the JSON representation of the outputs. When this option is specified, the output is a single file (with a `.zip`  extension) that contains one or more JSON files (with a `.json`  extension) for each of the outputs created by the service. 
+-   **GeoJSON File**—The output features will be returned as a compressed file containing the GeoJSON representation of the outputs. When this option is specified, the output is a single file (with a `.zip`  extension) that contains one or more GeoJSON files (with a `.geojson`  extension) for each of the outputs created by the service.
+
+<Note type={"note"}>
+
+Specifying file based output format, such as `JSON File` , is useful when you are calling the service using the REST endpoint of the service. In such cases, returning all the outputs as a single file allows you to download large results that can be generated by the service. For example, if you are working with `GenerateOriginDestinationCostMatrix`  service and you generate a travel matrix with 1,000,000 records, returning such a large output as a `Feature Set`  can cause the service to fail since the service will try to send the entire output in a single attempt. With a file based output, the service sends the output in multiple chunks reducing the possibility of timeouts when returning the outputs. 
+
+</Note>
+
+### env:outSR
+
+Use this parameter to specify the spatial reference of the geometries, such as line or point features, returned by the service.
+
+The parameter value can be specified as a well-known ID (WKID) for the spatial reference. See [Using spatial references](DEVSITE/rest/services-reference/enterprise/using-spatial-references) to look up WKID values.
+
+Many of the basemaps provided by ArcGIS Online are in the Web Mercator spatial reference (WKID 102100). Specifying `env:outSR=102100`  returns the geometries in the Web Mercator spatial reference, which can be drawn on top of the basemaps. 
+
+### ignore_invalid_locations
+
+Specifies whether invalid input locations will be ignored. 
+
+-   `true` —
+
+    Network locations that are unlocated will be ignored and the analysis will run using valid network locations only. The analysis will also continue if locations are on nontraversable elements or have other errors. This is useful if you know the network locations are not all correct, but you want to run the analysis with the network locations that are valid. This is the default.
+-   `false` —
+
+    Invalid locations will not be ignored. Do not run the analysis if there are invalid locations. Correct the invalid locations and rerun the analysis.
+
+### locate_settings
+
+Use this parameter to specify settings that affect how inputs are located, such as the maximum search distance to use when locating the inputs on the network or the network sources being used for locating.
+
+[Learn more about locating inputs](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/locating-analysis-inputs.htm)
+
+The default value is as follows:
+
+```javascript
+{
+  "default": {
+    "tolerance": 20000,
+    "toleranceUnits": "esriMeters",
+    "allowAutoRelocate": true,
+    "sources": [
+      {
+        "name": "main.Routing_Streets"
+      }
+    ]
+  }
+}
+```
+
+ 
+
+The locator JSON object has following properties:
+
+-   `tolerance`  and `toleranceUnits` —Allows you to control the maximum search distance when locating inputs. If no valid network location is found within this distance, the input features will be considered unlocated. A small search tolerance decreases the likelihood of locating on the wrong street but increases the likelihood of not finding any valid network location. The `toleranceUnits`  parameter value can be specified as one of the following values:
+
+    -   `esriCentimeters` 
+    -   `esriDecimalDegrees` 
+    -   `esriDecimeters` 
+    -   `esriFeet` 
+    -   `esriInches` 
+    -   `esriIntFeet` 
+    -   `esriIntInches` 
+    -   `esriIntMiles` 
+    -   `esriIntNauticalMiles` 
+    -   `esriIntYards` 
+    -   `esriKilometers` 
+    -   `esriMeters` 
+    -   `esriMiles` 
+    -   `esriMillimeters` 
+    -   `esriNauticalMiles` 
+    -   `esriYards` 
+-   `sources` — Allows you to control which network source can be used for locating. For example, you can configure the analysis to locate inputs on streets but not on sidewalks. The list of possible sources on which to locate is specific to the network dataset this service references. Only the sources that are present in the sources array are used for locating. Sources is specified as an array of objects each having the following property:
+
+    -   `name` —The name of the network source feature class that can be used for locating inputs
+-   `allowAutoRelocate` —Allows you to control whether inputs with existing network location fields can be automatically relocated when solving to ensure valid, routable location fields for the analysis. If the value is `true` , points located on restricted network elements and points affected by barriers will be relocated to the closest routable location. If the value is `false` , network location fields will be used as is even if the points are unreachable, and this may cause the solve to fail. Even if the value is `false` , inputs with no location fields or incomplete location fields will be located during the solve operation.
+
+The parameter value is specified as a JSON object. The JSON object allows you to specify a locator JSON for all input feature in the analysis, or you can specify an override for a particular input. The override allows you to have different settings for each analysis input. 					When specifying the `locateSettings`  JSON, you must provide all the properties including `tolerance` , `toleranceUnits` , `sources` , and `allowAutoRelocate`  in the default locator JSON object. If you need to provide a different locator JSON for a particular input class, you must include the overrides property for that input. The property name must match the input parameter name. The locator JSON for a particular input doesn't need to include all the properties; you only need to include the properties that are different from the default locator JSON properties.
+
+<Note type={"note"}>
+
+Currently, you can't specify different source names for the `sources`  array. Also, `allowAutoRelocate`  is always set to `true`  since the service does not support location fields. 
+
+</Note>
+
+#### Syntax for locate_settings
+
+Syntax for specifying `locate_settings`  using JSON structure.
+
+<Note type={"note"}>
+
+Polyline barriers and polygon barriers doesn't support the `tolerance`  and `toleranceUnits`  properties.
+
+</Note>
+
+```javascript
+{
+    "default": {
+        "tolerance": <value>,
+        "toleranceUnits": "<unit>",
+        "allowAutoRelocate": true | false,
+        "sources": [{
+            "name": "<sourceName>"            
+        }]
+    },
+    "overrides": {
+        "facilities": {
+            "tolerance": <value>,
+            "toleranceUnits": "<unit>",
+            "allowAutoRelocate": true | false,
+            "sources": [{
+                "name": "<sourceName>"                
+            }]
+        },
+        "point_barriers": {
+            "tolerance": <value>,
+            "toleranceUnits": "<unit>",
+            "allowAutoRelocate": true | false,             
+            "sources": [{
+                "name": "<sourceName>"               
+            }]
+        },
+        "line_barriers": {
+            "allowAutoRelocate": true | false,       
+            "sources": [{
+                "name": "<sourceName>"                
+            }]
+        },
+        "polygon_barriers": {
+            "allowAutoRelocate": true | false,  
+            "sources": [{
+                "name": "<sourceName>"                
+            }]
+        }
+    }
+}
+```
+
+ 
+
+#### Example for locate_settings
+
+Example 1: Specify default locate settings using JSON structure
+
+This example shows how to specify locate settings so inputs are located within 500 meters of the specified location. A small search tolerance like this can be valuable if you are solving using a walking travel mode and don't want inputs to be located farther than 500 meters from the original point location.
+
+```javascript
+{
+  "default": {
+    "tolerance": 500,
+    "toleranceUnits": "esriMeters",
+    "allowAutoRelocate": true,
+    "sources": [
+      {
+        "name": "main.Routing_Streets"
+      }
+    ]
+  }
+}
+```
+
+ 
+
+## JSON response
+
+When you submit a request, the service assigns a unique job ID for the transaction. The job ID and the status of the job are returned in the response.
+
+```other
+{
+    "jobId": <jobID>,
+    "jobStatus": <jobStatus>
+}
+```
+
+ 
+
+The `jobStatus`  property can have the following values:
+
+-   esriJobSubmitted
+-   esriJobWaiting
+-   esriJobExecuting
+-   esriJobSucceeded
+-   esriJobFailed
+-   esriJobTimedOut
+-   esriJobCancelling
+-   esriJobCancelled
+
+You can use the job ID to periodically check the status of the job and messages. Additionally, if the job has successfully completed, you can use the job ID to retrieve the results or even the inputs. The job information and results remain available for 24 hours after the job is done.
+
+After the initial request is submitted, you can make a request of the following form to get the status of the job:
+
+`https://logistics.arcgis.com/arcgis/rest/services/World/ServiceAreas/GPServer/GenerateServiceAreas/jobs/<yourJobID>?token=<yourToken>&returnMessages=true&f=json` 
+
+```other
+{
+    "jobId": "<jobId>",
+    "jobStatus": "<jobStatus>",
+    "messages": [
+        {
+            "type": "<type1>",
+            "description": "<description1>"
+        },
+        {
+            "type": "<type2>",
+            "description": "<description2>"
+        }
+    ]
+}
+```
+
+ 
+
+While a job is executing, you can cancel it by making a request of the form:
+
+`https://logistics.arcgis.com/arcgis/rest/services/World/ServiceAreas/GPServer/GenerateServiceAreas/jobs/<yourJobID>/cancel?token=<yourToken>&f=json` 
+
+When you submit your request, if the service is busy processing other requests, the job will wait in the queue. The job status will be reported as `esriJobSubmitted` . If your application cannot wait for the entire duration while the job is in the queue, you can cancel the request and submit it at a later time. A canceled request will not incur any service credits. However, if your application did not cancel the request, it will eventually execute and will incur service credits irrespective of whether your application retrieved the results or ignored them. Therefore, your application should always cancel the request if required. 
+
+After the successful completion of the job, you can retrieve a specific output by making a request of the following form:
+
+`https://logistics.arcgis.com/arcgis/rest/services/World/ServiceAreas/GPServer/GenerateServiceAreas/jobs/<yourJobID>/results/<output_parameter_name>?token=<yourToken>&f=json` 
+
+Instead of retrieving outputs individually, you can make a request of the following form to retrieve all the outputs.
+
+`https://logistics.arcgis.com/arcgis/rest/services/World/ServiceAreas/GPServer/GenerateServiceAreas/jobs/<yourJobID>/results?token=<yourToken>&f=json` 
+
+Refer to the [Output parameters](/service-area-asynchronous-service#output-parameters) section for more information on how to interpret the solution provided by the service.
+
+<Note type={"tip"}>
+
+Since retrieving all the outputs using the results operation can take significantly longer to execute and can cause a timeout error, this option is recommended when your request parameters are creating only the outputs that you need and not all the outputs the service can possibly generate. 
+
+</Note>
+
+The feature geometries are returned by default in the `WGS84`  spatial reference. You can get the feature geometries in any spatial reference by specifying the `outSR`  parameter when retrieving an output parameter or all the output parameters. 
+
+The below example shows how to retrieve an output parameter with feature geometries in `Web Mercator (WKID: 102100)`  spatial reference. 
+
+`https://logistics.arcgis.com/arcgis/rest/services/World/ServiceAreas/GPServer/GenerateServiceAreas/jobs/<yourJobID>/results/<output_parameter_name>?token=<yourToken>&f=json&outSR=102100` 
+
+The below example shows how to retrieve all the output parameters with feature geometries in Web Mercator (WKID: 102100) spatial reference.
+
+`https://logistics.arcgis.com/arcgis/rest/services/World/ServiceAreas/GPServer/GenerateServiceAreas/jobs/<yourJobID>/results?token=<yourToken>&f=json&outSR=102100` 
+
+The below example shows how to retrieve the value for an input parameter by making the requests of the following form:
+
+`https://logistics.arcgis.com/arcgis/rest/services/World/ServiceAreas/GPServer/GenerateServiceAreas/jobs/<yourJobID>/inputs/<inputParameterName>?token=<yourToken>&f=json` 
+
+The below example shows how to retrieve all the inputs by making the request of the following form.
+
+`https://logistics.arcgis.com/arcgis/rest/services/World/ServiceAreas/GPServer/GenerateServiceAreas/jobs/<yourJobID>/inputs?token=<yourToken>&f=json` 
+
+## Output parameters
+
+Upon successful execution, the service returns the service areas around the facilities and the status indicating the analysis was successful by using the `service_areas` , `output_facilities` , and `solve_succeeded`  output parameters. 
+
+### service_areas
+
+Use this parameter to get the area that can be reached from the input location within a given travel time or travel distance. The `polygon_overlap_type` , `polygons_for_multiple_facilities` , `polygon_trim_distance` , and the `polygon_simplification_tolerance`  parameters highly influence the shape of the output service areas. The service area geometries are returned in the spatial reference specified as the `env:outSR`  parameter.
+
+The following table provides a description of fields that are returned for each service area: 
+
+<StyledTable headers={"Field,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Name` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The name of the service area. It is based on the name of the associated facility and the cutoffs; for example, `Store1: 0.0 – 5.0`  represents a service area that covers all traversable streets within five minutes of a facility named `Store1` .
+
+The break values are returned without the name of the facility, for example, `0.0 – 5.0` , when the `polygons_for_multiple_facilities`  property is set to `Merge by Break Value` .
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`FromBreak` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The lower bound of the service area's impedance cutoff range. The unit for this field is based on the unit of the impedance attribute set for the analysis. 
+
+The value is in the units specified in the `break_units`  parameter.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`ToBreak` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The upper bound of the service area's impedance cutoff range. The value is in the same units as the `FromBreak`  field values.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`FacilityOID` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The `ObjectID`  value of the input facility feature used to generate the service area polygon. This field is often used to join information from the input facilities. 
+
+Multiple facilities can be associated with one service area when the `polygons_for_multiple_facilities`  property is set to `Merge by Break Value` ; therefore, `FacilityOID`  field values are set to null when service areas are merged.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`FacilityID` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The unique identifier of the associated facility that is automatically generated by the analysis. 
+
+Multiple facilities can be associated with one service area when the `polygons_for_multiple_facilities`  property is set to `Merge by Break Value` ; therefore, `FacilityID`  field values are set to null when service areas are merged.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Name_1` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The name of the facility a service area is associated with.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Breaks` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The values for this field are copied from the `Breaks`  field on the input facilities. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`AdditionalTime` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The values for this field are copied from the `AdditionalTime`  field on the input facilities. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`AdditionalDistance` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The values for this field are copied from the `AdditionalDistance`  field on the input facilities. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`AdditionalCost` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The values for this field are copied from the `AdditionalCost`  field on the input facilities. This field is included only when the travel mode used for the analysis has an impedance attribute that is neither time based nor distance based.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+The `service_areas`  parameter is returned as a JSON feature set with the following syntax:
+
+<Note type={"caution"}>
+
+The service can return a maximum of 10,000 features with the `service_areas`  output parameter. If your request generates more than 10,000 features, you will only get the first 10,000 features in the response. In such cases, the `exceededTransferLimit`  property will be set to `true` . 
+
+</Note>
+
+```other
+{
+    "paramName": "Service_Areas",
+    "dataType": "GPFeatureRecordSetLayer",
+    "value": {
+        "displayFieldName": "",
+        "geometryType": "esriGeometryPolygon",
+        "spatialReference": {
+            "wkid": <wkid>,
+            "latestWkid": <wkid>,
+            
+        },
+        "fields": [
+            {
+                "name": "<field1Name>",
+                "type": "<field1Type>",
+                "alias": "<field1Alias>",
+                "length": "<field1Length>" //length is included only for esriFieldTypeString
+            },
+            {
+                "name": "<field2Name>",
+                "type": "<field2Type>",
+                "alias": "<field2Alias>",
+                "length": "<field2Length>"
+            }
+        ],
+        "features": [
+        {
+            "geometry": {
+                "rings": [
+                    [
+                        [
+                            <x11>,
+                            <y11>
+                        ],
+                        [
+                            <x12>,
+                            <y12>
+                        ],
+                        ...,
+                        [
+                            <x11>,
+                            <y11>
+                        ]
+                    ],
+                    [
+                        [
+                            <x21>,
+                            <y21>
+                        ],
+                        [
+                            <x22>,
+                            <y22>
+                        ],
+                        ...,
+                        [
+                            <x21>,
+                            <y21>
+                        ]
+                    ]
+                ]
+            },
+            "attributes": {
+                "<field1>": <value11>,
+                "<field2>": <value12>
+            }
+        },
+        {
+            "geometry": {
+                "rings": [
+                    [
+                        [
+                            <x11>,
+                            <y11>
+                        ],
+                        [
+                            <x12>,
+                            <y12>
+                        ],
+                        ...,
+                        [
+                            <x11>,
+                            <y11>
+                        ]
+                    ],
+                    [
+                        [
+                            <x21>,
+                            <y21>
+                        ],
+                        [
+                            <x22>,
+                            <y22>
+                        ],
+                        ...,
+                        [
+                            <x21>,
+                            <y21>
+                        ]
+                    ]
+                ]
+            },
+            "attributes": {
+                "<field1>": <value21>,
+                "<field2>": <value22>
+            }
+        }
+    ],
+        "exceededTransferLimit": <true|false>
+    }
+}
+```
+
+ 
+
+The following shows an example of the `service_areas`  parameter.
+
+<Note type={"note"}>
+
+Because the response is quite verbose, the repeated elements within the response are abbreviated for clarity.
+
+</Note>
+
+```other
+{
+    "paramName": "Service_Areas",
+    "dataType": "GPFeatureRecordSetLayer",
+    "value": {
+        "displayFieldName": "",
+        "geometryType": "esriGeometryPolygon",
+        "spatialReference": {
+            "wkid": 4326,
+            "latestWkid": 4326
+        },
+        "fields": [
+            {
+                "name": "ObjectID",
+                "type": "esriFieldTypeOID",
+                "alias": "ObjectID"
+            },
+            {
+                "name": "FacilityID",
+                "type": "esriFieldTypeInteger",
+                "alias": "FacilityID"
+            },
+            {
+                "name": "Name",
+                "type": "esriFieldTypeString",
+                "alias": "Name",
+                "length": 128
+            },
+            {
+                "name": "FromBreak",
+                "type": "esriFieldTypeDouble",
+                "alias": "FromBreak"
+            },
+            {
+                "name": "ToBreak",
+                "type": "esriFieldTypeDouble",
+                "alias": "ToBreak"
+            },
+            {
+                "name": "FacilityOID",
+                "type": "esriFieldTypeInteger",
+                "alias": "FacilityOID"
+            },
+            {
+                "name": "FacilityName",
+                "type": "esriFieldTypeString",
+                "alias": "Name",
+                "length": 128
+            },
+            {
+                "name": "Shape_Length",
+                "type": "esriFieldTypeDouble",
+                "alias": "Shape_Length"
+            },
+            {
+                "name": "Shape_Area",
+                "type": "esriFieldTypeDouble",
+                "alias": "Shape_Area"
+            }
+        ],
+        "features": [
+            {
+                "attributes": {
+                    "ObjectID": 1,
+                    "FacilityID": 1,
+                    "Name": "Facility 1 : 5 - 10",
+                    "FromBreak": 5,
+                    "ToBreak": 10,
+                    "FacilityOID": 1,
+                    "FacilityName": "Facility 1",
+                    "Shape_Length": 0.62070029717646258,
+                    "Shape_Area": 0.0033515430829082126
+                },
+                "geometry": {
+                    "rings": [
+                        [
+                            [
+                                -0.17744255103286832,
+                                51.558202743861614
+                            ],
+                            [
+                                -0.17631721496746877,
+                                51.557527541862612
+                            ],
+                            //...additional points in the polygon ring
+                        ],
+                        [
+                            [
+                                -0.19568443269037061,
+                                51.539964676228863
+                            ],
+                            [
+                                -0.19658470172254283,
+                                51.53816032413971
+                            ],
+                            //...additional points in the polygon ring
+                        ]
+                    ]
+                }
+            },
+            {
+                "attributes": {
+                    "ObjectID": 2,
+                    "FacilityID": 1,
+                    "Name": "Facility 1 : 0 - 5",
+                    "FromBreak": 0,
+                    "ToBreak": 5,
+                    "FacilityOID": 1,
+                    "FacilityName": "Facility 1",
+                    "Shape_Length": 0.16771059350061351,
+                    "Shape_Area": 0.00094631728859383775
+                },
+                "geometry": {
+                    "rings": [
+                        [
+                            [
+                                -0.18937839999313155,
+                                51.540412800310548
+                            ],
+                            [
+                                -0.18847760036089767,
+                                51.54018760017766
+                            ],
+                            //...additional points in the polygon ring
+                        ]
+                    ]
+                }
+            },
+            //...additional polygon features
+        ],
+        "exceededTransferLimit": false
+    }
+}
+```
+
+ 
+
+### output_facilities
+
+This provides access to the attributes of the facilities that are used in the service area analysis. You can use the attributes from this data type, such as the `Status`  field, to determine why a facility was not used in the analysis. 
+
+The data type supports the following fields. In addition to these fields, the data type also includes all the fields from the input feature class used as facilities for the analysis.
+
+<StyledTable headers={"Field,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Name` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The name of the facility. The values for this field are copied from the `Name`  field on the input facilities. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`SourceID` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The numeric identifier of the network dataset source feature class on which the input point is located. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`SourceOID` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The ObjectID of the feature in the source on which the input point is located.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`PosAlong` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The position along the digitized direction of the source line feature. This value is stored as a ratio. This field is null if the network location references a junction.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`SideOfEdge` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The side of the edge in relation to the digitized direction of the line feature. This field is limited to a domain of two values: Right Side (1) and Left Side (2).
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`CurbApproach` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The direction a vehicle may arrive at and depart from the facility. The values for this field are copied from the `CurbApproach`  field on the input facilities. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Status` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Indicates the status of the point with respect to its location on the network and the outcome of the analysis. The possible values are the following: 
+
+-   0 (OK)—The point was located on the network.
+-   1 (Not Located)—The point was not located on the network and consequently was not included in the analysis.
+-   2 (Network element not located)—The network element identified by the point's network location fields can't be found. This can occur when a network element where the point should be was deleted, and the network location was not recalculated.
+-   3 (Element not traversable)—The network element that the point is located on is not traversable. This can occur when the element is restricted by a restriction attribute.
+-   4 (Invalid Field Values)—Field values fall outside a range or coded-value domain. For example, a negative number exists where positive numbers are required.
+-   5 (Not Reached)—The point can't be reached by the solver. The point may be on a separate, disconnected area of the network from the other inputs, or barriers or restrictions prevent travel to or from the point.
+-   6 (Time window violation)—The point could not be reached within the designated time windows. This status only applies to network analysis types that support time windows.
+-   7 (Not located on closest)—The closest network location to the point is not traversable because of a restriction or barrier, so the point has been located on the closest traversable network feature instead.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`SnapX` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The x-coordinate of the position on the network dataset where the point was located, in the coordinate system of the network dataset.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`SnapY` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The y-coordinate of the position on the network dataset where the point was located, in the coordinate system of the network dataset.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`SnapZ` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The z-coordinate of the position on the network dataset where the point was located, in the coordinate system of the network dataset. The `SnapZ`  field is 0 if the network is two dimensional.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`DistanceToNetworkInMeters` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The distance in meters between the point's geographic location and the position where it was located on the network.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`FacilityOID` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The `ObjectID`  value of the input facility feature. This field is often used to join information from the input facilities. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Bearing` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The values for this field are copied from the `Bearing`  field on the input facilities. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`BearingTol` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The values for this field are copied from the `BearingTol`  field on the input facilities. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`NavLatency` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The values for this field are copied from the `NavLatency`  field on the input facilities. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`Breaks` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The values for this field are copied from the `Breaks`  field on the input facilities. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`AdditionalTime` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The values for this field are copied from the `AdditionalTime`  field on the input facilities. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`AdditionalDistance` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The values for this field are copied from the `AdditionalDistance`  field on the input facilities. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`AdditionalCost` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The values for this field are copied from the `AdditionalCost`  field on the input facilities. This field is included only when the travel mode used for the analysis has an impedance attribute that is neither time based nor distance based.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+### usage_cost
+
+This parameter returns the [credits](https://doc.arcgis.com/en/arcgis-online/administer/credits.htm) used by the analysis. 
+
+#### Syntax example for usage_cost
+
+The `usage_cost`  parameter is returned as a JSON with the following syntax:
+
+```javascript
+{
+    "paramName": "Usage_Cost",
+    "dataType": "GPString",
+    "value": {
+        "numObjects": "<number>",
+        "credits": "<number>"
+    }
+}
+
+```
+
+ 
+
+#### Example for usage_cost
+
+The following shows an example of the `usage_cost`  parameter in which the analysis generated 9 billable objects (represented by `numObjects` ) and 4.5 credits were used by the analysis.
+
+```javascript
+{
+    "paramName": "Usage_Cost",
+    "dataType": "GPString",
+    "value": {
+        "numObjects": 9,
+        "credits": 4.5
+    }
+}
+
+```
+
+ 
+
+<Note type={"note"}>
+
+Each analysis can generate a different number of billable objects and thus will use different number of credits. If the service fails to determine credits, the `usage_cost`  parameter returns a value of `-1`  for `credits` .
+
+</Note>
+
+### solve_succeeded
+
+Use this parameter to determine if the service was able to successfully find the service areas. The error messages for the failure can be obtained by making a request to get the status of the job. 
+
+The `solve_succeeded`  parameter is returned as a JSON feature set with the following syntax:
+
+```other
+{
+    "paramName": "Solve_Succeeded",
+    "dataType": "GPBoolean",
+    "value": <true | false>
+}
+```
+
+ 
+
+The following shows an example of the `solve_succeeded`  parameter:
+
+```other
+{
+    "paramName": "Solve_Succeeded",
+    "dataType": "GPBoolean",
+    "value": true
+}
+```
+
+ 
+
+## Usage limits
+
+The table below lists the limits that apply to this service. 
+
+<StyledTable headers={"Limit description,Limit value"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Maximum number of facilities:
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1,000
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Maximum number of (point) barriers:
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+250
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Maximum number of street features intersected by polyline barriers:
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+500
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Maximum number of street features intersected by polygon barriers:
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2,000
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Maximum number of breaks specified in defaultBreaks:
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+No limit
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Maximum travel time:
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+9 hours (540 minutes) OR 
+
+5 hours(300 minutes)
+
+When walking, the maximum travel time can be 9 hours (540 minutes). For all other travel modes, the maximum travel time can be 5 hours(300 minutes).
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Maximum travel distance:
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+27 miles (43.45 kilometers) OR
+
+300 miles (482.80 kilometers)
+
+When walking, the maximum travel distance can be 27 miles (43.45 kilometers). For all other travel modes, the maximum travel distance can be 300 miles (482.80 kilometers).
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Maximum travel time when generating detailed polygons: 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+5 hours (300 minutes) OR
+
+15 minutes
+
+When walking, the maximum travel time can be 5 hours (300 minutes). For all other travel modes, the maximum travel time can be 15 minutes.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Maximum travel distance when generating detailed polygons: 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+15 miles (24.14 kilometers)
+
+For all travel modes including walking, the maximum travel distance can be 15 miles (24.14 kilometers). 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Maximum travel time when generating service area lines:
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+5 hours(300 minutes) OR
+
+15 minutes
+
+When walking, the maximum travel time can be 5 hours(300 minutes). For all other travel modes, the maximum travel time can be 15 minutes.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Maximum travel distance when generating service area lines:
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+15 miles (24.14 kilometers)
+
+For all travel modes including walking, the maximum travel distance can be 15 miles (24.14 kilometers).
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Force hierarchy beyond a defaultBreaks time of:
+
+(If you specify a defaultBreaks drive time that exceeds the limit shown here, the analysis steps up the hierarchy even if useHierarchy is set to false.)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+240 minutes
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Force hierarchy beyond a defaultBreaks distance of:
+
+(If you specify a defaultBreaks drive distance that exceeds the limit shown here, the analysis steps up the hierarchy even if useHierarchy is set to false.)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+240 miles (386.24 kilometers)
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Maximum polygon trim distance:
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+500 meters
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Maximum number of polygon features that can be returned by job request service:
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+10,000
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Maximum time a client can use the job request service area service:
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2 hour (7,200 seconds)
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Examples
+
+<Note type={"caution"}>
+
+If you copy and paste the request URL from the examples into a web browser, you need to replace `<yourToken>`  with a valid token. See [Security and authentication](https://developers.arcgis.com/documentation/mapping-apis-and-services/security/) to learn more.
+
+</Note>
+
+### Calculate 5-, 10-, 15-minute drive-time polygons around store locations
+
+This example shows how to calculate the 5-, 10-, and 15-minute drive-time polygons around a store. The store location is specified as the `facilities`  parameter. The drive-time polygons need to be drawn on an ArcGIS Online basemap that uses the Web Mercator spatial reference. Therefore, the `env:outSR`  parameter is specified with a value of `102100`  to return polygon geometries in the appropriate spatial reference. The default values for all the other parameters are appropriate for this request and are not specified. 
+
+#### Request URL
+
+<StyledTable headers={""}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+```other
+https://logistics.arcgis.com/arcgis/rest/services/World/ServiceAreas/GPServer/
+GenerateServiceAreas/submitJob?facilities={"features":[{"geometry":{"x":-122.253,"y":37.757},
+"attributes":{"Name":"Store5689"}}]}&env:outSr=102100&f=json&token=<yourToken>
+```
+
+```javascript
+https://logistics.arcgis.com/arcgis/rest/services/World/ServiceAreas/GPServer/
+GenerateServiceAreas/submitJob?facilities=%7B%22features%22:%5B%7B%22geometry%22:%7B%22x%22:-122.253,%22y%22:37.757%7D,
+%22attributes%22:%7B%22Name%22:%22Store5689%22%7D%7D%5D%7D&env:outSr=102100&f=json&token=<yourToken>
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+#### JSON response
+
+```other
+{
+    "jobId": "j54d8cee6384e45a594cc9f8fbc4697f3",
+    "jobStatus": "esriJobSubmitted"
+}
+```
+
+ 
+
+#### Request URL to query job status
+
+The job ID obtained from the response of the first request can be queried periodically to determine the status of the job.
+
+<StyledTable headers={""}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+```other
+https://logistics.arcgis.com/arcgis/rest/services/World/ServiceAreas/GPServer/
+GenerateServiceAreas/jobs/<yourJobID>?f=json&token=<yourToken>
+```
+
+ 
+
+```javascript
+https://logistics.arcgis.com/arcgis/rest/services/World/ServiceAreas/GPServer/
+GenerateServiceAreas/jobs/<yourJobID>?f=json&token=<yourToken>
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+#### JSON response
+
+```other
+{
+    "jobId": "j54d8cee6384e45a594cc9f8fbc4697f3",
+    "jobStatus": "esriJobSucceeded",
+    "results": {
+        "Service_Areas": {
+            "paramUrl": "results/Service_Areas"
+        },
+        "Solve_Succeeded": {
+            "paramUrl": "results/Solve_Succeeded"
+        }
+    },
+    "inputs": {
+        "Facilities": {
+            "paramUrl": "inputs/Facilities"
+        },
+        "Break_Values": {
+            "paramUrl": "inputs/Break_Values"
+        },
+        "Break_Units": {
+            "paramUrl": "inputs/Break_Units"
+        },
+        "Analysis_Region": {
+            "paramUrl": "inputs/Analysis_Region"
+        },
+        "Travel_Direction": {
+            "paramUrl": "inputs/Travel_Direction"
+        },
+        "Time_of_Day": {
+            "paramUrl": "inputs/Time_of_Day"
+        },
+        "Use_Hierarchy": {
+            "paramUrl": "inputs/Use_Hierarchy"
+        },
+        "UTurn_at_Junctions": {
+            "paramUrl": "inputs/UTurn_at_Junctions"
+        },
+        "Polygons_for_Multiple_Facilities": {
+            "paramUrl": "inputs/Polygons_for_Multiple_Facilities"
+        },
+        "Polygon_Overlap_Type": {
+            "paramUrl": "inputs/Polygon_Overlap_Type"
+        },
+        "Detailed_Polygons": {
+            "paramUrl": "inputs/Detailed_Polygons"
+        },
+        "Polygon_Trim_Distance": {
+            "paramUrl": "inputs/Polygon_Trim_Distance"
+        },
+        "Polygon_Simplification_Tolerance": {
+            "paramUrl": "inputs/Polygon_Simplification_Tolerance"
+        },
+        "Point_Barriers": {
+            "paramUrl": "inputs/Point_Barriers"
+        },
+        "Line_Barriers": {
+            "paramUrl": "inputs/Line_Barriers"
+        },
+        "Polygon_Barriers": {
+            "paramUrl": "inputs/Polygon_Barriers"
+        },
+        "Restrictions": {
+            "paramUrl": "inputs/Restrictions"
+        },
+        "Attribute_Parameter_Values": {
+            "paramUrl": "inputs/Attribute_Parameter_Values"
+        }
+    },
+    "messages": []
+}
+```
+
+ 
+
+#### Request URL to return the output service areas
+
+Because the job succeeded, you can make a request to return the service areas from the `service_areas`  output parameter.
+
+<StyledTable headers={""}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+```other
+https://logistics.arcgis.com/arcgis/rest/services/World/ServiceAreas/GPServer/
+GenerateServiceAreas/jobs/<yourJobID>/results/service_areas?f=pjson&token=<yourToken>
+```
+
+ 
+
+```javascript
+https://logistics.arcgis.com/arcgis/rest/services/World/ServiceAreas/GPServer/
+GenerateServiceAreas/jobs/<yourJobID>/results/service_areas?f=pjson&token=<yourToken>
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+#### JSON response
+
+The response contains three drive-time areas around the store location. The name of the store and the break range is used to construct the `Name`  attribute for each drive-time area. The drive-time area geometries are returned in the Web Mercator spatial reference.
+
+<Note type={"note"}>
+
+Because the response is quite verbose, the repeated elements within the response are abbreviated for clarity.
+
+</Note>
+
+```other
+{
+    "paramName": "Service_Areas",
+    "dataType": "GPFeatureRecordSetLayer",
+    "value": {
+        "displayFieldName": "",
+        "geometryType": "esriGeometryPolygon",
+        "spatialReference": {
+            "wkid": 102100,
+            "latestWkid": 3857
+        },
+        "fields": [
+            {
+                "name": "ObjectID",
+                "type": "esriFieldTypeOID",
+                "alias": "ObjectID"
+            },
+            {
+                "name": "FacilityID",
+                "type": "esriFieldTypeInteger",
+                "alias": "FacilityID"
+            },
+            {
+                "name": "Name",
+                "type": "esriFieldTypeString",
+                "alias": "Name",
+                "length": 128
+            },
+            {
+                "name": "FromBreak",
+                "type": "esriFieldTypeDouble",
+                "alias": "FromBreak"
+            },
+            {
+                "name": "ToBreak",
+                "type": "esriFieldTypeDouble",
+                "alias": "ToBreak"
+            },
+            {
+                "name": "FacilityOID",
+                "type": "esriFieldTypeInteger",
+                "alias": "FacilityOID"
+            },
+            {
+                "name": "FacilityName",
+                "type": "esriFieldTypeString",
+                "alias": "Name",
+                "length": 128
+            },
+            {
+                "name": "Shape_Length",
+                "type": "esriFieldTypeDouble",
+                "alias": "Shape_Length"
+            },
+            {
+                "name": "Shape_Area",
+                "type": "esriFieldTypeDouble",
+                "alias": "Shape_Area"
+            }
+        ],
+        "features": [
+            {
+                "attributes": {
+                    "ObjectID": 1,
+                    "FacilityID": 1,
+                    "Name": "Store5689 : 10 - 15",
+                    "FromBreak": 10,
+                    "ToBreak": 15,
+                    "FacilityOID": 1,
+                    "FacilityName": "Store5689",
+                    "Shape_Length": 186829.46238855206,
+                    "Shape_Area": 101157487.56126754
+                },
+                "geometry": {
+                    "rings": [
+                        [
+                            [
+                                -13609000.5407,
+                                4557625.0921000019
+                            ],
+                            [
+                                -13609011.581599999,
+                                4557630.4697000012
+                            ],
+                            //... additional points in the polygon ring
+                        ],
+                        [
+                            [
+                                -13609000.5407,
+                                4557625.0921000019
+                            ],
+                            [
+                                -13608886.309799999,
+                                4557567.0144999996
+                            ],
+                            //... additional points in the polygon ring
+                        ],
+                        //... additional rings in the polygon            
+                    ]
+                }
+            },
+            {
+                "attributes": {
+                    "ObjectID": 2,
+                    "FacilityID": 1,
+                    "Name": "Store5689 : 5 - 10",
+                    "FromBreak": 5,
+                    "ToBreak": 10,
+                    "FacilityOID": 1,
+                    "FacilityName": "Store5689",
+                    "Shape_Length": 98556.221615700371,
+                    "Shape_Area": 45188876.257299371
+                },
+                "geometry": {
+                    "rings": [
+                        [
+                            [
+                                -13610967.0956,
+                                4551187.9716000035
+                            ],
+                            [
+                                -13610942.041099999,
+                                4551061.1401000023
+                            ],
+                            //... additional points in the polygon ring
+                        ],
+                        [
+                            [
+                                -13611418.2863,
+                                4546620.322300002
+                            ],
+                            [
+                                -13611451.621300001,
+                                4546606.3554000035
+                            ],
+                            //... additional points in the polygon ring
+                        ],
+                        //... additional rings in the polygon
+                    ]
+                }
+            },
+            {
+                "attributes": {
+                    "ObjectID": 3,
+                    "FacilityID": 1,
+                    "Name": "Store5689 : 0 - 5",
+                    "FromBreak": 0,
+                    "ToBreak": 5,
+                    "FacilityOID": 1,
+                    "FacilityName": "Store5689",
+                    "Shape_Length": 21281.354678039555,
+                    "Shape_Area": 11623189.162529219
+                },
+                "geometry": {
+                    "rings": [
+                        [
+                            [
+                                -13609262.337400001,
+                                4547603.4253999963
+                            ],
+                            [
+                                -13609237.2831,
+                                4547476.6374000013
+                            ],
+                            //... additional points in the polygon ring
+                        ]
+                    ]
+                }
+            }
+        ],
+        "exceededTransferLimit": false
+    }
+}
+```
+
+ 

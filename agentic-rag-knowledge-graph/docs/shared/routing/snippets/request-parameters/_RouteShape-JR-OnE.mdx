@@ -1,0 +1,71 @@
+{/*Shared snippet for route_shape OR outputLines*/} 
+
+import ParamMetadata from "../../../components/param-metatdata" 
+
+<If c="requestType == 'job'">
+
+{/* <p class="space-x-2"><span class="font-sm text-color-3">type:enum</span><span class="font-bold text-[#6d29cc]">default:`True Shape`</span></p> */}
+
+<ParamMetadata types={[{name:"string"}]} defaultValue="True Shape" />
+
+**Allowed values:** `True Shape`, `True Shape with Measures`, `Straight Line`, `None`
+
+Specify the type of route features that are output by the service. The parameter can be specified using one of the following values:
+
+-   `True Shape`—Return the exact shape of the resulting route that is based on the underlying streets. Since this option creates the most detailed geometry for the output routes, choosing it tends to make the process run longer and create larger output files.
+-   `True Shape with Measures`—Return the exact shape of the resulting route that is based on the underlying streets. Additionally, construct measures so the shape may be used in linear referencing. The measurements increase from the first stop and record the cumulative travel time or travel distance in the units specified by the `measurement_units` parameter. 
+-   `Straight Line`—Return a straight line between the route start and end.
+-   `None`—Do not return any route shapes. This value can be useful in cases where you want to optimize performance and are only interested in determining the route's total travel time or travel distance, but not the route paths.
+
+When the `route_shape` parameter is set to `True Shape`, or `True Shape with Measure`, the generalization of the route shape can be further controlled using the appropriate value for the `route_ line_simplification_tolerance` parameter.
+
+No matter which value you choose for the `route_shape`  parameter, the best route is always determined by minimizing the travel time or the travel distance, never using the straight-line distance between stops. This means that only the route shapes are different, not the underlying streets that are searched when finding the route.
+
+<Note type={"note"}>
+
+Specifying `True Shape` or `True Shape with Measures` creates the most detailed geometry for the output routes. So choosing these options tends to increase the response time for the request and also create larger responses. So use these options only when the exact route shape is required.
+
+</Note>
+</If>
+
+<If c="requestType == 'direct'">
+
+{/* <p class="space-x-2"><span class="font-sm text-color-3">type:enum</span><span class="font-bold text-[#6d29cc]">default:`esriNAOutputLineTrueShape`</span></p> */}
+
+<ParamMetadata types={[{name:"string"}]} defaultValue="esriNAOutputLineTrueShape" />
+
+**Allowed values:** `esriNAOutputLineTrueShape`, `esriNAOutputLineTrueShapeWithMeasure`, `esriNAOutputLineStraight`, `esriNAOutputLineNone`
+
+<If c={props.route}>
+Specify the type of route features that are output by the service. This parameter is applicable only if the [`returnRoutes`](#returnroutes) parameter is set to `true`. The `outputLines` parameter can have one of the following values: 
+</If>
+
+<If c={props.closestFacility}>
+Specify the type of route features that are output by the service. This parameter is applicable only if the [`returnCFRoutes`](#returncfroutes) parameter is set to `true`. The `outputLines` parameter can have one of the following values: 
+</If>
+
+-   `esriNAOutputLineTrueShape`—Return the exact shape of the resulting route that is based on the underlying streets. 
+-   `esriNAOutputLineTrueShapeWithMeasure`—Return the exact shape of the resulting route that is based on the underlying streets and include route measurements that keep track of the cumulative travel time or travel distance along the route relative to the first stop. When this value is chosen for the `outputLines` parameter, each point in the route shape will include an m-value along with an x-value and a y-value. The m-value, also known as the measure value, indicates the accumulated travel time or travel distance at that point along the route. The m-values can be used to determine how far you have traveled from the start of the route or the remaining distance or time left to reach the destination. The m-values are in the same units as the impedance attribute.
+-   `esriNAOutputLineStraight`—Return a straight line between the stops.
+<If c={props.route}>
+-   `esriNAOutputLineNone`—Do not return any shapes for the routes. This value can be useful when you are only interested in determining the total travel time or travel distance of the route. For example, if the application has calculated the route and after some time it will calculate the estimated time of arrival (ETA) to the destination, you can set the [`returnRoutes`](#returnroutes)  parameter to `true`  and the `outputLines`  parameter to `esriNAOutputLineNone`. The `routes` property of the JSON response will only contain the total travel time that can be used to determine the ETA. Since the route shape is not returned when using the `esriNAOutputLineNone` value, the response size will be considerably smaller.
+</If>
+
+<If c={props.closestFacility}>
+-   `esriNAOutputLineNone`—Do not return any shapes for the routes. This value can be useful when you are only interested in determining the total travel time or travel distance of the route. For example, if the application has calculated the route and after some time it will calculate the estimated time of arrival (ETA) to the destination, you can set the [`returnRoutes`](#returncfroutes)  parameter to `true`  and the `outputLines`  parameter to `esriNAOutputLineNone`. The `routes` property of the JSON response will only contain the total travel time that can be used to determine the ETA. Since the route shape is not returned when using the `esriNAOutputLineNone` value, the response size will be considerably smaller.
+</If>
+
+
+<Note type={"note"}>
+
+When the `outputLines` parameter is set to `esriNAOutputLineTrueShape` or `esriNAOutputLineTrueShapeWithMeasure`, the generalization of the route shape can be further controlled using the appropriate values for the `outputGeometryPrecision` and `outputGeometryPrecisionUnits` parameters. 
+
+</Note>
+
+<Note type={"note"}>
+
+Regardless of the value you choose for the `outputLines` parameter, the best route is always determined by minimizing the travel time or the travel distance, never using the Euclidean distance (or as-the-crow-flies distance) between the stops. This means that only the route shapes are different, not the underlying streets that are searched when finding the route.
+
+</Note>
+
+</If>

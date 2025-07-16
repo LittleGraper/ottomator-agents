@@ -1,0 +1,201 @@
+---
+title: "Enable Topology"
+description: "The enableTopology operation enables the network topology for a utility network in the DEFAULT version."
+slug: "enabletopology-utility-network-server"
+url: "/enabletopology-utility-network-server"
+guid: "GUID-50602BB7-A828-44CE-BE00-3E1561BE0662"
+migratedTopicMetadata:
+  FTITLE: "enableTopology (Utility Network Server)"
+  FDESCRIPTION: ""
+  FCHANGES: "Minor updates to clarify.  See #9621"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1 - *"
+  CREATED-ON: "10/11/2022 08:10:10"
+  FAUTHOR: "jderose"
+  FSTATUS: "Released"
+  MODIFIED-ON: "21/11/2022 07:45:35"
+  VERSION: "6"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-8A206983-FF9A-4089-9EC3-4ADF4FFBDD17"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/UtilityNetworkServer/enableTopology
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/UtilityNetworkServer/enableTopology
+  methods: 
+    - post
+  versionIntroduced: '10.6'
+  requiredCapability: Requires the portal utility network owner and ArcGIS Advanced Editing user type extension license
+---
+
+import GUID_68FE7C20_B3BC_4175_A32D_778C3A29380D_LI_DA8E0C47228D49D5B412C454CFA4137A from "./snippets/GUID-68FE7C20-B3BC-4175-A32D-778C3A29380D/_LI_DA8E0C47228D49D5B412C454CFA4137A";
+import GUID_68FE7C20_B3BC_4175_A32D_778C3A29380D_GUID_6635EF88_7E6F_4290_8DF6_6A15ECEC0D11 from "./snippets/GUID-68FE7C20-B3BC-4175-A32D-778C3A29380D/_GUID-6635EF88-7E6F-4290-8DF6-6A15ECEC0D11";
+
+## Description
+
+The `enableTopology` operation enables the network topology for a utility network in the DEFAULT version. When the topology is enabled, all feature and association edits generate dirty areas, which are then consumed when you use [validate](/validatenetworktopology-utiility-network-server) to update the network topology. When the topology is enabled, the following happens:
+
+-   The topology is built and updated for the full extent of the network.
+-   All errors are deleted.
+-   Any new errors are added to the dirty areas sublayer of the utility network.
+-   The topology is marked as enabled.
+
+You can enable the topology using either an asynchronous or synchronous job. While the network is being enabled, all other sessions connected to the DEFAULT version are blocked from running validate or enable operations.  This operation is not supported with named versions.
+
+-   <GUID_68FE7C20_B3BC_4175_A32D_778C3A29380D_LI_DA8E0C47228D49D5B412C454CFA4137A />
+
+<Note type={"note"}>
+
+<GUID_68FE7C20_B3BC_4175_A32D_778C3A29380D_GUID_6635EF88_7E6F_4290_8DF6_6A15ECEC0D11 />
+
+</Note>
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the output format of the response. The default response format is `html` .
+
+```
+f=html | json | pjson
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`maxErrorCount`
+
+(Optional) 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The `maxErrorCount` specifies the threshold of errors that will stop the process of enabling the network topology when met. The default value is 10,000. 
+
+Syntax: `maxErrorCount=<integer>` 
+
+Example: `maxErrorCount=10000` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`async`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Introduced at ArcGIS Enterprise 10.9.1.  If `true`, the request is processed as an asynchronous job, and a URL is returned that a client can visit to check the status of the job. The default is `false`.
+
+```
+async=true | false
+```
+
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## JSON Response syntax
+
+JSON response (when async = false):
+
+```json
+{
+  "moment" : <datetime>,
+  "success" : <true | false>,
+  "error" : {                   // only if success is false
+    "extendedCode” : <HRESULT>,
+    "message" : <error message>,
+    "details" : [ <detail> ]
+  }
+}
+
+```
+
+ 
+
+JSON response (when async = true):
+
+```json
+{
+  "statusUrl" : <url>
+}
+
+```
+
+ 
+
+JSON response to the status URL (when pending or in progress):
+
+```json
+{
+  "status" : "<Pending | InProgress>",
+  "submissionTime" : <datetime>,
+  "lastUpdatedTime" : <datetime>
+ }
+
+```
+
+ 
+
+## Example usage
+
+Enable the network topology for a utility network using the `enableTopology` operation.
+
+Request URL and parameters:
+
+`https://myserver.esri.com/server/rest/services/LandUse/UtilityNetworkServer/enableTopology` 
+
+```json
+f=json
+maxErrorCount=1000
+async=false
+
+```
+
+ 
+
+JSON response:
+
+```json
+{
+ "moment": 1554336000000,
+ "success": true
+}
+```
+
+ 

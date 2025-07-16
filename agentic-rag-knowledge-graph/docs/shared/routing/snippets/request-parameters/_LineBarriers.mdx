@@ -1,0 +1,106 @@
+{/*Shared snippet for line_barriers OR polylineBarriers */} 
+
+import ParamMetadata from "../../../components/param-metatdata" 
+
+<ParamMetadata types={[{name:"feature",link:"../routing-data-types#feature"}]} />
+
+{/* <If c="requestType == 'job'">
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+</If>
+
+<If c="requestType == 'direct'">
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+</If> */}
+
+Specify one or more lines that prohibit travel anywhere the lines intersect the streets. For example, a parade or protest that blocks traffic across several street segments can be modeled with a line barrier. A line barrier can also quickly fence off several roads from being traversed, thereby channeling possible routes away from undesirable parts of the street network.
+
+![Two maps demonstrate how a line barrier affects finding a route between two stops.](../../images/Polyline_Barriers.png)
+
+_The first map displays the shortest path between two stops. The second map shows the shortest path when several streets are blocked by a polyline barrier._
+
+
+When specifying line barriers, you can set the name of each barrier using the following attribute:
+
+<details>
+
+ <If c="requestType == 'job'">
+ <summary><span class="font-sm text-color-link">Show attributes for `line_barriers`</span></summary>
+
+ #### Attributes for line_barriers
+ </If>
+
+ <If c="requestType == 'direct'">
+ <summary><span class="font-sm text-color-link">Show attributes for `polylineBarriers`</span></summary>
+
+ #### Attributes for polylineBarriers
+ </If>
+
+- <p class="space-x-2"><span class="font-bold">Name</span><span class="font-sm text-color-3">string (length: 500)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The name of the barrier.
+
+<If c="requestType == 'direct'">
+- <p class="space-x-2"><span class="font-bold">ObjectID</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The object ID of the line barrier. `ObjectID` is a unique identifier for the line barrier. If you want to maintain a relationship between the input and output, set `preserveObjectID` to `true`. The `ObjectID` value of the input line barrier is included in the output line barrier (as the `ObjectID` field) and can be used to join additional information from analysis outputs to the attribute of the line barriers. If the `ObjectID` value is not specified, a unique ID is automatically generated in the output.
+</If>
+
+<If c="publication=='services-reference/enterprise && requestType== direct'">
+<Note type="{Note}">
+
+  You can specify a network location using `SourceID`, `SourceOID`, `PosAlong`, and `SideOfEdge` described below. If the network location is not provided, the solver will derive it from the input geometry
+  
+  </Note>
+
+- <p class="space-x-2"><span class="font-bold">SourceID</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The numeric identifier of the network dataset source feature class on which the input point is located.
+
+- <p class="space-x-2"><span class="font-bold">SourceOID</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The object ID of the feature in the source on which the input point is located. 
+
+- <p class="space-x-2"><span class="font-bold">PosAlong</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The position along the digitized direction of the source line feature. This value is stored as a ratio. This attribute is null if the network location references a junction.
+
+- <p class="space-x-2"><span class="font-bold">SideOfEdge</span><span class="font-sm text-color-3">int enum</span></p>
+
+   Allowed values: `1`, `2`
+
+   The side of the edge in relation to the digitized direction of the line feature.
+
+   This attribute is limited to a domain of two values:
+
+   - `1`: Right Side
+   - `2`: Left Side
+
+- <p class="space-x-2"><span class="font-bold">BarrierType</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+  Allowed values: `0`, `1`
+
+  Specify whether the point barrier restricts travel completely or adds time or distance when it is crossed.
+
+  The value for this attribute is specified as one of the following integers:
+
+  - `0`: Restriction. Prohibits travel through the barrier. The barrier is referred to as a restriction line barrier since it acts as a restriction. 
+  - `1`: Scaled Cost. Scales the time or distance required to travel the underlying streets by a factor specified using the `Attr_[Cost]` attribute.
+
+- <p class="space-x-2"><span class="font-bold">Attr_[Cost]</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+  This attribute is specific to scaled-cost barriers. It is the factor by which the cost of edges underlying the barrier are multiplied.
+  
+</If>
+
+</details>
+
+<details>
+
+    <summary><span class="font-sm text-color-link">Show example</span></summary>
+
+This example shows how to add two lines as polyline barriers to restrict travel on the streets intersected by the lines. Barrier 1 is a single-part line feature composed of two points. Barrier 2 is a two-part line feature. The first part is composed of three points, and the second part is composed of two points.
+
+<CodeBlock language="json" source="../../code-samples/shared/examples/input/line_barriers.json" maxLines={20} expandable/>
+</details>
+
+

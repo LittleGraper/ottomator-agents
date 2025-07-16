@@ -1,0 +1,335 @@
+---
+title: "Run (Health Check Reports)"
+description: "The run operation performs a health check using suites specified by an administrator and generates a health check report."
+slug: "run-health-check"
+url: "/run-health-check"
+guid: "GUID-2C46EEF6-3DEF-433D-A00E-2E5CC9ED66FD"
+migratedTopicMetadata:
+  FTITLE: "Run Health Check"
+  FDESCRIPTION: ""
+  FCHANGES: "New operation"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2-*"
+  CREATED-ON: "06/11/2023 18:00:13"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "12/11/2023 11:22:32"
+  VERSION: "1"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "6"
+  ED: "GUID-9CB3A9E8-F24E-4989-8A03-0FA7E29B8CBD"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /healthCheck/run
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /healthCheck/run
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '11.2'
+  requiredCapabilities:
+    - name: Access allowed with the "Security and infrastructure" privilege
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `run` operation performs a health check using suites specified by an administrator and generates a health check report. A suite is a grouping of predefined tests that are performed against the organization during a health check. Administrators cannot change the tests or choose which tests are performed from a specific suite. At ArcGIS Enterprise 11.2 on Kubernetes, administrators have access to a basic health check suite, which validates the overall health for an organization. For more information, see the [Suite](/suite) documentation.
+
+This operation can be performed asynchronously. If performed asynchronously, the request will return a job ID. The HTML view redirects to the requests job page. Otherwise, to access the job resource you can make a request of the following form:
+
+```markdown
+https://organization.domain.com/context/admin/jobs/<jobID>
+```
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `suiteIds` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A comma-separated list of suite IDs, specifying which suites are used during the health check. Currently, administrators have access to a basic health check. The suite ID can be retrieved from the [Suites](/suites) resource.
+
+      ```markdown label=Example
+      suiteIds=BSHC-001
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `runName` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A user-specified name for the report.
+
+      ```markdown label=Example
+      runName=report-test
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies whether the operation is performed synchronously or asynchronously. If performed synchronously (`false`), the operation returns portion of a URL that be appended to the [Health Check](/health-check) resource URL to access the report. Performing the operation synchronously may take some time. If performed asynchronously (`true`), the operation returns a `jobsUrl` that can be used to check the status of the operation. The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is sample POST request for the `run` operation:
+
+```other
+POST /context/admin/healthCheck/run HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+suiteIds=BSHC-001&runName=report-test&async=true&f=pjson&token=m7zGSezM7znt6ZuIwr827imJxOTSDsjYujVdd7SiAQLYG1HmesG8EbSnTwCbiekEh0QwRdmeyp1hP63M60TPrdZQ2NzIg5G7qFaQh40MdiOCfh60-6oPKC2MNoqwdVDZ3srzreVZb66QofWXws8GMrKWkgP45A-2an5crKvReUo-pwvkzm68W87Q0yPJFA2Kww39UnMYNw-5qd2-Bt04VmkrqKI-lCbA-jFZY_UGzeGzNqnBGrjKuVB_q17HogMw
+```
+
+## JSON Response examples
+
+The following JSON response is returned when the operation is performed asynchronously. Appending the `statusURL`  to the [Health Check](/health-check) resource URL will redirect to the report.
+
+<Note type={"note"}>
+
+If performed synchronously, the operation may take some time to complete.
+
+</Note>
+
+```other
+{
+  "statusURL": "/context/admin/healthCheck/reports/x7iv8phn1f"
+}
+```
+
+The following JSON response is returned when the operation is performed asynchronously. Using the provided job URL will redirect to the job page for the report, which can be occasionally polled to check the status of the job.
+
+```other
+{
+  "jobsUrl": "https://organization.domain.com/context/admin/jobs/j62f4691f-162d-4f1a-be62-7365e44a8549",
+  "jobid": "j62f4691f-162d-4f1a-be62-7365e44a8549",
+  "status": "SUBMITTED"
+}
+```
+
+The following is a sample report returned by the job resource once the job has completed:
+
+```other
+{
+  "result": {
+    "diagnosticHealthReport": {
+      "owner": "user",
+      "result": "passed",
+      "suiteStatus": [
+        {
+          "result": "passed",
+          "criticalTestStatus": [
+            {
+              "severity": "critical",
+              "result": "pass",
+              "name": "sharing_availability",
+              "description": "Portal API endpoint is available",
+              "startTime": 1699328080477,
+              "id": "HC_112_001",
+              "endTime": 1699328080601,
+              "state": "completed"
+            },
+            {
+              "severity": "critical",
+              "result": "pass",
+              "name": "healthcheck_relationalDatastore",
+              "description": "Relational store health check",
+              "startTime": 1699328080631,
+              "id": "HC_112_002",
+              "endTime": 1699328080824,
+              "state": "completed"
+            }
+          ],
+          "name": "Basic health checks",
+          "description": "Conducts a suite of functional and availability health checks to validate overall organization health.",
+          "startTime": 1699328080439,
+          "generalTestStatus": [
+            {
+              "severity": "general",
+              "result": "pass",
+              "name": "healthcheck_objectStore",
+              "description": "Object store health check",
+              "startTime": 1699328083231,
+              "id": "HC_112_003",
+              "endTime": 1699328083342,
+              "state": "completed"
+            },
+            {
+              "severity": "general",
+              "result": "pass",
+              "name": "home_app_availability",
+              "description": "ArcGIS Enterprise portal endpoint is available",
+              "startTime": 1699328083231,
+              "id": "HC_112_005",
+              "endTime": 1699328083337,
+              "state": "completed"
+            },
+            {
+              "severity": "general",
+              "result": "pass",
+              "name": "manager_availability",
+              "description": "ArcGIS Enterprise Manager endpoint is available",
+              "startTime": 1699328083231,
+              "id": "HC_112_007",
+              "endTime": 1699328083334,
+              "state": "completed"
+            },
+            {
+              "severity": "general",
+              "result": "pass",
+              "name": "healthcheck_spatioTemporalIndexStore",
+              "description": "Spatio temporal and index store health check",
+              "startTime": 1699328083231,
+              "id": "HC_112_004",
+              "endTime": 1699328083377,
+              "state": "completed"
+            },
+            {
+              "severity": "general",
+              "result": "pass",
+              "name": "healthcheck_ingress",
+              "description": "Ingress health check",
+              "startTime": 1699328083345,
+              "id": "HC_112_008",
+              "endTime": 1699328083402,
+              "state": "completed"
+            },
+            {
+              "severity": "general",
+              "result": "pass",
+              "name": "healthcheck_publishingService",
+              "description": "System publishing tools health check",
+              "startTime": 1699328083354,
+              "id": "HC_112_009",
+              "endTime": 1699328083803,
+              "state": "completed"
+            },
+            {
+              "severity": "general",
+              "result": "pass",
+              "name": "healthcheck_sharedMapService",
+              "description": "Shared map services health check",
+              "startTime": 1699328083355,
+              "id": "HC_112_010",
+              "endTime": 1699328083801,
+              "state": "completed"
+            },
+            {
+              "severity": "general",
+              "result": "pass",
+              "name": "healthcheck_spatialanalysis",
+              "description": "Spatial analysis service health check",
+              "startTime": 1699328083387,
+              "id": "HC_112_011",
+              "endTime": 1699328095302,
+              "state": "completed"
+            },
+            {
+              "severity": "general",
+              "result": "pass",
+              "name": "healthcheck_geometryService",
+              "description": "Geometry service health check",
+              "startTime": 1699328083416,
+              "id": "HC_112_012",
+              "endTime": 1699328083561,
+              "state": "completed"
+            },
+            {
+              "severity": "general",
+              "result": "pass",
+              "name": "query_logs_availability",
+              "description": "Can query logs",
+              "startTime": 1699328083573,
+              "id": "HC_112_013",
+              "endTime": 1699328084782,
+              "state": "completed"
+            },
+            {
+              "severity": "general",
+              "result": "pass",
+              "name": "healthcheck_index_synced",
+              "description": "Users, groups, and items indices are in sync",
+              "startTime": 1699328083819,
+              "id": "HC_112_014",
+              "endTime": 1699328083934,
+              "state": "completed"
+            }
+          ],
+          "id": "BSHC-001",
+          "state": "completed",
+          "endTime": 1699328095313
+        }
+      ],
+      "createdBy": "administrator",
+      "name": "report-test",
+      "startTime": 1699328080431,
+      "id": "vegcl1xm6u",
+      "endTime": 1699328095317,
+      "state": "completed"
+    }
+  },
+  "updatedtime": 1699328095466,
+  "jobid": "j62f4691f-162d-4f1a-be62-7365e44a8549",
+  "resource": {"name": "healthCheck"},
+  "requestID": "c8b6a584-6d1f-4696-8a96-015ed64de9a1",
+  "name": "runHealthCheck",
+  "endtime": 1699328095469,
+  "starttime": 1699328080392,
+  "operationURI": "/context/admin/healthCheck/run",
+  "status": "COMPLETED",
+  "username": "administrator"
+}
+```

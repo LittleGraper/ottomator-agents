@@ -1,0 +1,755 @@
+---
+title: "Deployment Properties"
+description: "The properties resource returns the default template for GIS service microservices, as well as microservices that are not service related."
+slug: "deployment-default-properties"
+url: "/deployment-default-properties"
+guid: "GUID-6FCBE04E-94CC-4AE8-BA5B-1ECFF1656A82"
+migratedTopicMetadata:
+  FTITLE: "Deployment Default Properties"
+  FDESCRIPTION: ""
+  FCHANGES: "Changing supported hpaVersion"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2-*"
+  CREATED-ON: "31/10/2023 16:34:10"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "12/11/2023 11:22:41"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-927DD3CE-0F89-4170-A292-5B91AAF150E3"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /system/deployments/properties
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /system/deployments/properties
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed only with the default administrator role
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `properties` resource returns the default template for GIS service microservices, as well as microservices that are not service related. The properties section for each template can be updated using the Edit (Default Properties) operation.
+
+Starting at ArcGIS Enterprise 11.2 on Kubernetes, the default property template supports having node affinity and tolerations that are applied to the pods of newly created GIS service deployments.
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Response properties
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `mode` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The microservice mode. A mode type of `Undefined` is returned when the microservice is system related (Admin API, portal sharing, ingress controller, and so on). Only microservices related to an ArcGIS service type return `Dedicated` or `Shared` for this property.
+
+      Values: `Shared` | `Dedicated` | `Undefined` | `Primary` | `Standby` | `Coordinator`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `provider` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The microservice provider. Only microservices related to an ArcGIS service type have a provider type. A provider type of `Undefined` is returned for microservices that are not service related (Admin API, portal sharing, ingress controller, and so on).
+
+      Values: `SDS` | `ArcObjects11` | `DMaps` | `Undefined` | `Postgres` | `Tiles` | `Ignite` | `MinIO` | `Elasticsearch` | `RabbitMQ` | `ArcObjectsRasterRendering`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `id` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The template ID.
+
+      ```markdown label=Example
+      "id": "9375dd81-30d1-41c0-a802-cabb425159a9",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `type` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The microservice type. For example, if the microservice is a shared feature server containing feature services, `FeatureServer` is returned.
+
+      Values: `FeatureServer` | `GeometryServer` | `GPServer` | `GPSyncServer` | `MapServer` | `TileServer` | `System` | `InMemoryStore` | `ObjectStore` | `SpatiotemporalIndexStore` | `QueueServer` | `RelationalStore` | `WebhookProcessor` (Added at 11.0)
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `spec` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The JSON object representation of the template's specifications, including replicas and the container resources.
+
+      ```other label=Example
+      "spec": {
+        "replicas": {
+          "min": 3,
+          "max": 3,
+          "scalingMode": "manual" //Added at 11.0
+        },
+        "podPlacementPolicy": {
+          "tolerations": [
+            {
+              "effect": "NoSchedule",
+              "key": "label1",
+              "operator": "Equal",
+              "value": "test1"
+            }
+          ]
+          "nodeAffinity": {}
+        },
+        "containers": [
+          {
+            "name": "main-container",
+            "resources": {
+              "memoryMin": "500Mi",
+              "memoryMax": "4Gi",
+              "cpuMin": "0.125",
+              "cpuMax": "2"
+            },
+            "containerImageKey": "SDS_FEATURE_SERVER"
+          },
+          {
+            "name": "filebeat",
+            "resources": {
+              "memoryMin": "32Mi",
+              "memoryMax": "50Mi",
+              "cpuMin": "0.05",
+              "cpuMax": "0.25"
+            },
+            "containerImageKey": "FILEBEAT"
+          }
+        ]
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `replicas` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The number of replicas for the microservice. For manual scaling, the value for both `min` and `max` must be the same. Organizations using a version of ArcGIS Enterprise on Kubernetes at 10.9.1 or higher have the option to enable autoscaling. For more information on manual scaling and autoscaling, see the [Edit](/edit-scaling).
+
+      <Note type={"caution"}>
+
+      Though scaling properties can be updated using the [Edit](/edit-deployment-properties) default properties and [Edit](/edit-deployment) deployment operations, to reduce risk of errors it is recommended that changes to scaling information is performed using the [Edit](/edit-scaling) scaling.
+
+      </Note>
+
+      ```other label=Example
+      "replicas": {
+        "min": 3,
+        "max": 3,
+        "scalingMode": "manual" //Added at 11.0
+      },
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `podPlacementPolicy` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.2. The node affinity or tolerations applied to the pods of a GIS service deployment. For more information on node affinity and tolerations, see the [Edit](/edit-placement-policy) operation.
+
+      ```other label=Example
+      ...
+      "podPlacementPolicy": {
+        "tolerations": [
+          {
+            "effect": "NoSchedule",
+            "key": "label1",
+            "operator": "Equal",
+            "value": "test1"
+          }
+        ]
+        "nodeAffinity": {}
+      },
+      ...
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `resources` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The minimum and maximum resource allocations for the microservice, including the minimum memory (`memoryMin`) and minimum CPU (`cpuMin`) resources required for the microservice to start. The default values for `memoryMin`, `cpuMin`, `memoryMax`, and `cpuMax` are outlined in the example below. Starting at ArcGIS Enterprise 11.3 on Kubernetes, `resources` also includes the `customResources` object, which includes the values for GPU requests and limits for GPU nodes that are part of raster analytic and deep learning workflows.
+
+      ```markdown label=Example
+      "resources": {
+        "memoryMin": "500Mi",
+        "memoryMax": "2Gi",
+        "cpuMin": "0.125",
+        "cpuMax": "2",
+        "customResources": {
+          "limits": {
+            "nvidia.com/gpu": "1"
+          },
+          "requests": {
+            "nvidia.com/gpu": "1"
+          }
+        }
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `revision` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The date, in milliseconds from epoch format, of the latest revision to the template.
+
+      ```markodwn lable=Example
+      "revision": 1598217421474
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample request URL used to access the `properties` resource:
+
+```other
+https://organization.domain.com/context/admin/system/deployments/properties?f=pjson
+```
+
+## JSON Response example
+
+```other
+{
+  "properties": [
+    {
+      "mode": "Shared",
+      "provider": "SDS",
+      "id": "prava5pumwtr4a9tu4u6x",
+      "type": "FeatureServer",
+      "spec": {
+        "replicas": {
+          "min": 1,
+          "max": 10,
+          "scalingMode": "auto",
+          "autoscaling": {
+            "hpaSpec": {
+              "metrics": [
+                {
+                  "resource": {
+                    "name": "cpu",
+                    "target": {
+                      "averageUtilization": "65",
+                      "type": "Utilization"
+                    }
+                  },
+                  "type": "Resource"
+                }
+              ],
+              "hpaVersion": "autoscaling/v2"
+            }
+          }
+        },
+        "podPlacementPolicy": {
+          "tolerations": [{"effect": "NoSchedule","key": "label1","operator": "Equal","value": "test1"}]
+          "nodeAffinity": {}
+        },
+        "containers": [
+          {
+            "name": "main-container",
+            "resources": {
+              "memoryMin": "500Mi",
+              "memoryMax": "4Gi",
+              "cpuMin": "0.125",
+              "cpuMax": "2"
+            },
+            "containerImageKey": "SDS_FEATURE_SERVER"
+          },
+          {
+            "name": "filebeat",
+            "resources": {
+              "memoryMin": "32Mi",
+              "memoryMax": "50Mi",
+              "cpuMin": "0.05",
+              "cpuMax": "0.25"
+            },
+            "containerImageKey": "FILEBEAT"
+          }
+        ]
+      },
+      "revision": 1655462610863
+    },
+    {
+      "mode": "Dedicated",
+      "provider": "ArcObjects11",
+      "id": "pub3eotrxkkfwjq5mej0z",
+      "type": "GPServer",
+      "spec": {
+        "replicas": {
+          "min": 1,
+          "max": 1,
+          "scalingMode": "manual"
+        },
+        "containers": [
+          {
+            "name": "main-container",
+            "resources": {
+              "memoryMin": "1.5Gi",
+              "memoryMax": "2Gi",
+              "cpuMin": "0.125",
+              "cpuMax": "1"
+            },
+            "containerImageKey": "GPPROXY_SERVER"
+          },
+          {
+            "name": "filebeat",
+            "resources": {
+              "memoryMin": "32Mi",
+              "memoryMax": "50Mi",
+              "cpuMin": "0.05",
+              "cpuMax": "0.25"
+            },
+            "containerImageKey": "FILEBEAT"
+          }
+        ]
+      },
+      "revision": 1655462610897
+    },
+    {
+      "mode": "Dedicated",
+      "provider": "ArcObjects11",
+      "id": "pykfh7b6tclxybgr4btz6",
+      "type": "GPSyncServer",
+      "spec": {
+        "replicas": {
+          "min": 1,
+          "max": 1,
+          "scalingMode": "manual"
+        },
+        "containers": [
+          {
+            "name": "main-container",
+            "resources": {
+              "memoryMin": "1.5Gi",
+              "memoryMax": "4Gi",
+              "cpuMin": "0.125",
+              "cpuMax": "2"
+            },
+            "containerImageKey": "GP_SERVER"
+          },
+          {
+            "name": "filebeat",
+            "resources": {
+              "memoryMin": "32Mi",
+              "memoryMax": "50Mi",
+              "cpuMin": "0.05",
+              "cpuMax": "0.25"
+            },
+            "containerImageKey": "FILEBEAT"
+          }
+        ]
+      },
+      "revision": 1655462610920
+    },
+    {
+      "mode": "Dedicated",
+      "provider": "ArcObjects11",
+      "id": "pc6zcbz5dooa6a4rkw8vd",
+      "type": "DistributedServer",
+      "spec": {
+        "replicas": {
+          "min": 2,
+          "max": 2,
+          "scalingMode": "manual"
+        },
+        "containers": [
+          {
+            "name": "main-container",
+            "resources": {
+              "memoryMin": "1.5Gi",
+              "memoryMax": "4Gi",
+              "cpuMin": "0.125",
+              "cpuMax": "2"
+            },
+            "containerImageKey": "DISTRIBUTED_SERVER"
+          },
+          {
+            "name": "filebeat",
+            "resources": {
+              "memoryMin": "32Mi",
+              "memoryMax": "50Mi",
+              "cpuMin": "0.05",
+              "cpuMax": "0.25"
+            },
+            "containerImageKey": "FILEBEAT"
+          }
+        ]
+      },
+      "revision": 1655462610937
+    },
+    {
+      "mode": "Dedicated",
+      "provider": "ArcObjects11",
+      "id": "pice0u4obpd61q1468awv",
+      "type": "MapServer",
+      "spec": {
+        "replicas": {
+          "min": 1,
+          "max": 1,
+          "scalingMode": "manual"
+        },
+        "containers": [
+          {
+            "name": "main-container",
+            "resources": {
+              "memoryMin": "500Mi",
+              "memoryMax": "2Gi",
+              "cpuMin": "0.125",
+              "cpuMax": "2"
+            },
+            "containerImageKey": "MAP_SERVER"
+          },
+          {
+            "name": "filebeat",
+            "resources": {
+              "memoryMin": "32Mi",
+              "memoryMax": "50Mi",
+              "cpuMin": "0.05",
+              "cpuMax": "0.25"
+            },
+            "containerImageKey": "FILEBEAT"
+          }
+        ]
+      },
+      "revision": 1655462610954
+    },
+    {
+      "mode": "Dedicated",
+      "provider": "ArcObjects11",
+      "id": "pkdgkvtk715depace6u12",
+      "type": "GeometryServer",
+      "spec": {
+        "replicas": {
+          "min": 1,
+          "max": 1,
+          "scalingMode": "manual"
+        },
+        "containers": [
+          {
+            "name": "main-container",
+            "resources": {
+              "memoryMin": "500Mi",
+              "memoryMax": "2Gi",
+              "cpuMin": "0.125",
+              "cpuMax": "1"
+            },
+            "containerImageKey": "GEOMETRY_SERVER"
+          },
+          {
+            "name": "filebeat",
+            "resources": {
+              "memoryMin": "32Mi",
+              "memoryMax": "50Mi",
+              "cpuMin": "0.05",
+              "cpuMax": "0.25"
+            },
+            "containerImageKey": "FILEBEAT"
+          }
+        ]
+      },
+      "revision": 1655462611029
+    },
+    {
+      "mode": "Shared",
+      "provider": "DMaps",
+      "id": "pdidly9jaqnemz24fiand",
+      "type": "MapServer",
+      "spec": {
+        "replicas": {
+          "min": 1,
+          "max": 1,
+          "scalingMode": "manual"
+        },
+        "containers": [
+          {
+            "name": "main-container",
+            "resources": {
+              "memoryMin": "500Mi",
+              "memoryMax": "4Gi",
+              "cpuMin": "0.125",
+              "cpuMax": "2"
+            },
+            "containerImageKey": "MAP_SERVER"
+          },
+          {
+            "name": "filebeat",
+            "resources": {
+              "memoryMin": "32Mi",
+              "memoryMax": "50Mi",
+              "cpuMin": "0.05",
+              "cpuMax": "0.25"
+            },
+            "containerImageKey": "FILEBEAT"
+          }
+        ]
+      },
+      "revision": 1655462611048
+    },
+    {
+      "mode": "Shared",
+      "provider": "Tiles",
+      "id": "psnbuq4yo1mqbqa7iwm4s",
+      "type": "TileServer",
+      "spec": {
+        "replicas": {
+          "min": 1,
+          "max": 1,
+          "scalingMode": "manual"
+        },
+        "containers": [
+          {
+            "name": "main-container",
+            "resources": {
+              "memoryMin": "500Mi",
+              "memoryMax": "2Gi",
+              "cpuMin": "0.125",
+              "cpuMax": "2"
+            },
+            "containerImageKey": "TILE_SERVER"
+          },
+          {
+            "name": "filebeat",
+            "resources": {
+              "memoryMin": "32Mi",
+              "memoryMax": "50Mi",
+              "cpuMin": "0.05",
+              "cpuMax": "0.25"
+            },
+            "containerImageKey": "FILEBEAT"
+          }
+        ]
+      },
+      "revision": 1655462611066
+    },
+    {
+      "mode": "Dedicated",
+      "provider": "ArcObjects11",
+      "id": "pb1uozskr2pt5xohg8aqj",
+      "type": "GeocodeServer",
+      "spec": {
+        "replicas": {
+          "min": 1,
+          "max": 1,
+          "scalingMode": "manual"
+        },
+        "containers": [
+          {
+            "name": "main-container",
+            "resources": {
+              "memoryMin": "500Mi",
+              "memoryMax": "4Gi",
+              "cpuMin": "0.125",
+              "cpuMax": "2"
+            },
+            "containerImageKey": "GEOCODE_SERVER"
+          },
+          {
+            "name": "filebeat",
+            "resources": {
+              "memoryMin": "32Mi",
+              "memoryMax": "50Mi",
+              "cpuMin": "0.05",
+              "cpuMax": "0.25"
+            },
+            "containerImageKey": "FILEBEAT"
+          }
+        ]
+      },
+      "revision": 1655462611084
+    },
+    {
+      "mode": "Dedicated",
+      "provider": "ArcObjects11",
+      "id": "pjzgnwaihdcsk8ot939kk",
+      "type": "ImageServer",
+      "spec": {
+        "replicas": {
+          "min": 1,
+          "max": 1,
+          "scalingMode": "manual"
+        },
+        "containers": [
+          {
+            "name": "main-container",
+            "resources": {
+              "memoryMin": "500Mi",
+              "memoryMax": "4Gi",
+              "cpuMin": "0.125",
+              "cpuMax": "2"
+            },
+            "containerImageKey": "IMAGE_SERVER"
+          },
+          {
+            "name": "filebeat",
+            "resources": {
+              "memoryMin": "32Mi",
+              "memoryMax": "50Mi",
+              "cpuMin": "0.05",
+              "cpuMax": "0.25"
+            },
+            "containerImageKey": "FILEBEAT"
+          }
+        ]
+      },
+      "revision": 1655462611103
+    },
+    {
+      "mode": "Shared",
+      "provider": "ArcObjectsRasterRendering",
+      "id": "ps6lhh4esym49vqx13yni",
+      "type": "ImageServer",
+      "spec": {
+        "replicas": {
+          "min": 1,
+          "max": 1,
+          "scalingMode": "manual"
+        },
+        "containers": [
+          {
+            "name": "main-container",
+            "resources": {
+              "memoryMin": "500Mi",
+              "memoryMax": "4Gi",
+              "cpuMin": "0.125",
+              "cpuMax": "2"
+            },
+            "containerImageKey": "IMAGE_SERVER"
+          },
+          {
+            "name": "filebeat",
+            "resources": {
+              "memoryMin": "32Mi",
+              "memoryMax": "50Mi",
+              "cpuMin": "0.05",
+              "cpuMax": "0.25"
+            },
+            "containerImageKey": "FILEBEAT"
+          }
+        ]
+      },
+      "revision": 1655462611121
+    },
+    {
+      "mode": "Undefined",
+      "provider": "Undefined",
+      "id": "pc87bjte6yjihiajr111s",
+      "type": "WebhookProcessor",
+      "spec": {
+        "replicas": {
+          "min": 1,
+          "max": 1,
+          "scalingMode": "manual"
+        },
+        "containers": [
+          {
+            "name": "main-container",
+            "resources": {
+              "memoryMin": "0.5Gi",
+              "memoryMax": "1Gi",
+              "cpuMin": "0.25",
+              "cpuMax": "0.5"
+            },
+            "containerImageKey": "WEBHOOK_PROCESSOR"
+          },
+          {
+            "name": "filebeat",
+            "resources": {
+              "memoryMin": "32Mi",
+              "memoryMax": "50Mi",
+              "cpuMin": "0.05",
+              "cpuMax": "0.25"
+            },
+            "containerImageKey": "FILEBEAT"
+          }
+        ]
+      },
+      "revision": 1655462611138
+    }
+  ]
+}
+```

@@ -1,0 +1,385 @@
+---
+title: "Search"
+description: "The search operation filters an organization's logs for specific log records using supported query types."
+slug: "search-logs"
+url: "/search-logs"
+guid: "GUID-15AC6968-6878-4764-B092-0844C4BC72D2"
+migratedTopicMetadata:
+  FTITLE: "Search Logs"
+  FDESCRIPTION: ""
+  FCHANGES: "Adding a note about Boolean searches"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0-*"
+  CREATED-ON: "10/08/2022 12:03:44"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "15/08/2022 08:56:24"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-C4F92753-E933-4F64-B71F-E17DD07018D4"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /logs/search
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /logs/search
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: 10.9.1
+  requiredCapabilities:
+    - name: Access allowed with either the "Manage Licenses", "Links to organization-specific group", "Delete", "Security and infrastructure", or "Servers" privileges, or the Publisher role
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `search` operation filters an organization's logs for specific log records using supported query types. The `search` operation supports the following query types:
+
+- [Full-text search](/search-logs#full-text-search)
+- [Exact match search](/search-logs#exact-match-search)
+- [Field-based search](/search-logs#field-based-search)
+- [Boolean queries](/search-logs#boolean-queries)
+- [Range queries](/search-logs#range-queries)
+- [Grouping queries](/search-logs#grouping-queries)
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `searchQuery` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The search terms used to query your organization's logs. This parameter supports keywords (for example, `completed`) and phrases (for example, `completed successfully`). For accepted query types and examples, see the [Supported queries](/search-logs#supported-queries) section below.
+
+      <Note type={"note"}>
+
+      To include special characters in a search term, the special character must be escaped with a backslash (for example, `successful\!`), unless the search query is enclosed in quotes for an exact match search (for example, `"successful!"`). Wildcard values (`?` , `*` , `^` , or `+`) are not supported search values. If a wildcard is used, the search fails and returns an error message.
+
+      </Note>
+
+      ```markdown label=Example
+      searchQuery=(“Updated Kubernetes Secret” AND logCode:1312) AND NOT logLevel:VERBOSE OR elapsed:[1.45195 TO 2.43]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sortBy` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the way in which search results are sorted. Sorting by `bestMatch` returns the results that best match the `searchQuery` values. Sorting by `time` sorts the search results by the time information recorded in the log's time stamp, the order of which is determined by the `sortOrder` parameter. The default value is `bestMatch`.
+
+      Values: `bestMatch` | `time`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sortOrder` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The sort order for the results, either descending or ascending, in relation to the `sortBy` value. The default is `desc`. This parameter is ignored if `sortBy` is set to `bestMatch`.
+
+      Values: `desc` | `asc`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `showStackTraces` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A binary that specifies whether stack traces are included in the search results. The default is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `countOnly` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A binary that, if `true`, only returns a count of the logs that would be returned by the search operation. If `false`, the response includes the search results in full. The default is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `num` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum number of results to be included in the response. The default value is 1000, with a maximum value of 10000.
+
+      ```markdown label=Example
+      num=1000
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Supported queries
+
+The sections below outline the supported query ties for `searchQuery`.
+
+
+### Full-text search
+
+Full-text queries return all logs that match any of the search terms.
+
+In this example, log records that contain, in some capacity, the words completed or successfully are returned:
+
+```markdown label=Example
+searchQuery=completed successfully
+```
+
+### Exact match search
+
+Exact match queries search for a phrase, contained within doubt quotes, that allows exact matches of the search terms to be returned.
+
+In this example, an exact match search is used to find log records that match exactly the success response for creating a new organization:
+
+```markdown label=Example
+searchQuery="The process to create a new organization has completed successfully."
+```
+
+### Field-based search
+
+Field-based queries allow `searchQuery` values to be searched against a single log field by using the field name, followed by a colon (`:`), and the search term. If no field indicator is used, all default fields are searched. The default log fields for `searchQuery` are as follows:
+
+- `msg` 
+- `source` 
+- `className` 
+- `username` 
+- `stackTraces` 
+- `serviceTypes` 
+- `logLevel` 
+- `logCode` 
+
+In this example, a field-based search is used to search for a log record that has `ArcSOCGISServiceClient` as the `className`:
+
+```markdown label=Example
+searchQuery=className: ArcSOCGISServiceClient
+```
+
+### Boolean queries
+
+Using Boolean operators in `searchQuery` allows terms to be combined through logic operators. ArcGIS Enterprise Administrator API supports `AND`, `OR`, and `NOT` as Boolean operators. Operators must be in all caps.
+
+
+#### AND
+
+The `AND` operator performs matching where both terms exist in either the given or default fields. This is equivalent to an intersection using sets.
+
+In this example, the `AND` operator is used to search for a log record that contains the phrase `"Updated Kubernetes Secret"` and the `username` administrator:
+
+```markdown label=Example
+searchQuery="Updated Kubernetes Secret" AND username:administrator
+```
+
+<Note type={"note"}>
+
+The above example demonstrates a specific search. It is not mandatory to combine both field-based searches and Boolean queries.
+
+</Note>
+
+
+#### OR
+
+The `OR` operator links two terms and returns a match if either term exists in the log records. This is equivalent to a union using sets.
+
+<Note type={"note"}>
+
+When using boolean queries to search terms within the same field type (Type, Message, Time (UTC), Code, RequestID, User, Node, Source, Service Type, Class Name), its recommended that the field type is specified as part of the query. For example, if searching for a specific event type service, `SampleWorldCities.MapServer` or `ITTSampleWorldCities`, within the `message` field, formatting the boolean query in the following way:
+
+```markdown
+searchQuery=message:("SampleWorldCities.MapServer" OR "ITTSampleWorldCities")
+```
+
+will return more accurate results than a query formatted as:
+
+```markdown
+searchQuery=("SampleWorldCities.MapServer" OR "ITTSampleWorldCities")
+```
+
+While formatting boolean queries in this way is recommended for searching within the `message` field, this format can be applied to all field types listed above to return more thorough and accurate results.
+
+</Note>
+
+In this example, the `OR` operator is used to search for a log record that contains the phrase `"GP Server"` or has the `logCode` 1312:
+
+```markdown label=Example
+searchQuery="GP Server" OR logCode:1312
+```
+
+
+#### NOT
+
+The `NOT` operator excludes items that contain the term after `NOT`. This is equivalent to a differencing using sets.
+
+In this example, the `NOT` operator is used to search for a log record that contains the phrase `"Updated Kubernetes Secret"` that belongs to any `logLevel` other than `VERBOSE`:
+
+<Note type={"note"}>
+
+The `NOT` operator does not support being used with only a single term.
+
+</Note>
+
+```markdown label=Example
+searchQuery="Updated Kubernetes Secret" AND NOT logLevel:VERBOSE
+```
+
+
+### Range queries
+
+Using range queries allows `searchQuery` to match single or multiple field values between lower and upper boundaries, exclusively for numerical fields (for example, `logCodes` and `timestamps`). 
+
+Range queries can be inclusive or exclusive of the upper and lower bounds. Range requests that are inclusive of their bounds use brackets `[]`, whereas exclusive range requests use braces `{}`.
+
+```markdown label=Example
+searchQuery=elapsed: [1.4195 TO 2.43]
+```
+
+
+### Grouping queries
+
+Grouping allows powerful queries by grouping together subqueries within parenthesis to combine clauses and any of the other query types.
+
+In this example, grouping is used in combination with exact match, Boolean, field-based, and range queries to find all log records with the phrase `"Updated Kubernetes Secret"` and a `logCode` of 1312 that either belong to any `logLevel` other than `VERBOSE` or have elapsed between 1.45195 to 2.43:
+
+```markdown label=Example
+searchQuery=(“Updated Kubernetes Secret” AND logCode:1312) AND NOT logLevel:VERBOSE OR elapsed:[1.45195 TO 2.43]
+```
+
+
+## Example usage
+
+The following is a sample request URL for the `search` operation, demonstrating an exact match query for log records that contain the phrase `"Completed Successfully"`:
+
+```markdown
+https://organization.domain.com/context/admin/logs/search?searchQuery="Completed Successfully"&sortBy=bestMatch&sortOrder=desc&showStackTraces=false&countOnly=false&num=1000&f=pjson
+```
+
+## JSON Response examples
+
+The following JSON response demonstrates the response returned when `countOnly` is `false`:
+
+```other
+{
+  "total": 3,
+  "num": 1000,
+  "query": "{\"countOnly\":false,\"searchQuery\":\"\\\"Completed Successfully\\\"\",\"sortOrder\":\"desc\",\"sortBy\":\"bestMatch\",\"stackTraces\":false}",
+  "start": 1,
+  "messages": [
+    {
+      "msg": "Clean logs request has completed successfully",
+      "pod": "arcgis-rest-administrator-api-9495b764b-f492j",
+      "logCode": "",
+      "className": "LogManager",
+      "source": "Enterprise Admin",
+      "threadID": "25",
+      "elapsed": "",
+      "node": "orgNode.domain.com",
+      "msgTimestamp": "2021-11-08T15:06:15,143",
+      "logLevel": "DEBUG",
+      "processID": "1",
+      "requestId": "62e22cd9-f080-4099-940b-ee3cba950d23",
+      "stackTraces": "\n2021-11-08T15:06:15,171|WARN|request [DELETE http://arcgis-spatiotemporal-index-store-e077:9200/.tasks/task/h4TmrgmVTxalAVPFtJIeAQ:32470] returned 1 warnings: [299 Elasticsearch-7.9.3-c4138e51121ef06a6404866cddc601906fe5c868 \"[types removal] Specifying types in document index requests is deprecated, use the /{index}/_doc/{id} endpoint instead.\"]|",
+      "username": "administrator"
+    },
+    {
+      "msg": "Clean logs request has completed successfully",
+      "pod": "arcgis-rest-administrator-api-9495b764b-f492j",
+      "logCode": "",
+      "className": "LogManager",
+      "source": "Enterprise Admin",
+      "threadID": "25",
+      "elapsed": "",
+      "node": "orgNode.domain.com",
+      "msgTimestamp": "2021-11-08T15:06:51,640",
+      "logLevel": "DEBUG",
+      "processID": "1",
+      "requestId": "38b24c7f-5dd4-4d30-858c-9a065c4f6a7e",
+      "stackTraces": "\n2021-11-08T15:06:51,663|WARN|request [DELETE http://arcgis-spatiotemporal-index-store-e077:9200/.tasks/task/h4TmrgmVTxalAVPFtJIeAQ:32574] returned 1 warnings: [299 Elasticsearch-7.9.3-c4138e51121ef06a6404866cddc601906fe5c868 \"[types removal] Specifying types in document index requests is deprecated, use the /{index}/_doc/{id} endpoint instead.\"]|",
+      "username": "administrator"
+    },
+    {
+      "msg": "Check if Portal content preparation job has completed successfully. ",
+      "pod": "arcgis-rest-administrator-api-9495b764b-tdxdb",
+      "logCode": "1285",
+      "className": "PortalContentManager",
+      "source": "Enterprise Admin",
+      "threadID": "53",
+      "elapsed": "",
+      "node": "orgNode.domain.com",
+      "msgTimestamp": "2021-11-08T12:23:36,448",
+      "logLevel": "FINE",
+      "processID": "1",
+      "requestId": "0992ef8b-da9a-4129-8ce9-76775e0b9cbc",
+      "stackTraces": "",
+      "username": ""
+    }
+  ],
+  "nextStart": -1
+}
+```
+
+The following JSON response demonstrates a response returned when `countOnly` is `true`:
+
+```javascript
+{
+  "total": 3,
+  "num": 1000,
+  "query": "{\"countOnly\":true,\"searchQuery\":\"\\\"Completed Successfully\\\"\",\"sortOrder\":\"desc\",\"sortBy\":\"bestMatch\",\"stackTraces\":false}",
+  "start": 1,
+  "messages": [],
+  "nextStart": -1
+}
+```

@@ -1,0 +1,206 @@
+{/*Shared snippet for time_of_day */} 
+import ParamMetadata from "../../../components/param-metatdata" 
+
+<ParamMetadata types={[{name:"datetime",link:"../routing-data-types#datetime"}]} />
+
+{/* <p class="space-x-2"><span class="font-sm text-color-3">type:string</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a></p> */}
+
+{/* for route */}
+<If c={props.route}>
+Specify the time and date the routes will begin.
+
+Specifying a time of day results in more accurate estimations of travel times because the travel times account for the traffic conditions that are applicable for that date and time.
+
+To use traffic in the analysis, choose a time-based unit for `impedance` and assign a value to `time_Of_day`.
+</If>
+
+
+{/* for closest facility job request */}
+<If c="requestType == 'job'">
+  <If c={props.closestFacility}>
+    Specify the time and date to depart from or arrive at incidents or facilities.
+
+    Specifying a time of day results in more accurate estimations of travel times because the travel times account for the traffic conditions that are applicable for that date and time.
+
+    To use traffic in the analysis, choose a time-based unit for `impedance` and assign a value to `time_Of_day`.
+
+    The `time_Of_day` value represents the target start time or arrive time of the routes in the analysis. If `time_of_day_usage` is set to `End Time`, the value represents when the routes should arrive at their nearby locations. The time is specified as Unix time (milliseconds since midnight, January 1, 1970).
+  </If>
+</If>
+
+{/* for closest facility direct request */}
+<If c="requestType == 'direct'">
+  <If c={props.closestFacility}>
+    Specify the time and date to depart from or arrive at incidents or facilities. You can also specify a value of `now`, to set the depart or arrive time to current time.
+
+    Specifying a time of day results in more accurate estimations of travel times because the travel times account for the traffic conditions that are applicable for that date and time. 
+
+    To use traffic in the analysis, set `impedanceAttributeName` to `TravelTime`, and assign a `timeOfDay` value. 
+
+    The `timeOfDay` value represents the target start time or arrive time of the routes in the analysis. The time is specified as Unix time (milliseconds since midnight, January 1, 1970).
+
+    If a value of `now` is passed to the `timeOfDay` parameter, the travel begins at the current time. This will also override the `timeOfDayIsUTC` parameter value to be `true`. When `timeOfDay`  is `now` and `timeOfDayIsUTC` is `true`, the travel will begin or end at input locations at the current time regardless of the time zone of the input locations.
+  </If>
+</If>
+
+
+{/* for service area job request */}
+
+<If c="requestType == 'job'">
+  <If c={props.serviceArea}>
+
+    Specify the time and date to depart from or arrive at facilities. This parameter is ignored when `break_units` is set to distance units.
+
+    To use traffic in the analysis, set `break_units` to a time-based unit, and assign a value to `time_of_day`. The `time_of_day` value represents the time at which travel begins, or departs, from the input points. The time is specified as Unix time (milliseconds since midnight, January 1, 1970). 
+
+    The interpretation of the parameter value depends on whether travel is toward or away from the facilities as specified by the `travel_direction` parameter.
+
+    -   It represents the departure time if `travel_direction` is set to `Away From Facility`. This is the default.
+    -   It represents the arrival time if `travel_direction` set to `Towards Facility`.
+    </If>
+</If>
+
+
+{/* for service area direct request */}
+
+<If c="requestType == 'direct'">
+  <If c={props.serviceArea}>
+  
+    Specify the time and date to depart from or arrive at facilities. You can also specify a value of `now`, to set the depart or arrive time to current time.
+
+    Specifying a time of day results in more accurate estimations of travel times because the travel times account for the traffic conditions that are applicable for that date and time. 
+
+    To use traffic in the analysis, set `impedanceAttributeName` to `TravelTime`, and assign a `timeOfDay` value. 
+
+    The `timeOfDay` value represents the target start time or arrive time of the routes in the analysis. The time is specified as Unix time (milliseconds since midnight, January 1, 1970).
+
+    If a value of `now` is passed to the `timeOfDay` parameter, the travel begins at the current time. This will also override the `timeOfDayIsUTC` parameter value to be `true`. When `timeOfDay`  is `now` and `timeOfDayIsUTC` is `true`, the travel will begin or end at input locations at the current time regardless of the time zone of the input locations.
+  </If> 
+</If>
+
+{/* for travel cost matrix service */}
+<If c={props.ODCost}>
+
+Specify the time and date to depart from the origins.
+
+Specifying a time of day results in more accurate estimations of travel times because the travel times account for the traffic conditions that are applicable for that date and time.
+
+To use traffic in the analysis, choose a time-based unit for `impedance` and assign a value to `time_Of_day`.
+</If>
+
+{/* for location allocation */}
+<If c={props.locationAllocation}>
+Specify the time at which travel begins, or departs, from the starting locations.
+
+Specifying a time of day results in more accurate estimations of travel times because the travel times account for the traffic conditions that are applicable for that date and time. 
+
+To use traffic in the analysis, choose a time-based unit for `impedance` and assign a value to `time_Of_day`.
+
+The `time_Of_day` value represents the target start time from facilities or demand points, depending on the `travel_direction`. The time is specified as Unix time (milliseconds since midnight, January 1, 1970).
+</If>
+
+If a time of day is not passed in, the service uses static road speeds based on average historical speeds or posted speed limits. It uses posted speeds in areas where historical traffic information isn't available.
+
+<Note type={"note"}>
+Traffic is supported only with the driving time impedance or travel mode.
+</Note>
+
+<If c="requestType == 'job'">
+If the `time_Of_day` specified is within 4 hours of the current time, live traffic will be used where available. Live traffic retrieves speeds based on phone probe records, sensors, and other data sources and reflects the current travel speeds and predicts speeds for the near future. If the `time_Of_day` specified is earlier than 4 hours or later than 4 hours from the current time, or the road does not have live traffic, typical traffic speeds will be used. Typical speeds are based on historical traffic patterns. The travel time data is aggregated in 15 minute intervals per day of week based on multiple years worth of data. So a road may have a different travel time at Monday at 8 am, Monday at 8:15 am, or Tuesday at 8 am. Since the variance is just at the day of week and time of day, the travel time is the same on a road for any Monday at 8 am, regardless of the month or year.
+</If>
+
+<If c="requestType == 'direct'">
+If the `timeOfDay` specified is within 4 hours of the current time, live traffic will be used where available. Live traffic retrieves speeds based on phone probe records, sensors, and other data sources and reflects the current travel speeds and predicts speeds for the near future. If the `timeOfDay` specified is earlier than 4 hours or later than 4 hours from the current time, or the road does not have live traffic, typical traffic speeds will be used. Typical speeds are based on historical traffic patterns. The travel time data is aggregated in 15 minute intervals per day of week based on multiple years worth of data. So a road may have a different travel time at Monday at 8 am, Monday at 8:15 am, or Tuesday at 8 am. Since the variance is just at the day of week and time of day, the travel time is the same on a road for any Monday at 8 am, regardless of the month or year.
+</If>
+
+If your goal is to model typical travel conditions and avoid large variances from the average due to live traffic, it is recommended to use a date from the past to ensure it doesn't coincide with the 4 hour window from the current time. As an extreme example, you can even use dates from 1990.
+
+The [Data Coverage page](https://www.arcgis.com/home/webmap/viewer.html?webmap=b7a893e8e1e04311bd925ea25cb8d7c7) shows the countries Esri currently provides traffic data for.
+
+The service support two kinds of traffic: live and typical.
+
+#### Typical traffic
+
+To ensure the task uses typical traffic in locations where it is available, choose a time and day of the week, and then convert the day of the week to one of the following dates from 1990:
+
+- Monday—1/1/1990
+- Tuesday—1/2/1990
+- Wednesday—1/3/1990
+- Thursday—1/4/1990
+- Friday—1/5/1990
+- Saturday—1/6/1990
+- Sunday—1/7/1990
+
+Set the time and date as Unix time in milliseconds. For example, to solve for 1:03 p.m. on Thursdays, set the time and date to 1:03 p.m., January 4, 1990; and convert to milliseconds (`631458180000`). Although the dates representing days of the week are from 1990, typical traffic is calculated from recent traffic trends—usually over the last two years worth of data.
+
+<If c={props.closestFacility}>
+
+All facilities and incidents must be in the same time zone when you are doing any of the following:
+
+- Specifying a start time and traveling from incident to facility
+- Specifying an end time and traveling from facility to incident
+- Specifying a start time and traveling from facility to incident
+- Specifying an end time and traveling from incident to facility
+
+</If>
+
+#### Live traffic
+
+To use live traffic when and where it is available, choose a time and date and convert to Unix time.
+
+<Note type={"note"}>
+You need to have a Live Traffic extension and configure your Street Map Premium network dataset to access live traffic.
+</Note>
+
+Esri saves live traffic data for 4 hours and references predictive data extending 4 hours into the future. If the time and date you specify for this parameter is outside the 8-hour time window, or the travel time in the analysis continues past the predictive data window, the task falls back to typical traffic speeds.
+
+<details>
+
+    <summary><span class="font-sm text-color-link">Show examples</span></summary> 
+
+<Tabs>
+<TabNav slot="tab-nav">
+  <TabTitle is-active>Example 1</TabTitle>
+  <TabTitle>Example 2</TabTitle>
+  <TabTitle>Example 3</TabTitle>
+</TabNav>
+
+<Tab is-active>
+
+**Typical traffic on Thursdays**
+
+13:03, January 4, 1990. Typical traffic on Thursdays at 1:03 p.m.
+
+<CodeSwitcher>
+  <CodeBlock language="json" source="../../code-samples/shared/examples/input/timeOfDay_ex1.json" group="json" maxLines={20} expandable/>
+</CodeSwitcher>
+
+</Tab>
+
+<Tab>
+
+**Typical traffic on Sundays**
+
+17:00, January 7, 1990. Typical traffic on Sundays at 5:00 p.m.
+
+<CodeSwitcher>
+  <CodeBlock language="json" source="../../code-samples/shared/examples/input/timeOfDay_ex2.json" group="json" maxLines={20} expandable/>
+</CodeSwitcher>
+
+</Tab>
+
+<Tab>
+
+**Live traffic speed**
+
+10:20, March 18, 2015. If the current time is between 6:20 a.m., March 18, 2015, and 2:20 p.m., March 18, 2015, live traffic speeds are referenced in the analysis; otherwise, typical traffic speeds are referenced.
+
+<CodeSwitcher>
+  <CodeBlock language="json" source="../../code-samples/shared/examples/input/timeOfDay_ex3.json" group="json" maxLines={20} expandable/>
+</CodeSwitcher>
+
+</Tab>
+
+</Tabs>
+
+</details>

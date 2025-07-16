@@ -1,0 +1,253 @@
+---
+title: "Rollback"
+description: "The rollback operation uninstalls a patch, removing the updates and fixes that had been applied to specific containers, and restoring the deployment to a previous, user-specified version of the software."
+slug: "rollback"
+url: "/rollback"
+guid: "GUID-065F614D-A609-42D0-979C-B60F9D158A58"
+migratedTopicMetadata:
+  FTITLE: "Rollback"
+  FDESCRIPTION: ""
+  FCHANGES: "New Product"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9-*"
+  CREATED-ON: "14/08/2020 16:04:33"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "17/11/2021 16:33:46"
+  VERSION: "1"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "22"
+  ED: "GUID-4F923AA5-D524-4132-88CB-20DFBE4447E3"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /system/upgrades/rollback
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /system/upgrades/rollback
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed with either "Security and infrastructure" or "Servers" privileges
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `rollback` operation uninstalls a patch, removing the updates and fixes that had been applied to specific containers, and restoring the deployment to a previous, user-specified version of the software. The `rollback` operation cannot be performed for release-based updates.
+
+<Note type={"caution"}>
+
+While this operation can be used to roll back installed patches, performing a rollback should not be the first step in a troubleshooting workflow. It is recommended that administrators first meet with their organization's account managers, or contact Esri Support, to properly diagnose and troubleshoot the issue before calling this operation.
+
+</Note>
+
+The organization will be placed into read-only mode while a rollback is occurring.
+
+<Note type={"note"}>
+
+When the current version of the deployment is being represented, the version and build numbers are combined. For example, if the version of the deployment is 10.9.0, and the build is 505, the current version is returned as 10.9.0.505. The version number will be updated with each installed release, while the build number will be updated with each installed update (either patch or release). This representation is returned through the HTML view of the API, as well as in the upgrade job messages retained by the [Current Version](/current-version) and [Upgrades](/upgrades) resources. For an example of these messages, see the [JSON Response example](#json-response-example) section below.
+
+</Note>
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `versionManifest` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The version of the deployment the operation will roll back toward. This value can be retrieved from the [Check Rollback](/check-rollback) operation.
+
+      ```markdown label=Example
+      versionManifest={"id": "pat_345432_505"}
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `rollbackSettings` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object containing patch settings. At 10.9, the object is empty and doesn't support any values.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `rollback` operation:
+
+```other
+POST /context/admin/system/upgrades/rollback HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+versionManifest={"id": "pat_345432_505"}&rollbackSettings={}&f=pjson&token=ugW_uEP1WiJV7PkHhb2BU-f1C30eAZclpgOKE599aSIFxwYBNRc8O7h6sjjgzC3l3NxhPjpa-6zgeun7rB6xCizGstMk9ZcTgLeOc67dWbTsrn7A7_VzvfpC2cV2Ig77h6w0_mvhbaMTmpnzOek7tY85PguVExKeM-ODE5L2NTX2z9LM5URYviKA4nJu7Oyg3xBKwZzxXnhPUxpiCxUy5rZ_C9QRS6kNnZjNcvhAp6Dw2FE6hL6wnLIjk3H9IjvY
+
+```
+
+## JSON Response example
+
+The following example demonstrates the immediate JSON response returned by a successful `rollback` request. Detailed, real-time job information is returned on the [upgrades](/upgrades) resource while the patch is being uninstalled.
+
+```other
+{
+  "status": {
+    "state": "in_progress",
+    "code": 1,
+    "messages": [
+      {
+        "message": "Starting the rollback process from 10.9.0.506 to 10.9.0.505.",
+        "when": 1602276011623,
+        "code": 2072
+      }
+    ]
+  }
+}
+```
+
+Once the rollback process is complete, the JSON view of the `upgrades` resource will return the full job messages of the job and success status. Abbreviated information is denoted by `...`:
+
+```other
+{
+  "status": {
+    "code": 3,
+    "messages": [
+      {
+        "code": 2072,
+        "message": "Starting the rollback process from 10.9.0.1090 to 10.9.0.1089.",
+        "when": 1618599881971
+      },
+      {
+        "code": 2168,
+        "message": "Launching upgrader... ",
+        "when": 1618599882141
+      },
+      {
+        "code": 2165,
+        "message": "System is going into Read-Only mode.",
+        "when": 1618599893065
+      },
+      {
+        "code": 2270,
+        "message": "Preparing an upgrade plan.",
+        "when": 1618599954127
+      },
+      {
+        "code": 2287,
+        "message": "Pre-diagnostics started.",
+        "when": 1618599954626
+      },
+      {
+        "code": 2288,
+        "message": "Pre-diagnostics completed.",
+        "when": 1618599954696
+      },
+      {
+        "code": 2271,
+        "message": "Executing upgrade plan.",
+        "when": 1618599954714
+      },
+      {
+        "code": 2293,
+        "message": "Rollback of apps module started.",
+        "when": 1618599954726
+      },
+      {
+        "code": 2177,
+        "message": "The rolling back of apps has completed in 31520 millis (~ 0 minutes).",
+        "when": 1618599986262
+      },
+      {
+        "code": 2293,
+        "message": "Rollback of monitoring components module started.",
+        "when": 1618599986283
+      },
+      {
+        "code": 2177,
+        "message": "The rolling back of monitoring components has completed in 35655 millis (~ 0 minutes).",
+        "when": 1618600021938
+      },
+      {
+        "code": 2293,
+        "message": "Rollback of main core rest APIs module started.",
+        "when": 1618600021963
+      },
+      {
+        "code": 2177,
+        "message": "The rolling back of main core rest APIs has completed in 216945 millis (~ 3 minutes).",
+        "when": 1618600238908
+      },
+      {
+        "code": 2166,
+        "message": "System is coming out of Read-Only mode.",
+        "when": 1618600238938
+      },
+      {
+        "code": 2179,
+        "message": "Post-upgrade operations started.",
+        "when": 1618600298984
+      },
+      {
+        "code": 2183,
+        "message": "Post-upgrade operations completed.",
+        "when": 1618600299001
+      },
+      {
+        "code": 2263,
+        "message": "Persisting rollback state to database.",
+        "when": 1618600299001
+      },
+      {
+        "code": 2077,
+        "message": "The rollback process from 10.9.0.1090 to 10.9.0.1089 has completed in 00hr:06min:45sec:968millisec.",
+        "when": 1618600299019
+      },
+      {
+        "code": 2076,
+        "message": "The ArcGIS Enterprise on Kubernetes has been rolled-back from 10.9.0.1090 to 10.9.0.1089 successfully.",
+        "when": 1618600299019
+      }
+    ],
+    "state": "success"
+  }
+}
+```

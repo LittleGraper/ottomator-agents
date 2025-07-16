@@ -1,0 +1,1123 @@
+---
+title: "Apportionment reliability for raster-based settlement points"
+description: "Reliability is determined by assessing the quality of the census data and the quality of a weighted footprint of human settlement to enrich demographic information onto a given polygon."
+slug: "reliability"
+url: "/reliability"
+guid: "GUID-8A7EA652-6B7E-4878-B818-9EE5BCFD0061"
+migratedTopicMetadata:
+  FTITLE: "Reliability"
+  FDESCRIPTION: ""
+  FCHANGES: "Confidence score note"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0 - *"
+  CREATED-ON: "21/10/2022 12:37:12"
+  FAUTHOR: "cdistefano"
+  FSTATUS: "Released"
+  MODIFIED-ON: "12/05/2023 11:55:33"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-41F42B12-B14E-4254-8B44-5547D6E74AB3"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+---
+
+The reliability of any GeoEnrichment using raster-based settlement points is determined by the quality of each country's census from which population and other demographic variables are derived and the quality of a weighted footprint of human settlement used to apportion the selected GeoEnrichment variables onto a given polygon.
+
+Each country using raster-based settlement points is given two scores:
+
+1.  Area to population reliability which focuses only on the size (area) of the census polygon and the number of people estimated to live in that polygon.
+2.  The overall reliability score which encompasses all aspects of reliability and includes the area to population score.
+
+## Area to population reliability
+
+There are currently two methods for calculating each of these. The older method is simpler and beginning with the countries released in the October 2020 and later, a more robust method is used.
+
+### Mean of scores for polygon size and level of population (1.0 – 5.0)
+
+We assign reliability as follows:
+
+<StyledTable headers={"Population of a given census polygon,Reliability Score"} className="afd-flow-content-block">
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Over 100,001
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+100
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+10,001 to 100,000
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+25
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+2,501 to 10,000
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+10
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+501 to 2500
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+5
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+101 to 500
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Less than 100
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+<StyledTable headers={"Area of a given census polygon,Reliability Score"} className="afd-flow-content-block">
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Over 100.1 Km2
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+100
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+16.1 to 100 Km2
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+25
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+4.1 to 16.0 Km2
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+10
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1.1 to 4.0 Km2
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+5
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+0.11 to 1.0 Km2
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Less than 0.1 Km2
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+The mean of these scores is then scaled using a simple linear equation to a range of 1.0 (best) to 5.0 (worst).
+
+## Overall reliability
+
+We combine Area to Population Reliability with Complexity of the weighted footprint of human settlement and Census Quality reliability scores from The United Nations Statistical Division.
+
+### Complexity of settlement footprint relative to NoData and zero population cells (1.0 to 5.0)
+
+Esri processes Landsat8 panchromatic imagery (15-meter resolution) to find texture. When levels of texture are sufficiently high, the likelihood that it represents human settlement is high. [Worldpop.org](https://worldpop.org) uses a similar approach. However, because these models are largely completed using raster data, underestimation of the footprint edges occur due to [resampling](HTTPS://PRO.ARCGIS.COM/EN/PRO-APP/HELP/ANALYSIS/SPATIAL-ANALYST/PERFORMING-ANALYSIS/CELL-SIZE-AND-RESAMPLING-IN-ANALYSIS.HTM). The amount of area is proportional to the complexity of the (raster) human settlement footprint. Complexity is measured as the sum of distances from a given cell to all NoData cells within 8 kilometers (this figure is then scaled to 1.0 to 5.0). NoData occurs at coastlines and where low amounts of texture from Landsat8 imagery are located.
+
+### Census Quality reliability scores (1.0 - 5.0)
+
+The United Nations Statistical Division reports characteristics for each country’s census with respect to completeness, age of the most recent census and subsequent estimates used to derive the current estimate, and the type of census (de-jure vs. de facto). Examples of these scores can be found on the U.N. Statistical Division’s [website](http://data.un.org). Esri scores each of these characteristics as shown below and produces a combined mean score that is represented as a constant value everywhere in the country.
+
+<StyledTable headers={"Census Type,Reliability Score"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Census - de jure - complete tabulation
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Estimate - de jure
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Census - de facto - complete tabulation
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+3
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Estimate - de facto
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+4
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Sample survey - de facto
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+5
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+<StyledTable headers={"Completeness / Reliability,Reliability Score"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Final figure, complete
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Provisional figure
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Final figure, incomplete/questionable reliability
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+5
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Provisional figure with questionable reliability
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+5
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+<StyledTable headers={"Age of Census or Estimate,Reliability Score"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1 - 2 years (rarely available this soon)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+3 years
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+2
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+3 - 5 years
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+3
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+5 - 6 years
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+4
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+6 - 10 years
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+5
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+More detailed information about the data sources and methods for each country can be found on the Esri Demographics [Global data overview](HTTPS://DOC.ARCGIS.COM/EN/ESRI-DEMOGRAPHICS/DATA/GLOBAL-INTRO.HTM) page.
+
+Because of the varied nature of each country and how census information is collected, there are some biases in this score. In general:
+
+-   Small countries tend to have better scores.
+-   Countries with small, similarly-sized tabulation units, have better scores.
+-   Countries with a wide variety of tabulation geography sizes-for example, Saudi Arabia or India, have middling scores.
+
+Two metrics are used to calculate scores, how settlement points are used is explained further in [Data Apportionment](/data-apportionment).
+
+1.  **Percent of Area Settled**—This is determined using a raster analysis at 75-m resolution where the count of cells in the footprint of settlement is divided by the count of cells representing the census polygon.
+
+    <StyledTable headers={"Percent of Area Settled,Reliability Score"}>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Less than 0.1%
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    100
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    0.1 to 4.99%
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    25
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    5.0 to 19.99%
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    10
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    20.0 to 49.9%
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    5
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    50.0 to 98.9%
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    2
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    99.0 to 100%
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    1
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    </StyledTable>
+2.  **Ratio of Settlement points (centroids of 75-m raster cells) to population**—Depending on how settlement points were derived, especially those not based on address points or building footprint centroids, it is possible to have extra points representing buildings people do not live in, or other landscape disturbances Esri's algorithm may mistake for human settlement. Ideally each settlement point represents where 15-50 people live.
+
+    <StyledTable headers={"Ratio of population to settlement point,Reliability Score"}>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Less than 2.9
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Over 500
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    100
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    3.0 to 6.9
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    200.1 to 500
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    25
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    7.0 to 11.9
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    100.1 to 200
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    10
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    12.0 to 17.9
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    50.1 to 100
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    5
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    18.0 to 23.9
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    36.1.to 50.0
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    2
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Between 24-36
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    1
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    </StyledTable>
+
+The census quality reliability scores for census type and completeness remain the same, while age of census was modified as follows in the new method:
+
+<StyledTable headers={"Age of Census or Estimate,Reliability Score"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+1 - 2 years (rarely available this soon)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+1
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+3 - 5 years
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+3
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+6 - 20+ years
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+5
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+The mean of all the scores are scaled using a simple linear equation to a range of 1.0 (best) to 5.0 (worst), and then are averaged with the census reliability scores to produce the overall reliability score.
+
+## Applying the reliability score
+
+The reliability score can be used to estimate the smallest polygon that can be accurately enriched in a given country. To perform this estimate, you square the reliability score and multiply by three to derive the number of square kilometers a polygon's area will need to expect the best quality results when enriching polygons in that country. The reliability score can be modified by up to a 1.0 depending on whether the polygon to be enriched is covering an urban area or a rural area. Subtract 1.0 if it is an urban area because census data, generally, is more reliable in urban areas. Conversely, add 1.0 for rural areas.
+
+As the reliability score increases (becomes poorer), so must the size of the enriched polygons in order to obtain reliable results.
+
+<Note type={"tip"}>
+
+It is important to remember that while a country's reliability may be average or even poor, there may be areas of better reliability within the country which could reliably support enriching smaller polygons.
+
+</Note>
+
+## Example usage
+
+The reliability score values are determined on a per country basis. This makes them easily discoverable using the **Countries** query method.
+
+**Request example 1**
+
+In order to find the reliability estimates for each country, you can use the **Countries** discovery method. The values that represent the reliability estimates are: `populationToPolygonSizeRating`  and `apportionmentConfidence` .
+
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Prettified</TabTitle>
+
+<TabTitle>URL Encoded</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```other
+https://geoenrich.arcgis.com/arcgis/rest/services/World/GeoEnrichmentServer/Geoenrichment/Countries/GR?f=pjson
+```
+
+ 
+
+</Tab>
+
+<Tab>
+
+```javascript
+https%3A%2F%2Fgeoenrich.arcgis.com%2Farcgis%2Frest%2Fservices%2FWorld%2FGeoEnrichmentServer%2FGeoenrichment%2FCountries%2FGR%3Ff%3Dpjson
+```
+
+ 
+
+</Tab>
+
+</Tabs>
+
+JSON response example 1
+
+```javascript
+{
+  "messages" : [ ],
+  "childResources" : [ ],
+  "countries" : [ {
+    "id" : "GR",
+    "name" : "Greece",
+    "abbr3" : "GRC",
+    "altName" : "GREECE",
+    "continent" : "Europe",
+    "distanceUnits" : "Kilometers",
+    "esriUnits" : "esriKilometers",
+    "defaultExtent" : {
+      "xmin" : 19.3725059703,
+      "ymin" : 34.8012039371,
+      "xmax" : 29.6066369556,
+      "ymax" : 41.7485377735,
+      "spatialReference" : {
+        "wkid" : 4326,
+        "latestWkid" : 4326
+      }
+    },
+    "defaultDatasetID" : "GRC_MBR_2021",
+    "datasets" : [ "GRC_MBR_2021" ],
+    "hierarchies" : [ {
+      "ID" : "census",
+      "alias" : "GR Standard Data",
+      "shortDescription" : "This data source for the standard GR data is Michael Bauer Research (MBR). Vintage 2021.",
+      "default" : true,
+      "longDescription" : "This data source for the standard GR data is Michael Bauer Research (MBR). Vintage 2021.",
+      "locales" : [ "en" ],
+      "datasets" : [ "GRC_MBR_2021" ],
+      "levelsInfo" : {
+        "geographyLevels" : [ "Country", "Decentralized Administrations", "Postcodes1", "Regions", "Postcodes2", "Regional Units", "Postcodes3", "Municipalities", "Postcodes5" ]
+      },
+      "variablesInfo" : {
+        "dataBrowserVariableCount" : 125,
+        "categories" : [ "Age", "Education", "Households", "Income", "Jobs", "Key Facts", "Marital Status", "Population", "Spending" ]
+      },
+      "populationToPolygonSizeRating" : 2.19,
+      "apportionmentConfidence" : 2.29,
+      "apportionmentThresholds" : [ {
+        "method" : "BlockApportion",
+        "dataLayer" : "GR.Postcodes5",
+        "pointsLayer" : "GR.BlockPoints",
+        "maximumSize" : 150.0
+      }, {
+        "method" : "CentroidsInPolygon",
+        "dataLayer" : "GR.Postcodes5",
+        "maximumSize" : 250.0
+      }, {
+        "method" : "CentroidsInPolygon",
+        "dataLayer" : "GR.Municipalities"
+      } ],
+      "hasInterestingFactsStatistics" : true
+    } ],
+    "defaultDataCollection" : "KeyGlobalFacts",
+    "defaultReport" : "GreeceSummaryReport",
+    "defaultReportTemplate" : "Greece Summary Report",
+    "defaultInfographic" : "key-facts-global",
+    "defaultInfographicTemplate" : "Key Facts (MBR)",
+    "currencyCode" : "EUR",
+    "currencyName" : "Euro",
+    "currencySymbol" : "€",
+    "currencyFormat" : "€0;-€0",
+    "dataCollections" : ""
+  } ]
+}
+```
+
+ 
+
+**Notes:**
+
+**Request example 2**
+
+The values representing reliability estimates are also returned in the results of the enrich method. The names of the variables are the same as in the **Countries** discovery method: `populationToPolygonSizeRating`  and `apportionmentConfidence` .
+
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Prettified</TabTitle>
+
+<TabTitle>URL Encoded</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```other
+https://geoenrich.arcgis.com/arcgis/rest/services/World/geoenrichmentserver/GeoEnrichment/enrich?studyareas=[{"address":{"text":"Pireos 84, Athina 104 35, Greece"}}]&studyareasoptions={"areaType": "NetworkServiceArea","bufferUnits": "Minutes","bufferRadii": [15],"travel_mode":"Walking"}&dataCollections=["KeyGlobalFacts"]&returngeometry=false&f=pjson
+```
+
+ 
+
+</Tab>
+
+<Tab>
+
+```javascript
+https%3A%2F%2Fgeoenrich.arcgis.com%2Farcgis%2Frest%2Fservices%2FWorld%2Fgeoenrichmentserver%2FGeoEnrichment%2Fenrich%3Fstudyareas%3D%5B%7B%22address%22%3A%7B%22text%22%3A%22Pireos%2084%2C%20Athina%20104%2035%2C%20Greece%22%7D%7D%5D%26amp%3Bstudyareasoptions%3D%7B%22areaType%22%3A%20%22NetworkServiceArea%22%2C%22bufferUnits%22%3A%20%22Minutes%22%2C%22bufferRadii%22%3A%20%5B15%5D%2C%22travel_mode%22%3A%22Walking%22%7D%26amp%3BdataCollections%3D%5B%22KeyGlobalFacts%22%5D%26amp%3Breturngeometry%3Dfalse%26amp%3Bf%3Dpjson
+```
+
+ 
+
+</Tab>
+
+</Tabs>
+
+JSON response example 2
+
+```javascript
+{
+  "results" : [ {
+    "paramName" : "GeoEnrichmentResult",
+    "dataType" : "GeoEnrichmentResult",
+    "value" : {
+      "version" : "2.0",
+      "FeatureSet" : [ {
+        "displayFieldName" : "",
+        "fieldAliases" : {
+          "ID" : "Id",
+          "OBJECTID" : "Object ID",
+          "sourceCountry" : "Country code",
+          "X" : "X",
+          "Y" : "Y",
+          "areaType" : "Area type",
+          "bufferUnits" : "Buffer units",
+          "bufferUnitsAlias" : "Buffer units alias",
+          "bufferRadii" : "Buffer radii",
+          "aggregationMethod" : "Aggregation method",
+          "populationToPolygonSizeRating" : "Population to polygon size rating for the country",
+          "apportionmentConfidence" : "Apportionment confidence for the country",
+          "HasData" : "Has data",
+          "TOTPOP" : "Total Population",
+          "TOTHH" : "Total Households",
+          "AVGHHSZ" : "Average Household Size",
+          "TOTMALES" : "Male Population",
+          "TOTFEMALES" : "Female Population"
+        },
+        "spatialReference" : {
+          "wkid" : 4326,
+          "latestWkid" : 4326
+        },
+        "fields" : [ {
+          "name" : "ID",
+          "alias" : "Id",
+          "type" : "esriFieldTypeString",
+          "length" : 256
+        }, {
+          "name" : "OBJECTID",
+          "alias" : "Object ID",
+          "type" : "esriFieldTypeOID"
+        }, {
+          "name" : "sourceCountry",
+          "alias" : "Country code",
+          "type" : "esriFieldTypeString",
+          "length" : 256
+        }, {
+          "name" : "X",
+          "alias" : "X",
+          "type" : "esriFieldTypeDouble"
+        }, {
+          "name" : "Y",
+          "alias" : "Y",
+          "type" : "esriFieldTypeDouble"
+        }, {
+          "name" : "areaType",
+          "alias" : "Area type",
+          "type" : "esriFieldTypeString",
+          "length" : 256
+        }, {
+          "name" : "bufferUnits",
+          "alias" : "Buffer units",
+          "type" : "esriFieldTypeString",
+          "length" : 256
+        }, {
+          "name" : "bufferUnitsAlias",
+          "alias" : "Buffer units alias",
+          "type" : "esriFieldTypeString",
+          "length" : 256
+        }, {
+          "name" : "bufferRadii",
+          "alias" : "Buffer radii",
+          "type" : "esriFieldTypeDouble"
+        }, {
+          "name" : "aggregationMethod",
+          "alias" : "Aggregation method",
+          "type" : "esriFieldTypeString",
+          "length" : 256
+        }, {
+          "name" : "populationToPolygonSizeRating",
+          "alias" : "Population to polygon size rating for the country",
+          "type" : "esriFieldTypeDouble"
+        }, {
+          "name" : "apportionmentConfidence",
+          "alias" : "Apportionment confidence for the country",
+          "type" : "esriFieldTypeDouble"
+        }, {
+          "name" : "HasData",
+          "alias" : "Has data",
+          "type" : "esriFieldTypeInteger"
+        }, {
+          "name" : "TOTPOP",
+          "alias" : "Total Population",
+          "type" : "esriFieldTypeDouble",
+          "fullName" : "KeyGlobalFacts.TOTPOP",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTHH",
+          "alias" : "Total Households",
+          "type" : "esriFieldTypeDouble",
+          "fullName" : "KeyGlobalFacts.TOTHH",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "AVGHHSZ",
+          "alias" : "Average Household Size",
+          "type" : "esriFieldTypeDouble",
+          "fullName" : "KeyGlobalFacts.AVGHHSZ",
+          "component" : "scripts",
+          "decimals" : 2,
+          "units" : "count"
+        }, {
+          "name" : "TOTMALES",
+          "alias" : "Male Population",
+          "type" : "esriFieldTypeDouble",
+          "fullName" : "KeyGlobalFacts.TOTMALES",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        }, {
+          "name" : "TOTFEMALES",
+          "alias" : "Female Population",
+          "type" : "esriFieldTypeDouble",
+          "fullName" : "KeyGlobalFacts.TOTFEMALES",
+          "component" : "demographics",
+          "decimals" : 0,
+          "units" : "count"
+        } ],
+        "features" : [ {
+          "attributes" : {
+            "ID" : "0",
+            "OBJECTID" : 1,
+            "sourceCountry" : "GR",
+            "X" : 23.718019958454192,
+            "Y" : 37.97983998804345,
+            "areaType" : "NetworkServiceArea",
+            "bufferUnits" : "Minutes",
+            "bufferUnitsAlias" : "Walk Time Minutes",
+            "bufferRadii" : 15,
+            "aggregationMethod" : "BlockApportionment:GR.Postcodes5;PointsLayer:GR.BlockPoints",
+            "populationToPolygonSizeRating" : 2.19,
+            "apportionmentConfidence" : 2.29,
+            "HasData" : 1,
+            "TOTPOP" : 47666,
+            "TOTHH" : 21576,
+            "AVGHHSZ" : 2.21,
+            "TOTMALES" : 22715,
+            "TOTFEMALES" : 24951
+          }
+        } ]
+      } ]
+    }
+  }
+}
+```
+
+ 
+
+**Notes:**
+
+-    Reliability estimates cannot be used if the **studyAreas**, being used for analysis, have areas that include parts of more than one country. The values: `populationToPolygonSizeRating`  and `apportionmentConfidence`  will have NULL values as a result.

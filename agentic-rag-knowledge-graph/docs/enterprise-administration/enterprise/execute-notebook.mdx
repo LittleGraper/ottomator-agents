@@ -1,0 +1,259 @@
+---
+title: "Execute Notebook"
+
+description: "This operation allows administrators and users with Create and Edit ArcGIS Notebooks privileges to automate running a notebook."
+
+slug: "execute-notebook"
+url: "/execute-notebook"
+restInfoMetadata:
+  apiPath: /notebooks/executeNotebook
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /notebooks/executeNotebook
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '11.4'
+  requiredCapabilities:
+    - name: Access allowed with "Create and edit notebooks" privilege
+
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `executeNotebook` operation allows administrators and users with Create and Edit ArcGIS Notebooks privileges to automate running a notebook. The notebook specified in the operation is run with all cells in order. Using this operation and an external scheduling tool, you can schedule a notebook to run automatically either once or as a regular occurrence. This allows you to automate repeating tasks such as data collection and cleaning, content updates, and portal administration.  
+
+
+You can specify parameters to be used in the notebook when it's run. If you specify one or more parameters, they are inserted into the notebook as a new cell. This cell is placed at the beginning of the notebook, unless you added the parameters tag to a cell. 
+
+
+<Note type="tip">
+To add a tag to a notebook cell, perform the following steps:
+
+* In the notebook editor ribbon, click **View > Cell Toolbar > Tags** 
+* Select a cell
+* Type the tag's value, and click **Add tag**
+
+</Note>
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+
+        `itemId` 
+
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+            The portal item ID of the notebook you want to execute. You can find this value in the [Notebook](/notebook) resource in this directory or in the portal as part of the item details page URL. Ensure that the notebook is using a runtime that's compatible with your software version. 
+
+            Example:
+            ```other
+
+            itemId=70770e46d4be426dbd3adbec5f9124c8 
+            ```
+
+        </StyledTableCell>
+    </StyledTableRow>   
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+
+        `updatePortalItem ` 
+
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+
+            Specifies whether the notebook portal item is updated after execution. The default is `true`. You can specify `true` when the notebook you're executing contains information that needs to be updated, such as a workflow that collects the most recent version of a dataset. It may not be important to update the portal item if the notebook won't store new information after execution, such as an administrative notebook that sends email reminders to inactive users. 
+
+            Values: `true` | `false`
+
+        </StyledTableCell>
+    </StyledTableRow>    
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+
+        `notebookParameters ` 
+
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+
+            Optional parameters in JSON format that will be added to the notebook for this execution. The parameters are inserted as a new cell directly after the cell you tagged as parameters . The following data types are supported for task parameters: string, long, Boolean, date, feature set, and record set.
+
+            Example:
+            ```other
+            notebookParameters= 
+                { 
+                    "myLongVariable": 100, 
+                    "epochSecondsDate": 1632326711000, 
+                    "myStringVariable": "secret.pwd", 
+                    "myDoubleVariable": 3.14, 
+                    "myBooleanVariable": false, 
+                    "myLinearUnitDictionary": 
+                        { 
+                            "distance": 345.678, 
+                            "units": "esriMiles" 
+                        }, 
+                    "myFeatureSetJSON": 
+                        { 
+                            "geometryType": "esriGeometryPoint", 
+                            "spatialReference": 
+                                { 
+                                "wkid": 4326 
+                                }, 
+                            "fields": 
+                                [
+                                    { 
+                                        "name": "Id", 
+                                        "type": "esriFieldTypeOID", 
+                                        "alias": "Id" 
+                                    }, 
+                                    { 
+                                        "name": "Name", 
+                                        "type": "esriFieldTypeString", 
+                                        "alias": "Name" 
+                                    } 
+                                ], 
+                            "features": 
+                                [{ 
+                                    "geometry": 
+                                        { 
+                                            "x": -104.44, 
+                                            "y": 34.83 
+                                        }, 
+                                    "attributes": 
+                                        { 
+                                            "Id": 43, 
+                                            "Name": "Feature 1" 
+                                    } 
+                                }, 
+                                { 
+                                    "geometry": 
+                                        { 
+                                            "x": -100.65, 
+                                            "y": 33.69 
+                                        }, 
+                                    "attributes": 
+                                        { 
+                                            "Id": 67, 
+                                            "Name": "Feature 2" 
+                                        } 
+                                } 
+                            ] 
+                    } 
+                } 
+            ```
+
+        </StyledTableCell>
+    </StyledTableRow>    
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+
+        `saveInjectedParameters` 
+
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+
+        Specifies whether the `notebookParameters` cell is saved in the notebook for future use. The default is `false`. 
+
+        Values: `true | false` 
+
+        </StyledTableCell>
+    </StyledTableRow>    
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+
+        `f` 
+
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+
+        The response format. The default response format is `html`.
+        
+        Values: `html` | `json` | `pjson`
+
+        </StyledTableCell>
+    </StyledTableRow>
+</StyledTable>
+
+## Response properties
+
+<StyledTable headers={"Property,Details"}>
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+
+            `status` 
+
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+
+            Indicates whether the operation succeeded in executing the notebook. 
+
+        </StyledTableCell>
+    </StyledTableRow>
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+
+          `jobId` 
+
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+
+          A unique Job Id representing the asynchronous `executeNotebook` job.
+
+        </StyledTableCell>
+    </StyledTableRow>
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+
+          `maxSnapshotsPerNotebookItem` 
+
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+
+          The maximum number of snapshots allowed for a notebook. 
+          
+          The default value is 5.
+
+        </StyledTableCell>
+    </StyledTableRow>
+    <StyledTableRow>
+        <StyledTableCell cellStyle="markdown">
+
+          `jobUrl` 
+
+        </StyledTableCell>
+        <StyledTableCell cellStyle="markdown">
+
+          Job url to monitor the status of `executeNotebook` job.
+
+        </StyledTableCell>
+    </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+The following is a sample POST request for the `executeNotebook` operation:
+
+
+
+```other
+POST /context/admin/notebooks/executeNotebook HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: [ ]
+
+itemId=70770e46d4be426dbd3adbec5f9124c8&updatePortalItem=true&notebookParameters={"name": "somename", "population": 19927500, "pop_percent": 11.94, "lowest_elevation_ft": -220, "highest_elevation": 12486, "top5cities": ["City 1", "City 2", "City 3", "City 4", "City 5"], "top5Values": [ 100, 98.2, 93.3, 89, 74], "isTrue": false, "value": null, "access": { "allowed": true}}&saveInjectedParameters=false&f=pjson&token=[token]
+```
+
+## JSON Response example
+
+```json
+{ 
+  "jobId": "j3a581ce0-cf2f-4190-96a5-c5bc0617dd5d", 
+  "jobUrl": " https://organization.domain.com/context/admin/jobs/j3a581ce0-cf2f-4190-96a5-c5bc0617dd5d", 
+  "status": "success" 
+} 
+```

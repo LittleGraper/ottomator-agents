@@ -1,0 +1,975 @@
+---
+title: /solveServiceArea
+uid: serviceArea-service-direct
+description: "Find directions using the global route service available with ArcGIS Location Services."
+context:
+    requestType: "direct"
+---
+import SAServiceDesc from "../../shared/routing/snippets/_serviceArea-service.mdx"
+import Facilities from "../../shared/routing/snippets/request-parameters/_SA-facilities.mdx"
+import SplitPolygonsAtBreaks from "../../shared/routing/snippets/request-parameters/_SA-splitPolygonsAtBreaks.mdx"
+import OverlapPolygons from "../../shared/routing/snippets/request-parameters/_SA-overlapPolygons.mdx"
+import MergeSimilar from "../../shared/routing/snippets/request-parameters/_SA-mergeSimilarPolygonRanges.mdx"
+import TrimOuterPolygons from "../../shared/routing/snippets/request-parameters/_SA-trimOuterPolygons.mdx"
+import TrimPolygonDist from "../../shared/routing/snippets/request-parameters/_SA-trimPolygonDistance.mdx"
+import TrimPolygonDistUnits from "../../shared/routing/snippets/request-parameters/_SA-trimPolygonDistanceUnits.mdx"
+import OutputLines from "../../shared/routing/snippets/request-parameters/_SA-outputLines.mdx"
+import SplitLines from "../../shared/routing/snippets/request-parameters/_SA-splitLinesAtBreaks.mdx"
+import OverlapLines from "../../shared/routing/snippets/request-parameters/_SA-overlapLines.mdx"
+import ReturnFacilities from "../../shared/routing/snippets/request-parameters/_SA-returnFacilities.mdx"
+import Impedance from "../../shared/routing/snippets/request-parameters/_Impedance-JDR-OnE.mdx"
+import DefaultBreaks from "../../shared/routing/snippets/request-parameters/_SA-DefaultBreaks.mdx"
+import TravelDirection from "../../shared/routing/snippets/request-parameters/_SA-TravelDirection.mdx"
+import AttributeParameterValues from "../../shared/routing/snippets/request-parameters/_AttributeParameterValues-JDR-OnE.mdx"
+import TravelModes from "../../shared/routing/snippets/request-parameters/_TravelMode.mdx"
+import AnalysisRegion from "../../shared/routing/snippets/request-parameters/_AnalysisRegion-JR-OnE.mdx"
+import Context from "../../shared/routing/snippets/request-parameters/_Context.mdx"
+import LineBarriers from "../../shared/routing/snippets/request-parameters/_LineBarriers.mdx"
+import LocateSettings from "../../shared/routing/snippets/request-parameters/_LocateSettings.mdx"
+import PointBarriers from "../../shared/routing/snippets/request-parameters/_PointBarriers.mdx"
+import PolygonBarriers from "../../shared/routing/snippets/request-parameters/_PolygonBarriers.mdx"
+import UTurnAtJunctions from "../../shared/routing/snippets/request-parameters/_UTurnAtJunctions.mdx"
+import UseHierarchy from "../../shared/routing/snippets/request-parameters/_UseHierarchy-JDR-OnE.mdx"
+import Restrictions from "../../shared/routing/snippets/request-parameters/_Restrictions-JDR-OnE.mdx"
+import Overrides from "../../shared/routing/snippets/request-parameters/_Overrides-JDR-OnE.mdx"
+import IgnoreInvalidLocations from "../../shared/routing/snippets/request-parameters/_IgnoreInvalidLocations-JDR-OnE.mdx"
+import TimeOfDay from "../../shared/routing/snippets/request-parameters/_Direct-timeOfDay.mdx"
+import TimeOfDayUTC from "../../shared/routing/snippets/request-parameters/_Direct-timeOfDayIsUTC.mdx"
+import LineBarrier from "../../shared/routing/snippets/request-parameters/_LineBarriers.mdx"
+import PolygonBarrier from "../../shared/routing/snippets/request-parameters/_PolygonBarriers.mdx"
+import PointBarrier from "../../shared/routing/snippets/request-parameters/_PointBarriers.mdx"
+import AccumulateAttrNames from "../../shared/routing/snippets/request-parameters/_AccumulateAttributeNames-DR-OnE.mdx"
+import DirectionsOutputType from "../../shared/routing/snippets/request-parameters/_DirectionsOutputType.mdx"
+import ImpedanceAttrName from "../../shared/routing/snippets/request-parameters/_Impedance-JDR-OnE.mdx"
+import ReturnBarriers from "../../shared/routing/snippets/request-parameters/_returnBarriers.mdx"
+import ReturnPolygonBarriers from "../../shared/routing/snippets/request-parameters/_returnPolygonBarriers.mdx"
+import ReturnPolylineBarriers from "../../shared/routing/snippets/request-parameters/_returnPolylineBarriers.mdx"
+import ReturnTraversedEdges from "../../shared/routing/snippets/request-parameters/_returnTraversedEdges.mdx"
+import ReturnTraversedJunctions from "../../shared/routing/snippets/request-parameters/_returnTraversedJunctions.mdx"
+import ReturnTraversedTurns from "../../shared/routing/snippets/request-parameters/_returnTraversedTurns.mdx"
+import OutputGeometryPrecision from "../../shared/routing/snippets/request-parameters/_RouteLineSimplificationTolerance-JR-OnE.mdx"
+import OutputGeometryPrecisionUnits from "../../shared/routing/snippets/request-parameters/_OutputGeometryPrecisionUnits.mdx"
+import GeometryPrecision from "../../shared/routing/snippets/request-parameters/_GeometryPrecision.mdx"
+import GeometryPrecisionM from "../../shared/routing/snippets/request-parameters/_GeometryPrecisionM.mdx"
+import PreserveObjectID from "../../shared/routing/snippets/request-parameters/_PreserveObjectID.mdx"
+import ReturnEmptyResults from "../../shared/routing/snippets/request-parameters/_ReturnEmptyResults.mdx"
+import LocateSetting from "../../shared/routing/snippets/request-parameters/_LocateSettings.mdx"
+import Contxt from "../../shared/routing/snippets/request-parameters/_Context.mdx"
+import RestrictUTurns from "../../shared/routing/snippets/request-parameters/_UTurnAtJunctions.mdx"
+import PolygonDetail from "../../shared/routing/snippets/request-parameters/_SA-PolygonDetail.mdx"
+
+import SAOutputFacility from "../../shared/routing/snippets/output-parameters/_SA-outputFacilities.mdx"
+import SaPolygons from "../../shared/routing/snippets/output-parameters/_SA-saPolygons.mdx"
+import SaPolylines from "../../shared/routing/snippets/output-parameters/_SA-saPolylines.mdx"
+import OutputBarriers from "../../shared/routing/snippets/output-parameters/_barriers.mdx"
+import OutputPolylineBarriers from "../../shared/routing/snippets/output-parameters/_polylineBarriers.mdx"
+import OutputPolygonBarriers from "../../shared/routing/snippets/output-parameters/_polygonBarriers.mdx"
+import SAUsageLimits from "../../shared/routing/snippets/request-parameters/_SA-UsageLimits.mdx"
+
+import SharedContent from "../../shared/content/_required-params.mdx"
+
+import ParamMetadata from "../../shared/components/param-metatdata" 
+
+<CodeSwitcher>
+<CodeBlock language="curl" label="GET">{`GET  https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World/solveServiceArea`}</CodeBlock>
+<CodeBlock language="curl" label="POST">{`POST https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World/solveServiceArea`}</CodeBlock>
+</CodeSwitcher>
+
+<SAServiceDesc />
+
+## Parameters 
+
+<StyledTable headers="Name, Required, Type, Default, Description">
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[f](#f)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown"></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The request response format, either `json` or `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[token](#token)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    An access token with the [required privileges](#token).
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[facilities](#facilities)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">locations | feature</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+   Input locations around which service areas are generated.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[travelMode](#travelmode)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">object</StyledTableCell>
+    <StyledTableCell cellStyle="markdown"> 
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The mode of transportation for the analysis provided as a JSON object.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[defaultBreaks](#defaultbreaks)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `Minutes`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The size and number of service areas to generate for each facility. 
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[travelDirection](#traveldirection)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `esriNATravelDirectionToFacility`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Search for the closest facility as measured from the incident to the facility or from the facility to the incident.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[timeOfDay](#timeofday)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The time and date to depart from or arrive at facilities.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[timeOfDayIsUTC](#timeofdayisutc)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The time zone or zones of the `timeOfDay` parameter.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[outputPolygons](#outputpolygons)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `esriNAOutputPolygonSimplified`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The level of detail for the output service area polygons. 
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[splitPolygonsAtBreaks](#splitpolygonsatbreaks)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Specify whether multiple service areas around a facility are created as disks or rings.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[overlapPolygons](#overlappolygons)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Service areas from different facilities can overlap each other.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[mergeSimilarPolygonRanges](#mergesimilarpolygonranges)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Service areas from different facilities that have the same break value will be joined together or split at break values.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[trimOuterPolygons](#trimouterpolygons)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Service areas are trimmed.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[trimPolygonDistance](#trimpolygondistance)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">integer</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `100`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The distance within which the service area polygon will extend.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[trimPolygonDistanceUnits](#trimpolygondistanceunits)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `esriMeters`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Units of the value specified in the `trimPolygonDistance` parameter.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[restrictUTurns](#restrictuturns)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `esriNFSBAllowBacktrack`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Restricts or allows a route to make U-turns at junctions.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[useHierarchy](#usehierarchy)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Hierarchy used when generating service areas.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[impedanceAttributeName](#impedanceattributename)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `TravelTime`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The type of impedance, such as `Minutes` or `Miles`.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[accumulateAttributeNames](#accumulateattributenames)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `Miles,Kilometers`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Accumulates values other than the value set in the `impedanceAttributeName` parameter.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[restrictionAttributeNames](#restrictionattributenames)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The restrictions that should be honored by the service.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[attributeParameterValues](#attributeparametervalues)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">[object]</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Additional values required by an attribute or restriction.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[barriers](#barriers)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">locations | feature</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      One or more points that act as temporary restrictions, additional time, or distance.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[polylineBarriers](#polylinebarriers)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">feature</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      One ore more lines that prohibit travel anywhere the lines intersect the streets.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[polygonBarriers](#polygonbarriers)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">feature</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Polygons that either prohibit travel or proportionately scale the time or distance required to travel on the streets.
+    </StyledTableCell>
+  </StyledTableRow>
+  
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[splitLinesAtBreaks](#splitlinesatbreaks)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Service area lines split at break values.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[outputLines](#outputlines)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `esriNAOutputLineNone`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Create service area lines.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[overlapLines](#overlaplines)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Service area lines from different facilities overlap each other.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnFacilities](#returnfacilities)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Returns facilities.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnBarriers](#returnbarriers)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Returns barriers.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnPolylineBarriers](#returnpolylinebarriers)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Returns polyline barriers.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnPolygonBarriers](#returnpolygonbarriers)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Returns polygon barriers.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[ignoreInvalidLocations](#ignoreinvalidlocations)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Ignores invalid input locations.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[context](#context)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Additional settings that affect task operation
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[outputGeometryPrecision](#outputgeometryprecision)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">number</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `10`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Simplifies route geometry.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[outputGeometryPrecisionUnits](#outputgeometryprecisionunits)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `esriMeters`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The units for the value in the `outputGeometryPrecision` parameter.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[geometryPrecision](#geometryprecision)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The number of decimal places in the response geometries. Applies to x and y values only.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[geometryPrecisionM](#geometryprecisionm)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The number of decimal places in the response geometries. Applies to m-values only.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[overrides](#overrides)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      For internal use only.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[preserveObjectID](#preserveobjectid)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Preserves the object IDs from input locations when the input locations are returned as output.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnEmptyResults](#returnemptyresults)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Returns empty results instead of the error property when a request fails.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[locateSettings](#locatesettings)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">object</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Determines how input data are located.
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Required parameters
+
+<Box>
+
+### f
+
+<SharedContent f/>
+
+</Box>
+
+<Box>
+
+### token
+
+<SharedContent token alpPrivileges="premium:user:networkanalysis:routing or premium:user:networkanalysis:optimizedrouting" agoPrivileges="premium:user:networkanalysis"/>
+
+</Box>
+
+<Box>
+
+### facilities
+
+<Facilities />
+
+</Box>
+
+## Optional parameters
+
+<Box>
+
+### travelMode
+
+<TravelModes />
+
+</Box>
+
+<Box>
+
+### defaultBreaks
+
+<DefaultBreaks />
+
+</Box>
+
+<Box>
+
+### travelDirection
+
+<TravelDirection />
+
+</Box>
+
+<Box>
+
+### timeOfDay 
+
+<TimeOfDay serviceArea/>
+
+</Box>
+
+<Box>
+
+### timeOfDayIsUTC
+
+<TimeOfDayUTC />
+
+</Box>
+
+<Box>
+
+### outputPolygons 
+
+<PolygonDetail />
+
+</Box>
+
+<Box>
+
+### splitPolygonsAtBreaks
+
+<SplitPolygonsAtBreaks />
+
+</Box>
+
+<Box>
+
+### overlapPolygons
+
+<OverlapPolygons />
+
+</Box>
+
+<Box>
+
+### mergeSimilarPolygonRanges
+
+<MergeSimilar />
+
+</Box>
+
+<Box>
+ 
+### trimOuterPolygons
+
+<TrimOuterPolygons />
+
+</Box>
+
+<Box>
+
+### trimPolygonDistance
+
+<TrimPolygonDist />
+
+</Box>
+
+<Box>
+
+### trimPolygonDistanceUnits
+
+<TrimPolygonDistUnits />
+
+</Box>
+
+<Box>
+
+### useHierarchy
+
+<UseHierarchy />
+
+</Box>
+
+<Box>
+
+### restrictUTurns
+
+<RestrictUTurns />
+
+</Box>
+
+<Box>
+
+### impedanceAttributeName
+
+<ImpedanceAttrName />
+
+</Box>
+
+<Box>
+
+### accumulateAttributeNames
+
+<AccumulateAttrNames />
+
+</Box>
+
+<Box>
+
+### restrictionAttributeNames
+
+<Restrictions />
+
+</Box>
+
+<Box>
+
+### attributeParameterValues
+
+<AttributeParameterValues />
+
+</Box>
+
+<Box>
+
+### barriers
+
+<PointBarrier />
+
+</Box>
+
+<Box>
+
+### polylineBarriers
+
+<LineBarrier />
+
+</Box>
+
+<Box>
+
+### polygonBarriers
+
+<PolygonBarrier />
+
+</Box>
+
+<Box>
+
+### outputLines 
+
+<OutputLines />
+
+</Box>
+
+<Box>
+
+### splitLinesAtBreaks
+
+<SplitLines />
+
+</Box>
+
+<Box>
+
+### overlapLines
+
+<OverlapLines />
+
+</Box>
+
+<Box>
+
+### returnFacilities
+
+<ReturnFacilities />
+
+</Box>
+
+<Box>
+
+### returnBarriers
+
+<ReturnBarriers />
+
+</Box>
+
+<Box>
+
+### returnPolylineBarriers
+
+<ReturnPolylineBarriers />
+
+</Box>
+
+<Box>
+
+### returnPolygonBarriers
+
+<ReturnPolygonBarriers />
+
+</Box>
+
+<Box>
+
+### ignoreInvalidLocations
+
+<IgnoreInvalidLocations />
+
+</Box>
+
+<Box>
+
+### outSR
+
+<Contxt />
+
+</Box>
+
+<Box>
+
+### outputGeometryPrecision
+
+<OutputGeometryPrecision />
+
+</Box>
+
+<Box>
+
+### outputGeometryPrecisionUnits
+
+<OutputGeometryPrecisionUnits />
+
+</Box>
+
+<Box>
+
+### geometryPrecision 
+
+<GeometryPrecision />
+
+</Box>
+
+<Box>
+
+### geometryPrecisionM 
+
+<GeometryPrecisionM />
+
+</Box>
+
+<Box>
+
+### overrides
+
+<Overrides />
+
+</Box>
+
+<Box>
+
+### preserveObjectID
+
+<PreserveObjectID serviceArea />
+
+</Box>
+
+<Box>
+
+### returnEmptyResults
+
+<ReturnEmptyResults />
+
+</Box>
+
+<Box>
+
+### locateSettings
+
+<LocateSetting SA/>
+
+</Box>
+
+{/* ## Response status
+
+For a list of error codes and details, go to [Direct request error codes](xref:///routing-error-codes) */}
+
+## Response details 
+
+{/* Go to [Response types](xref:///routing-types/#routes-result) for an example of the JSON response object. */}
+
+The JSON response from the service area service is based on the following syntax. The actual properties returned in the response depend on the request parameters. For example, the `facilities` property is returned only if the `returnFacilities` parameter is set to `true` . If a request fails, the JSON response only contains the error property. 
+
+For a list of error codes and details, go to [Direct request error codes](xref:///routing-error-codes)
+
+The examples in the subsequent section illustrate the response returned with specific request parameters.
+
+<CodeBlock language="json" source="../../shared/routing/code-samples/responseSyntax/direct/SA-JSON_response_direct.json" group="json" maxLines={20} expandable/>
+
+On successful completion, the service returns the service areas around the facilities. This data type supports the fields described below. In addition to these fields, the data type also includes all the fields from the input feature class used as facilities for the analysis when generating overlapping or non-overlapping polygons.
+
+<Box>
+
+### saPolygons
+
+<SaPolygons />
+
+</Box>
+
+<Box>
+
+### saPolylines
+
+<SaPolylines />
+
+</Box>
+
+<Box>
+
+### facilities
+
+<SAOutputFacility />
+
+</Box>
+
+<Box>
+
+### barriers
+
+<OutputBarriers />
+
+</Box>
+
+<Box>
+
+### polylineBarriers
+
+<OutputPolylineBarriers />
+
+</Box>
+
+<Box>
+
+### polygonBarriers
+
+<OutputPolygonBarriers />
+
+</Box>
+
+## Examples
+
+<Note type={"mapping-guide"}>
+
+To build client application [see API reference examples](DEVSITE/documentation/mapping-and-location-services/routing-and-directions/service-areas/#direct-find-walk-distance-areas)
+
+</Note>
+
+Below is an example of the service showing how to calculate drive-time polygons around a store.
+
+<Note type={"caution"}>
+If you copy and paste the request URL from the examples into a web browser, you need to replace `<yourToken>`  with a valid token. See [Security and authentication](DEVSITE/documentation/security-and-authentication/) to learn more.
+</Note>
+
+<Box>
+
+### Calculate 5-, 10-, and 15-minute drive-time polygons around store locations
+
+This example shows how to calculate the 5-, 10-, and 15-minute drive-time polygons around a store. The store location is specified as the `facilities` parameter using the longitude and latitude values. The drive-time polygons must be drawn on an ArcGIS Online basemap that uses the Web Mercator spatial reference. Therefore, the `outSR` parameter is specified with a value of `102100`  to return polygon geometries in the appropriate spatial reference. The default values for all the other parameters are appropriate for this request and are not specified. 
+
+<Tabs>
+<TabNav slot="tab-nav">
+  <TabTitle is-active>Request</TabTitle>
+  <TabTitle>Response</TabTitle>
+</TabNav>
+
+<Tab is-active>
+<CodeBlock language="http" source="../../shared/routing/code-samples/responseExample/direct/SA_submit_job_online_direct.http" group="HTTP" maxLines={20} expandable/>
+</Tab>
+
+<Tab>
+<CodeBlock language="json" source="../../shared/routing/code-samples/responseExample/direct/SA-JSONExample1.json" group="json" maxLines={20} expandable/>
+</Tab>
+
+</Tabs>
+
+</Box>
+
+## Service limits
+
+<If c="publication=='rest/online'">
+
+<Note type={"note"}> 
+
+The service works in all the supported countries as listed in the [data coverage page](/network-coverage). One or more countries are grouped together to form an analysis region. The service can determine the best region to use based on the location of the inputs; otherwise, you can use a parameter to specify a region. The service does not support requests that span more than one region. Consequently, the service will only generate results for inputs that fall within one region. 
+
+</Note>
+
+</If>
+
+<SAUsageLimits />

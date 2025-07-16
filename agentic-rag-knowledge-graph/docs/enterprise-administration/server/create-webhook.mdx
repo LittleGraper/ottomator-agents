@@ -1,0 +1,550 @@
+---
+title: "Create (Webhooks)"
+description: "The create  operation allows administrators to create a webhook for either an asynchronous geoprocessing service or a feature service."
+slug: "create-webhook"
+url: "/create-webhook"
+guid: "GUID-D8477643-5A52-45BB-ADFE-8B69B06E4AE7"
+migratedTopicMetadata:
+  FTITLE: "Create Webhook"
+  FDESCRIPTION: ""
+  FCHANGES: "Updating note about referenced feature layer limitations"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2-*"
+  CREATED-ON: "07/11/2023 09:00:53"
+  FAUTHOR: "tohara"
+  FSTATUS: "To be reviewed"
+  MODIFIED-ON: "07/11/2023 09:58:25"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-D6F07FBF-B23B-4621-9D64-232467C9CDA7"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /services/<serviceName>.<serviceType>/webhooks/create
+  urlSegments:
+    - name: <root>
+      url: /site
+    - name: /services/<serviceName>.<serviceType>/webhooks/create
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '11.1'
+  requiredCapabilities:
+    - name: Access allowed with either the "Geoprocessing" or "Feature layer" privileges
+      url: /managing-access-to-the-server-administration-rest-api
+---
+
+## Description
+
+<Note type={"note"}>
+
+Webhooks can only be created on your organization's hosting server or a federated server. For additional requirements for either service or organization webhooks, see [Create webhooks](https://enterprise.arcgis.com/en/portal/latest/administer/windows/create-webhooks.htm) in the Portal for ArcGIS documentation.
+
+</Note>
+
+The `create` operation allows administrators to create a webhook for either an asynchronous geoprocessing service or a feature service. Once the webhook is invoked, it will deliver a payload to the configured payload URL.
+
+For geoprocessing services, the webhook is triggered when the geoprocessing job is successfully completed, canceled, or fails to complete. For feature services, administrators can [specify the event triggers](/create-webhook#feature-service-event-triggers) for the webhook, which range from all possible feature service event triggers to being notified if a single event occurs, such as a feature being created.
+
+To configure webhooks for a feature service, the feature service must include the editing capability and have change tracking enabled without sync. These properties can be modified using the [Update Definition](DEVSITE/rest/services-reference/enterprise/update-definition-feature-service) operation, which can be accessed in the ArcGIS REST Admin Services Directory by modifying the hosting or federated server's services directory URL as shown below, where `<folder>` and `<serviceName>` are changed to reflect the location of the feature service that will be updated:
+
+```markdown
+https://machine.domain.com/webadaptor/rest/admin/services/<folder>/<serviceName>/FeatureServer/updateDefinition
+
+```
+
+To configure webhooks for non-hosted feature services, the data the service references from the enterprise geodatabase must be nonversioned and have archiving enabled. Starting at ArcGIS Enterprise 11.3, service webhooks support services with branch versioned data.
+
+### Webhook security
+
+Starting at ArcGIS Enterprise 11.2, service webhooks use signature verification to ensure the integrity and security of webhook payloads sent from ArcGIS Enterprise to a webhook receiver. The input for the `signatureKey` parameter acts as a shared secret key between both ArcGIS Enterprise and the webhook receiver, which is known, and stored independently by, both ArcGIS Enterprise and the webhook receiver and used to determined if the payload is trusted. When a webhooks event is triggered, the secret key and the payload are hashed using a HMAC-SHA256 algorithm, creating the signature. The signature is then passed in the webhook request as the `x-esriHook-Signature` header value. When the webhook payload is delivered to the receiver, the receiver uses the secret key and payload to create a signature of its own using the same HMAC-SHA256 algorithm that ArcGIS Enterprise used. If the signature included in the request header matches the recalculated value created by the webhook receiver, the webhook payload can be trusted by the receiver. Otherwise, the receiver may choose to reject the incoming webhook payload.
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `name` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The webhook name.
+
+      Example
+
+      ```markdown label=Example
+      name=Microsoft Flow
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `changeTypes` 
+
+      (Required for feature service webhooks)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      <Note type={"note"}>
+
+      This parameter is not applicable to geoprocessing service webhooks.
+
+      </Note>
+
+      Specifies the event triggers that will invoke the webhook. For more information about the supported event triggers listed below, see the [Feature service event triggers](/create-webhook#feature-service-event-triggers) section. The values for this parameter can be submitted as a string or as an array.
+
+      Values: `*` | `FeaturesCreated` | `FeaturesUpdated` | `FeaturesDeleted` | `FeaturesEdited` | `AttachmentsCreated` | `AttachmentsUpdated` | `AttachmentsDeleted` | `LayerSchemaChanged` | `LayerDefinitionChanged` | `FeatureServiceDefinitionChanged` | `FeaturesPosted`
+
+      ```markdown label=Example
+      //String example
+      changeTypes=FeaturesDeleted, FeaturesEdited, FeaturesUpdated
+
+      //Array example
+      changeTypes=["FeaturesDeleted", "FeaturesEdited", "FeaturesUpdated"]
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `signatureKey` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A user-defined alphanumerical string. Starting at ArcGIS Enterprise 11.2, the value provided for `signatureKey` is used by both ArcGIS Enterprise and the webhook receiver to ensure the authenticity of outgoing webhook requests.
+
+      ```markdown label=Example
+      signatureKey=123456789&ABCDE
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `hookUrl` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The payload URL where the payload will be delivered once the webhook is invoked.
+
+      ```markdown label=Example
+      hookUrl=https://app.logic.azure.com:443/workflows/...
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `contentType` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the media type of the resource. The media type is a string sent with the file indicating the file's format.
+
+      Values: `application/json` | `application/x-www-form-urlencoded`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `payloadFormat` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the response payload format. The default value is `json`.
+
+      Values: `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `active` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies whether callbacks will be enabled (`true`) or disabled (`false`) when a webhook is triggered. The default value is `true`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `scheduleInfo` 
+
+      (Optional for feature service webhooks)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      <Note type={"note"}>
+
+      This parameter is not applicable to geoprocessing service webhooks.
+
+      </Note>
+
+      The window for cataloging event triggers for a feature service. The modifiable values for this parameter are the `name` property, which allows you to provide a name of the schedule type, and the `interval`  property, which sets the value for how frequently payloads will be delivered. For feature services that receive frequent updates, the schedule for its webhook can be modified to send more frequent payloads containing less information by reducing the `interval` value. For feature services that receive less frequent updates, the `interval` value can be raised to send less frequent webhooks that include more event information. The default, and minimum, value for the `interval` property is 20 seconds.
+
+      ```markdown label=Example
+      scheduleInfo={"name":"Every20Seconds","state":"enabled",
+      "startAt":1670521784506,"recurrenceInfo":{"interval":20,"frequency":"second"}}
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Feature service event triggers
+
+The table below lists the supported event triggers for feature services:
+
+<StyledTable headers={"Event,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `*` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Any event is triggered.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `FeaturesCreated` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A feature is created.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `FeaturesUpdated` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A feature is updated.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `FeaturesDeleted` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A feature is deleted.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `FeaturesEdited` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A feature is edited (e.g., insert, update, or delete).
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `AttachmentsCreated` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A new attachment is added to a feature.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `AttachmentsUpdated` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A feature attachment is updated.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `AttachmentsDeleted` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A feature attachment is deleted.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `LayerSchemaChanged` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A feature layer's schema is changed.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `LayerDefinitionChanged` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A feature layer's definition is changed.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `FeatureServiceDefinitionChanged` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A feature service's definition is changed.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `FeaturesPosted` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.3. The [post](DEVSITE/rest/services-reference/enterprise/post/) operation is performed on the service.
+
+      <Note>
+
+      To schedule a webhook using this event trigger, the feature service must have the [Version Management capability enabled](https://pro.arcgis.com/en/pro-app/latest/help/data/geodatabases/overview/publish-branch-versioned-data.htm). For more information, see the [Create webhooks](https://enterprise.arcgis.com/en/portal/latest/administer/windows/create-webhooks.htm) documentation for Portal for ArcGIS.
+
+      </Note>
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usages
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Geoprocessing service webhooks</TabTitle>
+  <TabTitle>Feature service webhooks</TabTitle>
+</TabNav>
+
+<Tab>
+
+The following is a sample POST request for the `create` operation, demonstrating a geoprocessing service webhook:
+
+```markdown
+POST /webadaptor/admin/services/myService.GPServer/webhooks/create HTTPS/1.1
+Host: machine.domain.com
+Content-type: application/x-www-form-urlencoded
+Content-Length: []
+
+name=Microsoft Flow&signatureKey=123456789ABCDE&hookUrl=https://app.logic.azure.com:443/workflows/b688528a36e246279dc050f936e5eb&payloadFormat=pjson&active=true&f=pjson
+
+```
+</Tab>
+
+<Tab>
+
+The following is a sample POST request for the `create` operation, demonstrating a feature service webhook:
+
+```markdown
+POST /webadaptor/admin/services/myService.FeatureServer/webhooks/create HTTPS/1.1
+Host: machine.domain.com
+Content-type: application/x-www-form-urlencoded
+Content-Length: []
+
+name=Microsoft Flow&changeTypes=FeaturesCreated&signatureKey=123456789&ABCDE&hookUrl=https://app.logic.azure.com:443/workflows/b688528a36e246279dc050f936e5eb&payloadFormat=pjson&active=true&f=pjson
+
+```
+</Tab>
+
+</Tabs>
+
+## JSON Response syntax
+
+```other
+{
+  "id": "<webhook ID>",
+  "folderName": "<the service's root folder name>",
+  "serviceName": "<the service name>",
+  "serviceType": "<the service type>",
+  "name": "<user provided webhook name>",
+  "changeTypes": ["user-defined event triggers"],
+  "signatureKey": "<user-defined signature key>",
+  "hookUrl": "<payload URL>",
+  "active": <true | false>,
+  "contentType": "<application/json | application/x-www-form-urlencoded",
+  "scheduleInfo": { //The following object is only returned when creating a feature service webhook, as scheduling info is not applicable to geoprocessing webhooks
+    "name": "<user provided schedule name>",
+    "state": "enabled",
+    "startAt": <time in Epoch>,
+    "recurrenceInfo": {
+      "interval": <integer value>,
+      "frequency": "second"
+    }
+  },
+  "payloadFormat": "<json | pjson>",
+  "created": <time in Epoch when the webhook was created>,
+  "modified": <time in Epoch when the webhook was last modified. If just created, this value will be the same as the value above>,
+  "ownerId": "<username of the webhook's owner>",
+  "modifiedId": "<username of the user to last modify the webhook. If just created, this value will be the same as the value above>",
+  "status": "<success message>"
+}
+```
+
+## JSON Response examples
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Geoprocessing service response</TabTitle>
+  <TabTitle>Feature service response</TabTitle>
+</TabNav>
+
+<Tab>
+
+The following is a sample JSON response for a newly created geoprocessing service webhook:
+
+```other
+{
+  "id": "9b9073a2-5569-4873-96d5-b46ebfe07ecb",
+  "folderName": "System",
+  "serviceName": "CachingTools",
+  "serviceType": "GPServer",
+  "name": "TestGPWebhook",
+  "changeTypes": ["*"],
+  "signatureKey": "",
+  "hookUrl": "https://app.logic.azure.com:443/workflows/...",
+  "active": true,
+  "contentType": "application/json",
+  "scheduleInfo": {},
+  "payloadFormat": "pjson",
+  "created": 1670456295297,
+  "modified": 1670456295297,
+  "ownerId": "webhooksAdmin",
+  "modifiedId": "webhooksAdmin",
+  "status": "success"
+}
+```
+</Tab>
+
+<Tab>
+
+The following is a sample JSON response for a newly created feature service webhook:
+
+```javascript
+{
+  "id": "e871defd-b339-43eb-aeeb-d500184820c6",
+  "folderName": "Hosted",
+  "serviceName": "Test",
+  "serviceType": "FeatureServer",
+  "name": "TestWebhook",
+  "signatureKey": "12345ABCDEF",
+  "hookUrl": "https://app.logic.azure.com:443/workflows/...",
+  "active": true,
+  "contentType": "application/json",
+  "scheduleInfo": {
+    "name": "Every20Seconds",
+    "state": "enabled",
+    "startAt": 1670521784506,
+    "recurrenceInfo": {
+      "interval": 20,
+      "frequency": "second"
+    }
+  },
+  "payloadFormat": "json",
+  "created": 1670521908014,
+  "modified": 1670521908014,
+  "ownerId": "webhookAdmin",
+  "modifiedId": "webhookAdmin",
+  "changeTypes": ["*"],
+  "status": "success"
+}
+```
+</Tab>
+
+</Tabs>

@@ -1,0 +1,328 @@
+---
+title: "Find Transformations"
+description: "The findTransformations operation is performed on a geometry service resource."
+slug: "findtransformations"
+url: "/findtransformations"
+guid: "GUID-24611A23-02C5-4828-8AA2-B0916D3C8401"
+migratedTopicMetadata:
+  FTITLE: "FindTransformations"
+  FDESCRIPTION: ""
+  FCHANGES: "Fixing broken links"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9.1- *"
+  CREATED-ON: "07/09/2021 14:38:45"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "04/10/2021 10:02:36"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-3851581A-D5A1-48A7-A027-4C5B10E16CE0"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /Utilities/Geometry/GeometryServer/findTransformations
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /Utilities/Geometry/GeometryServer/findTransformations
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.3'
+  relatedResources:
+    - name: Project
+      url: /project
+---
+
+## Description
+
+The `findTransformations` operation is performed on a [geometry service resource](/geometry-service). This operation returns a list of applicable geographic transformations you should use when projecting geometries from the input spatial reference to the output spatial reference. The transformations are in JSON format and are returned in order of most applicable to least applicable. Recall that a geographic transformation is not needed when the input and output spatial references have the same underlying geographic coordinate systems. In this case, `findTransformations` returns an empty list.
+
+Every returned geographic transformation is a forward transformation, meaning that it can be used as-is to project from the input spatial reference to the output spatial reference. When a predefined transformation needs to be applied in the reverse direction, it is returned as a forward composite transformation containing one transformation and a `transformForward` element with a value of `false`. See the [examples](/findtransformations/#example-usage) given below.
+
+You can provide arguments to the `findTransformations` operation as query parameters defined in the following parameters table.
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+<StyledTableCell cellStyle="markdown">
+
+`inSR`
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the well-known ID (WKID) of the spatial reference or a [spatial reference JSON object](/geometry-objects#spatial-reference) for the input geometries. For a list of valid WKID values, see [Using spatial references](/using-spatial-references). 
+
+</StyledTableCell>
+</StyledTableRow>
+
+<StyledTableRow>
+<StyledTableCell cellStyle="markdown">
+
+`outSR`
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the WKID of the spatial reference or a [spatial reference JSON object](/geometry-objects#spatial-reference) for the projected geometries. For a list of valid WKID values, see [Using spatial references](/using-spatial-references).
+
+</StyledTableCell>
+</StyledTableRow>
+
+<StyledTableRow>
+<StyledTableCell cellStyle="markdown">
+
+`extentOfInterest`
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Sets the bounding box of the area of interest specified as a [JSON envelope](/geometry-objects#envelope). If provided, the extent of interest is used to return the most applicable geographic transformations for the area. If a spatial reference is not included in the JSON envelope, the `inSR` is used for the envelope. 
+
+</StyledTableCell>
+</StyledTableRow>
+
+<StyledTableRow>
+<StyledTableCell cellStyle="markdown">
+
+`numOfResults`
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the number of geographic transformations to return. The default value is 1. If `numOfResults` has a value of -1, all applicable transformations are returned.
+
+</StyledTableCell>
+</StyledTableRow>
+
+<StyledTableRow>
+<StyledTableCell cellStyle="markdown">
+
+`vertical`
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether or not to check for vertical transformations. The default value is false. If `vertical` is set to true, both `inSR` and `outSR` must have a vertical coordinate system. A list of horizontal-vertical transformations (hvtransforms) will be returned in this case.
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+</StyledTableRow>
+
+<StyledTableRow>
+<StyledTableCell cellStyle="markdown">
+
+`f`
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default format is `html`.
+
+Values: `html`  \| `json`  \| `pjson` 
+
+</StyledTableCell>
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+The following are sample request URLs for `findTransformations`.
+
+### Example 1
+
+This example finds the top two transformations that should be used when projecting data from GCS_North_American_1927 (wkid = 4267) to GCS_North_American_1983 (wkid = 4269). 
+
+[`https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer/findTransformations?inSR=4267&outSR=4269&numOfResults=2`](https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer/findTransformations?inSR=4267&outSR=4269&numOfResults=2)
+
+The first transformation is a single forward geographic transformation. The second transformation is a forward composite transformation containing two geographic transformations. It will first apply the transformation 8073 in the forward direction from NAD 27 to WGS 84. It will then apply 8494 in the reverse direction from WGS 84 to NAD 83. Note that although the second transformation in the composite transformation is applied in the reverse direction, the entire composite transformation is a forward transformation. You can copy and paste the composite transformation, or any transformation returned by `findTransformations`, into the `project` operation as-is without having to change the default direction which is forward.
+
+The output looks like the following:
+
+```json
+[
+{
+    "wkid": 108001,
+    "latestWkid": 1241,
+    "name": "NAD_1927_To_NAD_1983_NADCON"
+  },
+{"geoTransforms": [
+    {
+      "wkid": 8073,
+      "latestWkid": 1173,
+      "transformForward": true,
+      "name": "NAD_1927_To_WGS_1984_4"
+    },
+    {
+      "wkid": 8494,
+      "latestWkid": 1515,
+      "transformForward": false,
+      "name": "NAD_1983_To_WGS_1984_5"
+    }
+  ]}
+]
+```
+
+### Example 2
+
+This example performs the reverse of the operation performed in Example 1. This example projects data from GCS_North_American_1983 (wkid = 4269) to GCS_North_American_1927 (wkid = 4267) and retrieves the top three transformations.
+
+[`https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer/findTransformations?inSR=4269&outSR=4267&numOfResults=2`](https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer/findTransformations?inSR=4269&outSR=4267&numOfResults=2)
+
+Notice that the first transformation is a composite transformation containing a single geographic transformation with the `transformForward` element set to `false`. The reason for this is that `findTransformations` always returns forward transformations. The transformation with wkid = 108001 is the best one for this situation, but if you use it directly, it must be used in the reverse direction. The composite transformation with one transformation is a forward transformation, so you can copy and paste it as-is. 
+
+The output looks like the following:
+
+```json
+[
+{"geoTransforms": [{
+    "wkid": 108001,
+    "latestWkid": 1241,
+    "transformForward": false,
+    "name": "NAD_1927_To_NAD_1983_NADCON"
+  }]},
+{"geoTransforms": [
+    {
+      "wkid": 8494,
+      "latestWkid": 1515,
+      "transformForward": true,
+      "name": "NAD_1983_To_WGS_1984_5"
+    },
+    {
+      "wkid": 8073,
+      "latestWkid": 1173,
+      "transformForward": false,
+      "name": "NAD_1927_To_WGS_1984_4"
+    }
+  ]}
+]
+```
+
+### Example 3
+
+This example shows how to find the top two transformations for projecting data from North_America_Equidistant_Conic, a projected coordinate system with NAD 83 as its underlying geographic coordinate system, to World_Mercator, a projected coordinate system with WGS 84 as its underlying geographic coordinate system. The URL shown here has been decoded for illustrative purposes, but the actual URL must be encoded. 
+
+[`https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer/findTransformations?inSR=102010&outSR=54004&extentOfInterest=&numOfResults=2`](https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer/findTransformations?inSR=102010&outSR=54004&extentOfInterest=&numOfResults=2)
+
+The output looks like the following:
+
+```json
+[
+{"geoTransforms": [{
+    "wkid": 108190,
+    "latestWkid": 108190,
+    "transformForward": false,
+    "name": "WGS_1984_(ITRF00)_To_NAD_1983"
+  }]},
+{
+    "wkid": 8494,
+    "latestWkid": 1515,
+    "name": "NAD_1983_To_WGS_1984_5"
+  }
+]
+```
+
+To run the same query, but with an envelope covering an area in Southern California containing Esri headquarters, you would add the `extentOfInterest` parameter.
+
+```json
+{
+  "xmin": -118,"ymin": 33,
+  "xmax": -116,"ymax": 35,
+  "spatialReference": {"wkid": 4326}
+}
+```
+
+The decoded URL with the `extent of interest` parameter added looks like this. The actual URL must be encoded.
+
+[`https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer/findTransformations?inSR=102010&outSR=54004&extentOfInterest={"xmin":-118,"ymin":33,"xmax":-116,"ymax":35,"spatialReference":{"wkid":4326}}&numOfResults=2&vertical=false`](https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer/findTransformations?inSR=102010&outSR=54004&extentOfInterest=%7B%22xmin%22%3A-118%2C%22ymin%22%3A33%2C%22xmax%22%3A-116%2C%22ymax%22%3A35%2C%22spatialReference%22%3A%7B%22wkid%22%3A4326%7D%7D&numOfResults=2&vertical=false&f=html)
+
+With the `extentOfInterest` parameter added, the results consist of different transformations.
+
+```json
+[
+{"geoTransforms": [{
+    "wkid": 108190,
+    "latestWkid": 108190,
+    "transformForward": false,
+    "name": "WGS_1984_(ITRF00)_To_NAD_1983"
+  }]},
+{"geoTransforms": [
+    {
+      "wkid": 8422,
+      "latestWkid": 1477,
+      "transformForward": true,
+      "name": "NAD_1983_To_HARN_CA_S"
+    },
+    {
+      "wkid": 1900,
+      "latestWkid": 1900,
+      "transformForward": true,
+      "name": "NAD_1983_HARN_To_WGS_1984_2"
+    }
+  ]}
+]
+```
+
+### Example 4
+
+This example shows the decoded URL (the actual URL must be encoded) used to find the top horizontal-vertical transformation when projecting data from GCS_ITRF_1988 (WKID = 104115) and vertical coordinate system ITRF_1988 (WKID = 115729) to GCS_ITRF_1989 (WKID = 104116) and vertical coordinate system ITRF_1989 (WKID = 115730). Notice that since `Vertical` is set to true, the result is an array of horizontal-vertical transformations (hvTransforms) rather than geoTransforms.
+
+[`https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer/findTransformations?inSR={"wkid":104115,"vcsWkid":115729}&outSR={"wkid":104116,"vcsWkid":115730}&vertical=true`](https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer/findTransformations?inSR=%7B%22wkid%22%3A+104115%2C+%22vcsWkid%22%3A+115729%7D&outSR=%7B%22wkid%22%3A+104116%2C+%22vcsWkid%22%3A+115730%7D&extentOfInterest=&numOfResults=&vertical=true&f=html)
+
+The output looks like the following:
+
+```json
+[{
+  "hvTransforms": [
+    {
+      "wkid": 1943,
+      "latestWkid": 108034,
+      "transformForward": true,
+      "name": "ITRF_1988_To_ITRF_2000_1"
+    },
+    {
+      "wkid": 1942,
+      "latestWkid": 108033,
+      "transformForward": false,
+      "name": "ITRF_1989_To_ITRF_2000_1"
+    }
+  ],
+  "srIn": {
+    "wkid": 104115,
+    "latestWkid": 8988,
+    "vcsWkid": 115729,
+    "latestVcsWkid": 115729
+  },
+  "srOut": {
+    "wkid": 104116,
+    "latestWkid": 8989,
+    "vcsWkid": 115730,
+    "latestVcsWkid": 115730
+  }
+}]
+```

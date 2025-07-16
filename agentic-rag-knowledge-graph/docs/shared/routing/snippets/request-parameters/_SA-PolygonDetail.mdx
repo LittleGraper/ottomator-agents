@@ -1,0 +1,43 @@
+{/*Shared snippet for polygon_detail OR outputPolygons*/}
+import ParamMetadata from "../../../components/param-metatdata" 
+
+<If c="requestType == 'direct'">
+{/* <p class="space-x-2"><span class="font-sm text-color-3">type:enum</span><span class="font-bold text-[#6d29cc]">default:`esriNAOutputPolygonSimplified`</span></p> */}
+
+<ParamMetadata types={[{name:"string"}]} defaultValue="esriNAOutputPolygonSimplified" />
+</If>
+
+<If c="requestType == 'job'">
+{/* <p class="space-x-2"><span class="font-sm text-color-3">type:enum</span><span class="font-bold text-[#6d29cc]">default:`Standard`</span></p> */}
+
+<ParamMetadata types={[{name:"string"}]} defaultValue="Standard" />
+</If>
+
+Specify the level of detail for the output service area polygons. The parameter can be specified using the following values:
+
+<If c="requestType == 'direct'">
+
+-   `esriNAOutputPolygonNone`—Do not create service areas. This is useful when you don't want to generate areas around facilities but want to generate service area lines.
+-   `esriNAOutputPolygonDetailed`—Create detailed service areas. Detailed service areas model the service areas more accurately and may result in islands of unreached areas in certain cases.
+-   `esriNAOutputPolygonSimplified`—Create generalized service areas. Generalized service areas are fairly accurate for most cases. However, in some cases, creating generalized service areas may cover islands of unreached areas and would be undesirable if your goal is to find such islands.
+
+If your facilities are in an urban area with a grid-like street network, the difference between generalized and detailed service areas would be minimal. However, if your facilities are in a region containing mountain and rural roads, the detailed service areas may present more accurate results than generalized service areas.
+
+<Note type={"caution"}>
+Detailed service areas are not supported when using hierarchy. Specifying `outputPolygons= esriNAOutputPolygonDetailed` and `useHierarchy= true` results in a failed request.
+<If c="publication=='rest/online'">
+Also, the service doesn't support generating detailed polygons that have defaultBreaks values greater than 15 minutes or 15 miles (24.14 kilometers).
+</If>
+</Note>
+</If>
+
+<If c="requestType == 'job'">
+
+-   `Standard`—Polygons will be created with a standard level of detail. Standard polygons are generated quickly and are fairly accurate, but quality deteriorates somewhat as you move toward the borders of the service area polygons. This is the default. 
+-   `Generalized`—Generalized polygons will be created using the hierarchy present in the network data source to produce results quickly. Generalized polygons are inferior in quality compared to standard or high-precision polygons. 
+-   `High`—Polygons will be created with the highest level of detail. Holes in the polygon may exist; they represent islands of network elements, such as streets, that couldn't be reached without exceeding the cutoff impedance or due to travel restrictions This option should be used for applications in which precise results are important. 
+
+If your analysis covers an urban area with a grid-like street network, the difference between generalized and standard polygons will be minimal. However, for mountain and rural roads, the standard and detailed polygons may present significantly more accurate results than generalized polygons.
+
+</If>
+

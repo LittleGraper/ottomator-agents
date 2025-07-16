@@ -1,0 +1,513 @@
+---
+title: "/createTask: Create Task"
+description: "The createTask operation creates a scheduled task for a specified Notebook Server installation, Insights workbook, scene service, ArcGIS Workflow Manager, administrative report, and geoprocessing service."
+slug: "create-new-scheduled-task"
+url: "/create-new-scheduled-task"
+guid: "GUID-B42E49B4-4D71-4D7C-AA2B-5BA20C289A47"
+migratedTopicMetadata:
+  FTITLE: "Create New Scheduled Task"
+  FDESCRIPTION: ""
+  FCHANGES: "Add GP scheduling"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2-*"
+  CREATED-ON: "07/08/2023 15:31:25"
+  FAUTHOR: "ssuo"
+  FSTATUS: "Released"
+  MODIFIED-ON: "02/10/2023 15:14:32"
+  VERSION: "8"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-B00C0E38-C78A-454D-B087-8C049108C5EE"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /community/users/[userName]/tasks/createTask
+  urlSegments:
+    - name: '[root]'
+      url: /root
+    - name: /community/users/[userName]/tasks/createTask
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: 'ArcGIS Enterprise 10.8.1'
+---
+
+## Example usage
+
+The following is a sample ArcGIS Online POST request for the `createTask` operation, demonstrating how to create a task for a scene service:
+
+```other
+POST /sharing/rest/community/users/NBadmin/tasks/a7ce628005004e758f3387d735b3e1ca/createTask HTTP/1.1
+Host: org.arcgis.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+title=OnceAnHour30Times&type=ExecuteSceneCook&parameters={"service_url": "https://machine.esri.com/webadaptor/rest/services/Hosted/ServiceName/SceneServer", "num_of_caching_service_instances": 2, "layer": "{}", "update_mode": "PARTIAL_UPDATE_NODES"}&itemId=029b61ca770e428d9468a2a55f40b9fb&startDate=1589428800000&endDate=1589428800000&minute=*/1&hour=*&dayOfMonth=*&month=*&dayOfWeek=?&maxOccurrences=30&f=pjson
+``` 
+
+The following is a sample ArcGIS Enterprise POST request for the `createTask` operation, demonstrating how to create a task for a scene service:
+
+```other
+POST /webadaptor/sharing/rest/community/users/NBadmin/tasks/a7ce628005004e758f3387d735b3e1ca/createTask HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+title=OnceAnHour30Times&type=ExecuteSceneCook&parameters={"service_url": "https://machine.esri.com/webadaptor/rest/services/Hosted/ServiceName/SceneServer", "num_of_caching_service_instances": 2, "layer": "{}", "update_mode": "PARTIAL_UPDATE_NODES"}&itemId=029b61ca770e428d9468a2a55f40b9fb&startDate=1589428800000&endDate=1589428800000&minute=*/1&hour=*&dayOfMonth=*&month=*&dayOfWeek=?&maxOccurrences=30&f=pjson
+```
+
+## Description
+
+The `createTask` operation creates a scheduled task for a specified Notebook Server installation, Insights workbook, scene service, ArcGIS Workflow Manager workflow, and administrative report. Once the task has been created, it can be updated using the [`update`](/edit-existing-task) operation. Additionally, scheduled tasks can be [disabled](/disable-task), [re-enabled](/enable-task), and [deleted](/delete-task).
+
+<Note type={"note"}>
+
+Support for scene services and ArcGIS Workflow Manager was added at ArcGIS Enterprise 10.9. Support for administrative reports (`ExecuteReport`) was added at ArcGIS Enterprise 11.0. Support for geoprocessing services was added at ArcGIS Enterprise 11.1.
+
+</Note>
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `title` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Title of the task.
+
+      Example:
+
+      ```markdown
+      title=OnceAMinute30Times
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `type` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The type of task that will be run on the specified item. 
+
+      Values: `ExecuteNotebook` \| `UpdateInsightsWorkbook` \| `ExecuteSceneCook` \| `ExecuteWorkflowManager` \| `ExecuteReport` \| `GPService`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `taskURL` 
+
+      (Optional; required for geoprocessing service)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The URL of the task of an asynchronous geoprocessing service on any of the federated servers of your portal.
+
+      Example: `https://machine.domain.com/webadaptor/rest/services/ServiceName/GPServer/TaskName` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `parameters` 
+
+      (Optional; required for scene services, administrative reports, and geoprocessing service)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object of additional parameters that will be added to the task run request. This parameter is required for scene services.
+
+      Syntax example for a scene service (formatted for readability):
+
+      ```other
+      {
+        "service_url": <scene service URL>,
+        "num_of_caching_service_instances": 2, //2 instances are required
+        "layer": "{<list of scene layers to cook>}", //The default is all layers
+        "update_mode": "PARTIAL_UPDATE_NODES" //RECREATE_ALL_NODES (Re-cook full scene cache) | 
+                        PARTIAL_UPDATE_NODES //(Update scene cache from latest edits to the scene service) | 
+                        PARTIAL_UPDATE_ATTRIBUTES //(Update only attributes and not geometries) 
+      }
+      ```
+
+      Scene service example:
+
+      ```other
+      parameters={"service_url": https://machine.esri.com/wedadaptor/rest/services/Hosted/ServiceName/SceneServer, 
+                  "num_of_caching_service_instances": 2, "layer": "{}", "update_mode":"PARTIAL_UPDATE_NODES"}
+      ``` 
+
+      Administrative reports example:
+
+      ```markdown
+      parameters={​​"reportType":"org","reportSubType":"activity","timeDuration":"daily", "title":"MyTitle"}​​
+      ``` 
+
+      Geoprocessing service example (formatted for readability):
+
+      ```other
+      {
+          "in_features": {
+              "url": "https://machine.domain.com/webadaptor/rest/services/Hosted/ServiceName/FeatureServer/0"
+          },
+          "buffer_distance_or_field": {
+              "distance": 5,
+              "units": "esriKilometers"
+          },
+          "esri_out_feature_service_name": {
+              "serviceProperties": {
+                  "serviceUrl": 
+                  "https://machine.domain.com/server/rest/services/Hosted/OutputFeatureServiceName/FeatureServer"
+              },
+              "itemProperties": {
+                  "overwrite": true,
+                  "newFeatureServiceOnOverwriteFail": true
+              }
+          }
+      }
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `itemId` 
+
+      (Required; optional for administrative reports)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Item ID of the item the scheduled task will be run on.
+
+      Example:
+
+      ```markdown
+      itemId=029b61ca770e428d9468a2a55f40b9fb
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `startDate` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The date, in Epoch milliseconds, the scheduled task will begin running.
+
+      Example:
+
+      ```markdown
+      startDate=1589428800000
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `endDate` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The date, in Epoch milliseconds, the scheduled task will stop running.
+
+      Example:
+
+      ```markdown
+      endDate=1589428800000
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `minute` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A valid CRON expression (`,` `-` `*` `/`) that specifies the minute value for the task's schedule.
+
+      Example:
+
+      ```other
+      minute=*/1
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `hour` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A valid CRON expression (`,` `-` `*` `/`) that specifies the hour value for the task's schedule. The `hour`, `dayOfWeek`, and `dayOfMonth` parameters must be adjusted for UTC.
+
+      Example:
+
+      ```other
+      hour=3
+      hour=*
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `dayOfMonth` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A valid CRON expression (`,` `-` `*` `?` `/` `L` `W` `C`) that specifies the day of the month for the task's schedule. Adjust the \
+      `dayOfMonth` value to UTC hours. For example, 8:00 p.m. PDT on the fourth day of the month would be 3:00 a.m. UTC on the fifth day \
+      of the month. Values for this parameter can be 1 through 31, representing a day of the month. 
+
+      Example:
+
+      ```other
+      dayOfMonth=5
+      dayOfMonth=*
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `month` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A valid CRON expression (`,` `-` `*` `/`) that specifies the month for the task's schedule. To represent a specific month, use values 1 through 12 (January to December).
+
+      Examples:
+
+      ```other
+      //Any month
+      month=*
+
+      //A specific month (August)
+      month=8
+
+      //Every two months
+      month=*/2
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `dayOfWeek` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A valid CRON expression (`,` `-` `*` `?` `/` `L` `C` `#`) that specifies the day of the week for the task's schedule. Adjust the `dayOfWeek` value to UTC hours. For example, Monday, 8:00 p.m. PDT would be Tuesday, 3:00 a.m. UTC. Values for this parameter can be 1 through 7, representing Sunday through Saturday.
+
+      Example:
+
+      ```other
+      dayOfWeek=2
+      dayOfWeek=?
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `maxOccurrences` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum number of times this task will run.
+
+      Example:
+
+      ```markdown
+      maxOccurrences=30
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` \| `json` \| `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Additional example usage 1
+
+The following is a sample ArcGIS Enterprise POST request for `createTask`, demonstrating creating a task for a notebook:
+
+```other
+POST /webadaptor/sharing/rest/community/users/NBadmin/tasks/a7ce628005004e758f3387d735b3e1ca/createTask HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+title=OnceAMinute30Times&type=ExecuteNotebook&parameters=&itemId=029b61ca770e428d9468a2a55f40b9fb&startDate=1589428800000&endDate=1589428800000&minute=*/1&hour=*&dayOfMonth=*&month=*&dayOfWeek=?&maxOccurrences=30&f=pjson
+```
+
+## Additional example usage 2
+
+The following is a sample ArcGIS Enterprise POST request for `createTask`, demonstrating creating a task for a geoprocessing service:
+
+Schedule a pairwise buffer geoprocessing service with an overwritten output feature service. You can have a customized `boundary` for your request. You need to provide a valid administrator token.
+
+```other
+POST /webadaptor/sharing/rest/community/users/GPadmin/createTask HTTP/2
+Host: machine.domain.com
+Content-Type:	multipart/form-data; boundary=---------------------------4137116237415213046158097313
+Content-Length: 2490
+
+-----------------------------4137116237415213046158097313
+Content-Disposition: form-data; name="title"
+
+TestGPServiceTask
+-----------------------------4137116237415213046158097313
+Content-Disposition: form-data; name="type"
+
+GPService
+-----------------------------4137116237415213046158097313
+Content-Disposition: form-data; name="taskURL"
+
+https://machine.domain.com/webadaptor/rest/services/Level1_Async/GPServer/Pairwise%20Buffer
+-----------------------------4137116237415213046158097313
+Content-Disposition: form-data; name="parameters"
+
+{
+    "in_features": {
+        "url": "https://machine.domain.com/webadaptor/rest/services/Hosted/ServiceName/FeatureServer/0"
+    },
+    "buffer_distance_or_field": {
+        "distance": 5,
+        "units": "esriKilometers"
+    },
+    "esri_out_feature_service_name": {
+        "serviceProperties": {
+            "serviceUrl": "https://machine.domain.com/server/rest/services/Hosted/OutputFeatureServiceName/FeatureServer"
+        },
+        "itemProperties": {
+            "overwrite": true,
+            "newFeatureServiceOnOverwriteFail": true
+        }
+    }
+}
+-----------------------------4137116237415213046158097313
+Content-Disposition: form-data; name="itemId"
+
+9512500fb1ac443baf943f418400b661
+-----------------------------4137116237415213046158097313
+Content-Disposition: form-data; name="startDate"
+
+1691451979521
+-----------------------------4137116237415213046158097313
+Content-Disposition: form-data; name="endDate"
+
+-----------------------------4137116237415213046158097313
+Content-Disposition: form-data; name="minute"
+
+*/10
+-----------------------------4137116237415213046158097313
+Content-Disposition: form-data; name="hour"
+
+*
+-----------------------------4137116237415213046158097313
+Content-Disposition: form-data; name="dayOfMonth"
+
+*
+-----------------------------4137116237415213046158097313
+Content-Disposition: form-data; name="month"
+
+*
+-----------------------------4137116237415213046158097313
+Content-Disposition: form-data; name="dayOfWeek"
+
+?
+-----------------------------4137116237415213046158097313
+Content-Disposition: form-data; name="maxOccurrences"
+
+5
+-----------------------------4137116237415213046158097313
+Content-Disposition: form-data; name="f"
+
+json
+-----------------------------4137116237415213046158097313
+Content-Disposition: form-data; name="token"
+
+j18phrBxUy4tX_JAIGFEDqCsVkNsPZfwt-1X2ehnRqcihHaJ54Lbt97Y6pOn83jD6ytI8x9tMkqod3uQ6HYqvIqwUTEdKkkNQiEM2S_ehwGuUuIiQkmKbo6KdnUeuVqKmxaWdAXCy2nftfxKhW47rd_jAccwT8bQyls5p8f14Nts5I5_4fS2URnQ70H5W83O
+-----------------------------4137116237415213046158097313--
+``` 
+
+## JSON Response example
+
+```other
+{
+  "success": true,
+  "taskId": "ddea837537ef435c9496c5fc22799973"
+}
+```
+
+ 

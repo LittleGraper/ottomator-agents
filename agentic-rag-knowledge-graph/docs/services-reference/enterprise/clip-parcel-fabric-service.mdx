@@ -1,0 +1,551 @@
+---
+title: "Clip"
+description: "The clip operation uses new parcels to overlay and clip existing parcels to create remainder parcels."
+slug: "clip-parcel-fabric-service"
+url: "/clip-parcel-fabric-service"
+guid: "GUID-9161420C-67F0-4546-9DE2-FD53FEE37016"
+migratedTopicMetadata:
+  FTITLE: "Clip-parcel-fabric-service"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "14/08/2023 10:34:10"
+  FAUTHOR: "cleslie"
+  FSTATUS: "Released"
+  MODIFIED-ON: "29/09/2023 11:51:56"
+  VERSION: "6"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-0D0200ED-D466-4011-BB61-68B2B5E635B7"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/ParcelFabricServer/clip
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/ParcelFabricServer/clip
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.8'
+  requiredCapability: ArcGIS Advanced Editing
+---
+
+## Description
+
+The `clip` operation uses new parcels to overlay and clip existing parcels to create remainder parcels. The areas of the parent parcels that are covered by the new parcels are removed or clipped and retired as historic. The remaining areas are the remainder parcels. 
+
+When clipping parcels that are in a different parcel type, parcel history will not be tracked.
+
+[Learn more about clipping parcels](https://pro.arcgis.com/en/pro-app/latest/help/data/parcel-editing/clipparcels.htm)
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `gdbVersion` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The name of the geodatabase version (the default is the `DEFAULT` version).
+
+      Syntax
+
+      ```javascript
+      gdbVersion=<version>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sessionId` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The token (GUID) used to lock the version. If the calling client is editing a named version, the `sessionId` value is required. If the specified version is currently locked by another session, the request will fail if the `sessionId` value is not provided or does not match the `sessionId` value that holds the exclusive lock. If the client is editing the default version, the `sessionId` value is not required.
+
+      Syntax
+
+      ```javascript
+      sessionId=<guid>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `parentParcels` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      A list of the parent parcels that will be clipped.
+
+      Syntax
+
+      ```javascript
+      parentParcels=[{"id":"<parcelguid>","layerId":"<layerID>"}, {...}]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      record
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The unique identifier (GUID) of the record that will be used for the clip.
+
+      Syntax
+
+      ```javascript
+      record=<guid>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `clippingParcels` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The parcels that will overlay and clip the parent parcels. 
+      If the `clippingParcels` values are not the same parcel type as the `parentParcels` values, parcel history will not be tracked.
+
+      Use either the `clippingParcels` parameter or the `clippingGeometry` parameter to perform the clip. One of these parameters is required.
+
+      Syntax
+
+      ```javascript
+      clippingParcels=[{"id":"<parcelguid>","layerId":"<layerID>"},{...}]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `clippingGeometry` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      A list of the geometries that will overlay and clip the parent parcels. Use this list as an alternative input to the `clippingParcels` parameter. If the `clippingParcels` parameter is populated, this parameter is not used.
+
+      Syntax
+
+      ```javascript
+      clippingGeometry={<geometry>,<spatialreference>}
+      ```
+  
+      Example:
+
+      ```javascript
+      clippingGeometry={
+      "hasZ":true,
+      "rings":[[[156141.236872494221,173508.911657653749,0],[156001.237480577081,173508.576356485486,0],[156001.149554245174,173528.576316490769,0],[156141.148946162313,173528.911289572716,0],[156141.236872494221,173508.911657653749,0]]],
+      "spatialReference":{"wkt":"PROJCS[\"User_Defined_Transverse_Mercator\",GEOGCS[\"GCS_User_Defined\",DATUM[\"D_User_Defined\",SPHEROID[\"User_Defined_Spheroid\",6378285.48,298.2641653866821]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"False_Easting\",262000.0009333333],PARAMETER[\"False_Northing\",0.0],PARAMETER[\"Central_Meridian\",-87.55],PARAMETER[\"Scale_Factor\",1.0],PARAMETER[\"Latitude_Of_Origin\",43.26666666666667],UNIT[\"Foot_US\",0.3048006096012192]]"}
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `clipOption` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      Specifies the type of clip that will be performed.
+
+      -   `PreserveArea`—The areas that intersect will be preserved and the remainder areas will be discarded.
+      -   `DiscardArea`—The areas that intersect will be discarded and the remainder areas will be preserved.
+      -   `PreserveBothAreasSplit`—Both the intersecting and the remainder areas will be preserved.
+
+      Syntax
+
+      ```javascript
+      clipOption=<string>
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+  <StyledTableCell cellStyle="markdown">
+
+    `defaultAreaUnit` 
+
+    (Required)
+
+  </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The default area units that will be used when calculating the stated areas of the clipped parcels. The stated area of the clipped parcels will be calculated if the stated areas exist on the parent parcels being clipped.
+
+      Syntax
+
+      ```javascript
+      defaultAreaUnit=<area unit code>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.1.
+      
+      Specifies whether the request will be processed as an asynchronous job and a URL that points to a location displaying the status of the job will be returned. See the topic regarding [asynchronous](HTTP://RESOURCES.ARCGIS.COM/EN/HELP/ARCGIS-REST-API/02R3/02R3000000RT000000.HTM) usage for more information. The default is `false`.
+
+      Values: `true` | `false` 
+
+      Syntax
+
+      ```javascript
+      async=true|false
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the output format of the response. The default response format is `html`.
+
+      Values: `html` | `json`  
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+This example shows the steps for clipping parcels using the `clip` operation. 
+
+<Note type={"note"}>
+
+  The `sessionId` parameter value must be the same for starting the edit session, performing the edit operation, and stopping the edit session.
+
+</Note>
+
+1.  [Start a service session](/start-reading) on the version.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/VersionManagementServer/versions/E4DAED9D-C859-489B-9053-767A45F1D97C/startReading
+    f=json
+    sessionId={3773a35a-ed21-4e80-a5b1-c086c229623d}
+    ```
+     
+2.  [Start an edit session](/start-editing) on the version.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/VersionManagementServer/versions/E4DAED9D-C859-489B-9053-767A45F1D97C/startEditing
+    f=json
+    sessionId={3773a35a-ed21-4e80-a5b1-c086c229623d}
+    ```
+     
+3.  Clip two parcels using a single parcel that overlays the parcels. Create remainder parcels.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/ParcelFabricServer/clip
+    f=json
+    gdbVersion=admin.Version1
+    sessionId={3773a35a-ed21-4e80-a5b1-c086c229623d}
+    parentParcels=[{"id":"{A845C600-1979-48C1-B664-56C483B6575A}","layerId":"13"},{"id":"{64AD04A0-29AD-445D-A808-33CEB68C4A22}","layerId":"13"}]
+    record={988F2526-D5A0-473E-BD90-363E6E345524}
+    clippingParcels=[{"id":"{9C375767-8DCA-49D5-A3FF-D214612B3775}","layerId":"13"}]
+    clipOption=DiscardArea
+    desfaultAreaUnit=109405
+    async=false
+    ```
+     
+4.  If edits are complete, [stop the edit session](/stop-editing).
+
+5.  [Stop](/stop-reading) and release the service session. 
+
+## JSON Response syntax
+
+The following response is returned when `async` is `false`:
+
+```other
+{
+  "exceededTransferLimit : <true | false>,
+  "moment" : <datetime>,
+  "serviceEdits": {  // only if transfer limit is not exceeded
+    "editedFeatures": {
+      "adds": {
+        "attributes": {}, 
+        "geometry": {}
+      },
+      {
+        "spatialReference": {<spatial reference>}
+      }
+    },
+    "updates": {
+      "attributes": {},
+      "geometry": {}
+    },
+    "id": <layerID>,
+  },
+  "success": <true | false>,
+  "error": {  // only if success is false
+    "extendedCode": <HRESULT>,
+    "message": <error message>,
+    "details": [ <detail> ]
+  }
+}
+``` 
+
+The following response is returned when `async` is `true`:
+
+```other
+{
+		"statusUrl": <url>
+}
+```
+
+## JSON Response example
+
+The following is a response example when `async` is `false`:
+
+```other
+{
+  "moment": 1570488938750,
+  "exceededTransferLimit": false,
+  "serviceEdits": [
+    {
+      "id": 13,
+      "editedFeatures": {
+        "spatialReference": {
+          "wkid": 2913,
+          "latestWkid": 2913,
+          "xyTolerance": 0.0032808398950131233,
+          "zTolerance": 0.001,
+          "mTolerance": 0.001,
+          "falseX": -111333600,
+          "falseY": -98152500,
+          "xyUnits": 3048,
+          "falseZ": -100000,
+          "zUnits": 10000,
+          "falseM": -100000,
+          "mUnits": 10000
+        },
+        "adds": [
+          {
+            "attributes": {
+              "OBJECTID": 264,
+              "Name": null,
+              "ParcelSubtype": null,
+              "CreatedByRecord": "{00000000-0000-0000-0000-000000000000}",
+              "RetiredByRecord": null,
+              "StatedArea": null,
+              "StatedAreaUnit": null,
+              "CalculatedArea": null,
+              "MiscloseRatio": null,
+              "MiscloseDistance": null,
+              "IsSeed": 0,
+              "created_user": "admin",
+              "create_date": 1570489024000,
+              "last_edited_user": "admin",
+              "last_edited_date": 1570489024000,
+              "GlobalID": "{F8194632-1A07-4114-A068-6641CAE52EB5}",
+              "Shape__Area": 3690.2913672426389,
+              "Shape__Length": 273.513193995743791
+            },
+            "geometry": {
+              "hasZ": true,
+              "rings": [
+                [
+                  [7500923.92125983536, 447202.514763772488, 0],
+                  [7500920.03641732037, 447102.832349076867, 0],
+                  [7500883.07513123751, 447104.270341202617, 0],
+                  [7500886.96161417663, 447203.972112864256, 0],
+                  [7500923.92125983536, 447202.514763772488, 0]
+                ]
+              ]
+            }
+          },
+          {
+            "attributes": {
+              "OBJECTID": 265,
+              "Name": null,
+              "ParcelSubtype": null,
+              "CreatedByRecord": "{00000000-0000-0000-0000-000000000000}",
+              "RetiredByRecord": null,
+              "StatedArea": null,
+              "StatedAreaUnit": null,
+              "CalculatedArea": null,
+              "MiscloseRatio": null,
+              "MiscloseDistance": null,
+              "IsSeed": 0,
+              "created_user": "admin",
+              "create_date": 1570489024000,
+              "last_edited_user": "admin",
+              "last_edited_date": 1570489024000,
+              "GlobalID": "{BE5CF128-5D08-4575-9DCE-BD5FAE18B457}",
+              "Shape__Area": 3691.00674443200569,
+              "Shape__Length": 273.551980772549712},
+              "geometry": {
+                "hasZ": true,
+                "rings": [
+                  [
+                    [7500886.96161417663, 447203.972112864256, 0],
+                    [7500883.07513123751, 447104.270341202617, 0],
+                    [7500846.11417323351, 447105.708333328366, 0],
+                    [7500850.00164042413, 447205.429461941123, 0],
+                    [7500868.94488188624, 447204.682414695621, 0],
+                    [7500886.96161417663, 447203.972112864256, 0]
+                  ]
+                ]
+              }
+            }
+          }
+        ],
+        "updates": [
+          {
+            "attributes": {
+              "OBJECTID": 244,
+              "Name": "244",
+              "ParcelSubtype": 1,
+              "CreatedByRecord": "{78BEE123-4A76-4B6C-9B12-C30786E46B48}",
+              "RetiredByRecord": null,
+              "StatedArea": null,
+              "StatedAreaUnit": null,
+              "CalculatedArea": null,
+              "MiscloseRatio": 100000.0,
+              "MiscloseDistance": 0.0,
+              "IsSeed": 0,
+              "created_user": "GIS",
+              "create_date": 1570125823000,
+              "last_edited_user": "GIS",
+              "last_edited_date": 1570125949000,
+              "GlobalID": "{A845C600-1979-48C1-B664-56C483B6575A}",
+              "RecName": "SP13-28",
+              "Shape__Area": 4060.17413585174381,
+              "Shape__Length": 293.51293326490304},
+              "geometry": {
+                "hasZ": true,
+                "rings": [
+                  [
+                    [7500886.96161417663, 447203.972112864256, 0],
+                    [7500923.92125983536, 447202.514763772488, 0],
+                    [7500919.64698162675, 447092.840223103762, 0],
+                    [7500882.68569554389, 447094.277887135744, 0],
+                    [7500886.96161417663, 447203.972112864256, 0]
+                  ]
+                ]
+              }
+            }
+          },
+          {
+            "attributes": {
+              "OBJECTID": 244,
+              "Name": "244",
+              "ParcelSubtype": 1,
+              "CreatedByRecord": "{78BEE123-4A76-4B6C-9B12-C30786E46B48}",
+              "RetiredByRecord": "{00000000-0000-0000-0000-000000000000}",
+              "StatedArea": null,
+              "StatedAreaUnit": null,
+              "CalculatedArea": null,
+              "MiscloseRatio": 100000.0,
+              "MiscloseDistance": 0.0,
+              "IsSeed": 0,
+              "created_user": "GIS",
+              "create_date": 1570125823000,
+              "last_edited_user": "admin",
+              "last_edited_date": 1570489024000,
+              "GlobalID": "{A845C600-1979-48C1-B664-56C483B6575A}",
+              "RecName": "SP13-28",
+              "Shape__Area": 4060.17413585174381,
+              "Shape__Length": 293.51293326490304},
+              "geometry": {
+                "hasZ": true,
+                "rings":[
+                  [
+                    [7500886.96161417663, 447203.972112864256, 0],
+                    [7500923.92125983536, 447202.514763772488, 0],
+                    [7500919.64698162675, 447092.840223103762, 0],
+                    [7500882.68569554389, 447094.277887135744, 0],
+                    [7500886.96161417663, 447203.972112864256, 0]
+                  ]
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "success": true
+}
+```
+
+ 

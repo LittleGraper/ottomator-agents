@@ -1,0 +1,492 @@
+---
+title: "Create Site"
+description: "This operation initializes and configures an ArcGIS Enterprise portal."
+slug: "create-site"
+url: "/create-site"
+guid: "GUID-7BAEE310-203E-44BF-A19C-23C38104730B"
+migratedTopicMetadata:
+  FTITLE: "Create Site"
+  FDESCRIPTION: ""
+  FCHANGES: "Style changes"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1- *"
+  CREATED-ON: "18/02/2023 16:11:52"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "27/09/2023 08:50:19"
+  VERSION: "9"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-CC0A9EF8-384C-4010-9A67-EDC0B871C6B3"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /createNewSite
+  urlSegments:
+    - name: <root>
+      url: /portal-administration-root
+    - name: /createNewSite
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.2'
+  requiredCapabilities:
+    - name: Access allowed only with the default administrator role
+      url: /privileges-for-portal-admin-api
+---
+
+## Description
+
+The `createNewSite` operation initializes and configures an ArcGIS Enterprise portal for use. It must be the first operation invoked after installation. Creating a new site involves the following:
+
+- Creating the initial administrator account
+- Creating a database administrator account (which is same as the initial administrator account)
+- Creating token shared keys
+- Registering directories
+
+This operation is time consuming, as the database is initialized and populated with default templates and content. If the database directory is not empty, the operation attempts to migrate the database to the current version while keeping its data intact. At the end of the operation, the web server that hosts the API is automatically restarted.
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `username` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The initial administrator account name.
+
+      ```markdown label=Example
+      cadmin
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `password` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The password for the initial administrator account.
+
+      ```markdown label=Example
+      admin.secret
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `fullname` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The full name for the initial administrator account.
+
+      ```markdown label=Example
+      Administrator
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `email` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The account email address.
+
+      ```markdown label=Example
+      admin@email.com
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `description` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      An optional description for the account.
+
+      ```markdown label=Example
+      The initial admin account
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `securityQuestionIdx` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The index of the secret question to retrieve a forgotten password. [The secret questions and their indexes](/create-site#secret-questions-and-indexes) are listed below.
+
+      ```markdown label=Example
+      1
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `securityQuestionAns` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The answer to the secret question specified in the `securityQuestionIdx` parameter.
+
+      ```markdown label=Example
+      Mumbai
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `contentStore` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The JSON string including the path to the location of the site's content.
+
+      ```markdown label=Example
+      {
+        "type": "fileStore",
+        "provider": "FileSystem",
+        "connectionString": "C:/arcgisportal/content"
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `file` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The portal license file. You obtain the portal license file (a multipart POST file that contains information regarding your user types, apps, and app bundles) from My Esri. For more information, see [Obtain a portal license file](https://enterprise.arcgis.com/en/portal/latest/install/windows/obtain-portal-license.htm).
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `userLicenseTypeId` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The user type for the initial administrator account. The values listed below are the user types that are compatible with the Administrator role. For more information about roles and user types, see [User types, roles, and privileges](https://enterprise.arcgis.com/en/portal/latest/administer/windows/roles.htm).
+
+      <Note type="legacy">
+
+      At ArcGIS Enterprise 11.4, the `GISProfessionalBasicUT` user type has been merged with the `creatorUT` user type; this change provides users assigned the `creatorUT` user type access to the applications previously included with `GISProfessionalBasicUT`.
+
+      </Note>
+
+      Values: `creatorUT` | `GISProfessionalStdUT` | `GISProfessionalAdvUT`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `enableDebug` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at ArcGIS Enterprise 11.3. This specifies the log level when creating a portal. If `true`, the log level is set to `DEBUG`, which can aid in troubleshooting issues related running the `createSite` operation. If `false`, the log level is set to `VERBOSE`. The default value is `false`.
+      
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The formatting parameter. The default format is `html`. 
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Secret questions and indexes
+
+The `securityQuestionIdx` parameter defines a security question that is used when retrieving a forgotten password. Listed below are the security questions and their associated index numbers:
+
+<StyledTable headers={"Index number,Security question"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      1
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      What city were you born in?
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      2
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      What was your high school mascot?
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      3
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      What is your mother's maiden name?
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      4
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      What was the make of your first car?
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      5
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      What high school did you go to?
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      6
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      What is the last name of your best friend?
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      7
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      What is the middle name of your youngest sibling?
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      8
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      What is the name of the street on which you grew up?
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      9
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      What is the name of your favorite fictional character?
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      10
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      What is the name of your favorite pet?
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      11
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      What is the name of your favorite restaurant?
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      12
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      What is the title of your favorite book?
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      13
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      What is your dream job?
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      14
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Where did you go on your first date?
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+The following is a sample POST request for the `createNewSite` operation:
+
+```other
+POST /webadaptor/portaladmin/createNewSite HTTP/1.1
+Host: machine.domain.com
+Content-Type: multipart/form-data; boundary=----boundary
+Content-Length: []
+
+------boundary
+Content-Disposition: form-data; name="username"
+
+cadmin
+------boundary
+Content-Disposition: form-data; name="password"
+
+admin.secret
+------boundary
+Content-Disposition: form-data; name="fullname"
+
+Administrator
+------boundary
+Content-Disposition: form-data; name="email"
+
+admin@email.com
+------boundary
+Content-Disposition: form-data; name="description"
+
+The initial admin account
+------boundary
+Content-Disposition: form-data; name="securityQuestionIdx"
+
+1
+------boundary
+Content-Disposition: form-data; name="securityQuestionAns"
+
+Mumbai
+------boundary
+Content-Disposition: form-data; name="contentStore"
+
+{"type": "fileStore","provider": "FileSystem","connectionString": "C:/arcgisportal/content"}
+------boundary
+Content-Disposition: form-data; name="file"; filename=""
+Content-Type: application/octet-stream
+
+portal_license.json
+------boundary
+Content-Disposition: form-data; name="userLicenseTypeId"
+
+creatorUT
+------boundary
+Content-Disposition: form-data; name="f"
+
+pjson
+------boundary
+
+```
+
+## JSON Response example
+
+```other
+{
+  "status": "success",
+  "recheckAfterSecs": 10
+}
+```

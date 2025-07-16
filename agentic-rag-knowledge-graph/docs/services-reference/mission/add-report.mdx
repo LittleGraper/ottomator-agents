@@ -1,0 +1,790 @@
+---
+title: "Add Report"
+description: "The add reports operation allows users to add custom report types to a mission."
+slug: "add-report"
+url: "/add-report"
+guid: "GUID-AC0408DC-9963-42F4-B18B-F679C6E131A7"
+migratedTopicMetadata:
+  FTITLE: "Add Report"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1 "
+  CREATED-ON: "20/12/2022 10:42:55"
+  FAUTHOR: "shefner"
+  FSTATUS: "Draft"
+  MODIFIED-ON: "20/12/2022 10:45:14"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-1CFEB863-395E-45A5-A060-F539C5F5ED4D"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /add
+  urlSegments:
+    - name: <reports-url>
+      url: /reports
+    - name: /add
+  methods:
+    - post
+  sslOnly: 'yes'
+  versionIntroduced: '10.9'
+  requiredCapability: Administrator
+---
+
+## Description
+
+This operation adds a report to the associated mission. A mission report is used by clients to submit relevant information to the mission and is represented in the portal by a Mission Report portal item and an associated hosted feature layer. The feature layer can be used by clients to submit new reports and to edit and view existing reports..
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`title` 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+String. The title of the report.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`source` 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Indicates the `source`  submitting the reports. Set to `user`  if a user will be submitting these reports, set to `sensor`  if sensors will be used to submit reports instead.
+
+If `source`  is `sensor` `sensorInfo`  is required.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`description` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+String. A description of the report.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`tags` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A comma-separated list of strings. Used to add tags to the report.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`questions` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+JSON Array. If an empty array is passed, the request is rejected. Used to represent the desired questions and their fields. Question types are based on Survey123 question type fields. See below for further details.
+
+Available question types: Single Line Text, Single Choice, Number, Multiline Text, Dropdown, Button and Date/Time.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`displayField` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+String. The name of the report feature layer's display field. Normally this is the field name of one of the report questions. If absent, the report feature layer's display field will be the first question's field name.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`drawingInfo` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+JSON Object. Defines the report feature layer's drawing info, including a feature renderer.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`locale` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+String. The locale used to generate the report. Must be a valid IETF BCP 47 language tag. Defaults to `en` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`shareAsTemplate` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Boolean. Shares the report as a template.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`hasAttachments` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Boolean. Enables attachments on the reports layer. Enable this to allow clients to upload images when submitting reports.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sensorInfo` 
+
+(Required when `source`  is `sensor)` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+JSON Object. Defines the sensor that will generate the report. The sensor integration must be set to `enabled` , must contain a valid `sensorId`  and at least one valid `triggers`  property.
+
+Example:
+
+Example sensorInfo parameter:
+
+```javascript
+{
+	  sensorId: "Flic2",
+	  triggers: ["double-press","single-press"]
+	}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+onReceiveAction
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+JSON Object. Defines the client action when a report is submitted.
+
+Example:
+
+```javascript
+{
+		  "arcgisMissionManager": {
+			"map": ["zoomToFeature", "showFeaturePopup", "animateFeatureSymbol"],
+			"device": ["alert.mp4"] 
+		  },
+		  "arcgisMissionResponder": {
+			"map": ["zoomToFeature"],
+			"device": ["vibrate-3", "notification"]
+		  }
+		}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` . 
+
+Values: `html`  \| `json`  \| `pjson` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Question Properties
+
+Users answer questions while submitting reports. Use the `questions`  parameter to define questions for a new report. Each question has the properties in the following table.
+
+<StyledTable headers={"Attribute,Value(s)"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`id` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+String. The desired `id`  of the question.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`position` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Integer. The desired position within the questions fields you wish this question to appear.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`fieldName` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Required. String. The desired field name for the question in the feature layer.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`name` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+String. The name of the question.
+
+Example: 
+
+```javascript
+...
+"name": "damage_level_dropdown",
+"type": "esriQuestionTypeDropdown",
+"label": "Pick one from this dropdown list",
+...
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`type` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Required. String. The question type.
+
+Available types: `esriQuestionTypeText` , `esriQuestionTypeTextArea` , `esriQuestionTypeSingleChoice` , `esriQuestionTypeDropdown` , or `esriQuestionTypeDateTime` .
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`label` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+String. A user facing label for the question.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`description` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+String. A description of the question.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`isRequired` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Boolean. Determines whether the question requires an answer when submitting a report.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`defaultValue` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The default value of the question when a user chooses to submit the report. The type of value provided should match the question's answer.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`choices` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Required when `type`  is `esriQuestionTypeSingleChoice`  or `esriQuestionTypeDropdown` 
+
+Contains a JSON Object `items`  that contains an array of `label` , `value` , and `position` .
+
+Example: 
+
+```javascript
+"choices": {
+            "items": [
+                {
+                    "label": "This is option 1",
+                    "value": "single_choice_1",
+                    "position": 0
+                },
+                {
+                    "label": "This is option 2",
+                    "value": "single_choice_2",
+                    "position": 1
+                }
+            ]
+        }
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example User Report Request
+
+Below is a sample request URL for the `/addReport`  operation:
+
+```javascript
+POST /webadaptor/rest/services/<mission_id>/MissionServer/addReport HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+title=Damage Report
+description=Use this report to document damage in the area
+tags=Damage Report, Alpha, Bravo, Mission
+questions=[
+        {
+            "isRequired": true,
+            "fieldName": "damage_description",
+            "defaultValue": "",
+            "name": "multi_line_text",
+            "description": "Multiline Text Field used to describe the damage",
+            "id": "field_2",
+            "position": 1,
+            "label": "Describe the damage",
+            "type": "esriQuestionTypeTextArea"
+        },
+        {
+            "isRequired": false,
+            "fieldName": "damage_level",
+            "defaultValue": "single_choice_1",
+            "name": "single_choice",
+            "description": "Select a level of damage.",
+            "id": "field_3",
+            "position": 2,
+            "label": "Label for selecting a level of damage",
+            "type": "esriQuestionTypeSingleChoice",
+            "choices": {"items": [
+                {
+                    "label": "This is option 1",
+                    "position": 0,
+                    "value": "single_choice_1"
+                },
+                {
+                    "label": "This is option 2",
+                    "position": 1,
+                    "value": "single_choice_2"
+                }
+            ]}
+        },
+        {
+            "isRequired": false,
+            "fieldName": "date_time_occured",
+            "name": "date_time",
+            "description": "Select a Date and Time when the damage approx. occured",
+            "id": "field_4",
+            "position": 3,
+            "label": "Date and Time damage occured",
+            "type": "esriQuestionTypeDateTime"
+        },
+        {
+            "isRequired": false,
+            "fieldName": "team_reported",
+            "defaultValue": "",
+            "name": "dropdown",
+            "description": "Select a team that reported the damage",
+            "id": "field_5",
+            "position": 4,
+            "label": "Reported by team:",
+            "type": "esriQuestionTypeDropdown",
+            "choices": {"items": [
+                {
+                    "label": "Team Alpha",
+                    "position": 0,
+                    "value": "dropdown_choice_1"
+                },
+                {
+                    "label": "Team Bravo",
+                    "position": 1,
+                    "value": "dropdown_choice_2"
+                }
+            ]}
+        }
+    ]
+displayField=damage_level
+drawingInfo={"renderer":{"type":"simple","symbol":{"color":[0,0,128,128],"size":15,"angle":0,"xoffset":0,"yoffset":0,"type":"esriSMS","style":"esriSMSCircle","outline":{"color":[0,0,128,255],"width":0.99975,"type":"esriSLS","style":"esriSLSSolid"}}}}
+locale=en
+hasAttachments=true
+shareAsTemplate=true
+      
+```
+
+ 
+
+## Example Sensor Report Request
+
+Below is a sample request URL for the `reports/add`  operation:
+
+```javascript
+POST /webadaptor/rest/services/<mission_id>/MissionServer/addReport HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+title=Sensor Report
+description=Use this for creating reports with sensors
+tags=Sensor Report, Alpha, Bravo, Mission
+questions=[
+    {
+        "id": "device_id",
+        "position": 0,
+        "fieldName": "single_line_text_1",
+        "name": "single_line_text",
+        "type": "esriQuestionTypeText",
+        "label": "Device Id",
+        "description": "",
+        "isRequired": true,
+        "defaultValue": "{deviceId}",
+        "validation": {
+            "valueRange": {
+                "isEnabled": true,
+                "min": 0,
+                "max": 200
+            }
+        }
+    },
+    {
+        "id": "location",
+        "position": 1,
+        "fieldName": "single_line_text_2",
+        "name": "single_line_text",
+        "type": "esriQuestionTypeText",
+        "label": "Location",
+        "description": "",
+        "isRequired": true,
+        "defaultValue": "{XY}",
+        "validation": {
+            "valueRange": {
+                "isEnabled": true,
+                "min": 0,
+                "max": 200
+            }
+        }
+    },
+    {
+        "id": "default_message",
+        "position": 2,
+        "fieldName": "single_line_text_3",
+        "name": "single_line_text",
+        "type": "esriQuestionTypeText",
+        "label": "Message",
+        "description": "",
+        "isRequired": true,
+        "defaultValue": "A sensor report has been submitted",
+        "validation": {
+            "valueRange": {
+                "isEnabled": true,
+                "min": 0,
+                "max": 200
+            }
+        }
+    },
+    {
+        "id": "user_fullname",
+        "position": 3,
+        "fieldName": "single_line_text_4",
+        "name": "single_line_text",
+        "type": "esriQuestionTypeText",
+        "label": "Name of Sender",
+        "description": "",
+        "isRequired": true,
+        "defaultValue": "{userFullname}",
+        "validation": {
+            "valueRange": {
+                "isEnabled": true,
+                "min": 0,
+                "max": 200
+            }
+        }
+    },
+    {
+        "id": "date",
+        "position": 4,
+        "fieldName": "date_time_5",
+        "name": "date_time",
+        "type": "esriQuestionTypeDateTime",
+        "label": "Date and Time",
+        "description": "Select a Date and Time",
+        "isRequired": true,
+        "defaultValue": "{dateNow}",
+        "validation": {
+            "valueRange": {
+                "isEnabled": false
+            }
+        }
+    }
+]
+drawingInfo={
+    "transparency": 0,
+    "labelingInfo": null,
+    "renderer": {
+        "type": "simple",
+        "symbol": {
+            "type": "esriSMS",
+            "color": [
+                255,
+                76,
+                25,
+                255
+            ],
+            "angle": 0,
+            "xoffset": 0,
+            "yoffset": 0,
+            "size": 12,
+            "style": "esriSMSDiamond",
+            "outline": {
+                "type": "esriSLS",
+                "color": [
+                    0,
+                    0,
+                    0,
+                    255
+                ],
+                "width": 0.375,
+                "style": "esriSLSSolid"
+            }
+        }
+    }
+}
+onReceiveAction={
+    "arcgisMissionManager": {
+        "map": [
+            "zoomToFeature"
+        ],
+        "device": [
+            {
+                "type": "action",
+                "name": "notification"
+            },
+            {
+                "type": "sound",
+                "name": "ring",
+                "loop": false,
+                "file": null
+            }
+        ]
+    },
+    "arcgisMissionResponder": {
+        "map": [],
+        "device": []
+    }
+}
+f=json
+      
+```
+
+ 
+
+## JSON Response example
+
+```other
+{
+  "reportId": "a4d4228234af47978f787e75e7691498",
+  "success": true,
+  "templateId": "2fc4192579224368b2ac87d492392f66"
+}
+
+```
+
+ 

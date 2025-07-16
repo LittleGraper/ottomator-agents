@@ -1,0 +1,199 @@
+---
+title: "Data Source object"
+description: "Learn about the JSON representation of data source objects."
+slug: "data-source-object"
+url: "/data-source-object"
+---
+
+## Overview
+
+This topic discusses the JSON representation of data source objects. A dataSource is a table, feature class, or raster that resides in a registered workspace (either a folder or geodatabase).
+
+The following dataSource objects are discussed:
+
+* Table data source
+* Query table data source
+* Raster data source
+* Join table data source
+
+### Table data source
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Syntax</TabTitle>
+  <TabTitle>Example</TabTitle>
+</TabNav>
+
+<Tab>
+
+  ```markdown
+  {
+    "type": "table",
+    "workspaceId": "<registered workspace id>",
+    "dataSourceName": "<table name>",
+    "gdbVersion": "<version name>"
+  }
+  ```
+</Tab>
+
+<Tab>
+
+  ```markdown
+  {
+    "type": "table",
+    "workspaceId": "MAP",
+    "dataSourceName": "MAP.user1.Taxlots",
+    "gdbVersion": "MAP.Version1"
+  }
+  ```
+</Tab>
+
+</Tabs>
+
+### Query table data source
+
+A query table data source is a layer/table that is defined by a SQL query. Query layers allow both spatial and nonspatial information stored in a DBMS to be easily integrated into map service operations. Since queryTable uses SQL to directly query database tables and views, spatial information used by a queryTable is not required to be in a geodatabase.
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Syntax</TabTitle>
+  <TabTitle>Example</TabTitle>
+</TabNav>
+
+<Tab>
+
+  ```markdown
+  {
+    "type": "queryTable",
+    "workspaceId": "<registered workspace id>",
+    "query": "<SQL query>",
+    "oidFields": "<field1>,<field2>,<field3>",
+    "geometryType": "<esriGeometryPoint | esriGeometryMultipoint | esriGeometryPolyline | esriGeometryPolygon>",
+    "spatialReference": {<spatial reference>}
+  }
+  ```
+</Tab>
+
+<Tab>
+
+  ```other
+  {
+    "type": "queryTable",
+    "workspaceId": "SqlMAP",
+    "query": "SELECT * FROM TaxLots",
+    "oidFields": "taxlotid",
+    "geometryType": "esriGeometryPolygon",
+    "spatialReference": {"wkid": 4326}
+  }
+  ```
+</Tab>
+
+</Tabs>
+
+Keep in mind the following for the properties above:
+
+* When querying a table that stores geometry in the database native format, the result is returned as a layer that can be used in any operation supported by [dynamic layer](DEVSITE/rest/services-reference/enterprise/dynamic-layer-table). For example, use this layer in an export operation by specifying a renderer.
+* When a query layer is added as a dynamic layer to a map service, the extent defaults to the full extent of the spatial reference provided in the request.
+* When querying a table that stores geometry in a non-native format, the result is returned as a table that can be used in query operations.
+* When querying a table that does not have a geometry column, do not include `geometryType` and `spatialReference`.
+* For the `oidFields` property, there are only certain field types that can be used as a unique identifier. These field types include integer, string, GUID, and date. If a single integer field is specified, map server uses the values in that field directly to uniquely identify all features and rows returned from a `queryTable`. However, if a single string field or a group of fields is used as the unique identifier, map server maps those unique values to an integer.
+  * Since the value in the unique identifier field uniquely identifies a row or feature object, values in that field must always be unique and not null. Map server operations will behave unpredictably when non-unique or null values are encountered. It is your responsibility to guarantee that values in this field meet this requirement. Map server does not enforce the uniqueness of values in the unique identifier field of a `queryTable`. If multiple fields are chosen, the values in these fields will be used as a key to generate a unique integer value. This resultant field is always called `ESRI_OID` unless a field of that name already exists. The value of the `ESRI_OID` field might possibly change for each request.
+
+### Raster data source
+
+Raster data source is a file-based raster that resides in a registered raster workspace.
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Syntax</TabTitle>
+  <TabTitle>Example</TabTitle>
+</TabNav>
+
+<Tab>
+
+  ```markdown
+  {
+    "type": "raster",
+    "workspaceId": "<registered workspace id>",
+    "dataSourceName": "<raster name>"
+  }
+  ```
+</Tab>
+
+<Tab>
+
+  ```markdown
+  {
+    "type": "raster",
+    "workspaceId": "rasterWS",
+    "dataSourceName": "NewOrleans.tif"
+  }
+  ```
+
+</Tab>
+
+</Tabs>
+
+### Join table data source
+
+A join table data source is the result of a join operation.
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Syntax</TabTitle>
+  <TabTitle>Example</TabTitle>
+</TabNav>
+
+<Tab>
+
+  ```markdown
+  {
+    "type": "joinTable",
+    "leftTableSource": <layerSource>,
+    "rightTableSource": <layerSource>,
+    "leftTableKey": "<field name from left table>",
+    "rightTableKey": "<field name from right table>",
+    "joinType": "<esriLeftOuterJoin | esriLeftInnerJoin>"
+  }
+  ```
+</Tab>
+
+<Tab>
+
+  ```markdown
+  {
+    "type": "joinTable",
+    "leftTableSource": 
+    {
+        "type": "mapLayer",
+        "mapLayerId": 0
+    },
+    "rightTableSource":
+    {
+        "type": "dataLayer",
+        "dataSource":
+        {
+          "type": "table",
+          "workspaceId": "MAP",
+          "dataSourceName": "MAP.user1.TaxLots",
+          "gdbVersion": "MAP.Version1"
+        }
+    },
+    "leftTableKey": "STATE_FIPS",
+    "rightTableKey": "FIPS",
+    "joinType": "esriLeftOuterJoin"
+  }
+  ```
+</Tab>
+
+</Tabs>
+
+Keep in mind the following for the properties above:
+
+* Nested joins are supported. To use nested joins, set either `leftTableSource` or `rightTableSource` to be a `joinTable`.
+* The layer type is determined by the `leftTableSource` property. If `leftTableSource` is a table, the resulting `joinTable` is a table. If the `leftTableSource` property is a layer, the resulting `joinTable` is a layer.
+* For performance reasons it is ideal to have the `leftTableSource` and `rightTableSource` properties point to a data source from the same workspace and have both properties be indexed.

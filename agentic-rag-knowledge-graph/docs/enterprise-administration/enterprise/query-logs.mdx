@@ -1,0 +1,486 @@
+---
+title: "Query"
+description: "The query operation allows users to aggregate, filter, and page through logs for an ArcGIS Enterprise on Kubernetes deployment."
+slug: "query-logs"
+url: "/query-logs"
+guid: "GUID-51959C45-C4D3-4213-AB50-37C6ABDFE710"
+migratedTopicMetadata:
+  FTITLE: "Query Logs"
+  FDESCRIPTION: ""
+  FCHANGES: "Fixing information in topic"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9-*"
+  CREATED-ON: "06/07/2022 14:49:59"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "07/08/2022 21:21:54"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-A22FDC75-6FC3-409F-B39F-8AD72AA11F0E"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /logs/query
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /logs/query
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed with either the "Manage Licenses", "Links to organization-specific group", "Delete", "Security and infrastructure", or "Servers" privileges, or the Publisher role
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `query` operation allows users to aggregate, filter, and page through logs for an ArcGIS Enterprise on Kubernetes deployment.
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `logLevel` 
+ 
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The base log level for the logs being queried. Only logs at that same log level, or at a log level with higher severity, will be returned. The default level is the [log level currently set](/log-settings) for the organization.
+
+      Values: `WARNING` | `SEVERE` | `INFO` | `FINE` | `VERBOSE` | `DEBUG`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `startTime` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The most recent time to query logs against, formatted as either a time stamp (`yyyy-mm-ddThh:mm:ss`) or milliseconds from epoch. The default is the current time.
+
+      ```markdown label=Example
+      //Timestamp
+      startTime=2020-08-01T15:14:20
+
+      //Milliseconds
+      startTime=1597072520000
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `endTime` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The oldest time to query against, formatted as either a time stamp (`yyyy-mm-ddThh:mm:ss`) or milliseconds from epoch. The default is kept blank.
+
+      ```markdown label=Example
+      //Timestamp
+      endTime=2020-08-01T15:17:20
+
+      //Milliseconds
+      endTime=1597072460000
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `logCode` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the log codes assigned to the logs. When specified, query will return logs associated with those codes.
+
+      ```markdown label=Example
+      logCode=202010,1251
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `users` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The user name of a user within the organization to further filter log results.
+
+      ```markdown label=Example
+      users=user1
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `requestIDs` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      An ID assigned to a specific server event.
+
+      ```markdown label=Example
+      requestIDs=a1fc28db-4575-4a09-84df-7b313c239e5b,22d8113a-e229-4e48-8fe4-008a5037fcba
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serviceTypes` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The service type of a service within the organization to further filter query results.
+
+      <Note type={"note"}>
+
+      Currently, `MapServer`, `GPServer`, and `FeatureServer` are the only supported service types.
+
+      </Note>
+
+      ```markdown label=Example
+      serviceTypes=MapServer
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `source` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The source of logged events.
+
+      ```markdown label=Examples
+      //Sharing API as source
+      source=Sharing
+
+      //Service in folder as source
+      source=Folder/CommercialDamageAssessment.FeatureServer
+
+      //Enterprise Admin as source
+      source=Enterprise Admin
+
+      //REST Catalog as source
+      source=Rest Catalog
+
+      //SOAP Catalog as source
+      source=Soap Catalog
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `pageSize` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum number of log records to be returned by this query. The default messages per page is 1000. The limit for this parameter is 10000 records.
+
+      ```markdown label=Example
+      pageSize=1000
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `showStackTraces` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A binary that specifies whether stack traces of exceptions will be included with the returned logs. The default is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample request for the `query` operation:
+
+```other
+https://organization.domain.com/context/admin/logs/queryFilter?logLevel=SEVERE&startTime=2020-08-09T22:45:00&endTime=2020-08-09T22:45:06&className=&users=user1
+&requestIDs=&pageSize=1000&showStackTraces=false&f=pjson&token=HRozb6bnTL6gfA-SJO-IxhfLgJrioK1KJdMLWmCE5HjHWz9U3fOiFv3-HkgPZqsLljTkk2WDENGt5fjho5s39e_mZL5At60UvJPoNnC5O2sv2HTlumG7TsYfbtnokpWmS6-lf8XoQpSKusZwmxIkEMP-yE0Wxrj8o9sWKi29J-pxzkoCDhoUfdLt6NnBWxhESpegh8BzNcEruqxuDQD-JRmaTsbRDaBHTQTePMzQePhXl7KcEG9Cfkw2sa7P1W1e
+```
+
+## JSON Response example
+
+The following is a collection of logs from a query of `INFO` logs created between `2020-08-09T22:45:00` and `2020-08-09T22:45:06`:
+
+```other
+{
+  "messages": [
+    {
+      "msgTimestamp": "2020-08-09T22:45:06,852",
+      "logLevel": "INFO",
+      "requestId": "",
+      "node": "reverseproxy.domain.com",
+      "username": "KBadmin",
+      "msg": "Item '348254a44fe34c26af8be121ff071134' (id:348254a44fe34c26af8be121ff071134) updated.",
+      "source": "Sharing",
+      "pod": "gis-portal-sharing-7cf9668cc9-mdsbh",
+      "logCode": "202010",
+      "processID": "65",
+      "threadID": "63",
+      "serverID": "",
+      "serviceTypes": "",
+      "exceptionDetail": ""
+    },
+    {
+      "msgTimestamp": "2020-08-09T22:45:06,731",
+      "logLevel": "INFO",
+      "requestId": "",
+      "node": "reverseproxy.domain.com",
+      "username": "KBadmin",
+      "msg": "Item 'e1d3f7a0cd784f61b79ed66d317ee485' updated.",
+      "source": "Sharing",
+      "pod": "gis-portal-sharing-7cf9668cc9-mdsbh",
+      "logCode": "202010",
+      "processID": "65",
+      "threadID": "66",
+      "serverID": "",
+      "serviceTypes": "",
+      "exceptionDetail": ""
+    },
+    {
+      "msgTimestamp": "2020-08-09T22:45:05,728",
+      "logLevel": "INFO",
+      "requestId": "f8372b7e-23b7-4aff-8974-d59ac5f7b0e3",
+      "node": "reverseproxy.domain.com",
+      "username": "",
+      "msg": "Service 'SampleService.MapServer' was started successfully.",
+      "source": "Enterprise Admin",
+      "pod": "gis-enterpriseadmin-7b988bddd7-ds67d",
+      "logCode": "1251",
+      "processID": "1",
+      "threadID": "66",
+      "serverID": "",
+      "serviceTypes": "",
+      "exceptionDetail": ""
+    },
+    {
+      "msgTimestamp": "2020-08-09T22:45:05,728",
+      "logLevel": "INFO",
+      "requestId": "f8372b7e-23b7-4aff-8974-d59ac5f7b0e3",
+      "node": "reverseproxy.domain.com",
+      "username": "",
+      "msg": "Service 'SampleService.MapServer' was created successfully.",
+      "source": "Enterprise Admin",
+      "pod": "gis-enterpriseadmin-7b988bddd7-ds67d",
+      "logCode": "1249",
+      "processID": "1",
+      "threadID": "66",
+      "serverID": "",
+      "serviceTypes": "",
+      "exceptionDetail": ""
+    },
+    {
+      "msgTimestamp": "2020-08-09T22:45:05,432",
+      "logLevel": "INFO",
+      "requestId": "",
+      "node": "reverseproxy.domain.com",
+      "username": "",
+      "msg": "Service 'SampleService.MapServer' started successfully.",
+      "source": "",
+      "pod": "gis-v8fe9d235-ee20-4779-8770-ff9c493c2f66-mapserver-6d7cd5zrgdh",
+      "logCode": "10021",
+      "processID": "1",
+      "threadID": "1",
+      "serverID": "v8fe9d235-ee20-4779-8770-ff9c493c2f66",
+      "serviceTypes": "",
+      "exceptionDetail": ""
+    },
+    {
+      "msgTimestamp": "2020-08-09T22:45:05,323",
+      "logLevel": "INFO",
+      "requestId": "",
+      "node": "reverseproxy.domain.com",
+      "username": "",
+      "msg": "Server object instance created successfully - SampleService.",
+      "source": "",
+      "pod": "gis-v8fe9d235-ee20-4779-8770-ff9c493c2f66-mapserver-6d7cd5zrgdh",
+      "logCode": "8000",
+      "processID": "171",
+      "threadID": "23",
+      "serverID": "v8fe9d235-ee20-4779-8770-ff9c493c2f66",
+      "serviceTypes": "",
+      "exceptionDetail": ""
+    },
+    {
+      "msgTimestamp": "2020-08-09T22:45:05,314",
+      "logLevel": "INFO",
+      "requestId": "",
+      "node": "reverseproxy.domain.com",
+      "username": "",
+      "msg": "Construct ended.",
+      "source": "SampleService.MapServer",
+      "pod": "gis-v8fe9d235-ee20-4779-8770-ff9c493c2f66-mapserver-6d7cd5zrgdh",
+      "logCode": "12003",
+      "processID": "38",
+      "threadID": "41",
+      "serverID": "",
+      "serviceTypes": "",
+      "exceptionDetail": ""
+    },
+    {
+      "msgTimestamp": "2020-08-09T22:45:05,299",
+      "logLevel": "INFO",
+      "requestId": "",
+      "node": "reverseproxy.domain.com",
+      "username": "",
+      "msg": "Construct started.",
+      "source": "SampleService.MapServer",
+      "pod": "gis-v8fe9d235-ee20-4779-8770-ff9c493c2f66-mapserver-6d7cd5zrgdh",
+      "logCode": "12002",
+      "processID": "38",
+      "threadID": "41",
+      "serverID": "",
+      "serviceTypes": "",
+      "exceptionDetail": ""
+    },
+    {
+      "msgTimestamp": "2020-08-09T22:45:05,283",
+      "logLevel": "INFO",
+      "requestId": "",
+      "node": "reverseproxy.domain.com",
+      "username": "",
+      "msg": "Construct ended.",
+      "source": "SampleService.MapServer",
+      "pod": "gis-v8fe9d235-ee20-4779-8770-ff9c493c2f66-mapserver-6d7cd5zrgdh",
+      "logCode": "16003",
+      "processID": "38",
+      "threadID": "41",
+      "serverID": "",
+      "serviceTypes": "",
+      "exceptionDetail": ""
+    },
+    {
+      "msgTimestamp": "2020-08-09T22:45:05,271",
+      "logLevel": "INFO",
+      "requestId": "",
+      "node": "reverseproxy.domain.com",
+      "username": "",
+      "msg": "Construct started.",
+      "source": "SampleService.MapServer",
+      "pod": "gis-v8fe9d235-ee20-4779-8770-ff9c493c2f66-mapserver-6d7cd5zrgdh",
+      "logCode": "16002",
+      "processID": "38",
+      "threadID": "41",
+      "serverID": "",
+      "serviceTypes": "",
+      "exceptionDetail": ""
+    },
+    {
+      "msgTimestamp": "2020-08-09T22:45:03,147",
+      "logLevel": "INFO",
+      "requestId": "",
+      "node": "reverseproxy.domain.com",
+      "username": "KBadmin",
+      "msg": "Item 'e09d419948194eefb833c88e0dc6ffce' updated.",
+      "source": "Sharing",
+      "pod": "gis-portal-sharing-7cf9668cc9-mdsbh",
+      "logCode": "202010",
+      "processID": "65",
+      "threadID": "65",
+      "serverID": "",
+      "serviceTypes": "",
+      "exceptionDetail": ""
+    },
+    {
+      "msgTimestamp": "2020-08-09T22:45:01,122",
+      "logLevel": "INFO",
+      "requestId": "",
+      "node": "reverseproxy.domain.com",
+      "username": "KBadmin",
+      "msg": "Item '55a29baae49b4962aea6e663e41abc4b' updated.",
+      "source": "Sharing",
+      "pod": "gis-portal-sharing-7cf9668cc9-mdsbh",
+      "logCode": "202010",
+      "processID": "65",
+      "threadID": "61",
+      "serverID": "",
+      "serviceTypes": "",
+      "exceptionDetail": ""
+    }
+  ],
+  "total": 21,
+  "start": 1,
+  "num": 1000,
+  "nextStart": -1,
+  "query": "{\"logLevel\":\"INFO\",\"logCode\":[],\"username\":[],\"requestId\":[],\"serviceTypes\":[],\"exceptionDetail\":false}"
+}
+```

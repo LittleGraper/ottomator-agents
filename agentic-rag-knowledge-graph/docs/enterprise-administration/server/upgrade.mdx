@@ -1,0 +1,288 @@
+---
+title: "Upgrade"
+description: "The upgrade operation upgrades ArcGIS Server to a newer version."
+slug: "upgrade"
+url: "/upgrade"
+guid: "GUID-02B224D3-3843-464B-84BF-FA11E80DBA1C"
+migratedTopicMetadata:
+  FTITLE: "Upgrade"
+  FDESCRIPTION: ""
+  FCHANGES: "Adding enableDebug parameter"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0- *"
+  CREATED-ON: "20/04/2022 08:47:48"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "23/05/2022 18:15:45"
+  VERSION: "5"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "6"
+  ED: "GUID-AB0F57C5-0C21-4748-9198-409492FEE612"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /upgrade
+  urlSegments:
+    - name: <site-url>
+      url: /site
+    - name: /upgrade
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.5'
+  requiredCapabilities:
+    - name: Access allowed only with the default administrator role
+      url: /managing-access-to-the-server-administration-rest-api
+---
+
+## Description
+
+The `upgrade` operation is the first operation that must be invoked during an ArcGIS Server upgrade. Once the new software version has been installed and the setup has completed, the `upgrade` operation will be available. A successful run of this operation will complete the upgrade of ArcGIS Server. This operation is available only when a server machine is currently being upgraded. It will not be available after a successful upgrade of a server machine.
+
+<Note type={"caution"}>
+
+If errors are returned with the `upgrade` operation, you must address the errors before you continue. For example, if you encounter an error about an invalid license, you must re-authorize the software using a valid license before running this operation again.
+
+</Note>
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `runAsync`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A flag that indicates whether the operation must be run asynchronously. If submitted synchronously, the response will be returned once the upgrade process completes successfully or if the request fails. If submitted asynchronously, the upgrade operation can be polled by making a request to the root resource. The default value is `false` (synchronously).
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `enableDebug` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.0. This parameter sets the log level for the upgrade process. If `true`, the log level is set to `DEBUG` during the upgrade, which can aid in troubleshooting issues related to the upgrade process. If `false`, the log level is set to `VERBOSE` during the upgrade process. The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `upgrade` operation:
+
+```markdown
+POST /webadaptor/admin/upgrade HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+runAsync=false&enableDeubg=false&f=pjson
+```
+
+## JSON Response examples
+
+Below are the possible responses that can be returned when performing an upgrade. 
+
+### Synchronous upgrade JSON response example
+The following example demonstrates the response returned when the upgrade completes successfully.
+```
+  {"status": "success"}
+```
+
+### Asynchronous upgrade JSON response examples
+
+While the upgrade is in progress, the root resource can be polled to return the upgrade's current status. The following sample demonstrates the updated response. 
+```
+{
+  "status": "In Progress",
+  "upgradeFromVersion": "11.2.0",
+  "upgradeToVersion": "11.4.0",
+  "stages": [
+  {
+  "startTime": 1723216666222,
+  "lastUpdated": 1723216666303,
+  "name": "Initialize upgrade and check licenses",
+  "state": "Succeeded"
+  },
+  {
+  "startTime": 1723216666222,
+  "lastUpdated": 1723216667598,
+  "name": "Upgrade site configurations",
+  "state": "Succeeded"
+  },
+  {
+  "startTime": 1723216666222,
+  "lastUpdated": 1723216667607,
+  "name": "Upgrade and start System and Utility services",
+  "state": "In Progress"
+  },
+  {
+  "startTime": 1723216666222,
+  "lastUpdated": 1723216666222,
+  "name": "Synchronize local machine with site",
+  "state": "Not Started"
+  },
+  {
+  "startTime": 1723216666222,
+  "lastUpdated": 1723216666222,
+  "name": "Configure Extensions and data providers",
+  "state": "Not Started"
+  },
+  {
+  "startTime": 1723216666222,
+  "lastUpdated": 1723216666222,
+  "name": "Generate SSL Certificate and Enable SSL",
+  "state": "Not Started"
+  },
+  {
+  "startTime": 1723216666222,
+  "lastUpdated": 1723216666222,
+  "name": "Final checks and cleanup",
+  "state": "Not Started"
+  }
+  ],
+  "messages": "",
+  "warnings": []
+  }
+```
+Once the upgrade has successfully completed, the root resource will return the following success response.
+```
+  {
+  "status": "Success",
+  "upgradeFromVersion": "11.2.0",
+  "upgradeToVersion": "11.4.0",
+  "stages": [
+  {
+  "startTime": 1723216666222,
+  "lastUpdated": 1723216666303,
+  "name": "Initialize upgrade and check licenses",
+  "state": "Succeeded"
+  },
+  {
+  "startTime": 1723216666222,
+  "lastUpdated": 1723216667598,
+  "name": "Upgrade site configurations",
+  "state": "Succeeded"
+  },
+  {
+  "startTime": 1723216666222,
+  "lastUpdated": 1723216749624,
+  "name": "Upgrade and start System and Utility services",
+  "state": "Succeeded"
+  },
+  {
+  "startTime": 1723216666222,
+  "lastUpdated": 1723216790931,
+  "name": "Synchronize local machine with site",
+  "state": "Succeeded"
+  },
+  {
+  "startTime": 1723216666222,
+  "lastUpdated": 1723216791243,
+  "name": "Configure Extensions and data providers",
+  "state": "Succeeded"
+  },
+  {
+  "startTime": 1723216666222,
+  "lastUpdated": 1723216791268,
+  "name": "Generate SSL Certificate and Enable SSL",
+  "state": "Succeeded"
+  },
+  {
+  "startTime": 1723216666222,
+  "lastUpdated": 1723216794061,
+  "name": "Final checks and cleanup",
+  "state": "Succeeded"
+  }
+  ],
+  "messages": "",
+  "warnings": []
+  }
+```
+
+If the upgrade is complete, but there are action items that must be performed, the root resource will return a success response with a warnings property that will contain information about those action items. 
+```
+  {
+  "status": "Success with warnings",
+  "upgradeFromVersion": "10.9.1",
+  "upgradeToVersion": "11.4.0",
+  "stages": [
+  {
+  "startTime": 1724279351022,
+  "lastUpdated": 1724279351494,
+  "name": "Initialize upgrade and check licenses",
+  "state": "Succeeded"
+  },
+  {
+  "startTime": 1724279351022,
+  "lastUpdated": 1724279355450,
+  "name": "Upgrade site configurations",
+  "state": "Succeeded"
+  },
+  {
+  "startTime": 1724279351022,
+  "lastUpdated": 1724279646570,
+  "name": "Upgrade and start System and Utility services",
+  "state": "Succeeded"
+  },
+  {
+  "startTime": 1724279351022,
+  "lastUpdated": 1724279694488,
+  "name": "Synchronize local machine with site",
+  "state": "Succeeded"
+  },
+  {
+  "startTime": 1724279351022,
+  "lastUpdated": 1724279695934,
+  "name": "Configure Extensions and data providers",
+  "state": "Succeeded"
+  },
+  {
+  "startTime": 1724279351022,
+  "lastUpdated": 1724279696940,
+  "name": "Generate SSL Certificate and Enable SSL",
+  "state": "Succeeded"
+  },
+  {
+  "startTime": 1724279351022,
+  "lastUpdated": 1724279701608,
+  "name": "Final checks and cleanup",
+  "state": "Succeeded with warnings"
+  }
+  ],
+  "messages": "",
+  "warnings": ["Found mismatch in the .NET Extension Support installation on machines in the site. All machines in a site are required to have the same .NET Extension Support configuration. Information on how to resolve this issue is available in the help topic 'About multiple-machine ArcGIS Server sites'."]
+  }
+```

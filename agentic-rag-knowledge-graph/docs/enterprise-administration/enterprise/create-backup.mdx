@@ -1,0 +1,183 @@
+---
+title: "Create Backup"
+description: "The create operation creates a backup that can be restored in the event of data loss, data corruption, or deployment failures."
+slug: "create-backup"
+url: "/create-backup"
+guid: "GUID-95D8168E-F9E0-4AF9-B87A-F2F6D4C58306"
+migratedTopicMetadata:
+  FTITLE: "Create Backup"
+  FDESCRIPTION: ""
+  FCHANGES: "Updating description and example usage with job URL information"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0-*"
+  CREATED-ON: "19/04/2022 13:51:44"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "24/05/2022 09:34:30"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-93F960AF-611A-4F86-A374-1F8F23DFDF4B"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /system/disasterrecovery/stores/<storeName>/backups/create
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /system/disasterrecovery/stores/<storeName>/backups/create
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed with the "Security and infrastructure" privilege
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `create` operation creates a backup that can be restored in the event of data loss, data corruption, or deployment failures. Backups are stored in a designated backup store. The response returns a JSON object containing job information, including a `jobsUrl` property. The value returned for `jobsUrl` can be used to access the job resource to track the job's status. For more information, see the [Job resource topic](/jobs).
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `name` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The name of the backup.
+
+      ```markdown label=Example
+      name=backup
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `storeName` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      <Note type={"note"}>
+
+      This parameter has been deprecated with the release of ArcGIS Enterprise on Kubernetes 10.9.1.
+
+      </Note>
+
+      The name of the backup store where the backup will be stored.
+
+      ```markdown label=Example
+      storeName=backupsDefault
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `passcode` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A passcode that will be used to encrypt the content of the backup. When restoring a backup, this passcode must be passed in. The passcode must be at least eight characters in length.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `description` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A description of the backup.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `retentionDate` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.9.1. The date, in epoch milliseconds, when the backup will be eligible for cleanup by a system task.
+
+      <Note type={"note"}>
+
+      Assigning a value of -1 to `retentionDate` will cause the backup to never expire, meaning that it will never be cleaned by the `backupRetentionCleaner` task. Not assigning a value to this parameter will automatically set the `retentionDate` value to -1.
+
+      </Note>
+
+      ```markdown label=Example
+      retentionDate=1635945710988
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `create` operation:
+
+```other
+POST /context/admin/system/disasterrecovery/stores/<storeName>/backups/create HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+name=backup_first&passcode=passcode&description=&retentionDate=1635945710988&f=pjson&token=HRozb6bnTL6gfA-SJO-IxhfLgJrioK1KJdMLWmCE5HjHWz9U3fOiFv3-HkgPZqsLljTkk2WDENGt5fjho5s39e_mZL5At60UvJPoNnC5O2sv2HTlumG7TsYfbtnokpWmS6-lf8XoQpSKusZwmxIkEMP-yE0Wxrj8o9sWKi29J-pxzkoCDhoUfdLt6NnBWxhESpegh8BzNcEruqxuDQD-JRmaTsbRDaBHTQTePMzQePhXl7KcEG9Cfkw2sa7P1W1e
+
+```
+
+## JSON Response example
+
+```other
+{
+  "jobsUrl": "https://organization.domain.com/context/admin/jobs/j7d22f855-2c9f-4934-94e4-93c5e85cd271",
+  "jobid": "j7d22f855-2c9f-4934-94e4-93c5e85cd271",
+  "status": "SUBMITTED"
+}
+```

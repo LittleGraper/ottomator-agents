@@ -1,0 +1,234 @@
+---
+title: "Hydrology analysis service"
+description: "The Hydrology analysis service allows you to delineate watersheds and trace downstream flow path at a given location without having to maintain the data yourself."
+slug: "hydrology-analysis-service"
+url: "/hydrology-analysis-service"
+guid: "GUID-7DB2DEA8-C5FE-4D0F-8917-263AB272F3A6"
+migratedTopicMetadata:
+  FTITLE: "Hydrology analysis service"
+  FDESCRIPTION: ""
+  FCHANGES: "Remove 'API' from 'Mapping APIs and location services' in the tip, and update the 2 urls from the tip"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "AGOL24R02 - * 11.4 - *"
+  CREATED-ON: "20/06/2024 14:27:33"
+  FAUTHOR: "schatterjee"
+  FSTATUS: "Released"
+  MODIFIED-ON: "24/06/2024 12:02:45"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-5938C8F3-88D9-46AA-86AF-D01D776E09EE"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+---
+
+The hydrology analysis service performs hydrological analysis based on authoritative elevation and hydrologic data. The service is available at different geographic areas and spatial resolutions. See the [Hydrology analysis data coverage](/source-data-for-hydrology-analysis-tasks) section for more information. 
+
+## Key features
+
+-   Use [Trace downstream](/trace-downstream) to determine the downstream flow path from a given location. 
+-   Delineate the catchment area of a particular location using [Watershed](/watershed).
+
+## Access the service
+
+To access the hydrology analysis service you need the following: 
+
+-   An [ArcGIS Developer](https://developers.arcgis.com/sign-up/) account or an [ArcGIS Online](https://www.esri.com/en-us/arcgis/products/arcgis-online/trial) account. 
+-   An [access token](https://developers.arcgis.com/documentation/glossary/access-token/) (API key or OAuth 2.0).
+
+<Note type={"tip"}>
+
+To learn more about API keys and OAuth 2.0, go to [Security and authentication](<https://developers.arcgis.com/documentation/security-and-authentication/ >) in the [Mapping and location services](https://developers.arcgis.com/documentation/mapping-and-location-services/) guide.
+
+</Note>
+
+## Example
+
+This example shows you how to delineate the watershed of a point located at southern Colorado, USA using the [Watershed](/watershed) request.
+
+1\. Send a job request to delineate the watershed. Note that the `InputPoints`  parameter contains the spatial information of the point of interest:
+
+<Tabs>
+<TabNav>
+  <TabTitle>Request</TabTitle>
+  <TabTitle>Response</TabTitle>
+</TabNav>
+    <Tab>
+
+    ```json
+    POST https://hydro.arcgis.com/arcgis/rest/services/Tools/Hydrology/GPServer/Watershed/submitJob HTTP/1.1
+    content-type: application/x-www-form-urlencoded
+
+    f=json
+    &token=<ACCESS_TOKEN>
+    &InputPoints={"geometryType":"esriGeometryPoint","features":[{"geometry":{"x":-11946425.36295705,"y":4930494.072505761,"spatialReference":{"wkid":102100,"latestWkid":3857}}}],"sr":{"wkid":102100,"latestWkid":3857}}
+    &SnapDistance=500
+    &SnapDistanceUnits=Meters
+    &SourceDatabase=FINEST
+    &Generalize=True
+    ```
+    </Tab>
+
+    <Tab>
+
+    ```json
+    {
+      "jobId":"<unique job identifier>",
+      "jobStatus":"esriJobSubmitted",
+      "results":{}
+      },
+      "inputs":{},
+      "messages":[]
+    }
+
+    ```
+    </Tab>
+</Tabs>
+
+2\. Check the job status using the provided jobID until the job has succeeded or failed. Learn more about submitting [GP Jobs](https://developers.arcgis.com/rest/services-reference/enterprise/gp-job/).
+
+<Tabs>
+<TabNav>
+  <TabTitle>Request</TabTitle>
+  <TabTitle>Response</TabTitle>
+</TabNav>
+
+    <Tab>
+
+    ```json
+    POST https://hydro.arcgis.com/arcgis/rest/services/Tools/Hydrology/GPServer/Watershed/jobs/<unique job identifier> HTTP/1.1
+    content-type: application/x-www-form-urlencoded
+
+    f=json
+    &token=<ACCESS_TOKEN>
+
+    ```
+    </Tab>
+
+    <Tab>
+
+    ```json
+    {
+      "jobId":"<unique job identifier>",
+      "jobStatus":"esriJobSucceeded",
+      "results":{"WatershedArea":{"paramUrl":"results/WatershedArea"},"SnappedPoints":{"paramUrl":"results/SnappedPoints"}}
+      },
+      "inputs":{},
+      "messages":[]
+    }
+
+    ```
+
+ 
+    </Tab>
+</Tabs>
+
+3\. Once the job has succeeded, get the results for watershed polygons from parameter `WatershedArea` .
+
+<Tabs>
+<TabNav>
+  <TabTitle>Request</TabTitle>
+  <TabTitle>Response</TabTitle>
+</TabNav>
+
+    <Tab>
+
+    ```json
+    POST https://https://hydro.arcgis.com/arcgis/rest/services/Tools/Hydrology/GPServer/Watershed/jobs/<jobID>/results/WatershedArea HTTP/1.1
+    content-type: application/x-www-form-urlencoded
+
+    f=json
+    &token=<ACCESS_TOKEN>
+    &returnType="data"
+
+    ```
+    </Tab>
+
+    <Tab>
+
+    ```json
+    {
+    "paramName": "WatershedArea",
+    "dataType": "GPFeatureRecordSetLayer",
+      "value": {
+      "displayFieldName": "",
+      "geometryType": "esriGeometryPolygon",
+      "spatialReference": {"wkt": "PROJCS[\"NAD_1983_Albers\",GEOGCS[\"GCS_North_American_1983\",DATUM[\"D_North_American_1983\",SPHEROID[\"GRS_1980\",6378137.0,298.257222101]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],PROJECTION[\"Albers\"],PARAMETER[\"False_Easting\",0.0],PARAMETER[\"False_Northing\",0.0],PARAMETER[\"central_meridian\",-96.0],PARAMETER[\"Standard_Parallel_1\",29.5],PARAMETER[\"Standard_Parallel_2\",45.5],PARAMETER[\"latitude_of_origin\",23.0],UNIT[\"Meter\",1.0]],VERTCS[\"Unknown VCS\",VDATUM[\"Unknown\"],PARAMETER[\"Vertical_Shift\",0.0],PARAMETER[\"Direction\",1.0],UNIT[\"User_Defined_Unit\",0.01]]"},
+      "fields": [
+       {
+        "name": "OBJECTID",
+        "type": "esriFieldTypeOID",
+        "alias": "OBJECTID"
+       },
+       {
+        "name": "PourPtID",
+        "type": "esriFieldTypeInteger",
+        "alias": "Pour Point ID"
+      },
+      {
+        "name": "Description",
+        "type": "esriFieldTypeString",
+        "alias": "Description",
+        "length": 50
+      },
+      {
+        "name": "DataResolution",
+        "type": "esriFieldTypeString",
+        "alias": "Data Resolution",
+        "length": 50
+      },
+      {
+        "name": "AreaSqKm",
+        "type": "esriFieldTypeDouble",
+        "alias": "Area Square Kilometers"
+      },
+      {
+        "name": "Shape_Length",
+        "type": "esriFieldTypeDouble",
+        "alias": "Shape_Length"
+      },
+      {
+        "name": "Shape_Area",
+        "type": "esriFieldTypeDouble",
+        "alias": "Shape_Area"
+      }
+      ],
+      "features": [{
+      "attributes": {
+        "OBJECTID": 1,
+        "PourPtID": 1,
+        "Description": "NED 30m processed by Esri",
+        "DataResolution": "30.0",
+        "AreaSqKm": 4.74840003239477,
+        "Shape_Length": 12840,
+        "Shape_Area": 4748400
+      },
+    "geometry": {"rings": [[
+        [
+         -951945,
+         1991295
+        ],
+        [
+         -952155,
+         1991295
+        ],
+        [
+         -952155,
+         1991325
+        ],
+         ...
+         additional points in the geometry
+         ...
+        ]]}
+      }],
+      "exceededTransferLimit": false
+    }
+    }
+         
+    ```
+    </Tab>
+</Tabs>

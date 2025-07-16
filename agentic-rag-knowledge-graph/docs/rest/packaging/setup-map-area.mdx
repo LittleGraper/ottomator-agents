@@ -1,0 +1,427 @@
+---
+title: "Setup Map Area"
+description: "The Setup Map Area task creates packages for each service in the web map within the map area extent."
+slug: "setup-map-area"
+url: "/setup-map-area"
+guid: "GUID-2037A992-8D25-406E-A2DF-B2338945BF1E"
+migratedTopicMetadata:
+  FTITLE: "Setup Map Area"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.6.1 - *"
+  CREATED-ON: "02/08/2019 14:13:47"
+  FAUTHOR: "j.cullen"
+  FSTATUS: "Released"
+  MODIFIED-ON: "20/12/2019 14:48:37"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-D62B6FFF-01F0-4FD3-8F1D-E1C9F55D4061"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  urls:
+    - label: ArcGIS Online
+      urlSegments:
+        - name: https://packaging.arcgis.com/arcgis/rest/services/OfflinePackaging/GPServer/SetupMapArea/submitJob
+    - label: ArcGIS Enterprise
+      urlSegments:
+        - name: <catalog-url>
+          url: /rest/services-reference/enterprise/catalog/
+        - name: /Utilities/OfflinePackaging/GPServer/SetupMapArea/submitJob
+  methods: ["post"]
+  sslOnly: 'no'
+  versionIntroduced: 10.6.1
+---
+
+## Description
+
+The Setup Map Area task creates packages for each service in the web map within the map area extent. The tool generates tile packages (`.tpk` or `.vtpk`) for `exportTilesAllowed` tiled services (in other words, basemap layers) and `SQLite Geodatabase` format replica packages for sync-enabled feature services (in other words, operational layers). It adds an `Area2Package` [relationship](DEVSITE/rest/users-groups-and-items/relationship-types/) between the map area item and created package items.
+
+An existing package related to a map area will remain unchanged after running the task a second time as long as its corresponding layer remains in the web map and therefore a valid map layer. For example, if a web map is updated with a feature layer removed after a package is created for that layer using the GP tool, the package will be removed the next time it is executed since its corresponding layer no longer exists in the web map and thus becomes invalid.
+
+This task is available for the map area item owner and organization administrators in ArcGIS Online and ArcGIS Enterprise.
+
+<Note type={"note"}>
+
+The API does not support request body using multipart/form-data encoding.
+
+</Note>
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The supported output format is JSON.
+
+Example
+
+```javascript
+f=json
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`token` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+An access token that identifies the authenticated user and controls access to restricted resources and operations.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`mapAreaItemId` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Map area item ID, created by the [Create Map Area](/create-map-area) tool.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`mapLayersToIgnore` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A list of individual layers, specified with their service URLs, in the map to ignore. The task generates packages for all map layers by default.
+
+Example:
+
+```javascript
+[
+  "https://services.arcgis.com/ERmEceOGq5cHrItq/arcgis/rest/services/SaveTheBaySync/FeatureServer/1",
+  "https://services.arcgis.com/ERmEceOGq5cHrItq/arcgis/rest/services/WildfireSync/FeatureServer/0"
+]
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`tileServices` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+An array of JSON objects that contains additional export tiles-enabled tile services for which tile packages (`.tpk` or `.vtpk`) need to be created. Each tile service is specified with its URL and desired level of details.
+
+Example:
+
+```javascript
+[
+  {
+    "url": "https://tiledbasemaps.arcgis.com/arcgis/rest/services/World_Imagery/MapServer",
+    "levels": "17,18,19"
+  }
+]
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`featureServices` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+An array of JSON objects that contains additional sync-enabled feature services for which replicas need to be created. It can also be used to override a layer definition query in the map. Each feature service is specified with its `url` , `layers` , `layerQueries` , `returnAttachments` , `attachmentsSyncDirection` , `syncModel` , `syncDirection` , and `createPkgDeltas` properties. See [create replica](DEVSITE/rest/services-reference/enterprise/create-replica/) for details of each.
+
+Example:
+
+```javascript
+[
+  {
+    "url":"https://services.arcgis.com/ERmEceOGq5cHrItq/arcgis/rest/services/LandUse/FeatureServer",
+    "layers":[0,1],
+    "returnAttachments":false,
+    "attachmentsSyncDirection":"upload",
+    "syncModel":"perLayer"
+  }
+]
+```
+
+ 
+
+Feature services support scheduled updates (version 10.7.1 and later). Scheduled updates allow apps to download server side changes based on a fixed schedule. This is to support download-only workflows in which you only need a copy of the data for reference even if the service supports editing. It is not intended for workflows in which clients make edits and sync. If `createPkgDeltas` is configured, apps downloading the map area can periodically download changes from the server based on a schedule. 
+
+The `maxDeltaAge` property of `createPkgDeltas` is used to set the number of days that individual deltas are kept on the server and are available for download (the default is 5 days). If an app goes too long without downloading updates, they may be required to redownload the full map area again.
+
+Example:
+
+```javascript
+[
+  {
+    "url": "https://services.arcgis.com/ERmEceOGq5cHrItq/arcgis/rest/services/LandUse/FeatureServer",
+    "layers": [0,1],
+    "returnAttachments": false,
+    "attachmentsSyncDirection": "upload",
+    "syncModel": "perLayer",
+    "createPkgDeltas": {
+      "maxDeltaAge": 5
+    }
+  }
+]
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Response properties
+
+When a job request is submitted, the service assigns a unique job identifier for the transaction. A JSON response with the job ID and job status are returned as below:
+
+```javascript
+{
+  "jobId": "<jobID>",
+  "jobStatus": "esriJobSubmitted" | "esriJobWaiting" | "esriJobExecuting" | "esriJobSucceeded" | "esriJobFailed" | "esriJobTimedOut" | "esriJobCancelling" | "esriJobCancelled"
+}
+```
+
+ 
+
+### Check job status
+
+After the initial request is submitted, you can use the job ID to check its status and messages periodically by calling as below:
+
+```
+https://packaging.arcgis.com/arcgis/rest/services/OfflinePackaging/GPServer/SetupMapArea/jobs/<jobID>?token=<token>&returnMessages=true&f=json
+```
+
+ 
+
+JSON response syntax during job execution
+
+```javascript
+{
+    "jobId": "<jobId>",
+    "jobStatus": "<jobStatus>",
+    "messages": [
+        {
+            "type": "<type1>",
+            "description": "<description1>"
+        },
+        {
+            "type": "<type2>",
+            "description": "<description2>"
+        }
+    ]
+}
+```
+
+ 
+
+### Retrieve results
+
+When the status of the job is `esriJobSucceeded` upon its successful completion, you can retrieve the output results by calling as below:
+
+```
+https://packaging.arcgis.com/arcgis/rest/services/OfflinePackaging/GPServer/SetupMapArea/jobs/<jobID>/results/<outputParameter>?token=<token>&f=json
+```
+
+ 
+
+You can also retrieve the value of any input parameter by calling as below:
+
+```
+https://packaging.arcgis.com/arcgis/rest/services/OfflinePackaging/GPServer/SetupMapArea/jobs/<jobID>/inputs/<inputParameter>?token=<token>&f=json
+```
+
+ 
+
+Upon successful execution, the service returns a JSON object that contains an array of packages for the given map area using the following output parameter:
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`packages` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A JSON object that contains properties for the output parameter name, data type, and value. The `value` property is a JSON array that contains the list of packages for the given map area; each has `source` (for the source service URL), `itemId` (for the corresponding package item ID), and `state` (for the package state).
+
+Supported values for `state` are: `new` \| `deleted` \| `unchanged`.
+
+Example:
+
+```javascript
+{
+ "paramName": "packages",
+ "dataType": "GPString",
+ "value": [
+  {
+   "source": "https://services.arcgis.com/J423vH8fR9HV444k/arcgis/rest/services/myFeatureService1/FeatureServer",
+   "itemId": "0da8bbef893a44a484be48732c7f018b",
+   "state": "new"
+  },
+  {
+   "source": "https://services.arcgis.com/J423vH8fR9HV444k/arcgis/rest/services/myFeatureService2/FeatureServer",
+   "itemId": "817cbd6752aa42f89d80e86a4560bc0f",
+   "state": "deleted"
+  },
+  {
+   "source": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer",
+   "itemId": "c8d1ae20448b487c9e28ad1e8eab13b7",
+   "state": "unchanged"
+  }
+ ]
+}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+Request URL to submit the job
+
+```
+https://packaging.arcgis.com/arcgis/rest/services/OfflinePackaging/GPServer/SetupMapArea/submitJob?mapItemId=1a6c552e5cbe4249aa307df94a84c2b3
+```
+
+ 
+
+JSON Response example
+
+```javascript
+{
+ "jobId": "jf360770cb2c44398abc5ce474bbfae88",
+ "jobStatus": "esriJobSubmitted"
+}
+```
+
+ 
+
+Check job status
+
+Request URL to query job status
+
+```
+https://packaging.arcgis.com/arcgis/rest/services/OfflinePackaging/GPServer/SetupMapArea/jobs/jf360770cb2c44398abc5ce474bbfae88
+```
+
+ 
+
+JSON Response
+
+```javascript
+{
+ "jobId": "jf360770cb2c44398abc5ce474bbfae88",
+ "jobStatus": "esriJobExecuting",
+ "messages": []
+}
+```
+
+ 
+
+Retrieve results
+
+Request URL to return output map area item
+
+```
+https://packaging.arcgis.com/arcgis/rest/services/OfflinePackaging/GPServer/SetupMapArea/jobs/j40fb94bf101840fc90f130ab2da9553b/results/packages
+```
+
+ 
+
+JSON Response
+
+```javascript
+{
+ "paramName": "packages",
+ "dataType": "GPString",
+ "value": [
+  {
+   "source":  "https://services.arcgis.com/J423vH8fR9HV444k/arcgis/rest/services/featureService1/FeatureServer",
+    "error":  "Sync not enabled on service featureService1"
+  },
+   {
+   "source":  "https://services.arcgis.com/J423vH8fR9HV444k/arcgis/rest/services/featureService2/FeatureServer",
+    "itemId":  "0da8bbef893a44a484be48732c7f018b",
+    "state":  "new"
+  },
+   {
+   "source":  "https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer",
+    "itemId":  "c8d1ae20448b487c9e28ad1e8eab13b7",
+    "state":  "unchanged"
+  }
+ ]
+}
+```
+
+ 

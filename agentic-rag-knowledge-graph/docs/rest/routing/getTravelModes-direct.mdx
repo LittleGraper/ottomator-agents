@@ -1,0 +1,175 @@
+---
+title: GetTravelModes operation
+uid: getTravelModes-direct
+description: "The `GetToolInfo` operation provides additional information such as the description of the network dataset used for the analysis and execution limits for an operation available as part of the routing services."
+context:
+    requestType: "direct"
+---
+import SharedContent from "../../shared/content/_required-params"
+import ParamMetadata from "../../shared/components/param-metatdata" 
+
+The Utilities service contains operations that provide auxiliary information for working with routing services available with ArcGIS Online. The Utilities service contains two operations, `GetTravelModes` and `GetToolInfo`. The `GetTravelModes` operation returns a list of travel modes configured for your organization that can be used with routing services. A travel mode represents a means of transportation, such as driving or walking. [Travel modes](https://doc.arcgis.com/en/arcgis-online/analyze/travel-modes-analysis-mv.htm) essentially templates consisting of a long list of travel settings. 
+
+<MoreInfo>
+
+The `GetTravelModes` operation is meant to be used by different applications to display the name and, optionally, the description of the available travel modes in their user experience. An administrator of your organization can [configure travel modes](https://doc.arcgis.com/en/arcgis-online/reference/travel-modes.htm) to change the properties of the default travel modes provided by ArcGIS Online, add new travel modes that better reflect your organization’s workflows, or remove travel modes that are not suitable for your organization’s workflows.
+
+<Note type={"caution"}>
+
+When the operation is called using a [token](https://developers.arcgis.com/authentication/) obtained through application logins, it always returns the default travel modes even if your organization has customized the travel modes. To get the travel modes from your organization, call this operation using a token obtained through a named user login. To run this operation in scenarios where you do not want the end users of your application to provide any credentials, you can use the following workflows: 
+
+-   Add the Utilities service (which contains the `GetTravelModes` operation) as an ArcGIS Server [web service item](https://doc.arcgis.com/en/arcgis-online/share-maps/share-items.htm) using its REST URL (`https://route.arcgis.com/arcgis/rest/services/World/Utilities/GPServer` ) and storing your named user credentials with the service item. You can then call the `GetTravelModes`  operation using the new URL provided by the service item. For example, after you add the web service item, the new URL to call `GetTravelModes` operation will be of the following form: `https://utility.arcgis.com/usrsvcs/servers/<itemId>/rest/services/World/Utilities/GPServer/GetTravelModes/execute?parameters` .
+-   Use a [self-hosted proxy service](DEVSITE/documentation/mapping-apis-and-services/security/). For the [proxy configuration](https://github.com/esri/resource-proxy#proxy-configuration-settings), set the Utilities service REST URL as the value for the `url`  property and the named user credentials for the `username` and `password`  properties. 
+
+</Note>
+
+</MoreInfo>
+
+## Required parameters
+
+The `GetTravelModes` operation takes the `token` and `f` parameters, which are both required.
+
+<Box>
+
+### f
+
+<SharedContent f/>
+
+</Box>
+
+<Box>
+
+### token
+
+<SharedContent token alpPrivileges="premium:user:networkanalysis:routing or premium:user:networkanalysis:optimizedrouting" agoPrivileges="premium:user:networkanalysis"/>
+
+</Box>
+
+## Response details
+
+The request to `GetTravelModes` returns a JSON response that contains any warning messages from the service execution as well as an array of results. Each result in this array contains the value for the output parameters, `supportedTravelModes` and `defaultTravelMode` . If the request fails to execute, the response only contains the `error` property that contains the error messages.
+
+For a list of error codes and details, go to [Direct request error codes](xref:///routing-error-codes)
+
+<Tabs>
+<TabNav slot="tab-nav">
+  <TabTitle is-active>Request URL</TabTitle>
+  <TabTitle is-active>Request response</TabTitle>
+  <TabTitle>Syntax for failed request</TabTitle>
+</TabNav>
+
+<Tab is-active>
+
+You can make a request to the `GetTravelModes`  operation from the Utilities service using the URL of the following form
+
+<CodeBlock language="http" label="POST" source="../../shared/routing/code-samples/responseExample/direct/getTravelMode.http"/>
+
+</Tab>
+
+<Tab>
+
+<CodeBlock language="json" source="../../shared/routing/code-samples/responseExample/direct/getTravelMode_ExampleResponse.json" group="json" maxLines={20} expandable/>
+
+</Tab>
+
+<Tab>
+
+<CodeBlock language="json" source="../../shared/routing/code-samples/responseExample/direct/getToolInfo_FailedRequest.json" group="json" maxLines={20} expandable/>
+
+</Tab>
+</Tabs>
+
+Upon successful completion, the service returns a list of supported travel modes and the default travel mode as the output parameters described below:
+
+<Box>
+
+### supportedTravelModes
+
+{/* <p class="space-x-2"><span class="font-sm text-color-3">type:string</span></p> */}
+
+<ParamMetadata types={[{name:"string"}]} />
+
+Use this parameter to a get a list of travel modes supported by your organization. 
+
+The following provides a description of fields that are returned for each travel mode:
+
+-   `ObjectID`—A unique identifier for the travel mode. This identifier is automatically generated by the service. 
+-   `Name`—The name of the travel mode. This field can include the localized travel mode name and cannot be used to uniquely identify a travel mode based on its name. Use the `AltName`  field for this instead. 
+-   `TravelModeId`—A unique identifier for the travel mode. This identifier is created every time a new travel mode is added but remains the same for existing travel modes. 
+-   `TravelMode`—The travel mode setting for a given travel mode. The value is a string representing a JSON object. When calling the routing services, you must convert this string into a JSON object using your API. 
+-   `AltName`—The name of the travel mode that does not change based on the profile language of the signed in user. This value can be used to uniquely identify a travel mode based on its name, unlike the `Name` field.
+
+The following shows an example of the `supportedTravelModes` parameter.
+
+**Example:**
+
+<CodeBlock language="json" source="../../shared/routing/code-samples/utilities/supportedTravelModes.json" group="json" maxLines={20} expandable/>
+
+</Box>
+
+<Box>
+
+### defaultTravelMode
+
+{/* <p class="space-x-2"><span class="font-sm text-color-3">type:string</span></p> */}
+
+<ParamMetadata types={[{name:"string"}]} />
+
+Use this parameter to get the default travel mode to be used by the user interface of your application. The `value` property returns the travel mode ID that corresponds to the `TravelModeId` property of the `attributes` objects returned by the `supportedTravelModes` output parameter. 
+
+The following shows an example of the `defaultTravelMode` parameter: 
+
+**Example:**
+
+<CodeBlock language="json" source="../../shared/routing/code-samples/utilities/defaultTravelModes.json" group="json" maxLines={20} expandable/>
+
+</Box>
+
+## Examples
+
+<Note type={"caution"}>
+
+If you copy and paste the request URL from the examples into a web browser, you need to replace `<yourToken>`  with a valid token. See [Security and authentication](DEVSITE/documentation/security-and-authentication/) to learn more.
+
+</Note>
+
+### Get a list of supported travel modes when the user profile language is English
+
+In this example, you will get a list of all the travel modes that are supported in your ArcGIS Online organization. The language of the signed in user is English. The `Name` and `AltName` fields for travel modes have identical values.
+
+<Tabs>
+<TabNav slot="tab-nav">
+  <TabTitle is-active>Request</TabTitle>
+  <TabTitle>Response</TabTitle>
+</TabNav>
+
+<Tab is-active>
+<CodeBlock language="http" source="../../shared/routing/code-samples/responseExample/direct/getTravelMode_English.http" group="HTTP" maxLines={20} expandable/>
+</Tab>
+
+<Tab>
+<CodeBlock language="http" source="../../shared/routing/code-samples/responseExample/direct/getTravelModeEnglish.json" group="json" maxLines={20} expandable/>
+</Tab>
+
+</Tabs>
+
+### Get a list of supported travel modes when the user profile language is Spanish
+
+In this example, you will get a list of all the travel modes that are supported in your ArcGIS Online organization. The language of the signed in user is Spanish. The `Name` field provides the travel mode name in Spanish, and the `AltName` field provides the travel mode name in English. Regardless of the user profile language, the `AltName` field always provides the travel mode name in English.
+
+<Tabs>
+<TabNav slot="tab-nav">
+  <TabTitle is-active>Request</TabTitle>
+  <TabTitle>Response</TabTitle>
+</TabNav>
+
+<Tab is-active>
+<CodeBlock language="http" source="../../shared/routing/code-samples/responseExample/direct/getTravelMode_Spanish.http" group="HTTP" maxLines={20} expandable/>
+</Tab>
+
+<Tab>
+<CodeBlock language="http" source="../../shared/routing/code-samples/responseExample/direct/getTravelModeSpanish.json" group="json" maxLines={20} expandable/>
+</Tab>
+
+</Tabs>
+

@@ -1,0 +1,213 @@
+---
+title: "Export Site"
+description: "The exportSite operation allows you to export your server site to a designated location."
+slug: "export-site"
+url: "/export-site"
+guid: "GUID-0A5764FE-D786-43D5-ADF9-9CFC971AB682"
+migratedTopicMetadata:
+  FTITLE: "Export Site"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.8.1 - *"
+  CREATED-ON: "24/09/2019 18:26:04"
+  FAUTHOR: "ithoman"
+  FSTATUS: "Released"
+  MODIFIED-ON: "01/06/2020 15:51:45"
+  VERSION: "1"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "6"
+  ED: "GUID-5DA7BA40-A3E0-448E-8A48-17DECE7B7DD1"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /exportSite
+  urlSegments:
+    - name: <admin-root>
+      url: /admin-site-root
+    - name: /exportSite
+  methods: []
+  sslOnly: 'yes'
+  versionIntroduced: '10.8'
+  requiredCapability: Administrator
+---
+
+## Description
+
+Exports the site configuration to a location you specify as input to this operation. The exported file includes and excludes the following information:
+
+<StyledTable headers={""}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Information included in the backup
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Information not included
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+-    Service configurations and service properties
+-    Server object extensions (SOEs)
+-    Server object interceptors (SOIs)
+-    Registered data store item locations
+-    Registered relational data store types
+-    User and role information
+-    List of machines in the site
+-    Log settings
+-    Statistics reports
+-    Scene tile cache configuration files under `arcgiscache/Hosted` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+-    Cache tiles and tiling schemes
+-    Data used by services (unless it was copied to a folder on the server automatically at publish time)
+-    Dynamically generated map images and other temporary output
+-    Log messages (including geoprocessing job statuses and messages)
+-    Primary site administrator name and password
+-    Statistics data
+-    ArcGIS Web Adaptor configurations
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+<Note type={"caution"}>
+
+You cannot make other administrative site configuration changes while a backup is in progress.
+
+</Note>
+
+## Protecting information not included in the backup
+
+As noted above, some information is not included in the backup of your site. It's recommended you manually back up this information at the same time you run the backup utility. When you restore the site, manually copy or move this information back to the site, for example:
+
+-    Cache tiles and tiling schemes - These directories will contain the cache tiles and the tiling scheme file conf.xml. The cache directories may also contain a file geodatabase status.gdb that contains information about which tiles have been built. When you restore the site, move or copy (L) the information back to the original arcgiscache directory.
+-    Data used by your services - If the data used by your services was not copied to a folder on the server (L?) when publishing, it will not be included in the backup. Manually back up your data directories, geodatabases, databases, source tables, and any other information used by your services. When you restore the site, verify  ArcGIS Mission Server has permissions to access your data locations.
+-    Log messages - When the site is running, logs are created and distributed among all  ArcGIS Mission Server machines participating in your site. When you restore the site, move or copy the information back to the original logs directory.
+-    Primary site administrator name and password - After you restore a site, you continue using the primary site administrator name and password that was in place when performing the restore. This is true even if you restore a site whose primary site administrator had been disabled. It's recommended you record the user name and password and store it in a secure location before performing the restore.
+-    Statistics data - When the site is running, various service statistics are recorded. When you restore the site, move or copy the information back to the original statistics directory.
+-   ArcGIS Web Adaptor configurations - If your site includes one or more ArcGIS Web Adaptor, you'll need to reconfigure them with your site after performing the restore. For full instructions, see the configuration topics for [IIS ](https://enterprise.arcgis.com/en/web-adaptor/latest/install/iis/configure-arcgis-web-adaptor-server.htm), [Java (Windows)](https://enterprise.arcgis.com/en/web-adaptor/latest/install/java-windows/configure-arcgis-web-adaptor-server.htm), and [Java (Linux)](https://enterprise.arcgis.com/en/web-adaptor/latest/install/java-linux/configure-arcgis-web-adaptor-server.htm).
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`location` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A path to a folder accessible to the server where the exported site configuration will be written. If a `location`  is not specified, the server writes the exported site configuration file to directory owned by the server and returns a virtual path (an HTTPS URL) to that location from where it can be downloaded.
+
+Example
+
+```javascript
+location=\\server\share\backup
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` . 
+
+Values: `html`  \| `json` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+Below is a sample POST request for `exportSite`  with the location parameter defined:
+
+```javascript
+POST /webadaptor/admin/exportSite HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+location=\\server\share\backup&f=json
+
+```
+
+ 
+
+Below is a sample POST request for `exportSite`  without the location parameter defined:
+
+```javascript
+POST /webadaptor/admin/exportSite HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+location=&f=json
+
+```
+
+ 
+
+## JSON Response example
+
+Below is a response example for a request that specified the `location`  parameter.
+
+```javascript
+{
+  status: "success",
+  location: "\\server\share\backup\Jan-15-2013_11-50-33.agssite"
+}
+```
+
+ 
+
+Below is a response example for a request that did not specify the `location`  parameter.
+
+```javascript
+{
+  status: "success",
+  location: "https://machine.domain.com/webadaptor/admin/uploads/i33d579b6-d8a8-4886-a1bc-671ae52e7a00"
+}
+```
+
+ 

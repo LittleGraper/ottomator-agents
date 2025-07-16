@@ -1,0 +1,195 @@
+---
+title: "Update System Properties"
+description: "The update operation modifies the system properties for an ArcGIS Enterprise on Kubernetes deployment."
+slug: "update-system-properties"
+url: "/update-system-properties"
+guid: "GUID-7D0C0766-06A6-4EC9-B4AB-072D061CE264"
+migratedTopicMetadata:
+  FTITLE: "Update System Properties"
+  FDESCRIPTION: ""
+  FCHANGES: "Removing version manifest information"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2-*"
+  CREATED-ON: "02/11/2023 14:36:46"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "09/11/2023 19:35:09"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-F2951722-F8C3-498B-BE80-F52DF45B8218"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /system/properties/update
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /system/properties/update
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed with the "Security and infrastructure" privilege
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `update` operation modifies the system properties for an ArcGIS Enterprise on Kubernetes deployment. When using this operation, all current system properties must be passed through in the request, including both the updated and preexisting property values. The current properties can be retrieved from the JSON view of the [Properties](/system-properties) resource and used as input for this operation's `properties` parameter. Only new system properties added to the JSON object, or properties with updated values, will be modified by the operation.
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `properties` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The JSON object containing the system properties to be added or updated.
+
+      ```markdown label=Example
+      properties={
+        "containerStartUpTimeoutSeconds": 900,
+        "allowGPAndExtensionPublishingToPublishers": true,
+        "arcgis.com.map.url": "https://organization.example.com/context/apps/mapviewer/index.html",
+        "arcgis.com.map.text": "My Orgainzation's Map Viewer"
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## System properties
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `containerStartUpTimeoutSeconds` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Sets the timeout (in seconds) for the start-up of containers during the upgrade process. The default value is 900.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `uploadFileExtensionAllowedList` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies which files are allowed to be uploaded through the file upload API by identifying the allowable extensions. It is a list of comma-separated extensions without dots. If this property is not specified, a default list is used.
+
+      <Note>
+
+      Updating the list overrides the default list completely. This means that if you set this property to a subset of the default list, only those items in the subset will be accepted for upload. Example: `sd`, `so`, `sde`, `odc`.
+
+      </Note>
+
+      Default list: `soe` | `cdpk` | `sd` | `sde` | `odc` | `csv` | `txt` | `zshp` | `agssite` | `agssiteservices` | `zip` | `geodatabase` | `kmz` | `json` | `geojson` | `gpx` | `xlsx` | `xls`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `allowGPAndExtensionPublishingToPublishers` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.0. When set as `true`, this property allows administrators and publishers to publish geoprocessing services and deploy service extensions (SOEs). By default, only administrators can publish geoprocessing services and service extensions.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `arcgis.com.map.url` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.2. Specifies the URL to use for the **ArcGIS Online Map Viewer** preview link that opens a service in Map Viewer.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `arcgis.com.map.text` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.2. Modifies the text to use for the **ArcGIS Online Map Viewer** preview link.
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+Before calling this operation, gather the current system properties configured for the deployment from the [Properties](/system-properties) resource. The JSON view of the resource is demonstrated below. These properties will be passed in with new properties, or modified values, in the `properties` parameter:
+
+```other
+{
+  "containerStartUpTimeoutSeconds": 900,
+  "allowGPAndExtensionPublishingToPublishers": true
+}
+```
+
+The following is a sample POST request that demonstrates updating the deployment's system properties to include the `arcgis.com.map.url` and `arcgis.com.map.text` properties:
+
+```other
+POST /context/admin/system/properties/update HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+properties={
+  "containerStartUpTimeoutSeconds": 900,
+  "allowGPAndExtensionPublishingToPublishers": true,
+  "arcgis.com.map.url": "https://organization.example.com/context/apps/mapviewer/index.html",
+  "arcgis.com.map.text": "My Orgainzation's Map Viewer"
+}&f=json&token=HRozb6bnTL6gfA-SJO-IxhfLgJrioK1KJdMLWmCE5HjHWz9U3fOiFv3-HkgPZqsLljTkk2WDENGt5fjho5s39e_mZL5At60UvJPoNnC5O2sv2HTlumG7TsYfbtnokpWmS6-lf8XoQpSKusZwmxIkEMP-yE0Wxrj8o9sWKi29J-pxzkoCDhoUfdLt6NnBWxhESpegh8BzNcEruqxuDQD-JRmaTsbRDaBHTQTePMzQePhXl7KcEG9Cfkw2sa7P1W1e
+```
+
+## JSON Response example
+
+```other
+{"status": "success"}
+```

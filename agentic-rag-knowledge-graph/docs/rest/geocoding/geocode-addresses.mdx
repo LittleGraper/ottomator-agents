@@ -1,0 +1,4549 @@
+---
+title: "/geocodeAddresses"
+description: "Use the ArcGIS Geocoding service to geocode a table of addresses, or batch geocode."
+slug: "geocode-addresses"
+url: "/geocode-addresses"
+guid: "GUID-73E3A10F-0510-4DF6-AC90-70EB98C110DD"
+migratedTopicMetadata:
+  FTITLE: "geocoding-geocode-addresses"
+  FDESCRIPTION: ""
+  FCHANGES: "December 2024 geocoding update"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "agol 24.R03"
+  CREATED-ON: "10/09/2024 14:02:11"
+  FAUTHOR: "mchaffin"
+  FSTATUS: "Draft"
+  MODIFIED-ON: "16/09/2024 16:19:51"
+  VERSION: "35"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-800389DA-E89B-4953-AE64-1955513E8394"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+---
+
+import ParamMetadata from "../../shared/components/param-metatdata"
+import SharedParams from "../../shared/content/_required-params"
+
+<div class="calcite-tabs-hide-borders">
+<Tabs>
+<TabNav slot="tab-nav">
+  <TabTitle is-active>Enhanced</TabTitle>
+</TabNav>
+
+<Tab is-active>
+<div style={{height:"15px"}}></div>
+
+<CodeSwitcher>
+<CodeBlock language="curl" label="GET">{`GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses`}</CodeBlock>
+<CodeBlock language="curl" label="POST">{`POST https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses`}</CodeBlock>
+</CodeSwitcher>
+
+</Tab>
+</Tabs>
+</div>
+
+
+The `/geocodeAddresses` request converts a list of addresses or place names to a set of complete addresses with locations. The list of addresses can be formatted as a JSON structure or provided in a CSV file.
+
+<!-- Geocode an entire list of addresses in one request using the `geocodeAddresses`  operation. Geocoding many addresses at once is also known as batch or bulk geocoding. -->
+
+<MoreInfo>
+
+![geocodeAddresses](./images/GUID-FD609701-B9B5-49DB-BFD9-A936280A09C6-web.png)
+
+This operation can be used to find the following types of locations:
+
+-   Street addresses
+
+    -   `27488 Stanford Ave, Bowden, North Dakota` 
+    -   `380 New York St, Redlands, CA
+        92373` 
+-   Administrative place-names, such as city, county, state, province, or country names
+
+    -   `Seattle,
+        Washington` 
+    -   `State of Mahārāshtra` 
+    -   `Liechtenstein` 
+-   Postal codes 
+
+    -   `92591` 
+    -   `TW9 1DN` 
+-   Points of interest (POI) by name
+
+    -   `Disneyland, California` 
+    -   `starbucks, 5th Ave, San Diego` 
+    -   `mount everest` 
+-   Coordinates
+
+    -   `-117.155579,32.703761` 
+
+The addresses in your table can be stored in a single field or in multiple fields—one for each address component. Batch geocoding performance is better when the address parts are stored in separate fields.
+
+Use the [batchGeocode](/batch-geocode)  operation to geocode a CSV (comma-separated values) file of addresses. The capabilities of `batchGeocode`  are the same as the `geocodeAddresses`  operation. These are the primary differences—
+
+-   With `batchGeocode` , the input addresses are passed to the service in a file; with `geocodeAddresses` , the addresses are passed to the service as a collection of JSON objects.
+-   The `batchGeocode`  process is executed as a job whose status can be monitored, and it does not block, nor is blocked by, other geocoding operations running concurrently.
+
+The `batchGeocode`  workflow is recommended for geocoding scenarios where a very large number of addresses need to be geocoded. 
+
+You can also batch geocode address tables using the ArcGIS Online [`Generate` ](DEVSITE/rest/users-groups-and-items/generate.htm) and [`Publish` ](DEVSITE/rest/users-groups-and-items/publish-item.htm) operations. These are higher-level APIs that simplify the batch geocoding process. 
+
+To successfully geocode addresses, at least one of the following must be included in the request:
+
+-   One or more administrative zones (smaller than country), such as a city name or postal code. 
+
+In this context, an address refers to one of the following [match address types](/service-output#GUID-D8DE94E9-5E2E-480D-9DE3-2212B9D7350D): [Subaddress](/service-output#LI_1BD33C21E9424A54BBF06B772B5D1696), [PointAddress](/service-output#LI_4B3F17B4A93A4610AC69269B4E782C93), [StreetAddress](/service-output#LI_1CDF019CA8DB497986F991693CFE0760), [StreetInt](/service-output#LI_EE1154CBFB464E99A1E2EA05203DDD27), [DistanceMarker](/service-output#LI_5E8DA7A1BE0B4FCA80D4954571390B03), [StreetMidBlock](/service-output#LI_99C7E857383A44979A734578BD10DBEC), [StreetBetween](/service-output#LI_CF9B2569B8F648AE9DA8D1A6AA386524), or [StreetName](/service-output#LI_FC46C9F4015D4BDA95F262C324EE6DF1).
+
+</MoreInfo>
+
+<!-- {/* <Note type={"note"}>
+
+URL encoding is enforced by ArcGIS Online and the ArcGIS Geocoding service. Ensure the request URLs sent to the service are properly encoded and patterned after the examples in this topic. 
+
+</Note>
+
+<Note type={"note"}>
+
+The REST request URL must include `HTTPS` . Requests with `HTTP`  are not supported.
+
+</Note>
+
+<Note type={"note"}>
+
+
+
+</Note> */} -->
+
+
+<!-- ## Batch geocode access
+
+An ArcGIS Online organizational account is required to use the batch geocoding functionality provided by the ArcGIS Geocoding service. Successfully geocoded addresses that return a status of Matched or Tied cause ArcGIS Online service credits to be consumed for batch geocoding operations.
+
+Each batch geocode request requires a token to be included with the request. Refer to [Security and authentication](DEVSITE/documentation/mapping-apis-and-services/security/) for information about how to generate a token. -->
+
+## Parameters 
+
+<StyledTable headers="Name, Required, Type, Default, Description">
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[f](#f)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The request response format, either `json` or `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[token](#token)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    An access token with the [required privileges](#token).
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[addresses](#addresses)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">object</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    A record set representing the addresses to be geocoded.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[category](#category)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    A place or address type that can be used to filter results.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[sourceCountry](#sourcecountry)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    Sets the country to be geocoded.
+
+    </StyledTableCell>
+  </StyledTableRow>
+
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[outSr](#outsr)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">number</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+        `4326`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The spatial reference of the `x` and `y` coordinates returned in a response.
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[matchOutOfRange](#matchoutofrange)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    Returns a match when the input house number is outside the street's house number range.
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[locationType](#locationtype)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `rooftop`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    
+    Specifies whether output geometry of `PointAddress` and `Subaddress` matches should be the rooftop point or street entrance.
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[searchExtent](#searchextent)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string | [envelope](DEVSITE/rest/services-reference/enterprise/geometry-objects/#envelope)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The set of bounding box coordinates that limits the search area. 
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[langCode](#langcode)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The language in which results are returned. 
+
+    </StyledTableCell>
+  </StyledTableRow>  
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[preferredLabelValues](#preferredlabelvalues)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     Returns the specified street or city name in output fields.
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[outFields](#outfields)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string | *</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The list of fields to be returned within the `attributes` object of a response.
+
+    </StyledTableCell>
+  </StyledTableRow> 
+</StyledTable>
+
+## Required parameters
+
+<Box>
+
+### f
+
+<SharedParams f/>
+
+</Box>
+
+<Box>
+
+### token
+
+<SharedParams token alpPrivileges={"premium:user:geocode:temporary or premium:user:geocode:stored"} agoPrivileges={"premium:user:geocode or premium:user:geocode:stored"}/>
+
+</Box>
+
+<Box>
+
+### addresses
+
+<ParamMetadata types={[{name:"object"}]} required />
+
+A record set representing the addresses to be geocoded. Each record must include an `OBJECTID`  attribute with a unique value as well as values for the address fields supported by the service. 
+
+For passing in the location name as a single line of text—single field batch geocoding—use the `SingleLine`  input field. 
+
+For passing in the location name as multiple lines of text—multifield batch geocoding—use the address fields described in [findAddressCandidates](/find-address-candidates). 
+
+The service info page [ https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer?f=pjson](http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer?f=pjson) provides localized versions of the input field names in all locales supported by the service. See [Localized input field names](/localized-input-field-names) for more information.
+
+The service info page also provides the maximum length of strings supported for each address input field. For the `SingleLine`  input field, refer to the `length`  attribute of the `singleLineAddressField`  object in the service info page. Currently, the maximum length is 200 characters. For the multifield address input fields, such as `address` , `address2` , `address3` , `city` , `postal` , and so on, refer to the `addressFields`  object. 	Within this object, each multifield input field is described by a `name`  attribute as well as a corresponding `length`  attribute. The `name`  attribute value in the service info is the same as the input field name. For example, information about the `address`  field can be found by searching for `name`  = `address`  within the `addressFields`  object.
+
+<MoreInfo labelMore="Addresses and batch size">
+
+**Maximum addresses**
+
+There is a limit to the maximum number of addresses that can be geocoded in a single batch request with the service. The `MaxBatchSize`  property defines this limit. For instance, if `MaxBatchSize=2000` , and a record set sent to the service contains 3,000 addresses, only the first 2,000 will be geocoded. The `SuggestedBatchSize`  property is also useful, as it specifies the optimal number of addresses to include in a single batch request.
+
+Both of these properties can be determined by querying the service description at [ https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer?f=pjson](http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer?f=pjson).
+
+The client application must account for the limit by dividing the input address table into record sets of `MaxBatchSize`  or fewer addresses and send each record set to the service as a separate request. Note that the [Generate](DEVSITE/rest/users-groups-and-items/generate.htm)  and [Publish](DEVSITE/rest/users-groups-and-items/publish-item.htm)  operations take care of this for you.
+
+**Batch size**
+
+For batch geocode operations, the service only returns a response after each address in the input record set has been geocoded. If an unhandled error such as a time-out occurs during the process, the server will not return any results for that request, even if most of the addresses in the input record set have already been geocoded. For this reason, the client application should implement logic to detect and handle such errors. 
+
+Response time-outs tend to occur when input addresses are poorly formed or include many extraneous tokens that are not likely to be matched to real address components. The frequency of lost batches due to such time-outs can be mitigated by reducing the number of addresses included in each batch. Follow these general guidelines when choosing a batch size for your operation:
+
+-   If the addresses you want to geocode are poorly formatted, ambiguous, or include many tokens, decrease the batch size to reduce the likelihood of time-outs. For extreme cases, you may need to set the batch size as low as 10 addresses. Be aware that using smaller batches will cause the `geocodeAddresses`  operation to perform more slowly overall. 
+-   If the addresses you want to geocode are well-formatted and unambiguous, increase the batch size to improve overall performance. For example, a batch size of 1,000 will result in better performance than smaller batch sizes in this scenario.
+
+  
+Ambiguous addresses are those that include little distinguishing information, and for which there may be many potential matches. For example, `100 Main St USA`  is an ambiguous address. There may be hundreds of places in the United States with the address 100 Main St. Including more details with the address, such as city and postal code, distinguishes it from other similar addresses and reduces the amount of time needed to find a match. For example, `100 Main St, Escondido, CA, 92026, USA`  is distinct and will likely only be matched to a single place. 
+</MoreInfo>
+
+<!-- {/* <Note type={"note"}>
+
+When sending long JSON objects in a request, it is necessary to use the `POST`  method instead of `GET` . This is due to URL length limitations. When `GET`  is used, the entire request is encoded in the URL; long JSON objects can cause the limit to be exceeded and the URL to be truncated. A typical `geocodeAddresses`  request will include hundreds of street addresses, which are formatted as part of the `addresses`  parameter. Such large numbers of addresses can quickly cause the URL length limit to be reached. For this reason, it is recommended that applications use the `POST`  method to send `geocodeAddresses`  requests. 
+
+</Note> */} -->
+
+```javascript
+addresses=
+{
+    "records": [
+        {
+            "attributes": {
+                "OBJECTID": 1,
+                "Address": "380 New York St",
+                "Neighborhood": "",
+                "City": "Redlands",
+                "Subregion": "",
+                "Region": "CA"
+            }
+        },
+        {
+            "attributes": {
+                "OBJECTID": 2,
+                "Address": "1 World Way",
+                "Neighborhood": "",
+                "City": "Los Angeles",
+                "Subregion": "",
+                "Region": "CA"
+            }
+        }
+    ]
+}
+```
+
+</Box>
+
+## Optional parameters
+
+<Box>
+
+### category
+
+<ParamMetadata types={[{name:"string"}]} /> 
+
+A place or address type that can be used to filter `geocodeAddresses`  results. The parameter supports input of single-category values or multiple comma-separated values. See [Category filtering](/category-filtering) for details about the `category`  parameter.
+
+<Note type={"note"}>
+
+If more than one value is specified for the parameter, the values must be separated by a comma, with no spaces after the comma.
+
+</Note>
+
+Example of category filtering with a single category
+
+```javascript
+category=Address
+```
+
+ Example of category filtering with multiple categories
+
+```javascript
+category=Address,Postal
+```
+</Box> 
+
+<Box>
+
+### sourceCountry
+
+<ParamMetadata types={[{name:"string"}]} />
+
+A value representing the country. When a value is passed for this parameter, all of the addresses in the input table are sent to the specified country to be geocoded. For example, if `sourceCountry=USA`  is passed with a batch request, it is assumed that all of the addresses in the table are in the United States, so only matching addresses in the U.S. are returned. Using this parameter can increase batch geocoding performance when all addresses are within a single country.
+
+Acceptable values include the three-character country code. You can specify multiple country codes to limit results to more than one country.
+
+A list of supported countries and codes is available in [Data coverage](/geocode-coverage).
+
+<Note type={"note"}>
+
+The `sourceCountry`  and `countryCode`  parameters are similar but serve different purposes. The `countryCode`  parameter defines the country value for an individual record in a multifield batch geocode request. The `sourceCountry`  parameter defines the country value for the entire table of addresses. If both `countryCode`  and `sourceCountry`  are included in a `geocodeAddresses`  request, and the country values are different, the `countryCode`  value takes priority over `sourceCountry` . 
+
+</Note>
+
+<Note type={"note"}>
+
+If more than one value is specified for the parameter, the values must be separated by a comma, with no spaces after the comma.
+
+</Note>
+
+Example: Single country
+
+```javascript
+sourceCountry=USA
+```
+
+ Example: Multiple countries
+
+```javascript
+sourceCountry=FRA,DEU,ESP
+```
+
+</Box>
+
+<Box>
+
+### outSR
+
+<ParamMetadata types={[{name:"number"}]} defaultValue="4326" />
+
+The spatial reference of the x,y coordinates returned by a geocode request. This is useful for applications using a map with a spatial reference different than that of the geocode service. 
+
+The spatial reference can be specified as either a well-known ID (WKID) or as a [JSON spatial reference object](DEVSITE/rest/services-reference/enterprise/geometry-objects/#spatial-reference). If `outSR`  is not specified, the spatial reference of the output locations is the same as that of the service. The ArcGIS Geocoding service spatial reference is WGS84 (WKID = 4326). 
+
+For a list of valid WKID values, see [Projected coordinate systems](https://links.esri.com/proj-coord-systems) and [Geographic coordinate systems](https://links.esri.com/geo-coord-systems).
+
+Example (102100 is the WKID for the Web Mercator projection)
+
+```javascript
+outSR=102100
+```
+
+</Box>
+ 
+<Box>
+
+### matchOutOfRange
+
+<ParamMetadata types={[{name:"boolean"}]} defaultValue="true"/> 
+
+A Boolean that specifies whether StreetAddress matches should be returned even when the input house number is outside of the house number range defined for the input street. Out-of-range matches have `=StreetAddressExt` . The geometry of such matches is a point corresponding to the end of the street segment where the range value is closest to the input house number. If `matchOutOfRange`  is not specified in a request, its value is set to `true`  by default.
+
+With the `matchOutOfRange`  parameter, better spatial accuracy is provided for inexact street address searches. Most street segments are assigned house number ranges. For example, Main Street may include house numbers from 2–100 on one side of the street and 1–99 on the other. A user may search for a house number that is not within this range, such as 109 Main Street. If `matchOutOfRange=false`  is passed in this request, the geocode service will return a StreetName-level match to Main Street, with geometry corresponding to the centroid of a street segment that most closely matches the input values. StreetName matches can be ambiguous because there may be multiple street segments with the same name that equally match the input. However, if `matchOutOfRange=true` , in this case, a more precise geometry is returned to the specific side of the segment of Main Street with house number range 1–99. 
+
+<Note type={"note"}>
+
+Input house numbers that exceed the range on a street segment by more than 100 will not result in StreetAddressExt matches. For streets with smaller house number ranges, the `maxOutOfRange`  tolerance is less than 100.
+
+</Note>
+
+
+```javascript
+matchOutOfRange=false
+```
+</Box>
+ 
+<Box>
+
+### locationType
+
+<ParamMetadata types={[{name:"string"}]} values="rooftop, street"/>
+
+The `locationType`  parameter specifies whether the output geometry of PointAddress matches should be the rooftop point or street entrance location. Valid values are `rooftop`  and `street` . The default value is `rooftop` .
+
+Geocode results include one geometry object (the `location`  object) which defines the location of the address, as well as two sets of x,y coordinate values within the `attributes`  object: [X](/service-output#GUID-BFD661FB-1180-45D8-9ECE-9868D95B7D6E) /[Y](/service-output#GUID-F9505F9C-5550-47B5-8776-3997F12B88F8) , and [DisplayX](/service-output#GUID-458D2C0A-15FC-49FE-95E5-CEF1747156F1) /[DisplayY](/service-output#GUID-7FA7D401-4A50-462F-A5CD-0489405A5A07) . In most cases, for geocode results with `=PointAddress`  or `Subaddress` , the `X` /`Y`  attribute values describe the coordinates of the address along the street, while the `DisplayX` /`DisplayY`  values describe the rooftop, or building centroid, coordinates. By default, the geometry returned for geocode results represents the rooftop location of the address (if the rooftop location is available in the source data). This is useful for most spatial analysis and map display purposes. However, for routing scenarios, it may be desirable to use the street location because the rooftop location of some addresses may be offset from a street by a large distance. For these cases, the `locationType`  parameter can be used to specify that the street entrance geometry should be returned. 
+
+It is important to note that `locationType`  is limited by the address data sources used by the ArcGIS Geocoding service. Not all PointAddress and Subaddress features include rooftop and street location coordinates. For some addresses, only a rooftop location is available; for others, only a street location is provided by the data source. For cases such as this, the `locationType`  parameter may not function as expected. For example, if only rooftop location coordinates are available for an address, the rooftop geometry will be returned for the geocoded address even when `locationType=street`  is requested. 
+
+<Note type={"note"}>
+
+The `locationType`  parameter only affects the `location`  object in the geocode JSON response. It does not change the `X` /`Y`  or `DisplayX` /`DisplayY`  attribute values.
+
+</Note>
+
+```javascript
+locationType=street
+```
+</Box>
+
+<Box>
+
+### searchExtent
+
+<ParamMetadata types={[{name:"string"},{name:"envelope", link:"DEVSITE/rest/services-reference/enterprise/geometry-objects/#envelope"}]} />
+
+A set of bounding box coordinates that limit the search area to a specific region. This is especially useful for applications in which a user will search for places and addresses within the current map extent.
+
+You can specify the spatial reference of the `searchExtent`  coordinates, which is necessary if the map spatial reference is different than that of the ArcGIS Geocoding service; otherwise, the spatial reference of the coordinates is assumed to be the same as that of the ArcGIS Geocoding service. 
+
+The input can either be a comma-separated list of coordinates defining the bounding box or a [JSON envelope object](DEVSITE/rest/services-reference/enterprise/geometry-objects/#envelope). The spatial reference of the bounding box coordinates can be included if an envelope object is used.
+
+Refer to the [Geocode addresses within an extent](/geocode-addresses#geocode-addresses-within-an-extent) section below for more details about using `searchExtent` .
+
+Example without a spatial reference
+
+```javascript
+searchExtent=-104,35.6,-94.32,41
+```
+
+ Example with a spatial reference
+
+```javascript
+searchExtent=
+{
+    "xmin": -13052769,
+    "ymin": 3951172,
+    "xmax": -13019630,
+    "ymax": 3978490,
+    "spatialReference": {
+        "wkid": 3395
+    }
+}
+```
+</Box>
+<Box>
+
+### langCode
+
+<ParamMetadata types={[{name:"string"}]} />
+
+The `langCode`  parameter sets the language in which geocode results are returned. Addresses and places in many countries are available in more than one language; in these cases, the `langCode`  parameter can be used to specify which language should be used for results returned by the `geocodeAddresses`  operation. This is useful for ensuring that results are returned in the expected language. For example, a web application could be designed to get the browser language and pass it as the `langCode`  parameter value in a `geocodeAddresses`  request.
+
+See the [table of supported countries](/geocode-coverage#level-1) for valid language code values in each country. The Supported Language Codes column provides the valid input values for the `langCode`  parameter. Full language names cannot be used with the `langCode`  parameter. Only one language code value can be included for the `langCode`  parameter in a `geocodeAddresses`  request.
+
+If the `langCode`  parameter isn't included in a request, or if it is included but there are no matching features with the input language code, the resultant match is returned in the language code of the primary matched component from the input search string. Typically, this is either place-name or street name, depending on the search string.
+
+Similarly, when there are multiple supported languages for a country, it doesn't mean that every address in the country is available in each of the languages. It may be the case that addresses are available in multiple languages for only one region of the country, or that each language is exclusive to a different region and there is no overlap. The following are some examples:
+
+-   Both English and French are listed as supported languages for Canada. However, there is no overlap between the languages for any addresses in most provinces. In the province of Quebec, only French addresses are available, while English is the only language used for addresses in Ontario. 
+-   In Belgium, where three languages are supported (Dutch, French, and German), addresses are available in the city of Brussels in both Dutch and French. However, in the majority of the country, only a single language is used for addresses. 
+-   In Greece, there is complete address coverage in both Greek and transliterated Greek languages (Greek words represented with Latin characters).
+
+Due to variability of language coverage, the following logic is used to handle the different scenarios that may be encountered.
+
+<StyledTable headers={"Scenario,Result,Example"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Only one language is supported for an address, and no `langCode`  value is specified in the `geocodeAddresses`  request.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Candidate is returned in the supported language.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Input (address in Geneva, Switzerland):
+
+-   `Avenue Appia 20 1202 Geneva` 
+-   `langCode=` 
+
+Output: `Avenue Appia 20, 1202, Pregny-Chambésy, Genève` 
+
+<Note type={"note"}>
+
+The candidate is returned in French because it is the only language supported for addresses in Geneva, Switzerland.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Only one language is supported for an address, and an unsupported language is specified for the `langCode`  parameter in the `geocodeAddresses`  request.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Candidate is returned in the supported language.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Input (address in Geneva, Switzerland):
+
+-   `Avenue Appia 20 1202 Geneva` 
+-   `langCode=zh`  (Chinese)
+
+Output: `Avenue Appia 20, 1202, Pregny-Chambésy, Genève` 
+
+<Note type={"note"}>
+
+The candidate is returned in French because language `zh`  (Chinese) is not supported for addresses in Geneva. French is the only language supported for addresses in Geneva.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Multiple languages are supported for an address, and no `langCode`  value is specified in the `geocodeAddresses`  request. 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Candidate is returned in the language of the primary matched component from the input string (street name or place-name).
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Input (address in Brussels, Belgium):
+
+-   `Wetstraat 175 Brussel` 
+-   `langCode=` 
+
+Output: `Wetstraat 175, 1040, Brussel` 
+
+<Note type={"note"}>
+
+The candidate is returned in Dutch based on the matched street name Wetstraat, which is Dutch. Both Dutch and French languages are supported for addresses in Brussels, Belgium.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Multiple languages are supported for an address, and an unsupported language is specified for the `langCode`  parameter in the `geocodeAddresses`  request.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Candidate is returned in the language of the primary matched component from the input string (street name or place-name).
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Input (address in Athens, Greece):
+
+-   `Dionysiou Areopagitou 15, 11742, Athens` 
+-   `langCode=ru`  (Russian)
+
+Output: `Dionysiou Areopagitou 15, 117 42, Athens` 
+
+<Note type={"note"}>
+
+The candidate is returned in transliterated Greek based on the matched street name Dionysiou Areopagitou, because language `ru`  (Russian) is not supported for addresses in Greece. Only Greek and transliterated Greek are supported for addresses in Greece.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Multiple languages are supported for an address, and a supported language is specified for the `langCode`  parameter in the `geocodeAddresses`  request.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Candidate is returned in the requested language.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Input (address in Athens, Greece):
+
+-   `Dionysiou Areopagitou 15, 11742, Athens` 
+-   `langCode=el`  (Greek)
+
+Output: `Διονυσίου Αρεοπαγίτου 15, 117 42, Αθήνα` 
+
+<Note type={"note"}>
+
+The candidate is returned in Greek because language `el`  (Greek) is supported for addresses in Greece.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+```javascript
+langCode=fr
+```
+</Box>
+<Box>
+
+### preferredLabelValues
+
+<ParamMetadata types={[{name:"string"}]} />
+
+The `preferredLabelValues`  parameter allows simple configuration of output fields returned in a response from the ArcGIS Geocoding service by specifying which address component values should be included in output fields. The parameter supports a single value or a comma-delimited collection of values as input. If the parameter is blank or excluded from a request, default address label formats will be used. 
+
+A particular address may have multiple city names associated with it. In the United States, for example, all addresses have a ZIP Code (postal code) assigned to them. Each ZIP Code has one or more associated locality names, which are known as postal cities. There is always one primary postal city value for each ZIP Code. ZIP Codes typically have no set boundaries, and the primary postal city name for the ZIP Code that is assigned to an address may be different than the name of the local city that the address is within.
+
+<Note type={"note"}>
+
+ In the context of the `preferredLabelValues`  parameter, the name of the city whose boundary an address is within is referred to as the local city, as opposed to the postal city name assigned to the address's postal code.
+
+</Note>
+
+For addresses in the United States, the ArcGIS Geocoding service includes the primary postal city in response output fields by default. As an example, postal code 45420 in Ohio has the primary postal city value Dayton. Addresses in the city of Kettering are assigned this postal code. It means that the default output fields for all geocoded addresses with postal code 45420, even those within the city of Kettering, will include Dayton as the city. To illustrate, if a user searches for `2109 E Dorothy Ln, OH, 45420` , the default match label returned in the response is **2109 E Dorothy Ln, Dayton, Ohio, 45420**, even though the address is within the Kettering city limits. 
+
+Some organizations may prefer to include the local city name in the response instead of the postal city. The `preferredLabelValues`  can be used for this purpose. For the previous example, if `preferredLabelValues=localCity`  is included in the request, the output match label in the response will be **2109 E Dorothy Ln, Kettering, Ohio, 45420**. 
+
+Similarly, streets may be known by multiple names. This is especially true with highways. For example, Pearblossom Hwy in California, which is the primary name, is also known as CA-138. The ArcGIS Geocoding service allows matching to addresses using either name as input, and by default will return the name that was matched to in the response. 
+
+Some organizations may prefer that the primary street name be returned in the response even if a user searches for an alternate street name, and they can use the `preferredLabelValues`  parameter to accomplish this. In other words, if a user searches for `CA-138, Pearblossom, CA` , and `preferredLabelValues=primaryStreet`  is included in the request, the match label returned in the response is **Pearblossom Hwy, Pearblossom, California, 93553**. 
+
+See the following table for supported parameter values.
+
+<StyledTable headers={"Parameter value,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+postalCity
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Include the primary postal city value in geocoding response output fields, even if it is different than the city name in the geocoding request. This is the primary name assigned to the postal code of the address. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+localCity
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Include the primary local city name in geocoding response output fields, even if it is different than the city name in the geocoding request. This is the name of the city that the address is within, and may be different than the postal city. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+matchedCity
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If the input city name in a geocoding request matches any of the local city or postal city names associated with an address, include the matched value in geocoding response output fields. If a city name is not included in the input, or is included but doesn't match to anything, default address formats will be used.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+primaryStreet
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Include the primary street name in geocoding response output fields, even if it is different than the street name in the geocoding request.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+matchedStreet
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If the input street name in a geocoding request matches any of the supported street names assigned to an address, include the matched value in geocoding response output fields.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+Here are additional details about the `preferredLabelValues`  parameter
+
+-   The `preferredLabelValues`  parameter takes a comma-delimited collection of values as input.
+-   The parameter values correspond to two groups—a City group and a Street group, indicated by the suffix of the value name. The `postalCity` , `localCity` , and `matchedCity`  values are part of the City group. The `primaryStreet`  and `matchedStreet`  values are part of the Street group.
+-   A geocode request can include one City value and one Street value—for instance: `preferredLabelValues=primaryStreet,postalCity` .
+-   A request can only include one value per group. In other words, a request with `preferredLabelValues=matchedCity,postalCity`  is invalid.
+
+Example: Single label value
+
+```javascript
+preferredLabelValues=matchedCity
+```
+
+ Example: Multiple label values
+
+```javascript
+preferredLabelValues=matchedCity,primaryStreet
+```
+
+ 
+
+<Note type={"note"}>
+
+The functionality of the `preferredLabelValues`  parameter is limited by the data sources used to produce the ArcGIS Geocoding service. Not all addresses have postal city and local city values assigned to them. Likewise, only certain streets may include primary and alternate names. If the `preferredLabelValues`  parameter is used and the output labels don't correspond to expectations in some cases, it is likely because the expected values aren't included in the source data for the addresses. 
+
+</Note>
+
+</Box>
+<Box>
+
+### outFields
+
+<ParamMetadata types={[{name:"string"},{name:"*"}]} />
+
+The list of fields to be returned within the `attributes`  object of the `geocodeAddresses`  response. Descriptions for each of these fields are available in the [Service output](/service-output#output-fields) topic. 
+
+Unless otherwise specified, all output fields are returned in a `geocodeAddresses`  response (refer to this [example](/geocode-addresses#GUID-B9E74F70-6428-493E-9A29-9E29DC22208B) to see the full set of output fields). The `outFields`  parameter can be used to limit the result set by allowing specific fields to be returned, which is useful if not all fields are required for a user workflow.
+
+If `outFields=none`  is passed in a `geocodeAddresses`  request, only the minimum set of components is included in the response. This includes the `ResultID`  field, which is always part of the `geocodeAddresses`  response no matter which values are defined for the `outFields`  parameter. The minimum set of objects includes the following:
+
+-   `spatialReference` 
+-   `locations`  (full address and x,y coordinates of the match location)
+-   `score` 
+-   `attributes`  (including the `ResultID`  output field)
+
+<Note type={"note"}>
+
+The full set of output fields is included in a `geocodeAddresses`  response for the following conditions:
+
+-   The `outFields`  parameter is excluded from the request.
+-   The `outFields`  parameter is included but empty (`outFields=` ).
+-   The wildcard character is passed as the `outFields`  value (`outFields=*` ).
+
+</Note>
+
+<Note type={"note"}>
+
+The `outFields`  values included in a request should use the same casing as the `name`  values listed within the `candidateFields`  section of the service description page: [https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer?f=pjson](https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer?f=pjson). More information about output fields can be found in [Service output](/service-output).
+
+</Note>
+
+<Note type={"note"}>
+
+If more than one value is specified for the parameter, the values must be separated by a comma, with no spaces after the comma.
+
+</Note>
+
+Examples that return all output fields
+
+```javascript
+outFields=*
+outFields=
+
+```
+
+ Example that returns a partial set of output fields
+
+```javascript
+outFields=AddNum,StAddr,City
+```
+
+ Example that returns the minimum set of output fields
+
+```javascript
+outFields=none
+```
+</Box>
+
+<!-- ## Batch geocoding output fields
+
+When geocoding a table of addresses, the output fields are returned as part of the attributes in the response. See the example JSON response below, which shows all of the output fields that are returned for each record from a batch geocode process. The output fields are described in the [Service output](/service-output#output-fields) topic. 
+
+With batch geocoding, it is useful to define a unique ID for each record in your input table of addresses. You can pass the `ID`  as the `OBJECTID`  in the batch geocode request, and the `ID`  will be returned as the `ResultID`  in the response. The `ResultID`  can then be used to link the output fields in the response records, including the x,y location, to the attributes in the original table.  -->
+
+## Response status
+
+<StyledTable headers="Status, Meaning, Description, Schema">
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">200</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[OK](https://datatracker.ietf.org/doc/html/rfc7231#section-6.3.1)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     A successful response for a `/geocodeAddresses` request.
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     Inline
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">400</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[Bad request](https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    Invalid query parameters. Learn more in [Service output](xref:///geocoding-service-output/#error-code-400).
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     [Error](#response-details)
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">403</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[Forbidden](https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.3)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     The required paramter `token` is valid but does not have permission to access the service. Learn more in [Service output](xref:///geocoding-service-output/#error-code-403).
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     [Error](#response-details)
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">5XX</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">Unknown</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     An error occured on the server. Learn more in [Service output](xref:///geocoding-service-output/#error-code-500).
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     [Error](#response-details)
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+Go to [Service output](xref:///geocoding-service-output/#error-codes) for extended codes.
+
+<MoreInfo labelMore="Handling request failures">
+
+The `geocodeAddresses`  REST operation results in an output JSON response. However, the REST request may not always successfully return results. A variety of things could cause a REST request to fail:
+
+-   Incorrect authentication (token required or invalid token).
+-   Incorrect syntax in the request. Ensure the request being sent is properly formatted.
+-   Internet connectivity issues.
+-   Server time-out.
+
+ You can write code to handle these request failures caused by server time-outs. When a time-out occurs, your code will need to do the following:
+
+-   Recognize the time-out in the JSON response.
+-   Split the request into smaller batch sizes and resubmit the request as two separate requests. Each new request will be half the size of the original request and will contain half the addresses.
+-   See whether each request succeeds. If one of the batches fails due to a time-out, continue the process of splitting the failing batch in two and sending both requests.
+-   If a request is sent with only one address and it times out, manually write that record as unmatched and continue processing requests.
+-   Continue this process until all batch requests have completed successfully.
+
+The retry logic described above is the recommended best practice when using the `geocodeAddresses`  operation. The [Geocode Addresses](https://pro.arcgis.com/en/pro-app/latest/tool-reference/geocoding/geocode-addresses.htm), [Geocode File](https://pro.arcgis.com/en/pro-app/latest/tool-reference/geocoding/geocode-file.htm), and [Geocode Locations from Table](https://pro.arcgis.com/en/pro-app/latest/tool-reference/geocoding/geocode-locations-from-table.htm) geoprocessing tools in ArcGIS Pro already use this logic to ensure batch geocoding never fails against a geocode service. 
+
+</MoreInfo>
+
+## Response details 
+
+<!-- Go to [Response types](xref:///geocoding-types) for an example of the JSON response object.  -->
+
+<CodeSwitcher displayMode="tabs">
+  <CodeBlock language="json" group="200 OK" source="./code/geocode-addresses-response.json" section="200"/>
+  <CodeBlock language="json" group="No results" source="./code/geocode-addresses-response.json" section="noresponse" />
+  <CodeBlock language="json" group="Error" source="./code/error-response.json"/>
+</CodeSwitcher> 
+
+
+## Examples 
+
+<!-- The following examples illustrate how to format JSON batch geocoding requests for multiline address input (first example) and single-line input (second example) scenarios. In both cases, the response contains the same information. -->
+
+<Box>
+
+### Batch geocode two addresses 
+
+##### Multifield 
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses={"records":
+[{"attributes":{"OBJECTID":1,"Address":"380 New York St.","City":"Redlands","Region":"CA","Postal":"92373"}},{"attributes":{"OBJECTID":2,"Address":"1 World Way","City":"Los Angeles","Region":"CA","Postal":"90045"}}]}&sourceCountry=USA&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "locations": [
+  {
+   "address": "1 World Way, Los Angeles, California, 90045",
+   "location": {
+    "x": -118.398178349434,
+    "y": 33.944692934838
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 2,
+    "Loc_name": "World",
+    "Status": "M",
+    "Score": 100,
+    "Match_addr": "1 World Way, Los Angeles, California, 90045",
+    "LongLabel": "1 World Way, Los Angeles, CA, 90045, USA",
+    "ShortLabel": "1 World Way",
+    "Addr_type": "PointAddress",
+    "Type": "",
+    "PlaceName": "",
+    "Place_addr": "1 World Way, Los Angeles, California, 90045",
+    "Phone": "",
+    "URL": "",
+    "Rank": 20,
+    "AddBldg": "",
+    "AddNum": "1",
+    "AddNumFrom": "",
+    "AddNumTo": "",
+    "AddRange": "",
+    "Side": "",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "World",
+    "StType": "Way",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "1 World Way",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "Los Angeles",
+    "MetroArea": "",
+    "Subregion": "Los Angeles County",
+    "Region": "California",
+    "RegionAbbr": "CA",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "90045",
+    "PostalExt": "5803",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -118.398119676112,
+    "Y": 33.945061151844,
+    "DisplayX": -118.398178349434,
+    "DisplayY": 33.944692934838,
+    "Xmin": -118.399178349434,
+    "Xmax": -118.397178349434,
+    "Ymin": 33.943692934838,
+    "Ymax": 33.945692934838,
+    "ExInfo": "",
+    "StrucType": "Commercial",
+    "StrucDet": "Transport"
+   }
+  },
+  {
+   "address": "380 New York St, Redlands, California, 92373",
+   "location": {
+    "x": -117.195426038092,
+    "y": 34.056097983409
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 1,
+    "Loc_name": "World",
+    "Status": "M",
+    "Score": 100,
+    "Match_addr": "380 New York St, Redlands, California, 92373",
+    "LongLabel": "380 New York St, Redlands, CA, 92373, USA",
+    "ShortLabel": "380 New York St",
+    "Addr_type": "PointAddress",
+    "Type": "",
+    "PlaceName": "",
+    "Place_addr": "380 New York St, Redlands, California, 92373",
+    "Phone": "",
+    "URL": "",
+    "Rank": 20,
+    "AddBldg": "",
+    "AddNum": "380",
+    "AddNumFrom": "",
+    "AddNumTo": "",
+    "AddRange": "",
+    "Side": "",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "New York",
+    "StType": "St",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "380 New York St",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "Redlands",
+    "MetroArea": "",
+    "Subregion": "San Bernardino County",
+    "Region": "California",
+    "RegionAbbr": "CA",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "92373",
+    "PostalExt": "8118",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -117.195658887362,
+    "Y": 34.056466284234,
+    "DisplayX": -117.195426038092,
+    "DisplayY": 34.056097983409,
+    "Xmin": -117.196426038092,
+    "Xmax": -117.194426038092,
+    "Ymin": 34.055097983409,
+    "Ymax": 34.057097983409,
+    "ExInfo": "",
+    "StrucType": "Commercial",
+    "StrucDet": "Office"
+   }
+  }
+ ]
+}
+```
+</Tab>
+</Tabs>
+
+##### Single-field 
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses={"records":[{"attributes":{"OBJECTID":1,"SingleLine":"380 New York St., Redlands, CA, 92373"}},{"attributes":{"OBJECTID":2,"SingleLine":"1 World Way, Los Angeles, CA, 90045"}}]}&sourceCountry=USA&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "locations": [
+  {
+   "address": "1 World Way, Los Angeles, California, 90045",
+   "location": {
+    "x": -118.398178349434,
+    "y": 33.944692934838
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 2,
+    "Loc_name": "World",
+    "Status": "M",
+    "Score": 100,
+    "Match_addr": "1 World Way, Los Angeles, California, 90045",
+    "LongLabel": "1 World Way, Los Angeles, CA, 90045, USA",
+    "ShortLabel": "1 World Way",
+    "Addr_type": "PointAddress",
+    "Type": "",
+    "PlaceName": "",
+    "Place_addr": "1 World Way, Los Angeles, California, 90045",
+    "Phone": "",
+    "URL": "",
+    "Rank": 20,
+    "AddBldg": "",
+    "AddNum": "1",
+    "AddNumFrom": "",
+    "AddNumTo": "",
+    "AddRange": "",
+    "Side": "",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "World",
+    "StType": "Way",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "1 World Way",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "Los Angeles",
+    "MetroArea": "",
+    "Subregion": "Los Angeles County",
+    "Region": "California",
+    "RegionAbbr": "CA",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "90045",
+    "PostalExt": "5803",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -118.398119676112,
+    "Y": 33.945061151844,
+    "DisplayX": -118.398178349434,
+    "DisplayY": 33.944692934838,
+    "Xmin": -118.399178349434,
+    "Xmax": -118.397178349434,
+    "Ymin": 33.943692934838,
+    "Ymax": 33.945692934838,
+    "ExInfo": "",
+    "StrucType": "Commercial",
+    "StrucDet": "Transport"
+   }
+  },
+  {
+   "address": "380 New York St, Redlands, California, 92373",
+   "location": {
+    "x": -117.195426038092,
+    "y": 34.056097983409
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 1,
+    "Loc_name": "World",
+    "Status": "M",
+    "Score": 100,
+    "Match_addr": "380 New York St, Redlands, California, 92373",
+    "LongLabel": "380 New York St, Redlands, CA, 92373, USA",
+    "ShortLabel": "380 New York St",
+    "Addr_type": "PointAddress",
+    "Type": "",
+    "PlaceName": "",
+    "Place_addr": "380 New York St, Redlands, California, 92373",
+    "Phone": "",
+    "URL": "",
+    "Rank": 20,
+    "AddBldg": "",
+    "AddNum": "380",
+    "AddNumFrom": "",
+    "AddNumTo": "",
+    "AddRange": "",
+    "Side": "",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "New York",
+    "StType": "St",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "380 New York St",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "Redlands",
+    "MetroArea": "",
+    "Subregion": "San Bernardino County",
+    "Region": "California",
+    "RegionAbbr": "CA",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "92373",
+    "PostalExt": "8118",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -117.195658887362,
+    "Y": 34.056466284234,
+    "DisplayX": -117.195426038092,
+    "DisplayY": 34.056097983409,
+    "Xmin": -117.196426038092,
+    "Xmax": -117.194426038092,
+    "Ymin": 34.055097983409,
+    "Ymax": 34.057097983409,
+    "ExInfo": "",
+    "StrucType": "Commercial",
+    "StrucDet": "Office"
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+{/* Input multiline JSON record set (URL encoded):
+
+
+`GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses=%7B%22records%22%3A%5B%7B%22attributes%22%3A%7B%22OBJECTID%22%3A1%2C%22Address%22%3A%22380%20New%20York%20St%2E%22%2C%22City%22%3A%22Redlands%22%2C%22Region%22%3A%22CA%22%2C%22Postal%22%3A%2292373%22%7D%7D%2C%7B%22attributes%22%3A%7B%22OBJECTID%22%3A2%2C%22Address%22%3A%221%20World%20Way%22%2C%22City%22%3A%22Los%20Angeles%22%2C%22Region%22%3A%22CA%22%2C%22Postal%22%3A%2290045%22%7D%7D%5D%7D&sourceCountry=USA&f=pjson&token=<ACCESS TOKEN>`
+
+For clarity, here is the `addresses`  parameter in PJSON:
+
+```java
+addresses=
+{           "records": [
+        {
+            "attributes": {
+                "OBJECTID": 1,
+                "Address": "380 New York St.",
+                "City": "Redlands",
+                "Region": "CA",
+                "Postal": "92373"
+            }
+        },
+   {
+            "attributes": {
+                "OBJECTID": 2,
+                "Address": "1 World Way",
+                "City": "Los Angeles",
+                "Region": "CA",
+                "Postal": "90045"
+            }
+        }
+    ]
+}
+
+```
+
+ 
+
+Here is the input single-field JSON record set (URL encoded):
+
+<Box>
+
+`GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses=%7B%22records%22%3A%5B%7B%22attributes%22%3A%7B%22OBJECTID%22%3A1%2C%22SingleLine%22%3A%22380%20New%20York%20St%2E%2C%20Redlands%2C%20CA%2C%2092373%22%7D%7D%2C%7B%22attributes%22%3A%7B%22OBJECTID%22%3A2%2C%22SingleLine%22%3A%221%20World%20Way%2C%20Los%20Angeles%2C%20CA%2C%2090045%22%7D%7D%5D%7D&sourceCountry=USA&f=pjson&token=<ACCESS TOKEN>`
+
+</Box>
+
+For clarity, here is the `addresses`  parameter in PJSON:
+
+```java
+addresses=
+{           "records": [
+        {
+            "attributes": {
+                "OBJECTID": 1,
+                "SingleLine": "380 New York St., Redlands, CA, 92373"
+            }
+        },
+   {
+            "attributes": {
+                "OBJECTID": 2,
+                "SingleLine": "1 World Way, Los Angeles, CA, 90045"
+            }
+        }
+    ]
+}
+
+```
+
+<span id="GUID-B9E74F70-6428-493E-9A29-9E29DC22208B" />
+
+JSON response */}
+
+</Box>
+
+<Box>
+
+### Filter categories
+
+The `geocodeAddresses`  operation supports batch geocode filtering by category values, which represent address and place types. By including the `category`  parameter in a `geocodeAddresses`  request, you can avoid false positive matches to unexpected place and address types due to ambiguous input. 
+
+For example, a user has a table of three-letter airport codes that they want to geocode. There may be city or business names that are the same as an airport code, causing false positive matches to other places. However the user can ensure that only airport matches are returned by specifying `category=airport`  in the request. 
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http 
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses={"records":[{"attributes":{"OBJECTID":1,"SingleLine":"LAX",}},{"attributes":{"OBJECTID":2,"SingleLine":"SFO",}}]}&category=airport&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "locations": [
+  {
+   "address": "LAX",
+   "location": {
+    "x": -118.4085523,
+    "y": 33.9435233
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 1,
+    "Loc_name": "World",
+    "Status": "T",
+    "Score": 100,
+    "Match_addr": "LAX",
+    "LongLabel": "LAX, 1 World Way, Los Angeles, CA, 90045, USA",
+    "ShortLabel": "LAX",
+    "Addr_type": "POI",
+    "Type": "Airport",
+    "PlaceName": "LAX",
+    "Place_addr": "1 World Way, Los Angeles, California, 90045",
+    "Phone": "(855) 463-5252",
+    "URL": "www.lawa.org/welcomeLAX.aspx",
+    "Rank": 9,
+    "AddBldg": "",
+    "AddNum": "1",
+    "AddNumFrom": "",
+    "AddNumTo": "",
+    "AddRange": "",
+    "Side": "",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "World",
+    "StType": "Way",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "1 World Way",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "Westchester",
+    "District": "",
+    "City": "Los Angeles",
+    "MetroArea": "",
+    "Subregion": "Los Angeles County",
+    "Region": "California",
+    "RegionAbbr": "CA",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "90045",
+    "PostalExt": "",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -118.405581418239,
+    "Y": 33.945016955146,
+    "DisplayX": -118.4085523,
+    "DisplayY": 33.9435233,
+    "Xmin": -118.4295523,
+    "Xmax": -118.3875523,
+    "Ymin": 33.9225233,
+    "Ymax": 33.9645233,
+    "ExInfo": "",
+    "StrucType": "",
+    "StrucDet": ""
+   }
+  },
+  {
+   "address": "SFO",
+   "location": {
+    "x": -122.3895912,
+    "y": 37.6154824
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 2,
+    "Loc_name": "World",
+    "Status": "T",
+    "Score": 100,
+    "Match_addr": "SFO",
+    "LongLabel": "SFO, Us Hwy 101, San Francisco, CA, 94128, USA",
+    "ShortLabel": "SFO",
+    "Addr_type": "POI",
+    "Type": "Airport",
+    "PlaceName": "SFO",
+    "Place_addr": "Us Hwy 101, San Francisco, California, 94128",
+    "Phone": "(800) 435-9736",
+    "URL": "flysfo.com",
+    "Rank": 9,
+    "AddBldg": "",
+    "AddNum": "",
+    "AddNumFrom": "",
+    "AddNumTo": "",
+    "AddRange": "",
+    "Side": "",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "Us Hwy 101",
+    "StType": "",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "Us Hwy 101",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "San Francisco",
+    "MetroArea": "",
+    "Subregion": "San Mateo County",
+    "Region": "California",
+    "RegionAbbr": "CA",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "94128",
+    "PostalExt": "",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -122.386902201643,
+    "Y": 37.614962219089,
+    "DisplayX": -122.3895912,
+    "DisplayY": 37.6154824,
+    "Xmin": -122.4105912,
+    "Xmax": -122.3685912,
+    "Ymin": 37.5944824,
+    "Ymax": 37.6364824,
+    "ExInfo": "",
+    "StrucType": "",
+    "StrucDet": ""
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+
+{/* <Box>
+
+`GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses=%7B%22records%22%3A%5B%7B%22attributes%22%3A%7B%22OBJECTID%22%3A1%2C%22SingleLine%22%3A%22LAX%22%2C%7D%7D%2C%7B%22attributes%22%3A%7B%22OBJECTID%22%3A2%2C%22SingleLine%22%3A%22SFO%22%2C%7D%7D%5D%7D&category=airport&f=pjson&token=<ACCESS TOKEN>`
+
+</Box>
+
+JSON response
+
+ */}
+
+</Box>
+
+<Box>
+
+### Batch geocode with fallback allowed
+
+You can also use category filtering to avoid low resolution fallback matches. By default, if the ArcGIS Geocoding service cannot find a match for an input address, it will automatically search for a lower match level, such as a street name, city, or postal code. For batch geocoding, a user may prefer that no match is returned in such cases so that they are not charged for the geocode. If a user passes `category=Point Address,Street Address`  in a `geocodeAddresses`  request, no fallback will occur if address matches cannot be found; the user will only be charged for the address matches.
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http 
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses={"records":[{"attributes":{"OBJECTID":1,"SingleLine":"380 New York St Redlands CA 92373",}},{"attributes":{"OBJECTID":2,"SingleLine":"Escondido CA",}}]}&category=&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "locations": [
+  {
+   "address": "Escondido, California",
+   "location": {
+    "x": -117.0853571,
+    "y": 33.130363
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 2,
+    "Loc_name": "World",
+    "Status": "T",
+    "Score": 100,
+    "Match_addr": "Escondido, California",
+    "LongLabel": "Escondido, CA, USA",
+    "ShortLabel": "Escondido",
+    "Addr_type": "Locality",
+    "Type": "City",
+    "PlaceName": "Escondido",
+    "Place_addr": "Escondido, California",
+    "Phone": "",
+    "URL": "",
+    "Rank": 8.5,
+    "AddBldg": "",
+    "AddNum": "",
+    "AddNumFrom": "",
+    "AddNumTo": "",
+    "AddRange": "",
+    "Side": "",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "",
+    "StType": "",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "Escondido",
+    "MetroArea": "",
+    "Subregion": "San Diego County",
+    "Region": "California",
+    "RegionAbbr": "CA",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "",
+    "PostalExt": "",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -117.0853571,
+    "Y": 33.130363,
+    "DisplayX": -117.0853571,
+    "DisplayY": 33.130363,
+    "Xmin": -117.1623571,
+    "Xmax": -117.0083571,
+    "Ymin": 33.053363,
+    "Ymax": 33.207363,
+    "ExInfo": "",
+    "StrucType": "",
+    "StrucDet": ""
+   }
+  },
+  {
+   "address": "380 New York St, Redlands, California, 92373",
+   "location": {
+    "x": -117.195426038092,
+    "y": 34.056097983409
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 1,
+    "Loc_name": "World",
+    "Status": "M",
+    "Score": 100,
+    "Match_addr": "380 New York St, Redlands, California, 92373",
+    "LongLabel": "380 New York St, Redlands, CA, 92373, USA",
+    "ShortLabel": "380 New York St",
+    "Addr_type": "PointAddress",
+    "Type": "",
+    "PlaceName": "",
+    "Place_addr": "380 New York St, Redlands, California, 92373",
+    "Phone": "",
+    "URL": "",
+    "Rank": 20,
+    "AddBldg": "",
+    "AddNum": "380",
+    "AddNumFrom": "",
+    "AddNumTo": "",
+    "AddRange": "",
+    "Side": "",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "New York",
+    "StType": "St",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "380 New York St",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "Redlands",
+    "MetroArea": "",
+    "Subregion": "San Bernardino County",
+    "Region": "California",
+    "RegionAbbr": "CA",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "92373",
+    "PostalExt": "8118",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -117.195658887362,
+    "Y": 34.056466284234,
+    "DisplayX": -117.195426038092,
+    "DisplayY": 34.056097983409,
+    "Xmin": -117.196426038092,
+    "Xmax": -117.194426038092,
+    "Ymin": 34.055097983409,
+    "Ymax": 34.057097983409,
+    "ExInfo": "",
+    "StrucType": "Commercial",
+    "StrucDet": "Office"
+   }
+  }
+ ]
+}
+
+```
+
+</Tab>
+</Tabs>
+{/* Example: Batch geocode with fallback allowed (no category)  */}
+
+{/* Here is the input single field JSON record set:
+
+<Box>
+
+`GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses=%7B%22records%22%3A%5B%7B%22attributes%22%3A%7B%22OBJECTID%22%3A1%2C%22SingleLine%22%3A%22380%20New%20York%20St%20Redlands%20CA%2092373%22%2C%7D%7D%2C%7B%22attributes%22%3A%7B%22OBJECTID%22%3A2%2C%22SingleLine%22%3A%22Escondido%20CA%22%2C%7D%7D%5D%7D&category=&f=pjson&token=<ACCESS TOKEN>`
+
+</Box>
+
+JSON response
+
+ */}
+
+</Box>
+
+<Box>
+
+### Batch geocode with no fallback allowed
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http 
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses={"records":[{"attributes":{"OBJECTID":1,"SingleLine":"380 New York St Redlands CA 92373",}},{"attributes":{"OBJECTID":2,"SingleLine":"Escondido CA",}}]}&category=Point Address&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "locations": [
+  {
+   "address": "",
+   "score": 0,
+   "attributes": {
+    "ResultID": 2,
+    "Loc_name": "World",
+    "Status": "U",
+    "Score": 0,
+    "Match_addr": "",
+    "LongLabel": "",
+    "ShortLabel": "",
+    "Addr_type": "",
+    "Type": "",
+    "PlaceName": "",
+    "Place_addr": "",
+    "Phone": "",
+    "URL": "",
+    "Rank": 0,
+    "AddBldg": "",
+    "AddNum": "",
+    "AddNumFrom": "",
+    "AddNumTo": "",
+    "AddRange": "",
+    "Side": "",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "",
+    "StType": "",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "",
+    "MetroArea": "",
+    "Subregion": "",
+    "Region": "",
+    "RegionAbbr": "",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "",
+    "PostalExt": "",
+    "Country": "",
+    "CntryName": "",
+    "LangCode": "",
+    "Distance": 0,
+    "X": 0.0,
+    "Y": 0.0,
+    "DisplayX": 0.0,
+    "DisplayY": 0.0,
+    "Xmin": 0.0,
+    "Xmax": 0.0,
+    "Ymin": 0.0,
+    "Ymax": 0.0,
+    "ExInfo": "",
+    "StrucType": "",
+    "StrucDet": ""
+   }
+  },
+  {
+   "address": "380 New York St, Redlands, California, 92373",
+   "location": {
+    "x": -117.195426038092,
+    "y": 34.056097983409
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 1,
+    "Loc_name": "World",
+    "Status": "M",
+    "Score": 100,
+    "Match_addr": "380 New York St, Redlands, California, 92373",
+    "LongLabel": "380 New York St, Redlands, CA, 92373, USA",
+    "ShortLabel": "380 New York St",
+    "Addr_type": "PointAddress",
+    "Type": "",
+    "PlaceName": "",
+    "Place_addr": "380 New York St, Redlands, California, 92373",
+    "Phone": "",
+    "URL": "",
+    "Rank": 20,
+    "AddBldg": "",
+    "AddNum": "380",
+    "AddNumFrom": "",
+    "AddNumTo": "",
+    "AddRange": "",
+    "Side": "",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "New York",
+    "StType": "St",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "380 New York St",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "Redlands",
+    "MetroArea": "",
+    "Subregion": "San Bernardino County",
+    "Region": "California",
+    "RegionAbbr": "CA",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "92373",
+    "PostalExt": "8118",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -117.195658887362,
+    "Y": 34.056466284234,
+    "DisplayX": -117.195426038092,
+    "DisplayY": 34.056097983409,
+    "Xmin": -117.196426038092,
+    "Xmax": -117.194426038092,
+    "Ymin": 34.055097983409,
+    "Ymax": 34.057097983409,
+    "ExInfo": "",
+    "StrucType": "Commercial",
+    "StrucDet": "Office"
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+{/* Here is the input single field JSON record set:
+
+
+
+
+`GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses=%7B%22records%22%3A%5B%7B%22attributes%22%3A%7B%22OBJECTID%22%3A1%2C%22SingleLine%22%3A%22380%20New%20York%20St%20Redlands%20CA%2092373%22%2C%7D%7D%2C%7B%22attributes%22%3A%7B%22OBJECTID%22%3A2%2C%22SingleLine%22%3A%22Escondido%20CA%22%2C%7D%7D%5D%7D&category=Point%20Address&f=pjson&token=<ACCESS TOKEN>`
+
+
+
+JSON response
+
+  */}
+
+See the topic [Category filtering](/category-filtering) for details.
+
+</Box>
+
+<Box>
+
+### Batch geocode a set of coordinates 
+
+The ArcGIS Geocoding service supports batch geocoding of coordinates with the `geocodeAddresses`  operation. The output is a geometry point with a match address that is the same as the input coordinates. This is different than reverse geocoding, in which input x,y coordinates are resolved to a matching street address; see [reverseGeocode](/reverse-geocode)  for more information. The following types of coordinates are supported for batch geocoding: 
+
+-   x,y coordinates; x refers to longitude (east-west coordinates), and y refers to latitude (north-south coordinates)
+-   Military Grid Reference System (MGRS) coordinates
+-   United States National Grid (USNG) coordinates
+
+Detailed information about valid input formats for coordinate geocoding is provided in the [findAddressCandidates](/find-address-candidates#search-for-coordinates)  topic. Examples for batch geocoding coordinates with the `geocodeAddresses`  operation are provided below.
+
+<Note type={"note"}>
+
+Coordinates must be passed as the value for the `singleLine`  or `Address`  field in the request. If the coordinates are included in the `Address`  field, all other input fields, such as `Address2` , `City` , `Region` , and `Postal` , must be empty.
+
+</Note>
+
+#### Longitude and latitude 
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http 
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses={"records":[{"attributes":{"OBJECTID":1,"SingleLine":"18.9919543,47.5283605",}},{"attributes":{"OBJECTID":2,"SingleLine":"Y:47.5283605 X:18.9919543",}}]}&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "locations": [
+  {
+   "address": "Y:47.528360 X:18.991954",
+   "location": {
+    "x": 18.9919543,
+    "y": 47.5283605
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 2,
+    "Loc_name": "World",
+    "Status": "M",
+    "Score": 100,
+    "Match_addr": "Y:47.528360 X:18.991954",
+    "LongLabel": "47°31'42.097\"N 18°59'31.035\"E",
+    "ShortLabel": "Y:47.528360 X:18.991954",
+    "Addr_type": "YX",
+    "Type": "",
+    "PlaceName": "",
+    "Place_addr": "",
+    "Phone": "",
+    "URL": "",
+    "Rank": 0,
+    "AddBldg": "",
+    "AddNum": "",
+    "AddNumFrom": "",
+    "AddNumTo": "",
+    "AddRange": "",
+    "Side": "",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "",
+    "StType": "",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "",
+    "MetroArea": "",
+    "Subregion": "",
+    "Region": "",
+    "RegionAbbr": "",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "",
+    "PostalExt": "",
+    "Country": "",
+    "CntryName": "",
+    "LangCode": "",
+    "Distance": 0,
+    "X": 18.9919543,
+    "Y": 47.5283605,
+    "DisplayX": 18.9919543,
+    "DisplayY": 47.5283605,
+    "Xmin": 18.9909543,
+    "Xmax": 18.9929543,
+    "Ymin": 47.5273605,
+    "Ymax": 47.5293605,
+    "ExInfo": "",
+    "StrucType": "",
+    "StrucDet": ""
+   }
+  },
+  {
+   "address": "18.991954 47.528360",
+   "location": {
+    "x": 18.9919543,
+    "y": 47.5283605
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 1,
+    "Loc_name": "World",
+    "Status": "T",
+    "Score": 100,
+    "Match_addr": "18.991954 47.528360",
+    "LongLabel": "47°31'42.097\"N 18°59'31.035\"E",
+    "ShortLabel": "18.991954 47.528360",
+    "Addr_type": "LatLong",
+    "Type": "",
+    "PlaceName": "",
+    "Place_addr": "",
+    "Phone": "",
+    "URL": "",
+    "Rank": 0,
+    "AddBldg": "",
+    "AddNum": "",
+    "AddNumFrom": "",
+    "AddNumTo": "",
+    "AddRange": "",
+    "Side": "",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "",
+    "StType": "",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "",
+    "MetroArea": "",
+    "Subregion": "",
+    "Region": "",
+    "RegionAbbr": "",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "",
+    "PostalExt": "",
+    "Country": "",
+    "CntryName": "",
+    "LangCode": "",
+    "Distance": 0,
+    "X": 18.9919543,
+    "Y": 47.5283605,
+    "DisplayX": 18.9919543,
+    "DisplayY": 47.5283605,
+    "Xmin": 18.9909543,
+    "Xmax": 18.9929543,
+    "Ymin": 47.5273605,
+    "Ymax": 47.5293605,
+    "ExInfo": "",
+    "StrucType": "",
+    "StrucDet": ""
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+
+{/* Example: Batch geocode latitude/longitude coordinates  */}
+
+{/* Here is the input single field JSON record set:
+
+<Box>
+
+`GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses=%7B%22records%22%3A%5B%7B%22attributes%22%3A%7B%22OBJECTID%22%3A1%2C%22SingleLine%22%3A%2218.9919543%2C47.5283605%22%2C%7D%7D%2C%7B%22attributes%22%3A%7B%22OBJECTID%22%3A2%2C%22SingleLine%22%3A%22Y%3A47.5283605%20X%3A18.9919543%22%2C%7D%7D%5D%7D&f=pjson&token=<ACCESS TOKEN>`
+
+</Box>
+
+JSON response
+
+ */}
+
+#### MGRS coordinates 
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http 
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses={"records":[{"attributes":{"OBJECTID":1,"SingleLine":"18SUH6789043210",}},{"attributes":{"OBJECTID":2,"SingleLine":"19TDJ5538855106",}}]}&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "locations": [
+  {
+   "address": "19TDJ5538855106",
+   "location": {
+    "x": -69.555020740502,
+    "y": 43.847689826831
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 2,
+    "Loc_name": "World",
+    "Status": "M",
+    "Score": 100,
+    "Match_addr": "19TDJ5538855106",
+    "LongLabel": "19TDJ5538855106",
+    "ShortLabel": "19TDJ5538855106",
+    "Addr_type": "MGRS",
+    "Type": "",
+    "PlaceName": "",
+    "Place_addr": "",
+    "Phone": "",
+    "URL": "",
+    "Rank": 0,
+    "AddBldg": "",
+    "AddNum": "",
+    "AddNumFrom": "",
+    "AddNumTo": "",
+    "AddRange": "",
+    "Side": "",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "",
+    "StType": "",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "",
+    "MetroArea": "",
+    "Subregion": "",
+    "Region": "",
+    "RegionAbbr": "",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "",
+    "PostalExt": "",
+    "Country": "",
+    "CntryName": "",
+    "LangCode": "",
+    "Distance": 0,
+    "X": -69.555020740502,
+    "Y": 43.847689826831,
+    "DisplayX": -69.555020740502,
+    "DisplayY": 43.847689826831,
+    "Xmin": -69.556020740502,
+    "Xmax": -69.554020740502,
+    "Ymin": 43.846689826831,
+    "Ymax": 43.848689826831,
+    "ExInfo": "",
+    "StrucType": "",
+    "StrucDet": ""
+   }
+  },
+  {
+   "address": "18SUH6789043210",
+   "location": {
+    "x": -76.511416672563,
+    "y": 38.327287449633
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 1,
+    "Loc_name": "World",
+    "Status": "M",
+    "Score": 100,
+    "Match_addr": "18SUH6789043210",
+    "LongLabel": "18SUH6789043210",
+    "ShortLabel": "18SUH6789043210",
+    "Addr_type": "MGRS",
+    "Type": "",
+    "PlaceName": "",
+    "Place_addr": "",
+    "Phone": "",
+    "URL": "",
+    "Rank": 0,
+    "AddBldg": "",
+    "AddNum": "",
+    "AddNumFrom": "",
+    "AddNumTo": "",
+    "AddRange": "",
+    "Side": "",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "",
+    "StType": "",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "",
+    "MetroArea": "",
+    "Subregion": "",
+    "Region": "",
+    "RegionAbbr": "",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "",
+    "PostalExt": "",
+    "Country": "",
+    "CntryName": "",
+    "LangCode": "",
+    "Distance": 0,
+    "X": -76.511416672563,
+    "Y": 38.327287449633,
+    "DisplayX": -76.511416672563,
+    "DisplayY": 38.327287449633,
+    "Xmin": -76.512416672563,
+    "Xmax": -76.510416672563,
+    "Ymin": 38.326287449633,
+    "Ymax": 38.328287449633,
+    "ExInfo": "",
+    "StrucType": "",
+    "StrucDet": ""
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+
+{/* Example: Batch geocode MGRS coordinates 
+
+Here is the input single field JSON record set:
+
+<Box>
+
+`GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses=%7B%22records%22%3A%5B%7B%22attributes%22%3A%7B%22OBJECTID%22%3A1%2C%22SingleLine%22%3A%2218SUH6789043210%22%2C%7D%7D%2C%7B%22attributes%22%3A%7B%22OBJECTID%22%3A2%2C%22SingleLine%22%3A%2219TDJ5538855106%22%2C%7D%7D%5D%7D&f=pjson&token=<ACCESS TOKEN>`
+
+</Box>
+
+JSON response
+ */}
+
+</Box>
+
+<Box>
+
+### Batch geocode points of interest
+
+The ArcGIS Geocoding service supports batch geocoding of POIs with the `geocodeAddresses`  operation. A POI is a named point location that can represent a cultural or geographic landmark or a business. For example, you can find amusement parks, museums, schools, restaurants, hotels, gas stations, or other types of businesses or landmarks, as well as geographic features, such as mountains, lakes, rivers, or deserts. 
+
+As with street addresses, you can search for POIs with `geocodeAddresses`  using the single-field or multifield approach.
+
+<MoreInfo>
+
+##### Single-field POI search
+
+To search for POIs with single-field search, use the `singleLine`  parameter. In general, valid `singleLine`  POI search strings can be formatted in variations of three basic structures:
+
+1.  &lt;name> &lt;optional connector> &lt;zone> 
+2.  &lt;zone> &lt;name>
+3.  &lt;name>&lt;address>&lt;zone>
+
+Where
+
+-   &lt;name> = A place-name, such as Disneyland, Starbucks, or Niagra Falls. 
+-   &lt;zone> = A postal code or administrative boundary—such as neighborhood, city, subregion, region, country, or any combination thereof—that provides a spatial boundary to the search. It can be included in the search to limit matching candidates but is not required.
+-   &lt;optional connector> = `in`  or `at` ; this is not required for the search.
+-   &lt;address> = A street name, such as `Main St` , or a complete street address, such as `590 N Main St` .
+
+Examples of valid `singleLine`  search strings include the following:
+
+Business name searches
+
+-   Starbucks San Diego
+-   Starbucks in San Diego
+-   San Diego Starbucks
+-   Starbucks 92101
+-   Starbucks 5th Ave San Diego
+-   Reuben H Fleet Science Center, 1875 El Prado, San Diego, CA, 92101, USA
+
+##### Multifield POI search
+
+When searching for POIs using multifield input, the name of the POI must be passed as the value for the `address`  parameter. The zone information can be passed in the `postal` , `neighborhood` , `city` , `subregion` , `region` , and `countryCode`  parameters. If searching for POI + address, the address should be passed as the value for the `address2`  parameter.
+
+</MoreInfo>
+
+#### Batch geocode amusement parks 
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http 
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses={"records":[{"attributes":{"OBJECTID":1,"SingleLine":"universal studios los angeles",}},{"attributes":{"OBJECTID":2,"SingleLine":"disneyland anaheim",}}]}&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "locations": [
+  {
+   "address": "Disneyland",
+   "location": {
+    "x": -117.9189585,
+    "y": 33.8099461
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 2,
+    "Loc_name": "World",
+    "Status": "M",
+    "Score": 100,
+    "Match_addr": "Disneyland",
+    "LongLabel": "Disneyland, 1313 S Harbor Blvd, Anaheim, CA, 92802, USA",
+    "ShortLabel": "Disneyland",
+    "Addr_type": "POI",
+    "Type": "Amusement Park",
+    "PlaceName": "Disneyland",
+    "Place_addr": "1313 S Harbor Blvd, Anaheim, California, 92802",
+    "Phone": "(714) 781-4636",
+    "URL": "disneyland.disney.go.com",
+    "Rank": 4.5,
+    "AddBldg": "",
+    "AddNum": "1313",
+    "AddNumFrom": "",
+    "AddNumTo": "",
+    "AddRange": "",
+    "Side": "L",
+    "StPreDir": "S",
+    "StPreType": "",
+    "StName": "Harbor",
+    "StType": "Blvd",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "1313 S Harbor Blvd",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "Anaheim",
+    "MetroArea": "",
+    "Subregion": "Orange County",
+    "Region": "California",
+    "RegionAbbr": "CA",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "92802",
+    "PostalExt": "2309",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -117.915410775663,
+    "Y": 33.803779450016,
+    "DisplayX": -117.9189585,
+    "DisplayY": 33.8099461,
+    "Xmin": -117.9249585,
+    "Xmax": -117.9129585,
+    "Ymin": 33.8039461,
+    "Ymax": 33.8159461,
+    "ExInfo": "",
+    "StrucType": "",
+    "StrucDet": ""
+   }
+  },
+  {
+   "address": "Universal Studios",
+   "location": {
+    "x": -118.3541,
+    "y": 34.1360467
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 1,
+    "Loc_name": "World",
+    "Status": "T",
+    "Score": 100,
+    "Match_addr": "Universal Studios",
+    "LongLabel": "Universal Studios, Universal City, CA, 91608, USA",
+    "ShortLabel": "Universal Studios",
+    "Addr_type": "POI",
+    "Type": "Tourist Attraction",
+    "PlaceName": "Universal Studios",
+    "Place_addr": "Universal City, California, 91608",
+    "Phone": "",
+    "URL": "www.universalstudioshollywood.com/web/en/us",
+    "Rank": 4.5,
+    "AddBldg": "",
+    "AddNum": "",
+    "AddNumFrom": "",
+    "AddNumTo": "",
+    "AddRange": "",
+    "Side": "",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "",
+    "StType": "",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "Universal City",
+    "District": "",
+    "City": "Universal City",
+    "MetroArea": "",
+    "Subregion": "Los Angeles County",
+    "Region": "California",
+    "RegionAbbr": "CA",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "91608",
+    "PostalExt": "",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -118.354365287235,
+    "Y": 34.135884342536,
+    "DisplayX": -118.3541,
+    "DisplayY": 34.1360467,
+    "Xmin": -118.3591,
+    "Xmax": -118.3491,
+    "Ymin": 34.1310467,
+    "Ymax": 34.1410467,
+    "ExInfo": "",
+    "StrucType": "",
+    "StrucDet": ""
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+
+#### Batch geocode place names with addresses 
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http 
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses={"records":[{"attributes":{"OBJECTID":1,"SingleLine":"Starbucks, 5th Ave, San Diego",}},{"attributes":{"OBJECTID":2,"SingleLine":"San Diego Zoo, 2920 Zoo Dr, San Diego",}}]}&category=&sourceCountry=&matchOutOfRange=true&langCode=&locationType=&searchExtent=&outSR=&outFields=&preferredLabelValues=&f=pjson&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "locations": [
+  {
+   "address": "San Diego Zoo",
+   "location": {
+    "x": -117.1491061,
+    "y": 32.7352775
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 2,
+    "Loc_name": "World",
+    "Status": "T",
+    "Score": 100,
+    "Match_addr": "San Diego Zoo",
+    "LongLabel": "San Diego Zoo, 2920 Zoo Dr, San Diego, CA, 92101, USA",
+    "ShortLabel": "San Diego Zoo",
+    "Addr_type": "POI",
+    "Type": "Zoo",
+    "PlaceName": "San Diego Zoo",
+    "Place_addr": "2920 Zoo Dr, San Diego, California, 92101",
+    "Phone": "(619) 231-1515",
+    "URL": "www.sandiegozoo.org",
+    "Rank": 15,
+    "AddBldg": "",
+    "AddNum": "2920",
+    "AddNumFrom": "",
+    "AddNumTo": "",
+    "AddRange": "",
+    "Side": "R",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "Zoo",
+    "StType": "Dr",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "2920 Zoo Dr",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "Balboa Park",
+    "District": "",
+    "City": "San Diego",
+    "MetroArea": "",
+    "Subregion": "San Diego County",
+    "Region": "California",
+    "RegionAbbr": "CA",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "92101",
+    "PostalExt": "",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -117.147297117657,
+    "Y": 32.735370287668,
+    "DisplayX": -117.1491061,
+    "DisplayY": 32.7352775,
+    "Xmin": -117.1541061,
+    "Xmax": -117.1441061,
+    "Ymin": 32.7302775,
+    "Ymax": 32.7402775,
+    "ExInfo": "",
+    "StrucType": "",
+    "StrucDet": ""
+   }
+  },
+  {
+   "address": "Starbucks",
+   "location": {
+    "x": -117.159905,
+    "y": 32.707766
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 1,
+    "Loc_name": "World",
+    "Status": "T",
+    "Score": 100,
+    "Match_addr": "Starbucks",
+    "LongLabel": "Starbucks, 209 5th Ave, San Diego, CA, 92101, USA",
+    "ShortLabel": "Starbucks",
+    "Addr_type": "POI",
+    "Type": "Coffee Shop",
+    "PlaceName": "Starbucks",
+    "Place_addr": "209 5th Ave, San Diego, California, 92101",
+    "Phone": "(619) 234-0749",
+    "URL": "",
+    "Rank": 19,
+    "AddBldg": "",
+    "AddNum": "209",
+    "AddNumFrom": "",
+    "AddNumTo": "",
+    "AddRange": "",
+    "Side": "",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "5th",
+    "StType": "Ave",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "209 5th Ave",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "San Diego",
+    "MetroArea": "",
+    "Subregion": "San Diego County",
+    "Region": "California",
+    "RegionAbbr": "CA",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "92101",
+    "PostalExt": "",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -117.159905,
+    "Y": 32.707766,
+    "DisplayX": -117.159905,
+    "DisplayY": 32.707766,
+    "Xmin": -117.160905,
+    "Xmax": -117.158905,
+    "Ymin": 32.706766,
+    "Ymax": 32.708766,
+    "ExInfo": "",
+    "StrucType": "",
+    "StrucDet": ""
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+
+{/* Example: Batch geocode amusement parks 
+
+Here is the input single-field JSON record set:
+
+<Box>
+
+`GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses=%7B%22records%22%3A%5B%7B%22attributes%22%3A%7B%22OBJECTID%22%3A1%2C%22SingleLine%22%3A%22universal%20studios%20los%20angeles%22%2C%7D%7D%2C%7B%22attributes%22%3A%7B%22OBJECTID%22%3A2%2C%22SingleLine%22%3A%22disneyland%20anaheim%22%2C%7D%7D%5D%7D&f=pjson&token=<ACCESS TOKEN>`
+
+</Box>
+
+Here is the input multifield JSON record set:
+
+<Box>
+
+`GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses=%7B%22records%22%3A%5B%7B%22attributes%22%3A%7B%22OBJECTID%22%3A1%2C%22Address%22%3A%22universal%20studios%22%2C%22City%22%3A%22los%20angeles%22%7D%7D%2C%7B%22attributes%22%3A%7B%22OBJECTID%22%3A2%2C%22Address%22%3A%22disneyland%22%2C%22City%22%3A%22anaheim%22%7D%7D%5D%7D&f=pjson&token=<ACCESS TOKEN>`
+
+</Box>
+
+JSON response
+
+
+
+ 
+
+Example: Batch geocode place-names with addresses 
+
+Here is the input single-field JSON record set:
+
+<Box>
+
+`GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses=%7B%22records%22%3A%5B%7B%22attributes%22%3A%7B%22OBJECTID%22%3A1%2C%22SingleLine%22%3A%22Starbucks%2C%205th%20Ave%2C%20San%20Diego%22%2C%7D%7D%2C%7B%22attributes%22%3A%7B%22OBJECTID%22%3A2%2C%22SingleLine%22%3A%22San%20Diego%20Zoo%2C%202920%20Zoo%20Dr%2C%20San%20Diego%22%2C%7D%7D%5D%7D&category=&sourceCountry=&matchOutOfRange=true&langCode=&locationType=&searchExtent=&outSR=&outFields=&preferredLabelValues=&f=pjson&token=<ACCESS TOKEN>`
+
+</Box>
+
+Here is the input multifield JSON record set:
+
+<Box>
+
+`GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses=%7B%22records%22%3A%5B%7B%22attributes%22%3A%7B%22OBJECTID%22%3A1%2C%22Address%22%3A%22Starbucks%22%2C%22Address2%22%3A%225th%20Ave%22%2C%22City%22%3A%22San%20Diego%22%7D%7D%2C%7B%22attributes%22%3A%7B%22OBJECTID%22%3A2%2C%22Address%22%3A%22San%20Diego%20Zoo%22%2C%22Address2%22%3A%222920%20Zoo%20Dr%22%2C%22City%22%3A%22San%20Diego%22%7D%7D%5D%7D&category=&sourceCountry=&matchOutOfRange=true&langCode=&locationType=&searchExtent=&outSR=&outFields=&preferredLabelValues=&f=pjson&token=<ACCESS TOKEN>`
+
+</Box>
+
+JSON response
+
+```javascript
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "locations": [
+  {
+   "address": "San Diego Zoo",
+   "location": {
+    "x": -117.1491061,
+    "y": 32.7352775
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 2,
+    "Loc_name": "World",
+    "Status": "T",
+    "Score": 100,
+    "Match_addr": "San Diego Zoo",
+    "LongLabel": "San Diego Zoo, 2920 Zoo Dr, San Diego, CA, 92101, USA",
+    "ShortLabel": "San Diego Zoo",
+    "Addr_type": "POI",
+    "Type": "Zoo",
+    "PlaceName": "San Diego Zoo",
+    "Place_addr": "2920 Zoo Dr, San Diego, California, 92101",
+    "Phone": "(619) 231-1515",
+    "URL": "www.sandiegozoo.org",
+    "Rank": 15,
+    "AddBldg": "",
+    "AddNum": "2920",
+    "AddNumFrom": "",
+    "AddNumTo": "",
+    "AddRange": "",
+    "Side": "R",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "Zoo",
+    "StType": "Dr",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "2920 Zoo Dr",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "Balboa Park",
+    "District": "",
+    "City": "San Diego",
+    "MetroArea": "",
+    "Subregion": "San Diego County",
+    "Region": "California",
+    "RegionAbbr": "CA",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "92101",
+    "PostalExt": "",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -117.147297117657,
+    "Y": 32.735370287668,
+    "DisplayX": -117.1491061,
+    "DisplayY": 32.7352775,
+    "Xmin": -117.1541061,
+    "Xmax": -117.1441061,
+    "Ymin": 32.7302775,
+    "Ymax": 32.7402775,
+    "ExInfo": "",
+    "StrucType": "",
+    "StrucDet": ""
+   }
+  },
+  {
+   "address": "Starbucks",
+   "location": {
+    "x": -117.159905,
+    "y": 32.707766
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 1,
+    "Loc_name": "World",
+    "Status": "T",
+    "Score": 100,
+    "Match_addr": "Starbucks",
+    "LongLabel": "Starbucks, 209 5th Ave, San Diego, CA, 92101, USA",
+    "ShortLabel": "Starbucks",
+    "Addr_type": "POI",
+    "Type": "Coffee Shop",
+    "PlaceName": "Starbucks",
+    "Place_addr": "209 5th Ave, San Diego, California, 92101",
+    "Phone": "(619) 234-0749",
+    "URL": "",
+    "Rank": 19,
+    "AddBldg": "",
+    "AddNum": "209",
+    "AddNumFrom": "",
+    "AddNumTo": "",
+    "AddRange": "",
+    "Side": "",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "5th",
+    "StType": "Ave",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "209 5th Ave",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "San Diego",
+    "MetroArea": "",
+    "Subregion": "San Diego County",
+    "Region": "California",
+    "RegionAbbr": "CA",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "92101",
+    "PostalExt": "",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -117.159905,
+    "Y": 32.707766,
+    "DisplayX": -117.159905,
+    "DisplayY": 32.707766,
+    "Xmin": -117.160905,
+    "Xmax": -117.158905,
+    "Ymin": 32.706766,
+    "Ymax": 32.708766,
+    "ExInfo": "",
+    "StrucType": "",
+    "StrucDet": ""
+   }
+  }
+ ]
+}
+
+``` 
+*/}
+
+</Box>
+
+<Box>
+
+### Geocode addresses within an extent
+
+The `geocodeAddresses`  operation allows spatial filtering of search results by using the `searchExtent`  parameter. If you want to confine a search to a localized area, something that is especially useful in a mobile application, you can define a bounding rectangle to search within. No candidates outside of the rectangle are returned. When bounding rectangle coordinates are entered as a simple comma-separated string in the format &lt;lower left corner>,&lt;upper right corner>, the coordinates must be in the default spatial reference of the geocode service, which is WGS84. The `searchExtent`  parameter can be used with all supported search types (street address, POI, admin place, postal code). 
+
+<MoreInfo>
+
+The `searchExtent`  parameter is not intended to be used with extents that cover large areas, such as entire countries or provinces/states. Geocoding quality and performance may be reduced with large `searchExtent`  values. For example, if a request includes a `searchExtent`  that covers the state of California, an ambiguous input address such as `100 Main St`  would cause an excessive number of matching candidates to be generated, which would slow down the response. To counteract such a delay, the service may not process all possible candidates, leading to unexpected results.
+
+The following best practices will help you avoid issues when using `searchExtent` :
+
+-   Reduce the `searchExtent`  area. Ideally, the size of the extent should not exceed an area corresponding to a map scale of approximately 1:1,000,000.
+-   Include an administrative zone (such as city) or postal code in the request when searching for a place or address. For instance, instead of searching for `100 Main St` , be more specific and search for `100 Main St, Barstow` .
+
+</MoreInfo>
+
+The example URL below illustrates how to exclude candidates that are outside a specified extent from being returned by using the `searchExtent`  parameter. In this example, two addresses are passed to `geocodeAddresses` , along with a `searchExtent`  value corresponding to downtown Detroit. Only one of the input addresses is located within the extent, and no match is returned for the other address.
+
+####  Only return address matches in downtown Detroit 
+
+##### Single-field
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses={"records":[{"attributes":{"OBJECTID":1,"SingleLine":"315 Bagley St, Detroit, Michigan, 48226",}},{"attributes":{"OBJECTID":2,"SingleLine":"24241 Scotia Rd, Detroit, Michigan, 48237",}}]}&searchExtent=-83.06757808033565,42.32169269843457,-83.03015590015993,42.3455495740986&category=Address&f=pjson&token=<ACCESSTOKEN>
+```
+</Tab>
+<Tab>
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "locations": [
+  {
+   "address": "315 Bagley, Detroit, Michigan, 48226",
+   "location": {
+    "x": -83.053157815269,
+    "y": 42.333638711057
+   },
+   "score": 98.04,
+   "attributes": {
+    "ResultID": 1,
+    "Loc_name": "World",
+    "Status": "M",
+    "Score": 98.04,
+    "Match_addr": "315 Bagley, Detroit, Michigan, 48226",
+    "LongLabel": "315 Bagley, Detroit, MI, 48226, USA",
+    "ShortLabel": "315 Bagley",
+    "Addr_type": "PointAddress",
+    "Type": "",
+    "PlaceName": "",
+    "Place_addr": "315 Bagley, Detroit, Michigan, 48226",
+    "Phone": "",
+    "URL": "",
+    "Rank": 20,
+    "AddBldg": "",
+    "AddNum": "315",
+    "AddNumFrom": "",
+    "AddNumTo": "",
+    "AddRange": "",
+    "Side": "",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "Bagley",
+    "StType": "",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "315 Bagley",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "Detroit",
+    "MetroArea": "",
+    "Subregion": "Wayne County",
+    "Region": "Michigan",
+    "RegionAbbr": "MI",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "48226",
+    "PostalExt": "",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -83.053414972058,
+    "Y": 42.333855802349,
+    "DisplayX": -83.053157815269,
+    "DisplayY": 42.333638711056,
+    "Xmin": -83.054157815269,
+    "Xmax": -83.052157815269,
+    "Ymin": 42.332638711056,
+    "Ymax": 42.334638711056,
+    "ExInfo": "",
+    "StrucType": "Commercial",
+    "StrucDet": ""
+   }
+  },
+  {
+   "address": "",
+   "score": 0,
+   "attributes": {
+    "ResultID": 2,
+    "Loc_name": "World",
+    "Status": "U",
+    "Score": 0,
+    "Match_addr": "",
+    "LongLabel": "",
+    "ShortLabel": "",
+    "Addr_type": "",
+    "Type": "",
+    "PlaceName": "",
+    "Place_addr": "",
+    "Phone": "",
+    "URL": "",
+    "Rank": 0,
+    "AddBldg": "",
+    "AddNum": "",
+    "AddNumFrom": "",
+    "AddNumTo": "",
+    "AddRange": "",
+    "Side": "",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "",
+    "StType": "",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "",
+    "MetroArea": "",
+    "Subregion": "",
+    "Region": "",
+    "RegionAbbr": "",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "",
+    "PostalExt": "",
+    "Country": "",
+    "CntryName": "",
+    "LangCode": "",
+    "Distance": 0,
+    "X": 0.0,
+    "Y": 0.0,
+    "DisplayX": 0.0,
+    "DisplayY": 0.0,
+    "Xmin": 0.0,
+    "Xmax": 0.0,
+    "Ymin": 0.0,
+    "Ymax": 0.0,
+    "ExInfo": "",
+    "StrucType": "",
+    "StrucDet": ""
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+
+##### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http 
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses={"records":[{"attributes":{"OBJECTID":1,"Address":"315 Bagley St","City":"Detroit","Region":"Michigan","Postal":"48226"}},{"attributes":{"OBJECTID":2,"Address":"24241 Scotia Rd","City":"Detroit","Region":"Michigan","Postal":"48237"}}]}&searchExtent=-83.06757808033565,42.32169269843457,-83.03015590015993,42.3455495740986&category=Address&f=pjson&token=<ACCESSTOKEN>
+```
+</Tab>
+<Tab>
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "locations": [
+  {
+   "address": "315 Bagley, Detroit, Michigan, 48226",
+   "location": {
+    "x": -83.053157815269,
+    "y": 42.333638711057
+   },
+   "score": 98.04,
+   "attributes": {
+    "ResultID": 1,
+    "Loc_name": "World",
+    "Status": "M",
+    "Score": 98.04,
+    "Match_addr": "315 Bagley, Detroit, Michigan, 48226",
+    "LongLabel": "315 Bagley, Detroit, MI, 48226, USA",
+    "ShortLabel": "315 Bagley",
+    "Addr_type": "PointAddress",
+    "Type": "",
+    "PlaceName": "",
+    "Place_addr": "315 Bagley, Detroit, Michigan, 48226",
+    "Phone": "",
+    "URL": "",
+    "Rank": 20,
+    "AddBldg": "",
+    "AddNum": "315",
+    "AddNumFrom": "",
+    "AddNumTo": "",
+    "AddRange": "",
+    "Side": "",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "Bagley",
+    "StType": "",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "315 Bagley",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "Detroit",
+    "MetroArea": "",
+    "Subregion": "Wayne County",
+    "Region": "Michigan",
+    "RegionAbbr": "MI",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "48226",
+    "PostalExt": "",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -83.053414972058,
+    "Y": 42.333855802349,
+    "DisplayX": -83.053157815269,
+    "DisplayY": 42.333638711056,
+    "Xmin": -83.054157815269,
+    "Xmax": -83.052157815269,
+    "Ymin": 42.332638711056,
+    "Ymax": 42.334638711056,
+    "ExInfo": "",
+    "StrucType": "Commercial",
+    "StrucDet": ""
+   }
+  },
+  {
+   "address": "",
+   "score": 0,
+   "attributes": {
+    "ResultID": 2,
+    "Loc_name": "World",
+    "Status": "U",
+    "Score": 0,
+    "Match_addr": "",
+    "LongLabel": "",
+    "ShortLabel": "",
+    "Addr_type": "",
+    "Type": "",
+    "PlaceName": "",
+    "Place_addr": "",
+    "Phone": "",
+    "URL": "",
+    "Rank": 0,
+    "AddBldg": "",
+    "AddNum": "",
+    "AddNumFrom": "",
+    "AddNumTo": "",
+    "AddRange": "",
+    "Side": "",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "",
+    "StType": "",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "",
+    "MetroArea": "",
+    "Subregion": "",
+    "Region": "",
+    "RegionAbbr": "",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "",
+    "PostalExt": "",
+    "Country": "",
+    "CntryName": "",
+    "LangCode": "",
+    "Distance": 0,
+    "X": 0.0,
+    "Y": 0.0,
+    "DisplayX": 0.0,
+    "DisplayY": 0.0,
+    "Xmin": 0.0,
+    "Xmax": 0.0,
+    "Ymin": 0.0,
+    "Ymax": 0.0,
+    "ExInfo": "",
+    "StrucType": "",
+    "StrucDet": ""
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+</Box>
+<Box>
+
+### Specify different city and street names for output fields
+
+The `preferredLabelValues`  parameter allows limited customization of output values in `geocodeAddresses`  responses. Refer to the parameter [overview](/geocode-addresses#preferredlabelvalues) for details about its functionality; this section includes examples showing how it can be used.
+
+<MoreInfo>
+
+The parameter can be used to override the default city and street names returned in output fields for a geocoding transaction. The default values are based on country addressing conventions and data availability. For instance, United States addresses returned by the ArcGIS Geocoding service include the primary city name assigned to the postal code that is associated with the address; this is known as the postal city name. Sometimes the postal city name is different than the name of the city whose boundaries the address is within (known as the local city name). Streets may be known by multiple names as well. For streets that have more than one name, the ArcGIS Geocoding service returns the name that was matched to from the request in the geocoding results by default. 
+
+For the following addresses, the streets have multiple names and the local city name differs from the postal city name. 
+
+<StyledTable headers={"Address,Primary street name,Alternate street name,Local city name,Postal city name"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+635 CR-30, Olmstedville, NY 12857
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Church Rd
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+CR-30
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Town of Minerva
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Olmstedville
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+7608 National Pike, Uniontown, Pennsylvania, 15401
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+US-40
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+National Pike
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Menallen Township
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Uniontown
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+</MoreInfo>
+
+The examples below illustrate how to modify the city and street names returned in a batch geocode response for these addresses by using the `preferredLabelValues`  parameter. The first example shows what the geocode results look like without `preferredLabelValues` . The second example shows how to use `preferredLabelValues`  to return the primary street names and local city names in geocoding results for the same input addresses.
+
+Here is what the `addresses`  parameter looks like in PJSON for the example addresses in single-field format (use with POST requests):
+
+```json
+addresses=
+{           "records": [
+        {
+            "attributes": {
+                "OBJECTID": 1,
+                "SingleLine": "635 CR-30, Olmstedville, NY 12857"
+            }
+        },
+   {
+            "attributes": {
+                "OBJECTID": 2,
+                "SingleLine": "7608 National Pike, Uniontown, Pennsylvania, 15401"
+            }
+        }
+    ]
+}
+
+```
+
+ 
+
+Here is what the `addresses`  parameter looks like in PJSON for these addresses in multifield format (use with POST requests):
+
+```json
+addresses=
+{           "records": [
+        {
+            "attributes": {
+                "OBJECTID": 1,
+                "Address": "635 CR-30",
+                "City": "Olmstedville",
+                "Region": "NY",
+                "Postal": "12857"
+            }
+        },
+   {
+            "attributes": {
+                "OBJECTID": 2,
+                "Address": "7608 National Pike",
+                "City": "Uniontown",
+                "Region": "Pennsylvania",
+                "Postal": "15401"
+            }
+        }
+    ]
+}
+
+```
+
+</Box>
+
+<Box>
+
+### Batch geocode two addresses without `preferredLabelValues ` 
+
+Without using the `preferredLabelValues`  parameter in the `geocodeAddresses`  request for these addresses, the alternate street names and postal city names are shown in the output geocoding results.
+
+##### Single-field
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses={"records":[{"attributes":{"OBJECTID":1,"SingleLine":"635 CR-30, Olmstedville, NY 12857",}},{"attributes":{"OBJECTID":2,"SingleLine":"7608 National Pike, Uniontown, Pennsylvania, 15401",}}]}&preferredLabelValues=&f=pjson&token=<ACCESSTOKEN>
+```
+</Tab>
+<Tab>
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "locations": [
+  {
+   "address": "635 County Highway 30, Olmstedville, New York, 12857",
+   "location": {
+    "x": -73.931301357812,
+    "y": 43.77195695338
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 1,
+    "Loc_name": "World",
+    "Status": "T",
+    "Score": 100,
+    "Match_addr": "635 County Highway 30, Olmstedville, New York, 12857",
+    "LongLabel": "635 County Highway 30, Olmstedville, NY, 12857, USA",
+    "ShortLabel": "635 County Highway 30",
+    "Addr_type": "StreetAddress",
+    "Type": "",
+    "PlaceName": "",
+    "Place_addr": "635 County Highway 30, Olmstedville, New York, 12857",
+    "Phone": "",
+    "URL": "",
+    "Rank": 20,
+    "AddBldg": "",
+    "AddNum": "635",
+    "AddNumFrom": "699",
+    "AddNumTo": "607",
+    "AddRange": "607-699",
+    "Side": "R",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "County Highway 30",
+    "StType": "",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "635 County Highway 30",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "Olmstedville",
+    "MetroArea": "",
+    "Subregion": "Essex County",
+    "Region": "New York",
+    "RegionAbbr": "NY",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "12857",
+    "PostalExt": "1828",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -73.931301357812,
+    "Y": 43.77195695338,
+    "DisplayX": -73.931301357812,
+    "DisplayY": 43.77195695338,
+    "Xmin": -73.932301357812,
+    "Xmax": -73.930301357812,
+    "Ymin": 43.77095695338,
+    "Ymax": 43.77295695338,
+    "ExInfo": "",
+    "StrucType": "",
+    "StrucDet": ""
+   }
+  },
+  {
+   "address": "7608 National Pike, Uniontown, Pennsylvania, 15401",
+   "location": {
+    "x": -79.777306142717,
+    "y": 39.933194907282
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 2,
+    "Loc_name": "World",
+    "Status": "M",
+    "Score": 100,
+    "Match_addr": "7608 National Pike, Uniontown, Pennsylvania, 15401",
+    "LongLabel": "7608 National Pike, Uniontown, PA, 15401, USA",
+    "ShortLabel": "7608 National Pike",
+    "Addr_type": "StreetAddress",
+    "Type": "",
+    "PlaceName": "",
+    "Place_addr": "7608 National Pike, Uniontown, Pennsylvania, 15401",
+    "Phone": "",
+    "URL": "",
+    "Rank": 20,
+    "AddBldg": "",
+    "AddNum": "7608",
+    "AddNumFrom": "7614",
+    "AddNumTo": "7572",
+    "AddRange": "7572-7614",
+    "Side": "L",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "National",
+    "StType": "Pike",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "7608 National Pike",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "Uniontown",
+    "MetroArea": "",
+    "Subregion": "Fayette County",
+    "Region": "Pennsylvania",
+    "RegionAbbr": "PA",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "15401",
+    "PostalExt": "",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -79.777306142717,
+    "Y": 39.933194907282,
+    "DisplayX": -79.777306142717,
+    "DisplayY": 39.933194907282,
+    "Xmin": -79.778306142717,
+    "Xmax": -79.776306142717,
+    "Ymin": 39.932194907282,
+    "Ymax": 39.934194907282,
+    "ExInfo": "",
+    "StrucType": "",
+    "StrucDet": ""
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+
+##### Multifield
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses={"records":[{"attributes":{"OBJECTID":1,"Address":"635 CR-30","City":"Olmstedville","Region":"NY","Postal":"12857"}},{"attributes":{"OBJECTID":2,"Address":"7608 National Pike","City":"Uniontown","Region":"Pennsylvania","Postal":"15401"}}]}&preferredLabelValues=&f=pjson&token=<ACCESSTOKEN>
+```
+</Tab>
+<Tab>
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "locations": [
+  {
+   "address": "635 County Highway 30, Olmstedville, New York, 12857",
+   "location": {
+    "x": -73.931301357812,
+    "y": 43.77195695338
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 1,
+    "Loc_name": "World",
+    "Status": "T",
+    "Score": 100,
+    "Match_addr": "635 County Highway 30, Olmstedville, New York, 12857",
+    "LongLabel": "635 County Highway 30, Olmstedville, NY, 12857, USA",
+    "ShortLabel": "635 County Highway 30",
+    "Addr_type": "StreetAddress",
+    "Type": "",
+    "PlaceName": "",
+    "Place_addr": "635 County Highway 30, Olmstedville, New York, 12857",
+    "Phone": "",
+    "URL": "",
+    "Rank": 20,
+    "AddBldg": "",
+    "AddNum": "635",
+    "AddNumFrom": "699",
+    "AddNumTo": "607",
+    "AddRange": "607-699",
+    "Side": "R",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "County Highway 30",
+    "StType": "",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "635 County Highway 30",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "Olmstedville",
+    "MetroArea": "",
+    "Subregion": "Essex County",
+    "Region": "New York",
+    "RegionAbbr": "NY",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "12857",
+    "PostalExt": "1828",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -73.931301357812,
+    "Y": 43.77195695338,
+    "DisplayX": -73.931301357812,
+    "DisplayY": 43.77195695338,
+    "Xmin": -73.932301357812,
+    "Xmax": -73.930301357812,
+    "Ymin": 43.77095695338,
+    "Ymax": 43.77295695338,
+    "ExInfo": "",
+    "StrucType": "",
+    "StrucDet": ""
+   }
+  },
+  {
+   "address": "7608 National Pike, Uniontown, Pennsylvania, 15401",
+   "location": {
+    "x": -79.777306142717,
+    "y": 39.933194907282
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 2,
+    "Loc_name": "World",
+    "Status": "M",
+    "Score": 100,
+    "Match_addr": "7608 National Pike, Uniontown, Pennsylvania, 15401",
+    "LongLabel": "7608 National Pike, Uniontown, PA, 15401, USA",
+    "ShortLabel": "7608 National Pike",
+    "Addr_type": "StreetAddress",
+    "Type": "",
+    "PlaceName": "",
+    "Place_addr": "7608 National Pike, Uniontown, Pennsylvania, 15401",
+    "Phone": "",
+    "URL": "",
+    "Rank": 20,
+    "AddBldg": "",
+    "AddNum": "7608",
+    "AddNumFrom": "7614",
+    "AddNumTo": "7572",
+    "AddRange": "7572-7614",
+    "Side": "L",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "National",
+    "StType": "Pike",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "7608 National Pike",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "Uniontown",
+    "MetroArea": "",
+    "Subregion": "Fayette County",
+    "Region": "Pennsylvania",
+    "RegionAbbr": "PA",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "15401",
+    "PostalExt": "",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -79.777306142717,
+    "Y": 39.933194907282,
+    "DisplayX": -79.777306142717,
+    "DisplayY": 39.933194907282,
+    "Xmin": -79.778306142717,
+    "Xmax": -79.776306142717,
+    "Ymin": 39.932194907282,
+    "Ymax": 39.934194907282,
+    "ExInfo": "",
+    "StrucType": "",
+    "StrucDet": ""
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+
+By including `preferredLabelValues=primaryStreet,localCity`  in the `geocodeAddresses`  request for the same input addresses, the output street and city names are different than the previous example.
+
+</Box>
+<Box>
+
+### Batch geocode with `preferredLabelValues`
+
+#### Single field 
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http 
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses={"records":[{"attributes":{"OBJECTID":1,"SingleLine":"635 CR-30, Olmstedville, NY 12857",}},{"attributes":{"OBJECTID":2,"SingleLine":"7608 National Pike, Uniontown, Pennsylvania, 15401",}}]}&preferredLabelValues=localCity,primaryStreet&f=pjson&token=<ACCESSTOKEN>
+```
+</Tab>
+<Tab>
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "locations": [
+  {
+   "address": "635 Morse Memorial Hwy, Minerva, New York, 12857",
+   "location": {
+    "x": -73.931301357812,
+    "y": 43.77195695338
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 1,
+    "Loc_name": "World",
+    "Status": "T",
+    "Score": 100,
+    "Match_addr": "635 Morse Memorial Hwy, Minerva, New York, 12857",
+    "LongLabel": "635 Morse Memorial Hwy, Minerva, NY, 12857, USA",
+    "ShortLabel": "635 Morse Memorial Hwy",
+    "Addr_type": "StreetAddress",
+    "Type": "",
+    "PlaceName": "",
+    "Place_addr": "635 Morse Memorial Hwy, Minerva, New York, 12857",
+    "Phone": "",
+    "URL": "",
+    "Rank": 20,
+    "AddBldg": "",
+    "AddNum": "635",
+    "AddNumFrom": "699",
+    "AddNumTo": "607",
+    "AddRange": "607-699",
+    "Side": "R",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "Morse Memorial",
+    "StType": "",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "635 Morse Memorial Hwy",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "Minerva",
+    "MetroArea": "",
+    "Subregion": "Essex County",
+    "Region": "New York",
+    "RegionAbbr": "NY",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "12857",
+    "PostalExt": "1828",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -73.931301357812,
+    "Y": 43.77195695338,
+    "DisplayX": -73.931301357812,
+    "DisplayY": 43.77195695338,
+    "Xmin": -73.932301357812,
+    "Xmax": -73.930301357812,
+    "Ymin": 43.77095695338,
+    "Ymax": 43.77295695338,
+    "ExInfo": "",
+    "StrucType": "",
+    "StrucDet": ""
+   }
+  },
+  {
+   "address": "7608 National Pike, Menallen, Pennsylvania, 15401",
+   "location": {
+    "x": -79.777306142717,
+    "y": 39.933194907282
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 2,
+    "Loc_name": "World",
+    "Status": "M",
+    "Score": 100,
+    "Match_addr": "7608 National Pike, Menallen, Pennsylvania, 15401",
+    "LongLabel": "7608 National Pike, Menallen, PA, 15401, USA",
+    "ShortLabel": "7608 National Pike",
+    "Addr_type": "StreetAddress",
+    "Type": "",
+    "PlaceName": "",
+    "Place_addr": "7608 National Pike, Menallen, Pennsylvania, 15401",
+    "Phone": "",
+    "URL": "",
+    "Rank": 20,
+    "AddBldg": "",
+    "AddNum": "7608",
+    "AddNumFrom": "7614",
+    "AddNumTo": "7572",
+    "AddRange": "7572-7614",
+    "Side": "L",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "National",
+    "StType": "Pike",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "7608 National Pike",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "Menallen",
+    "MetroArea": "",
+    "Subregion": "Fayette County",
+    "Region": "Pennsylvania",
+    "RegionAbbr": "PA",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "15401",
+    "PostalExt": "",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -79.777306142717,
+    "Y": 39.933194907282,
+    "DisplayX": -79.777306142717,
+    "DisplayY": 39.933194907282,
+    "Xmin": -79.778306142717,
+    "Xmax": -79.776306142717,
+    "Ymin": 39.932194907282,
+    "Ymax": 39.934194907282,
+    "ExInfo": "",
+    "StrucType": "",
+    "StrucDet": ""
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+
+##### Multifield
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses={"records":[{"attributes":{"OBJECTID":1,"Address":"635 CR-30","City":"Olmstedville","Region":"NY","Postal":"12857"}},{"attributes":{"OBJECTID":2,"Address":"7608 National Pike","City":"Uniontown","Region":"Pennsylvania","Postal":"15401"}}]}&preferredLabelValues=localCity,primaryStreet&f=pjson&token=<ACCESSTOKEN>
+```
+</Tab>
+<Tab>
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "locations": [
+  {
+   "address": "635 Morse Memorial Hwy, Minerva, New York, 12857",
+   "location": {
+    "x": -73.931301357812,
+    "y": 43.77195695338
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 1,
+    "Loc_name": "World",
+    "Status": "T",
+    "Score": 100,
+    "Match_addr": "635 Morse Memorial Hwy, Minerva, New York, 12857",
+    "LongLabel": "635 Morse Memorial Hwy, Minerva, NY, 12857, USA",
+    "ShortLabel": "635 Morse Memorial Hwy",
+    "Addr_type": "StreetAddress",
+    "Type": "",
+    "PlaceName": "",
+    "Place_addr": "635 Morse Memorial Hwy, Minerva, New York, 12857",
+    "Phone": "",
+    "URL": "",
+    "Rank": 20,
+    "AddBldg": "",
+    "AddNum": "635",
+    "AddNumFrom": "699",
+    "AddNumTo": "607",
+    "AddRange": "607-699",
+    "Side": "R",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "Morse Memorial",
+    "StType": "",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "635 Morse Memorial Hwy",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "Minerva",
+    "MetroArea": "",
+    "Subregion": "Essex County",
+    "Region": "New York",
+    "RegionAbbr": "NY",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "12857",
+    "PostalExt": "1828",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -73.931301357812,
+    "Y": 43.77195695338,
+    "DisplayX": -73.931301357812,
+    "DisplayY": 43.77195695338,
+    "Xmin": -73.932301357812,
+    "Xmax": -73.930301357812,
+    "Ymin": 43.77095695338,
+    "Ymax": 43.77295695338,
+    "ExInfo": "",
+    "StrucType": "",
+    "StrucDet": ""
+   }
+  },
+  {
+   "address": "7608 National Pike, Menallen, Pennsylvania, 15401",
+   "location": {
+    "x": -79.777306142717,
+    "y": 39.933194907282
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 2,
+    "Loc_name": "World",
+    "Status": "M",
+    "Score": 100,
+    "Match_addr": "7608 National Pike, Menallen, Pennsylvania, 15401",
+    "LongLabel": "7608 National Pike, Menallen, PA, 15401, USA",
+    "ShortLabel": "7608 National Pike",
+    "Addr_type": "StreetAddress",
+    "Type": "",
+    "PlaceName": "",
+    "Place_addr": "7608 National Pike, Menallen, Pennsylvania, 15401",
+    "Phone": "",
+    "URL": "",
+    "Rank": 20,
+    "AddBldg": "",
+    "AddNum": "7608",
+    "AddNumFrom": "7614",
+    "AddNumTo": "7572",
+    "AddRange": "7572-7614",
+    "Side": "L",
+    "StPreDir": "",
+    "StPreType": "",
+    "StName": "National",
+    "StType": "Pike",
+    "StDir": "",
+    "BldgType": "",
+    "BldgName": "",
+    "LevelType": "",
+    "LevelName": "",
+    "UnitType": "",
+    "UnitName": "",
+    "SubAddr": "",
+    "StAddr": "7608 National Pike",
+    "Block": "",
+    "Sector": "",
+    "Nbrhd": "",
+    "District": "",
+    "City": "Menallen",
+    "MetroArea": "",
+    "Subregion": "Fayette County",
+    "Region": "Pennsylvania",
+    "RegionAbbr": "PA",
+    "Territory": "",
+    "Zone": "",
+    "Postal": "15401",
+    "PostalExt": "",
+    "Country": "USA",
+    "CntryName": "United States",
+    "LangCode": "ENG",
+    "Distance": 0,
+    "X": -79.777306142717,
+    "Y": 39.933194907282,
+    "DisplayX": -79.777306142717,
+    "DisplayY": 39.933194907282,
+    "Xmin": -79.778306142717,
+    "Xmax": -79.776306142717,
+    "Ymin": 39.932194907282,
+    "Ymax": 39.934194907282,
+    "ExInfo": "",
+    "StrucType": "",
+    "StrucDet": ""
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+{/* Batch geocode two addresses with preferredLabelValues=localCity,primaryStreet  */}
+
+{/* Single-field request URL (GET example)
+
+<Box>
+
+`GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses=%7B%22records%22%3A%5B%7B%22attributes%22%3A%7B%22OBJECTID%22%3A1%2C%22SingleLine%22%3A%22635%20CR%2D30%2C%20Olmstedville%2C%20NY%2012857%22%2C%7D%7D%2C%7B%22attributes%22%3A%7B%22OBJECTID%22%3A2%2C%22SingleLine%22%3A%227608%20National%20Pike%2C%20Uniontown%2C%20Pennsylvania%2C%2015401%22%2C%7D%7D%5D%7D&preferredLabelValues=localCity%2CprimaryStreet&f=pjson&token=<ACCESS TOKEN>`
+
+</Box>
+
+Multifield request URL (GET example)
+
+<Box>
+
+`GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses=%7B%22records%22%3A%5B%7B%22attributes%22%3A%7B%22OBJECTID%22%3A1%2C%22Address%22%3A%22635%20CR%2D30%22%2C%22City%22%3A%22Olmstedville%22%2C%22Region%22%3A%22NY%22%2C%22Postal%22%3A%2212857%22%7D%7D%2C%7B%22attributes%22%3A%7B%22OBJECTID%22%3A2%2C%22Address%22%3A%227608%20National%20Pike%22%2C%22City%22%3A%22Uniontown%22%2C%22Region%22%3A%22Pennsylvania%22%2C%22Postal%22%3A%2215401%22%7D%7D%5D%7D&preferredLabelValues=localCity%2CprimaryStreet&f=pjson&token=<ACCESS TOKEN>`
+
+</Box>
+
+For clarity, here is the `addresses`  parameter in PJSON:
+
+```java
+addresses=
+{           "records": [
+        {
+            "attributes": {
+                "OBJECTID": 1,
+                "Address": "635 CR-30",
+                "City": "Olmstedville",
+                "Region": "NY",
+                "Postal": "12857"
+            }
+        },
+   {
+            "attributes": {
+                "OBJECTID": 2,
+                "Address": "7608 National Pike",
+                "City": "Uniontown",
+                "Region": "Pennsylvania",
+                "Postal": "15401"
+            }
+        }
+    ]
+}
+
+```
+
+ 
+
+JSON response
+
+ */}
+
+</Box>
+<Box>
+
+### Specify output fields
+
+The `geocodeAddresses`  operation allows you to specify individual output fields or return all output fields in a response. The `outFields`  parameter is used for this. If you want to return all supported output fields, set `outFields=*` , `outFields=` , or exclude the parameter from the request. If you only want to return the minimum set of default output fields, set `outFields=none` . If you want to return specific fields, pass the desired field names as comma-separated values in the request, such as `outFields=Addr_type,AddNum,StName,StType,Nbrhd,City,Region,Postal,Country` . 
+
+See [Service output](/service-output#output-fields) for details about the fields returned by a `geocodeAddresses`  request.
+
+The examples below illustrate how to control the fields that are included in a `geocodeAddresses`  response by using the `outFields`  parameter. The first example shows what the geocode results look like when a partial set of output fields is defined for `outFields` . The second example shows how to use `outFields`  to return the minimum set of default output fields.
+
+#### Return a partial set of output fields 
+
+##### Single-field
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses={"records":[{"attributes":{"OBJECTID":1,"SingleLine":"269 Lonsdale St, Melbourne, Victoria",}},{"attributes":{"OBJECTID":2,"SingleLine":"30 Flemington Rd, Melbourne, Victoria",}}]}&outFields=Addr_type,AddNum,StName,StType,Nbrhd,City,Region,Postal,Country&f=pjson&token=<ACCESSTOKEN>  
+```
+</Tab>
+<Tab>
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "locations": [
+  {
+   "address": "269 Lonsdale St, Melbourne, Victoria, 3000",
+   "location": {
+    "x": 144.963701807411,
+    "y": -37.812085793266
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 1,
+    "Addr_type": "PointAddress",
+    "AddNum": "269",
+    "StName": "Lonsdale",
+    "StType": "St",
+    "Nbrhd": "Melbourne",
+    "City": "Melbourne",
+    "Region": "Victoria",
+    "Postal": "3000",
+    "Country": "AUS"
+   }
+  },
+  {
+   "address": "30 Flemington Rd, Parkville, Melbourne, Victoria, 3052",
+   "location": {
+    "x": 144.954186922384,
+    "y": -37.797494785766
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 2,
+    "Addr_type": "PointAddress",
+    "AddNum": "30",
+    "StName": "Flemington",
+    "StType": "Rd",
+    "Nbrhd": "Parkville",
+    "City": "Melbourne",
+    "Region": "Victoria",
+    "Postal": "3052",
+    "Country": "AUS"
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+
+##### Multifield
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses={"records":[{"attributes":{"OBJECTID":1,"Address":"269 Lonsdale St","City":"Melbourne","Region":"Victoria",}},{"attributes":{"OBJECTID":2,"Address":"30 Flemington Rd","City":"Melbourne","Region":"Victoria",}}]}&outFields=Addr_type,AddNum,StName,StType,Nbrhd,City,Region,Postal,Country&f=pjson&token=<ACCESSTOKEN>
+```
+</Tab>
+<Tab>
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "locations": [
+  {
+   "address": "269 Lonsdale St, Melbourne, Victoria, 3000",
+   "location": {
+    "x": 144.963701807411,
+    "y": -37.812085793266
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 1,
+    "Addr_type": "PointAddress",
+    "AddNum": "269",
+    "StName": "Lonsdale",
+    "StType": "St",
+    "Nbrhd": "Melbourne",
+    "City": "Melbourne",
+    "Region": "Victoria",
+    "Postal": "3000",
+    "Country": "AUS"
+   }
+  },
+  {
+   "address": "30 Flemington Rd, Parkville, Melbourne, Victoria, 3052",
+   "location": {
+    "x": 144.954186922384,
+    "y": -37.797494785766
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 2,
+    "Addr_type": "PointAddress",
+    "AddNum": "30",
+    "StName": "Flemington",
+    "StType": "Rd",
+    "Nbrhd": "Parkville",
+    "City": "Melbourne",
+    "Region": "Victoria",
+    "Postal": "3052",
+    "Country": "AUS"
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+
+{/* Here is what the `addresses`  parameter looks like in PJSON for the example addresses in single-field format (use with POST requests):
+
+```java
+addresses=
+{           "records": [
+        {
+            "attributes": {
+                "OBJECTID": 1,
+                "SingleLine": "269 Lonsdale St, Melbourne, Victoria"
+            }
+        },
+   {
+            "attributes": {
+                "OBJECTID": 2,
+                "SingleLine": "30 Flemington Rd, Melbourne, Victoria"
+            }
+        }
+    ]
+}
+
+```
+
+ 
+
+Here is what the `addresses`  parameter looks like in PJSON for these addresses in multifield format (use with POST requests):
+
+```java
+addresses=
+{           "records": [
+        {
+            "attributes": {
+                "OBJECTID": 1,
+                "Address": "269 Lonsdale St",
+                "City": "Melbourne",
+                "Region": "Victoria"
+            }
+        },
+   {
+            "attributes": {
+                "OBJECTID": 2,
+                "Address": "30 Flemington Rd",
+                "City": "Melbourne",
+                "Region": "Victoria"
+            }
+        }
+    ]
+}
+
+```
+
+ 
+
+By default, all output fields are returned in a `geocodeAddresses`  response. For some workflows or applications, this may cause the response to be larger than necessary. The `outFields`  parameter can be used to limit the result set so that only the fields required by the application are returned. The example below shows how to return basic address and administrative zone fields in the response.
+
+
+Batch geocode two addresses and use outFields to return a partial set of output fields (outFields=Addr_type,AddNum,StName,StType,Nbrhd,City,Region,Postal,Country) 
+
+Single-field request URL (GET example)
+
+<Box>
+
+`GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses=%7B%22records%22%3A%5B%7B%22attributes%22%3A%7B%22OBJECTID%22%3A1%2C%22SingleLine%22%3A%22269%20Lonsdale%20St%2C%20Melbourne%2C%20Victoria%22%2C%7D%7D%2C%7B%22attributes%22%3A%7B%22OBJECTID%22%3A2%2C%22SingleLine%22%3A%2230%20Flemington%20Rd%2C%20Melbourne%2C%20Victoria%22%2C%7D%7D%5D%7D&outFields=Addr_type%2CAddNum%2CStName%2CStType%2CNbrhd%2CCity%2CRegion%2CPostal%2CCountry&f=pjson&token=<ACCESS TOKEN>`
+
+</Box>
+
+Multifield request URL (GET example)
+
+<Box>
+
+`GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses=%7B%22records%22%3A%5B%7B%22attributes%22%3A%7B%22OBJECTID%22%3A1%2C%22Address%22%3A%22269%20Lonsdale%20St%22%2C%22City%22%3A%22Melbourne%22%2C%22Region%22%3A%22Victoria%22%2C%7D%7D%2C%7B%22attributes%22%3A%7B%22OBJECTID%22%3A2%2C%22Address%22%3A%2230%20Flemington%20Rd%22%2C%22City%22%3A%22Melbourne%22%2C%22Region%22%3A%22Victoria%22%2C%7D%7D%5D%7D&outFields=Addr_type%2CAddNum%2CStName%2CStType%2CNbrhd%2CCity%2CRegion%2CPostal%2CCountry&f=pjson&token=<ACCESS TOKEN>`
+
+</Box>
+
+
+ 
+
+To reduce the response size even more, set `outFields=none`  in the request.  */}
+
+#### Return the minimum set of output fields 
+
+##### Single-field
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses={"records":[{"attributes":{"OBJECTID":1,"SingleLine":"269 Lonsdale St, Melbourne, Victoria",}},{"attributes":{"OBJECTID":2,"SingleLine":"30 Flemington Rd, Melbourne, Victoria",}}]}&outFields=none&f=pjson&token=<ACCESSTOKEN>
+```
+</Tab>
+<Tab>
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "locations": [
+  {
+   "address": "269 Lonsdale St, Melbourne, Victoria, 3000",
+   "location": {
+    "x": 144.963701807411,
+    "y": -37.812085793266
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 1
+   }
+  },
+  {
+   "address": "30 Flemington Rd, Parkville, Melbourne, Victoria, 3052",
+   "location": {
+    "x": 144.954186922384,
+    "y": -37.797494785766
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 2
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs>
+
+##### Multifield
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses={"records":[{"attributes":{"OBJECTID":1,"Address":"269 Lonsdale St","City":"Melbourne","Region":"Victoria",}},{"attributes":{"OBJECTID":2,"Address":"30 Flemington Rd","City":"Melbourne","Region":"Victoria",}}]}&outFields=none&f=pjson&token=<ACCESSTOKEN>
+```
+</Tab>
+<Tab>
+
+```json
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "locations": [
+  {
+   "address": "269 Lonsdale St, Melbourne, Victoria, 3000",
+   "location": {
+    "x": 144.963701807411,
+    "y": -37.812085793266
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 1
+   }
+  },
+  {
+   "address": "30 Flemington Rd, Parkville, Melbourne, Victoria, 3052",
+   "location": {
+    "x": 144.954186922384,
+    "y": -37.797494785766
+   },
+   "score": 100,
+   "attributes": {
+    "ResultID": 2
+   }
+  }
+ ]
+}
+
+```
+</Tab>
+</Tabs> 
+{/* Batch geocode two addresses and use outFields to return the minimum set of output fields (outFields=none) 
+
+Single-field request URL (GET example)
+
+<Box>
+
+`GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses=%7B%22records%22%3A%5B%7B%22attributes%22%3A%7B%22OBJECTID%22%3A1%2C%22SingleLine%22%3A%22269%20Lonsdale%20St%2C%20Melbourne%2C%20Victoria%22%2C%7D%7D%2C%7B%22attributes%22%3A%7B%22OBJECTID%22%3A2%2C%22SingleLine%22%3A%2230%20Flemington%20Rd%2C%20Melbourne%2C%20Victoria%22%2C%7D%7D%5D%7D&outFields=none&f=pjson&token=<ACCESS TOKEN>`
+
+</Box>
+
+Multifield request URL (GET example)
+
+<Box>
+
+`GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses?addresses=%7B%22records%22%3A%5B%7B%22attributes%22%3A%7B%22OBJECTID%22%3A1%2C%22Address%22%3A%22269%20Lonsdale%20St%22%2C%22City%22%3A%22Melbourne%22%2C%22Region%22%3A%22Victoria%22%2C%7D%7D%2C%7B%22attributes%22%3A%7B%22OBJECTID%22%3A2%2C%22Address%22%3A%2230%20Flemington%20Rd%22%2C%22City%22%3A%22Melbourne%22%2C%22Region%22%3A%22Victoria%22%2C%7D%7D%5D%7D&outFields=none&f=pjson&token=<ACCESS TOKEN>`
+
+</Box>
+
+JSON response
+
+
+ */}
+</Box>

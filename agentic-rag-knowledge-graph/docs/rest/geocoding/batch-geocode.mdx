@@ -1,0 +1,1642 @@
+---
+title: "/batchGeocode"
+description: "Use the ArcGIS Geocoding service to geocode a file of addresses."
+slug: "batch-geocode"
+url: "/batch-geocode"
+guid: "GUID-174C5490-1595-44A4-A292-C135E367ABA4"
+migratedTopicMetadata:
+  FTITLE: "geocoding-batch-geocode"
+  FDESCRIPTION: "Describes how to geocode a table of addresses using the Geocoding service"
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "agol 24.R02"
+  CREATED-ON: "09/07/2024 09:39:40"
+  FAUTHOR: "mchaffin"
+  FSTATUS: "Draft"
+  MODIFIED-ON: "01/10/2024 09:35:38"
+  VERSION: "1"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "27"
+  ED: "GUID-2988B18C-9D56-4B11-96E6-99E7A81970F3"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+---
+
+import ParamMetadata from "../../shared/components/param-metatdata"
+import SharedParams from "../../shared/content/_required-params"
+
+<div class="calcite-tabs-hide-borders">
+<Tabs>
+<TabNav slot="tab-nav">
+  <TabTitle is-active>Enhanced</TabTitle>
+</TabNav>
+
+<Tab is-active>
+<div style={{height:"15px"}}></div>
+
+<CodeSwitcher>
+<CodeBlock language="curl" label="POST">{`POST https://geocode-beta.arcgis.com/arcgis/rest/services/World/GeocodeServer/batchGeocode/beta/submitJob`}</CodeBlock>
+<CodeBlock language="curl" label="GET">{`GET https://geocode-beta.arcgis.com/arcgis/rest/services/World/GeocodeServer/batchGeocode/beta/submitJob`}</CodeBlock>
+</CodeSwitcher> 
+
+</Tab>
+</Tabs>
+</div>
+
+The `/batchGeocode` job request geocodes a file of addresses in CSV (comma-separated values) or zipped CSV format.
+
+To learn more about job requests, go to [Service request types](xref://site.geocoding/geocoding-request-types). 
+
+<MoreInfo>
+
+The capabilities of `batchGeocode`  are the same as the [geocodeAddresses](/geocode-addresses)  operation. These are the primary differences—
+
+1.  With `batchGeocode` , the input addresses are passed to the service in a file; with `geocodeAddresses` , the addresses are passed to the service as a collection of JSON objects.
+2.  The `batchGeocode`  process is executed as a job whose status can be monitored, and it does not block, nor is blocked by, other geocoding operations running concurrently.
+
+The `batchGeocode`  workflow is recommended for larger geocoding scenarios, where 100,000 or more addresses need to be geocoded. 
+
+{/* 
+`batchGeocode`  usage will be billed during the beta period. */}
+
+
+South Korea address geocoding is not supported by `batchGeocode` . The [geocodeAddresses](/geocode-addresses)  operation must be used for that.
+
+</MoreInfo>
+
+## Parameters 
+
+<StyledTable headers="Name, Required, Type, Default, Description">
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[token](#token)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    An access token with the [required privileges](#token).
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[item](#item)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The <Term term="item id">item id</Term>, passed as a string in a JSON object. 
+
+    </StyledTableCell>
+  </StyledTableRow>
+    <StyledTableRow>
+    <StyledTableCell cellStyle="code">[fieldMapping](#fieldmapping)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    Maps the fields in an address table to the input fields expected by the service.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[category](#category)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    A place or address type that can be used to filter results.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[sourceCountry](#sourcecountry)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    Sets the country to be geocoded.
+
+    </StyledTableCell>
+  </StyledTableRow>
+
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[outSr](#outsr)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">number</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+        `4326`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The spatial reference of the `x` and `y` coordinates returned in a response.
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[matchOutOfRange](#matchoutofrange)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    Returns a match when the input house number is outside the street's house number range.
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[locationType](#locationtype)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `rooftop`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    
+    Specifies whether output geometry of `PointAddress` and `Subaddress` matches should be the rooftop point or street entrance.
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[searchExtent](#searchextent)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string | [envelope](DEVSITE/rest/services-reference/enterprise/geometry-objects/#envelope)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The set of bounding box coordinates that limits the search area. 
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[langCode](#langcode)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The language in which results are returned. 
+
+    </StyledTableCell>
+  </StyledTableRow>  
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[preferredLabelValues](#preferredlabelvalues)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     Returns the specified street or city name in output fields.
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[outFields](#outfields)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string | *</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The list of fields to be returned within the `attributes` object of a response.
+
+    </StyledTableCell>
+  </StyledTableRow> 
+</StyledTable>
+
+## Required parameters 
+
+<Box>
+
+### token
+
+<SharedParams token alpPrivileges={"premium:user:geocode:temporary or premium:user:geocode:stored"} agoPrivileges={"premium:user:geocode or premium:user:geocode:stored"}/>
+
+</Box>
+
+<Box>
+
+### item 
+
+<ParamMetadata types={[{name:"{object}"}]} required />
+
+The `id`  value returned in the response from the `addItem`  request in the first step of the `batchGeocode` process. It represents the address file that was uploaded to the portal. It must be passed as a JSON object. 
+
+```
+item = {'itemID': 'f507a5ddf4f9485c8f8ac6dc6ad9f25f'}
+```
+
+<MoreInfo labelMore="How to create an item">
+
+You can use the [`addItem`](DEVSITE/rest/users-groups-and-items/add-item/) operation to upload the file of addresses to the portal. The result of the [`addItem`](DEVSITE/rest/users-groups-and-items/add-item/) request is an item `id` property in the JSON response that is associated with the uploaded file of addresses. The `id` value must be used in subsequent steps to complete the batch geocoding process. You may use a third-party application such as Microsoft Excel or Notepad++ to add a UTF-8 BOM to your CSV file.
+
+The input file must adhere to the following requirements:
+
+-   The file must be in CSV (.csv) or zipped CSV (.zip) format.
+-   The file must use UTF-8 encoding with a BOM (byte order mark).
+-   The maximum file size supported by the ArcGIS Geocoding service is 2 GB. If you have a CSV file that exceeds 2 GB you must compress it as a zipped file or reduce the number of records in the file before submitting it to the service.
+-   The filename must be unique for the ArcGIS Online user. If the file already exists as an item in the portal, you can get its ID and use it as the `id` value in subsequent batch geocoding workflow steps. Alternatively you can delete the item using the [Delete Items](DEVSITE/rest/users-groups-and-items/delete-items/) API call and reupload it using [`addItem`](DEVSITE/rest/users-groups-and-items/add-item/).
+
+<Note type="portal-guide">
+To learn more, go to [Create an item](xref://site.documentation/portal-and-data-services-create-an-item).
+</Note>
+
+</MoreInfo> 
+
+</Box>
+
+<Box>
+
+### fieldMapping 
+
+<ParamMetadata types={[{name:"string"}]} required />
+
+Use this parameter to map the fields in your address table to the input fields expected by the service. The mapping should follow this general format:
+
+`<service input field>:<field in address file>` 
+
+If the entire address is stored in a single field in your file, map it to the [SingleLine](/find-address-candidates#singleline) input field. For instance, if the address field in your file is named "full_address", the `fieldMapping`  parameter value should look like this:
+
+SingleLine example
+
+```javascript
+fieldMapping=SingleLine:full_address
+```
+
+If the addresses are split up into individual components, such as street address, city, state, and postal code, map them to the [multiline](/find-address-candidates#address-parameters) input fields supported by the service. This is referred to as multiline or multifield geocoding. The fields should be separated by commas.
+
+As an example, your address file may include the following fields:
+
+-   `street_address`  (house number + street name)
+-   `municipality`  (city name)
+-   `state`  (state name)
+-   `zip_code`  (postal code)
+
+In this case, the `fieldMapping`  parameter value should look like this:
+
+Multiline example
+
+```javascript
+fieldMapping=Address:street_address,City:municipality,Region:state,Postal:zip_code
+```
+
+<MoreInfo>
+
+The `fieldMapping`  parameter is case-sensitive. This means that the address file field names must be entered exactly as they appear in the CSV file. For example, if the CSV file includes field name `street_address` , it must be passed this way in the `fieldMapping`  parameter: `fieldMapping=Address:street_address` . If the field name is passed in all capital letters, or with any other casing which is different than that in the CSV file - such as `fieldMapping=Address:Street_Address`  - an error will be returned by the service. 
+
+</MoreInfo>
+
+</Box>
+
+## Optional parameters
+
+<Box>
+
+### category
+
+<ParamMetadata types={[{name:"string"}]} /> 
+
+A place or address type that can be used to filter `geocodeAddresses`  results. The parameter supports input of single-category values or multiple comma-separated values. See [Category filtering](/category-filtering) for details about the `category`  parameter.
+
+<Note type={"note"}>
+
+If more than one value is specified for the parameter, the values must be separated by a comma, with no spaces after the comma.
+
+</Note>
+
+Example of category filtering with a single category
+
+```javascript
+category=Address
+```
+
+ Example of category filtering with multiple categories
+
+```javascript
+category=Address,Postal
+```
+</Box> 
+
+<Box>
+
+### sourceCountry
+
+<ParamMetadata types={[{name:"string"}]} />
+
+A value representing the country. When a value is passed for this parameter, all of the addresses in the input table are sent to the specified country to be geocoded. For example, if `sourceCountry=USA`  is passed with a batch request, it is assumed that all of the addresses in the table are in the United States, so only matching addresses in the U.S. are returned. Using this parameter can increase batch geocoding performance when all addresses are within a single country.
+
+Acceptable values include the three-character country code. You can specify multiple country codes to limit results to more than one country.
+
+A list of supported countries and codes is available in [Data coverage](/geocode-coverage).
+
+<Note type={"note"}>
+
+The `sourceCountry`  and `countryCode`  parameters are similar but serve different purposes. The `countryCode`  parameter defines the country value for an individual record in a multifield batch geocode request. The `sourceCountry`  parameter defines the country value for the entire table of addresses. If both `countryCode`  and `sourceCountry`  are included in a `geocodeAddresses`  request, and the country values are different, the `countryCode`  value takes priority over `sourceCountry` . 
+
+</Note>
+
+<Note type={"note"}>
+
+If more than one value is specified for the parameter, the values must be separated by a comma, with no spaces after the comma.
+
+</Note>
+
+Example: Single country
+
+```javascript
+sourceCountry=USA
+```
+
+ Example: Multiple countries
+
+```javascript
+sourceCountry=FRA,DEU,ESP
+```
+
+</Box>
+
+<Box>
+
+### outSR
+
+<ParamMetadata types={[{name:"number"}]} defaultValue="4326" />
+
+The spatial reference of the x,y coordinates returned by a geocode request. This is useful for applications using a map with a spatial reference different than that of the geocode service. 
+
+The spatial reference can be specified as either a well-known ID (WKID) or as a [JSON spatial reference object](DEVSITE/rest/services-reference/enterprise/geometry-objects/#spatial-reference). If `outSR`  is not specified, the spatial reference of the output locations is the same as that of the service. The ArcGIS Geocoding service spatial reference is WGS84 (WKID = 4326). 
+
+For a list of valid WKID values, see [Projected coordinate systems](https://links.esri.com/proj-coord-systems) and [Geographic coordinate systems](https://links.esri.com/geo-coord-systems).
+
+Example (102100 is the WKID for the Web Mercator projection)
+
+```javascript
+outSR=102100
+```
+
+</Box>
+ 
+<Box>
+
+### matchOutOfRange
+
+<ParamMetadata types={[{name:"boolean"}]} defaultValue="true"/> 
+
+A Boolean that specifies whether StreetAddress matches should be returned even when the input house number is outside of the house number range defined for the input street. Out-of-range matches have `=StreetAddressExt` . The geometry of such matches is a point corresponding to the end of the street segment where the range value is closest to the input house number. If `matchOutOfRange`  is not specified in a request, its value is set to `true`  by default.
+
+With the `matchOutOfRange`  parameter, better spatial accuracy is provided for inexact street address searches. Most street segments are assigned house number ranges. For example, Main Street may include house numbers from 2–100 on one side of the street and 1–99 on the other. A user may search for a house number that is not within this range, such as 109 Main Street. If `matchOutOfRange=false`  is passed in this request, the geocode service will return a StreetName-level match to Main Street, with geometry corresponding to the centroid of a street segment that most closely matches the input values. StreetName matches can be ambiguous because there may be multiple street segments with the same name that equally match the input. However, if `matchOutOfRange=true` , in this case, a more precise geometry is returned to the specific side of the segment of Main Street with house number range 1–99. 
+
+<Note type={"note"}>
+
+Input house numbers that exceed the range on a street segment by more than 100 will not result in StreetAddressExt matches. For streets with smaller house number ranges, the `maxOutOfRange`  tolerance is less than 100.
+
+</Note>
+
+
+```javascript
+matchOutOfRange=false
+```
+</Box>
+ 
+<Box>
+
+### locationType
+
+<ParamMetadata types={[{name:"string"}]} values="rooftop, street"/>
+
+The `locationType`  parameter specifies whether the output geometry of PointAddress matches should be the rooftop point or street entrance location. Valid values are `rooftop`  and `street` . The default value is `rooftop` .
+
+Geocode results include one geometry object (the `location`  object) which defines the location of the address, as well as two sets of x,y coordinate values within the `attributes`  object: [X](/service-output#GUID-BFD661FB-1180-45D8-9ECE-9868D95B7D6E) /[Y](/service-output#GUID-F9505F9C-5550-47B5-8776-3997F12B88F8) , and [DisplayX](/service-output#GUID-458D2C0A-15FC-49FE-95E5-CEF1747156F1) /[DisplayY](/service-output#GUID-7FA7D401-4A50-462F-A5CD-0489405A5A07) . In most cases, for geocode results with `=PointAddress`  or `Subaddress` , the `X` /`Y`  attribute values describe the coordinates of the address along the street, while the `DisplayX` /`DisplayY`  values describe the rooftop, or building centroid, coordinates. By default, the geometry returned for geocode results represents the rooftop location of the address (if the rooftop location is available in the source data). This is useful for most spatial analysis and map display purposes. However, for routing scenarios, it may be desirable to use the street location because the rooftop location of some addresses may be offset from a street by a large distance. For these cases, the `locationType`  parameter can be used to specify that the street entrance geometry should be returned. 
+
+It is important to note that `locationType`  is limited by the address data sources used by the ArcGIS Geocoding service. Not all PointAddress and Subaddress features include rooftop and street location coordinates. For some addresses, only a rooftop location is available; for others, only a street location is provided by the data source. For cases such as this, the `locationType`  parameter may not function as expected. For example, if only rooftop location coordinates are available for an address, the rooftop geometry will be returned for the geocoded address even when `locationType=street`  is requested. 
+
+<Note type={"note"}>
+
+The `locationType`  parameter only affects the `location`  object in the geocode JSON response. It does not change the `X` /`Y`  or `DisplayX` /`DisplayY`  attribute values.
+
+</Note>
+
+```javascript
+locationType=street
+```
+</Box>
+
+<Box>
+
+### searchExtent
+
+<ParamMetadata types={[{name:"string"},{name:"envelope", link:"DEVSITE/rest/services-reference/enterprise/geometry-objects/#envelope"}]} />
+
+A set of bounding box coordinates that limit the search area to a specific region. This is especially useful for applications in which a user will search for places and addresses within the current map extent.
+
+You can specify the spatial reference of the `searchExtent`  coordinates, which is necessary if the map spatial reference is different than that of the ArcGIS Geocoding service; otherwise, the spatial reference of the coordinates is assumed to be the same as that of the ArcGIS Geocoding service. 
+
+The input can either be a comma-separated list of coordinates defining the bounding box or a [JSON envelope object](DEVSITE/rest/services-reference/enterprise/geometry-objects/#envelope). The spatial reference of the bounding box coordinates can be included if an envelope object is used.
+
+Refer to the [Geocode addresses within an extent](/geocode-addresses#geocode-addresses-within-an-extent) section below for more details about using `searchExtent` .
+
+Example without a spatial reference
+
+```javascript
+searchExtent=-104,35.6,-94.32,41
+```
+
+ Example with a spatial reference
+
+```javascript
+searchExtent=
+{
+    "xmin": -13052769,
+    "ymin": 3951172,
+    "xmax": -13019630,
+    "ymax": 3978490,
+    "spatialReference": {
+        "wkid": 3395
+    }
+}
+```
+</Box>
+<Box>
+
+### langCode
+
+<ParamMetadata types={[{name:"string"}]} />
+
+The `langCode`  parameter sets the language in which geocode results are returned. Addresses and places in many countries are available in more than one language; in these cases, the `langCode`  parameter can be used to specify which language should be used for results returned by the `geocodeAddresses`  operation. This is useful for ensuring that results are returned in the expected language. For example, a web application could be designed to get the browser language and pass it as the `langCode`  parameter value in a `geocodeAddresses`  request.
+
+See the [table of supported countries](/geocode-coverage#level-1) for valid language code values in each country. The Supported Language Codes column provides the valid input values for the `langCode`  parameter. Full language names cannot be used with the `langCode`  parameter. Only one language code value can be included for the `langCode`  parameter in a `geocodeAddresses`  request.
+
+If the `langCode`  parameter isn't included in a request, or if it is included but there are no matching features with the input language code, the resultant match is returned in the language code of the primary matched component from the input search string. Typically, this is either place-name or street name, depending on the search string.
+
+Similarly, when there are multiple supported languages for a country, it doesn't mean that every address in the country is available in each of the languages. It may be the case that addresses are available in multiple languages for only one region of the country, or that each language is exclusive to a different region and there is no overlap. The following are some examples:
+
+-   Both English and French are listed as supported languages for Canada. However, there is no overlap between the languages for any addresses in most provinces. In the province of Quebec, only French addresses are available, while English is the only language used for addresses in Ontario. 
+-   In Belgium, where three languages are supported (Dutch, French, and German), addresses are available in the city of Brussels in both Dutch and French. However, in the majority of the country, only a single language is used for addresses. 
+-   In Greece, there is complete address coverage in both Greek and transliterated Greek languages (Greek words represented with Latin characters).
+
+Due to variability of language coverage, the following logic is used to handle the different scenarios that may be encountered.
+
+<StyledTable headers={"Scenario,Result,Example"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Only one language is supported for an address, and no `langCode`  value is specified in the `geocodeAddresses`  request.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Candidate is returned in the supported language.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Input (address in Geneva, Switzerland):
+
+-   `Avenue Appia 20 1202 Geneva` 
+-   `langCode=` 
+
+Output: `Avenue Appia 20, 1202, Pregny-Chambésy, Genève` 
+
+<Note type={"note"}>
+
+The candidate is returned in French because it is the only language supported for addresses in Geneva, Switzerland.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Only one language is supported for an address, and an unsupported language is specified for the `langCode`  parameter in the `geocodeAddresses`  request.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Candidate is returned in the supported language.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Input (address in Geneva, Switzerland):
+
+-   `Avenue Appia 20 1202 Geneva` 
+-   `langCode=zh`  (Chinese)
+
+Output: `Avenue Appia 20, 1202, Pregny-Chambésy, Genève` 
+
+<Note type={"note"}>
+
+The candidate is returned in French because language `zh`  (Chinese) is not supported for addresses in Geneva. French is the only language supported for addresses in Geneva.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Multiple languages are supported for an address, and no `langCode`  value is specified in the `geocodeAddresses`  request. 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Candidate is returned in the language of the primary matched component from the input string (street name or place-name).
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Input (address in Brussels, Belgium):
+
+-   `Wetstraat 175 Brussel` 
+-   `langCode=` 
+
+Output: `Wetstraat 175, 1040, Brussel` 
+
+<Note type={"note"}>
+
+The candidate is returned in Dutch based on the matched street name Wetstraat, which is Dutch. Both Dutch and French languages are supported for addresses in Brussels, Belgium.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Multiple languages are supported for an address, and an unsupported language is specified for the `langCode`  parameter in the `geocodeAddresses`  request.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Candidate is returned in the language of the primary matched component from the input string (street name or place-name).
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Input (address in Athens, Greece):
+
+-   `Dionysiou Areopagitou 15, 11742, Athens` 
+-   `langCode=ru`  (Russian)
+
+Output: `Dionysiou Areopagitou 15, 117 42, Athens` 
+
+<Note type={"note"}>
+
+The candidate is returned in transliterated Greek based on the matched street name Dionysiou Areopagitou, because language `ru`  (Russian) is not supported for addresses in Greece. Only Greek and transliterated Greek are supported for addresses in Greece.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Multiple languages are supported for an address, and a supported language is specified for the `langCode`  parameter in the `geocodeAddresses`  request.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Candidate is returned in the requested language.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Input (address in Athens, Greece):
+
+-   `Dionysiou Areopagitou 15, 11742, Athens` 
+-   `langCode=el`  (Greek)
+
+Output: `Διονυσίου Αρεοπαγίτου 15, 117 42, Αθήνα` 
+
+<Note type={"note"}>
+
+The candidate is returned in Greek because language `el`  (Greek) is supported for addresses in Greece.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+```javascript
+langCode=fr
+```
+</Box>
+<Box>
+
+### preferredLabelValues
+
+<ParamMetadata types={[{name:"string"}]} />
+
+The `preferredLabelValues`  parameter allows simple configuration of output fields returned in a response from the ArcGIS Geocoding service by specifying which address component values should be included in output fields. The parameter supports a single value or a comma-delimited collection of values as input. If the parameter is blank or excluded from a request, default address label formats will be used. 
+
+A particular address may have multiple city names associated with it. In the United States, for example, all addresses have a ZIP Code (postal code) assigned to them. Each ZIP Code has one or more associated locality names, which are known as postal cities. There is always one primary postal city value for each ZIP Code. ZIP Codes typically have no set boundaries, and the primary postal city name for the ZIP Code that is assigned to an address may be different than the name of the local city that the address is within.
+
+<Note type={"note"}>
+
+ In the context of the `preferredLabelValues`  parameter, the name of the city whose boundary an address is within is referred to as the local city, as opposed to the postal city name assigned to the address's postal code.
+
+</Note>
+
+For addresses in the United States, the ArcGIS Geocoding service includes the primary postal city in response output fields by default. As an example, postal code 45420 in Ohio has the primary postal city value Dayton. Addresses in the city of Kettering are assigned this postal code. It means that the default output fields for all geocoded addresses with postal code 45420, even those within the city of Kettering, will include Dayton as the city. To illustrate, if a user searches for `2109 E Dorothy Ln, OH, 45420` , the default match label returned in the response is **2109 E Dorothy Ln, Dayton, Ohio, 45420**, even though the address is within the Kettering city limits. 
+
+Some organizations may prefer to include the local city name in the response instead of the postal city. The `preferredLabelValues`  can be used for this purpose. For the previous example, if `preferredLabelValues=localCity`  is included in the request, the output match label in the response will be **2109 E Dorothy Ln, Kettering, Ohio, 45420**. 
+
+Similarly, streets may be known by multiple names. This is especially true with highways. For example, Pearblossom Hwy in California, which is the primary name, is also known as CA-138. The ArcGIS Geocoding service allows matching to addresses using either name as input, and by default will return the name that was matched to in the response. 
+
+Some organizations may prefer that the primary street name be returned in the response even if a user searches for an alternate street name, and they can use the `preferredLabelValues`  parameter to accomplish this. In other words, if a user searches for `CA-138, Pearblossom, CA` , and `preferredLabelValues=primaryStreet`  is included in the request, the match label returned in the response is **Pearblossom Hwy, Pearblossom, California, 93553**. 
+
+See the following table for supported parameter values.
+
+<StyledTable headers={"Parameter value,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+postalCity
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Include the primary postal city value in geocoding response output fields, even if it is different than the city name in the geocoding request. This is the primary name assigned to the postal code of the address. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+localCity
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Include the primary local city name in geocoding response output fields, even if it is different than the city name in the geocoding request. This is the name of the city that the address is within, and may be different than the postal city. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+matchedCity
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If the input city name in a geocoding request matches any of the local city or postal city names associated with an address, include the matched value in geocoding response output fields. If a city name is not included in the input, or is included but doesn't match to anything, default address formats will be used.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+primaryStreet
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Include the primary street name in geocoding response output fields, even if it is different than the street name in the geocoding request.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+matchedStreet
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If the input street name in a geocoding request matches any of the supported street names assigned to an address, include the matched value in geocoding response output fields.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+Here are additional details about the `preferredLabelValues`  parameter
+
+-   The `preferredLabelValues`  parameter takes a comma-delimited collection of values as input.
+-   The parameter values correspond to two groups—a City group and a Street group, indicated by the suffix of the value name. The `postalCity` , `localCity` , and `matchedCity`  values are part of the City group. The `primaryStreet`  and `matchedStreet`  values are part of the Street group.
+-   A geocode request can include one City value and one Street value—for instance: `preferredLabelValues=primaryStreet,postalCity` .
+-   A request can only include one value per group. In other words, a request with `preferredLabelValues=matchedCity,postalCity`  is invalid.
+
+Example: Single label value
+
+```javascript
+preferredLabelValues=matchedCity
+```
+
+ Example: Multiple label values
+
+```javascript
+preferredLabelValues=matchedCity,primaryStreet
+```
+
+ 
+
+<Note type={"note"}>
+
+The functionality of the `preferredLabelValues`  parameter is limited by the data sources used to produce the ArcGIS Geocoding service. Not all addresses have postal city and local city values assigned to them. Likewise, only certain streets may include primary and alternate names. If the `preferredLabelValues`  parameter is used and the output labels don't correspond to expectations in some cases, it is likely because the expected values aren't included in the source data for the addresses. 
+
+</Note>
+
+</Box>
+<Box>
+
+### outFields
+
+<ParamMetadata types={[{name:"string"},{name:"*"}]} />
+
+The list of fields to be returned within the `attributes`  object of the `geocodeAddresses`  response. Descriptions for each of these fields are available in the [Service output](/service-output#output-fields) topic. 
+
+Unless otherwise specified, all output fields are returned in a `geocodeAddresses`  response (refer to this [example](/geocode-addresses#GUID-B9E74F70-6428-493E-9A29-9E29DC22208B) to see the full set of output fields). The `outFields`  parameter can be used to limit the result set by allowing specific fields to be returned, which is useful if not all fields are required for a user workflow.
+
+If `outFields=none`  is passed in a `geocodeAddresses`  request, only the minimum set of components is included in the response. This includes the `ResultID`  field, which is always part of the `geocodeAddresses`  response no matter which values are defined for the `outFields`  parameter. The minimum set of objects includes the following:
+
+-   `spatialReference` 
+-   `locations`  (full address and x,y coordinates of the match location)
+-   `score` 
+-   `attributes`  (including the `ResultID`  output field)
+
+<Note type={"note"}>
+
+The full set of output fields is included in a `geocodeAddresses`  response for the following conditions:
+
+-   The `outFields`  parameter is excluded from the request.
+-   The `outFields`  parameter is included but empty (`outFields=` ).
+-   The wildcard character is passed as the `outFields`  value (`outFields=*` ).
+
+</Note>
+
+<Note type={"note"}>
+
+The `outFields`  values included in a request should use the same casing as the `name`  values listed within the `candidateFields`  section of the service description page: [https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer?f=pjson](https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer?f=pjson). More information about output fields can be found in [Service output](/service-output).
+
+</Note>
+
+<Note type={"note"}>
+
+If more than one value is specified for the parameter, the values must be separated by a comma, with no spaces after the comma.
+
+</Note>
+
+Examples that return all output fields
+
+```javascript
+outFields=*
+outFields=
+
+```
+
+ Example that returns a partial set of output fields
+
+```javascript
+outFields=AddNum,StAddr,City
+```
+
+ Example that returns the minimum set of output fields
+
+```javascript
+outFields=none
+```
+</Box>
+
+## Response status 
+
+<StyledTable headers="Status, Meaning, Description, Schema">
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">200</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[OK](https://datatracker.ietf.org/doc/html/rfc7231#section-6.3.1)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     A successful response for a `/reverseGeocode` request.
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     Inline
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">403</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[Forbidden](https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.3)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     The `token` is valid but access is denied. This error is returned when a user with insufficient privileges attempts to geocode a file using the `batchGeocode`  operation. 
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     [Error](#response-details)
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">409</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">Bad request</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     An item '\{item name}' already exists. This error is returned when an item already exists in the portal with the same name as the filename passed in the `addItem` request.
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     [Error](#response-details)
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">5XX</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">Unknown</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     An error occured on the server. 
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     [Error](#response-details)
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+<Note>
+
+The `batchGeocode`  process may fail if there is a problem with the input CSV file or if the [field mapping](/batch-geocode#submit-the-geocoding-job-to-the-service) is incorrect. In these situations, the status returned by the `jobs`  request will indicate the issue.
+
+</Note>
+
+## Response details 
+
+<CodeSwitcher displayMode="tabs">
+  <CodeBlock language="json" group="200 OK (submit job)" source="./code/batch-geocode.json" section="submit" />
+  <CodeBlock language="json" group="200 OK (executing job)" source="./code/batch-geocode.json" section="execute" />
+  <CodeBlock language="json" group="200 OK (job succeeded)" source="./code/batch-geocode.json" section="success" />
+  <CodeBlock language="json" group="200 OK (job failed)" source="./code/batch-geocode.json" section="fail" />
+  <CodeBlock language="json" group="Error" source="./code/error-response.json"/>
+</CodeSwitcher>
+
+
+
+## Examples
+
+<Box>
+
+### Batch geocode a list of addresses 
+
+For the complete workflow, go to [Mapping and location services > Batch geocoding](xref://site.documentation/batch-geocoding/#job-geocode-a-file-of-addresses).
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+POST https://geocode-beta.arcgis.com/arcgis/rest/services/World/GeocodeServer/batchGeocode/beta/submitJob HTTP/1.1
+content-type: application/x-www-form-urlencoded
+User-Agent: <USER AGENT>
+
+item = {'itemID': 'f507a5ddf4f9485c8f8ac6dc6ad9f25f'}
+&token=<ACCESS_TOKEN>
+&fieldMapping=Address:street_address,City:municipality,Region:state,Postal:zip_code
+&<PARAMETERS>
+```
+</Tab>
+<Tab>
+
+```json
+{
+  "jobId": "7aaae43b-b47e-43d1-bff1-75f2d2d2d33f",
+  "jobStatus": "esriJobSubmitted",
+  "messages": []
+}
+
+```
+</Tab>
+</Tabs>
+
+</Box>
+
+<Box>
+
+### Check the job status
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+POST https://geocode-beta.arcgis.com/arcgis/rest/services/World/GeocodeServer/batchGeocode/beta/jobs/7aaae43b-b47e-43d1-bff1-75f2d2d2d33f HTTP/1.1
+content-type: application/x-www-form-urlencoded
+User-Agent: <USER AGENT>
+
+&token=<ACCESS_TOKEN>
+```
+</Tab>
+<Tab>
+
+```json
+{
+  "jobId": "7aaae43b-b47e-43d1-bff1-75f2d2d2d33f",
+  "jobStatus": "esriJobExecuting",
+  "status": "RUNNING",
+  "messages": []
+}
+
+```
+</Tab>
+</Tabs>
+
+</Box>
+
+<Box>
+
+### Get the result file URL 
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+POST https://geocode-beta.arcgis.com/arcgis/rest/services/World/GeocodeServer/batchGeocode/beta/jobs/7aaae43b-b47e-43d1-bff1-75f2d2d2d33f/results/geocodeResult HTTP/1.1
+content-type: application/x-www-form-urlencoded
+User-Agent: <USER AGENT>User-Agent: <USER AGENT>
+
+token: <ACCESS TOKEN>
+```
+</Tab>
+<Tab>
+
+```json
+{
+  "paramName": "geocodeResult",
+  "dataType": "GPDataFile",
+  "value": {
+    "url": "https://geocode-beta.arcgis.com/rest/services/World/GeocodeServer/batchGeocode/beta/download/7aaae43b-b47e-43d1-bff1-75f2d2d2d33f.zip"
+  }
+}
+
+```
+</Tab>
+</Tabs>
+
+
+</Box>
+
+<Box>
+
+### Download the geocoded file
+
+```http 
+GET https://geocode-beta.arcgis.com/rest/services/World/GeocodeServer/batchGeocode/beta/download/7aaae43b-b47e-43d1-bff1-75f2d2d2d33f.zip HTTP/1.1
+User-Agent: <USER AGENT>
+Accept-Encoding: br,gzip
+token: <ACCESS_TOKEN>
+```
+</Box>
+
+{/* 
+
+When requests cannot be completed, messages describing the problem are returned by the service. This can be due to invalid parameters included in the request or insufficient user permissions. Some potential errors that may be encountered with the service are described below. */}
+
+{/* ### Error messages
+
+#### Error code 403
+
+<StyledTable headers={"Message,Details,Cause,ExtendedCode"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Token is valid but access is denied.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+User does not have permissions to store geocoding results.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This error is returned when a user with insufficient privileges attempts to geocode a file using the `batchGeocode`  operation. 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+none
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+#### Error code 409
+
+<StyledTable headers={"Message,Details,Cause,ExtendedCode"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Item '\{item name}' already exists.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+none 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This error is returned when an item already exists in the portal with the same name as the filename passed in the `addItem` request. 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+none
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+#### Error code 500
+
+<StyledTable headers={"Message,Details,Cause,ExtendedCode"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Invalid token.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+none
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This error is returned when an expired or otherwise invalid access token is included in a `batchGeocode`  request. 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+none
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable> */}
+
+{/* ## Check the job status
+
+Use the `jobs`  operation to check the status of the geocoding job. The `jobId`  value returned in the `submitJob`  response must be passed in the `jobs`  request. Additionally, a `token`  must be included in the `jobs`  request.
+
+The `jobs`  operation allows you to monitor the progress of the geocoding job. As you periodically send `jobs`  requests to the service, informational responses are returned which describe the current state of the job. When the geocoding job is complete, the jobs response indicates that the job was successful and provides a URL to the geocoded file. The URL will be used in the next step to download the file.
+
+The `jobId`  value in the response from the `submitJob`  request must be appended to end of the `jobs`  request URL. 
+
+<Note type={"note"}>
+
+The `jobs`  request may use either the GET or POST methods.
+
+</Note>
+
+#### Request URL
+
+<Box>
+
+`https://geocode-beta.arcgis.com/arcgis/rest/services/World/GeocodeServer/batchGeocode/beta/jobs/{jobId}`
+
+</Box>
+
+#### Request parameters
+
+<StyledTable headers={"Parameter value,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+token
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Use this parameter to specify an access token that provides the identity of a user who has the needed permissions to access the service. 
+
+See [Security and authentication](DEVSITE/documentation/security-and-authentication/) for more information on how to generate an access token.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+{/*  
+
+#### Obtain the download URL
+
+The `jobs`  operation is also used to obtain the URL for downloading the output file that contains the batch geocoding results. As with the previous step for checking the status of the geocoding job, the `jobId`  value returned in the `submitJob`  response must be passed in the `jobs`  request. Additionally, a `token`  must be included in the `jobs`  request.
+
+When `jobStatus`  value in the `jobs`  response from the previous step is `esriJobSucceeded` , send a second `jobs`  request by appending the value of the `paramURL`  object to the end of the `jobs`  request URL.
+
+<Note type={"note"}>
+
+The `jobs`  request may use either the GET or POST methods.
+
+</Note>
+
+#### Request URL
+
+<Box>
+
+`https://geocode-beta.arcgis.com/arcgis/rest/services/World/GeocodeServer/batchGeocode/beta/jobs/<jobId>/results/geocodeResult`
+
+</Box>
+
+#### Request parameters
+
+<StyledTable headers={"Parameter value,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+token
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Use this parameter to specify an access token that provides the identity of a user who has the needed permissions to access the service. 
+
+See [Security and authentication](DEVSITE/documentation/security-and-authentication/) for more information on how to generate an access token.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+#### Example
+
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Request</TabTitle>
+
+<TabTitle>Response</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```json
+POST https://geocode-beta.arcgis.com/arcgis/rest/services/World/GeocodeServer/batchGeocode/beta/jobs/7aaae43b-b47e-43d1-bff1-75f2d2d2d33f/results/geocodeResult HTTP/1.1
+content-type: application/x-www-form-urlencoded
+User-Agent: <USER AGENT>User-Agent: <USER AGENT>
+
+token: <ACCESS TOKEN>
+
+
+```
+
+</Tab>
+
+<Tab>
+
+```json
+{
+  "paramName": "geocodeResult",
+  "dataType": "GPDataFile",
+  "value": {
+    "url": "https://geocode-beta.arcgis.com/rest/services/World/GeocodeServer/batchGeocode/beta/download/7aaae43b-b47e-43d1-bff1-75f2d2d2d33f.zip"
+  }
+}
+
+
+```
+
+</Tab>
+
+</Tabs>
+
+#### Download the file
+
+The final step in the `batchGeocode`  process is to download the zipped CSV file that contains the batch geocoding results. The URL for the download is included in the response for the previous `jobs`  request in the `url`  object. 
+
+<Note type={"note"}>
+
+Downloading the file requires the GET method to be used. The `token`  value must be included in the request header. 
+
+</Note>
+
+##### Request parameters
+
+<StyledTable headers={"Parameter value,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+token
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Use this parameter to specify an access token that provides the identity of a user who has the needed permissions to access the service. 
+
+See [Security and authentication](DEVSITE/documentation/security-and-authentication/) for more information on how to generate an access token.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+#### Example
+
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Request</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```json
+GET https://geocode-beta.arcgis.com/rest/services/World/GeocodeServer/batchGeocode/beta/download/7aaae43b-b47e-43d1-bff1-75f2d2d2d33f.zip HTTP/1.1
+User-Agent: <USER AGENT>
+Accept-Encoding: br,gzip
+token: <ACCESS TOKEN>
+
+
+```
+
+ 
+
+</Tab>
+
+</Tabs> */}
+
+{/* <StyledTable headers={"Parameter value,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+token
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Use this parameter to specify an access token that provides the identity of a user who has the needed permissions to access the service. 
+
+See [Security and authentication](DEVSITE/documentation/security-and-authentication/) for more information on how to generate an access token.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+item
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The `id`  value returned in the response from the `addItem`  request in the first step of the `batchGeocode` process. It represents the address file that was uploaded to the portal. It must be passed as a JSON object in the format `item = {'itemID': '<id>'}`.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+fieldMapping
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Use this parameter to map the fields in your address table to the input fields expected by the service. The mapping should follow this general format:
+
+`<service input field>:<field in address file>` 
+
+If the entire address is stored in a single field in your file, map it to the [SingleLine](/find-address-candidates#singleline) input field. For instance, if the address field in your file is named "full_address", the `fieldMapping`  parameter value should look like this:
+
+SingleLine example
+
+```javascript
+fieldMapping=SingleLine:full_address
+```
+
+ 
+
+If the addresses are split up into individual components, such as street address, city, state, and postal code, map them to the [multiline](/find-address-candidates#address-parameters) input fields supported by the service. This is referred to as multiline or multifield geocoding. The fields should be separated by commas.
+
+As an example, your address file may include the following fields:
+
+-   `street_address`  (house number + street name)
+-   `municipality`  (city name)
+-   `state`  (state name)
+-   `zip_code`  (postal code)
+
+In this case, the `fieldMapping`  parameter value should look like this:
+
+Multiline example
+
+```javascript
+fieldMapping=Address:street_address,City:municipality,Region:state,Postal:zip_code
+```
+
+ 
+
+<Note type={"tip"}>
+
+The `fieldMapping`  parameter is case-sensitive. This means that the address file field names must be entered exactly as they appear in the CSV file. For example, if the CSV file includes field name `street_address` , it must be passed this way in the `fieldMapping`  parameter: `fieldMapping=Address:street_address` . If the field name is passed in all capital letters, or with any other casing which is different than that in the CSV file - such as `fieldMapping=Address:Street_Address`  - an error will be returned by the service. 
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Additional geocoding parameters
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+There are many optional parameters that can be used to refine or adjust the geocoding results. These are described in detail in the [geocodeAddresses](/geocode-addresses#optional-parameters)  topic. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable> */} 
+
+
+{/* ## Access the services
+
+To access the geocoding service you need the following:
+
+1.  An [ArcGIS Location Platform](https://location.arcgis.com/sign-up/) account or [ArcGIS Online](https://www.esri.com/en-us/arcgis/products/arcgis-online/trial) account.
+2.  An [access token](DEVSITE/documentation/glossary/access-token/) (API key or OAuth 2.0) with the appropriate privilege.
+
+<Note type={"note"}>
+
+If you have an [ArcGIS Online](https://www.esri.com/en-us/arcgis/products/arcgis-online/trial) account or an [ArcGIS Location Platform](https://location.arcgis.com/sign-up/) account the `premium:user:geocode:stored`  privilege is always required for `batchGeocode`  requests.
+
+</Note>
+
+<Note type={"tip"}>
+
+To learn how to get an access token, see [Security and authentication](DEVSITE/documentation/security-and-authentication/).
+
+</Note>
+
+#### batchGeocode workflow
+
+Using `batchGeocode`  to batch geocode a file of addresses involves a sequence of steps whereby the output from one operation is used as the input for the next operation. The final output is a downloadable file that includes the original address rows with the x and y coordinates of the geocoded locations appended to them, along with additional informational fields describing the geocoding results. These are the same [output fields](/geocode-addresses#batch-geocoding-output-fields) returned in the JSON response by the `geocodeAddresses`  operation. Each step must be completed in order for the file to be geocoded successfully.
+
+1.  [Upload the address file](/batch-geocode#upload-the-address-file). Upload the file of addresses to the server using [`addItem`](DEVSITE/rest/users-groups-and-items/add-item/). The JSON response includes an `id` value for the item which is used in the next step. 
+2.  [Submit the geocoding job to the service](/batch-geocode#submit-the-geocoding-job-to-the-service). Pass the item `id` from the `addItem` response, map the fields in your file to the input fields supported by the service, and include any additional geocoding parameters using `submitJob`. This produces an output `jobId` value which is used in the next step.
+3.  [Check the job status](/batch-geocode#check-the-job-status). Pass the `jobId`  value from the `submitJobs`  response in a `jobs`  request to check the status of the `batchGeocode`  job. When the returned `status`  value is `SUCCEEDED`  proceed to the next step. 
+4.  [Obtain the URL to download the geocoded file](/batch-geocode#obtain-the-download-url). Make a second `jobs`  request to obtain a URL which is used to download the geocoded file. This request must also include the `jobId`  value from the previous steps.
+5.  [Download the file](/batch-geocode#download-the-file). Pass the download URL from the previous step in a final step to download the file that includes the batch geocoding results. 
+
+<Note type={"tip"}>
+
+The same `User-Agent`  value should be included in the header for all of the requests in the `batchGeocode`  workflow. 
+
+</Note>
+
+<Note type={"note"}>
+
+An [access token](DEVSITE/documentation/glossary/access-token/) is required for each step. 
+
+</Note>
+
+<Note type={"note"}>
+
+URL encoding is enforced by ArcGIS Online and the ArcGIS Geocoding service. Ensure the request URLs sent to the service are properly encoded and patterned after the examples in this topic. 
+
+</Note>
+
+<Note type={"note"}>
+
+The REST request URL must include `HTTPS` . Requests with `HTTP`  are not supported.
+
+</Note>
+
+#### Upload the address file
+
+Use the [`addItem`](DEVSITE/rest/users-groups-and-items/add-item/) operation to upload the file of addresses to the portal. The result of the [`addItem`](DEVSITE/rest/users-groups-and-items/add-item/) request is an item `id` property in the JSON response that is associated with the uploaded file of addresses. The `id` value must be used in subsequent steps to complete the batch geocoding process.
+
+The input file must adhere to the following requirements:
+
+-   The file must be in CSV (.csv) or zipped CSV (.zip) format.
+-   The file must use UTF-8 encoding with a BOM (byte order mark).
+-   The maximum file size supported by the ArcGIS Geocoding service is 2 GB. If you have a CSV file that exceeds 2 GB you must compress it as a zipped file or reduce the number of records in the file before submitting it to the service.
+-   The filename must be unique for the ArcGIS Online user. If the file already exists as an item in the portal, you can get its ID and use it as the `id` value in subsequent batch geocoding workflow steps. Alternatively you can delete the item using the [Delete Items](DEVSITE/rest/users-groups-and-items/delete-items/) API call and reupload it using [`addItem`](DEVSITE/rest/users-groups-and-items/add-item/).
+
+<Note type={"note"}>
+
+You may use a third-party application such as Microsoft Excel or Notepad++ to add a UTF-8 BOM to your CSV file.
+
+</Note> -->
+
+
+<!-- 
+### Request parameters
+
+<StyledTable headers={"Parameter value,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+token
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Use this parameter to specify an access token that provides the identity of a user who has the needed permissions to access the service. 
+
+See [Security and authentication](DEVSITE/documentation/security-and-authentication/) for more information about how to generate an access token.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+file
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The file name of the address file to be geocoded.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+Refer to the [`addItem`](DEVSITE/rest/users-groups-and-items/add-item/) topic for complete details about adding a file to a portal. 
+
+### Example
+
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Response</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```json
+{
+  "success": true,
+  "id": "dbbf2fed71784aec9815e91190da5239", 
+  "folder": ""
+}
+
+```
+
+</Tab>
+
+</Tabs>
+
+## Submit the geocoding job to the service
+
+Use the `submitJob`  operation to start the geocoding job. The `id`  value returned in the response for the `addItem`  request in the previous step, as well as a `token` , must be passed in the `submitJob`  request. 
+
+Additionally, a field mapping definition must be included in the `submitJob`  request, which aligns the fields in your CSV file with the input fields expected by the ArcGIS Geocoding service. The supported input fields are described in the [findAddressCandidates](/find-address-candidates#optional-parameters)  topic. Optional geocoding parameters to refine results may also be included in the request. The additional geocoding parameters are documented in the [geocodeAddresses](/geocode-addresses)  topic. 
+
+The result of the `submitJob`  operation is a `jobId`  value that is associated with the geocoding job. This `jobId`  value must be used in all subsequent steps to complete the batch geocoding process.
+
+<Note type={"note"}>
+
+The `submitJob`  request may use either the GET or POST methods.
+
+</Note>
+
+#### Request URL
+
+<Box>
+
+`https://geocode-beta.arcgis.com/arcgis/rest/services/World/GeocodeServer/batchGeocode/beta/submitJob`
+
+</Box>  */}

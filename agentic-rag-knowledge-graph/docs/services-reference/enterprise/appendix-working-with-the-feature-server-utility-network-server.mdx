@@ -1,0 +1,576 @@
+---
+title: "Appendix—Work with the utility network using the feature service"
+description: "When working with the utility network through the REST API, it is important to consider that key capabilities are also exposed through the feature service to work with associations, subnetworks, and rules."
+slug: "appendix-working-with-the-feature-server-utility-network-server"
+url: "/appendix-working-with-the-feature-server-utility-network-server"
+guid: "GUID-E8D76ACA-17BA-48BB-AAF6-6DF5A22DDBF2"
+migratedTopicMetadata:
+  FTITLE: "Appendix - Working with the Feature Server (Utility Network Server)"
+  FDESCRIPTION: ""
+  FCHANGES: "UN #6618 - In addition to isVisibleContent... adding percentAlong, fromTerminal, and toTerminal to editable for associations. Also, see #7588 - updating to incluide usage examples for queryDataElements and UN controller dataset"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9 - *"
+  CREATED-ON: "06/01/2021 09:04:29"
+  FAUTHOR: "mjarman"
+  FSTATUS: "Released"
+  MODIFIED-ON: "05/02/2021 10:43:34"
+  VERSION: "5"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "17"
+  ED: "GUID-C6DBC298-F1AA-400C-8468-38CB39ECBEE4"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata: {}
+---
+
+When working with the utility network through the REST API, there are various properties available to query and edit.
+
+## Access the systemLayers for a utility network
+
+It is important to consider the ability to access system tables that are exposed through the feature service as layers. The layer IDs associated with these layers can be identified either through the utility network layer definition or via the associated portal item. In the JSON layer definition, they are grouped under the collection of system layers. The layer IDs that are associated with each of these layers can be used to access that table through the various feature service operations (for example, `query`  and `applyEdits` ).
+
+Using the layerId of the system layer, the following are a few examples of tasks that can be completed using these layers:
+
+-   [Work with associations](/appendix-working-with-the-feature-server-utility-network-server#work-with-associations)
+
+    -   Use the `query`  operation to inspect associations.
+    -   Use the `applyEdits`  operation to add, update, and delete associations.
+-   Use the `query`  operation to inspect subnetworks.
+-   Use the `query`  operation to inspect network rules.
+
+To access the systemLayers for a utility network, complete the following steps:
+
+1.  Use the Esri JSON object output for the feature server that includes the utility network layer. 
+
+    You can format the JSON object using pjson in the URL: `https://myserver.esri.com/server/rest/services/LandUse/FeatureServer?f=pjson` 
+
+    Find the `utilityNetworkLayerId`  in the pjson.
+2.  Use the utility network layerId and the Esri JSON object output for the feature server. 
+
+    You can format the JSON object using pjson in the URL: `https://myserver.esri.com/server/rest/services/LandUse/FeatureServer/17?f=pjson` 
+
+    Find the `systemLayers`  to identify the layerId for the layer of interest. From here you can access the operations for the layer.
+3.  Append the specific layerId or tableId to the end of the feature server.
+
+    Here is an example of the `query`  operation using the `associationsTableId` : `https://myserver.esri.com/server/rest/services/LandUse/FeatureServer/500001/query` 
+
+The following is an example of the `systemLayers` for a Utility Network Version 6 and later(using the "layer name" : layerId syntax):
+
+```other
+"systemLayers": {
+  "dirtyAreasLayerId": 12,
+  "associationsTableId": 500001,
+  "subnetworksTableId": 500002,
+  "rulesTableId": 500003,
+  "diagramEdgeLayerId": 500004,
+  "diagramJunctionLayerId": 500005,
+  "diagramContainerLayerId": 500006,
+  "temporaryDiagramEdgeLayerId": 500007,
+  "temporaryDiagramJunctionLayerId": 500008,
+  "temporaryDiagramContainerLayerId": 500009
+}
+
+```
+
+ 
+
+The following is an example of the `systemLayers` for a Utility Network Version 3 and earlier (using the "layer name" : layerId syntax):
+
+```other
+"systemLayers": {
+  "dirtyAreasLayerId": 12,
+  "lineErrorsLayerId": 10,
+  "pointErrorsLayerId": 9,
+  “polygonErrorsLayerId”: 11,
+  "associationsTableId": 500001,
+  "subnetworksTableId": 500002,
+  "rulesTableId": 500003,
+  "diagramEdgeLayerId": 500004,
+  "diagramJunctionLayerId": 500005,
+  "diagramContainerLayerId": 500006,
+  "temporaryDiagramEdgeLayerId": 500007,
+  "temporaryDiagramJunctionLayerId": 500008,
+  "temporaryDiagramContainerLayerId": 500009
+}
+
+```
+
+ 
+
+## Work with associations
+
+After identifying the layerId for the associations systemLayer, you can use feature service operations to inspect and edit associations.
+
+It is important to keep the following in mind when working with associations:
+
+-   The percentAlong property is only applicable for junctionEdgeMidspanConnectivity associations.
+-   The terminalId property is only applicable for the following association types:
+
+    -   JunctionJunctionConnectivity
+    -   JunctionEdgeFromConnectivity
+    -   JunctionEdgeMidspanConnectivity
+    -   JunctionEdgeToConnectivity
+-   The terminalId property is only applicable for a junction source of an association.
+
+To add an association, the following fields can be specified in the call to `applyEdits` :
+
+```other
+"ASSOCIATIONTYPE" : <1|2|3|4|5|6>, // connectivity(1), containment(2), attachment(3), junctionEdgeFromConnectivity(4), junctionEdgeMidspanConnectivity(5), junctionEdgeToConnectivity(6)  
+"ISCONTENTVISIBLE" : <0|1>,  // optional: false, true
+"FROMNETWORKSOURCEID" : <networkSourceId>,
+"FROMGLOBALID" : <guid>,
+"FROMTERMINALID" : <long>,   // optional
+"TONETWORKSOURCEID" : <networkSourceId>,
+"TOGLOBALID" : <guid>,
+"TOTERMINALID" : <long>,      // optional
+"PERCENTALONG" : <float>       // optional 
+
+```
+
+ 
+
+<Note type={"note"}>
+
+The ASSSOCIATIONTYPE values 4, 5, and 6 require a utility network version 4 or higher.
+
+</Note>
+
+The following association properties support updates for the `edits` parameter of the [applyEdits](/apply-edits-feature-service)  operation:
+
+```other
+"ISCONTENTVISIBLE" : <0|1> : false, true
+"FROMTERMINALID" : <long>
+"TOTERMINALID" : <long>
+"PERCENTALONG" : <float>
+
+```
+
+The `applyEdits` operation allows you to bypass the validation process when creating associations, resulting in faster writes.  To skip validation when creating associations, set the following for the `applyEditsOptions` property: `{"utilityNetworkOptions":1}`
+
+When this utility network option is set and one or more invalid associations are created, the next validate operation will detect and mark the invalid associations as errors.
+ 
+
+### Example usage—add association
+
+Add a new connectivity association using the `edit`  parameter of the [applyEdits](/apply-edits-feature-service) operation.
+
+Request URL:`https://myserver.esri.com/server/rest/services/Auburn_Elec/FeatureServer/applyEdits` 
+
+The applyEdits operation is executed using `geodatabaseVersionName = sde.DEFAULT`  and `useGlobalIds = true` . The following represents the `edits`  parameter.
+
+```json
+[
+{
+	"id": 500001,
+	"adds": [
+		{
+			"attributes": {
+			"objectid": 801,
+			"fromnetworksourceid": 9,
+			"fromglobalid": "{CAD436A9-1FD9-4F7B-B740-63C09313281A}",
+			"fromterminalid": 1,
+			"tonetworksourceid": 12,
+			"toglobalid": "{3A8185AF-2A13-4072-AB3C-F8A4EFE733E4}",
+			"toterminalid": 1,
+			"associationtype": 1,
+			"iscontentvisible": -1,
+			"percentalong": 0,
+			"status": 0,
+			"errorcode": 0,
+			"errormessage": null,
+			"creationdate": 1611693998000,
+			"creator": "unadmin",
+			"lastupdate": 1611693998000,
+			"updatedby": "unadmin",
+			"globalid": "{4ED4701E-A80C-42C2-9C7C-43DB03AC7CE2}"
+				}
+   }
+  ]
+ }
+]
+```
+
+ 
+
+JSON response:
+
+```javascript
+[
+ {
+ "id": 500001,
+ "addResults": [
+  {
+  "objectId": 902,
+  "globalId": "{4ED4701E-A80C-42C2-9C7C-43DB03AC7CE2}",
+  "success": true
+   }
+  ]
+ }
+]
+```
+
+ 
+
+### Example usage—update association
+
+Update the `iscontentvisible`  property for an existing containment association using the `edit`  parameter of the [applyEdits](/apply-edits-feature-service) operation.
+
+Request URL:`https://myserver.esri.com/server/rest/services/Auburn_Elec/FeatureServer/applyEdits` 
+
+The applyEdits operation is executed using `geodatabaseVersionName = sde.DEFAULT`  and `useGlobalIds = true` . The following represents the `edits`  parameter.
+
+```other
+[
+{
+ "id": 500001,
+ "updates": [
+   {
+    "attributes": {
+     "iscontentvisible": 1,
+     "globalid": "{4EA7C98E-FC8B-485E-AE6E-C257777CFA10}"
+    }
+   } 
+  ]
+ }
+]
+
+```
+
+ 
+
+JSON response:
+
+```javascript
+[
+ {
+  "id": 500001,
+  "updateResults": [
+   {
+    "globalId": "{4EA7C98E-FC8B-485E-AE6E-C257777CFA10}",
+    "success": true
+   }
+  ]
+ }
+]
+```
+
+ 
+
+## Access network properties using queryDataElements
+
+The `queryDataElements`  resource can provide access to valuable information about utility network layers.
+
+The data element for a utility network controller dataset returns basic network properties as well as details about domain networks, network attributes, terminal configurations, and network categories.
+
+[Learn more about Query Data Elements](/query-data-elements-feature-service)
+
+### Example Usage
+
+Provide the layerId for the utility network layer as an array to return data elements from the Auburn feature service: 
+
+Request URL:`https://myserver.esri.com/server/rest/services/Auburn_Elec/FeatureServer/queryDataElements` 
+
+### JSON Response
+
+JSON response:
+
+```json
+{ 
+"layerDataElements": [ 
+	{ 
+	"layerId": 9, 
+	"dataElement": { 
+		"name": "AuburnElectric", 
+		"creationTime": 1607475293000, 
+		"schemaGeneration": 7, 
+		"globalId": "{CA2E61CF-89D0-43C9-A286-5BD867C55B41}", 
+		"userIdentity": "unadmin", 
+		"properties": {}, 
+		"proVersion": "ArcGIS Pro 3.3.0", 
+		"serviceTerritoryFeatureLayerId": 8, 
+		"minimalDirtyAreaSize": 1, 
+		"createDirtyAreaForAnyAttributeUpdate": 0, 
+		"domainNetworks": [], 
+		"networkAttributes":[], 
+		"terminalConfigurations":[], 
+		"categories":[]  
+		  } 
+		}
+	] 
+}   
+```
+
+ 
+
+JSON response examples can be found in the below sections for domain networks, tiers, junction sources, edge sources, network attributes, terminal configurations, and network categories.
+
+#### Domain networks
+
+The `domainNetworks` array contains information about each domain network in the utility network as well as information on the tier’s subnetwork definition and trace configuration, junction sources, and edge sources.
+
+JSON response:
+
+```json
+"domainNetworks": 
+[ 
+	{ 
+	"creationTime": 1607475359000, 
+	"releaseNumber": 1, 
+	"isStructureNetwork": false, 
+	"domainNetworkId": 2, 
+	"domainNetworkName": "ElectricDistribution", 
+	"domainNetworkAliasName": "Electric Distribution", 
+	"subnetworkLayerId": 6, 
+	"subnetworkLabelFieldName": "SUBNETWORKNAME", 
+	"tierDefinition": "esriTDPartitioned", 
+	"subnetworkControllerType": "Source", 
+	"tierGroups": [], 
+	"tiers": [], 
+	"junctionSources": [], 
+	"edgeSources": [], 
+	… 
+	},
+]
+ 
+```
+
+ 
+
+Tiers example JSON response. The tiers array details information about the tier’s subnetwork definition and trace configuration:
+
+```json
+"tiers": 
+[ 
+	{ 
+	"creationTime": 1607475385000, 
+	"tierID": 1, 
+	"name": "Medium Voltage", 
+	"rank": 1, 
+	"tierTopology": "esriTTTRadial", 
+	"supportDisjointSubnetwork": true, 
+	"subnetworkFieldName": "", 
+	"tierGroupName": "", 
+	"manageSubnetwork": 
+		{ 
+		"type": "PropertySet", 
+		"propertySetItems": ["IsDirty", true ] 
+		}, 
+	"updateSubnetworkEditModeForDefaultVersion": "esriUSEMWithoutEventing", 
+	"updateSubnetworkEditModeForNamedVersion": "esriUSEMWithEventing", 
+	"updateSubnetworkOnStructures": true, 
+	"updateSubnetworkOnContainers": true, 
+	"updateSubnetworkOnSubnetLines": true, 
+	"validateLocatability": false, 
+	"updateSubnetworkOptions": 0, 
+	"validDevices": [], 
+	"validSubnetworkControllers": [], 
+	"validLines": [], 
+	"validJunctions": [], 
+	"validJunctionObjects": [], 
+	"validJunctionObjectSubnetworkControllers": [], 
+	"validEdgeObjects": [], 
+	"aggregatedLinesForSubnetLine": [], 
+	"diagramTemplates": [], 
+	"updateSubnetworkTraceConfiguration": {}
+	},			
+] 
+...
+ 
+```
+
+ 
+
+Junction sources example JSON response:
+
+```json
+"junctionSources": 
+[
+{
+	"sourceId": 9,
+	"layerId": 3,
+	"usesGeometry": true,
+	"shapeType": "esriGeometryPoint",
+	"utilityNetworkFeatureClassUsageType": "esriUNFCUTDevice",
+	"assetTypeFieldName": "ASSETTYPE",
+	"supportedProperties": 
+	[
+	"esriNSSPSupportsContainment",
+	"esriNSSPSupportsCategories",
+	"esriNSSPSupportsTerminals",
+	"esriNSSPSupportsNetworkAttributes"
+	],
+	"assetGroups": 
+	[
+	{
+		"creationTime": 1607475437000,
+		"assetTypeCode": 1,
+		"assetTypeName": "Device",
+		"containmentViewScale": 50,
+		"associationDeleteType": "esriADTSetToNone",
+		"associationRoleType": "esriARTContainer",
+		"isTerminalConfigurationSupported": true,
+		"terminalConfigurationId": 0,
+		"isLinearConnectivityPolicySupported": false,
+		"connectivityPolicy": "esriNECPEndVertex",
+		"categories": [],
+		"splitContent": false
+	}
+	]
+}
+]
+...
+
+ 
+```
+
+ 
+
+Edge sources example JSON response:
+
+```json
+"edgeSources": 
+[
+{
+	"sourceId": 10,
+	"layerId": 5,
+	"usesGeometry": true,
+	"shapeType": "esriGeometryPolyline",
+	"utilityNetworkFeatureClassUsageType": "esriUNFCUTLine",
+	"assetTypeFieldName": "ASSETTYPE",
+	"supportedProperties": 
+		[
+		"esriNSSPSupportsContainment",
+		"esriNSSPSupportsCategories",
+		"esriNSSPSupportsNetworkAttributes"
+		],
+	"assetGroups": 
+	[
+	{
+		"creationTime": 1607475367000,
+		"assetGroupCode": 0,
+		"assetGroupName": "Unknown",
+		"assetTypes": 
+			[
+			{
+			"creationTime": 1607475367000,
+			"assetTypeCode": 0,
+			"assetTypeName": "Unknown",
+			"containmentViewScale": 0,
+			"associationDeleteType": "esriADTRestricted",
+			"associationRoleType": "esriARTNone",
+			"isTerminalConfigurationSupported": false,
+			"terminalConfigurationId": 0,
+			"isLinearConnectivityPolicySupported": true,
+			"connectivityPolicy": "esriNECPEndVertex",
+			"categories": [],
+			"splitContent": false
+			}
+			]
+	}
+	]
+}
+],
+...
+
+ 
+```
+
+ 
+
+#### Network attributes
+
+Access information about the network attributes in the utility network
+
+JSON response:
+
+```json
+"networkAttributes": 
+[ 
+	{ 
+	"creationTime": 1607475293000, 
+	"id": 16, 
+	"name": "Phases Normal", 
+	"networkAttributeToSubstitute": "", 
+	"dataType": "esriNADTInteger", 
+	"fieldType": "esriFieldTypeSmallInteger", 
+	"usageType": "esriUNAUTUnknown", 
+	"isEmbedded": false, 
+	"isApportionable": false, 
+	"isOverridable": false, 
+	"isSubstitution": false, 
+	"isNullable": false, 
+	"domainName": "", 
+	"bitPosition": 0, 
+	"bitSize": 0, 
+	"junctionWeightId": 31, 
+	"edgeWeightId": 32, 
+	"assignments": 
+		[ 
+		"networkAttributeId": 16, 
+		"layerId": 3, 
+		"evaluator": {"fieldName": "phasesnormal"}, 
+		] 
+	}, 
+]
+...
+
+ 
+```
+
+ 
+
+#### Terminal configurations
+
+Access information about terminal configurations in the utility network
+
+JSON response:
+
+```json
+"terminalConfigurations": 
+[ 
+	{ 
+	"creationTime": 1607475293000, 
+	"terminalConfigurationId": 0, 
+	"terminalConfigurationName": "Single terminal", 
+	"traversabilityModel": "esriUNTMBidirectional", 
+	"terminals": 
+	[ 
+		{ 
+		"terminalId": 1, 
+		"terminalName": "Single Terminal", 
+		"isUpstreamTerminal": false 
+		} 
+	], 
+	"validConfigurationPaths": [], 
+	"defaultConfiguration": "All" 
+    },
+]	
+...
+ 
+```
+
+ 
+
+#### Network categories
+
+Access information about network categories in the utility network
+
+JSON response:
+
+```json
+"categories": 
+[ 
+	{ 
+	"creationTime": 1607475293000, 
+	"name": "Subnetwork Controller" 
+	},
+]	
+... 
+ 
+```
+
+ 

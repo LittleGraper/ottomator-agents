@@ -1,0 +1,160 @@
+---
+title: "Update (Overview Configuration)"
+description: "The update operation can be used to modify the updateIntervalMin  property for an overview resource type."
+slug: "update-overview-config"
+url: "/update-overview-config"
+guid: "GUID-D1B03350-0B75-4B6E-B210-4E516E185F29"
+migratedTopicMetadata:
+  FTITLE: "Update Overview Config"
+  FDESCRIPTION: ""
+  FCHANGES: "New Product"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9-*"
+  CREATED-ON: "25/09/2020 18:06:35"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "16/11/2021 11:21:36"
+  VERSION: "1"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "16"
+  ED: "GUID-75E7C44E-E1BA-432B-B4B8-796F9F6A7EB1"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /overview/update/config
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /overview/update/config
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed with the "Security and infrastructure" privilege
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `config` operation can be used to modify the `updateIntervalMin` property for an overview resource type. The `updateIntervalMin` property determines the interval (in minutes) when information, such as health and status information, for each overview resource type is pulled and cached. If the update frequency is specified as 0, no information is collected and cached for that resource type. Instead, when the [Overview](/overview-api) resource is manually called from the ArcGIS Enterprise Administrator API, or automatically by the ArcGIS Enterprise Manager, the real-time information for the resource type is returned.
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `resourceConfigJson` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON array containing the overview resource type JSON objects. The JSON objects must contain the `id`, `type`, and `updateIntervalMin` for the overview resource type. The resource type JSON objects can be obtained from the JSON view of the [Config](/overview-config) resource. The accepted values for `updateIntervalMin` (0–60) can be modified to update the interval (in minutes) of when the resource type will have its information pulled and cached. If set to 0, information for the resource type will not be cached and instead have its real-time information returned when the [Overview](/overview-api) resource is called. The default values for each resource type are listed below:
+
+      <Note type={"note"}>
+
+      The full JSON object returned by the `config` resource must be passed in to update a resource type's properties. Attempting to perform this operation with a JSON object that only contains the resource type you want to update will result in the request failing and returning an error message.
+
+      </Note>
+
+      - `criticalLogs` : 0
+      - `systemServices` : 1
+      - `utilityServices` : 1
+      - `dataStores` : 2
+
+      ```markdown label=Example
+      resourceConfigJson={
+        "configs": [
+          {
+            "updateIntervalMin": 2,
+            "id": "1af0fa98-2ac2-44fe-be1c-0f9f75a8ef77",
+            "type": "criticalLogs"
+          },
+          {
+            "updateIntervalMin": 1,
+            "id": "9595eece-5d9b-408b-911f-93d080896ac5",
+            "type": "systemServices"
+          },
+          {
+            "updateIntervalMin": 1,
+            "id": "04c99764-0698-4586-badd-40ec9dc87a92",
+            "type": "utilityServices"
+          },
+          {
+            "updateIntervalMin": 1,
+            "id": "0c12a861-f29b-48ef-b515-36497b041830",
+            "type": "dataStores"
+          }
+        ]
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `update` operation:
+
+```other
+POST /context/admin/overview/update/config HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+resourceConfigJson={
+  "configs": [
+    {
+      "updateIntervalMin": 2,
+      "id": "1af0fa98-2ac2-44fe-be1c-0f9f75a8ef77",
+      "type": "criticalLogs"
+    },
+    {
+      "updateIntervalMin": 1,
+      "id": "9595eece-5d9b-408b-911f-93d080896ac5",
+      "type": "systemServices"
+    },
+    {
+      "updateIntervalMin": 1,
+      "id": "04c99764-0698-4586-badd-40ec9dc87a92",
+      "type": "utilityServices"
+    },
+    {
+      "updateIntervalMin": 1,
+      "id": "0c12a861-f29b-48ef-b515-36497b041830",
+      "type":"dataStores"
+    }
+  ]
+}&f=pjson&token=vGSqTwWwUv558RgvF1JzOM6dMJ4IXYR4sD9wwOBjHOppvvQp9Czd6S57c170S_T696AQOmfhK0NEn0wGhIUtHpaYFStDijj4yXmGgBbe6mj1zAm3oi0Up9pVLmH2V1rfAytc764RxOsx_BHwEEWQOBEn4kT0O3xkcpMDeOQaFlcphQ2XnBAot9r1riiWMFRenH-Rf1Mu0RSJuC9D5-LgnOSnkvC04K0Jy49ui-YSlqTL0i97Dw2SLtGtNoXUvVXQ
+
+```
+
+## JSON Response example
+
+```other
+{"status": "success"}
+```

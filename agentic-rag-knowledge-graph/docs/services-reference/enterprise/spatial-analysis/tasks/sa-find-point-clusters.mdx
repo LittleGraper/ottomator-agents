@@ -1,0 +1,242 @@
+---
+title: "Find Point Clusters"
+description: "This is an API reference for the Find Point Clusters service on ArcGIS Online."
+slug: "sa-find-point-clusters"
+url: "/spatial-analysis/tasks/sa-find-point-clusters"
+redirectFrom:
+  - /sa-find-point-clusters
+guid: "GUID-F60BCDD0-3DA4-44D4-AECE-C45E49DB9C62"
+migratedTopicMetadata:
+  FTITLE: "SA Find Point Clusters"
+  FDESCRIPTION: "REST API"
+  FCHANGES: "updating availability statement of the parameters method and sensitivity"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "agol23.R03 -* :11.2 - *"
+  CREATED-ON: "20/09/2023 14:49:11"
+  FAUTHOR: "hasefaw"
+  FSTATUS: "Released"
+  MODIFIED-ON: "27/09/2023 04:57:41"
+  VERSION: "10"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-3113E178-6D4D-4FDA-B9D1-F7FB832A1440"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata: {}
+---
+
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E0E9FDE9_9A98_4EA4_9164_0E878BADF591 from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-E0E9FDE9-9A98-4EA4-9164-0E878BADF591";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_D95DEC58_7F27_491A_AF3D_6E6A3C0A6F2D from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-D95DEC58-7F27-491A-AF3D-6E6A3C0A6F2D";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_30F3F406_9E06_4BE5_ABF8_AC3AC7C14E1C from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-30F3F406-9E06-4BE5-ABF8-AC3AC7C14E1C";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E671F554_89D2_4CAD_B032_525E1CE90C18 from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-E671F554-89D2-4CAD-B032-525E1CE90C18";
+
+![Find Point Clusters](../../images/GUID-40DA7286-67EA-4333-91C5-4CD527C21B4A-web.png)
+
+The `FindPointClusters` task finds clusters of point features within surrounding noise based on their spatial distribution.
+
+This task uses unsupervised machine learning clustering algorithms to detect patterns of point features based solely on spatial location and, optionally, the distance to a specified number of features.
+
+The result map shows each identified cluster as well as features that are considered noise. Multiple clusters will be assigned each color. Colors will be assigned and repeated so that each cluster is visually distinct from its neighboring clusters.
+
+This task uses the DBSCAN, HDBSCAN, or OPTICS method to find clusters. If the method is not specified and the `searchDistance` value is not provided, the HDBSCAN method will be used. If the method is not specified and `searchDistance` value is provided, the DBSCAN algorithm will be used. DBSCAN will return clusters with similar densities and is only appropriate if there is a clear search distance to use for the analysis. HDBSCAN will use a range of distances to separate clusters of varying densities from sparser noise resulting in more data-driven clusters. OPTICS will use the distances between neighboring features to create a reachability plot, and use it to separate clusters of varying densities from noise.
+
+## Request URL
+
+```javascript
+http://<analysis url>/FindPointClusters/submitJob
+```
+
+## Request parameters
+<StyledTable headers={"Parameter,Description"}>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `analysisLayer`
+
+         (Required)
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The point feature layer for which clusters will be found.
+
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E0E9FDE9_9A98_4EA4_9164_0E878BADF591 />
+
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_D95DEC58_7F27_491A_AF3D_6E6A3C0A6F2D />
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `minFeaturesCluster`
+
+         (Required)
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         A double value that will be used as the minimum number of features to be considered a cluster. Any cluster with fewer features than the number provided will be considered noise.
+
+         Example: `"minFeaturesCluster": 5`
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `method`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         Specifies the method that will be used to find clusters. If the method is not specified and the `searchDistance` value is not provided, the HDBSCAN algorithm will be used. If the method is not specified and the `searchDistance` value is provided, the DBSCAN algorithm will be used.
+
+         This parameter is available in ArcGIS Enterprise 11.2 or higher.
+
+         Values:`DBSCAN` \| `HDBSCAN` \| `OPTICS`
+
+         Example: `"method":"OPTICS"`
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `searchDistance`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         A double value that will be used as the maximum distance to search for neighboring features.
+
+         The units of the search distance value is supplied by the `searchDistanceUnit` parameter.
+
+         Example: `"searchDistance": 154`
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `searchDistanceUnit`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The linear unit that will be used with the distance value specified for `searchDistance`. You must provide a value if `searchDistance` has been set. The default is `Miles`.
+
+         Values: `Feet` \| `Miles` \| `Meters` \| `Kilometers`
+
+         Example: `"Units": "Kilometers"`
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `sensitivity`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         A double value between 0 and 100 that determines the compactness of the clusters.
+
+         This parameter is available in ArcGIS Enterprise 11.2 or higher.
+
+         Example: `"sensitivity": 22`
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+   <StyledTableCell cellStyle="markdown">
+      `timeField`
+   </StyledTableCell>
+   <StyledTableCell cellStyle="markdown">
+      Specifies the field in the `analysisLayer` value that contains a timestamp for each feature.
+
+      Example: `"timeField": "start_time"`
+   </StyledTableCell>
+</StyledTableRow>
+<StyledTableRow>
+   <StyledTableCell cellStyle="markdown">
+      `searchTimeInterval`
+   </StyledTableCell>
+   <StyledTableCell cellStyle="markdown">
+      A value that will be used to determine whether features form a space-time cluster. The search time interval spans before and after the time of each feature.
+
+      Example: `"searchTimeInterval": 4`
+   </StyledTableCell>
+</StyledTableRow>
+<StyledTableRow>
+   <StyledTableCell cellStyle="markdown">
+      `searchTimeUnit`
+   </StyledTableCell>
+   <StyledTableCell cellStyle="markdown">
+      The unit that will be used with the time value specified for `searchTimeInterval`. You must provide a value if `searchTimeInterval` has been set.
+
+      Values: `Seconds` \| `Minutes` \| `Hours` \| `Days` \| `Weeks ` \| `Months` \| `Years`
+
+      Example: `"searchTimeUnit": "Minutes"`
+   </StyledTableCell>
+</StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `outputName`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The name of the output.
+
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_30F3F406_9E06_4BE5_ABF8_AC3AC7C14E1C />
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `context`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E671F554_89D2_4CAD_B032_525E1CE90C18 />
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `f`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The response format. The default response format is `html`.
+
+         Values: `html` | `json`
+      </StyledTableCell>
+   </StyledTableRow>
+</StyledTable>
+## Response
+When you submit a request, the service assigns a unique job ID for the transaction.
+Syntax:
+```javascript
+{
+"jobId": "<unique job identifier>",
+"jobStatus": "<job status>"
+}
+```
+After the initial request is submitted, you can use the `jobId` value to periodically check the status of the job and messages as described in [Check job status](/checking-job-status-1). Once the job has successfully completed, you use the `jobId` value to retrieve the results. To track the status, you can make a request of the following form:
+```javascript
+http://<analysis url>/FindPointClusters/jobs/<jobId>
+```
+## Access results
+When the status of the job request is `esriJobSucceeded`, you can access the results of the analysis by making a request of the following form.
+```javascript
+http://<analysis url>/FindPointClusters/jobs/<jobId>/results/pointClustersResultLayer?token=<your token>&f=json
+```
+<StyledTable headers={"Parameter,Description"}>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `pointClustersResultLayer`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The result of `FindPointClusters` is a layer containing clustered points.
+
+         Example:
+         ```javascript
+         {"url":"http://analysis.arcgis.com/arcgis/rest/services/tasks/gpserver/findpointclusters/jobs/<jobId>/results/pointClustersResultLayer
+         ```
+         The result has properties for parameter name, data type, and value. The contents of `value` depend on the `OutputName` value provided in the initial request.
+         -   If the `OutputName` value was provided, `value` contains the URL to the feature service layer.
+         ```javascript
+         {
+        "paramName":"pointClustersResultLayer",
+        "dataType":"GPString",
+        "value":{"url":"<arcgis featureservice layer url>"}
+        }
+         ```
+         -   If no `OutputName` value was provided, `value` contains a feature collection.
+         ```javascript
+         {
+         "paramName":"pointClustersResultLayer",
+         "dataType":"GPString",
+         "value":{"featureCollection": ... }
+         }
+         ```
+         See [Feature Output](/feature-output-1) for more information about how the result layer or collection is accessed.
+      </StyledTableCell>
+   </StyledTableRow>
+</StyledTable>

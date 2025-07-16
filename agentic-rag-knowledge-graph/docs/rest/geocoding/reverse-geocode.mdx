@@ -1,0 +1,2279 @@
+---
+title: "/reverseGeocode"
+description: "Use the ArcGIS Geocoding service to find the nearest address from a point on a map."
+slug: "reverse-geocode"
+url: "/reverse-geocode"
+guid: "GUID-A059BC60-71EF-42F7-85E4-09E298BB011B"
+migratedTopicMetadata:
+  FTITLE: "geocoding-reverse-geocode"
+  FDESCRIPTION: ""
+  FCHANGES: "September 2024 geocoding update"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "agol 24.R02"
+  CREATED-ON: "10/09/2024 14:02:46"
+  FAUTHOR: "mchaffin"
+  FSTATUS: "Draft"
+  MODIFIED-ON: "21/09/2024 12:08:42"
+  VERSION: "37"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "6"
+  ED: "GUID-F9499143-DE9F-450A-B206-359BDD86822D"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+---
+
+import ParamMetadata from "../../shared/components/param-metatdata"
+import SharedParams from "../../shared/content/_required-params"
+
+<div class="calcite-tabs-hide-borders">
+<Tabs>
+<TabNav slot="tab-nav">
+  <TabTitle is-active>Standard</TabTitle>
+  <TabTitle>Enhanced</TabTitle>
+</TabNav>
+
+<Tab is-active> 
+<div style={{height:"15px"}}></div>
+
+<CodeSwitcher>
+<CodeBlock language="curl" label="GET">{`GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode`}</CodeBlock>
+<CodeBlock language="curl" label="POST">{`POST https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode`}</CodeBlock>
+</CodeSwitcher> 
+
+</Tab>
+
+<Tab>
+<div style={{height:"15px"}}></div>
+
+<CodeSwitcher>
+<CodeBlock language="curl" label="GET">{`GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode`}</CodeBlock>
+<CodeBlock language="curl" label="POST">{`POST https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode`}</CodeBlock>
+</CodeSwitcher> 
+
+</Tab>
+</Tabs>
+</div>
+
+The `/reverseGeocode` request determines the address at a particular x,y location. You pass the coordinates of a point location and the service returns the address or place that is closest to the location.
+
+<MoreInfo>
+The purpose of reverse geocoding is to answer the question: What's near me? Or more specifically: What's near this location? To best answer this question, the `reverseGeocode`  operation returns the most relevant feature near an input location based on a prioritized hierarchy of feature types. With a few exceptions, the same feature types that can be returned by `findAddressCandidates`  can also be returned by `reverseGeocode` . As long as the location is within a [supported country](/geocode-coverage), a single feature is always returned, even if the location is far from any streets or places. If there are no streets near the input location, large areal features such as parks, universities, zoos, or airports may be returned. If the location isn't within the boundary of this type of feature, a postal code or administrative area (such as a city) is returned.
+
+<span id="GUID-FC97069F-310B-44A8-9DD1-8EC188170831" /> {/* links to hierarchy table are sent here */}
+
+The hierarchy is summarized in the table below, ordered by descending priority. Unless otherwise noted, each feature type is only returned when the distance between the input location and the feature is within the tolerance specified in the Search Tolerance column.
+
+<Note type={"note"}>
+
+The label for StreetAddress matches includes the house number range for the matching street segment, rather than the interpolated house number value. For instance, a `reverseGeocode`  with input location -117.196324,34.059217 returns a StreetAddress match with the label `1001-1199 W Park Ave` . This means that the matching segment has a possible range of house numbers from 1001 to 1199. 
+
+</Note>
+
+<Note type={"note"}>
+
+If there are multiple Subaddress features with the same x,y value intersected by a reverse geocode location, the label for Subaddress candidate includes the range of unit numbers for all subaddress records in the stack. For instance, a `reverseGeocode`  with input location 151.073457,-33.916374 returns a Subaddress match with the label `28 Hampden Rd, Unit 1-8` . It means there are multiple subaddresses at the location with unit numbers such as Unit 1, Unit 2, Unit 3... up to Unit 8.
+
+</Note>
+
+<StyledTable headers={"Feature type,Search tolerance,Comments"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[StreetInt](/service-output#LI_EE1154CBFB464E99A1E2EA05203DDD27)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+10 meters
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Intersections are only returned when `=StreetInt`  is included in the request. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[StreetAddress](/service-output#LI_1CDF019CA8DB497986F991693CFE0760) (near), [DistanceMarker](/service-output#LI_5E8DA7A1BE0B4FCA80D4954571390B03), or [StreetName](/service-output#LI_FC46C9F4015D4BDA95F262C324EE6DF1)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+3 meters
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Candidates of type [StreetName](/service-output#LI_FC46C9F4015D4BDA95F262C324EE6DF1) are only returned if `=StreetName`  is included in the request.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[POI](/service-output#LI_39DE3BB0F3F24FCD9391B7F087B17767) centroid
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+25 meters
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A business or landmark that can be represented by a point.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[Subaddress](/service-output#LI_1BD33C21E9424A54BBF06B772B5D1696)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+10 meters
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Subaddress candidates, which can be features such as apartments or floors in a building, are not returned if multiple subaddresses exist at the same x,y location and one of the following conditions is met: 
+
+1.  The subaddress units cannot be collapsed into a contiguous range.
+2.  The subaddresses have a different street address, postal code, or administrative zone values.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[PointAddress](/service-output#LI_4B3F17B4A93A4610AC69269B4E782C93)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+50 meters
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A PointAddress match is not returned if it is on the opposite side of the street as the input location, even if it is within 50 meters of the location.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[StreetAddress](/service-output#LI_1CDF019CA8DB497986F991693CFE0760) (distant), [DistanceMarker](/service-output#LI_5E8DA7A1BE0B4FCA80D4954571390B03), or [StreetName](/service-output#LI_FC46C9F4015D4BDA95F262C324EE6DF1)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+100 meters
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Candidates of type [StreetName](/service-output#LI_FC46C9F4015D4BDA95F262C324EE6DF1) are only returned if `=StreetName`  is included in the request.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[POI](/service-output#LI_39DE3BB0F3F24FCD9391B7F087B17767) area
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+within boundary
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A business or landmark that can be represented by an area, such as a large park or university. Not available in all countries.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+[Postal](/service-output#LI_C4DB51FDAC774B9EA00092EC7EE59C66) or [Locality](/service-output#LI_7F9D260A640F452B90AE07E149C0201C) area
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+within boundary
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If the input location intersects multiple boundaries, the feature with the smallest area is returned.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+The images below should help with visualizing the `reverseGeocode`  feature type hierarchy.
+
+The following image shows a section of a typical map on which a user may click or add points for reverse geocoding.
+
+![Street map image showing location of reverse geocoding examples.](./images/GUID-29DFD346-AD06-40C9-8D18-CD1581C0EE57-web.png)
+
+The following image shows what the same map looks like with the available features for reverse geocoding highlighted: blue dots for StreetInt features, pink dots for POI centroids, green dots for PointAddress features, red lines for street segments, and a brown polygon representing a POI area feature. 
+
+![Features that can be reverse geocoded are highlighted.](./images/GUID-1619D08C-9515-45AC-B07C-3BCE3CB084C1-web.png)
+
+In the following image, buffers have been created around the different features based on the search tolerance values from the [hierarchy table](/reverse-geocode#GUID-FC97069F-310B-44A8-9DD1-8EC188170831) to illustrate the match types that would be returned for various `reverseGeocode`  input locations. Refer to the following examples to see the expected matches for the input locations in the image. 
+
+![Buffers illustrating the search tolerance of different feature types for reverse geocoding.](./images/GUID-1BF30FC8-D072-4A96-8A31-EC3B633354C3-web.png)
+
+For each number callout in the image above, there is a corresponding example with the same number. 
+
+</MoreInfo>
+
+<!-- ![reverseGeocode](./images/GUID-3A7A77E6-2E26-44E2-A7BA-362DA4EFC0E4-web.png)
+
+## Access the services
+
+To access the geocoding service you need the following:
+
+1.  An [ArcGIS Location Platform](https://location.arcgis.com/sign-up/) account or [ArcGIS Online](https://www.esri.com/en-us/arcgis/products/arcgis-online/trial) account.
+2.  An [access token](DEVSITE/documentation/glossary/access-token/) (API key or OAuth 2.0) with the appropriate privilege.
+
+<Note type={"note"}>
+
+If you have an [ArcGIS Online](https://www.esri.com/en-us/arcgis/products/arcgis-online/trial) account:
+
+-   The `premium:user:geocode:stored`  privilege is required for `reverseGeocode`  requests when the results are persisted (specifically when parameter `forStorage=true`  is included in the request).
+-   The `premium:user:geocode`  privilege is required for `reverseGeocode`  requests when the results are not persisted.
+
+If you have an [ArcGIS Location Platform](https://location.arcgis.com/sign-up/) account:
+
+-   The `premium:user:geocode:stored`  privilege is required for`reverseGeocode`  requests when the results are persisted (specifically when parameter `forStorage=true`  is included in the request).
+-   The `premium:user:geocode:temporary`  privilege is required for `reverseGeocode`  requests when the results are not persisted.
+
+</Note>
+
+<Note type={"tip"}>
+
+To learn how to get an API key or to use OAuth 2.0, see [Security and authentication](DEVSITE/documentation/mapping-apis-and-services/security/) in the [Mapping APIs and location services](DEVSITE/documentation/mapping-apis-and-services/) guide.
+
+</Note>
+
+## Request URL
+
+<Box>
+
+`https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?<PARAMETERS>`
+
+</Box>
+
+For more information about constructing a request, including how to choose which endpoint to use, refer to the [Geocoding service](DEVSITE/documentation/mapping-and-location-services/geocoding/) overview.
+
+<Note type={"note"}>
+
+URL encoding is enforced by ArcGIS Online and the ArcGIS Geocoding service. Ensure the request URLs sent to the service are properly encoded and patterned after the examples in this topic. 
+
+</Note>
+
+<Note type={"note"}>
+
+The REST request URL must include `HTTPS` . Requests with `HTTP`  are not supported.
+
+</Note> -->
+
+## Parameters 
+
+<StyledTable headers="Name, Required, Type, Default, Description">
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[f](#f)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The request response format, either `json` or `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[token](#token)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    An access token with the [required privileges](#token).
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[location](#location)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string | [point](DEVSITE/rest/services-reference/enterprise/geometry-objects/#point)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The point from which to search for the closest address.
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[outSr](#outsr)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">number</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `4326`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The spatial reference of the `x` and `y` coordinates returned in a response.
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[forStorage](#forstorage)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Specifies whether the results of a request are stored. 
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[featureTypes](#featuretypes)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Limits the possible match types. 
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnIntersection](#returnintersection)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Returns street intersections. This parameter has been replaced by `featureTypes`.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[locationType](#locationtype)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `rooftop`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    
+    Specifies whether output geometry of `PointAddress` and `Subaddress` matches should be the rooftop point or street entrance.
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[preferredLabelValues](#preferredlabelvalues)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     Returns specified address component values included in output fields.
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[outFields](#outfields)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string | *</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The list of fields to be returned within the `attributes` object of a response.
+
+  </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnInputLocation](#returninputlocation)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    Specifies which coordinates should be returned in the X and Y output fields within the location object of the JSON response
+
+  </StyledTableCell>
+  </StyledTableRow> 
+</StyledTable>
+
+## Required parameters 
+
+<Box>
+
+### f
+
+<SharedParams f/>
+
+</Box>
+
+<Box>
+
+### token
+
+<SharedParams token alpPrivileges={"premium:user:geocode:temporary or premium:user:geocode:stored"} agoPrivileges={"premium:user:geocode or premium:user:geocode:stored"}/>
+
+</Box>
+
+<Box>
+
+#### location
+
+<ParamMetadata types={[{name:"string"},{name:"point", link:"DEVSITE/rest/services-reference/enterprise/geometry-objects/#point"}]} />
+
+The point from which to search for the closest address. The point can be represented as a simple, comma-separated syntax or as a [JSON point object](DEVSITE/rest/services-reference/enterprise/geometry-objects/#point). 
+
+The spatial reference of the comma-separated syntax is always WGS84 (in decimal degrees), the same coordinate system as the ArcGIS Geocoding service.
+
+Use JSON formatting to specify any other coordinate system for the input location. Specifically, set the spatial reference using its well-known ID (WKID) value. For a list of valid WKID values, see [Projected coordinate systems](https://links.esri.com/proj-coord-systems) and [Geographic coordinate systems](https://links.esri.com/geo-coord-systems).
+
+Example using simple syntax and the default WGS84 spatial reference
+
+```javascript
+location=103.8767227,1.3330736
+
+```
+
+ Example using JSON and the default WGS84 spatial reference
+
+```javascript
+location={x: 103.876722, y: 1.3330736}
+
+```
+
+ Example using JSON and specifying a spatial reference (WGS84 Web Mercator Auxiliary Sphere)
+
+```javascript
+location=
+{
+    "x": 11563503,
+    "y": 148410,
+    "spatialReference": {
+        "wkid": 3857
+    }
+}
+
+```
+</Box>
+
+### Optional parameters
+
+<Box>
+
+### outSR
+
+<ParamMetadata types={[{name:"number"}]} defaultValue="4326"/>
+
+The spatial reference of the x,y coordinates returned by a geocode request. This is useful for applications using a map with a spatial reference different than that of the geocode service. 
+
+The spatial reference can be specified as either a well-known ID (WKID) or as a [JSON spatial reference object](DEVSITE/rest/services-reference/enterprise/geometry-objects/#spatial-reference). If `outSR`  is not specified, the spatial reference of the output locations is the same as that of the service. The ArcGIS Geocoding service spatial reference is WGS84 (WKID = 4326). 
+
+For a list of valid WKID values, see [Projected coordinate systems](https://links.esri.com/proj-coord-systems) and [Geographic coordinate systems](https://links.esri.com/geo-coord-systems).
+
+Example (102100 is the WKID for the Web Mercator projection)
+
+```javascript
+outSR=102100
+```
+</Box>
+<Box>
+### langCode
+
+<ParamMetadata types={[{name:"string"}]} />
+
+The `langCode`  parameter sets the language in which reverse-geocoded addresses are returned. Addresses in many countries are available in more than one language; in these cases, the `langCode`  parameter can be used to specify which language should be used for addresses returned by the `reverseGeocode`  operation. This is useful for ensuring that addresses are returned in the expected language. For example, a web application could be designed to get the browser language and pass it as the `langCode`  parameter value in a `reverseGeocode`  request.
+
+See the [table of supported countries](/geocode-coverage#level-1) for valid language code values in each country. The Supported Language Codes column provides the valid input values for the `langCode`  parameter. Full language names cannot be used with the `langCode`  parameter. Only one language code value can be included for the `langCode`  parameter in a `reverseGeocode`  request.
+
+<Note type={"note"}>
+
+The language code `EN`  should be used for returning transliterated or transcribed versions of a language, or for returning Pinyin. The Supported Languages column indicates the countries for which such languages are available.
+
+</Note>
+
+The default language code for each country is the first one listed in the Supported Language Codes column, highlighted with bold text. It is the default language of addresses returned by the `reverseGeocode`  operation for a particular country. For countries with multiple supported languages, the default language is the one spoken by the highest percentage of the country's population. For some countries, not all addresses are available in the default language. If the `langCode`  parameter isn't included in a request, or if it is included but there are no matching features with the input language code, the resultant match is returned in the country's default language code.
+
+Similarly, when there are multiple supported languages for a country, it doesn't mean that every address in the country is available in each of the languages. It may be the case that addresses are available in multiple languages for only one region of the country, or that each language is exclusive to a different region and there is no overlap at all. The following are some examples:
+
+-   Both English and French are listed as supported languages for Canada. However, there is no overlap between the languages for any addresses in most provinces. In the province of Quebec, only French addresses are available, while English is the only language used for addresses in Ontario. 
+-   In Belgium, where three languages are supported (Dutch, French, and German), addresses are available in the city of Brussels in both Dutch and French. However, in the majority of the country, only a single language is used for addresses. 
+-   In Greece, there is complete address coverage in both Greek and transliterated Greek languages (Greek words translated with Latin characters).
+
+Due to variability of language coverage, the following logic is used to handle the different scenarios that may be encountered.
+
+<StyledTable headers={"Scenario,Result,Example"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+No `langCode`  value is specified and only one language is supported at the input location. 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Address is returned in the supported language.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Location in Geneva, Switzerland (only French addresses are supported)
+
+Address returned in French language.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+No `langCode`  value is specified and multiple languages are supported at the input location. 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Address is returned in the country's default language.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Location in Brussels, Belgium (Dutch and French addresses are supported; Dutch is the default language)
+
+Address returned in Dutch language.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+An invalid `langCode`  value is specified and only one language is supported at the input location.
+
+<Note type={"note"}>
+
+A `langCode`  value is considered invalid if it is not supported for the given country. 
+
+</Note>
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Address is returned in the supported language.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Location in Geneva, Switzerland (only French addresses are supported), and `langCode=zh` 
+
+Address returned in French language.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+An invalid `langCode`  is specified and multiple languages are supported at the input location; the input `langCode`  is a Latin-based script and a transliterated address exists at the location.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Address is returned in the transliterated language. 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Location in Athens, Greece (Greek and transliterated Greek are supported), and `langCode=fr` 
+
+Transliterated address is returned.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+An invalid `langCode`  is specified and multiple languages are supported at the input location; the input `langCode`  is not a Latin-based script.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Address is returned in the country's default language.
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Location in Athens, Greece (Greek and transliterated Greek are supported; Greek is the default language), and `langCode=ru` 
+
+Address returned in Greek language.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+Example
+
+```javascript
+langCode=fr
+```
+
+</Box>
+<Box>
+
+### forStorage
+
+<ParamMetadata types={[{name:"boolean"}]} defaultValue={"false"} />
+
+Specifies whether the results of the operation will be persisted. The default value is `false` , which indicates the results of the operation can't be stored, but they can be temporarily displayed on a map, for instance. If you store the results, in a database, for example, you need to set this parameter to `true` .
+
+Applications are contractually prohibited from storing the results of geocoding transactions unless they make the request by passing the `forStorage`  parameter with a value of `true`  and the `token`  parameter with a valid token. Instructions for composing a request with a valid token are provided in [Security and authentication](DEVSITE/documentation/mapping-apis-and-services/security/).
+
+To learn more about free and paid geocoding operations, [stored versus not stored geocoding](DEVSITE/documentation/mapping-and-location-services/geocoding/geocode-addresses/#storage-parameter) are explained further.
+
+Example
+
+```javascript
+forStorage=true
+```
+
+</Box>
+<Box>
+
+### featureTypes
+
+<ParamMetadata types={[{name:"string"}]} values={"StreetInt, DistanceMarker, StreetAddress, StreetName, POI, Subaddress, PointAddress, Postal, Locality"} />
+
+The `featureTypes`  parameter limits the possible match types returned by the `reverseGeocode`  operation. Valid values are listed in the feature type [hierarchy table](/reverse-geocode#GUID-FC97069F-310B-44A8-9DD1-8EC188170831). Single or multiple values can be included in the request. If a single value is included, the search tolerance for the input feature type is 500 meters. If multiple values are included, the default search distances specified in the feature type [hierarchy table](/reverse-geocode#GUID-FC97069F-310B-44A8-9DD1-8EC188170831) are applied. 
+
+{/* The list below includes the valid values for the `featureTypes`  parameter.
+
+-   StreetInt
+-   DistanceMarker
+-   StreetAddress
+-   StreetName
+-   POI
+-   Subaddress
+-   PointAddress
+-   Postal
+-   Locality */}
+
+<MoreInfo>
+
+Use `featureTypes=StreetInt`  instead of the `returnIntersection`  parameter to return intersection matches. The `returnIntersection`  parameter is only supported for backward compatibility with legacy apps. Intersection matches are not returned by `reverseGeocode`  unless `featureTypes=StreetInt`  (or `returnIntersection=true` ) is included in the request.
+
+
+The label for StreetAddress matches includes the house number range for the matching street segment, rather than the interpolated house number value. For instance, `reverseGeocode`  with input location -117.196324,34.059217 returns a StreetAddress match with `Match_addr=1001-1199 W Park Ave` . This means that the matching segment has a possible range of house numbers from 1001 to 1199.
+
+
+If there are multiple Subaddress features with the same x,y value intersected by a reverse geocode location, the label for the Subaddress candidate includes the range of unit numbers for all subaddress records in the stack. For instance, a `reverseGeocode`  with input location 151.073457,-33.916374 returns a Subaddress match with label `28 Hampden Rd, Unit 1-8` . It means there are multiple subaddresses at the location with unit numbers such as Unit 1, Unit 2, Unit 3... up to Unit 8.
+
+If more than one value is specified for the parameter, the values must be separated by a comma, with no spaces after the comma.
+
+</MoreInfo>
+
+Example (single featureTypes value)
+
+```javascript
+featureTypes=PointAddress
+```
+
+ Example (multiple featureTypes values)
+
+```javascript
+featureTypes=PointAddress,StreetAddress
+```
+</Box>
+<Box>
+
+### returnIntersection
+
+<ParamMetadata types={[{name:"boolean"}]} defaultValue={"false"} />
+
+The `returnIntersection`  parameter has been replaced by the `featureTypes`  parameter for returning street intersection matches with `reverseGeocode` . It is only supported for backward compatibility with legacy apps. The `featureTypes`  parameter should be used instead of `returnIntersection` . If you want to return the nearest street intersection to the input location, pass `featureTypes=StreetInt`  in the `reverseGeocode`  request.
+
+A Boolean that indicates whether the service should return the nearest street intersection to the input location. If `true` , the closest intersection to the input location is returned; if `false` , the closest address or place to the input location is returned. The default value is `false` .
+
+<Note type={"note"}>
+
+`returnIntersection=true`  is equivalent to `featureTypes=StreetInt`  in a `reverseGeocode`  request.
+
+</Note>
+
+Example
+
+```javascript
+returnIntersection=true
+```
+</Box>
+<Box>
+
+### locationType
+
+<ParamMetadata types={[{name:"string"}]} values="rooftop, street"/>
+
+Specifies whether the output geometry of PointAddress and Subaddress matches should be the rooftop point or street entrance location. Valid values are `rooftop`  and `street` . The default value is `rooftop` .
+
+Geocode results include one geometry object (the `location`  object), which defines the location of the address, as well as two sets of x,y coordinate values within the `attributes`  object: [X](/service-output#GUID-BFD661FB-1180-45D8-9ECE-9868D95B7D6E) /[Y](/service-output#GUID-F9505F9C-5550-47B5-8776-3997F12B88F8) , and [DisplayX](/service-output#GUID-458D2C0A-15FC-49FE-95E5-CEF1747156F1) /[DisplayY](/service-output#GUID-7FA7D401-4A50-462F-A5CD-0489405A5A07) . In most cases, for geocode results with `=PointAddress`  or `Subaddress` , the `X` /`Y`  attribute values describe the coordinates of the address along the street, while the `DisplayX` /`DisplayY`  values describe the rooftop, or building centroid, coordinates. By default, the geometry returned for geocode results represents the rooftop location of the address (if the rooftop location is available in the source data). This is useful for most spatial analysis and map display purposes. However, for routing scenarios, it may be desirable to use the street location because the rooftop location of some addresses may be offset from a street by a large distance. For these cases, the `locationType`  parameter can be used to specify that the street entrance geometry should be returned. 
+
+It is important to note that `locationType`  is limited by the address data sources used by the ArcGIS Geocoding service. Not all PointAddress and Subaddress features include rooftop and street location coordinates. For some addresses, only a rooftop location is available; for others, only a street location is provided by the data source. For cases such as this, the `locationType`  parameter may not function as expected. For example, if only rooftop location coordinates are available for an address, the rooftop geometry will be returned for the geocoded address even when `locationType=street`  is requested. 
+
+<Note type={"note"}>
+
+The `locationType`  parameter only affects the `location`  object in the geocode JSON response. It does not change the `X` /`Y`  or `DisplayX` /`DisplayY`  attribute values.
+
+</Note>
+
+Example
+
+```javascript
+locationType=street
+```
+</Box>
+<Box>
+
+### preferredLabelValues
+
+<ParamMetadata types={[{name:"string"}]} />
+
+The `preferredLabelValues`  parameter allows simple configuration of output fields returned in a response from the ArcGIS Geocoding service by specifying which address component values should be included in output fields. It supports a single value as input. If the parameter is blank or excluded from a request, default address label formats will be used. 
+
+A particular address may have multiple city names associated with it. In the United States, for instance, all addresses have a ZIP Code (postal code) assigned to them. Each ZIP Code has one or more associated locality names, which are known as postal cities. There is always one primary postal city value for each ZIP Code. ZIP Codes typically have no set boundaries, and the primary postal city name for the ZIP Code that is assigned to an address may be different than the name of the local city that the address is within.
+
+<Note type={"note"}>
+
+ In the context of the `preferredLabelValues`  parameter, the name of the city whose boundary an address is within is referred to as the local city, as opposed to the postal city name assigned to the address's postal code.
+
+</Note>
+
+For addresses in the United States, the ArcGIS Geocoding service includes the primary postal city in response output fields by default. For example, postal code 45420 in Ohio has the primary postal city value Dayton. Addresses in the neighboring city of Kettering are assigned this postal code. It means that the default output fields for all reverse geocoded addresses with postal code 45420, even those within the city of Kettering, will include Dayton as the city. To illustrate, if a user reverse geocodes latitude/longitude coordinates `-84.1252005,39.703149` , the match address returned in the response is **2109 E Dorothy Ln, Dayton, Ohio, 45420**, even though the address is within the Kettering city limits. 
+
+Some organizations may prefer to include the local city name in the response instead of the postal city. The `preferredLabelValues`  can be used for this purpose. For the previous example, if `preferredLabelValues=localCity`  is included in the request, the output match address in the response will be **2109 E Dorothy Ln, Kettering, Ohio, 45420**. 
+
+See the following table for supported parameter values.
+
+<StyledTable headers={"Parameter value,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+postalCity
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Include the primary postal city value in geocoding response output fields. This is the primary name assigned to the postal code of the address. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+localCity
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Include the primary local city name in geocoding response output fields. This is the name of the city that the address is within, and may be different than the postal city. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+Example: Single label value
+
+```javascript
+preferredLabelValues=localCity
+```
+
+ 
+
+<Note type={"note"}>
+
+The functionality of the `preferredLabelValues`  parameter is limited by the data sources used to produce the ArcGIS Geocoding service. Not all addresses have postal city and local city values assigned to them. If the `preferredLabelValues`  parameter is used and the output labels don't correspond to expectations in some cases, it is likely because the expected values aren't included in the source data for the addresses. 
+
+</Note>
+
+</Box>
+<Box>
+
+### outFields
+
+<ParamMetadata types={[{name:"string"},{name:"*"}]} />
+
+The list of fields to be returned within the `address`  object of the `reverseGeocode`  JSON response. Descriptions for each of the `reverseGeocode`  output fields are available in the [Output fields](/service-output#output-fields) section of this document. The `reverseGeocode`  output fields are those for which "Supported request types" = "reverseGeocode" in the table. 
+
+The `reverseGeocode`  response consists of two objects: `address`  and `location` . The `location`  object includes the fields that are used for displaying reverse geocode results in a mapping application. The `address`  object includes fields which provide details about the address or place returned for the `reverseGeocode`  request, such as the full address, city, place name, and others. The `outFields`  parameter is only relevant for the `address`  object. The `location`  object is not affected by it.
+
+By default, all possible output fields are returned in the response. In other words, passing `outFields=`  (blank) in the request is functionally the same as passing `outFields=*` . 
+
+<Note type={"note"}>
+
+If more than one value is specified for the parameter, the values must be separated by a comma, with no spaces after the comma.
+
+</Note>
+
+Examples that returns all output fields
+
+```javascript
+outFields=*
+```
+
+ Example that returns the specified fields only
+
+```javascript
+outFields=Match_addr,Addr_type,CountryCode
+```
+</Box>
+<Box>
+
+### returnInputLocation
+
+<ParamMetadata types={[{name:"boolean"},{name:"false"}]} />
+
+The `returnInputLocation`  parameter is a Boolean which can be used to specify which coordinates should be returned in the `X`  and `Y`  output fields within the `location`  object of the JSON response. The default value is `false` .
+
+-   If `true` , then the coordinates which were included in the `reverseGeocode`  request for the `location`  parameter are returned in the `X`  and `Y`  output fields in the `location`  object of the JSON response.
+-   If false, then the coordinates of the reverse geocoded location are returned in the `X`  and `Y`  output fields in the `location`  object of the JSON response.
+
+<Note type={"note"}>
+
+The `address`  object of a `reverseGeocode`  JSON response also includes `X`  and `Y`  output fields. The values returned in these fields always represent the coordinates of the reverse geocoded location. The `address`  object is not affected by the `returnInputLocation`  parameter. The parameter only affects the values of the `X`  and `Y`  fields in the `location`  object of the response. This is because the `address`  object also includes the `InputX`  and `InputY`  output fields, whose values always represent the coordinates of the input `location`  parameter.
+
+</Note>
+
+Example
+
+```javascript
+returnInputLocation=true
+```
+</Box>
+
+## Response status 
+
+<StyledTable headers="Status, Meaning, Description, Schema">
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">200</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[OK](https://datatracker.ietf.org/doc/html/rfc7231#section-6.3.1)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     A successful response for a `/reverseGeocode` request.
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     Inline
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">400</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[Bad request](https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    Invalid query parameters. Learn more in [Service output](xref:///geocoding-service-output/#error-code-400).
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     [Error](#response-details)
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">403</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">[Forbidden](https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.3)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     The required paramter `token` is valid but does not have permission to access the service. Learn more in [Service output](xref:///geocoding-service-output/#error-code-403).
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     [Error](#response-details)
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">5XX</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">Unknown</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     An error occured on the server. Learn more in [Service output](xref:///geocoding-service-output/#error-code-500).
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+     [Error](#response-details)
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+Go to [Service output](xref:///geocoding-service-output/#error-codes) for extended codes.
+
+## Response details 
+
+<!-- Go to [Response types](xref:///geocoding-types) for an example of the JSON response object.  -->
+
+<CodeSwitcher displayMode="tabs">
+  <CodeBlock language="json" group="200 OK" source="./code/reverse-geocode-response.json" section="200" />
+  <CodeBlock language="json" group="Error" source="./code/error-response.json"/>
+</CodeSwitcher>  
+
+## Examples 
+
+<Box>
+
+###  Match to POI centroid returned
+
+{/* The input location is within the search tolerance of both POI and PointAddress features, but a match to the POI centroid is returned because it has a higher priority. */}
+
+In this example, which corresponds to callout 1 in the graphic above, the input location is within the search tolerance of both POI and PointAddress features, but a match to the POI centroid is returned because it has a higher priority.
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=-117.205525,34.038232&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+```json
+{
+ "address": {
+  "Match_addr": "InlandPsych",
+  "LongLabel": "InlandPsych, 255 Terracina Blvd, Ste 204, Redlands, CA, 92373, USA",
+  "ShortLabel": "InlandPsych",
+  "Addr_type": "POI",
+  "Type": "Doctor",
+  "PlaceName": "InlandPsych",
+  "AddNum": "255",
+  "Address": "255 Terracina Blvd",
+  "Block": "",
+  "Sector": "",
+  "Neighborhood": "",
+  "District": "",
+  "City": "Redlands",
+  "MetroArea": "",
+  "Subregion": "San Bernardino County",
+  "Region": "California",
+  "RegionAbbr": "CA",
+  "Territory": "",
+  "Postal": "92373",
+  "PostalExt": "",
+  "CntryName": "United States",
+  "CountryCode": "USA",
+  "X": -117.205525,
+  "Y": 34.038232,
+  "InputX": -117.205525,
+  "InputY": 34.038232,
+  "StrucType": "",
+  "StrucDet": ""
+ },
+ "location": {
+  "x": -117.205525,
+  "y": 34.038232,
+  "spatialReference": {
+   "wkid": 4326,
+   "latestWkid": 4326
+  }
+ }
+}
+
+```
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=-117.205525%2C34.038232&token=<ACCESS_TOKEN>
+
+``` */}
+</Tab>
+</Tabs>
+</Box>
+
+<Box>
+
+### Match to POI area returned
+
+{/* The input location is within a POI area feature, so a POI match is returned. */}
+
+In this example, which corresponds to callout 2 in the graphic above, the input location is within a POI area feature, so a POI match is returned.
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=-117.205525792308,34.037072461598&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=-117.205525792308%2C34.037072461598&token=<ACCESS_TOKEN>
+
+``` */}
+```json
+{
+ "address": {
+  "Match_addr": "Redlands Community Hospital",
+  "LongLabel": "Redlands Community Hospital, 350 Terracina Blvd, Redlands, CA, 92373, USA",
+  "ShortLabel": "Redlands Community Hospital",
+  "Addr_type": "POI",
+  "Type": "Hospital",
+  "PlaceName": "Redlands Community Hospital",
+  "AddNum": "350",
+  "Address": "350 Terracina Blvd",
+  "Block": "",
+  "Sector": "",
+  "Neighborhood": "",
+  "District": "",
+  "City": "Redlands",
+  "MetroArea": "",
+  "Subregion": "San Bernardino County",
+  "Region": "California",
+  "RegionAbbr": "CA",
+  "Territory": "",
+  "Postal": "92373",
+  "PostalExt": "",
+  "CntryName": "United States",
+  "CountryCode": "USA",
+  "X": -117.2055739,
+  "Y": 34.0368518,
+  "InputX": -117.205525792308,
+  "InputY": 34.037072461598,
+  "StrucType": "",
+  "StrucDet": ""
+ },
+ "location": {
+  "x": -117.2055739,
+  "y": 34.0368518,
+  "spatialReference": {
+   "wkid": 4326,
+   "latestWkid": 4326
+  }
+ }
+}
+
+```
+
+</Tab>
+</Tabs>
+</Box>
+<Box>
+
+### StreetAddress match returned
+
+{/*The input location intersects a POI area feature and a StreetAddress buffer. A StreetAddress match is returned since it has a higher priority than POI areas. */}
+
+In this example, which corresponds to callout 3 in the graphic above, the input location intersects a POI area feature and a StreetAddress buffer. A StreetAddress match is returned since it has a higher priority than POI areas. */}
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=-117.20700637168703,34.03582108290202&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=-117.20700637168703%2C34.03582108290202&token=<ACCESS_TOKEN>
+
+``` */}
+```json
+{
+ "address": {
+  "Match_addr": "1784-2098 W Fern Ave, Redlands, California, 92373",
+  "LongLabel": "1784-2098 W Fern Ave, Redlands, CA, 92373, USA",
+  "ShortLabel": "1784-2098 W Fern Ave",
+  "Addr_type": "StreetAddress",
+  "Type": "",
+  "PlaceName": "",
+  "AddNum": "1838",
+  "Address": "1838 W Fern Ave",
+  "Block": "",
+  "Sector": "",
+  "Neighborhood": "",
+  "District": "",
+  "City": "Redlands",
+  "MetroArea": "",
+  "Subregion": "San Bernardino County",
+  "Region": "California",
+  "RegionAbbr": "CA",
+  "Territory": "",
+  "Postal": "92373",
+  "PostalExt": "4834",
+  "CntryName": "United States",
+  "CountryCode": "USA",
+  "X": -117.206908751118,
+  "Y": 34.035685847087,
+  "InputX": -117.207006371687,
+  "InputY": 34.035821082902,
+  "StrucType": "",
+  "StrucDet": ""
+ },
+ "location": {
+  "x": -117.206908751118,
+  "y": 34.035685847087,
+  "spatialReference": {
+   "wkid": 4326,
+   "latestWkid": 4326
+  }
+ }
+}
+
+```
+</Tab>
+</Tabs>
+</Box>
+
+<Box>
+
+### PointAddress match returned
+
+{/* The input location is within the search tolerance of a PointAddress feature, so a PointAddress match is returned. */}
+
+In this example, which corresponds to callout 4 in the graphic above, the input location is within the search tolerance of a PointAddress feature, so a PointAddress match is returned.
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=-117.20689908332648,34.03431629224423&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+
+<Tab>
+{/* 
+```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=-117.20689908332648%2C34.03431629224423&token=<ACCESS_TOKEN>
+
+``` */}
+```json
+{
+ "address": {
+  "Match_addr": "421 San Timoteo Canyon Rd, Redlands, California, 92373",
+  "LongLabel": "421 San Timoteo Canyon Rd, Redlands, CA, 92373, USA",
+  "ShortLabel": "421 San Timoteo Canyon Rd",
+  "Addr_type": "PointAddress",
+  "Type": "",
+  "PlaceName": "",
+  "AddNum": "421",
+  "Address": "421 San Timoteo Canyon Rd",
+  "Block": "",
+  "Sector": "",
+  "Neighborhood": "",
+  "District": "",
+  "City": "Redlands",
+  "MetroArea": "",
+  "Subregion": "San Bernardino County",
+  "Region": "California",
+  "RegionAbbr": "CA",
+  "Territory": "",
+  "Postal": "92373",
+  "PostalExt": "7821",
+  "CntryName": "United States",
+  "CountryCode": "USA",
+  "X": -117.207342506017,
+  "Y": 34.034236513094,
+  "InputX": -117.206899083326,
+  "InputY": 34.034316292244,
+  "StrucType": "Residential",
+  "StrucDet": "Single Family"
+ },
+ "location": {
+  "x": -117.207342506017,
+  "y": 34.034236513094,
+  "spatialReference": {
+   "wkid": 4326,
+   "latestWkid": 4326
+  }
+ }
+}
+
+```
+
+</Tab>
+</Tabs>
+</Box>
+<Box>
+
+### Locality match returned
+
+{/* In this example, which corresponds to callout 5 in the graphic above,  */}
+
+In this example, which corresponds to callout 5 in the graphic above, the input location is outside the tolerance of address and POI features, so the service returns a match to the smallest (by area) administrative or postal boundary feature that the location intersects. In this case, a match to the Live Oak Canyon neighborhood is returned.
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=-117.205794,34.035115&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=-117.205794%2C34.035115&token=<ACCESS_TOKEN>
+
+``` */}
+```json
+{
+ "address": {
+  "Match_addr": "Redlands, California",
+  "LongLabel": "Redlands, CA, USA",
+  "ShortLabel": "Redlands",
+  "Addr_type": "Locality",
+  "Type": "City",
+  "PlaceName": "Redlands",
+  "AddNum": "",
+  "Address": "",
+  "Block": "",
+  "Sector": "",
+  "Neighborhood": "",
+  "District": "",
+  "City": "Redlands",
+  "MetroArea": "",
+  "Subregion": "San Bernardino County",
+  "Region": "California",
+  "RegionAbbr": "CA",
+  "Territory": "",
+  "Postal": "",
+  "PostalExt": "",
+  "CntryName": "United States",
+  "CountryCode": "USA",
+  "X": -117.205794,
+  "Y": 34.035115,
+  "InputX": -117.205794,
+  "InputY": 34.035115,
+  "StrucType": "",
+  "StrucDet": ""
+ },
+ "location": {
+  "x": -117.205794,
+  "y": 34.035115,
+  "spatialReference": {
+   "wkid": 4326,
+   "latestWkid": 4326
+  }
+ }
+}
+
+```
+
+</Tab>
+</Tabs>
+</Box>
+<Box>
+
+### StreetAddress match returned instead of StreetInt
+
+{/* In this example, which corresponds to callout 6 in the graphic above,  */}
+
+In this example, which corresponds to callout 6 in the graphic above, the input location is within the tolerance of both StreetInt and StreetAddress features. Even though StreetInt has a higher priority than StreetAddress, a StreetAddress match is returned. This is because intersection matches are only returned by `reverseGeocode`  if the request includes `featureTypes=StreetInt` . The `featureTypes`  parameter is empty in this case.
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=-117.203741,34.036609&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=-117.203741%2C34.036609&token=<ACCESS_TOKEN>
+
+``` */}
+```json
+{
+ "address": {
+  "Match_addr": "400-444 Terracina Blvd, Redlands, California, 92373",
+  "LongLabel": "400-444 Terracina Blvd, Redlands, CA, 92373, USA",
+  "ShortLabel": "400-444 Terracina Blvd",
+  "Addr_type": "StreetAddress",
+  "Type": "",
+  "PlaceName": "",
+  "AddNum": "402",
+  "Address": "402 Terracina Blvd",
+  "Block": "",
+  "Sector": "",
+  "Neighborhood": "",
+  "District": "",
+  "City": "Redlands",
+  "MetroArea": "",
+  "Subregion": "San Bernardino County",
+  "Region": "California",
+  "RegionAbbr": "CA",
+  "Territory": "",
+  "Postal": "92373",
+  "PostalExt": "5642",
+  "CntryName": "United States",
+  "CountryCode": "USA",
+  "X": -117.20378563673,
+  "Y": 34.036573526642,
+  "InputX": -117.203741,
+  "InputY": 34.036609,
+  "StrucType": "",
+  "StrucDet": ""
+ },
+ "location": {
+  "x": -117.20378563673,
+  "y": 34.036573526642,
+  "spatialReference": {
+   "wkid": 4326,
+   "latestWkid": 4326
+  }
+ }
+}
+
+``` 
+
+</Tab>
+</Tabs>
+</Box>
+<Box>
+
+### Choose specific output features
+
+{/* The ArcGIS Geocoding service is configured to return the most relevant address or place for a given `reverseGeocode`  input location. However, as a developer of an application that uses reverse geocoding, you may want to have more control over reverse geocode results. For instance, you may want users of your application to choose the features that are returned when they reverse geocode a location. Or perhaps the search tolerances mentioned in the previous table aren't sufficient and you want more distant addresses to be returned. Maybe you want to return StreetInt matches. You can use the `featureTypes`  parameter to satisfy such requirements by refining reverse geocoding results.  */}
+
+The `featureTypes`  parameter can be used to specify one or more match types to be returned by a `reverseGeocode`  request. If one value is included for `featureTypes` , the search tolerance is extended to 500 meters. If the `featureTypes`  parameter includes multiple values, the search tolerances defined in the feature types [hierarchy table](/reverse-geocode#GUID-FC97069F-310B-44A8-9DD1-8EC188170831) are used. Details for the logic used by the `featureTypes`  parameter are described below.
+
+<MoreInfo>
+
+The `featureTypes`  parameter affects geocoding results in the following ways:
+
+-   If `featureTypes`  is blank, the match is based on the default feature type hierarchy and search tolerances defined in the feature type [hierarchy table](/reverse-geocode#GUID-FC97069F-310B-44A8-9DD1-8EC188170831), excluding StreetInt. StreetInt matches are only returned if `featureTypes=StreetInt`  is included in the `reverseGeocode`  request.
+-   If `featureTypes`  includes a single value, a search tolerance of 500 meters is used and only the input feature type is searched for.
+
+    -   If the input feature type exists within 500 meters of the input location, a match to that feature is returned.
+    -   If there are no matches to the input feature type within 500 meters of the input location, no match is returned for the `reverseGeocode`  request.
+-   If `featureTypes`  includes multiple values, the default search tolerances for the input feature types as defined in the feature type [hierarchy table](/reverse-geocode#GUID-FC97069F-310B-44A8-9DD1-8EC188170831) are used to determine the match.
+
+    -   If the input location is within the search tolerance of only one of the input feature types, a match to that feature type is returned.
+    -   If the input location is within the search tolerance of multiple input feature types, a match to the input feature type with the highest priority is returned.
+    -   If the input location is not within the search tolerance of any of the input feature types, no match is returned.
+
+Review the following examples to see how `featureTypes`  can be used in different scenarios. 
+
+</MoreInfo>
+
+#### Reverse geocode an intersection
+
+In this example, you'll use the `featureTypes`  parameter to return a StreetInt match with a `reverseGeocode`  request. This example uses the same input location as [example 6](/reverse-geocode#example-input-location-6-streetaddress-match-returned) above.
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=StreetInt&location=-117.203741,34.036609&token=<ACCESS_TOKEN>
+
+```
+
+ 
+
+</Tab>
+
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=StreetInt&location=-117.203741%2C34.036609&token=<ACCESS_TOKEN>
+
+``` */}
+
+```javascript
+{
+ "address": {
+  "Match_addr": "W Fern Ave & Terracina Blvd, Redlands, California, 92373",
+  "LongLabel": "W Fern Ave & Terracina Blvd, Redlands, CA, 92373, USA",
+  "ShortLabel": "W Fern Ave & Terracina Blvd",
+  "Addr_type": "StreetInt",
+  "Type": "",
+  "PlaceName": "",
+  "AddNum": "",
+  "Address": "W Fern Ave & Terracina Blvd",
+  "Block": "",
+  "Sector": "",
+  "Neighborhood": "South Redlands",
+  "District": "",
+  "City": "Redlands",
+  "MetroArea": "",
+  "Subregion": "San Bernardino County",
+  "Region": "California",
+  "RegionAbbr": "CA",
+  "Territory": "",
+  "Postal": "92373",
+  "PostalExt": "4918",
+  "CntryName": "United States",
+  "CountryCode": "USA",
+  "X": -117.203752201611,
+  "Y": 34.03663390504,
+  "InputX": -117.203741,
+  "InputY": 34.036609,
+  "StrucType": "",
+  "StrucDet": "",
+  "StrucType1": "",
+  "StrucType2": "",
+  "StrucDet1": "",
+  "StrucDet2": ""
+ },
+ "location": {
+  "x": -117.203752201611,
+  "y": 34.03663390504,
+  "spatialReference": {
+   "wkid": 4326,
+   "latestWkid": 4326
+  }
+ }
+}
+
+```
+
+</Tab>
+</Tabs>
+
+#### Reverse geocode a distant PointAddress
+
+In this example, you'll use the `featureTypes`  parameter to return a match to a PointAddress feature when the input location is outside the default PointAddress search tolerance. Because `PointAddress`  is the only value included for the `featureTypes`  parameter in this `reverseGeocode`  request, the search tolerance is 500 meters, which allows more distant PointAddress matches to be returned.
+
+<Note type={"note"}>
+
+In this case, if `featureTypes`  is not included in the request, a Locality match is returned instead.
+
+</Note>
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=PointAddress&location=-117.205958,34.035039&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=PointAddress&location=-117.205958%2C34.035039&token=<ACCESS_TOKEN>
+
+``` */}
+
+```json
+{
+ "address": {
+  "Match_addr": "1741 W Fern Ave, Redlands, California, 92373",
+  "LongLabel": "1741 W Fern Ave, Redlands, CA, 92373, USA",
+  "ShortLabel": "1741 W Fern Ave",
+  "Addr_type": "PointAddress",
+  "Type": "",
+  "PlaceName": "",
+  "AddNum": "1741",
+  "Address": "1741 W Fern Ave",
+  "Block": "",
+  "Sector": "",
+  "Neighborhood": "",
+  "District": "",
+  "City": "Redlands",
+  "MetroArea": "",
+  "Subregion": "San Bernardino County",
+  "Region": "California",
+  "RegionAbbr": "CA",
+  "Territory": "",
+  "Postal": "92373",
+  "PostalExt": "4833",
+  "CntryName": "United States",
+  "CountryCode": "USA",
+  "X": -117.204947712461,
+  "Y": 34.035733227635,
+  "InputX": -117.205958,
+  "InputY": 34.035039,
+  "StrucType": "Residential",
+  "StrucDet": "Single Family"
+ },
+ "location": {
+  "x": -117.204947712461,
+  "y": 34.035733227635,
+  "spatialReference": {
+   "wkid": 4326,
+   "latestWkid": 4326
+  }
+ }
+}
+
+```
+
+</Tab>
+</Tabs>
+
+####  Multiple input featureTypes values
+
+A typical use case for the `featureTypes`  parameter is to exclude matches to nonaddress features, which can be accomplished by setting `featureTypes=PointAddress,StreetAddress` . In this example, the input location is within the search tolerance of both POI and PointAddress features, but a match to the PointAddress is returned because `featureTypes`  is used to exclude the POI match. This example uses the same input location as [example 1](/reverse-geocode#example-input-location-1-match-to-poi-centroid-returned) above.
+
+<Note type={"note"}>
+
+In this case, if `featureTypes`  is not included in the request, a POI match is returned.
+
+</Note>
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=PointAddress,StreetAddress&location=-117.205453,34.037988&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=PointAddress%2CStreetAddress&location=-117.205453%2C34.037988&token=<ACCESS_TOKEN>
+
+``` */}
+
+```json
+{
+ "address": {
+  "Match_addr": "255 Terracina Blvd, Redlands, California, 92373",
+  "LongLabel": "255 Terracina Blvd, Redlands, CA, 92373, USA",
+  "ShortLabel": "255 Terracina Blvd",
+  "Addr_type": "PointAddress",
+  "Type": "",
+  "PlaceName": "",
+  "AddNum": "255",
+  "Address": "255 Terracina Blvd",
+  "Block": "",
+  "Sector": "",
+  "Neighborhood": "",
+  "District": "",
+  "City": "Redlands",
+  "MetroArea": "",
+  "Subregion": "San Bernardino County",
+  "Region": "California",
+  "RegionAbbr": "CA",
+  "Territory": "",
+  "Postal": "92373",
+  "PostalExt": "4870",
+  "CntryName": "United States",
+  "CountryCode": "USA",
+  "X": -117.205510138164,
+  "Y": 34.038261670637,
+  "InputX": -117.205453,
+  "InputY": 34.037988,
+  "StrucType": "",
+  "StrucDet": ""
+ },
+ "location": {
+  "x": -117.205510138164,
+  "y": 34.038261670637,
+  "spatialReference": {
+   "wkid": 4326,
+   "latestWkid": 4326
+  }
+ }
+}
+
+```
+
+</Tab>
+</Tabs>
+</Box>
+<Box>
+
+### Reverse geocode examples with langCode
+
+Greek is the default language for features in Greece. However, many features are also available in English. This example shows how to return English reverse geocoding results for locations in Greece.
+
+#### Reverse geocode a location with `langCode=EN` 
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&langCode=EN&location=23.73687,37.975252&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&langCode=EN&location=23.73687%2C37.975252&token=<ACCESS_TOKEN>
+
+``` */}
+
+```json
+{
+ "address": {
+  "Match_addr": "Hellenic Parliament",
+  "LongLabel": "Hellenic Parliament, Athens, GRC",
+  "ShortLabel": "Hellenic Parliament",
+  "Addr_type": "POI",
+  "Type": "Historical Monument",
+  "PlaceName": "Hellenic Parliament",
+  "AddNum": "",
+  "Address": "",
+  "Block": "",
+  "Sector": "",
+  "Neighborhood": "",
+  "District": "",
+  "City": "Athens",
+  "MetroArea": "",
+  "Subregion": "Nomarchia Athinas",
+  "Region": "Attica",
+  "RegionAbbr": "",
+  "Territory": "",
+  "Postal": "",
+  "PostalExt": "",
+  "CntryName": "Greece",
+  "CountryCode": "GRC",
+  "X": 23.73695,
+  "Y": 37.97517,
+  "InputX": 23.73687,
+  "InputY": 37.975252,
+  "StrucType": "",
+  "StrucDet": ""
+ },
+ "location": {
+  "x": 23.73695,
+  "y": 37.97517,
+  "spatialReference": {
+   "wkid": 4326,
+   "latestWkid": 4326
+  }
+ }
+}
+
+```
+
+</Tab>
+</Tabs>
+
+#### Reverse geocode a location with `langCode=AR` 
+
+In Israel, some addresses are available in both Hebrew and Arabic languages. Hebrew is the default language, so `langCode=AR`  must be included in the `reverseGeocode`  request to return matches in Arabic.
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&langCode=AR&location=34.71402,31.79373&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+{/* 
+```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&langCode=AR&location=34.71402%2C31.79373&token=<ACCESS_TOKEN>
+
+``` */}
+
+```json
+{
+ "address": {
+  "Match_addr": "شارع تل هاي 21, جان يفني",
+  "LongLabel": "شارع تل هاي 21, جان يفني",
+  "ShortLabel": "شارع تل هاي 21",
+  "Addr_type": "PointAddress",
+  "Type": "",
+  "PlaceName": "",
+  "AddNum": "21",
+  "Address": "شارع تل هاي 21",
+  "Block": "",
+  "Sector": "",
+  "Neighborhood": "",
+  "District": "",
+  "City": "جان يفني",
+  "MetroArea": "",
+  "Subregion": "",
+  "Region": "مقاطعة مركز",
+  "RegionAbbr": "",
+  "Territory": "",
+  "Postal": "7084021",
+  "PostalExt": "",
+  "CntryName": "إسرائيل",
+  "CountryCode": "ISR",
+  "X": 34.71401602715,
+  "Y": 31.79373200135,
+  "InputX": 34.71402,
+  "InputY": 31.79373,
+  "StrucType": "",
+  "StrucDet": ""
+ },
+ "location": {
+  "x": 34.71401602715,
+  "y": 31.79373200135,
+  "spatialReference": {
+   "wkid": 4326,
+   "latestWkid": 4326
+  }
+ }
+}
+
+```
+
+
+</Tab>
+</Tabs>
+
+</Box>
+<Box>
+
+### Reverse geocode examples with the preferredLabelValues parameter
+
+The `preferredLabelValues`  parameter allows limited customization of output values in `reverseGeocode`  responses. Refer to the parameter [overview](/reverse-geocode#preferredlabelvalues) for details about its functionality; this section includes examples showing how it can be used.
+
+<MoreInfo>
+
+The `preferredLabelValues`  parameter can be used to override the default city name returned in output fields for a reverse geocoding transaction. The default values are based on country addressing conventions and data availability. United States addresses returned by the ArcGIS Geocoding service include the primary city name assigned to the postal code that is associated with the address; this is known as the postal city name. Sometimes the postal city name is different than the name of the city whose boundaries the address is within. For instance, one of the postal codes used in the city of Eagan, Minnesota, is 55123. The primary name assigned to postal code 55123 is Saint Paul, a city adjacent to Eagan. When addresses with postal code 55123 are reverse geocoded by the ArcGIS Geocoding service, the output labels and fields include Eagan as the city name by default.
+
+</MoreInfo>
+
+{/* The following examples illustrate how to use the `preferredLabelValues`  parameter to modify the output city name for latitude/longitude coordinates -93.137304,44.804042, which correspond to address `1004 Diffley Rd`  in Eagan, Minnesota. Without the parameter, Saint Paul is included in reverse geocoding results as the city name.  */}
+
+#### Reverse geocode a location without `preferredLabelValues` .
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=PointAddress&preferredLabelValues=&location=-93.13726,44.803809&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=PointAddress&preferredLabelValues=&location=-93.13726%2C44.803809&token=<ACCESS_TOKEN>
+
+``` */}
+```json
+{
+ "address": {
+  "Match_addr": "1004 Diffley Rd, Saint Paul, Minnesota, 55123",
+  "LongLabel": "1004 Diffley Rd, Saint Paul, MN, 55123, USA",
+  "ShortLabel": "1004 Diffley Rd",
+  "Addr_type": "PointAddress",
+  "Type": "",
+  "PlaceName": "",
+  "AddNum": "1004",
+  "Address": "1004 Diffley Rd",
+  "Block": "",
+  "Sector": "",
+  "Neighborhood": "",
+  "District": "",
+  "City": "Saint Paul",
+  "MetroArea": "",
+  "Subregion": "Dakota County",
+  "Region": "Minnesota",
+  "RegionAbbr": "MN",
+  "Territory": "",
+  "Postal": "55123",
+  "PostalExt": "5102",
+  "CntryName": "United States",
+  "CountryCode": "USA",
+  "X": -93.137522001349,
+  "Y": 44.804007781113,
+  "InputX": -93.13726,
+  "InputY": 44.803809,
+  "StrucType": "",
+  "StrucDet": ""
+ },
+ "location": {
+  "x": -93.137522001349,
+  "y": 44.804007781113,
+  "spatialReference": {
+   "wkid": 4326,
+   "latestWkid": 4326
+  }
+ }
+}
+
+```
+ 
+</Tab>
+</Tabs>
+
+#### Reverse geocode a location with `preferredLabelValues=localCity` 
+
+The `preferredLabelValues`  parameter can be used to return a more suitable city name for this address in reverse geocoding results. Pass `preferredLabelValues=localCity`  in the `reverseGeocode`  request to return Eagan as the city name in the output.
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=PointAddress&preferredLabelValues=localCity&location=-93.13726,44.803809&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=PointAddress&preferredLabelValues=localCity&location=-93.13726%2C44.803809&token=<ACCESS_TOKEN>
+
+``` */}
+
+```json
+{
+ "address": {
+  "Match_addr": "1004 Diffley Rd, Eagan, Minnesota, 55123",
+  "LongLabel": "1004 Diffley Rd, Eagan, MN, 55123, USA",
+  "ShortLabel": "1004 Diffley Rd",
+  "Addr_type": "PointAddress",
+  "Type": "",
+  "PlaceName": "",
+  "AddNum": "1004",
+  "Address": "1004 Diffley Rd",
+  "Block": "",
+  "Sector": "",
+  "Neighborhood": "",
+  "District": "",
+  "City": "Eagan",
+  "MetroArea": "",
+  "Subregion": "Dakota County",
+  "Region": "Minnesota",
+  "RegionAbbr": "MN",
+  "Territory": "",
+  "Postal": "55123",
+  "PostalExt": "5102",
+  "CntryName": "United States",
+  "CountryCode": "USA",
+  "X": -93.137522001349,
+  "Y": 44.804007781113,
+  "InputX": -93.13726,
+  "InputY": 44.803809,
+  "StrucType": "",
+  "StrucDet": ""
+ },
+ "location": {
+  "x": -93.137522001349,
+  "y": 44.804007781113,
+  "spatialReference": {
+   "wkid": 4326,
+   "latestWkid": 4326
+  }
+ }
+}
+
+```
+
+</Tab>
+</Tabs>
+
+</Box>
+<Box>
+
+### Specify output fields
+
+The `reverseGeocode`  operation allows you to specify individual output fields or return all output fields. The `outFields`  parameter is used for this. If you want to return all supported output fields, set `outFields=*` , or exclude the parameter from the request. By default, all output fields are returned for a `reverseGeocode`  request, so passing `outFields=*`  or `outFields=`  (blank) in the request, or excluding it altogether, produces the same results.
+
+<MoreInfo>
+
+If your use case does not require all of the output fields to be returned, you can use the `outFields`  parameter to specify a subset of output fields by passing the desired field names as comma-separated values in the request. For example, include `outFields=LongLabel,Addr_type,CountryCode` , to return the complete address, feature type, and country values for the reverse geocoded feature in the response. 
+
+See [Service output](/service-output#output-fields) for details about the fields returned by a `reverseGeocode`  request.
+
+The `InputX` /`InputY`  output fields in the `address`  object of the `reverseGeocode`  JSON response always represent the coordinates that were passed in the request as the value for the `location`  parameter. The `X` /`Y`  output fields in the `address`  object, on the other hand, always represent the coordinates of the feature returned by the `reverseGeocode`  request.
+
+</MoreInfo>
+
+#### Specify a subset of output fields for a PointAddress 
+
+{/* - reverse geocode location 4.937714,52.363908 with `outFields=LongLabel,Addr_type,CountryCode`  */}
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&location=4.937714,52.363908&featureTypes=PointAddress&outFields=LongLabel,Addr_type,CountryCode&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&location=4.937714%2C52.363908&featureTypes=PointAddress&outFields=LongLabel%2CAddr_type%2CCountryCode&token=<ACCESS_TOKEN>
+
+``` */}
+
+```javascript
+{
+ "address": {
+  "LongLabel": "Javastraat 137, 1094 HE Amsterdam, NLD",
+  "Addr_type": "PointAddress",
+  "CountryCode": "NLD"
+ },
+ "location": {
+  "x": 4.937718727131,
+  "y": 52.363904962486,
+  "spatialReference": {
+   "wkid": 4326,
+   "latestWkid": 4326
+  }
+ }
+}
+
+```
+
+</Tab>
+</Tabs>
+
+#### Return all output fields for a PointAddress 
+
+{/* - reverse geocode location 4.937714,52.363908 with `outFields=*`  */}
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&location=4.937714,52.363908&featureTypes=PointAddress&outFields=*&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&location=4.937714%2C52.363908&featureTypes=PointAddress&outFields=*&token=<ACCESS_TOKEN>
+
+``` */}
+
+```json
+{
+ "address": {
+  "Match_addr": "Javastraat 137, 1094 HE Amsterdam",
+  "LongLabel": "Javastraat 137, 1094 HE Amsterdam, NLD",
+  "ShortLabel": "Javastraat 137",
+  "Addr_type": "PointAddress",
+  "Type": "",
+  "PlaceName": "",
+  "AddNum": "137",
+  "Address": "Javastraat 137",
+  "Block": "",
+  "Sector": "",
+  "Neighborhood": "Oost",
+  "District": "",
+  "City": "Amsterdam",
+  "MetroArea": "",
+  "Subregion": "Amsterdam",
+  "Region": "Noord-Holland",
+  "RegionAbbr": "NH",
+  "Territory": "",
+  "Postal": "1094 HE",
+  "PostalExt": "",
+  "CntryName": "Nederland",
+  "CountryCode": "NLD",
+  "X": 4.937718727131,
+  "Y": 52.363904962486,
+  "InputX": 4.937714,
+  "InputY": 52.363908,
+  "StrucType": "",
+  "StrucDet": ""
+ },
+ "location": {
+  "x": 4.937718727131,
+  "y": 52.363904962486,
+  "spatialReference": {
+   "wkid": 4326,
+   "latestWkid": 4326
+  }
+ }
+}
+
+```
+
+</Tab>
+</Tabs>
+</Box>
+<Box>
+
+### Use input coordinates for output location
+
+For some applications it may be useful to display the location of the input X/Y coordinates which were submitted in a `reverseGeocode`  request as a point on a map. The `returnInputLocation`  parameter is used for this. 
+
+<MoreInfo>
+
+The JSON response returned for a `reverseGeocode`  request consists of two parts, with different purposes.
+
+The `location`  object includes information about the spatial reference and coordinates of the `reverseGeocode`  request, which can be used for displaying the result on a map. The coordinates for display are defined by the `x`  and `y`  fields in this object.
+
+`location`  object
+
+```javascript
+"location": {
+  "x": -117.195695233,
+  "y": 34.0560864,
+  "spatialReference": {
+   "wkid": 4326,
+   "latestWkid": 4326
+  }
+}
+```
+
+ 
+
+The `address`  object includes details about the `reverseGeocode`  result, such as the type of feature, its address, the city and country in which it's located, and other properties.
+
+`address`  object
+
+```javascript
+"address": {
+  "Match_addr": "Esri",
+  "LongLabel": "Esri, 380 New York St, Redlands, CA, 92373, USA",
+  "ShortLabel": "Esri",
+  "Addr_type": "POI",
+  "Type": "Business Facility",
+  "PlaceName": "Esri",
+  "AddNum": "380",
+  "Address": "380 New York St",
+  "Block": "",
+  "Sector": "",
+  "Neighborhood": "West Redlands",
+  "District": "",
+  "City": "Redlands",
+  "MetroArea": "",
+  "Subregion": "San Bernardino County",
+  "Region": "California",
+  "RegionAbbr": "CA",
+  "Territory": "",
+  "Postal": "92373",
+  "PostalExt": "",
+  "CntryName": "United States",
+  "CountryCode": "USA",
+  "X": -117.195695233,
+  "Y": 34.0560864,
+  "InputX": -117.1959,
+  "InputY": 34.0561,
+  "StrucType": "",
+  "StrucDet": ""
+ }
+
+```
+
+ 
+
+Notice that the address object also includes coordinate fields - `X` , `Y` , `InputX` , and `InputY` . The `X`  and `Y`  fields contain the coordinates of the feature returned by the `reverseGeocode`  request. The `InputX` , and `InputY`  fields contain the coordinates that were submitted in the `reverseGeocode`  request for the input `location`  parameter. 
+
+By default, the `x`  and `y`  fields in the `location`  object of the response correspond to the location of the feature that is returned by the `reverseGeocode`  request. If you want to display the input location on the map instead, include `returnInputLocation=true`  in the `reverseGeocode`  request. The `returnInputLocation`  parameter only affects the values in the `location`  object `x`  and `y`  fields; it does not modify the fields in the address object.
+
+The example below illustrates how `returnInputLocation`  can affect the output of a `reverseGeocode`  request. In the image there are two points shown on a map.
+
+1.  Point 1 represents the location of the coordinates passed as input in a `reverseGeocode`  request. (x/y coordinates -117.1959,34.0561) 
+2.  Point 2 represents the location of a POI in the geocoding service. (x/y coordinates -117.195695233,34.0560864)
+
+![Point locations on map for returnInputLocation example](./images/GUID-6BBA8F00-13DB-40B1-B90B-2C7E76D9EE5C-web.png)
+
+If you pass the coordinates for point #1 as the `location`  parameter in a `reverseGeocode`  request, and also include `returnInputLocation=true`  in the request, the point returned on the map in your application will correspond to the location of #1. 
+
+Using the same input location, if you exclude `returnInputLocation`  from the request, then the point returned on the map will correspond to the location of #2.
+
+</MoreInfo>
+
+#### Specify the input coordinates as the output location 
+
+<Tabs>
+<TabNav>
+<TabTitle>Request</TabTitle>
+<TabTitle>Response</TabTitle>
+</TabNav>
+<Tab>
+
+```http
+GET https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&returnInputLocation=true&location=-117.1959,34.0561&token=<ACCESS_TOKEN>
+
+```
+</Tab>
+<Tab>
+
+{/* ```javascript
+GET https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&returnInputLocation=true&location=-117.1959%2C34.0561&token=<ACCESS_TOKEN>
+
+``` */}
+
+```json
+{
+ "address": {
+  "Match_addr": "Esri",
+  "LongLabel": "Esri, 380 New York St, Redlands, CA, 92373, USA",
+  "ShortLabel": "Esri",
+  "Addr_type": "POI",
+  "Type": "Business Facility",
+  "PlaceName": "Esri",
+  "AddNum": "380",
+  "Address": "380 New York St",
+  "Block": "",
+  "Sector": "",
+  "Neighborhood": "West Redlands",
+  "District": "",
+  "City": "Redlands",
+  "MetroArea": "",
+  "Subregion": "San Bernardino County",
+  "Region": "California",
+  "RegionAbbr": "CA",
+  "Territory": "",
+  "Postal": "92373",
+  "PostalExt": "",
+  "CntryName": "United States",
+  "CountryCode": "USA",
+  "X": -117.195695233,
+  "Y": 34.0560864,
+  "InputX": -117.1959,
+  "InputY": 34.0561,
+  "StrucType": "",
+  "StrucDet": ""
+ },
+ "location": {
+  "x": -117.1959,
+  "y": 34.0561,
+  "spatialReference": {
+   "wkid": 4326,
+   "latestWkid": 4326
+  }
+ }
+}
+
+```
+
+
+</Tab>
+</Tabs>
+ 
+Notice that the `location`  object `x`  and `y`  values are the same as the `InputX`  and `InputY`  fields. This is because `returnInputLocation=true`  was used in the request.
+
+</Box>

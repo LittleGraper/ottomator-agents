@@ -1,0 +1,293 @@
+---
+title: "Default Properties"
+description: "An individual microservice property template resource returns the default property template, which defines the default scaling and resource allocations for a specific microservice."
+slug: "deployment-property-template"
+url: "/deployment-property-template"
+guid: "GUID-D563BC84-9701-43BE-89D2-D7EECFE9C15B"
+migratedTopicMetadata:
+  FTITLE: "Deployment Property Template"
+  FDESCRIPTION: ""
+  FCHANGES: "Updating information for autoscaling"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0-*"
+  CREATED-ON: "17/06/2022 08:07:33"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "07/08/2022 21:17:13"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "12"
+  ED: "GUID-8D8AD3BF-59CB-49BC-A7FB-71461E1EA73D"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /system/deployments/properties/<propertyTemplateID>
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /system/deployments/properties/<propertyTemplateID>
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed only with the default administrator role
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+An individual microservice property template resource returns the default property template, which defines the default scaling and resource allocations for a specific microservice. The default property configuration is applied to microservices that match the `type`, `provider`, and `mode` values of the corresponding template. The default properties of a microservice can be updated using the [Edit](/edit-deployment-properties).
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Response properties
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `mode` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The microservice mode. A mode type of `NA` is returned when the microservice is system related (Admin API, portal sharing, ingress controller, and so on). Only microservices related to an ArcGIS service type return `Dedicated` or `Shared` for this property.
+
+      Values: `Shared` | `Dedicated` | `Undefined` | `Primary` | `Standby` | `Coordinator`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `provider` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The microservice provider. Only microservices related to an ArcGIS service type have a provider type. A provider type of `NA` is returned for microservices that are not service related (Admin API, portal sharing, ingress controller, and so on).
+
+      Values: `SDS` | `ArcObjects11` | `Undefined` | `Postgres` | `Tiles` | `Ignite` | `MinIO` | `Elasticsearch` | `RabbitMQ` | `ArcObjectsRasterRendering`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `id` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The template ID.
+
+      ```markdown label=Example
+      "id": "9375dd81-30d1-41c0-a802-cabb425159a9",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `type` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The microservice type. For example, if the microservice is a shared feature server containing feature services, `FeatureServer` is returned. For microservices that are not service related, `System` is returned.
+
+      Values: `FeatureServer` | `GPServer` | `GPSyncServer` | `MapServer` | `TileServer` | `System` | `InMemoryStore` | `ObjectStore` | `SpatiotemporalIndexStore` | `QueueServer` | `RelationalStore` | `WebhookProcessor` (Added at 11.0)
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `spec` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The JSON object representation of the template's specifications, including replicas and container resources.
+
+      ```other label=Example
+      "spec": {
+        "replicas": {
+          "min": 3,
+          "max": 3,
+          "scalingMode": "manual" //Added at 11.0
+        },
+        "containers": [
+          {
+            "name": "main-container",
+            "resources": {
+              "memoryMin": "500Mi",
+              "memoryMax": "4Gi",
+              "cpuMin": "0.125",
+              "cpuMax": "2"
+            },
+            "containerImageKey": "SDS_FEATURE_SERVER"
+          },
+          {
+            "name": "filebeat",
+            "resources": {
+              "memoryMin": "32Mi",
+              "memoryMax": "50Mi",
+              "cpuMin": "0.05",
+              "cpuMax": "0.25"
+            },
+            "containerImageKey": "FILEBEAT"
+          }
+        ]
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `replicas` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The number of replicas for the microservice. For manual scaling, the value for both `min` and `max` must be the same. Organizations using ArcGIS Enterprise on Kubernetes 10.9.1 or later can enable autoscaling. For more information about manual scaling and autoscaling, see the [Edit](/edit-scaling) scaling operation.
+
+      <Note type={"caution"}>
+
+      Though scaling properties can be updated using the [Edit](/edit-deployment-properties) default properties and [Edit](/edit-deployment) deployment operations, to reduce risk of errors it is recommended that changes to scaling information is performed using the [Edit](/edit-scaling) sacling operation.
+
+      </Note>
+
+      ```other label=Example
+      "replicas": {
+        "min": 3,
+        "max": 3,
+        "scalingMode": "manual" //Added at 11.0
+      },
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `resources` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The minimum and maximum resource allocations for the microservice, including the minimum memory (`memoryMin`) and minimum CPU (`cpuMin`) resources required for the microservice to start. Starting at ArcGIS Enterprise 11.3 on Kubernetes, `resources` also includes the `customResources` object, which includes the values for GPU `requests` and `limits` for GPU nodes that are part of raster analytic and deep learning workflows.
+
+      ```markdown label=Example
+      "resources": {
+        "memoryMin": "32Mi",
+        "memoryMax": "50Mi",
+        "cpuMin": "0.05",
+        "cpuMax": "0.25",
+        "customResources": {
+          "limits": {
+            "nvidia.com/gpu": "1"
+          },
+          "requests": {
+            "nvidia.com/gpu": "1"
+          }
+        }
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `revision` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The date, in milliseconds from epoch format, of the latest revision to the template.
+
+      ```markdown label=Example
+      "revision": 1598217421474
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample request URL used to access an individual microservice property template resource:
+
+```markdown
+https://organization.domain.com/context/admin/system/deployments/properties/11abdae1-e44a-422c-911a-e8282dadf74a?f=pjson
+```
+
+## JSON Response example
+
+```other
+{
+  "mode": "Dedicated",
+  "provider": "ArcObjects11",
+  "id": "pfnpl9gr7gi44g1ufg3h9",
+  "type": "MapServer",
+  "spec": {
+    "replicas": {
+      "min": 3,
+      "max": 3,
+      "scalingMode": "manual"
+    },
+    "containers": [
+      {
+        "name": "main-container",
+        "resources": {
+          "memoryMin": "500Mi",
+          "memoryMax": "2Gi",
+          "cpuMin": "0.125",
+          "cpuMax": "2"
+        },
+        "containerImageKey": "MAP_SERVER"
+      },
+      {
+        "name": "filebeat",
+        "resources": {
+          "memoryMin": "32Mi",
+          "memoryMax": "50Mi",
+          "cpuMin": "0.05",
+          "cpuMax": "0.25"
+        },
+        "containerImageKey": "FILEBEAT"
+      }
+    ]
+  },
+  "revision": 1618223886572
+}
+```

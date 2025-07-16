@@ -1,0 +1,222 @@
+---
+title: "Acquire Locks"
+description: "This operation acquires a set of LRS locks to enable edits on the editable LRS layers in the service."
+slug: "lr-acquire-locks"
+url: "/lr-acquire-locks"
+guid: "GUID-19F4EC08-6952-4626-9D2C-6B2D6A9BDA7B"
+migratedTopicMetadata:
+  FTITLE: "LR Acquire Locks"
+  FDESCRIPTION: "New REST endpoint for ConPrev"
+  FCHANGES: "Add note for lock transfer (3523)"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9.1 - *"
+  CREATED-ON: "23/07/2021 09:57:27"
+  FAUTHOR: "jgardner"
+  FSTATUS: "Released"
+  MODIFIED-ON: "25/05/2023 10:59:54"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "7"
+  ED: "GUID-3CA33558-3AD4-4ADB-ABCB-BCFF4AE9DFCB"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /acquire
+  urlSegments:
+    - name: <locks-url>
+      url: /lr-locks
+    - name: /acquire
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.7'
+  parentResource: []
+  requiredCapability: The ArcGIS Location Referencing license is required to use this resource.
+---
+
+import GUID_FDC3EA81_25C0_4AC4_8B57_2008547446AD_GUID_E6C28557_ADDB_4260_92CF_C8983F9552C4 from "./snippets/GUID-FDC3EA81-25C0-4AC4-8B57-2008547446AD/_GUID-E6C28557-ADDB-4260-92CF-C8983F9552C4";
+import GUID_CF31BD86_ACFA_4774_8343_CC7C8307F248_GUID_338B692C_1241_497E_A75E_A120E90C5078 from "./snippets/GUID-CF31BD86-ACFA-4774-8343-CC7C8307F248/_GUID-338B692C-1241-497E-A75E-A120E90C5078";
+import GUID_CF31BD86_ACFA_4774_8343_CC7C8307F248_GUID_A18843D2_866B_4EFB_B533_9736C6767514 from "./snippets/GUID-CF31BD86-ACFA-4774-8343-CC7C8307F248/_GUID-A18843D2-866B-4EFB-B533-9736C6767514";
+import EncodeURLsNote from "./snippets/GUID-CF31BD86-ACFA-4774-8343-CC7C8307F248/_EncodeURLsNote";
+
+
+
+## Description
+
+This operation acquires a set of LRS locks to enable edits on the editable LRS layers in the service.
+
+An error response is returned when conflict prevention is not enabled on the LRS. Refer to the `conflictPreventionEnabled` property of the [Locks](/lr-locks) resource.
+
+<Note type={"note"}>
+
+An existing route, line or event lock is automatically transferred from the existing lock owner to the lock requestor if the following conditions are met: 
+
+-   The existing lock version is public.
+-   The lock request is made in the same version as the existing lock version.
+-   If the existing lock version is a child version, then the existing lock owner does not currently have an edit session open in that version. If the lock version is the default version, then the lock owner does not currently have a read session open in the default version. 
+
+</Note>
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      `f`
+
+      (Optional)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      <GUID_CF31BD86_ACFA_4774_8343_CC7C8307F248_GUID_338B692C_1241_497E_A75E_A120E90C5078 />
+      
+      <GUID_CF31BD86_ACFA_4774_8343_CC7C8307F248_GUID_A18843D2_866B_4EFB_B533_9736C6767514 />
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      `editVersion`
+
+      (Required)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The name of the geodatabase version to associate with the locks.
+      
+      Syntax: 
+      ```other
+      editVersion=<version>
+      ```
+      
+      Example: 
+      ```other
+      editVersion="user1.version1"
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      `acquireLocks`
+      
+      (Optional)
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Specifies locks to acquire. You can lock a network or an event layer on a route or line. Derived network layers cannot be locked.
+      
+      Syntax:
+      ```json
+      [
+        {
+          "routeId": "<routeId>",
+          "layerId": <layerId>
+        }|
+        {
+          "lineId": "<lineId>",
+          "layerId": <layerId>
+        },
+        ...
+      ]
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+The following are sample URLs for acquiring locks.
+
+<EncodeURLsNote />
+
+### Example 1
+
+The following is a URL for acquiring a single lock.
+
+```other
+https://sampleserver/arcgis/rest/services/MyLRS/MapServer/exts/LRServer/locks/acquire?f=json&editVersion=sde.job_42&acquireLocks=[{"routeId":"I90","layerId":3}]
+```
+
+### Example 2
+
+The following is a URL for acquiring multiple locks.
+
+```other
+https://sampleserver/arcgis/rest/services/MyLRS/MapServer/exts/LRServer/locks/acquire?f=json&editVersion=sde.job_42&acquireLocks=[{"routeId":"I90","layerId":3},{"lineId":"NWS Line A","layerId":4}]
+```
+
+## JSON Response syntax
+
+```json
+{
+  "acquireStatus": "<status>",  // one of: esriSuccess, esriReconcileRequired, esriCouldNotAcquireAllLocks
+  "acquiredLocks": [
+    {
+      "routeId": "<routeId>",
+      "layerId": <layerId>
+    },
+    {
+      "lineId": "<lineId>",
+      "layerId": <layerId>
+    },
+    ...
+  ] |
+  "unavailableLocks": [
+    {
+    ...
+    },
+    {
+      "lineId": "<lineId>",
+      "lineName": "<lineName>",
+      "layerId": <layerId>,
+      "lrsNetworkId": <networkId>,
+      "lrsNetworkName": "<networkName>",
+      "user": "<username>",
+      "versionName": "<versionName>",
+      "versionGuid": "<versionGuid>",
+      "lockDate": <timestamp>,
+      "eventFeatureClassName": "<eventFeatureClassName>"
+    },
+    ...
+  ]
+}
+  
+```
+
+
+## JSON Response example
+
+```json
+{
+  "acquireStatus": "esriCouldNotAcquireAllLocks",
+
+  "unavailableLocks": [
+    {
+      "routeId": "{50918F06-7D4C-43D4-B39A-3AA02E9CF075}",
+      "routeName": "RouteA",
+      "layerId": 2,
+      "lrsNetworkId": 1,
+      "lrsNetworkName" : "LRSN_Cont",
+      "user": "alice",
+      "versionName": "alice.job_65",
+      "versionGuid": "{DA09CF20-D98A-4F80-8599-061C21B2C3D9}",
+      "lockDate": 1397509340000,
+      "eventFeatureClassName": ""
+    },
+    {
+      "lineId": "{9AF33B43-2BFE-4EA1-96FB-152E6CF7CA3B}",
+      "lineName": "LineB",
+      "layerId": 6,
+      "lrsNetworkId": 2,
+      "lrsNetworkName" : "LRSN_Engg",
+      "user": "bob",
+      "versionName": "bob.job_67",
+      "versionGuid": "{FC4818D6-974E-4020-85C5-9DAA0FD539E0}",
+      "lockDate": 1397509340000,
+      "eventFeatureClassName": "P_Anomaly"
+    }
+  ]
+}
+  
+```
+
+ 

@@ -1,0 +1,293 @@
+---
+title: "Check Rollback"
+description: "This operation returns a list of rollback options for an organization."
+slug: "check-rollback"
+url: "/check-rollback"
+guid: "GUID-D5CD8DFF-D70E-4D81-96AA-C4B242E160BF"
+migratedTopicMetadata:
+  FTITLE: "Check Rollback"
+  FDESCRIPTION: ""
+  FCHANGES: "Removing Grafana"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2-*"
+  CREATED-ON: "06/11/2023 13:20:52"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "09/11/2023 19:36:24"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-53A8DB0C-059D-4921-BC04-082E9A7BFEE1"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /system/upgrades/checkRollback
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /system/upgrades/checkRollback
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed with either "Security and infrastructure" or "Servers" privileges
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `checkRollback` operation returns a list of possible rollback options for the site, depending on the patch that is installed. The ID for the specific rollback version is passed as input for the [`rollback`](/rollback) operation.
+
+<Note type={"note"}>
+
+When representing the current and future versions of the deployment, the version and build numbers are combined. For example, if the deployment version is 10.9.0, and the build number is 505, the current version is returned as 10.9.0.505. The version number is updated with each installed release, while the build number is updated with each update (either patch or release) that is installed. This representation is returned through the HTML view of the API, as well as in the upgrade job messages retained by the `currentVersion` and `upgrades` resources.
+
+</Note>
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `checkRollback` operation:
+
+```other
+POST /context/admin/system/upgrades/checkRollback
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+f=pjson&token=AlxZcfkBv82_T0nBjzJcErNNacLPBg_bX00OgWPRml3pra9_XuepUQZSe-8IEKEeKuUeqjoVUoVC2sT7-jcD8ovaCm9y_Uhjxuc_ZOQNPZcZVJocAS9wZyQ4pIjfg68yNyG6XXNmKBHB5BiIyAyrBHLaC7GnGlK4TAgLTlpHq-bel_uS1r02bxSsMgw28dLY4UfpI6tE5DBBBMxq0n0G8Xjhw9Z7J4NtywbVqGlIksP1SOXLi073bgc2sdto2MiU
+
+```
+
+## JSON Response example
+
+The example response below is returned by the `checkRollback` operation when no patch is installed. If no patch is installed, the operation returns an empty response with no rollback information:
+
+```other
+{"updates": []}
+```
+
+The response below is returned when a patch is installed, and rollback information is returned by the `checkRollback` operation:
+
+```other
+{
+  "updates": [
+    {
+      "build": "1089",
+      "previousVersion": "",
+      "name": "Base Release For Release Upgrade",
+      "description": "",
+      "containers": [
+        {
+          "image": "enterprise-admin:dev-stable",
+          "name": "ENTERPRISE_ADMIN_API",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "arcgis-postgresql:dev-stable",
+          "name": "STORE_POSTGRES",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "arcgis-minio:dev-stable-wrong",
+          "name": "STORE_MINIO",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "relational-datastore:dev-stable",
+          "name": "STORE_RELATIONAL",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "arcgis-elasticsearch:dev-stable",
+          "name": "STORE_SBDS",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "arcgis-ignite:dev-stable",
+          "name": "STORE_IGNITE",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "sharing:dev-stable",
+          "name": "PORTAL_SHARING_API",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "home:dev-stable",
+          "name": "PORTAL_HOME_APP",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "manager:dev-stable",
+          "name": "MANAGER_APP",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "jsapi:dev-stable",
+          "name": "PORTAL_JSAPI",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "catalog-server:dev-stable",
+          "name": "CATALOG_SERVER",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "config-factory-server:dev-stable",
+          "name": "CONFIG_FACTORY_SERVER",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "map-server:dev-stable",
+          "name": "MAP_SERVER",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "geocode-server:dev-stable",
+          "name": "GEOCODE_SERVER",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "geometry-server:dev-stable",
+          "name": "GEOMETRY_SERVER",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "image-server:dev-stable",
+          "name": "IMAGE_SERVER",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "gp-proxy-server:dev-stable",
+          "name": "GPPROXY_SERVER",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "gp-server:dev-stable",
+          "name": "GP_SERVER",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "sds-feature-server:dev-stable",
+          "name": "SDS_FEATURE_SERVER",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "tile-server:dev-stable",
+          "name": "TILE_SERVER",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "arcgis-prometheus:dev-stable",
+          "name": "PROMETHEUS",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "arcgis-kibana:dev-stable",
+          "name": "KIBANA",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "arcgis-filebeat:dev-stable",
+          "name": "FILEBEAT",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "enterprise-rabbitmq:dev-stable",
+          "name": "RABBITMQ",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "help:dev-stable",
+          "name": "HELP",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "enterprise-admin-tools:dev-stable",
+          "name": "ADMIN_TOOLS",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "enterprise-admin-tools:dev-stable",
+          "name": "UPGRADER",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "portal-content-template:dev-stable",
+          "name": "PORTAL_CONTENT_TEMPLATE",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "postgres-upgrade-tools:dev-stable",
+          "name": "POSTGRES_UPGRADER",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "arcgis-ingress-controller:dev-stable",
+          "name": "INGRESS_CONTROLLER",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "apps:dev-stable",
+          "name": "PORTAL_APPS",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "arcgis-busybox:dev-stable",
+          "name": "BUSYBOX",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "arcgis-disaster-recovery:dev-stable",
+          "name": "DISASTER_RECOVERY",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "arcgis-nginx-web:dev-stable",
+          "name": "WEB_PROXY",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        },
+        {
+          "image": "web-style:dev-stable",
+          "name": "PORTAL_WEB_STYLE_APP",
+          "checksum": "d8203f62486387d4abeb2b32ab59e2541e79bd4b8cbaee2366219bacd2f207cb"
+        }
+      ],
+      "id": "rel_123456_1089",
+      "previousReleaseBuild": "",
+      "type": "release",
+      "version": "10.9.0",
+      "released": 1618540600000,
+      "url": "https://support.esri.com/download/7443"
+    }
+  ]
+}
+```
+
+ 

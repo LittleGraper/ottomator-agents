@@ -1,0 +1,729 @@
+---
+title: "search: Search"
+description: "The search  operation searches for content items in the portal."
+slug: "search"
+url: "/search"
+guid: "GUID-57920C9F-0E54-4FE4-AFC0-C1FC8FCC8CE0"
+migratedTopicMetadata:
+  FTITLE: "Search"
+  FDESCRIPTION: "Added f=pjson to make working example"
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1 - *"
+  CREATED-ON: "31/05/2023 09:54:17"
+  FAUTHOR: "svennapoosa"
+  FSTATUS: "Released"
+  MODIFIED-ON: "27/09/2023 10:26:15"
+  VERSION: "20"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-49B1358B-C278-4385-ABDD-2E5F129D96EB"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /search
+  urlSegments:
+    - name: '[root]'
+      url: /root
+    - name: /search
+  methods: []
+  sslOnly: 'no'
+---
+
+## Example usage
+
+The following is an ArcGIS Online sample request URL used to access the `search` operation:
+
+```markdown
+https://org.arcgis.com/sharing/rest/search?q=park&f=pjson
+
+```
+The following is an ArcGIS Enterprise sample request URL used to access the `search` operation:
+
+```markdown
+https://machine.domain.com/webadaptor/sharing/rest/search?q=transit&enriched=true&f=pjson
+
+```
+
+## Description
+
+The `search` operation searches for content items in the portal. The searches are performed using a high-performance index that indexes the most popular fields of an item.
+
+The search index is updated whenever users add, update, or delete content. There may be a lag between the time that the content is updated and the time it's reflected in the search results.
+
+The results of a search only contain items that the user has permission to access. A search requires at least one of the following parameters be specified: `q`, `bbox`, or `categories`.
+
+See [Search reference](/search-reference) for information about the syntax of the query, additional fields, advanced filters, and tips for crafting better searches.
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `q` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The query string used to search.
+
+      See [Search reference](/search-reference) for advanced options.
+
+      Example:
+
+      ```markdown
+      q=redlands+map
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `bbox` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The bounding box for a spatial search defined as `minx`, `miny`, `maxx`, or `maxy`. Spatial search is an overlaps/intersects function of the query `bbox` and the extent of the document. Documents that have no extent (for example, `.mxd`, `.3ds`, and `.lyr`) will not be found when doing a `bbox` search. The document extent is assumed to be in the WGS84 geographic coordinate system.
+
+      Example:
+
+      ```markdown
+      bbox=-118,32,-116,34
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `filter` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Structured filtering is accomplished by specifying a field name followed by a colon and the term you are searching for with double quotation marks. It allows the passing in of application-level filters based on the context. Use an exact keyword match of the expected value for the specified field. Partially matching the filter keyword will not return meaningful results.
+
+      See [Search reference](/search-reference) for advanced options.
+
+      Example:
+
+      ```markdown
+      filter=type:"Web map"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `categories` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON array or comma-separated list of up to eight organization content categories to search items. The exact full path of each category is required, and an OR relationship between the categories must be specified. Each request allows a maximum of eight `categories` parameters with an AND relationship between the various `categories` parameters called.
+
+      Example (search for items with the water or forest category in the United States):
+
+      ```markdown
+      //JSON array
+      categories: ["/Categories/Water", "/Categories/Forest"]
+      categories: ["/Region/US"]
+      ```
+
+      <Note type={"note"}>
+
+      `/` are reserved and can't be used in the category names. If commas are included in the categories, the user must use JSON format.
+
+      </Note>
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `categoryFilters` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A comma-separated list of up to three category terms to search for items that have matching categories. Up to two `categoryFilters` parameters are allowed per request. This parameter cannot be used with the `categories` parameter to search in a request.
+
+      Example:
+
+      ```markdown
+      //Search for items with categories that include basemap or ocean
+      categoryFilters=basemap, ocean
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `start` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The result number of the first entry in the result set response. The index number is 1-based. The default value of `start` is 1 (in other words, the first search result). The `start` parameter, along with the `num` parameter, can be used to paginate the search results. 
+
+      Example:
+
+      ```markdown
+      //Returns the 11th result as the first entry in the response
+      start=11
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `num` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum number of results to be included in the result set response. The default value is `10`, and the maximum allowed value is `100`. The `num` parameter, along with the `start` parameter, can be used to paginate the search results. 
+
+      <Note type={"note"}>
+
+      The actual number of returned results may be fewer than the `num` value. This happens when the number of results remaining after `start` is fewer than the `num` value. `num` must be `0` if you are interested in the total item counts or aggregations matching a query with `countFields` and `countSize` values specified. Do not include `results` and `aggregations` in the same request; the `results` array will be empty when `num=0`.
+
+      </Note>
+
+      Example:
+
+      ```markdown
+      //Returns a max of 50 results in the response
+      num=50
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sortField` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The field to sort by. You can also sort by multiple fields (comma separated). Sort field names are not case sensitive.
+
+      Supported sort field names are `title`, `created`, `type`, `owner`, `modified`, `avgrating`, `numratings`, `numcomments`, `numviews`, and `scorecompleteness`.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sortOrder` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Describes whether the results are returned in ascending or descending order. The default is ascending.
+
+      <Note type={"note"}>
+
+      This applies when working with `sortField`.
+
+      </Note>
+
+      Values: `asc` | `desc` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `countFields` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A comma-separated list of fields to count. The maximum count fields allowed per request is three. Supported count fields are `type`, `access`, `contentstatus`, and `categories`.
+
+      Example:
+
+      ```markdown
+      countFields=categories, access
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `countSize` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum number of field values to count for each `countFields` field. The default value is `10`, and the maximum number allowed is `200`.
+
+      Example:
+
+      ```markdown
+      countSize=200
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `exclude` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Excludes fields from the search results. The maximum number of fields that can be excluded is 20.
+
+      Example:
+
+      ```markdown
+      exclude=title,culture,numViews
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `displaySublayers` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Returns feature layers for a hosted feature service. The default is `false`.
+
+      Values: `true` | `false` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `enriched` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at ArcGIS Enterprise 11.1. Specifies whether the search results will include both literal and relevant matches or only literal matches. A literal match is defined as having the search criteria be present in an item's title or tag. A related match is defined as having a term related to the search criteria being present in an item's tag. If `true`, the search results will include both literal and relevant matches. If `false`, search results will include only those that are a literal match for the search criteria. Searches that do not include this parameter will only return literal matches.
+
+      Values: `true` | `false` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `MeanPixelSize` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      An integer representing mean size of image pixels, in meters. The formula used to calculate this: 
+      `(PixelSizeX + PixelSizeY) / 2 * unitToMeterFactor`.
+
+      Example to find single-band imagery based on resolution (meters): 
+
+      ```markdown
+      type: "Image Service" AND MeanPixelSize:[0 TO 1]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `BandCount` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      An integer representing the number of bands in the imagery.
+
+      Example to find imagery based on band count: 
+
+      ```markdown
+      type: "Image Service" AND bandcount:1   //Single band
+ 
+      type: "Image Service" AND bandcount:[3 TO 20]   //Multi-band
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+   <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `displayServiceProperties` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Displays image service properties. The default is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Response properties
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `total` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The total number of results that match the query. It is counted accurately up to 10,000; if the total number is greater than this value, 10,000 will be returned. The top 10,000 query results are available to retrieve through pagination.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `start` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The result number of the first entry in the result set for this response. The index number is 1-based.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `num` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The number of results included in the result set for this response.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `nextStart` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The next entry index if the current result set doesn't contain all results.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `results` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON array of item objects. See the response properties of an [item](/item). 
+
+      <Note type={"note"}>
+
+      `size`  is always returned as `-1`. The `commentsEnabled` property of an item is not included in the search response.
+
+      </Note>
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `aggregations` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A `counts` JSON object that consists of an array of objects, one for each `countFields` value requested. Each count field object has `fieldName` and `fieldValues` properties with `fieldName` representing the count field and `fieldValues` consisting of an array for each field value along with its corresponding count.
+
+      <Note type={"note"}>
+
+      Field values are lowercase and are not case sensitive. For example, Basemap and basemap will be counted as one field value, not two.
+
+      The `aggregations` property is included in the response when `countFields` is requested. It is recommended that you only query for aggregated counts once per search query, that is, on the first pagination batch, or use with `num=0` to empty `results` for improved performance.
+
+      Counts are approximate and are not always accurate.
+
+      </Note>
+
+      Example:
+
+      ```markdown
+      {
+        "counts": [
+          {
+            "fieldName": "contentstatus",
+            "fieldValues": [
+              {
+                "value": "deprecated",
+                "count": 4
+              },
+              {
+                "value": "org_authoritative",
+                "count": 2
+              }
+            ]
+          },
+          {
+            "fieldName": "access",
+            "fieldValues": [
+              {
+                "value": "private",
+                "count": 59
+              },
+              {
+                "value": "public",
+                "count": 15
+              },
+              {
+                "value": "account",
+                "count": 6
+              },
+              {
+                "value": "shared",
+                "count": 2
+              }
+            ]
+          }
+        ]
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serviceProperties` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      An array of image service properties.
+
+      Example:
+
+      ```markdown
+       "serviceProperties": 
+      {
+         "bandCount": 7,
+         "meanPixelSize": 30,
+         "tags": 
+            [
+               "hasMultidimensions",
+               "allowAnalysis",
+               "pixelTypeF32",
+               "dataTypeGeneric",
+               "sourceTypeDataset"
+            ] 
+        }
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## JSON Response syntax
+
+```other
+{
+  "total": <total number of results>,
+  "start": <results in first set>,
+  "num": <number of results per page>,
+  "nextStart": <result number of next page>,
+  "results": [
+    {
+      "id": "<item id>",
+      "owner": "<owner username>",
+      "created": date created shown in UNIX time,
+      "modified": date modified shown in UNIX time,
+      "guid": "<unique id>",
+      "name": "<item name>",
+      "title": "<item title>",
+      "type": "<type>",
+      "typeKeywords": ["<keyword1>", "<keyword2>", "<keyword3>", "<keyword4>"],
+      "description": "<description>",
+      "snippet": "<summary>",
+      "thumbnail": "<file name>",
+      "extent": [
+        [
+          minX,
+          minY
+        ],
+        [
+          maxX,
+          maxY
+        ]
+      ],
+      "spatialReference": "<coordinate system>",
+      "accessInformation": <credits>,
+      "licenseInfo": "<access and use constraints>",
+      "culture": "<culture code>",
+      "url": <URL>,
+      "proxyFilter": {},
+      "access": "private | shared | org | public",
+      "size": <size>,
+      "properties": {},
+      "appCategories": [],
+      "industries": [<list of industries>],
+      "languages": [<list of languages>],
+      "largeThumbnail": "<URL to thumbnail>",
+      "banner": "<URL to banner>",
+      "screenshots": [<list of URL to screenshots>],
+      "listed": true | false,
+      "ownerFolder": "<folder id>",
+      "protected": true | false,
+      "numComments": <number of comments>,
+      "numRatings": <number of ratings>,
+      "avgRating": <average rating>,
+      "numViews": <number of views>,
+      "lastViewed": <date/time in UNIX format>
+    }
+  ]
+}
+```
+
+## JSON Response example
+
+```other
+{
+  "total": 11,
+  "start": 5,
+  "num": 2,
+  "nextStart": 7,
+  "results": [
+    {
+      "id": "eca787aacf9b4c0a8817f36276609db3",
+      "owner": "test",
+      "created": 1224884011000,
+      "modified": 1474327423000,
+      "guid": "{578DF0AF-660E-4735-9A83-D48395774CA2}",
+      "name": "yellowstone national park",
+      "title": "Forest resources within the study area.",
+      "type": "MapDocument mxd",
+      "typeKeywords": ["mxd", "map"],
+      "description": "This map is intended to be used as part of the ArcCatalog Quick start tutorial.",
+      "snippet": "<b>Yellowstone National Park</b>",
+      "thumbnail": "thumbnail/yellowstone_map.png",
+      "extent": [ 
+        [
+          -110.05,
+          44.13
+        ], 
+        [
+          -110,
+          44.98
+        ] 
+      ],        
+      "spatialReference": null,       
+      "accessInformation": null,        
+      "licenseInfo": "ArcEditor is a GIS desktop system for editing and managing geographic data.",    
+      "culture": "en-US",       
+      "url": null,   
+      "proxyFilter": null,     
+      "access": "public",   
+      "size": -1,
+      "properties": null,
+      "appCategories": [],
+      "industries": [],
+      "languages": [],
+      "largeThumbnail": null,
+      "banner": null,
+      "screenshots": [],
+      "listed": false,
+      "ownerFolder": null,
+      "protected": false,            
+      "numComments": 5,        
+      "numRatings": 16,        
+      "avgRating": 3.25,        
+      "numViews": 169,
+      "lastViewed": 1613148239000 
+    },
+    {
+      "id": "28c343b688224d0ca1b5ba741c28de6e",
+      "owner": "jsmith33",
+      "created": 1263460602000,
+      "modified": 1474327425000,
+      "guid": "1D70DAC0-505A-463F-A948-B324FD18BE2A",
+      "name": "National_Parks_in_the_Northwest",
+      "title": "National Parks in the Northwest",
+      "type": "Layer Package",
+      "typeKeywords": ["Data", "Layer Package", "ArcGlobe", "ArcGIS Explorer", "lpk"],
+      "description": null,
+      "snippet": null,
+      "thumbnail": "thumbnail/thumbnail.png",
+      "extent": [
+        [
+          -130.098,
+          15.469
+        ],
+        [
+          -63.337,
+          54.048
+        ]
+      ],
+      "spatialReference": "GCS_North_American_1983",
+      "accessInformation": null,
+      "licenseInfo": null,
+      "culture": "en-us",
+      "url": null,
+      "proxyFilter": null,
+      "access": "public",
+      "size": -1,
+      "properties": null,
+      "appCategories": [],
+      "industries": [],
+      "languages": [],
+      "largeThumbnail": null,
+      "banner": null,
+      "screenshots": [],
+      "listed": false,
+      "ownerFolder": "36e89e3bf6cc49b5a277e06d83b363ff",
+      "protected": true,
+      "numComments": 1,
+      "numRatings": 6,
+      "avgRating": 3,
+      "numViews": 86,
+      "lastViewed": 1613148239000
+    }
+  ]
+}
+```
+
+ 

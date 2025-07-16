@@ -1,0 +1,910 @@
+{/*Shared snippet for route service output parameters */} 
+
+import NetworkLocationFields from "../snippets/shared-attributes/_NetworkLocationFields.mdx"
+import Stats from "../snippets/shared-attributes/_Status.mdx"
+import SnapXYZ from "../snippets/shared-attributes/_SnapXYZ-DistToNet.mdx"
+
+On successful completion, the service returns the best paths between the stops and the status indicating whether the analysis was successful using the output parameters described below.
+
+### output_routes
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+
+Provides access to the resulting routes.
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for `output_routes`</span></summary>
+
+<If c="requestType == 'direct'">
+-   <p class="space-x-2"><span class="font-bold">ObjectID</span><span class="font-sm text-color-3">integer</span></p>
+
+    The object ID of the feature.
+</If>
+
+-   <p class="space-x-2"><span class="font-bold">Name</span><span class="font-sm text-color-3">string (length: 500)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The name of the route based on the `RouteName` field of the associated [stops](#stops). If the input `RouteName` field is null, the name is derived from the `Name` field of the first and last stops.
+
+-  <p class="space-x-2"><span class="font-bold">StopCount</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p> 
+
+    The number of stops assigned to the route.
+
+-   <p class="space-x-2"><span class="font-bold">StartTime</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The start time of the route, reported in the time zone in which the first stop is located.
+
+-   <p class="space-x-2"><span class="font-bold">EndTime</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The end time of the route, reported in the time zone in which the last stop is located.
+
+-   <p class="space-x-2"><span class="font-bold">StartTimeUTC</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The start time of the route in coordinated universal time (UTC).
+
+-   <p class="space-x-2"><span class="font-bold">EndTimeUTC</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The end time of the route in coordinated universal time (UTC).
+
+-   <p class="space-x-2"><span class="font-bold">FirstStopID</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    <If c="requestType == 'job'">
+    The `ObjectID` value of the first stop on the route. This field is often used to join information from input stops to routes.
+    </If>
+
+    <If c="requestType == 'direct'">
+    If you specify `preserveObjectID=false`, the value for this field will be a system-generated ID. If `preserveObjectID=True`, the value for this field will be the `ObjectID` of your associated input.
+    </If>
+
+-   <p class="space-x-2"><span class="font-bold">LastStopID</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    <If c="requestType == 'job'">
+    The `ObjectID` value of the last stop on the route. This field is often used to join information from input stops to routes.
+    </If>
+
+    <If c="requestType == 'direct'">
+    If you specify `preserveObjectID=false`, the value for this field will be a system-generated ID. If `preserveObjectID=True`, the value for this field will be the `ObjectID` of your associated input.
+    </If>
+
+<If c="requestType == 'job'">
+
+-   <p class="space-x-2"><span class="font-bold">Total_Minutes</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The cumulative travel time in minutes from the beginning of the first stop to the end of the last stop for a route. This includes any `AdditionalTime`  values for the visited stops if specified. 
+
+    <Note type="note" block>
+
+    -   An additional field, `Total_[TimeUnits]`, is included if `measurement_units` is time based and its value is not set to `Minutes`. The field values are in the units specified by the `measurement_units` parameter.
+
+    -   Additional fields, `Total_[AccumulateAttributeName]_[TimeUnits]`, are included for each time-based cost attribute that is accumulated during the analysis. 
+
+    </Note>
+
+
+-   <p class="space-x-2"><span class="font-bold">Total_Miles</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The cumulative travel distance in miles from the beginning of the first stop to the end of the last stop for a route. This includes any `AdditionalDistance` values for the visited stops if specified. 
+
+    <Note type="note" block>
+
+    -   An additional field, `Total_[DistanceUnits]`, is included if the `measurement_units` parameter is distance based and its value is not `Miles` or `Kilometers`. The field values are in the units specified by the `measurement_units` parameter.
+
+    -   Additional fields, `Total_[AccumulateAttributeName]_[DistanceUnits]`, are included for each distance-based cost attribute that is accumulated during the analysis.  
+
+    </Note>
+ 
+-   <p class="space-x-2"><span class="font-bold">Total_Kilometers</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The cumulative travel distance in kilometers from the beginning of the first stop to the end of the last stop for a route. This includes any `AdditionalDistance` values for the visited stops if specified.
+
+    Additional fields, `Total_[AccumulateAttributeName]_Other`, are included for each cost attribute that is neither time based nor distance based and accumulated during the analysis.
+
+-   <p class="space-x-2"><span class="font-bold">Total_Other</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The cumulative travel cost in unknown units from the beginning of the first stop to the end of the last stop for a route. This includes any `AdditionalCost` values for the visited stops if specified.
+
+    This field is included only when the travel mode used for the analysis has an impedance attribute that is neither time based nor distance based.
+
+    <Note type={"note"}>
+
+    Additional fields, `Total_[AccumulateAttributeName]_Other`, are included for each cost attribute that is neither time based nor distance based and accumulated during the analysis.
+
+    </Note>
+
+-   <p class="space-x-2"><span class="font-bold">TotalWait_Minutes</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    This field stores the route's overall wait time, which is the time spent at stops waiting for time windows to open.
+
+    The field has a null value if time windows are not used in the analysis.
+
+    <Note type="note" block> 
+
+    -    An additional field, `TotalWait_[TimeUnits]` , is included if the `measurement_units` parameter is not set to `Minutes`. The field values are in the units specified by the measurement_units parameter.
+
+    -    Additional fields, `TotalWait_[AccumulateAttributeName]_[TimeUnits]`, are included for each time-based cost attribute that is accumulated during the analysis.
+
+    </Note>
+
+-   <p class="space-x-2"><span class="font-bold">TotalViolation_Minutes</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    This field stores the route's overall violation time at stops. Violation time is added when the route arrives at a stop after the time window has ended; it's the difference between the `ArriveTime` and `TimeWindowEnd` field values on inputs stops.
+
+    The field has a null value if time windows are not used in the analysis. 
+
+    <Note type="note" block> 
+
+    -   An additional field, `TotalViolation_[TimeUnits]`, is included if the `timeUnits` property of the analysis object is not set to `TimeUnits.Minutes`. The field values are in the units specified by the `timeUnits` property.
+
+    -   Additional fields, `TotalViolation_[AccumulateAttributeName]_[TimeUnits]`, are included for each time-based cost attribute that is accumulated during the analysis.
+
+    </Note>
+
+</If>
+
+<If c="requestType == 'direct'">
+
+-   <p class="space-x-2"><span class="font-bold">TotalWait_[Cost]</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    This field stores the route's overall wait time, which is the time spent at stops waiting for time windows to open. For instance, `TotalWait_Minutes`, where `Minutes` is the travel cost for the network.
+
+    <Note type={"note"}>
+
+    Only `TotalWait_[impedanceAttributeName]` is populated with a value. The field has a null value if time windows are not used in the analysis.
+
+    </Note>
+
+-   <p class="space-x-2"><span class="font-bold">TotalViolation[Cost]</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    This field stores the route's overall violation time at stops. Violation time is added when the route arrives at a stop after the time window has ended; it's the difference between the `ArriveTime` and `TimeWindowEnd` field values on inputs [stops](#stops).
+
+   <Note type={"note"}> 
+
+   Only `TotalViolation_[impedanceAttributeName]` is populated with value. The field has a null value if time windows are not used in the analysis.
+
+   </Note>
+
+-   <p class="space-x-2"><span class="font-bold">Total_[Cost]</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The total distance, time, or other travel cost from the beginning of the first stop to the end of the last stop. The total travel cost and the `Attr_[Cost]` of the visited stops are included in this value.
+
+    This field will be populated if the `[Cost]` part of this field is used as impedance attribute or accumulated attributes.
+
+</If>
+
+</details>
+
+**Example:**
+
+The following shows an example of the `output_routes` parameter.
+
+<CodeBlock language="json" source="../code-samples/route/examples/outputs/output_routes.json" group="json" maxLines={20} expandable/>
+
+### output_stops
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+
+Provides access to the attributes of the stops that are visited by the routes as well as stops that cannot be reached by any of the routes.
+
+The following table list the fields returned for output stops. In addition to these fields, the parameter also includes all the fields from the input feature class used as stops for the analysis.
+
+You can use the attributes from this parameter, such as the `Status` field, to determine why a stop was not assigned to any routes.
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for `output_stops`</span></summary>
+
+<If c="requestType == 'direct'">
+-   <p class="space-x-2"><span class="font-bold">ObjectID</span><span class="font-sm text-color-3">integer</span></p>
+
+    If you specify `preserveObjectID=false`, the value for this field will be a system-generated ID. If `preserveObjectID=True`, the value for this field will be the `ObjectID` of your associated input.
+    
+</If>
+
+-   <p class="space-x-2"><span class="font-bold">Name</span><span class="font-sm text-color-3">string (length: 500)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The name of the stop visited by the route. The values for this field are copied from the Name field on the input stops.
+
+-   <p class="space-x-2"><span class="font-bold">RouteName</span><span class="font-sm text-color-3">string (length: 500)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The name of the route to which the stop is assigned.
+
+    Input stops that have the same route name at the time the tool runs are grouped together and visited by one route, and the route is assigned that name. When more than one route name is present on the input stops, the tool can output multiple routes—one for each unique route name.
+
+    If no name is present, all the stops belong to the same route.  
+
+-  <p class="space-x-2"><span class="font-bold">Sequence</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p> 
+
+    The order in which the stops are visited by the assigned route, which is listed in the `RouteName` field.
+
+-   <p class="space-x-2"><span class="font-bold">TimeWindowStart</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The earliest time the route can visit the stop. The values for this field are copied from the TimeWindowStart field on the input stops.
+
+-   <p class="space-x-2"><span class="font-bold">TimeWindowEnd</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The latest time the route can visit the stop. The values for this field are copied from the TimeWindowEnd field on the input stops.
+
+-   <p class="space-x-2"><span class="font-bold">ArriveCurbApproach</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The side of the vehicle the curb is on when arriving at the stop.
+
+-   <p class="space-x-2"><span class="font-bold">DepartCurbApproach</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The side of the vehicle the curb is on when departing from the stop.
+
+-   <p class="space-x-2"><span class="font-bold">ArriveTime</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The date and time value indicating the arrival time at the stop. The time zone for this time-of-day value is taken from the network element on which the stop is located.
+
+-   <p class="space-x-2"><span class="font-bold">DepartTime</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The date and time value indicating the departure time from the stop. The time zone for this time-of-day value is taken from the network element on which the stop is located.
+
+-   <p class="space-x-2"><span class="font-bold">ArriveTimeUTC</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The date and time value indicating the arrival time in coordinated universal time (UTC)
+
+-   <p class="space-x-2"><span class="font-bold">DepartTimeUTC</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The date and time value indicating the departure time in coordinated universal time (UTC)
+
+-   <p class="space-x-2"><span class="font-bold">LocationType</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The stop type. The values for this field are copied from the LocationType field on the input stops.
+
+<NetworkLocationFields />
+
+-   <p class="space-x-2"><span class="font-bold">CurbApproach</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The direction a vehicle may arrive at and depart from the stop. The values for this field are copied from the `CurbApproach` field on the input stops.
+
+<Stats />
+
+<SnapXYZ />
+
+<If c="requestType == 'job'">
+
+-   <p class="space-x-2"><span class="font-bold">AdditionalTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The amount of time added to the total route time when this stop is visited. The values for this field are copied from the `AdditionalTime` field on the input stops.
+
+-   <p class="space-x-2"><span class="font-bold">AdditionalDistance</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The amount of distance added to the total route distance when this stop is visited. The values for this field are copied from the `AdditionalDistance` field on the input stops.
+
+-   <p class="space-x-2"><span class="font-bold">AdditionalCost</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The cost added to the total route cost when this stop is visited. The values for this field are copied from the AdditionalCost field on the input stops. This field is included only when the travel mode used for the analysis has an impedance attribute that is neither time-based nor distance-based.
+
+-   <p class="space-x-2"><span class="font-bold">Cumul_Minutes</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The cumulative duration of the route in minutes from the origin to and including the stop. The value reported here is the cumulative route time to the stop, including any additional time at the stop and at any previous stops.
+
+    For example, if a route analysis determines that it takes 10 minutes to visit two stops, and the second stop has an `AdditionalTime` value of 5, the `Cumul_Minutes` value will be 15 minutes.
+
+    <Note type="note" block>
+
+    -   An additional field, `Cumul_[TimeUnits]`, is included if the `timeUnits` property of the analysis object is set to something other than `TimeUnits.Minutes`. The field values are in the units specified by the `timeUnits` property.
+    -   An additional field, `Cumul_[AccumulateAttributeName]_[TimeUnits]`, is included for each time-based cost attribute that is accumulated during the analysis.
+
+    </Note>
+
+-   <p class="space-x-2"><span class="font-bold">Cumul_Miles</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The cumulative distance of the route in miles from the origin to and including the stop. The value reported here is the cumulative route distance to the stop, including any additional distance at the stop and at any previous stops.
+
+    <Note type="note" block>
+
+    -   An additional field, `Cumul_[DistanceUnits]`, is included if the `distanceUnits` property of the analysis object is set to something other than `DistanceUnits.Miles` or `DistanceUnits.Kilometers`. The field values are in the units specified by the `distanceUnits` property.
+    -   An additional field, `Cumul_[AccumulateAttributeName]_[DistanceUnits]`, is included for each distance-based cost attribute that is accumulated during the analysis.
+
+    </Note>
+
+-   <p class="space-x-2"><span class="font-bold">Cumul_Kilometers</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The cumulative distance of the route in kilometers from the origin to and including the stop. The value reported here is the cumulative route distance to the stop, including any additional distance at the stop and at any previous stops.
+
+-   <p class="space-x-2"><span class="font-bold">Cumul_Cost</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The cumulative cost of the route from the origin to and including the stop. The value reported here is the cumulative route cost to the stop, including any additional cost at the stop and at any previous stops. This field is included only when the travel mode used for the analysis has an impedance attribute that is neither time based nor distance based. The value is in unknown units.
+
+    <Note type={"note"}>
+
+    An additional field, `Cumul_[AccumulateAttributeName]_Other`, is included for each cost attribute that is neither time based nor distance based and accumulated during the analysis.
+
+    </Note>
+
+-   <p class="space-x-2"><span class="font-bold">Wait_Minutes</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    This field stores the time spent waiting for the time window to open when the route arrives early at the stop.
+
+    The field has a null value if time windows are not used in the analysis.
+
+    <Note type="note" block>
+
+    -   An additional field,` Wait_[TimeUnits]`, is included if the `timeUnits` property of the analysis object is set to something other than `TimeUnits.Minutes`. The field values are in the units specified by the `timeUnits` property.
+    -   An additional field, `Wait_[AccumulateAttributeName]_[TimeUnits]`, is included for each time-based cost attribute that is accumulated during the analysis.
+
+    </Note>
+
+-   <p class="space-x-2"><span class="font-bold">CumulWait_Minutes</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    This field stores the sum of how much time has been spent waiting for time windows to open. It measures idle time. It includes the wait time from the current stop and all previous stops visited by the route.
+
+    <Note type="note" block>
+
+    -   An additional field, `CumulWait_[TimeUnits]`, is included if the time`Units property of the analysis object is set to something other than `TimeUnits.Minutes`. The field values are in the units specified by the `timeUnits` property.
+    -   An additional field, `CumulWait_[AccumulateAttributeName]_[TimeUnits]`, is included for each time-based cost attribute that is accumulated during the analysis.
+
+    </Note>
+
+    The field has a null value if time windows are not used in the analysis.
+
+-   <p class="space-x-2"><span class="font-bold">Violation_Minutes</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    This field is a measure of how late the route arrived after the time window closed. Specifically, it stores the amount of time between the end of the time window and when the route arrived at the stop.   
+
+    The field has a null value if time windows are not used in the analysis.
+
+    <Note type="note" block>
+
+    -   An additional field, `Violation_[TimeUnits]`, is included if the `timeUnits` property of the analysis object is set to something other than `TimeUnits.Minutes`. The field values are in the units specified by the `timeUnits` property.
+    -   An additional field, `Violation_[AccumulateAttributeName]_[TimeUnits]` is included for each time-based cost attribute that is accumulated during the analysis.
+
+    </Note>
+
+-   <p class="space-x-2"><span class="font-bold">CumulViolation_Minutes</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    This field stores the cumulative violation time from the current stop and all previous stops visited by the route.
+
+    The field has a null value if time windows are not used in the analysis.
+
+    <Note type="note" block>
+
+    -   An additional field, `CumulViolation_[TimeUnits]`, is included if the `timeUnits` property of the analysis object is set to something other than `TimeUnits.Minutes`. The field values are in the units specified by the `timeUnits` property.
+    -   An additional field, `CumulViolation_[AccumulateAttributeName]_[TimeUnits]`, is included for each time-based cost attribute that is accumulated during the analysis.
+
+    </Note>
+
+-  <p class="space-x-2"><span class="font-bold">ORIG_FID</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The `ObjectID` value of the input stop. This field can be used to join attributes from the output stops to the input stops or from the input stops to the output stops.
+
+-   <p class="space-x-2"><span class="font-bold">Bearing</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The values for this field are copied from the `Bearing` field on the input stops.
+
+-   <p class="space-x-2"><span class="font-bold">BearingTol</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The values for this field are copied from the `BearingTol` field on the input stops.
+
+-   <p class="space-x-2"><span class="font-bold">NavLatency</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The values for this field are copied from the `NavLatency` field on the input stops.
+
+</If>
+
+</details>
+
+**Example:**
+
+The following shows an example of the `output_stops` parameter.
+
+<CodeBlock language="json" source="../code-samples/route/examples/outputs/output_stops.json" group="json" maxLines={20} expandable/>
+
+
+### output_route_edges
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+
+Provides access to the individual network edges along which the routes travel.
+
+This parameter has value only when the [`populate_route_edges`](#populate_route_edges) parameter is set to `true`.
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for `output_route_edges`</span></summary>
+ 
+-   <p class="space-x-2"><span class="font-bold">SourceName</span><span class="font-sm text-color-3">string (length: 500)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The name of the edge source feature class from which the line was generated.
+
+-   <p class="space-x-2"><span class="font-bold">SourceOID</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The `ObjectID` value of the traversed street feature. Summarizing the values for this field can provide useful information such as the number of times a particular street feature is included in all the routes.
+
+-   <p class="space-x-2"><span class="font-bold">RouteEdgeID</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The ID representing the edge that comprises the street feature. Since there can be more than one edge per street feature, the `SourceOID` field can be used to uniquely identify the traversed street feature, and the `RouteEdgeID` field can be used to uniquely identify the edge within the traversed street feature.
+
+-   <p class="space-x-2"><span class="font-bold">FromPosition</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+    Specifies where the output `RouteEdges` feature begins in reference to the digitized direction of the underlying street feature.
+
+    -   0 (zero) indicates that the line begins at the from point of the underlying street feature.
+    -   1 indicates that the line begins at the to point of the street feature.
+    -   A value between 0 and 1 indicates that the line begins at a point along the underlying street feature; for example, a value of 0.25 means the line begins 25 percent along the digitized direction of the underlying street feature.
+
+-   <p class="space-x-2"><span class="font-bold">ToPosition</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    Specifies where the output `RouteEdges` feature ends in reference to the digitized direction of the underlying street feature.
+
+    -   0 indicates that the line ends at the from point of the underlying street feature.
+    -   1 indicates that the line ends at the to point of the street feature.
+    -   A value between 0 and 1 indicates that the line ends at a point along the underlying street feature; for example, a value of 0.25 means the line ends 25 percent along the digitized direction of the underlying street feature.
+
+<If c="requestType == 'job' && publication == 'rest/online'">
+-   <p class="space-x-2"><span class="font-bold">RouteID</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    Uniquely identifies the route that traversed the edge.
+
+    The `RouteID` value corresponds to an `ObjectID` value from the output routes.
+</If>
+
+-   <p class="space-x-2"><span class="font-bold">Attr_Minutes</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The travel time in minutes of the traversed portion of the underlying street feature.
+
+    <Note type={"note"}>
+    An additional field, `Attr_[TimeUnits]`, is included if the `measurement_units` parameter is time-based and its value is not set to `Minutes`. The field values are in the units specified by the `measurement_units` parameter.
+    </Note>
+
+-   <p class="space-x-2"><span class="font-bold">Attr_Miles</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The length in miles of the traversed portion of the underlying street feature.
+
+    <Note type={"note"}>
+    An additional field, `Attr_[DistanceUnits]`, is included if the `measurement_units` parameter is distance-based and its value is not `Miles` or `Kilometers`. The field values are in the units specified by the `measurement_units` parameter.
+    </Note>
+
+-   <p class="space-x-2"><span class="font-bold">Attr_Kilometers</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The length in kilometers of the traversed portion of the underlying street feature.
+
+-   <p class="space-x-2"><span class="font-bold">Attr_Other</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The travel cost of the traversed portion of the underlying street feature. This field is included only when the travel mode used for the analysis has an impedance attribute that is neither time-based nor distance-based. The value is in unknown units.
+
+    <Note type={"note"}>
+    Additional fields, `Attr_[AccumulateAttributeName]`, are included for each cost attribute that is neither time-based nor distance-based and accumulated during the analysis.
+    </Note>
+
+-   <p class="space-x-2"><span class="font-bold">Cumul_Minutes</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The travel time in minutes of the route from its origin to the end of the traversed portion of this underlying street feature.
+
+    <Note type="note" block>
+
+    -   An additional field, `Cumul_[TimeUnits]`, is included if the `measurement_units` parameter is time-based and its value is not set to `Minutes`. The field values are in the units specified by the `measurement_units` parameter.
+    -   Additional fields, `Cumul_[AccumulateAttributeName]`, are included for each time-based cost attribute that is accumulated during the analysis. The values are in the time units used for the analysis.
+
+    </Note>
+
+-   <p class="space-x-2"><span class="font-bold">Cumul_Miles</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The length in miles of the route from its origin to the end of the traversed portion of this underlying street feature. 
+
+    <Note type="note" block>
+
+    -   An additional field, `Cumul_[DistanceUnits]`, is included if the `measurement_units` parameter is distance-based and its value is not `Miles` or `Kilometers`. The field values are in the units specified by the `measurement_units` parameter.
+    -   Additional fields, `Cumul_[AccumulateAttributeName]`, are included for each distance-based cost attribute that is accumulated during the analysis. The values are in the distance units used for the analysis.
+
+    </Note>
+
+-   <p class="space-x-2"><span class="font-bold">Cumul_Kilometers</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The length in kilometers of the route from its origin to the end of the traversed portion of this underlying street feature.
+
+-   <p class="space-x-2"><span class="font-bold">Cumul_Other</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The travel cost of the route from its origin to the end of the traversed portion of this underlying street feature. This field is included only when the travel mode used for the analysis has an impedance attribute that is neither time-based nor distance-based. The value is in unknown units.
+
+    <Note type={"note"}>
+
+    Additional fields, `Cumul_[AccumulateAttributeName]`, are included for each cost attribute that is neither time-based nor distance-based and accumulated during the analysis.
+
+    </Note>
+
+-   <p class="space-x-2"><span class="font-bold">Attr_[SoftRestrictionsAttributeName]</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    Specifies whether the traversed edge used the soft restriction attribute referred to in this field's name.
+
+    0—The traversed edge didn't use the soft restriction.
+    1—The traversed edge used the soft restriction.
+
+    For example, if the analysis was performed using the soft restriction called Avoid Toll Roads, a field called `Attr_Avoid_Toll_Roads` is created for this soft restriction. A value of `1` for this field would represent the toll roads in the route.
+
+</details>
+
+**Example**
+
+The following shows an example of the `output_route_edges` parameter.
+
+<Note type={"note"}>
+Because the response is quite verbose, the repeated elements within the response are abbreviated for clarity.
+</Note>
+
+<CodeBlock language="json" source="../code-samples/route/examples/outputs/output_route_edges.json" group="json" maxLines={20} expandable/>
+
+### output_directions
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+
+Provides access to the turn-by-turn directions for each resulting route.
+
+<If c="requestType == 'job'">
+
+<Note type={"legacy"}>
+
+This output type has been superseded by the `output_direction_points` and `output_direction_lines` output parameters.
+
+</Note>
+
+The `directions_language`, `directions_distance_units`, and `directions_style_name` parameters highly influence the driving directions. The features are empty if the `populate_directions` parameter is `false`.
+
+</If>
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for `output_directions`</span></summary>
+
+-   <p class="space-x-2"><span class="font-bold">RouteName</span><span class="font-sm text-color-3">string (length: 500)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The name of the route to which the driving action applies. This value is the same as the `Name` field of the output routes.
+
+-   <p class="space-x-2"><span class="font-bold">ArriveTime</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The time of day to initiate the given driving action. If the route spans multiple days, the date and time of day are displayed.
+
+-   <p class="space-x-2"><span class="font-bold">Type</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The type of maneuver that the directions feature represents or the type of the directions text. To determine whether `Type` refers to a maneuver type or a directions string type, review the `SubItemType` field value.
+
+    `Type` can be used, for example, to assign an icon for direction text based on the maneuver type, or it can use a formatting style based on the directions string type when displaying the driving directions in the application.
+
+    <details>
+    <summary><span class="font-sm text-color-link">See Maneuver Types</span></summary>
+    -   0: Unknown
+    -   1: Arrive at Stop
+    -   2: Go straight
+    -   3: Bear left
+    -   4: Bear right
+    -   5: Turn left
+    -   6: Turn right
+    -   7: Make sharp left
+    -   8: Make sharp right
+    -   9: Make U-turn
+    -   10: Take ferry
+    -   11: Take roundabout
+    -   12: Merge to highway
+    -   13: Exit highway
+    -   14: Go on another highway
+    -   15: At fork keep center
+    -   16: At fork keep left
+    -   17: At fork keep right
+    -   18: Depart stop
+    -   19: Trip planning item
+    -   20: End of ferry
+    -   21: Ramp right
+    -   22: Ramp left
+    -   23: Turn left and immediately turn right
+    -   24: Turn right and immediately turn left
+    -   25: Turn right and immediately turn right
+    -   26: Turn left and immediately turn left
+    -   27: Pedestrian ramp
+    -   28: Elevator
+    -   29: Escalator
+    -   30: Stairs
+    -   31: Door passage
+
+    </details>
+
+    <details>
+    <summary><span class="font-sm text-color-link">See Directions String Types</span></summary>
+
+    -   0: General directions string type
+    -   1: Depart directions string type
+    -   2: Arrive directions string type
+    -   3: Length directions string type
+    -   4: Time directions string type
+    -   5: Time summary directions string type
+    -   6: Time Window directions string type
+    -   7: Violation Time directions string type
+    -   8: Wait Time directions string type
+    -   9: Service Time directions string type
+    -   10: Estimated Arrival Time directions string type
+    -   11: Cumulative Length directions string type
+    -   12: Street name directions string type
+    -   13: Alternate street name directions string type
+    -   14: Sign branch information directions string type
+    -   15: Sign toward information directions string type
+    -   16: Cross street name directions string type
+    -   17: Sign exit number directions string type
+    </details>
+
+-   <p class="space-x-2"><span class="font-bold">SubItemType</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    Specifies whether the `Type` field refers to an integer from the Directions String Types table or the Maneuver Types table.
+
+    -   If the `SubItemType` value is 1, the Type field refers to the values from the Maneuver Types table.
+    -   If the `SubItemType` value is 2, the Type field refers to the values from the Directions String Types table.
+    -   If the `SubItemType` value is 3, the Type field refers to the values from the Directions String Types table.
+
+-   <p class="space-x-2"><span class="font-bold">Text</span><span class="font-sm text-color-3">string (length: 500)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    A text description of the travel directions.
+
+-   <p class="space-x-2"><span class="font-bold">ElaspsedTime</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The time elapsed in minutes from when the current driving direction starts until the next one starts, or until the route ends for the last driving direction.
+
+-   <p class="space-x-2"><span class="font-bold">DriveDistance</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The distance from where the current driving direction occurs to where the next one occurs, or to where the route ends for the last driving direction.
+
+    The value is in the units specified by the `directions_distance_units` parameter.
+
+    This value is zero for driving directions that occur at the same location where the next one begins. For example, the `DriveDistance` value is 0 for the directions text at the start of the route.
+
+</details>
+
+**Example**
+
+The following shows an example of the `output_directions` parameter.
+
+<Note type={"note"}>
+
+Because the response is quite verbose, the repeated elements within the response are abbreviated for clarity.
+
+</Note>
+
+<CodeBlock language="json" source="../code-samples/route/examples/outputs/output_directions.json" group="json" maxLines={20} expandable/>
+
+### output_direction_points
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+
+Specifies the output turn-by-turn directions for the routes calculated in the analysis, represented as point locations along the routes where specific direction events or maneuvers occur.
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for `output_direction_points`</span></summary>
+
+-   <p class="space-x-2"><span class="font-bold">RouteID</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    <If c="requestType == 'job'">
+    The `ObjectID` of the output `output_routes` feature with which this direction point is associated.
+    </If>
+
+    <If c="requestType == 'direct'">
+    The `ObjectID` of the output `routes` feature with which this direction point is associated.
+    </If>
+
+-   <p class="space-x-2"><span class="font-bold">Sequence</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The sequence of the direction points for the route, starting with 1.
+
+-   <p class="space-x-2"><span class="font-bold">DirectionPointType</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The type of direction event or maneuver described by the point, designated by one of the values below:
+
+    <details>
+
+    <summary><span class="font-sm text-color-link">Show values</span></summary>
+    -   Header (1)
+    -   Arrive (50)
+    -   Depart (51)
+    -   Straight (52)
+    -   On Ferry (100)
+    -   Off Ferry (101)
+    -   Central Fork (102)
+    -   Roundabout (103)
+    -   U-Turn (104)
+    -   Door (150)
+    -   Stairs (151)
+    -   Elevator (152)
+    -   Escalator (153)
+    -   Pedestrian Ramp (154)
+    -   Left Fork (200)
+    -   Left Ramp (201)
+    -   Clockwise Roundabout (202)
+    -   Left-handed U-turn (203)
+    -   Bear left (204)
+    -   Left Turn (205)
+    -   Sharp Left (206)
+    -   Left Turn and immediate Left Turn (207)
+    -   Left Turn and immediate Right Turn (208)
+    -   Right Fork (300)
+    -   Right Ramp (301)
+    -   Counter-Clockwise Roundabout (302)
+    -   Right-handed U-turn (303)
+    -   Bear right (304)
+    -   Right Turn (305)
+    -   Sharp Right (306)
+    -   Right Turn and immediate Left Turn (307)
+    -   Right Turn and immediate Right Turn (308)
+    -   Up Elevator (400)
+    -   Up Escalator (401)
+    -   Up Stairs (402)
+    -   Down Elevator (500)
+    -   Down Escalator (501)
+    -   Down stairs (502)
+    -   General Event (1000)
+    -   Landmark (1001)
+    -   Time Zone Change (1002)
+    -   Traffic Event (1003)
+    -   Scaled Cost Barrier Event (1004)
+    -   Boundary Crossing (1005)
+    -   Restriction Violation (1006)
+    -   Lane (1007)
+    </details>
+
+-   <p class="space-x-2"><span class="font-bold">StopID</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The `ObjectID` of the stop with which this direction point is associated, if any. If the point does not represent a visit to a stop, the value is null.
+
+-   <p class="space-x-2"><span class="font-bold">DisplayText</span><span class="font-sm text-color-3">string (length: 1024)</span><span class="font-bold text-[#00619b]">nullable</span></p>    
+
+    The directions text to display in the consuming application.
+
+-   <p class="space-x-2"><span class="font-bold">ArrivalTime</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The time the direction event occurs in coordinated universal time (UTC).
+
+-   <p class="space-x-2"><span class="font-bold">ArrivalUTCOffset</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The difference in minutes between the local time at the maneuver location and UTC time shown in the `ArrivalTime` field.
+
+-   <p class="space-x-2"><span class="font-bold">Name</span><span class="font-sm text-color-3">string (length: 1024)</span><span class="font-bold text-[#00619b]">nullable</span></p> 
+
+    The name of the direction point.
+
+-   <p class="space-x-2"><span class="font-bold">ExitName</span><span class="font-sm text-color-3">string</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The highway exit name that appears in the directions instruction.
+
+-   <p class="space-x-2"><span class="font-bold">AlternateName</span><span class="font-sm text-color-3">string</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The alternate source name that appears in the directions instruction.
+
+-   <p class="space-x-2"><span class="font-bold">IntersectingName</span><span class="font-sm text-color-3">string</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The name of the intersecting or cross street that appears in the directions instruction.
+    
+-   <p class="space-x-2"><span class="font-bold">BranchName</span><span class="font-sm text-color-3">string</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The signpost branch name that appears in the directions instruction.
+
+-   <p class="space-x-2"><span class="font-bold">TowardName</span><span class="font-sm text-color-3">string</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The signpost toward destination name that appears in the directions instruction.
+
+-   <p class="space-x-2"><span class="font-bold">Level</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The building level at which this direction event occurs. This value corresponds to the Level property defined in the network dataset used for the analysis.
+
+-   <p class="space-x-2"><span class="font-bold">ShortVoiceInstruction</span><span class="font-sm text-color-3">string (length: 1024)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The short text to use as voice guidance text in the consuming application.
+
+-   <p class="space-x-2"><span class="font-bold">VoiceInstruction</span><span class="font-sm text-color-3">string (length: 1024)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The additional text, including expanded abbreviations and plurals, to use as voice guidance text in the consuming application.
+
+-   <p class="space-x-2"><span class="font-bold">Azimuth</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The bearing in degrees of the vehicle departing this point. Zero indicates north.
+
+</details>
+
+**Example**
+
+The following shows an example of the `output_direction_points` parameter.
+
+<CodeBlock language="json" source="../code-samples/route/examples/outputs/output_direction_points.json" group="json" maxLines={20} expandable/>
+
+### output_direction_lines
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+
+Specifies the output route lines calculated in the analysis sliced to represent each route segment between DirectionPoints events or maneuver locations.
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for `output_direction_lines`</span></summary>
+
+-   <p class="space-x-2"><span class="font-bold">DirectionPointID</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    <If c="requestType == 'job'">
+    The ObjectID of the feature in the `output_direction_points` with which this line is associated.
+    </If>
+
+    <If c="requestType == 'direct'">
+    The ObjectID value of the feature in the `DirectionPoints` table with which this line is associated.
+    </If>
+
+-   <p class="space-x-2"><span class="font-bold">RouteID</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    <If c="requestType == 'job'">
+    The `ObjectID` of the output `output_routes` feature with which this direction line is associated.
+    </If>
+
+    <If c="requestType == 'direct'">
+    The `ObjectID` of the output `routes` feature with which this direction line is associated.
+    </If>
+
+-   <p class="space-x-2"><span class="font-bold">DirectionLineType</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The type of direction situation described by this line, designated by one of the following values:
+
+    <details>
+    <summary><span class="font-sm text-color-link">Show values</span></summary>
+
+    -   Unknown (0)
+    -   Segment (1)
+    -   Maneuver Segment (2)
+    -   Restriction Violation (3)
+    -   Scaled Cost Barrier (4)
+    -   Heavy Traffic (5)
+    -   Slow Traffic (6)
+    -   Moderate Traffic (7)
+    </details>
+
+-   <p class="space-x-2"><span class="font-bold">Meters</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The length of the line segment measured in meters.
+
+-   <p class="space-x-2"><span class="font-bold">Minutes</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The travel time along the line segment in minutes.
+
+-   <p class="space-x-2"><span class="font-bold">FromLevel</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The building level at which this direction event begins. This value corresponds to the `Level` property defined in the network dataset used for the analysis.
+
+-   <p class="space-x-2"><span class="font-bold">ToLevel</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The building level at which this direction event ends. This value corresponds to the `Level` property defined in the network dataset used for the analysis.
+
+</details>
+
+**Example**
+
+The following shows an example of the `output_direction_lines` parameter.
+
+<CodeBlock language="json" source="../code-samples/route/examples/outputs/output_direction_lines.json" group="json" maxLines={20} expandable/>
+
+### usage_cost
+
+<p class="space-x-2"><span class="font-sm text-color-3">type:</span><span><a class="font-sm text-color-3" href="../routing-data-types#usage_cost_object">usage_cost_object</a></span></p>
+
+This parameter returns the credits used by the analysis.
+
+**Example**
+
+The following shows an example of the `usage_cost` parameter in which the analysis generated 9 billable objects (represented by numObjects ) and 4.5 credits were used by the analysis.
+
+<CodeBlock language="json" source="../code-samples/route/examples/outputs/usage_cost.json" group="json" maxLines={20} expandable/>
+
+### solve_succeeded
+
+<p class="space-x-2"><span></span><span class="font-sm text-color-3">type:bool</span></p>
+
+Determine if the service was able to find the routes successfully. The error messages for the failure can be obtained by making a request to get the status of the job.
+
+**Example**
+
+The following shows an example of the `solve_succeeded` parameter
+
+<CodeBlock language="json" source="../code-samples/route/examples/outputs/solve_succeeded.json" group="json" maxLines={20} expandable/>
+
+### output_route_data
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#file">file</a></span></p>
+
+Provides access to a `.zip` file that contains a file geodatabase containing the inputs and outputs of the analysis in a format that can be used to share route layers with ArcGIS Online or Portal for ArcGIS. The parameter value is populated only when the [`save_route_data`](#save_route_data) parameter is set to `true`.
+
+### output_result_file
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#file">file</a></span></p>
+
+Provides access to the results from the analysis as a `.zip` file containing one or more files for each output. The format of the individual file is specified by the [`output_format`](#output_format) parameter. The parameter value is not populated when the `output_format` parameter is set to `Feature Set`.
+
+### output_network_analysis_layer
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+
+Provides access to the network analysis layer file that stores the analysis settings and the inputs and outputs used for the analysis. The parameter value is populated only when the [`save_output_network_analysis_layer`](#save_output_network_analysis_layer) parameter is set to `true`.

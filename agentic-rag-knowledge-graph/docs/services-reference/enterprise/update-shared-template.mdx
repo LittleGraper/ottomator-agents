@@ -1,0 +1,190 @@
+---
+title: "Update (Feature Service/Shared Templates)"
+description: "The update operation modifies existing shared templates in the back-end data source."
+slug: "update-shared-template"
+url: "/update-shared-template"
+restInfoMetadata:
+  apiPath: /services/<serviceName>/sharedTemplates/update
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /services/<serviceName>/sharedTemplates/update
+  methods:
+    - post
+  versionIntroduced: '11.4'
+  requiredCapability: 'SharedTemplateEditing capability enabled on the service'
+---
+
+## Description
+
+The `update` operation modifies existing shared templates in the back-end data source. Only template owners, or organization administrators, can update a shared template. Once a template has been updated, clients will be able to access the templates with the new values. Support for this operation is indicated when the service's `supportsSharedTemplates` property is set as `true` and the service has the `SharedTemplateEditing` capability enabled.
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sharedTemplates`
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      An array of shared templates to be updated. The array should only contain the fields that will be updated, as well as their modified values. Fields not specified in the array will remain unchanged. The `globalId` field must be included in the array for each template in order to identify which template is being modified. The `templateId` field does not have to be included in the array. If it is included, it will be ignored. A full list of fields that can be included can be found in the [Shared Templates](/shared-templates/#response-properties) resource.
+
+      <Note>
+
+      The `layerId`, `type`, and `userIdentity` fields cannot be modified. This operation does not support partially updating the template's `definition` field. If a value in the `definition` field needs to be updated, every `definition` field must be included in the array.
+
+      </Note>
+
+      Syntax
+
+      ```other
+      sharedTemplates=[<sharedTemplate1>, < sharedTemplate2>]
+
+      ```
+
+      Example
+
+      ```other
+      sharedTemplates= [
+        {
+          "globalId": "{D060DABE-265A-4428-BEFB-DFA5FFC42C20}",
+          "name": "Purple Hydrant",
+          "description": "Hydrant with reclaimed water",
+          "definition": {
+            "defaultValues": {
+              "ATEXT": "Non-potable Hydrant"
+            } 
+          } 
+        }
+      ]
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+The following is a sample POST request for the `update` operation that demonstrates updating two feature templates. The first updates the template's `name` and `description` fields. The second updates the other template's `name`, `description`, `visible`, and `status` fields, as well as resetting the `definition`.
+
+```other
+POST /webadaptor/rest/services/MyService/FeatureServer/sharedTemplates/update HTTP/1/1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+sharedTemplates=[{"globalId": "{4521FC4A-293D-4457-A7D4-9D6496DFA377}","name": "PS- point tool NEW","description": "multiple updates in payload"},{"globalId": "{143B038A-EA78-4E81-BAA3-A1060431F493}","name": "test Anno template","description": "multiple updates in payload","visible": false,"status": "private","definition": {"defaultValues": {"Angle": 0,"AnnotationClassID": 1,"CharacterSpacing": 10,"CharacterWidth": 100,"Element": "","FlipAngle": 90,"FontLeading": 0,"FontName": "Constantia","FontSize": 8,"FontStyle": "Bold Italic","HorizontalAlignment": 0,"Override": 0,"Status": 0,"SymbolID": 1,"TextString": "Left","Underline": 0,"VerticalAlignment": 2,"WordSpacing": 100,"XOffset": 0,"YOffset": 0}}}]&f=pjson
+
+```
+
+The sample code below show the JSON array in the above request, formatted for readability:
+
+```other
+[
+  {
+    "globalId": "{4521FC4A-293D-4457-A7D4-9D6496DFA377}",
+    "name": "PS- point tool NEW",
+    "description": "multiple updates in payload"
+  },
+  {
+    "globalId": "{143B038A-EA78-4E81-BAA3-A1060431F493}",
+    "name": "test Anno template",
+    "description": "multiple updates in payload",
+    "visible": false,
+    "status": "private",
+    "definition": {
+      "defaultValues": {
+        "Angle": 0,
+        "AnnotationClassID": 1,
+        "CharacterSpacing": 10,
+        "CharacterWidth": 100,
+        "Element": "",
+        "FlipAngle": 90,
+        "FontLeading": 0,
+        "FontName": "Constantia",
+        "FontSize": 8,
+        "FontStyle": "Bold Italic",
+        "HorizontalAlignment": 0,
+        "Override": 0,
+        "Status": 0,
+        "SymbolID": 1,
+        "TextString": "Left",
+        "Underline": 0,
+        "VerticalAlignment": 2,
+        "WordSpacing": 100,
+        "XOffset": 0,
+        "YOffset": 0
+      }
+    }
+  }
+]
+
+```
+
+
+## JSON Response syntax
+
+```other
+[
+  {
+    <result1>
+  },
+  {
+    <result2>
+  }
+]
+
+```
+
+## JSON Response example
+
+The sample response below demonstrates the response returned when the operation completes successfully. The example below shows that two shared templates were successfully updated:
+
+```other
+[
+  {
+    "templateId": 51,
+    "globalId": "{83EDCDB5-9CEE-4384-B713-18BD1969D819}",
+    "hash": "{1E597512-A127-4516-80A4-8DB449D0E257}"
+  },
+  {
+    "templateId": 52,
+    "globalId": "{DF6534B7-DE7C-425B-8B08-4DB789A39A01}",
+    "hash": "{B957F388-EF63-467C-A13E-F5C3E530C599}"
+  }
+]
+
+```
+
+The sample response below demonstrates the response returned when the operation fails. When the operation fails, all changes are rolled back. The example below demonstrates a failure response that is returned when an organization member who is not the template owner, nor an organization administrator, attempts to update a shared template.
+
+```other
+{
+  "error": {
+    "code": 400,
+    "message": "Requested operation is not supported by this service.",
+    "details": []
+  }
+}
+
+```

@@ -1,0 +1,361 @@
+---
+title: "Validate SQL (Feature Service/Layer)"
+description: ""
+slug: "validate-sql-feature-service-layer"
+url: "/validate-sql-feature-service-layer"
+guid: "GUID-6789C63B-9FEF-44E9-9755-D220CE2D348B"
+migratedTopicMetadata:
+  FTITLE: "Validate SQL (Feature Service-Layer)"
+  FDESCRIPTION: "Layer validateSQL operation provides an API to validate sql’92 expression or where clause."
+  FCHANGES: "HTTP-S"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.7 -*"
+  CREATED-ON: "27/07/2018 14:41:32"
+  FAUTHOR: "gkelly"
+  FSTATUS: "Released"
+  MODIFIED-ON: "14/08/2018 10:16:20"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-C43DF419-2CA2-45CF-8EFE-EB4297608802"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /validateSQL
+  urlSegments:
+    - name: <featurelayer-url>
+      url: /layer-feature-service
+    - name: /validateSQL
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.3'
+---
+
+## Description
+
+<Note type={"note"}>
+
+The `validateSQL`  operation is only supported in ArcGIS Online hosted feature services.
+
+</Note>
+
+The `validateSQL`  operation validates an SQL-92 expression or `WHERE`  clause.
+
+The `validateSQL`  operation ensures that an SQL-92 expression, such as one written by a user through a user interface, is correct before performing another operation that uses the expression. For example, `validateSQL`  can be used to validate information that is subsequently passed in as part of the `where`  parameter of the [`calculate` ](/calculate-feature-service-layer) operation. 
+
+`validateSQL`  also prevents SQL injection. In addition, all table and field names used in the SQL `expression`  or `WHERE`  clause are validated to ensure they are valid tables and fields.
+
+<Note type={"note"}>
+
+To support the `validateSQL`  operation across all feature service implementations, a new support property, `supportsValidateSql` , is added to the layer metadata and is set to `true` .
+
+</Note>
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Description: The response format. The default response format is `html` .
+
+Values: html | json
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+sql
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Description: The SQL expression or `WHERE`  clause to validate.
+
+Syntax:
+
+`"sql": "sqlExpression"` 
+
+Example:
+
+`{"sql" : "Population > 300000"}` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+sqlType
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Description: Three SQL types are supported in `validateSQL` : 
+
+-   `where`  (default)—Represents the custom `WHERE`  clause the user can compose when querying a layer or using `calculate` .
+
+
+-   `expression` —Represents an SQL-92 expression. Currently, `expression`  is used as a default value expression when adding a new field or using the calculate API.
+
+
+-   `statement` —Represents the full SQL-92 statement that can be passed directly to the database. No current ArcGIS REST API resource or operation supports using the full SQL-92 `SELECT`  statement directly. It has been added to the `validateSQL`  for completeness.
+
+Values: `where`  \| `expression`  \| `statement` 
+
+Example:
+
+`"sqlType" : "where"` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Validation error codes
+
+When the SQL-92 expression is valid, `isValidSQL : true`  is returned. However, the following error codes and descriptions are returned when an invalid SQL-92 expression is submitted: 
+
+<StyledTable headers={"Error,Error code,Error description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Success
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+3000
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Success
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+NotSupported
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+3001 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Sql expression is not supported.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+SyntaxError
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+3002
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Sql expression syntax error.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+SemanticError
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+3004
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Sql expression semantic error.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+InvalidTableName
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+3007
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Invalid table name.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+InvalidFieldName
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+3008
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Invalid field name.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+UnsafeSQL
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+3009
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Unsafe sql expression is not allowed.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+Example 1: Validate SQL-92 (date SQL-92 `WHERE`  clause)
+
+```javascript
+sql = " some_date < CURRENT_DATE "
+sqlType = "where"
+
+```
+
+ 
+
+https&#x3A;//services.myserver.com/&lt;orgid>/ArcGIS/rest/services/stdQuery_SQLSrvr/FeatureServer/0/validateSQL?sql=some_date &lt; CURRENT_DATE&sqlType=where&f=html&token
+
+Example 2: Validate SQL-92 (using the `where` `sqlType` )
+
+```javascript
+Sql = CNTRY_NAME > 'L' and pop_cntry > 20000000
+sqlType = where
+
+```
+
+ 
+
+https&#x3A;//services.myserver.com/&lt;orgid>/ArcGIS/rest/services/stdQuery_SQLSrvr/FeatureServer/0/validateSQL?sql=CNTRY_NAME > 'L' and pop_cntry > 20000000&sqlType=where&f=html&token
+
+Example 3: Validate sql 92 expression
+
+```javascript
+sql = pop_cntry + 20000000
+sqlType = expression
+
+```
+
+ 
+
+https&#x3A;//services.myserver.com/&lt;orgid>/ArcGIS/rest/services/stdQuery_SQLSrvr/FeatureServer/0/validateSQL?sql=pop_cntry+%2B+20000000&sqlType=expression&f=html&token=
+
+## JSON response example (validate is successful)
+
+```javascript
+{
+  "isValidSQL" : true
+}
+```
+
+ 
+
+## JSON response example (validation error if some_date is not a valid field)
+
+```javascript
+{
+  "isValidSQL" : false,
+  "validationErrors" : [
+    {
+      "errorCode" : 3008, 
+      "description" : "Invalid field name [some_date]"
+    } 
+  ]
+}
+
+```
+
+ 

@@ -1,0 +1,318 @@
+---
+title: "Generate Diagram"
+description: "The generateDiagram operation creates a new schematic diagram resource."
+slug: "generate-diagram"
+url: "/generate-diagram"
+guid: "GUID-1A3D5D64-55A2-418E-8E6D-89081E087ABD"
+migratedTopicMetadata:
+  FTITLE: "Generate Diagram"
+  FDESCRIPTION: ""
+  FCHANGES: "Remove spaces in URL"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.7 -*"
+  CREATED-ON: "06/08/2018 09:24:47"
+  FAUTHOR: "gkelly"
+  FSTATUS: "Released"
+  MODIFIED-ON: "14/08/2018 10:51:32"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-B1C4FF55-9895-4CDA-A655-553718972B71"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/MapServer/exts/SchematicServer/templates/<tempID>/generateDiagram
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/MapServer/exts/SchematicServer/templates/<tempID>/generateDiagram
+  methods: 
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.1'
+---
+
+import GUID_1DF120E8_1A22_4E71_BEC3_0507D35460B9_GUID_5758AAEF_F54D_49E5_BA5D_506A52312E48 from "./snippets/GUID-1DF120E8-1A22-4E71-BEC3-0507D35460B9/_GUID-5758AAEF-F54D-49E5-BA5D-506A52312E48";
+
+## Description
+
+The `generateDiagram` operation creates a [new Schematic Diagram](/schematic-diagram) resource. It is performed on a [Schematic Diagram Template](/schematic-diagram-template) resource. The result of this operation is a [Schematic Diagram Information Object](/schematic-diagram-information-object). It is used to generate a new diagram.
+
+<Note type={"note"}>
+
+Schematics services published without the Editing operation enabled don't support the `generateDiagram` operation. Moreover, the `generateDiagram` operation is only supported on schematic diagram templates when `canGenerate=True` ; that is, when the published map references the schematic diagram template layer.
+
+</Note>
+
+You can provide arguments to the `generateDiagram` operation as query parameters defined in the parameters table below.
+
+## Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+_Description:_ The response format. The default response format is html.
+
+_Values:_ html | json
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`name` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Required
+
+_Description:_ The diagram name.
+
+_Syntax:_`name=<diagramName>` 
+
+_Example:_`name=MyTestDiagram` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`user` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Required
+
+_Description:_ The diagram creator.
+
+_Syntax:_`user=<diagramCreator>` 
+
+_Example:_`user=NCA3885` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`folderID` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+_Description:_ The ID of the folder in which the generated diagram will be stored. 
+
+This parameter is optional. If it is not specified, the generated diagram is stored at the schematic dataset root. 
+
+_Syntax:_`folderID=<diagramFolderID>` 
+
+_Example:_`folderID=1` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`builderContext` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Required
+
+Description: The context for the builder which updates the diagram.
+
+This parameter syntax depends on the diagram builder:
+
+-   Diagrams based on the Standard builder that are generated from a set of GIS features/objects
+
+    In that case, the operation expects the lists of the input GIS feature/object IDs per feature class/object table, and those features/objects version:
+
+    Syntax:
+
+    ```javascript
+    builderContext={
+      //The lists of the input GIS feature/object IDs per feature class/object table from which the diagram must be generated
+      "initialObjects": [
+        {
+          "objectClassName" : "<objectClass1Name>",
+          "objectIDs" : [ID11, ..., IDN] 
+        },
+        ...,
+        {
+          "objectClassName" : "<objectClassNName>",
+          "objectIDs" : [ID1, ..., IDM] 
+        }
+      ],
+      //The SDE database reference version for those input GIS features/objects
+      "version": "<version>"
+    }
+    ```
+
+    Example:
+
+    `builderContext={"initialObjects": [{"objectClassName": "PipelinesDatabase.SDE.pug_PUG_gas_plants", "objectIDs": [3]}], "version":"sde.DEFAULT"}` 
+
+    <Note type={"note"}>
+
+    The `version` parameter is mandatory. We recommend to specify the version when you work with GIS features/objects stored in geodatabases. For this case, when specifying no `version` , the version used is the one configured on the Associated Object Class section of the Properties tab that displays for the associated schematic feature class when you edit the schematic dataset within Schematic Dataset Editor.
+
+    </Note>
+
+    <Note type={"tip"}>
+
+    When generating a schematic diagram based on the Standard builder from a set of GIS features that compose a geometric network or network dataset, if the Standard builder properties are configured with the Add connected nodes option enabled, you can provide only the list of edge/line features.
+
+    </Note>
+-   Diagrams based on the Standard builder that are entirely built from custom queries
+
+    In that case, the operation expects an empty list of initial objects:
+
+    Syntax:
+
+    `builderContext={"initialObjects": []}` 
+
+    Example:
+
+    `builderContext={"initialObjects": []}` 
+-   Diagrams based on the XML builder
+
+    In that case, the operation expects the input XML data directly as a string.
+
+    Syntax: `builderContext=<XMLData>` 
+
+    Example:
+
+    ```javascript
+    builderContext=<Diagrams>
+    	<Diagram DiagramTemplateName="SimpleXML">
+    	<Features>
+    	<NodeFeature>
+    	<FeatureClassName>StationsFeeder1</FeatureClassName>
+    	<ExternalUniqueID>NS1</ExternalUniqueID>
+    	<InitialX>120067.5</InitialX>
+    	<InitialY>4070755.8</InitialY>
+    	</NodeFeature>
+    	<NodeFeature>
+    	<FeatureClassName>StationsFeeder1</FeatureClassName>
+    	<ExternalUniqueID>NS2</ExternalUniqueID>
+    	<InitialX>120090.5</InitialX>
+    	<InitialY>4070788.8</InitialY>
+    	</NodeFeature>
+    	<LinkFeature>
+    	<FeatureClassName>LV_Lines</FeatureClassName>
+    	<ExternalUniqueID>LV1</ExternalUniqueID>
+    	<FromNode>NS1</FromNode>
+    	<ToNode>NS2</ToNode>
+    	</LinkFeature>
+    	</Features>
+    	</Diagram>
+    	</Diagrams>
+    ```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## JSON Response syntax
+
+```other
+{
+  "name": "<diagramName>",
+  "id": "<diagramId>",
+  "templateIdentifier": "<templateIdentifier>",
+  "templateObjectID": <templateObjectID>,
+  "schematicLayerIdentifier": <schematicLayerIdentifier>,
+  "folderObjectID": <folderObjectID>,
+  "folderIdentifier": "<folderIdentifier>",
+  "objectID": <objectID>,
+  "createdBy": "<diagramCreator>",
+  "lastModificationBy": "<diagramLastEditor>",
+  "lastUpdateBy": "<diagramLastUpdator>",
+  "creationDate": "<diagramCreationDate>",
+  "lastModificationDate": "<diagramModificationDate>",
+  "lastUpdateDate": "<diagramLastUpdateDate>",
+  "lockedBy": "<diagramLastLocker>",
+  "version": "<version>",
+  "extent": <envelope>,
+  "rootNodes": [
+    "<rootNode1>",
+    ...,
+    "<rootNodeN>"
+  ],
+  "endNodes": [
+    "<endNode1>",
+    ...,
+    "<endNodeK>"
+  ]
+}
+
+```
+
+## JSON Response example
+
+```other
+{
+  "name": "DiagramFrom_pug_PUG_gas_plants_ID3",
+   "id": "0-5",
+   "templateIdentifier": "0",
+   "templateObjectID": 892,
+   "schematicLayerIdentifier": 0,
+   "folderObjectID": -2,
+   "folderIdentifier": "-2",
+   "objectID": 5,
+   "createdBy": "NCA3885",
+   "lastModificationBy": "NCA3885",
+   "lastUpdateBy": "",
+   "creationDate": "05/13/11 14:13:57",
+   "lastModificationDate": "05/13/11 14:13:57",
+   "lastUpdateDate": "",
+   "lockedBy": "",
+   "version": "sde.DEFAULT",
+   "extent": {
+     "xmin": -37.342619999999989,
+     "ymin": -11.398460000000886,
+     "xmax": -37.342179999999097,
+     "ymax": -11.398019999999997,
+     "spatialReference": {
+      "wkid": 4326,
+      "latestWkid": 4326
+     }
+   }
+}
+          
+```
+
+ 

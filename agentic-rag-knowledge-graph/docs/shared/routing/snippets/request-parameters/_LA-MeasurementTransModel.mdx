@@ -1,0 +1,206 @@
+import ParamMetadata from "../../../components/param-metatdata" 
+
+<ParamMetadata types={[{name:"string"}]} defaultValue="Linear" />
+
+{/* <p class="space-x-2"><span class="font-sm text-color-3">type:enum</span><span class="font-bold text-[#6d29cc]">default:`Linear`</span></p> */}
+
+**Allowed values:** `Linear`, `Power`, `Exponential`
+
+Specify the equation for transforming the network cost between facilities and demand points. This parameter, coupled with [`impedance`](#impedance) parameter, specifies how severely the network impedance between facilities and demand points influences the task's choice of facilities.
+
+In the following list of transformation options, d refers to demand points and f, facilities. "Impedance" refers to the shortest travel distance or time between two locations. So impedance
+<sub>df</sub> is the shortest path (time or distance) between demand point d and facility f, and cost<sub>df</sub> is the transformed travel time or distance between the facility and demand point. Lambda (λ) denotes the impedance parameter. The `measurement_units` setting determines whether travel time or distance is analyzed.
+
+-   Linear
+
+    cost<sub>df</sub> = λ * impedance<sub>df</sub>
+
+    The transformed travel time or distance between the facility and the demand point is the same as the time or distance of the shortest path between the two locations. With this option, the impedance parameter (λ) is always set to one.
+
+-   Power
+
+    cost<sub>df</sub> = impedance<sub>df</sub><sup>λ</sup>
+
+    The transformed travel time or distance between the facility and the demand point is equal to the time or distance of the shortest path raised to the power specified by the impedance parameter (λ). Use the Power option with a positive impedance parameter to specify higher weight to nearby facilities. 
+
+-   Exponential
+
+    cost<sub>df</sub> = e<sup>(λ * impedance)</sup>
+
+    The transformed travel time or distance between the facility and the demand point is equal to the mathematical constant e raised to the power specified by the shortest-path network impedance multiplied with the impedance parameter (λ). Use the Exponential option with a positive impedance parameter to specify a very high weight to nearby facilities.
+
+<details>
+  
+ <summary><span class="font-sm text-color-link">Example of measurement transformation model</span></summary>
+
+The next set of graphics and tables use Minimize Impedance to demonstrate the potential effects of using different impedance transformations and parameters.
+
+![Sample problem to demonstrate the effects of impedance transformations](../../images/la_transformation1.png)
+
+_A sample problem setup using two-mile edges with demand points on the ends and candidate facilities in the middle of the edges is shown._
+
+The `Linear`  transformation always uses a parameter value of one, so the cost is unchanged, and facility B minimizes that cost.
+
+<StyledTable headers={"Facility,Total cost (linear),Solution facility"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+A
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+3+3+5=11
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+N/A
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+B
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+7+1+1=9
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Facility B is chosen.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+_Comparison of costs using a linear transformation_
+
+![Sample problem to demonstrate the effects of impedance transformations](../../images/la_transformation2.png)
+
+_Facility B has a lower total transformed cost than facility A when a linear transformation is used._
+
+A `Power`  transformation with a parameter of two amplifies longer distances enough that facility A minimizes cost instead.
+
+<StyledTable headers={"Facility,Total cost (power transformation λ = 2),Solution facility"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+A
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+3<sup>2</sup> + 3<sup>2</sup> +5<sup>2</sup> = 43
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Facility A is chosen.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+B
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+7<sup>2</sup>+ 1<sup>2</sup>+ 1<sup>2</sup> = 51
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+N/A
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+_Comparison of costs using a power transformation with a parameter of 2.0_
+
+![Sample problem to demonstrate the effects of impedance transformations](../../images/la_transformation3.png)
+
+_Facility A has a lower total transformed cost than facility B when a squared power transformation is used._
+
+An `exponential`  transformation with an impedance parameter of 0.02 favors nearby demand points, so facility B is the solution facility in this case. (The graphic is omitted, since it would look the same as the linear transformation graphic.)
+
+<StyledTable headers={"Facility,Total cost (power transformation λ = 0.02),Solution facility"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+A
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+e<sup>0.02\*3</sup> + e<sup>0.02\*3</sup> + e<sup>0.02\*5</sup> = 3.23
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+N/A
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+B
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+e<sup>0.02\*7</sup> + e<sup>0.02\*1</sup> + e<sup>0.02\*1</sup> = 3.19
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Facility B is chosen
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+_Comparison of costs using an exponential transformation with a parameter of 0.02_
+
+</details>

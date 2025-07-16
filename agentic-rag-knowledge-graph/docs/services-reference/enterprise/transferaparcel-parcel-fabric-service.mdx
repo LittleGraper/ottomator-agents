@@ -1,0 +1,357 @@
+---
+title: "Transfer parcel"
+description: "The transferParcel operation transfers a piece of land between source parcels and target parcels."
+slug: "transferaparcel-parcel-fabric-service"
+url: "/transferaparcel-parcel-fabric-service"
+guid: "GUID-FC66C5CE-D249-48A7-B519-C10579ACADA1"
+migratedTopicMetadata:
+  FTITLE: "TransferAParcel-parcel-fabric-service"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "14/08/2023 15:32:34"
+  FAUTHOR: "cleslie"
+  FSTATUS: "Released"
+  MODIFIED-ON: "29/09/2023 11:52:07"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-7C1788BB-6FBC-46C6-BF7E-6A6F610F6925"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName/ParcelFabricServer/transferParcel
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName/ParcelFabricServer/transferParcel
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '11.0'
+  requiredCapability: ArcGIS Advanced Editing
+---
+
+## Description
+
+The `transferParcel` operation transfers a piece of land (single parcel) between source parcels and target parcels.
+
+A piece of land (single parcel) can be transferred in the following supported workflows:
+
+-   A piece of land (one parcel) is transferred from a single source parcel to a single target parcel, for example, an annexation.
+-   A piece of land (one parcel) is transferred from multiple source parcels to a single target parcel, for example, road dedication (widening).
+-   A piece of land (one parcel) is transferred from a single source parcel to multiple target parcels, for example, road vacation.
+-   A piece of land (one parcel) is transferred to a single target parcel. There is no source parcel, for example, annexation of unincorporated land.
+
+[Learn more about transferring a parcel](https://pro.arcgis.com/en/pro-app/latest/help/data/parcel-editing/transferparcels.htm)
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `gdbVersion` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.0.
+
+      The name of the geodatabase version (the default is the `DEFAULT` version).
+
+      Syntax
+
+      ```javascript
+      gdbVersion=<version>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sessionId`
+
+      (Required) 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.0.
+
+      The token (GUID) used to lock the version. If the calling client is editing a named version, the `sessionId` value is required. If the specified version is currently locked by another session, the request will fail if the `sessionId` value is not provided or does not match the `sessionId` value that holds the exclusive lock. If the client is editing the default version, the `sessionId` value is not required.
+
+      Syntax
+
+      ```javascript
+      sessionId=<guid>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `transferParcelFeature`
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.0.
+
+      The parcel that defines the piece of land that will be transferred. Only one parcel can be specified as the transfer parcel.
+
+      Syntax
+
+      ```javascript
+      transferparcelFeature={"id":"<guid>","layerId":"<layerID>"}
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sourceParcelFeatures`
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.0.
+
+      The source parcels from which land will be transferred. These parcels will be clipped and will become smaller.
+
+      -   There can be zero to many source parcels specified.
+      -   If multiple source parcels are specified, they must be in the same parcel type. They can, however, be in a different parcel type from the transfer  parcel and the target parcels.
+      -   Source parcels must at least partially overlap the area of the transfer parcel.
+
+      Syntax
+
+      ```javascript
+      sourceParcelFeatures=[{"id":"<guid>","layerId":"<layerID>"},{...}]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `targetParcelFeatures`
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.0.
+
+      The target parcels to which land will be transferred. These parcels will be merged with the transfer parcel and will become larger.
+
+      -   If multiple target parcels are specified, they must be in the same parcel type. They can, however, be in a different parcel type from the transfer parcel and the source parcels.
+      -   If multiple source parcels have been specified, only one target parcel can be specified.
+
+      Syntax
+
+      ```javascript
+      targetParcelFeatures=[{"id":"<guid>","layerId":"<layerID>"},{...}]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `record` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.0.
+
+      The unique identifier (GUID) of the record being used for the transfer. 
+
+      Syntax
+
+      ```javascript
+      record=<guid>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `defaultAreaUnit` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.0.
+
+      The units in which area will be stored. The parameter value is a domain code from the `PF_AreaUnits`  parcel fabric domain. 
+
+      Syntax
+
+      ```javascript
+      defaultAreaUnit=<long>
+      ```
+ 
+      Example using square feet:
+
+      ```javascript
+      defaultAreaUnit=109405
+      ```
+
+      Example using square meters:
+
+      ```javascript
+      defaultAreaUnit=109404
+      ```
+
+     </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+      
+      `async` 
+
+      (Optoinal)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.1.
+
+      Specifies whether the request will be processed as an asynchronous job and a URL that points to a location displaying the status of the job will be returned. See the topic regarding [asynchronous](HTTP://RESOURCES.ARCGIS.COM/EN/HELP/ARCGIS-REST-API/02R3/02R3000000RT000000.HTM) usage for more information. The default is `false`.
+
+      Values: `true` | `false` 
+
+      Syntax
+
+      ```javascript
+      async=<Boolean>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow> 
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+This example shows the steps for transferring a parcel in a right-of-way dedication. In this type of transfer, a piece of land is transferred from [multiple source parcels to a single target parcel](https://pro.arcgis.com/en/pro-app/latest/help/data/parcel-editing/transferparcels.htm#GUID-1B672218-9A45-459B-95E4-68E3F1AE3D1C). 
+
+<Note type={"note"}>
+
+  The `sessionId` parameter value must be the same for starting the edit session, performing the edit operation, and stopping the edit session.
+
+</Note>
+
+1.  [Start a service session](/start-reading) on the version.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/VersionManagementServer/versions/E4DAED9D-C859-489B-9053-767A45F1D97C/startReading
+    f=json
+    sessionId={c47be202-3682-4ab0-a730-9dd641487ba7}
+    ```
+     
+2.  [Start an edit session](/start-editing) on the version.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/VersionManagementServer/versions/E4DAED9D-C859-489B-9053-767A45F1D97C/startEditing
+    f=json
+    sessionId={c47be202-3682-4ab0-a730-9dd641487ba7}
+    ```
+     
+3.  Transfer one parcel of land from multiple source parcels to a single target parcel.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/ParcelFabricServer/transferParcel
+    f=json
+    gdbVersion=admin.Version1
+    sessionId={c47be202-3682-4ab0-a730-9dd641487ba7}
+    transferParcelFeature={"id":"{D664B654-D8F2-453C-966F-6FA66E1AE2E2}","layerId":"24"}
+    sourceParcelFeatures=[{"id":"{8233045B-A337-4087-957A-4F8A4814FF09}","layerId":"15"},{"id":"{EC850938-01F4-48C6-B7DB-16EFB0B544BC}","layerId":"15"},
+    {"id":"{BCF8B086-B5DB-472A-89AA-6A3AF54C75BD}","layerId":"15"}]
+    targetParcelFeatures=[{"id":"{449572F3-C2E1-405D-B642-4CFA90C10C46}","layerId":"21"}]
+    record={89E0F2EE-9788-4008-9CD4-1F02ABDCD49F}
+    defaultAreaUnit=109405
+    async=false
+    ```
+     
+4.  If edits are complete, [stop the edit session](/stop-editing).
+
+5.  [Stop](/stop-reading) and release the service session. 
+
+## JSON Response syntax
+
+The following response is returned when `async` is `false`:
+
+```other
+{
+  "moment": <datetime>,
+		"exceededTransferLimit: <true | false>,
+  "serviceEdits": [{  // only if transfer limit is not exceeded
+    "editedFeatures": {
+						"spatialReference": {}
+						"updates": [
+							[{ "attributes": {}
+										"geometry": {}
+								}]]
+							"adds":[
+							{ "attributes": {}
+									"geometry": {}
+							]}]
+				"success": <true | false>,
+    "error": {  // only if success is false
+      "extendedCode": <HRESULT>,
+      "message": <error message>,
+      "details": [<detail>]
+}
+```
+
+The following response is returned when `async` is `true`:
+
+```other
+{
+		"statusUrl": <url>
+}
+```
+
+
+ 

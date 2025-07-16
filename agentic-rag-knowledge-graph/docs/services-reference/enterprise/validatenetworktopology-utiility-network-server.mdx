@@ -1,0 +1,676 @@
+---
+title: "Validate Network Topology"
+description: "Validating the network topology for a utility network cleans dirty areas and maintains consistency between feature editing space and network topology space."
+slug: "validatenetworktopology-utiility-network-server"
+url: "/validatenetworktopology-utiility-network-server"
+guid: "GUID-F41C9768-67BD-44C3-B58C-157B349873D9"
+migratedTopicMetadata:
+  FTITLE: "validateNetworkTopology (Utiility Network Server)"
+  FDESCRIPTION: "description of validateNetworkTopology REST API operation"
+  FCHANGES: "Add clarity to validationType values of rebuild and forceRebuild.  See #10035"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1- *"
+  CREATED-ON: "17/05/2023 11:53:57"
+  FAUTHOR: "jderose"
+  FSTATUS: "Released"
+  MODIFIED-ON: "02/06/2023 08:40:29"
+  VERSION: "9"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-ECE3D32E-4613-4EA5-8C9D-83D3B54FD7C2"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/UtilityNetworkServer/validateNetworkTopology
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/UtilityNetworkServer/validateNetworkTopology
+  methods: 
+    - post
+  versionIntroduced: '10.6'
+  requiredCapability: Requires the ArcGIS Advanced Editing user type extension license
+---
+
+import GUID_68FE7C20_B3BC_4175_A32D_778C3A29380D_GUID_6635EF88_7E6F_4290_8DF6_6A15ECEC0D11 from "./snippets/GUID-68FE7C20-B3BC-4175-A32D-778C3A29380D/_GUID-6635EF88-7E6F-4290-8DF6-6A15ECEC0D11";
+
+## Description
+
+The `validateNetworkTopology` operation evaluates a specified area of the network to clean dirty areas on features. Validating the network topology for a utility network maintains consistency between feature editing space and network topology space. Validating a network topology may include all or a subset of the dirty areas present in the network. Validation of network topology is supported synchronously and asynchronously.
+
+The `validateNetworkTopology` operation returns the name of any subnetwork that is marked as dirty during the operation along with the domain network and tier containing the subnetwork in the response (`discoveredSubnetworks`). A subnetwork may be marked as dirty before the validate operation is run. In this scenario, the `discoveredSubnetworks` collection still contains the subnetworks modified by the validate operation. When working with hierarchical networks, if all the subnetworks in a tier are dirty, the tier is not traced during the validate operation. When this scenario is encountered, dirty subnetworks in the tier are not returned in the `discoveredSubnetworks` collection. 
+
+<Note type={"note"}>
+
+<GUID_68FE7C20_B3BC_4175_A32D_778C3A29380D_GUID_6635EF88_7E6F_4290_8DF6_6A15ECEC0D11 />
+
+</Note>
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The output format of the response. The default response format is `html`. 
+
+```
+f=html | json | pjson
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`gdbVersion` 
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the name of the geodatabase version. The default value is `sde.DEFAULT`.
+
+Syntax: `gdbVersion=<version>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sessionID` 
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the token guid used to lock the version. If the calling client is editing a named version, the `sessionId` value must be provided; if the client is editing `DEFAULT`, the version may not be locked and the `sessionId` value should not be specified.
+
+Syntax: `sessionId=<guid>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`validationType` 
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the type of validation that will be performed. The `rebuild` and `forceRebuild` options (introduced with ArcGIS Enterprise 10.9) provide tools to rebuild the network topology and repair inconsistencies discovered during the validate operation. The `rebuild` option uses the dirty areas associated with the specified `validateArea` or `validationSet` values. The `forceRebuild` option ignores any dirty areas and applies to all features in the specified `validateArea` or `validationSet` values. Both the `rebuild` and `forceRebuild` options perform a build to reconstruct the specified portions of network topology.  The default is `normal`. 
+
+```
+validationType=normal | rebuild | forceRebuild
+``` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`validateArea` 
+
+(Required)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The envelope of the area to validate.
+
+Syntax:
+
+```json
+{
+ "xmin": <minimum x-coordinate>,
+ "ymin": <minimum y-coordinate>,
+ "xmax": <maximum x-coordinate>,
+ "ymax": <maximum y-coordinate>,
+ "spatialReference": {
+  "wkid": <spatial reference well-known identifier>,
+  "latestWkid": <the current wkid value associated with the wkid>	
+ }
+}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`validationSet` 
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Introduced at ArcGIS Enterprise 10.9. Specifies the set of features and objects to validate.
+
+
+Syntax: 
+
+```json
+[ 
+ { 
+  “sourceId” : <long>, 
+  “globalIds” : [<guid>] 
+ } 
+] 
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnEdits` 
+
+(Optional) 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Boolean parameter that specifies whether edited features will be returned. Returned results are organized in a layer-by-layer fashion. If set to `true`, each layer may have edited features returned in an `editedFeatures` object.
+
+The `editedFeatures` object returns full features including the original features prior to delete, the original and current features for updates, and the current rows for inserts, which may contain implicit changes (for example, as a result of a calculation rule).
+
+The response includes no edited features and `exceededTransferLimit = true` if the count of edited features to return is more than the `maxRecordCount` value. If clients are using this parameter to maintain a cache, they should invalidate the cache when `exceededTransferLimit = true` is returned. If the server encounters an error when generating the list of edits in the response, `exceededTransferLimit = true` is also returned.
+
+Edited features are returned in the spatial reference of the feature service as defined by the service's `spatialReferenceobject` value or by the `spatialReference` value of the layer's extent object.
+
+The default for this parameter is `false` . When async is `true` this parameter is ignored.
+
+```
+returnEdits=true | false 
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`async` 
+
+(Optional) 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true`, the request is processed as an asynchronous job, and a URL is returned that a client can visit to check the status of the job. The default is `false`.
+
+```
+async=true | false
+``` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outSR` 
+
+(Optional) 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+introduced at ArcGIS Enterprise 11.1. Specifies the output spatial reference.
+
+Syntax: `outSR={wkid=<wkid>}` 
+
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## JSON Response syntax
+
+JSON response (when async = false):
+
+```json
+{
+  "moment" : <datetime>,
+  "fullUpdate" : <true | false>,
+  "validateErrorsCreated" : <true | false>, 
+  "dirtyAreaCount" : <long>,
+  "exceededTransferLimit" : <true | false>,  // only if returnEdits is true 
+  "serviceEdits" : [                        // only if returnEdits is true and async is false
+    { 
+      "id" : <layerId>,  
+      "editedFeatures" : 
+        { 
+          "adds" : [<currentFeature1>, <currentFeature2>], 
+          "updates" : [ 
+            [<originalFeature3>, <currentFeature3>], 
+            [<originalFeature4>, <currentFeature4>] 
+          ], 
+          "deletes" : [<originalFeature5>, <originalFeature6>] 
+        } 
+    } 
+  ], 
+  "discoveredSubnetworks" : [  
+    { 
+      "domain" : <string>, 
+      "tier" : <string>, 
+      "subnetwork" : <string> 
+    } 
+  ], 
+  "success" : <true | false>,
+  "error" : {                   // only if success is false
+    "extendedCode" : <HRESULT>,
+    "message" : <error message>,
+    "details" : [ <detail> ]
+  }
+}
+
+```
+
+ 
+
+JSON response (when async = true):
+
+```json
+{
+  "statusUrl" : <url>
+}
+
+```
+
+ 
+
+JSON response to the status URL (when pending or in progress):
+
+```json
+{
+  "status" : "<Pending | InProgress>",
+  "submissionTime" : <datetime>,
+  "lastUpdatedTime" : <datetime>
+ }
+
+```
+
+ 
+
+JSON response to the status URL (when completed):
+
+```json
+{
+  "moment" : <datetime>,
+  "validateErrorsCreated" : <true | false>,
+  "dirtyAreaCount" : <long>,
+  "fullUpdate" : <true | false>,
+  “exceededTransferLimit : <true | false>,  // only if returnEdits is true  
+  "discoveredSubnetworks" : [  
+    { 
+      "domain" : <string>, 
+      "tier" : <string>, 
+      "subnetwork" : <string> 
+    } 
+  ], 
+  "status" : "Completed",
+  "submissionTime" : <datetime>,
+  "lastUpdatedTime" : <datetime>,
+  "success" : <true | false>,
+  "error" : {              // only if success is false
+    "extendedCode" : <HRESULT>,
+    "message" : <error message>,
+    "details" : [ <detail> ]
+  }
+}
+
+```
+
+ 
+
+## Example usage
+
+Validate the full extent for a utility network using the `validateNetworkTopology` operation.
+
+Request URL and parameters:
+
+`https://myserver.esri.com/server/rest/services/NapervilleElectric/UtilityNetworkServer/validateNetworkTopology` 
+
+```json
+f=json
+gdbVersion=sde.default
+validateArea=
+{	
+ "xmin": 1034659.2752358826,	
+ "ymin": 1871561.7755379943,	
+ "xmax": 1034730.4307899779,	
+ "ymax": 1871623.0833411064,	
+ "spatialReference": {
+  "wkid": 102671,
+  "latestWkid": 3435	
+ }
+}
+returnEdits=true
+async=false
+```
+
+ 
+
+JSON response (async=false):
+
+```json
+{
+ "exceededTransferLimit": false,
+ "serviceEdits": [
+  {
+   "id": 17,
+   "editedFeatures": {
+    "spatialReference": {
+     "wkid": 3498,
+     "latestWkid": 3498,
+     "xyTolerance": 0.0032808333333333331,
+     "zTolerance": 0.001,
+     "mTolerance": 0.001,
+     "falseX": -117608900,
+     "falseY": -91881400,
+     "xyUnits": 3048.00609601219276,
+     "falseZ": -100000,
+     "zUnits": 10000,
+     "falseM": -100000,
+     "mUnits": 10000
+    },
+    "deletes": [
+     {
+      "attributes": {
+       "objectid": 4426,
+       "isretired": 1,
+       "status": null,
+       "sourceid": 7,
+       "guid": "{693652D5-A21B-47D1-B416-9452F60EC399}",
+       "updatetype": 1,
+       "creationdate": 1565614408000,
+       "creator": "jwilson",
+       "lastupdate": 1565614408000,
+       "updatedby": "jwilson",
+       "globalid": "{FFF05EA7-7A11-484C-A6F5-5103E8AE99F0}",
+       "Shape__Area": 4883.66339633075313,
+       "Shape__Length": 434.559498333333238
+      },
+      "geometry": {
+       "hasZ": true,
+       "hasM": true,
+       "rings": [
+        [
+         [
+          6810561.460448131,
+          1846168.57139080763,
+          0,
+          null
+         ],
+         [
+          6810561.460448131,
+          1846360.39154522121,
+          0,
+          null
+         ],
+         [
+          6810586.92004288733,
+          1846360.39154522121,
+          0,
+          null
+         ],
+         [
+          6810586.92004288733,
+          1846168.57139080763,
+          0,
+          null
+         ],
+         [
+          6810561.460448131,
+          1846168.57139080763,
+          0,
+          null
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "objectid": 4427,
+       "isretired": 1,
+       "status": null,
+       "sourceid": 7,
+       "guid": "{693652D5-A21B-47D1-B416-9452F60EC399}",
+       "updatetype": 1,
+       "creationdate": 1565614408000,
+       "creator": "jwilson",
+       "lastupdate": 1565614408000,
+       "updatedby": "jwilson",
+       "globalid": "{217AFE10-4E41-4E7B-8BF7-E05602CDEF1F}",
+       "Shape__Area": 277.6728423858433,
+       "Shape__Length": 330.236872333333281
+      },
+      "geometry": {
+       "hasZ": true,
+       "hasM": true,
+       "rings": [
+        [
+         [
+          6810561.460448131,
+          1846196.97225263715,
+          0,
+          null
+         ],
+         [
+          6810561.460448131,
+          1846360.39154522121,
+          0,
+          null
+         ],
+         [
+          6810563.15959171951,
+          1846360.39154522121,
+          0,
+          null
+         ],
+         [
+          6810563.15959171951,
+          1846196.97225263715,
+          0,
+          null
+         ],
+         [
+          6810561.460448131,
+          1846196.97225263715,
+          0,
+          null
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "objectid": 4428,
+       "isretired": 1,
+       "status": null,
+       "sourceid": 9,
+       "guid": "{BC20AD29-19DD-4D4B-A535-3D726E264BC9}",
+       "updatetype": 1,
+       "creationdate": 1565614408000,
+       "creator": "jwilson",
+       "lastupdate": 1565614408000,
+       "updatedby": "jwilson",
+       "globalid": "{4C8B4579-EE04-42CC-AA94-57D0A3143959}",
+       "Shape__Area": 1.13553461781511045,
+       "Shape__Length": 4.26245866666666551
+      },
+      "geometry": {
+       "hasZ": true,
+       "hasM": true,
+       "rings": [
+        [
+         [
+          6810577.9554938823,
+          1846158.81091164052,
+          0,
+          null
+         ],
+         [
+          6810577.9554938823,
+          1846159.876526311,
+          0,
+          null
+         ],
+         [
+          6810579.02110855281,
+          1846159.876526311,
+          0,
+          null
+         ],
+         [
+          6810579.02110855281,
+          1846158.81091164052,
+          0,
+          null
+         ],
+         [
+          6810577.9554938823,
+          1846158.81091164052,
+          0,
+          null
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "objectid": 4429,
+       "isretired": 1,
+       "status": null,
+       "sourceid": 9,
+       "guid": "{BC20AD29-19DD-4D4B-A535-3D726E264BC9}",
+       "updatetype": 1,
+       "creationdate": 1565614408000,
+       "creator": "jwilson",
+       "lastupdate": 1565614408000,
+       "updatedby": "jwilson",
+       "globalid": "{E91C3BF8-EEF6-4E3C-A314-4DF3D6D57F72}",
+       "Shape__Area": 1.13553461781511045,
+       "Shape__Length": 4.26245866666666551
+      },
+      "geometry": {
+       "hasZ": true,
+       "hasM": true,
+       "rings": [
+        [
+         [
+          6810561.777048558,
+          1846196.47225365043,
+          0,
+          null
+         ],
+         [
+          6810561.777048558,
+          1846197.537868306,
+          0,
+          null
+         ],
+         [
+          6810562.84266321361,
+          1846197.537868306,
+          0,
+          null
+         ],
+         [
+          6810562.84266321361,
+          1846196.47225365043,
+          0,
+          null
+         ],
+         [
+          6810561.777048558,
+          1846196.47225365043,
+          0,
+          null
+         ]
+        ]
+       ]
+      }
+     }
+    ]
+   }
+  }
+ ],
+ "moment": 1565614427020,
+ "validateErrorsCreated": false,
+ "dirtyAreaCount": 0,
+ "fullUpdate": false,
+ "discoveredSubnetworks": [
+  {
+   "domain": "ElectricDistribution",
+   "tier": "Medium Voltage",
+   "subnetwork": "ElliotSt-North"
+  },
+  {
+   "domain": "ElectricDistribution",
+   "tier": "Low Voltage",
+   "subnetwork": "NorthlakeAssoc"
+  }
+ ],
+ "success": true
+}
+```
+
+ 

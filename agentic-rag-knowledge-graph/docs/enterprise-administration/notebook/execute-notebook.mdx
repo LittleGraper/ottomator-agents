@@ -1,0 +1,284 @@
+---
+title: "Execute Notebook"
+description: "The Execute Notebook operation allows administrators to remotely run a notebook in an ArcGIS Notebook Server site."
+slug: "execute-notebook"
+url: "/execute-notebook"
+guid: "GUID-D143573D-18A6-4EDA-B66F-256637E51279"
+migratedTopicMetadata:
+  FTITLE: "Execute Notebook"
+  FDESCRIPTION: "the API call for scheduling notebooks"
+  FCHANGES: "https://devtopia.esri.com/WebGIS/arcgis-enterprise-documentation/issues/3773"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9.1 - *"
+  CREATED-ON: "18/02/2022 12:33:06"
+  FAUTHOR: "bpolk"
+  FSTATUS: "Released"
+  MODIFIED-ON: "29/03/2022 13:06:08"
+  VERSION: "5"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "7"
+  ED: "GUID-A126145E-6A95-4BC5-A02C-C8BC2F63B56D"
+  FUSERGROUP: "VUSERGROUPSERVERDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /notebooks/executeNotebook
+  urlSegments:
+    - name: <notebookserveradmin>
+      url: /notebook-server-administration-root
+    - name: /notebooks/executeNotebook
+  methods:
+    - post
+  sslOnly: 'yes'
+  versionIntroduced: '10.8'
+  requiredCapability: 'Administrator or Create and Edit '
+  relatedResources:
+    - name: Notebooks
+      url: /notebooks
+    - name: Notebook
+      url: /notebook
+    - name: Open Notebook
+      url: /close-notebook
+    - name: Close Notebook
+      url: /close-notebook
+---
+
+## Description
+
+The `executeNotebook`  operation allows administrators and users with Create and Edit ArcGIS Notebooks privileges to automate notebook execution in an ArcGIS Notebook Server site. The notebook specified in the operation is run with all cells in order.
+
+Using this operation and an external scheduling tool, you can schedule the automated execution of a notebook either once or as a regular occurrence. This allows you to automate repeating tasks such as data collection and cleaning, content updates, and portal administration. On Linux machines, use a cron job to schedule the `executeNotebook`  operation; on Windows machines, you can use the **Task Scheduler** app.
+
+<Note type={"note"}>
+
+To run this operation, you must be signed in with an ArcGIS Enterprise portal account. You cannot execute notebooks from the ArcGIS Notebook Server primary site administrator account.
+
+</Note>
+
+You can specify parameters to be used in the notebook at execution time. If you specify one or more parameters, they are inserted into the notebook as a new cell. This cell is placed at the beginning of the notebook, unless you added the `parameters`  tag to a cell.
+
+<Note type={"tip"}>
+
+To add a tag to a notebook cell, click **View** > **Cell Toolbar** > **Tags** on the notebook editor menu ribbon, select a cell, type the tag's value, and click **Add tag**.
+
+</Note>
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`itemId` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The portal item ID of the notebook you want to execute. You can find this value on the [`Notebook` ](/notebook) resource in this directory or in the portal as part of the item details page URL. Ensure that the notebook is using a runtime that's compatible with your software version.
+
+Example
+
+```javascript
+itemId=70770e46d4be426dbd3adbec5f9124c8
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`updatePortalItem` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether the notebook portal item is updated after execution. The default is `true` . You can specify `true`  when the notebook you're executing contains information that needs to be updated, such as a workflow that collects the most recent version of a dataset. It may not be important to update the portal item if the notebook won't store new information after execution, such as an administrative notebook that sends email reminders to inactive users.
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`notebookParameters` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Optional parameters in JSON format that will be added to the notebook for this execution. The parameters are inserted as a new cell directly after the cell you tagged as `parameters` . The following data types are supported for task parameters: string, long, Boolean, date, feature set, and record set.
+
+Example
+
+```javascript
+notebookParameters=
+{
+	"myLongVariable": 100,
+	"epochSecondsDate": 1632326711000,
+	"myStringVariable": "secret.pwd",
+	"myDoubleVariable": 3.14,
+	"myBooleanVariable": false,
+	"myLinearUnitDictionary": {
+		"distance": 345.678,
+		"units": "esriMiles"
+	},
+	"myFeatureSetJSON": {
+		"geometryType": "esriGeometryPoint",
+		"spatialReference": {
+			"wkid": 4326
+		},
+		"fields": [{
+				"name": "Id",
+				"type": "esriFieldTypeOID",
+				"alias": "Id"
+			},
+			{
+				"name": "Name",
+				"type": "esriFieldTypeString",
+				"alias": "Name"
+			}
+		],
+		"features": [{
+				"geometry": {
+					"x": -104.44,
+					"y": 34.83
+				},
+				"attributes": {
+					"Id": 43,
+					"Name": "Feature 1"
+				}
+			},
+			{
+				"geometry": {
+					"x": -100.65,
+					"y": 33.69
+				},
+				"attributes": {
+					"Id": 67,
+					"Name": "Feature 2"
+				}
+			}
+		]
+	}
+}
+
+
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`saveInjectedParameters` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether the `notebookParameters`  cell is saved in the notebook for future use. The default is `false` .
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` .
+
+Values: `html`  \| `json`  \| `pjson` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Response properties
+
+<StyledTable headers={"Property,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`status` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Indicates whether the operation succeeded in executing the notebook.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+```javascript
+https://gisserver.domain.com:11443/arcgis/admin/notebooks/executeNotebook
+itemId=70770e46d4be426dbd3adbec5f9124c8
+updatePortalItem=true
+notebookParameters={
+  "name": "somename",
+  "population": 19927500,
+  "pop_percent": 11.94,
+  "lowest_elevation_ft": -220,
+  "highest_elevation": 12486,
+  "top5cities": ["City 1", "City 2", "City 3", "City 4", "City 5"],
+  "top5Values": [ 100, 98.2, 93.3, 89, 74],
+  "isTrue": false,
+  "value": null,
+ "access": { "allowed": true}
+}
+saveInjectedParameters=false
+```
+
+ 
+
+## JSON Response example
+
+```other
+{
+  "jobId": "j3a581ce0-cf2f-4190-96a5-c5bc0617dd5d",
+  "jobUrl": "https://mydomain.example.com/notebookserver/admin/system/jobs/j3a581ce0-cf2f-4190-96a5-c5bc0617dd5d",
+  "status": "success"
+}
+```
+
+ 

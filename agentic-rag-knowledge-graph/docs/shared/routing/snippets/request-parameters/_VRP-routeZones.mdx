@@ -1,0 +1,43 @@
+import ParamMetadata from "../../../components/param-metatdata" 
+
+<ParamMetadata types={[{name:"feature",link:"../routing-data-types#feature"}]} />
+
+{/* <p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p> */}
+
+Delineates work territories for given routes. A route zone is a polygon feature used to constrain routes to servicing only those orders that fall within or near the specified area. The following are examples of when route zones may be useful:
+
+-   Some of your employees don't have the required permits to perform work in certain states or communities. You can create a hard route zone so they only visit orders in areas where they meet the requirements.
+-   One of your vehicles breaks down frequently and you want to minimize response time by having it only visit orders that are close to your maintenance garage. You can create a soft or hard route zone to keep the vehicle nearby.
+
+You can specify additional information about route zones with the following attributes:
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for route zones</span></summary>
+
+ #### Attributes for route zones
+
+-   <p class="space-x-2"><span class="font-bold">RouteName</span><span class="font-sm text-color-3">string (length: 1024)</span></p>
+
+    The name of the route to which this zone applies. A route zone can have a maximum of one associated route. This attribute is a foreign key to the `Name` attribute in the [`routes`](#routes) parameter, so the values must match. The attribute cannot have a `null` value.
+
+-   <p class="space-x-2"><span class="font-bold">IsHardZone</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#6d29cc]">default:null</span></p> 
+
+    **Allowed values:** `0`, `1`
+
+    Specify if the route zone is hard or soft. The attribute value is specified as an integer with possible values being `0` or `1`. A value of `1` indicates that the route zone is hard; that is, an order that falls outside of the route zone area can't be assigned to the route. A value of `0` indicates that such orders can still be assigned, but the cost of servicing the order is weighted by a function that is based on the Euclidean distance from the route zone. Basically, this means that as the straight-line distance from the soft zone to the order increases, the likelihood of the order being assigned to the route decreases.
+
+    <Note type={"note"}>
+
+    Even though a route associated with a hard route zone can only service orders inside the route zone, other routes can still enter and service the orders inside the same zone. This is because route zones restrict the route, not the orders. If you want to assign all the orders in an area exclusively to one route, don't use route zones; instead, for all the orders in an area, change the `RouteName` attribute on the `orders` parameter to the proper route, and set the `AssignmentRule` attribute for the orders to `2` .
+
+    </Note>
+</details>
+
+**Example**
+
+The example shows how to add route zones associated with the routes in a fleet routing problem. The two routes in the input fleet routing problem are operated by vans that are only licensed to service orders in a predetermined area and so cannot service orders that are outside of the route zone. Therefore, the `IsHardZone` attribute value is set to `1` to ensure that the vans are only assigned orders that are within the route zones. 
+
+The first zone is a single-part polygon feature made up of four points. The second zone is a two-part polygon feature in which both parts are made up of four points. The barrier geometries are in the spatial reference of the network dataset. Therefore, the `spatialReference` property is not required. 
+
+<CodeBlock language="json" source="../../code-samples/vrp/examples/inputs/routeZones_ex.json" group="json" maxLines={20} expandable/>
+

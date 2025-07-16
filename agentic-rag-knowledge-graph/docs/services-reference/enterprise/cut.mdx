@@ -1,0 +1,230 @@
+---
+title: "Cut"
+description: "This operation splits the target polyline or polygon where it's crossed by the cutter polyline."
+slug: "cut"
+url: "/cut"
+guid: "GUID-9C3DA65A-7F33-48B2-B456-1B0BAEB89A15"
+migratedTopicMetadata:
+  FTITLE: "Cut"
+  FDESCRIPTION: ""
+  FCHANGES: "Fixing broken links"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9.1- *"
+  CREATED-ON: "07/09/2021 10:48:00"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "04/10/2021 10:05:47"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-B5EFA539-10BF-4FB3-A5C3-513D50139EA5"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /Utilities/Geometry/GeometryServer/cut
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /Utilities/Geometry/GeometryServer/cut
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.0'
+---
+
+## Description
+
+The `cut` operation is performed on a [geometry service resource](/geometry-service). This operation splits the target polyline or polygon where it is crossed by the cutter polyline. This operation calls `simplify` on the input `cutter` and `target` geometries. You can provide arguments to the `cut` operation as query parameters defined in the following parameters:
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+<StyledTableCell cellStyle="markdown">
+
+`cutter` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the polyline that will be used to divide the `target` into pieces where it crosses the `target`. The spatial reference of the polylines is specified by `sr`. The structure of the polyline is the same as the structure of the [JSON polyline objects](/geometry-objects#polyline) returned by the ArcGIS REST API. 
+
+Syntax
+
+```other
+<polyline1>
+```
+
+Example
+
+```json
+{
+  "paths": [
+    [[-117,34],[-116,34],[-117,33]],
+    [[-115,44],[-114,43],[-115,43]]
+  ]
+}
+```
+
+</StyledTableCell>
+</StyledTableRow>
+
+<StyledTableRow>
+<StyledTableCell cellStyle="markdown">
+
+`target` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the array of polylines or polygons to be cut. The structure of the geometry is the same as the structure of the [JSON geometry objects](/geometry-objects) returned by the ArcGIS REST API. The spatial reference of the target geometry array is specified by `sr`.
+
+<Note type={"note"}>
+
+The `target` property is a geometry of the type defined by `geometryType`.
+
+</Note>
+
+Syntax
+
+```other
+{"geometryType": "<esriGeometryPolyline | esriGeometryPolygon>","geometries": [<geometry1>, <geometry2>]}
+
+```
+
+Example
+
+```json
+{
+  "geometryType": "esriGeometryPolyline",
+  "geometries": [
+    {
+      "paths": [
+        [[-117,34],[-116,34],[-117,33]],
+        [[-115,44],[-114,43],[-115,43]]
+      ]
+    },
+    {
+      "paths": [
+        [[32.49,17.83],[31.96,17.59],[30.87,17.01],[30.11,16.86]]
+      ]
+    }
+  ]
+}
+```
+
+</StyledTableCell>
+</StyledTableRow>
+
+<StyledTableRow>
+<StyledTableCell cellStyle="markdown">
+
+`sr` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the well-known ID (WKID) of the spatial reference or a [spatial reference JSON object](/geometry-objects#spatial-reference) for the input geometry. For a list of valid WKID values, see [Using spatial references](/using-spatial-references).
+
+</StyledTableCell>
+</StyledTableRow>
+
+<StyledTableRow>
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default format is `html`.
+
+Values: `html`  \| `json`  \| `pjson` 
+
+</StyledTableCell>
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+The following is a decoded sample request URL (the actual URL must be encoded) for `cut` that demonstrates cutting a polyline geometry:
+
+[`https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer/cut?sr=2229&target={"geometryType":"esriGeometryPolyline","geometries":[{"paths":[[[6805743,1843230],[6805740,1843619]]]},{"paths":[[[6802621,1843581],[6805496,1844963]]]}]}&cutter={"paths":[[[6805210,1843869],[6805842,1843529],[6805259,1843173]]]}&f=html`](https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer/cut?sr=2229&target=%7B%22geometryType%22%3A%22esriGeometryPolyline%22%2C%22geometries%22%3A%5B%7B%22paths%22%3A%5B%5B%5B6805743%2C1843230%5D%2C%5B6805740%2C1843619%5D%5D%5D%7D%2C%7B%22paths%22%3A%5B%5B%5B6802621%2C1843581%5D%2C%5B6805496%2C1844963%5D%5D%5D%7D%5D%7D&cutter=%7B%22paths%22%3A%5B%5B%5B6805210%2C1843869%5D%2C%5B6805842%2C1843529%5D%2C%5B6805259%2C1843173%5D%5D%5D%7D&f=html)
+
+## JSON Response syntax
+
+The geometry server's `cut` method returns a `cutIndexes` array along with an array of cut geometries. The `cutIndexes` array are used to determine which of the input geometries were cut to get the resultant geometries. 
+
+```other
+{
+  "geometryType": "<esriGeometryPolyline | esriGeometryPolygon>", 
+  "geometries": [<geometry1>, <geometry2>, ..., <geometryN>], 
+  "cutIndexes:": [integer1, integer2]
+}
+```
+
+## JSON Response example
+
+```json
+{
+ "geometryType": "esriGeometryPolyline",
+ "geometries": [
+  {"paths": [
+   [
+    [
+     6805742.999940723,
+     1843229.9998401403
+    ],
+    [
+     6805741.168907642,
+     1843467.4288272262
+    ]
+   ],
+   [
+    [
+     6805740.271927804,
+     1843583.727151066
+    ],
+    [
+     6805739.999946713,
+     1843619.0000463873
+    ]
+   ]
+  ]},
+  {"paths": [[
+   [
+    6805741.168907642,
+    1843467.4288272262
+   ],
+   [
+    6805740.271927804,
+    1843583.727151066
+   ]
+  ]]},
+  {"paths": [[
+   [
+    6802620.999951139,
+    1843581.0001223981
+   ],
+   [
+    6805496.000106633,
+    1844962.9999830574
+   ]
+  ]]}
+ ],
+ "cutIndexes": [
+  0,
+  0,
+  1
+ ]
+}
+```

@@ -1,0 +1,335 @@
+---
+title: "Update Errors"
+description: "Using the specified version and session ID, set the specified properties of the validation error features found in the GDB_VALIDATION*ERROR tables."
+slug: "update-errors"
+url: "/update-errors"
+guid: "GUID-FADD7D92-C094-4C64-A4F5-E5F201A379CD"
+migratedTopicMetadata:
+  FTITLE: "Update Errors"
+  FDESCRIPTION: "Using the specified version and session ID, set the specified properties of the validation error features fournd in the GDB_VALIDATION*ERROR tables. "
+  FCHANGES: "removing quotes from boolean examples for - returnErrors
+/geodatabase/issues/10946"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1 - *"
+  CREATED-ON: "06/02/2023 11:02:42"
+  FAUTHOR: "mjarman"
+  FSTATUS: "Released"
+  MODIFIED-ON: "07/02/2023 08:09:34"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-864C0BEB-F6DA-4CFE-9F45-A862DAB6AFCF"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/ValidationServer/updateErrors
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/ValidationServer/updateErrors
+  methods:
+    - post
+  versionIntroduced: '10.7'
+---
+
+## Description
+
+Using the specified version and session id, update an error feature's attributes, which are stored in the GDB_Validation\*Errors tables. This is a generalized API that supports extensions to the core validation framework (for example, the ArcGIS Data Reviewer extension that contains additional metadata on each persisted error feature).
+
+<Note>
+For Data Reviewer results, an ArcGIS Data Reviewer server extension license is required.
+</Note>
+
+##  Request Parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the output format of the response. The default response format is `html`.
+
+Values: `html` | `json` | `pjson`
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`gdbVersion` 
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the name of the geodatabase version (default is DEFAULT).
+
+Syntax: `gdbVersion=<version>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sessionId`
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the sessionId (guid) used to lock the version. A client can use the sessionId to enable long transaction (undo/redo) in a version.
+
+If the calling client is editing a named version, the sessionId must be provided; if the client is editing DEFAULT, the version may not be locked and the sessionId should not be specified.
+
+Syntax: `sessionId=<guid>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`errorFeatures` 
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The error features to be updated. The structure of each feature in the array is the similar to the structure of the json feature object returned by the ArcGIS REST API. 
+
+The `ruleType` property is introduced at ArcGIS Enterprise 10.8.1 to support `topologyRules`. The default value is `validationRules`.
+
+Syntax:
+
+```other
+[
+  {
+    "ruleType": "validationRules" | "topologyRules",
+    "errorType" : "object" | "point" | "line" |
+                 "polygon",
+    "features" : [
+      {
+        "globalId" : "<guid>",
+        "fields" : {
+          "name1" : <value1>,
+          "name2" : <value2> 
+        }
+      }
+    ]
+  }  
+]
+
+```
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnEdits` 
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Boolean parameter that returns features edited due to errors update. Results returned are organized in a layer by layer fashion. If returnEdits is set to true, each layer may have edited features returned in an editedFeatures object.
+
+The editedFeatures object returns full features including the original features prior to delete, the original and current features for updates and the current rows for inserts which may contain implicit changes (e.g. as a result of a calculation rule).
+
+The response includes no  editedFeatures  and  exceededTransferLimit = true  if the count of edited features to return is more than the  maxRecordCount . If clients are using this parameter to maintain a cache, they should invalidate the cash when   exceededTransferLimit = true   is returned . If the server encounters an error when generating the list of edits is the response ,  exceededTransferLimit = true   is also returned .
+
+Edited features are returned in the spatial reference of the feature service as defined by the services  spatialReferenceobject or by the spatialReference of the layers extent object.
+
+The default for this parameter is `false`.
+
+Values: `true` | `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## JSON Response Syntax
+
+JSON response:
+
+```other
+{
+  "moment" : <datetime>,
+  "success" : <true | false>,
+  "error" : {                   // only if success is false
+    "extendedCode" : <HRESULT>,
+    "message" : <error message>,
+    "details" : [ <detail> ]  
+  }
+}
+
+```
+
+## Example usages
+
+### Example one
+
+Update error features using the `updateErrors` operation.
+
+Request URL and parameters:
+
+`https://myserver.esri.com/server/rest/services/LandUse/ValidationServer/updateErrors`
+
+```javascript
+f=json
+gdbVersion=UNADMIN.CAROLINA
+sessionId={6F545D22-8689-4836-B22F-4DF867019DEE}
+errorFeatures=
+[  
+   {  
+      "errorType":"polygon",
+      "features":[  
+         {  
+            "globalId":"{E1E44DA0-562A-4AE9-BC07-AC105A4A0C2A}",
+            "fields":{  
+               "ISEXCEPTION":1
+            }
+         },
+         {  
+            "globalId":"{D9DF7E5C-6B10-4517-84FC-10A971DC6899}",
+            "fields":{  
+               "ISEXCEPTION":1
+            }
+         },
+         {  
+            "globalId":"{498733A2-9561-4BE3-A25F-B356040CB481}",
+            "fields":{  
+               "ISEXCEPTION":0
+            }
+         }
+      ]
+   }
+]
+```
+
+JSON response:
+
+```javascript
+{
+ "moment": 1555011525855,
+ "success": true
+}
+```
+### Example two
+
+Update Data Reviewer visual review errors to verified and acceptable using the `updateErrors` operation.
+
+Request URL and parameters:
+
+`https://myserver.esri.com/server/rest/services/LandUse/ValidationServer/updateErrors`
+
+Update the phase of a polygon error to `Verification` and its status to `Acceptable`.
+
+<Note>
+Error phase code 6 represents the `Verification` phase and error status code 4 indicates the `Acceptable` status.
+</Note>
+
+```js
+f=json 
+gdbVersion=UNADMIN.CAROLINA 
+sessionId={6F545D22-8689-4836-B22F-4DF867019DEE} 
+errorFeatures=  
+
+[ 
+{ 
+    "ruleType": "validationRules", 
+    "errorType": "polygon", 
+    "features": [ 
+      { 
+        "globalId": "{324335DE-FF1F-42BD-914A-BDD262C23981}",           
+        "fields": { 
+          "errorphase": 6,                    
+          "errorstatus": 4 
+        } 
+      } 
+    ] 
+  } 
+] 
+```
+
+JSON response:
+
+```js
+{ 
+ "moment": 1710972223, 
+ "success": true 
+} 
+```
+
+### Example three
+
+Update Data Reviewer visual review errors to be reviewed and unacceptable using the `updateErrors` operation.
+
+Request URL and parameters:
+
+`https://myserver.esri.com/server/rest/services/LandUse/ValidationServer/updateErrors`
+
+Update the phase of a polygon error to `Review` and its status to `Unacceptable`.
+
+<Note>
+Error phase code 2 represents the `Review` phase and error status code 6 indicates the `Unacceptable` status.
+</Note>
+
+```js
+f=json 
+gdbVersion=UNADMIN.CAROLINA 
+sessionId={6F545D22-8689-4836-B22F-4DF867019DEE} 
+errorFeatures=
+
+[ 
+{ 
+    "ruleType": "validationRules", 
+    "errorType": "polygon", 
+    "features": [ 
+      { 
+        "globalId": "{318335DE-FF1F-42BD-914A-BDD53B23981}",           
+        "fields": { 
+          "errorphase": 2,                    
+          "errorstatus": 6 
+        } 
+      } 
+    ] 
+  } 
+] 
+```
+
+JSON response:
+
+```js
+{ 
+ "moment": 1710972254, 
+ "success": true 
+} 
+```

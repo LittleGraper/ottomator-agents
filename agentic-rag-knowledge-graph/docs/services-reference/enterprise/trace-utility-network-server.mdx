@@ -1,0 +1,1765 @@
+---
+title: "Trace"
+description: "A trace refers to a preconfigured algorithm that systematically travels a network to return results."
+slug: "trace-utility-network-server"
+url: "/trace-utility-network-server"
+guid: "GUID-9BA1237E-2BCD-4B32-861A-F7714600A3C7"
+migratedTopicMetadata:
+  FTITLE: "trace (Utility Network Server)"
+  FDESCRIPTION: "Description of trace REST API operation"
+  FCHANGES: "Remove conref for Advanced Editing UTE requirement, see #10331"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "14/08/2023 06:55:03"
+  FAUTHOR: "jderose"
+  FSTATUS: "Released"
+  MODIFIED-ON: "25/09/2023 05:28:11"
+  VERSION: "17"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-094DB6AF-B59E-4F53-8452-17FB1217D1E3"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/UtilityNetworkServer/trace
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/UtilityNetworkServer/trace
+  methods: 
+    - post
+  versionIntroduced: '10.6'
+---
+
+import GUID_000464AF_E658_4D8F_B158_BB44B44FA2D7_GUID_E5D7D08D_8267_47EC_953B_0094DB76F8DD from "./snippets/GUID-000464AF-E658-4D8F-B158-BB44B44FA2D7/_GUID-E5D7D08D-8267-47EC-953B-0094DB76F8DD";
+
+## Description
+
+The `trace` operation is used to run traces on your network which can be configured to discover information or solve problems. A trace refers to a preconfigured algorithm that systematically travels a network to return results. Generalized traces allow you to trace across multiple types of domain networks. Multiple parameters and properties are provided with the `trace` operation that support various analytic workflows. 
+
+All traces use the network topology to read cached information about network features. This can improve performance of complex traces on large networks. Trace results are not guaranteed to accurately represent a utility network when dirty areas are present. The network topology must be validated to clean dirty areas and to ensure that it reflects the most recent edits or updates made to the network. The trace operation is supported both synchronously and asynchronously.
+
+[Learn more about utility network trace types](https://pro.arcgis.com/en/pro-app/latest/help/data/utility-network/utility-network-trace-types.htm)
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the output format of the response. The `pbf` response format was introduced at ArcGIS Enterprise 11.2. The default response format is `html`.
+
+```
+f=html | json | pjson | pbf
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`gdbVersion`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The name of the geodatabase version. The default is `sde.DEFAULT` .
+
+Syntax: `gdbVersion=<version>`
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sessionId`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The token guid used to lock the version. If the calling client has previously started a service session (editing) and holds an exclusive lock on the specified version, the request will fail if the `sessionId` is not provided. If the specified version is currently locked by any other session, the request will fail if the `sessionId` is not provided or does not match the `sessionId` that holds the exclusive lock.
+
+Syntax: `sessionId=<guid>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`moment`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The session moment (the default is the version current moment). This should only be specified by the client when they do not want to use the current moment.
+
+Syntax: `moment=<Epoch time in milliseconds>` 
+
+Example: `moment=1730456642` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`traceType`
+
+(Required)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The trace type. This specifies the core algorithm that will be run to analyze the network. Trace types can be configured using the [`traceConfiguration`](/trace-utility-network-server#traceconfiguration-properties) parameter.
+
+```
+traceType=connected | subnetwork | subnetworkController | upstream | downstream | loops | shortestPath | isolation 
+```
+
+Syntax: `traceType=<traceType>`
+
+Example: `traceType=subnetwork` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`traceLocations`
+
+(Required)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the locations for starting points and barriers. An empty array must be used when performing a subnetwork trace if a `subnetworkName` is provided as part of the `traceConfiguration` —for example, `traceLocations=[]` .
+
+`traceLocations` is ignored by the trace if the following required properties are not defined:
+
+-   A `percentAlong` value is required for edge features and objects.
+-   A `terminalID` value is required for junction features and objects.
+
+Syntax: 
+
+```json
+[
+ {
+  "traceLocationType" : `startingPoint` | `barrier`, 
+  "globalId" : <guid>,
+  "terminalId" : <long>,   // optional
+  “percentAlong” : <double>, // optional
+  "isFilterBarrier" : true | false // optional Introduced at 10.8.1
+ }
+]
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`traceConfiguration`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The collection of trace configuration properties. Depending on the trace type, some of the trace configuration properties are required. 
+
+To reference the collection of trace configuration properties, see the [traceConfiguration properties](/trace-utility-network-server#traceconfiguration-properties) section below.
+
+Syntax: `traceConfiguration=<traceConfiguration>`
+
+<GUID_000464AF_E658_4D8F_B158_BB44B44FA2D7_GUID_E5D7D08D_8267_47EC_953B_0094DB76F8DD />
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`traceConfigurationGlobalId`
+
+(Optional) 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Introduced at ArcGIS Enterprise 10.9. The global ID of a [named trace configuration](https://pro.arcgis.com/en/pro-app/latest/help/data/utility-network/about-trace-configurations.htm). When specified, this configuration is used instead of the `traceConfiguration` parameter. Additionally, named trace configurations are persisted with their own trace type so the trace type parameter is ignored.
+
+
+Syntax: `traceConfigurationglobalId=<guid>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`resultType` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This parameter was deprecated at ArcGIS Enterprise 10.8.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`resultTypes`
+
+(Optional) 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The types of results to return for the trace. The `connectivity` type was introduced at ArcGIS Enterprise 10.9.1. The `features` and `associations` types were introduced at ArcGIS Enterprise 11.1.
+
+
+Syntax :
+
+```json
+[
+  { 
+    "type" : `elements` | `aggregatedGeometry` | `connectivity` | `features` | `associations`,
+    "includeGeometry" : true | false,
+    "includePropagatedValues": true | false,
+    "includeDomainDescriptions" : true | false
+  },...
+]
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`async`
+
+(Optional) 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Introduced at ArcGIS Enterprise 10.9.1. If true, the request is processed as an asynchronous job, and a URL is returned that a client can visit to check the status of the job. The default is false.
+
+```
+async=true | false
+``` 
+
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outSR`
+
+(Optional) 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Introduced at ArcGIS Enterprise 11.1. Specifies the output spatial reference for the trace result.
+
+Syntax: `outSR={wkid=<wkid>}` 
+
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## traceConfiguration properties
+
+The `traceConfiguration` parameter is a collection of trace configuration properties that include basic properties for a trace and control trace settings for traversability, functions, filters, outputs, and propagators.
+
+<StyledTable headers={"Property,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`includeContainers`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether to include containers in the trace result. The default is `false` .
+
+```
+includeContainers=true | false
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`includeContent`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether to include content in the trace result. The default is `false` .
+
+```
+includeContent=true | false
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`includeStructures`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether to include structures in the trace result. The default is `false`.
+
+```
+includeStructures=true | false
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`includeBarriers`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether to include barrier features that stop a trace in the trace result. The default is `true`.
+
+```
+includeBarriers=true | false
+``` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`validateConsistency`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether to validate the consistency of the trace results. The default is `true`.
+
+```
+validateConsistency=true | false
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`validateLocatability`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether to validate whether traversed junction or edge objects have the necessary containment, attachment, or connectivity association in their association hierarchy. The default is `false`.
+
+```
+validateLocatability=true | false
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`synthesizeGeometries`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Introduced with ArcGIS Enterprise 11.3. Specifies whether geometries will be inferred and created (synthesized) for associations and edge objects traversed during a trace operation. This property is only applicable when using the `aggregatedGeometry` type for `resultTypes`. The default is `false`.
+
+```
+synthesizeGeometries=true | false
+``` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`includeIsolated`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether to include isolated features for an isolation trace. The default is `false`.
+
+```
+includeIsolated=true | false
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`ignoreBarriersAtStartingPoints`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether dynamic barriers in the trace configuration are ignored for starting points. This can be useful when performing an upstream protective device trace using the discovered protective devices (barriers) as starting points to find subsequent upstream protective devices. The default is `false`.
+
+```
+ignoreBarriersAtStartingPoints=true | false
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`includeUpToFirstSpatialContainer`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether to limit the containers returned in the trace result. This property depends on the `includeContainers` property and no-ops if `includeContainers` is false. If `includeContainers` is `true` and this property is `true`, containment associations up to and including the first spatial container are returned; otherwise, all containment associations are returned. The default is `false`.
+
+```
+includeUpToFirstSpatialContainer=true | false
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`allowIndeterminateFlow`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether network features with indeterminate flow stop traversability or are included in the trace results. This property is only honored when running an upstream, downstream, or isolation trace. 
+
+```
+allowIndeterminateFlow=true | false
+``` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`useDigitizedDirection`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Introduced at ArcGIS Enterprise 11.3. Specifies whether the direction of flow will be based on the digitized direction of the line, From global ID and To global ID of the edge object in the association, and the Flow direction attribute. Applies when the `traceType` is upstream or downstream, otherwise it is ignored. The default is `false`.
+
+
+[Learn more about flow direction in a utility network](https://pro.arcgis.com/en/pro-app/latest/help/data/utility-network/about-tracing-utility-networks.htm#ESRI_SECTION1_9721D1D37F5B4ED3A1EC354078920598)
+
+
+```
+useDigitizedDirection=true | false
+``` 
+
+<Note type={"note"}>
+
+[Utility Network Version](https://pro.arcgis.com/en/pro-app/latest/help/data/utility-network/utility-network-compatibility.htm#ESRI_SECTION1_A295577926DC4673B05E83556B8118DC) 7 and later.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`domainNetworkName`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the name of the domain network where the trace is starting. This is required for subnetwork-based traces and is ignored when `useDigitizedDirection` is true.
+
+Syntax: `domainNetworkName=<string>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`tierName`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the name of the tier where the trace is starting. This is required for subnetwork-based traces and is ignored when `useDigitizedDirection` is true.
+
+Syntax: `tierName=<string>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`targetTierName`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the name of the tier where an upstream or downstream trace ends. This is ignored when `useDigitizedDirection` is true.
+
+Syntax: `targetTierName=<string>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`subnetworkName`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the name of the subnetwork that will be traced. The starting points of the trace are the controllers of this subnetwork.
+
+Syntax: `subnetworkName=<string>`  
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`shortestPathNetworkAttributeName`
+
+(Optional)   
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the network attribute name used for determining cost when calculating the shortest path. This is required for a shortest path trace. 
+
+Syntax: `shortestPathNetworkAttributeName=<string>`  
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`filterBitsetNetworkAttributeName`
+
+(Optional)    
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This is used during upstream and downstream traces to ensure that trace results include any bit that is set in the starting points for the network attribute. Also used during a loops trace to only return loops with the same bit set all around the loop. 
+
+Syntax: `filterBitsetNetworkAttributeName=<string>`  
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`traversabilityScope`
+
+(Optional)   
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the network element types to which the condition, category, or function barriers apply. The default is `junctionsAndEdges`.
+
+```
+traversabilityScope=junctions | edges | junctionsAndEdges
+``` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`filterScope`
+
+(Optional)   
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the network element types to which the filter barriers or filter function barriers apply. The default is `junctionsAndEdges`.
+
+```
+filterScope=junctions | edges | junctionsAndEdges
+``` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`conditionBarriers`
+
+(Optional)   
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies an array of objects (representing network attribute or network category conditions) that serve as barriers. If `isSpecificValue` is `true`, the network attribute is compared to a specific value; otherwise, the network attribute is compared to another network attribute. To use a feature's network category `value`, ensure the `name` and `type` are set as `Category` and that `isSpecificValue` is set as `true`.  The default is null.
+
+Syntax:
+
+```json
+[
+  {
+    "name" : <string>,
+    "type" : "networkAttribute" | "category"
+    "operator" : "equal" | "notEqual"
+               | "greaterThan"
+               | "greaterThanEqual"
+               | "lessThan"
+               | "lessThanEqual"
+               | "includesTheValues"
+               | "doesNotIncludeTheValues"
+               | "includesAny"
+               | "doesNotIncludeAny",
+    "value" : <string>,
+    "combineUsingOr" : <true | false>,
+    "isSpecificValue" : <true | false>
+  }
+]
+
+```
+
+ 
+
+<GUID_000464AF_E658_4D8F_B158_BB44B44FA2D7_GUID_E5D7D08D_8267_47EC_953B_0094DB76F8DD />
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`functionBarriers`
+
+(Optional)   
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies an array of objects representing [function barriers](https://pro.arcgis.com/en/pro-app/latest/help/data/utility-network/barriers.htm#ESRI_SECTION1_F224BC2C2FC3488D840952275B4FDB35).
+
+Syntax:
+
+```json
+[
+  {
+    "functionType" : "add" | "subtract" |
+                   "average" | "count" |
+                   "min" | "max",
+    "networkAttributeName" : <string>,
+    "operator" : "equal" | "notEqual"
+               | "greaterThan"
+               | "greaterThanEqual"
+               | "lessThan"
+               | "lessThanEqual"
+               | "includesTheValues"
+               | "doesNotIncludeTheValues"
+               | "includesAny"
+               | "doesNotIncludeAny",
+    "value" : <string>,
+    "useLocalValues":true | false
+  }
+]
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`filterBarriers`
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies an array of objects (representing network attribute or category conditions) that serve as [filter barriers](https://pro.arcgis.com/en/pro-app/latest/help/data/utility-network/barriers.htm#ESRI_SECTION1_6824501A80834AFB8A95443EF4CB3219) If `isSpecificValue` is true, the network attribute is compared to a specific value; otherwise, the network attribute is compared to another network attribute. The default is null.
+
+```json
+[
+  {
+    "name" : <string>,
+    "operator" : "equal" | "notEqual"
+               | "greaterThan"
+               | "greaterThanEqual"
+               | "lessThan"
+               | "lessThanEqual"
+               | "includesTheValues"
+               | "doesNotIncludeTheValues"
+               | "includesAny"
+               | "doesNotIncludeAny",
+    "value" : string (numeric),
+    "combineUsingOr" : <true | false>,
+    "isSpecificValue" : <true | false>
+  }
+]
+
+```
+
+ 
+
+<GUID_000464AF_E658_4D8F_B158_BB44B44FA2D7_GUID_E5D7D08D_8267_47EC_953B_0094DB76F8DD />
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`filterFunctionBarriers`
+
+(Optional)   
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies an array of objects representing filter function barriers.
+
+```json
+[
+  {
+    "functionType" : "add" | "subtract" |
+                   "average" | "count" |
+                   "min" | "max",
+    "networkAttributeName" : <string>,
+    "operator" : "equal" | "notEqual"
+               | "greaterThan"
+               | "greaterThanEqual"
+               | "lessThan"
+               | "lessThanEqual"
+               | "includesTheValues"
+               | "doesNotIncludeTheValues"
+               | "includesAny"
+               | "doesNotIncludeAny",
+    "value" : string (numeric)
+  }
+]
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`functions`
+
+(Optional)   
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies an array of objects representing functions. Each function can have an optional array of network attribute conditions.
+
+Syntax:
+
+```json
+[
+  {
+    "functionType" : "add" | "subtract" 
+                   | "average" | "count" 
+                   | "min" | "max",
+    "networkAttributeName" : <string>, 
+    "conditions":
+    [
+      {
+        "name" : <string>,
+        "type" : "networkAttribute" | "category",
+        "operator" : "equal" | "notEqual" 
+               | "greaterThan"    
+               | "greaterThanEqual |  
+               | "lessThan" 
+               | "lessThanEqual" 
+               | "includesTheValues"
+               | "doesNotIncludeTheValues"
+               | "includesAny"
+               | "doesNotIncludeAny", 
+        "value" : <string>,
+        "combineUsingOr" : <true | false>,
+        "isSpecificValue" : <true | false>
+     }
+   ],
+   "summaryAttributeName" : <string>
+ }
+]
+
+```
+
+ 
+
+<GUID_000464AF_E658_4D8F_B158_BB44B44FA2D7_GUID_E5D7D08D_8267_47EC_953B_0094DB76F8DD />
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`nearestNeighbor`
+
+(Optional)   
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the parameters needed for calculating nearest neighbors. The default is null.
+
+```json
+{
+  "count" : int
+  "costNetworkAttributeName" : string,
+  "nearestCategories" : array of string,
+  "nearestAssets"
+  [ 
+    {
+      "networkSourceId" : long,
+      "assetGroupCode" : long,
+      "assetTypeCode" : long
+    }
+  ]
+}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outputFilters`
+
+(Optional)   
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies an array of objects representing the [output filter](https://pro.arcgis.com/en/pro-app/latest/help/data/utility-network/configure-a-trace.htm#ESRI_SECTION1_6DF114F607A643D1B4CD8D1BF7B97505). The default is null. 
+
+```json
+[
+ {
+  "networkSourceId" : long,
+  "assetGroupCode" : long,
+  "assetTypeCode" : long
+ }
+]
+
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outputConditions`
+
+(Optional)   
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the type of features returned based on a network attribute or category.
+
+```json
+[
+ {
+  "name": "<string>",
+  "type": "networkAttribute" | "category",
+  "operator": "equal" | "notEqual"
+               | "greaterThan"
+               | "greaterThanEqual"
+               | "lessThan"
+               | "lessThanEqual"
+               | "includesTheValues"
+               | "doesNotIncludeTheValues"
+               | "includesAny"
+               | "doesNotIncludeAny",
+ 	"value": <string>,			
+  "combineUsingOr": <true | false>,
+  "isSpecificValue": <true | false>
+ }	
+] 
+```
+
+ 
+
+Example:
+
+```json
+[
+ {
+  "name": "Line Asset Group",
+  "type": "networkAttribute",
+  "operator": "equal",
+  "value": 1,			
+  "combineUsingOr": false,
+  "isSpecificValue": true
+ }	
+]  
+
+```
+
+ 
+
+<GUID_000464AF_E658_4D8F_B158_BB44B44FA2D7_GUID_E5D7D08D_8267_47EC_953B_0094DB76F8DD />
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`propagators`
+
+(Optional)    
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies an array of objects to define. The default is null.
+
+```json
+[
+ {
+  "networkAttributeName" : "<string>",
+  "substitutionAttributeName": "<string>",
+  "propagatorfunctionType" : "bitwiseAnd" | "min" | "max"
+  "operator : "equal" | "notEqual" 
+               | "greaterThan" 
+               | "greaterThanEqual" 
+               | "lessThan"
+               | "lessThanEqual" 
+               | "includesTheValues” 
+               | "doesNotIncludeTheValues" 
+               | "includesAny" 
+               | "doesNotIncludeAny",
+  "value" : string (numeric),
+  "propagatedAttributeName": "<string>"
+ }
+]
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## JSON Response syntax
+
+JSON response (when async = false):
+
+```json
+{
+  "traceResults" : {
+    "elements" : [
+      {
+        "networkSourceId" : <long>,
+        "globalId" : <guid>,
+        "objectId" : <long>
+        "terminalId" : <long>,            
+        "networkAttributes" : [           
+          "<networkAttribute1>" : <long>,
+          "<networkAttribute2>" : <long>  
+        ],                                
+        "assetGroup" : <long>,            
+        "assetType" : <long>,              
+        "positionFrom" : <double>,          
+        "positionTo" : <double>           
+      }
+    ],
+    "connectivity": [ 
+      { 
+        "viaNetworkSourceId": <long>, 
+        "viaGlobalId": <guid>, 
+        "viaObjectId": <long>, 
+        "viaPositionFrom": <double>, 
+        "viaPositionTo": <double>, 
+        "viaGeometry": <geometry>, 
+        "fromNetworkSourceId": <long>, 
+        "fromGlobalId": <guid>, 
+        "fromObjectId": <long>, 
+        "fromTerminalId": <long>, 
+        "fromGeometry": <geometry> 
+        "toNetworkSourceId": <long>, 
+        "toGlobalId": <guid>, 
+        "toObjectId": <long>, 
+        "toTerminalId": <long>, 
+        "toGeometry": <geometry> 
+      },
+    "aggregatedGeometry" : { 
+      "point" : <aggregated point geometry>, 
+      "line" : <aggregated line geometry>,
+      "polygon" : <aggregated polygon geometry> 
+    }, 
+    "featureElements": [ 
+      { 
+        "networkSourceId": <long>, 
+        "globalId": <guid>, 
+        "objectId": <long>, 
+        "terminalId": <long>, 
+        "assetGroupCode": <long>, 
+        "assetTypeCode": <long>, 
+        "positionFrom": <double>,  
+        "positionTo": <double>, 
+        "geometry": <geometry>, 
+        "networkAttributesValues" : [ 
+          { 
+            "<attributeName>" : <value>, ... 
+          } 
+        ], 
+        "fieldValues" : [
+        {
+          "fieldName" : <value>,
+          "value" : <value>,
+          "description" : <string>
+        }
+        ],
+        "networkAttributeValues" : [],
+        "networkAttributeDescriptions" : [],
+      }
+    ], 
+    "associations": [ 
+      { 
+        "associationType": <long>, 
+        "fromNetworkSourceId": <long>, 
+        "fromGlobalId": <guid>, 
+        "fromTerminalId": <long>,
+        "toNetworkSourceId": <long>,
+        "toGlobalId": <guid>,
+        "toTerminalId": <long>  
+          } 
+        ]	   
+    ], 
+    "globalFunctionResults" : [
+      {
+        "functionType" : "add" | "average" | "count" | "max" | "min" | 
+                         "subtract",
+        "networkAttributeName" : <string>,
+        "result" : <double>,
+        "conditions": [
+      {
+        "name" : <string>,
+        "type" : "networkAttribute" | "category",
+        "operator" : "equal" | "notEqual" 
+               | "greaterThan"    
+               | "greaterThanEqual |  
+               | "lessThan" 
+               | "lessThanEqual" 
+               | "includesTheValues"
+               | "doesNotIncludeTheValues"
+               | "includesAny"
+               | "doesNotIncludeAny", 
+        "value" : <string>,
+        "combineUsingOr" : <true | false>,
+        "isSpecificValue" : <true | false>
+      }
+        ],
+        "summaryAttributeName": <string> 
+      }
+    ],
+    "isConsistent" : <true | false>,
+    "kFeaturesForKNNFound" : <true | false>,
+    "startingPointsIgnored" : <true | false>,
+    "warnings" : [ <string> ]
+  }
+  "sourceMapping":
+  {
+    "networkSourceId": "string",
+    ...
+  },
+  "resultTypes": [
+    {
+      "type": "features" | "connectivity" | "controllers" | "associations",
+      "includeGeometry": true | false,
+	     "includePropagatedValues": true | false,
+      "networkAttributeNames": ["<networkAttributeName1>", ...],
+      "diagramTemplateName": "",
+      "resultTypeFields": [
+        {
+          "networkSourceId": <long>,
+          "fieldName": "<string>"
+        }
+      ]
+    },
+  ],
+  "success" : <true | false>,
+  "error" : {                   // only if success is false
+    "extendedCode" : <HRESULT>,
+    "message" : <error message>,
+    "details" : [ <detail> ]
+  }
+}
+
+```
+
+ 
+
+JSON response (when async = true):
+
+```json
+{
+  "statusUrl" : <url>
+}
+
+```
+
+ 
+
+JSON response to the status URL (when pending or in progress):
+
+```json
+{
+  "status" : "<Pending | InProgress>",
+  "submissionTime" : <datetime>,
+  "lastUpdatedTime" : <datetime>
+ }
+
+```
+
+ 
+
+## Example usage
+
+Perform a subnetwork trace for the ElectricDistribution domain network Medium Voltage Radial tier. The `trace` operation request includes the `traceConfiguration` parameter.
+
+Request URL and parameters:
+
+`https://myserver.esri.com/server/rest/services/LandUse/UtilityNetworkServer/trace`
+
+ 
+
+```json
+f=json
+gdbVersion=SDE.DEFAULT
+sessionID={55DCF5E1-4DB9-478A-8B0C-65E5F37F5D16}
+moment=1554214441244
+traceType=subnetwork
+traceLocations=[]
+traceConfiguration=
+{
+ "includeContainers": true,
+ "includeContent": true,
+ "includeStructures": true,
+ "includeBarriers": true,
+ "validateConsistency": true,
+ "validateLocatability": false,
+ "synthesizeGeometries": false,
+ "includeIsolated": false,
+ "ignoreBarriersAtStartingPoints": false,
+ "includeUpToFirstSpatialContainer":false,
+ "allowIndeterminateFlow":true,
+ "useDigitizedDirection":false,
+ "domainNetworkName": "ElectricDistribution",
+ "tierName": "Medium Voltage",
+ "targetTierName": "",
+ "subnetworkName": "oakview_01",
+ "diagramTemplateName": "",
+ "shortestPathNetworkAttributeName": "",
+ "filterBitsetNetworkAttributeName": "",
+ "traversabilityScope": "junctionsAndEdges",
+ "conditionBarriers": [
+	{
+		"name": "Device Status",
+		"type": "networkAttribute",
+		"operator": "equal",
+		"value": 1,
+		"combineUsingOr": false,
+		"isSpecificValue": true
+	}
+ ],
+ "functionBarriers": [],
+ "arcadeExpressionBarrier": "",
+ "filterBarriers": [],
+ "filterFunctionBarriers": [],
+ "filterScope": "junctionsAndEdges",
+ "functions": [],
+ "nearestNeighbor": {
+		"count": -1,
+		"costNetworkAttributeName": "",
+		"nearestCategories": [],
+		"nearestAssets": []	
+ },
+ "outputFilters": [],
+ "outputConditions": [],
+ "propagators": [
+ {
+  "networkAttributeName":"Phases Current",
+  "substitutionAttributeName":"phasessub",
+  "propagatorFunctionType":"bitwiseAnd",
+  "operator":"includesAny",
+  "value":15,
+  "propagatedAttributeName":""
+}
+]
+},
+resultTypes= [
+  {
+   "type":"features",
+   "includeGeometry":true,
+   "includePropagatedValues":false,
+   "includeDomainDescriptions":false,
+   "networkAttributeNames":["Is subnetwork controller"],
+   "diagramTemplateName":"",
+   "resultTypeFields":[{"networkSourceId":9,"fieldName":"phasescurrent"}]
+  },
+  {
+   "type":"connectivity",
+   "includeGeometry":false,
+   "includePropagatedValues":false,
+   "includeDomainDescriptions":false,
+   "networkAttributeNames":[],
+   "diagramTemplateName":"",
+   "resultTypeFields":[]
+   }
+]
+async=false
+
+
+```
+
+ 
+
+JSON response:
+
+```json
+{
+	"traceResults": {
+		"featureElements": [
+			{
+				"networkSourceId": 12,
+				"globalId": "{CE537B94-E634-4F7E-9DA2-A3F219EA8D8A}",
+				"objectId": 21,
+				"terminalId": 1,
+				"assetGroupCode": 5,
+				"assetTypeCode": 1,
+				"geometry": {
+					"x": 6807667.161118746,
+					"y": 1846163.1724515558,
+					"z": 0,
+					"m": null
+				}
+			},
+			{
+				"networkSourceId": 12,
+				"globalId": "{1E737D64-32D3-4F9C-97E5-6CAAA163B497}",
+				"objectId": 18,
+				"terminalId": 1,
+				"assetGroupCode": 1,
+				"assetTypeCode": 1,
+				"geometry": {
+					"x": 6807667.716891915,
+					"y": 1846152.3732605577,
+					"z": 0,
+					"m": null
+				}
+			},
+			{
+				"networkSourceId": 12,
+				"globalId": "{245E6D0A-0BDC-4DF8-B9ED-3A613991A6A2}",
+				"objectId": 20,
+				"terminalId": 1,
+				"assetGroupCode": 1,
+				"assetTypeCode": 1,
+				"geometry": {
+					"x": 6807735.146219,
+					"y": 1846163.219695568,
+					"z": 0,
+					"m": null
+				}
+			},
+			{
+				"networkSourceId": 12,
+				"globalId": "{923E8163-2BFA-430D-987A-21A4E37C879D}",
+				"objectId": 19,
+				"terminalId": 1,
+				"assetGroupCode": 1,
+				"assetTypeCode": 1,
+				"geometry": {
+					"x": 6807705.951395497,
+					"y": 1846162.8719272316,
+					"z": 0,
+					"m": null
+				}
+			},
+			{
+				"networkSourceId": 12,
+				"globalId": "{046362B3-E6A2-4C52-BC3E-C7BF641E8914}",
+				"objectId": 9,
+				"terminalId": 1,
+				"assetGroupCode": 5,
+				"assetTypeCode": 1,
+				"geometry": {
+					"x": 6807851.27131483,
+					"y": 1846266.5347776414,
+					"z": 0,
+					"m": null
+				}
+			},
+			{
+				"networkSourceId": 12,
+				"globalId": "{A43506DE-91DB-44A0-9A4C-FD6D8DCD1C55}",
+				"objectId": 7,
+				"terminalId": 1,
+				"assetGroupCode": 1,
+				"assetTypeCode": 1,
+				"geometry": {
+					"x": 6807863.391041249,
+					"y": 1846185.0434708149,
+					"z": 0,
+					"m": null
+				}
+			},
+			{
+				"networkSourceId": 10,
+				"globalId": "{DF8BF4A1-4681-47CF-BE4A-96CF0D6C6458}",
+				"objectId": 2247,
+				"assetGroupCode": 4,
+				"assetTypeCode": 3,
+				"positionFrom": 0,
+				"positionTo": 1,
+				"geometry": {
+					"hasZ": true,
+					"hasM": true,
+					"paths": [
+						[
+							[
+								6807862.803443998,
+								1846266.5859586448,
+								0,
+								null
+							],
+							[
+								6807963.476470992,
+								1846261.9025690556,
+								0,
+								null
+							]
+						]
+					]
+				}
+			}
+		],
+		"connectivity": [
+			{
+				"viaNetworkSourceId": 10,
+				"viaGlobalId": "{0EE946B2-78D0-4BAC-8B74-D025CBA2EDC3}",
+				"viaObjectId": 16,
+				"viaPositionFrom": 0.771530936343911,
+				"viaPositionTo": 1,
+				"viaGeometry": {},
+				"fromNetworkSourceId": 12,
+				"fromGlobalId": "{CE537B94-E634-4F7E-9DA2-A3F219EA8D8A}",
+				"fromObjectId": 21,
+				"fromTerminalId": 1,
+				"fromGeometry": {},
+				"toNetworkSourceId": 12,
+				"toGlobalId": "{1E737D64-32D3-4F9C-97E5-6CAAA163B497}",
+				"toObjectId": 18,
+				"toTerminalId": 1,
+				"toGeometry": {}
+			},
+			{
+				"viaNetworkSourceId": 10,
+				"viaGlobalId": "{74CDDEB8-25E5-40CA-80A6-5EE0FA47C3C8}",
+				"viaObjectId": 5,
+				"viaPositionFrom": 0,
+				"viaPositionTo": 1,
+				"viaGeometry": {},
+				"fromNetworkSourceId": 12,
+				"fromGlobalId": "{65991DC0-C048-4180-BE3F-D95FAE816A72}",
+				"fromObjectId": 4,
+				"fromTerminalId": 1,
+				"fromGeometry": {},
+				"toNetworkSourceId": 9,
+				"toGlobalId": "{58A65781-93D2-4EBE-8CFB-E4AF4C4ED6AE}",
+				"toObjectId": 5,
+				"toTerminalId": 1,
+				"toGeometry": {}
+			},
+			{
+				"viaNetworkSourceId": 10,
+				"viaGlobalId": "{669946F4-B6E3-4CEA-9D5A-34521B9BF330}",
+				"viaObjectId": 461,
+				"viaPositionFrom": 0.07442874427180345,
+				"viaPositionTo": 0.670766639232807,
+				"viaGeometry": {},
+				"fromNetworkSourceId": 12,
+				"fromGlobalId": "{C0896252-1AF0-46CF-AF86-139F215870DA}",
+				"fromObjectId": 337,
+				"fromTerminalId": 1,
+				"fromGeometry": {},
+				"toNetworkSourceId": 12,
+				"toGlobalId": "{1D3999D1-28C6-4463-A28E-96B36C591AAC}",
+				"toObjectId": 413,
+				"toTerminalId": 1,
+				"toGeometry": {}
+			},
+			{
+				"viaNetworkSourceId": 10,
+				"viaGlobalId": "{669946F4-B6E3-4CEA-9D5A-34521B9BF330}",
+				"viaObjectId": 461,
+				"viaPositionFrom": 0.670766639232807,
+				"viaPositionTo": 0.7871749615820911,
+				"viaGeometry": {},
+				"fromNetworkSourceId": 12,
+				"fromGlobalId": "{1D3999D1-28C6-4463-A28E-96B36C591AAC}",
+				"fromObjectId": 413,
+				"fromTerminalId": 1,
+				"fromGeometry": {},
+				"toNetworkSourceId": 12,
+				"toGlobalId": "{4BE88B18-DC04-4179-BB60-5A3E5D2637C3}",
+				"toObjectId": 414,
+				"toTerminalId": 1,
+				"toGeometry": {}
+			},
+			{
+				"viaNetworkSourceId": 10,
+				"viaGlobalId": "{669946F4-B6E3-4CEA-9D5A-34521B9BF330}",
+				"viaObjectId": 461,
+				"viaPositionFrom": 0.7871749615820911,
+				"viaPositionTo": 1,
+				"viaGeometry": {},
+				"fromNetworkSourceId": 12,
+				"fromGlobalId": "{4BE88B18-DC04-4179-BB60-5A3E5D2637C3}",
+				"fromObjectId": 414,
+				"fromTerminalId": 1,
+				"fromGeometry": {},
+				"toNetworkSourceId": 2,
+				"toGlobalId": "{2F90F7D3-3401-4893-AEAC-A191CD4F0BBD}",
+				"toObjectId": 2619,
+				"toTerminalId": 0,
+				"toGeometry": {}
+			},
+			{
+				"viaNetworkSourceId": 10,
+				"viaGlobalId": "{DD1644D9-8921-4C85-9A44-1674FDF9D4FF}",
+				"viaObjectId": 1,
+				"viaPositionFrom": 0,
+				"viaPositionTo": 0.46821569031543666,
+				"viaGeometry": {},
+				"fromNetworkSourceId": 2,
+				"fromGlobalId": "{DFE16D5E-1D98-43AF-9F13-860EC6E1D78E}",
+				"fromObjectId": 2715,
+				"fromTerminalId": 0,
+				"fromGeometry": {},
+				"toNetworkSourceId": 12,
+				"toGlobalId": "{B00A4B9A-B38F-4167-AD85-1BF33DF30047}",
+				"toObjectId": 331,
+				"toTerminalId": 1,
+				"toGeometry": {}
+			},
+			{
+				"viaNetworkSourceId": 10,
+				"viaGlobalId": "{DD1644D9-8921-4C85-9A44-1674FDF9D4FF}",
+				"viaObjectId": 1,
+				"viaPositionFrom": 0.46821569031543666,
+				"viaPositionTo": 0.5298812758175973,
+				"viaGeometry": {},
+				"fromNetworkSourceId": 12,
+				"fromGlobalId": "{B00A4B9A-B38F-4167-AD85-1BF33DF30047}",
+				"fromObjectId": 331,
+				"fromTerminalId": 1,
+				"fromGeometry": {},
+				"toNetworkSourceId": 12,
+				"toGlobalId": "{340219C0-41DB-4C65-B5BC-4E25868472D0}",
+				"toObjectId": 332,
+				"toTerminalId": 1,
+				"toGeometry": {}
+			}
+		],
+		"elements": [],
+		"diagramName": "<placeholder>",
+		"globalFunctionResults": [],
+		"kFeaturesForKNNFound": false,
+		"startingPointsIgnored": false,
+		"warnings": [],
+		"sourceMapping": {
+			"1": "UN_6_Associations",
+			"2": "UN_6_SystemJunctions",
+			"4": "StructureJunction",
+			"6": "StructureBoundary",
+			"7": "StructureJunctionObject",
+			"5": "StructureLine",
+			"8": "StructureEdgeObject",
+			"9": "ElectricDistributionDevice",
+			"11": "ElectricDistributionAssembly",
+			"12": "ElectricDistributionJunction",
+			"14": "ElectricDistributionJunctionObject",
+			"10": "ElectricDistributionLine",
+			"13": "ElectricDistributionSubnetLine",
+			"15": "ElectricDistributionEdgeObject"
+		},
+		"resultTypes": [
+			{
+				"type": "features",
+				"includeGeometry": true,
+				"includePropagatedValues": false,
+				"includeDomainDescriptions": false,
+				"networkAttributeNames": [
+					"Is subnetwork controller"
+				],
+				"diagramTemplateName": "",
+				"resultTypeFields": [
+					{
+						"networkSourceId": 9,
+						"fieldName": "phasescurrent"
+					}
+				]
+			},
+			{
+				"type": "connectivity",
+				"includeGeometry": false,
+				"includePropagatedValues": false,
+				"includeDomainDescriptions": false,
+				"networkAttributeNames": [],
+				"diagramTemplateName": "",
+				"resultTypeFields": []
+			}
+		]
+	},
+	"success": true
+}
+
+```
+
+ 

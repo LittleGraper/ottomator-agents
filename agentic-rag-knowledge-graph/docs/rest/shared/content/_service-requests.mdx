@@ -1,0 +1,788 @@
+<If c={!!props.routing}>
+  The <Term term="routing service">ArcGIS Routing service</Term> supports two different types of requests: [Direct
+  request](#direct-requests) or [Job request](#job-requests). The method you use depends on the complexity of your task, the expected processing
+  time and the size of the data involved.
+</If>
+<If c={!!props.geocoding}>
+  The <Term term="geocoding service">ArcGIS Geocoding</Term> service supports two different types of requests: [Direct
+  request](#direct-requests) or [Job request](#job-requests). Each type of request returns exactly the same results the difference is how
+  the request is made and how the results are obtained. The method you use depends on the complexity of your task, the expected processing
+  time and the size of the data involved.
+</If>
+
+This section provides information about the different types of requests, their capabilities, and when to use them.
+
+## Direct requests
+
+A direct request is a single HTTPS request to a service for a transaction that typically has a short duration.
+
+Use a direct request when:
+
+- The data and number of parameters you are sending to the service is small in size.
+- You want results returned in the response from a single operation.
+- You want results returned quickly, typically under a few seconds.
+- You do not need to cancel a request or perform periodic status checks.
+
+#### Example
+
+<Box>
+  The general steps to perform a direct request are:
+  <If c={!!props.geocoding}>
+
+      1. Select the [request]().
+      1. Supply the appropriate parameters.
+      1. Make the request.
+      1.Access the results.
+
+  </If>
+  <If c={!!props.routing}>
+
+    1. Select the [request]().
+    1. Supply the appropriate parameters.
+    1. Make the request.
+    1. Access the results.
+
+  </If>
+  ##### Request
+  <If c={!!props.geocoding}>
+    <CodeSwitcher>
+      <CodeBlock
+        group="cURL"
+        source="../code/get-started/geocoding-curl.http"
+        links={[{ url: "https://www.postman.com/esridevs/esri-arcgis-services/request/7w4ewup/search-address", label: "Run in Postman" }]}
+      />
+      <CodeBlock
+        group="HTTP"
+        source="../code/get-started/geocoding-rest.http"
+        links={[{ url: "https://www.postman.com/esridevs/esri-arcgis-services/request/7w4ewup/search-address", label: "Run in Postman" }]}
+      />
+    </CodeSwitcher>
+  </If>
+  <If c={!!props.routing}>
+    <CodeSwitcher>
+      <CodeBlock
+        group="cURL"
+        language="curl"
+        source="../code/get-started/routing-curl.http"
+        links={[
+          {
+            url: "https://www.postman.com/esridevs/esri-arcgis-services/request/neghb5t/routing-find-a-route-and-directions",
+            label: "Run in Postman"
+          }
+        ]}
+      />
+      <CodeBlock
+        group="HTTP"
+        language="http"
+        source="../code/get-started/routing-rest.http"
+        links={[
+          {
+            url: "https://www.postman.com/esridevs/esri-arcgis-services/request/neghb5t/routing-find-a-route-and-directions",
+            label: "Run in Postman"
+          }
+        ]}
+      />
+    </CodeSwitcher>
+  </If>
+  ##### Response
+  <If c={!!props.geocoding}>
+    <CodeBlock source="../code/get-started/geocoding-response.json" maxLines={10} scrollable />
+  </If>
+  <If c={!!props.routing}>
+    <CodeBlock source="../code/get-started/routing-response-abbv.json" maxLines={10} scrollable />
+  </If>
+</Box>
+
+#### Error handling
+
+When performing a direct request, the response object will contain the results of the request if the response is successful.
+If the request failed, an `error` object with HTTP status [`code`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) and optionally `extendedCode` values will be returned.
+
+```json
+{
+  "error": {
+    "code": 400,
+    "extendedCode": -2147024809,
+    "message": "Invalid or missing input parameters.",
+    "details": ["Layer [Route_(null)] could not be found in the map or is of the wrong type."]
+  }
+}
+```
+
+<If c={!!props.routing}>See [Error codes]() for a list of `extendedCode` values and descriptions.</If>
+
+In some cases the response will be successful, but partial results may be returned. In these cases the `messages` array will contain pertinent information regarding the status of the results.
+
+<CodeBlock source="../code/get-started/routing-partial.json" lines="34" highlightLines="37" expandable />
+
+{/* https://developer.mozilla.org/en-US/docs/Web/HTTP/Status */}
+
+## Job requests
+
+A job request is an HTTPS request to a service that starts a server-side operation (or job) with a long duration. A job request returns a job ID that is used by client applications to make subsequent HTTPS requests to determine job status updates and, when it is complete, to download the final job output.
+
+Use a job request when:
+
+- Your problem involves significant time to process, such as large scale geoprocessing or complex spatial analysis.
+- You want to monitor the status of long running transactions and retrieve the results when they are ready.
+- You have a large long-running task and don't want time outs.
+- You want to submit multiple jobs simultaneously, allowing for efficient processing of multiple tasks without waiting for one to complete before starting another.
+
+<Box>
+The general steps to perform a job request are:
+  1. Make a `submitJob` request with the appropriate parameters to get a `jobId`.
+  1. Using the `jobId`, make periodic requests to check until `jobStatus` returned is `esriJobSucceeded | esriJobFailed | esriJobTimedOut`.
+        - To cancel a job you can append `/cancel` to the request url.
+  1. Use the `jobId` to get one or more results.
+
+#### Example
+
+<Tabs>
+  <TabNav>
+    <TabTitle>1. Submit job</TabTitle>
+    <TabTitle>2. Check status</TabTitle>
+    <TabTitle>3. Get one or more results</TabTitle>
+    <TabTitle>Optional: Cancel job</TabTitle>
+  </TabNav>
+  <Tab>
+    ##### Request
+    <If c={!!props.geocoding}>
+      <CodeBlock language="curl" source="../code/get-started/geocoding-job.http" section="SUBMIT_JOB" links={[{url:"https://www.postman.com/esridevs/esri-arcgis-services/request/c7bgqxa/2-submit-job",label:"Run in Postman"}]} />
+    </If>
+    <If c={!!props.routing}>
+      <CodeSwitcher>
+        <CodeBlock group="cURL" language="curl" source="../code/get-started/routing-job.sh" section="SUBMIT_JOB" links={[{url:"https://www.postman.com/esridevs/esri-arcgis-services/request/c7bgqxa/2-submit-job",label:"Run in Postman"}]} />
+        <CodeBlock group="HTTP" language="http" source="../code/get-started/routing-job.http" section="SUBMIT_JOB" links={[{url:"https://www.postman.com/esridevs/esri-arcgis-services/request/c7bgqxa/2-submit-job",label:"Run in Postman"}]} />
+      </CodeSwitcher>
+    </If>
+    ##### Response
+    ```json
+    {
+      "jobId": "{JOB_ID}",
+      "jobStatus": "{esriJobSubmitted | esriJobWaiting | esriJobExecuting | esriJobSucceeded | esriJobFailed | esriJobTimedOut | esriJobCancelling | esriJobCancelled}",
+      "messages": []
+    }
+    ```
+  </Tab>
+  <Tab>
+    ##### Request
+    <If c={!!props.geocoding}>
+      <CodeBlock  language="curl" source="../code/get-started/geocoding-job.http" section="CHECK_STATUS" links={[{url:"https://www.postman.com/esridevs/esri-arcgis-services/request/sm79u4i/3-check-status",label:"Run in Postman"}]} />
+    </If>
+    <If c={!!props.routing}>
+      <CodeSwitcher>
+        <CodeBlock group="cURL" language="curl" source="../code/get-started/routing-job.sh" section="CHECK_STATUS" links={[{url:"https://www.postman.com/esridevs/esri-arcgis-services/request/rivg2hv/1-submit-job",label:"Run in Postman"}]} />
+        <CodeBlock group="HTTP" language="http" source="../code/get-started/routing-job.http" section="CHECK_STATUS" links={[{url:"https://www.postman.com/esridevs/esri-arcgis-services/request/rivg2hv/1-submit-job",label:"Run in Postman"}]} />
+      </CodeSwitcher>
+    </If>
+    ##### Response
+    <If c={!!props.geocoding}>
+      ```json maxLines={10} scrollable
+      {
+        "jobId": "{JOB_ID}",
+        "jobStatus": "{esriJobSubmitted | esriJobSucceeded | esriJobExecuting | esriJobSucceeded}",
+        "status": "{SUBMITTED | RUNNABLE | STARTING | RUNNING | SUCCEEDED}",
+        "messages": [
+          {
+            "description": "Total Matched/Tied/Unmatched: 469/26/5",
+            "type": "esriJobMessageTypeInformative"
+          }
+        ],
+        "results": {
+          "geocodeResult": {
+            "paramUrl": "results/geocodeResult"
+          }
+        }
+      }
+      ```
+    </If>
+    <If c={!!props.routing}>
+      ```json scrollable
+      {
+        "jobId": "{JOB_ID}",
+        "jobStatus": "{esriJobSubmitted | esriJobWaiting | esriJobExecuting | esriJobSucceeded | esriJobFailed | esriJobTimedOut | esriJobCancelling | esriJobCancelled}",
+        "results": {
+          "Solve_Succeeded": {
+            "paramUrl": "results/Solve_Succeeded"
+          },
+          "Output_Routes": {
+            "paramUrl": "results/Output_Routes"
+          },
+          "Output_Route_Edges": {
+            "paramUrl": "results/Output_Route_Edges"
+          },
+          "Output_Directions": {
+            "paramUrl": "results/Output_Directions"
+          },
+          "Output_Stops": {
+            "paramUrl": "results/Output_Stops"
+          },
+          "Output_Network_Analysis_Layer": {
+            "paramUrl": "results/Output_Network_Analysis_Layer"
+          },
+          "Output_Route_Data": {
+            "paramUrl": "results/Output_Route_Data"
+          },
+          "Output_Result_File": {
+            "paramUrl": "results/Output_Result_File"
+          },
+          "Output_Network_Analysis_Layer_Package": {
+            "paramUrl": "results/Output_Network_Analysis_Layer_Package"
+          },
+          "Output_Direction_Points": {
+            "paramUrl": "results/Output_Direction_Points"
+          },
+          "Output_Direction_Lines": {
+            "paramUrl": "results/Output_Direction_Lines"
+          }
+        },
+        "inputs": {
+          "Stops": {
+            "paramUrl": "inputs/Stops"
+          },
+          "Route_Shape": {
+            "paramUrl": "inputs/Route_Shape"
+          },
+          "Populate_Directions": {
+            "paramUrl": "inputs/Populate_Directions"
+          },
+          "Travel_Mode": {
+            "paramUrl": "inputs/Travel_Mode"
+          }
+        },
+        "messages": [
+          {
+            "type": "esriJobMessageTypeWarning",
+            "description": "Network elements with avoid-restrictions are traversed in the output (restriction attribute names: \"Avoid Private Roads\")."
+          }
+        ]
+      }
+      ```
+    </If>
+  </Tab>
+  <Tab>
+    ##### Request
+    <If c={!!props.geocoding}>
+      <CodeBlock language="curl" source="../code/get-started/geocoding-job.http" section="GET_RESULTS" maxLines={10} links={[{url:"https://www.postman.com/esridevs/esri-arcgis-services/request/07yjqsp/4-get-result-url", label:"Run in Postman"}]} />
+    </If>
+    <If c={!!props.routing}>
+      <CodeSwitcher>
+        <CodeBlock group="cURL" language="curl" source="../code/get-started/routing-job.sh" section="GET_RESULTS" links={[{url:"https://www.postman.com/esridevs/esri-arcgis-services/request/8sfh4r3/3-get-results-output-routes",label:"Run in Postman"}]} />
+        <CodeBlock group="HTTP" language="http" source="../code/get-started/routing-job.http" section="GET_RESULTS" links={[{url:"https://www.postman.com/esridevs/esri-arcgis-services/request/8sfh4r3/3-get-results-output-routes",label:"Run in Postman"}]} />
+      </CodeSwitcher>
+    </If>
+    ##### Response
+    <If c={!!props.geocoding}>
+      ```json
+      {
+        "paramName": "geocodeResult",
+        "dataType": "GPDataFile",
+        "value": {
+          "url": "https://geocode-beta.arcgis.com/rest/services/World/GeocodeServer/batchGeocode/beta/download/{JOB_ID}.zip"
+        }
+      }
+      ```
+    </If>
+    <If c={!!props.routing}>
+      ```json scrollable
+      {
+        "paramName": "Output_Routes",
+        "dataType": "GPFeatureRecordSetLayer",
+        "value": {
+          "displayFieldName": "",
+          "geometryType": "esriGeometryPolyline",
+          "spatialReference": {
+            "wkid": 4326,
+            "latestWkid": 4326
+          },
+          "fields": [
+            {
+              "name": "ObjectID",
+              "type": "esriFieldTypeOID",
+              "alias": "ObjectID"
+            },
+            {
+              "name": "Name",
+              "type": "esriFieldTypeString",
+              "alias": "Name",
+              "length": 1024
+            },
+            {
+              "name": "StopCount",
+              "type": "esriFieldTypeInteger",
+              "alias": "StopCount"
+            },
+            {
+              "name": "StartTime",
+              "type": "esriFieldTypeDate",
+              "alias": "StartTime",
+              "length": 16
+            },
+            {
+              "name": "EndTime",
+              "type": "esriFieldTypeDate",
+              "alias": "EndTime",
+              "length": 16
+            },
+            {
+              "name": "StartTimeUTC",
+              "type": "esriFieldTypeDate",
+              "alias": "StartTimeUTC",
+              "length": 16
+            },
+            {
+              "name": "EndTimeUTC",
+              "type": "esriFieldTypeDate",
+              "alias": "EndTimeUTC",
+              "length": 16
+            },
+            {
+              "name": "Total_Miles",
+              "type": "esriFieldTypeDouble",
+              "alias": "Total_Miles"
+            },
+            {
+              "name": "Total_Kilometers",
+              "type": "esriFieldTypeDouble",
+              "alias": "Total_Kilometers"
+            },
+            {
+              "name": "Total_Minutes",
+              "type": "esriFieldTypeDouble",
+              "alias": "Total_Minutes"
+            },
+            {
+              "name": "TotalWait_Minutes",
+              "type": "esriFieldTypeDouble",
+              "alias": "TotalWait_Minutes"
+            },
+            {
+              "name": "TotalViolation_Minutes",
+              "type": "esriFieldTypeDouble",
+              "alias": "TotalViolation_Minutes"
+            },
+            {
+              "name": "FirstStopOID",
+              "type": "esriFieldTypeInteger",
+              "alias": "FirstStopOID"
+            },
+            {
+              "name": "LastStopOID",
+              "type": "esriFieldTypeInteger",
+              "alias": "LastStopOID"
+            },
+            {
+              "name": "Shape_Length",
+              "type": "esriFieldTypeDouble",
+              "alias": "Shape_Length"
+            }
+          ],
+          "features": [
+            {
+              "attributes": {
+                "ObjectID": 1,
+                "Name": "Route A",
+                "StopCount": 2,
+                "StartTime": null,
+                "EndTime": null,
+                "StartTimeUTC": null,
+                "EndTimeUTC": null,
+                "Total_Miles": 2807.5200490350212,
+                "Total_Kilometers": 4518.2745823433825,
+                "Total_Minutes": 2584.4098531815134,
+                "TotalWait_Minutes": null,
+                "TotalViolation_Minutes": null,
+                "FirstStopOID": 1,
+                "LastStopOID": 2,
+                "Shape_Length": 0
+              }
+            },
+            {
+              "attributes": {
+                "ObjectID": 2,
+                "Name": "Route B",
+                "StopCount": 2,
+                "StartTime": null,
+                "EndTime": null,
+                "StartTimeUTC": null,
+                "EndTimeUTC": null,
+                "Total_Miles": 2123.606970136163,
+                "Total_Kilometers": 3417.6209709887557,
+                "Total_Minutes": 1939.5100127556573,
+                "TotalWait_Minutes": null,
+                "TotalViolation_Minutes": null,
+                "FirstStopOID": 3,
+                "LastStopOID": 4,
+                "Shape_Length": 0
+              }
+            },
+            {
+              "attributes": {
+                "ObjectID": 3,
+                "Name": "Route C",
+                "StopCount": 2,
+                "StartTime": null,
+                "EndTime": null,
+                "StartTimeUTC": null,
+                "EndTimeUTC": null,
+                "Total_Miles": 1858.4461490619763,
+                "Total_Kilometers": 2990.8851410862794,
+                "Total_Minutes": 1740.3827734675385,
+                "TotalWait_Minutes": null,
+                "TotalViolation_Minutes": null,
+                "FirstStopOID": 5,
+                "LastStopOID": 6,
+                "Shape_Length": 0
+              }
+            },
+            {
+              "attributes": {
+                "ObjectID": 4,
+                "Name": "Route D",
+                "StopCount": 2,
+                "StartTime": null,
+                "EndTime": null,
+                "StartTimeUTC": null,
+                "EndTimeUTC": null,
+                "Total_Miles": 3270.1001167174209,
+                "Total_Kilometers": 5262.7265276915368,
+                "Total_Minutes": 2985.43363777472,
+                "TotalWait_Minutes": null,
+                "TotalViolation_Minutes": null,
+                "FirstStopOID": 7,
+                "LastStopOID": 8,
+                "Shape_Length": 0
+              }
+            },
+            {
+              "attributes": {
+                "ObjectID": 5,
+                "Name": "Route E",
+                "StopCount": 2,
+                "StartTime": null,
+                "EndTime": null,
+                "StartTimeUTC": null,
+                "EndTimeUTC": null,
+                "Total_Miles": 2394.245258399651,
+                "Total_Kilometers": 3853.1719474778229,
+                "Total_Minutes": 2134.087437753195,
+                "TotalWait_Minutes": null,
+                "TotalViolation_Minutes": null,
+                "FirstStopOID": 9,
+                "LastStopOID": 10,
+                "Shape_Length": 0
+              }
+            }
+          ],
+          "exceededTransferLimit": false
+        }
+      }
+      ```
+    </If>
+  </Tab>
+  <Tab>
+    ##### Request
+    <If c={!!props.geocoding}>
+      <CodeBlock  language="curl" source="../code/get-started/geocoding-job.http" section="CHECK_STATUS" links={[{url:"https://www.postman.com/esridevs/esri-arcgis-services/request/sm79u4i/3-check-status",label:"Run in Postman"}]} />
+    </If>
+    <If c={!!props.routing}>
+      <CodeSwitcher>
+        <CodeBlock group="cURL" language="curl" source="../code/get-started/routing-job.sh" section="CANCEL_JOB" links={[{url:"https://www.postman.com/esridevs/esri-arcgis-services/request/rivg2hv/1-submit-job",label:"Run in Postman"}]} />
+        <CodeBlock group="HTTP" language="http" source="../code/get-started/routing-job.http" section="CANCEL_JOB" links={[{url:"https://www.postman.com/esridevs/esri-arcgis-services/request/rivg2hv/1-submit-job",label:"Run in Postman"}]} />
+      </CodeSwitcher>
+    </If>
+    ##### Response
+    <If c={!!props.geocoding}>
+      ```json maxLines={10} scrollable
+      {
+        "jobId": "{JOB_ID}",
+        "jobStatus": "{esriJobSubmitted | esriJobSucceeded | esriJobExecuting | esriJobSucceeded}",
+        "status": "{SUBMITTED | RUNNABLE | STARTING | RUNNING | SUCCEEDED}",
+        "messages": [
+          {
+            "description": "Total Matched/Tied/Unmatched: 469/26/5",
+            "type": "esriJobMessageTypeInformative"
+          }
+        ],
+        "results": {
+          "geocodeResult": {
+            "paramUrl": "results/geocodeResult"
+          }
+        }
+      }
+      ```
+    </If>
+    <If c={!!props.routing}>
+      ```json scrollable
+      {
+        "jobId": "{JOB_ID}",
+        "jobStatus": "esriJobCancelling | esriJobCancelled"
+      }
+      ```
+    </If>
+  </Tab>
+</Tabs>
+
+</Box>
+
+#### Error handling
+
+The workflow for performing a job request is a multi-step process. For each step in the process (Submit job, Check status, Get results) a response object is returned. If there are issues related to accessing the job, an error object will be returned containing an error [`code`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) and in some cases an additional `extendedCode` value.
+
+Example error object with HTTP status code:
+
+```json
+{
+  "error": {
+    "code": 499,
+    "message": "Token Required",
+    "details": []
+  }
+}
+```
+
+Example error with HTTP status code and `extendedCode`:
+
+```json
+{
+  "error": {
+    "code": 400,
+    "extendedCode": -2147220218,
+    "message": "Job not found on server.",
+    "details": ["JobId not found : null. "]
+  }
+}
+```
+
+If the job failed, the `jobStatus` will be `esriJobFailed` and the `messages` array will contain pertinent information regarding the status of the job.
+
+Example response for a failed job:
+
+```json
+{
+  "jobId": "{JOB_ID}",
+  "jobStatus": "esriJobFailed",
+  "messages": [
+    {
+      "type": "esriJobMessageTypeInformative",
+      "description": "Submitted."
+    },
+    {
+      "type": "esriJobMessageTypeInformative",
+      "description": "Executing..."
+    },
+    {
+      "type": "esriJobMessageTypeWarning",
+      "description": "Location \"O2\" in \"Stops\" is unlocated."
+    },
+    {
+      "type": "esriJobMessageTypeWarning",
+      "description": "Need at least 2 valid stops."
+    },
+    {
+      "type": "esriJobMessageTypeError",
+      "description": "ERROR 030024: Solve returned a failure."
+    },
+    {
+      "type": "esriJobMessageTypeError",
+      "description": "\"Stops\" does not contain valid input for any route."
+    },
+    {
+      "type": "esriJobMessageTypeError",
+      "description": "Failed to execute (FindRoutes)."
+    },
+    {
+      "type": "esriJobMessageTypeError",
+      "description": "Failed."
+    }
+  ]
+}
+```
+
+If the job succeeded, the `jobStatus` will be `esriJobSucceeded`, the `messages` array may still contain pertinent information regarding the status of the job, especially if there are warning messages.
+
+Example response for a successful job with warning messages:
+
+```json
+{
+  "jobId": "{JOB_ID}",
+  "jobStatus": "esriJobSucceeded",
+  "results": {
+    "Solve_Succeeded": {
+      "paramUrl": "results/Solve_Succeeded"
+    },
+    "Output_Routes": {
+      "paramUrl": "results/Output_Routes"
+    },
+    "Output_Route_Edges": {
+      "paramUrl": "results/Output_Route_Edges"
+    },
+    "Output_Directions": {
+      "paramUrl": "results/Output_Directions"
+    },
+    "Output_Stops": {
+      "paramUrl": "results/Output_Stops"
+    },
+    "Output_Network_Analysis_Layer": {
+      "paramUrl": "results/Output_Network_Analysis_Layer"
+    },
+    "Output_Route_Data": {
+      "paramUrl": "results/Output_Route_Data"
+    },
+    "Output_Result_File": {
+      "paramUrl": "results/Output_Result_File"
+    },
+    "Output_Network_Analysis_Layer_Package": {
+      "paramUrl": "results/Output_Network_Analysis_Layer_Package"
+    },
+    "Output_Direction_Points": {
+      "paramUrl": "results/Output_Direction_Points"
+    },
+    "Output_Direction_Lines": {
+      "paramUrl": "results/Output_Direction_Lines"
+    },
+    "Usage_Cost": {
+      "paramUrl": "results/Usage_Cost"
+    }
+  },
+  "inputs": {
+    "Stops": {
+      "paramUrl": "inputs/Stops"
+    },
+    "Measurement_Units": {
+      "paramUrl": "inputs/Measurement_Units"
+    },
+    "Reorder_Stops_to_Find_Optimal_Routes": {
+      "paramUrl": "inputs/Reorder_Stops_to_Find_Optimal_Routes"
+    },
+    "Preserve_Terminal_Stops": {
+      "paramUrl": "inputs/Preserve_Terminal_Stops"
+    },
+    "Return_to_Start": {
+      "paramUrl": "inputs/Return_to_Start"
+    },
+    "Use_Time_Windows": {
+      "paramUrl": "inputs/Use_Time_Windows"
+    },
+    "Time_Zone_for_Time_of_Day": {
+      "paramUrl": "inputs/Time_Zone_for_Time_of_Day"
+    },
+    "UTurn_at_Junctions": {
+      "paramUrl": "inputs/UTurn_at_Junctions"
+    },
+    "Point_Barriers": {
+      "paramUrl": "inputs/Point_Barriers"
+    },
+    "Line_Barriers": {
+      "paramUrl": "inputs/Line_Barriers"
+    },
+    "Polygon_Barriers": {
+      "paramUrl": "inputs/Polygon_Barriers"
+    },
+    "Use_Hierarchy": {
+      "paramUrl": "inputs/Use_Hierarchy"
+    },
+    "Restrictions": {
+      "paramUrl": "inputs/Restrictions"
+    },
+    "Attribute_Parameter_Values": {
+      "paramUrl": "inputs/Attribute_Parameter_Values"
+    },
+    "Route_Shape": {
+      "paramUrl": "inputs/Route_Shape"
+    },
+    "Route_Line_Simplification_Tolerance": {
+      "paramUrl": "inputs/Route_Line_Simplification_Tolerance"
+    },
+    "Populate_Route_Edges": {
+      "paramUrl": "inputs/Populate_Route_Edges"
+    },
+    "Populate_Directions": {
+      "paramUrl": "inputs/Populate_Directions"
+    },
+    "Directions_Language": {
+      "paramUrl": "inputs/Directions_Language"
+    },
+    "Directions_Distance_Units": {
+      "paramUrl": "inputs/Directions_Distance_Units"
+    },
+    "Directions_Style_Name": {
+      "paramUrl": "inputs/Directions_Style_Name"
+    },
+    "Travel_Mode": {
+      "paramUrl": "inputs/Travel_Mode"
+    },
+    "Impedance": {
+      "paramUrl": "inputs/Impedance"
+    },
+    "Time_Zone_for_Time_Windows": {
+      "paramUrl": "inputs/Time_Zone_for_Time_Windows"
+    },
+    "Save_Output_Network_Analysis_Layer": {
+      "paramUrl": "inputs/Save_Output_Network_Analysis_Layer"
+    },
+    "Save_Route_Data": {
+      "paramUrl": "inputs/Save_Route_Data"
+    },
+    "Time_Impedance": {
+      "paramUrl": "inputs/Time_Impedance"
+    },
+    "Distance_Impedance": {
+      "paramUrl": "inputs/Distance_Impedance"
+    },
+    "Output_Format": {
+      "paramUrl": "inputs/Output_Format"
+    },
+    "Ignore_Invalid_Locations": {
+      "paramUrl": "inputs/Ignore_Invalid_Locations"
+    },
+    "Locate_Settings": {
+      "paramUrl": "inputs/Locate_Settings"
+    }
+  },
+  "messages": [
+    {
+      "type": "esriJobMessageTypeWarning",
+      "description": "Location \"O3\" in \"Stops\" is unlocated."
+    },
+    {
+      "type": "esriJobMessageTypeWarning",
+      "description": "WARNING 030025: Partial solution generated."
+    }
+  ]
+}
+```
+
+{/*
+
+<SupportTable>
+  <SupportTableHeader>Direct request</SupportTableHeader>
+  <SupportTableHeader>Job request</SupportTableHeader>
+  <SupportTableRow href="xref://site.rest/basemap-styles-service/" title="Basemap services" supports={[true, false]}></SupportTableRow>
+  <SupportTableRow href="xref://site.rest/places-service/" title="Places service" supports={[true, false]}></SupportTableRow>
+  <SupportTableRow href="DEVSITE/rest/geocoding/" title="Geocoding service" supports={[true, true]}></SupportTableRow>
+  <SupportTableRow href="DEVSITE/rest/routing" title="Routing service" supports={[true, true]}></SupportTableRow>
+  <SupportTableRow href="DEVSITE/rest/geoenrichment" title="GeoEnrichment service" supports={[true, false]}></SupportTableRow>
+  <SupportTableRow href="xref://site.rest/places-service/" title="Elevation service" supports={[true, false]}></SupportTableRow>
+  <SupportTableRow
+    href="DEVSITE/rest/users-groups-and-items/working-with-users-groups-and-items/"
+    title="Portal service"
+    supports={[true, false]}
+  ></SupportTableRow>
+  <SupportTableRow href="DEVSITE/rest/analysis-services/" title="Analysis services" supports={[true, true]}></SupportTableRow>
+</SupportTable> */}
+
+## HTTP Operations
+
+Most <Term term="service">ArcGIS Services</Term> support making requests as either a `GET` or `POST`. Below is a table describing the key differences between each:
+
+| Feature     | `GET`                                                                  | `POST`                                                                                                |
+| ----------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Purpose     | Retrieve data from a server, peform search queries                     | Send data to a server or update server state such as Form submissions, file uploads, and data updates |
+| Data        | Visible in URL parameters                                              | Sent in request body                                                                                  |
+| Security    | Less secure, data visible in URL. Parameters remain in browser history | More secure, data not visible in URL. Parameters are not saved in browser history                     |
+| Caching     | Can be cached                                                          | Not typically cached                                                                                  |
+| Bookmarking | Can be bookmarked                                                      | Cannot be bookmarked                                                                                  |
+| Data length | Limited by URL length (typically 2048 characters)                      | No restrictions                                                                                       |
+| Data types  | Only supports `string` data                                            | Support various data type (string, numeric, binary)                                                   |
+| Encoding    | `application/x-www-form-urlencoded`                                    | `application/x-www-form-urlencoded` or `multipart/form-data`                                          |

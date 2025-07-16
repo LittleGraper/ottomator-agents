@@ -1,0 +1,679 @@
+---
+title: "Generate Renderer (Map Service/Dynamic Layer)"
+description: "This operation returns a renderer of Class Breaks or Unique Value type that includes symbols based on your input."
+slug: "generate-renderer-map-service-dynamic-layer"
+url: "/generate-renderer-map-service-dynamic-layer"
+guid: "GUID-7C128A31-32E8-422E-A0C3-CC6F1D92DD2E"
+migratedTopicMetadata:
+  FTITLE: "Generate Renderer (Map Service-Dynamic Layer)"
+  FDESCRIPTION: ""
+  FCHANGES: "https://devtopia.esri.com/WebGIS/arcgis-rest-api-documentation/issues/120"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.6 - *"
+  CREATED-ON: "13/08/2018 14:31:59"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "02/10/2018 13:38:09"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-94DE2C9F-0DB4-459B-8123-4474249C56AD"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /generateRenderer
+  urlSegments:
+    - name: <dynamic-layer-url>
+      url: /dynamic-layer-table
+    - name: /generateRenderer
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.1'
+  requiredCapability: Map
+---
+
+## Description
+
+`generateRenderer`  operation is performed on a [ dynamic layer / table resource](/dynamic-layer-table). This operation groups data using the supplied `classificationDef`  (classification definition) and an optional `where`  clause. The result is a [renderer](/renderer-objects) object. Use `baseSymbol`  and `colorRamp`  to define the symbols assigned to each class. If the operation is performed on a table, the result is a [renderer](/renderer-objects) object containing the data classes and no symbols.
+
+You can provide arguments to the `generateRenderer`  operation as query parameters defined in the parameters table below.
+
+<Note type={"note"}>
+
+When generating a class breaks renderer map server uses `maxSampleSize`  configuration property set on the map service to determine the number of records to sample. In rare cases these classes might not include the minimum or maximum value in the data. 
+
+</Note>
+
+##  Request Parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Description: The response format. The default response format is html.
+
+Values: html | json
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`layer` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Description: Dynamic layer/table source definition.
+
+<Note type={"note"}>
+
+-   Use `gdbVersion`  on dynamic map layer definition to specify an alternate geodatabase version.
+
+</Note>
+
+Syntax: 
+
+```javascript
+{
+    "id": <layerOrTableId>,
+    "source": <layer source>,
+    "definitionExpression": "<definitionExpression>"
+  }
+
+```
+
+ 
+
+Example: 
+
+```javascript
+{
+  "id": 101,
+  "source":
+  {
+    "type": "mapLayer",
+    "mapLayerId": 0,
+    "gdbVersion": "SDE.DynamicLayers"
+  }
+}
+
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`classificationDef` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Description: The definition using the renderer that is generated.
+
+<Note type={"note"}>
+
+Use either one of `ClassBreaks`  or `UniqueValue`  classification definition.
+
+</Note>
+
+Syntax: 
+
+```javascript
+classificationDef = classification definition
+
+
+```
+
+ 
+
+Example: 
+
+```javascript
+//classBreaks classification definition
+classificationDef = {
+  "type": "classBreaksDef",
+  "classificationField": "POP2010",
+  "classificationMethod": "esriClassifyNaturalBreaks",
+  "breakCount": 5,
+  "normalizationType": "esriNormalizeByField",
+  "normalizationField": "Area"
+}
+
+//uniqueValue classification definition with symbology
+classificationDef = {
+  "type": "uniqueValueDef",
+  "uniqueValueFields": ["Type", "AdminClass"],
+  "fieldDelimiter": ",",
+  "baseSymbol":
+  {
+    "type": "esriSLS",
+    "style": "esriSLSSolid",
+    "width": 2
+  },
+  "colorRamp":
+  {
+    "type": "algorithmic",
+    "fromColor": [115,76,0,255],
+    "toColor": [255,25,86,255],
+    "algorithm": "esriHSVAlgorithm"
+  }
+}
+
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`where` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Description: A `where`  clause for which the data needs to be classified. Any legal SQL `where`  clause operating on the fields in the dynamic layer/table is allowed.
+
+Example: `where = POP2000 > 350000` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example Usage
+
+Example 1: Generate Renderer using a unique value classification definition, when `baseSymbol`  is missing, then server would assign an appropriate `baseSymbol` : 
+
+[https://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer/dynamicLayer/generateRenderer?layer={'{'}"id":101,"source":{'{'}"type":"mapLayer","mapLayerId":3{'}'}{'}'}&classificationDef={'{'}"type":"uniqueValueDef","uniqueValueFields":\["sub_region"\],"fieldDelimiter": ", ", "colorRamp":{'{'}"type":"algorithmic","fromColor":\[115,76,0,255\],"toColor":\[255,25,86,255\],"algorithm": "esriHSVAlgorithm"{'}'}{'}'}&where=&f=pjson](http://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer/dynamicLayer/generateRenderer?layer={%22id%22:101,%22source%22:{%22type%22:%22mapLayer%22,%22mapLayerId%22:3}}&classificationDef={%22type%22:%22uniqueValueDef%22,%22uniqueValueFields%22:[%22sub_region%22],%22fieldDelimiter%22:%20%22,%20%22,%20%22colorRamp%22:{%22type%22:%22algorithmic%22,%22fromColor%22:[115,76,0,255],%22toColor%22:[255,25,86,255],%22algorithm%22:%20%22esriHSVAlgorithm%22}}&where=&f=pjson)
+
+Example 2: Generate Renderer using a class breaks classification definition:
+
+[https://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer/dynamicLayer/generateRenderer?layer={'{'}"id":101,"source":{'{'}"type":"mapLayer","mapLayerId":3{'}'}{'}'}&classificationDef={'{'}"breakCount":5, "type":"classBreaksDef","normalizationType":"esriNormalizeByPercentOfTotal", "classificationField":"pop2007","classificationMethod":"esriClassifyQuantile","baseSymbol":{'{'}"type":"esriSMS","style":"esriSMSSquare","color":\[56,125,221,255\],"size":10.5,"angle":23,"xOffset":-10,"yOffset":null,"outline":null{'}'}{'}'}&where=&f=pjson](http://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer/dynamicLayer/generateRenderer?layer={%22id%22:101,%22source%22:{%22type%22:%22mapLayer%22,%22mapLayerId%22:3}}&classificationDef={%22breakCount%22:5,%20%22type%22:%22classBreaksDef%22,%22normalizationType%22:%22esriNormalizeByPercentOfTotal%22,%20%22classificationField%22:%22pop2007%22,%22classificationMethod%22:%22esriClassifyQuantile%22,%22baseSymbol%22:{%22type%22:%22esriSMS%22,%22style%22:%22esriSMSSquare%22,%22color%22:[56,125,221,255],%22size%22:10.5,%22angle%22:23,%22xOffset%22:-10,%22yOffset%22:null,%22outline%22:null}}&where=&f=pjson)
+
+## JSON Response Syntax (when `classificationDef type`  is `uniqueValueDef` )
+
+```javascript
+{
+  "type" : "uniqueValue",
+  "field1" : "<field1>",
+  "field2" : "<field2>",
+  "field3" : "<field3>",
+  "fieldDelimiter" : "<fieldDelimiter>",
+  "defaultSymbol" :  <symbol>,
+  "defaultLabel" : "<defaultLabel>",
+  "uniqueValueInfos" : [
+    {
+      "value" : "<value1>",
+      "count" : "<number of features with value1>",
+      "label" : "<label1>",
+      "description" : "<description1>",
+      "symbol" :  <symbol1>
+    },
+    {
+      "value" : "<value2>",
+      "count" : "<number of features with value2>",
+      "label" : "<label2>",
+      "description" : "<description2>",
+      "symbol" :  <symbol2>
+    }
+  ]
+}
+```
+
+ 
+
+## JSON Response Example (when `classificationDef type`  is `uniqueValueDef` )
+
+```javascript
+{
+ "type": "uniqueValue",
+ "field1": "sub_region",
+ "field2": "",
+ "field3": "",
+ "fieldDelimiter": ", ",
+ "defaultSymbol": {
+  "type": "esriSFS",
+  "style": "esriSFSSolid",
+  "color": [
+   110,
+   110,
+   110,
+   255
+  ],
+  "outline": {
+   "type": "esriSLS",
+   "style": "esriSLSSolid",
+   "color": [
+    0,
+    0,
+    0,
+    255
+   ],
+   "width": 1
+  }
+ },
+ "defaultLabel": "\u003call other values\u003e",
+ "uniqueValueInfos": [
+  {
+   "value": "East North Central",
+   "count": 5,
+   "label": "East North Central",
+   "description": "",
+   "symbol": {
+    "type": "esriSFS",
+    "style": "esriSFSSolid",
+    "outline": {
+     "type": "esriSLS",
+     "style": "esriSLSSolid",
+     "color": [
+      0,
+      0,
+      0,
+      255
+     ],
+     "width": 1
+    },
+    "color": [
+     115,
+     77,
+     0,
+     255
+    ]
+   }
+  },
+  {
+   "value": "East South Central",
+   "count": 4,
+   "label": "East South Central",
+   "description": "",
+   "symbol": {
+    "type": "esriSFS",
+    "style": "esriSFSSolid",
+    "outline": {
+     "type": "esriSLS",
+     "style": "esriSLSSolid",
+     "color": [
+      0,
+      0,
+      0,
+      255
+     ],
+     "width": 1
+    },
+    "color": [
+     92,
+     130,
+     3,
+     255
+    ]
+   }
+  },
+  {
+   "value": "Middle Atlantic",
+   "count": 3,
+   "label": "Middle Atlantic",
+   "description": "",
+   "symbol": {
+    "type": "esriSFS",
+    "style": "esriSFSSolid",
+    "outline": {
+     "type": "esriSLS",
+     "style": "esriSLSSolid",
+     "color": [
+      0,
+      0,
+      0,
+      255
+     ],
+     "width": 1
+    },
+    "color": [
+     14,
+     148,
+     4,
+     255
+    ]
+   }
+  },
+  {
+   "value": "Mountain",
+   "count": 8,
+   "label": "Mountain",
+   "description": "",
+   "symbol": {
+    "type": "esriSFS",
+    "style": "esriSFSSolid",
+    "outline": {
+     "type": "esriSLS",
+     "style": "esriSLSSolid",
+     "color": [
+      0,
+      0,
+      0,
+      255
+     ],
+     "width": 1
+    },
+    "color": [
+     7,
+     166,
+     97,
+     255
+    ]
+   }
+  },
+  {
+   "value": "New England",
+   "count": 6,
+   "label": "New England",
+   "description": "",
+   "symbol": {
+    "type": "esriSFS",
+    "style": "esriSFSSolid",
+    "outline": {
+     "type": "esriSLS",
+     "style": "esriSLSSolid",
+     "color": [
+      0,
+      0,
+      0,
+      255
+     ],
+     "width": 1
+    },
+    "color": [
+     9,
+     149,
+     184,
+     255
+    ]
+   }
+  },
+  {
+   "value": "Pacific",
+   "count": 5,
+   "label": "Pacific",
+   "description": "",
+   "symbol": {
+    "type": "esriSFS",
+    "style": "esriSFSSolid",
+    "outline": {
+     "type": "esriSLS",
+     "style": "esriSLSSolid",
+     "color": [
+      0,
+      0,
+      0,
+      255
+     ],
+     "width": 1
+    },
+    "color": [
+     14,
+     45,
+     201,
+     255
+    ]
+   }
+  },
+  {
+   "value": "South Atlantic",
+   "count": 9,
+   "label": "South Atlantic",
+   "description": "",
+   "symbol": {
+    "type": "esriSFS",
+    "style": "esriSFSSolid",
+    "outline": {
+     "type": "esriSLS",
+     "style": "esriSLSSolid",
+     "color": [
+      0,
+      0,
+      0,
+      255
+     ],
+     "width": 1
+    },
+    "color": [
+     112,
+     18,
+     219,
+     255
+    ]
+   }
+  },
+  {
+   "value": "West North Central",
+   "count": 7,
+   "label": "West North Central",
+   "description": "",
+   "symbol": {
+    "type": "esriSFS",
+    "style": "esriSFSSolid",
+    "outline": {
+     "type": "esriSLS",
+     "style": "esriSLSSolid",
+     "color": [
+      0,
+      0,
+      0,
+      255
+     ],
+     "width": 1
+    },
+    "color": [
+     237,
+     21,
+     216,
+     255
+    ]
+   }
+  },
+  {
+   "value": "West South Central",
+   "count": 4,
+   "label": "West South Central",
+   "description": "",
+   "symbol": {
+    "type": "esriSFS",
+    "style": "esriSFSSolid",
+    "outline": {
+     "type": "esriSLS",
+     "style": "esriSLSSolid",
+     "color": [
+      0,
+      0,
+      0,
+      255
+     ],
+     "width": 1
+    },
+    "color": [
+     255,
+     25,
+     87,
+     255
+    ]
+   }
+  }
+ ]
+}
+
+JSON Response Syntax (when classificationDef type is classBreaksDef)
+{
+  "type" : "classBreaks",
+  "field" : "<field>",
+  "classificationMethod" : "<classification method>",
+  "normalizationType" : "<esriNormalizeByField | esriNormalizeByLog | esriNormalizeByPercentOfTotal>",
+  "normalizationField" : "<normalization field>", //when normalizationType is esriNormalizeByField
+  "normalizationTotal" : <total value>, //when normalizationType is esriNormalizeByPercentOfTotal
+  "minValue" : <minValue>,
+  "classBreakInfos" : [
+    {
+      "classMinValue" : <classMinValue1>, //optional
+      "classMaxValue" : <classMaxValue1>,
+      "label" : "<label1>",
+      "description" : "<description1>",
+      "symbol" :  <symbol1>
+    },
+    {
+      "classMinValue" : <classMinValue2>,
+      "classMaxValue" : <classMaxValue2>,
+      "label" : "<label2>",
+      "description" : "<description2>",
+      "symbol" :  <symbol2>
+    }
+  ]
+}
+
+          
+```
+
+ 
+
+## JSON Response Example (when `classificationDef type`  is `classBreaksDef` )
+
+```javascript
+{
+ "type": "classBreaks",
+ "field": "pop2007",
+ "normalizationType": "esriNormalizeByPercentOfTotal",
+ "normalizationTotal": 306348230,
+ "minValue": 0.17077754945736098,
+ "classBreakInfos": [
+  {
+   "classMaxValue": 0.44150279569103434,
+   "label": "0.170778% - 0.441503%",
+   "description": "",
+   "symbol": {
+    "type": "esriSMS",
+    "style": "esriSMSSquare",
+    "size": 10.5,
+    "angle": 23,
+    "xoffset": -10,
+    "yoffset": 0,
+    "color": [
+     0,
+     255,
+     0,
+     255
+    ]
+   }
+  },
+  {
+   "classMaxValue": 0.96925841549663927,
+   "label": "0.441504% - 0.969258%",
+   "description": "",
+   "symbol": {
+    "type": "esriSMS",
+    "style": "esriSMSSquare",
+    "size": 10.5,
+    "angle": 23,
+    "xoffset": -10,
+    "yoffset": 0,
+    "color": [
+     0,
+     255,
+     128,
+     255
+    ]
+   }
+  },
+  {
+   "classMaxValue": 1.7498315560693791,
+   "label": "0.969259% - 1.749832%",
+   "description": "",
+   "symbol": {
+    "type": "esriSMS",
+    "style": "esriSMSSquare",
+    "size": 10.5,
+    "angle": 23,
+    "xoffset": -10,
+    "yoffset": 0,
+    "color": [
+     0,
+     255,
+     255,
+     255
+    ]
+   }
+  },
+  {
+   "classMaxValue": 2.9024522191624871,
+   "label": "1.749833% - 2.902452%",
+   "description": "",
+   "symbol": {
+    "type": "esriSMS",
+    "style": "esriSMSSquare",
+    "size": 10.5,
+    "angle": 23,
+    "xoffset": -10,
+    "yoffset": 0,
+    "color": [
+     0,
+     128,
+     255,
+     255
+    ]
+   }
+  },
+  {
+   "classMaxValue": 12.235568653358957,
+   "label": "2.902453% - 12.235569%",
+   "description": "",
+   "symbol": {
+    "type": "esriSMS",
+    "style": "esriSMSSquare",
+    "size": 10.5,
+    "angle": 23,
+    "xoffset": -10,
+    "yoffset": 0,
+    "color": [
+     0,
+     0,
+     255,
+     255
+    ]
+   }
+  }
+ ]
+}
+
+
+```
+
+ 

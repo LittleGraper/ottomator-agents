@@ -1,0 +1,224 @@
+import BearingAttributes from "../../snippets/shared-attributes/_BearingBrTolNavLat.mdx"
+import NetworkLocationFields from "../../snippets/shared-attributes/_NetworkLocationFields.mdx"
+
+import ParamMetadata from "../../../components/param-metatdata" 
+
+<ParamMetadata required types={[{name:"feature",link:"../routing-data-types#feature"}]} />
+
+{/* <p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span><span class="font-bold text-[#a82b1e]">Required</span></p> */}
+
+Specify one or more locations that serve as facilities. This service identifies the best facility or facilities to serve the demand points.
+
+When specifying the facilities, you can set attributes for each as follows:
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for facilities</span></summary>
+
+ #### Attributes for facilities
+
+-   <p class="space-x-2"><span class="font-bold">Name</span><span class="font-sm text-color-3">string (length: 500)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The name of the facility. The name is included in the name of output allocation lines if the facility is part of the solution.
+
+-   <p class="space-x-2"><span class="font-bold">FacilityType</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+    Allowed values: `0`, `1`, `2`
+
+    Specify whether the facility is a candidate, required, or a competitor facility. The field value is specified as one of the following integers:
+
+    -   `0`:Candidate—A facility that may be part of the solution.
+    -   `1`:Required—A facility that must be part of the solution.
+    -   `2`:Competitor—A rival facility that potentially removes demand from your facilities. Competitor facilities are specific to the maximize market share and target market share problem types; they are ignored in other problem types.   
+
+-   <p class="space-x-2"><span class="font-bold">Weight</span><span class="font-sm text-color-3">number (non-negative)</span></p>
+
+    The relative weighting of the facility, which is used to rate the attractiveness, desirability, or bias of one facility compared to another.
+
+    For example, a value of 2.0 could capture the preference of customers who prefer, at a ratio of 2 to 1, shopping in one facility over another facility. Factors that potentially affect facility weight include square footage, neighborhood, and age of the building. Weight values other than one are only honored by the maximize market share and target market share problem types; they are ignored in other problem types.
+
+-   <p class="space-x-2"><span class="font-bold">Cutoff</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+    The impedance value at which to stop searching for demand points from a given facility. The demand point can't be allocated to a facility that is beyond the value indicated here. 
+
+    This attribute allows you to specify a different cutoff value for each demand point. For example, You might find that people in rural areas are willing to travel up to 10 miles to reach a facility, while urbanites are only willing to travel up to 2 miles. You can model this behavior by setting the `Cutoff`  value for all demand points that are in rural areas to 10 and setting the `Cutoff`  value of the demand points in urban areas to 2. 
+
+-   <p class="space-x-2"><span class="font-bold">Capacity</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+    The `Capacity` field is specific to the Maximize Capacitated Coverage problem type; the other problem types ignore this field. 
+
+    Capacity specifies how much weighted demand the facility is capable of supplying. Excess demand won't be allocated to a facility even if that demand is within the facility's default measurement cutoff.
+
+    Any value assigned to the `Capacity` field overrides the `Default Capacity` parameter (`Default_Capacity` in Python) for the given facility.
+
+
+-   <p class="space-x-2"><span class="font-bold">CurbApproach</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+    Allowed values: `0`, `1`, `2`, `3`
+
+    Specifies the direction a vehicle may arrive at and depart from the facility. The field value is specified as one of the following integers:
+
+    - `0`: Either side of vehicle. The vehicle can approach and depart the facility in either direction. U-turns are allowed. You should choose this setting if your vehicle can make a U-turn at the order or if it can pull into a driveway or parking lot and turn around.
+    - `1`: Right side of vehicle. When the vehicle approaches and departs the facility, the curb must be on the right side of the vehicle. A U-turn is prohibited.
+    - `2`: Left side of vehicle. When the vehicle approaches and departs the facility, the curb must be on the left side of the vehicle. A U-turn is prohibited.
+    - `3`: No U-turn. When the vehicle approaches the facility, the curb can be on either side of the vehicle; however, the vehicle must depart without turning around. [Learn more about U-turn policies](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/u-turn-policies.htm)
+
+    <details>
+     <summary><span class="font-sm text-color-link">Show illustration</span></summary>
+
+    <StyledTable headers={"Setting,Coded value,Description"}>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Either side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    0
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    The vehicle can approach and depart the facility in either direction, so a U-turn is allowed at the facility. This setting can be chosen if it is possible and desirable for a vehicle to turn around at the facility. This decision may depend on the width of the road and the amount of traffic or whether the location has a parking lot where vehicles can pull in and turn around.
+
+    ![Either side of vehicle ](../../images/CurbApproach_EitherSide.png)
+
+    _All arrival and departure combinations are allowed with the Either side of vehicle curb approach._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Right side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    1
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches and departs the facility, the facility must be on the right side of the vehicle. A U-turn is prohibited. This is typically used for vehicles such as buses that must arrive with the bus stop on the right side.
+     
+    ![Right side of vehicle ](../../images/CurbApproach_RightSide.png)
+
+    _The allowed arrival and departure combination for the Right side of vehicle curb approach is shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Left side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    2
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches and departs the facility, the facility must be on the left side of the vehicle. A U-turn is prohibited. This is typically used for vehicles such as buses that must arrive with the bus stop on the left side.
+
+    ![Left side of vehicle ](../../images/CurbApproach_LeftSide.png)
+
+    _The allowed arrival and departure combination for the Left side of vehicle curb approach is shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    No U-Turn
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    3
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches the facility, the facility can be on either side of the vehicle; however, when it departs, the vehicle must continue in the same direction it arrived. A U-turn is prohibited.
+
+    ![No U-turns ](../../images/CurbApproach_NoU-Turns.png)
+
+    _The allowed arrival and departure combinations for the No U-Turn curb approach are shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    </StyledTable>
+
+    The `CurbApproach`  attribute is designed to work with both types of national driving standards: right-hand traffic (United States) and left-hand traffic (United Kingdom). First, consider an facility on the left side of a vehicle. It is always on the left side regardless of whether the vehicle travels on the left or right half of the road. What may change with national driving standards is your decision to approach an facility from one of two directions, that is, so it ends up on the right or left side of the vehicle. For example, if you want to arrive at an facility and not have a lane of traffic between the vehicle and the facility, choose 1 (Right side of vehicle) in the United States and 2 (Left side of vehicle) in the United Kingdom.
+
+    <ColumnLayout layout={2}>
+
+    <Column>
+
+    <Figure>
+
+    ![ Right side of vehicle with right-hand traffic](../../images/CurbApproach_RightSide.png)
+
+    <Caption>
+
+    _With right-hand traffic, the curb approach that leaves the vehicle closest to the facility is Right side of vehicle._
+
+    </Caption>
+
+    </Figure>
+
+    </Column>
+
+    <Column>
+
+    <Figure>
+
+    ![ Left side of vehicle with left-hand traffic ](../../images/CurbApproach_LeftSideDriving.png)
+
+    <Caption>
+
+    _With left-hand traffic, the curb approach that leaves the vehicle closest to the facility is Left side of vehicle._
+
+    </Caption>
+
+    </Figure>
+
+    </Column>
+
+    </ColumnLayout>
+
+    </details>
+
+<BearingAttributes />
+
+</details>
+
+**Example**
+
+The example shows how to specify some attributes for the `facilities`.
+
+<CodeBlock language="json" source="../../code-samples/locationAllocation/examples/inputs/facilities_ex.json" group="json" maxLines={20} expandable/>

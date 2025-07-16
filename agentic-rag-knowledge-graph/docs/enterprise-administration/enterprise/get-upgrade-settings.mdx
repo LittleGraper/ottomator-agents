@@ -1,0 +1,208 @@
+---
+title: "Get Upgrade Settings"
+description: "The getUpgradeSettings operation returns the required upgrade settings, and their expected formats, needed for a specific release."
+slug: "get-upgrade-settings"
+url: "/get-upgrade-settings"
+guid: "GUID-0998A246-2B3C-4E2B-B61F-FE4C07892119"
+migratedTopicMetadata:
+  FTITLE: "Get Upgrade Settings"
+  FDESCRIPTION: ""
+  FCHANGES: "Changes for 11.1 "
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1-*"
+  CREATED-ON: "17/04/2023 10:09:08"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "21/04/2023 11:27:09"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-FE5B7DEF-B404-4CBF-AABF-E67B9B20CC21"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /system/upgrades/getUpgradeSettings
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /system/upgrades/getUpgradeSettings
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '11.0'
+  requiredCapabilities:
+    - name: Access allowed with either "Security and infrastructure" or "Servers" privileges
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `getUpgradeSettings` operation returns the required upgrade settings, and their expected formats, needed for a specific release, applicable to ArcGIS Enterprise on Kubernetes versions 11.0 and later. These settings must be passed through as values for the [`upgradeSettings` parameter](/upgrade) to successfully upgrade an ArcGIS Enterprise on Kubernetes deployment. Some upgrade settings may require their `value` property to be modified before being submitted as part of the [`upgrade`](/upgrade) operation. For example, when upgrading an ArcGIS Enterprise on Kubernetes deployment from version 11.0 to 11.1, you will need to modify the `value` property for the `licenseUpload` JSON object. All current upgrade settings, as well as information about the modifications that are needed before the deployment can be upgraded, are described in the Response properties section below.
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `upgradeId` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The unique ID associated with a patch or release. The ID can be retrieved from the `available` operation. The version manifest for a patch or release can be retrieved from the JSON view of the `available` operation.
+
+      ```markdown label=Example
+      {"id": "rel_234567_2000"}
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Response properties
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `updateToLatestPatch` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      When set to `true`, patches included with a release will be automatically installed during the upgrade process. The default value of this property is `true`; the value should not be changed.
+
+      Values: `true` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `licenseUpload` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object that stores an uploaded ArcGIS Enterprise on Kubernetes license file (`.json`). When [upgrading](/upgrade), the `value` property must be updated to reflect the [upload ID](/uploads) of an [uploaded](/upload-item) ArcGIS Enterprise on Kubernetes license file.
+
+      Example of modified `value` property
+
+      ```other
+      {
+        "seqNum": 1,
+        "validFileExtensions": ["json"],
+        "name": "licenseUpload",
+        "description": "licenseFieldDescToken",
+        "id": "licenseUpload",
+        "type": "File",
+        "value": "caf81a83-b6a7-4810-9e7c-dbff96c6050a",
+        "required": true,
+        "newfield": ""
+      },
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `volumesConfig` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      <Note type={"note"}>
+
+      This response property has been deprecated at ArcGIS Enterprise on Kubernetes 11.1, and is only applicable to ArcGIS Enterprise on Kubernetes 11.0.
+
+      </Note>
+
+      A JSON object containing the storage configurations for persistent volumes that are required while upgrading.
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `getUpgradeSettings` operation:
+
+```other
+POST /context/admin/system/upgrades/getUpgradeSettings HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+upgradeId={"id": "rel_08042022_3000"}&
+f=pjson&token=ycIwQVgej6UA_ZHHgltGsXCLRP815k4nLCiNyQEqGfWztsccgK5XdTEellUjToKS3D2UoHxGDPff4OblGKwRsXA0eb1kIIei4Bi-Ke20Nw-NSZR8Z7ILCDoxqbmOnZLoeTssYMTkd_q-_OA00Aw_W2PG5UuzLyTq2EuJBiw6eMM2hZl3AubVc9aYjblgBG4t2vT5as-IGdhOVrWf5aD7fh3L_pQ70zKCPUubzxTJYoA.
+```
+
+## JSON Response example
+
+```other
+{
+  "userInputs": [
+    {
+      "seqNum": 0,
+      "defaultValue": false,
+      "name": "updateToLatestPatch",
+      "description": "updateToLatestPatch",
+      "isManagerInvisibleField": true,
+      "id": "updateToLatestPatch",
+      "type": "Boolean",
+      "value": true,
+      "required": true,
+      "newfield": ""
+    },
+    {
+      "seqNum": 1,
+      "validFileExtensions": ["json"],
+      "name": "licenseUpload",
+      "description": "licenseFieldDescToken",
+      "id": "licenseUpload",
+      "type": "File",
+      "value": "",
+      "required": true,
+      "newfield": ""
+    },
+    {
+      "orderedListofTemplates": "pvTemplateSharing,pvTemplateBlob",
+      "templateName": "volumesConfig",
+      "seqNum": 2,
+      "defaultValue": "[{\"component\":\"BLOB\",\"labels\":{\"arcgis/tier\":\"storage\",\"arcgis/app\":\"minio\"},\"provisioningType\":\"DYNAMIC\",\"size\":\"32Gi\",\"storageClass\":\"arcgis-storage-default\"},{\"component\":\"SHARING\",\"labels\":{\"arcgis/tier\":\"api\",\"arcgis/app\":\"sharing\"},\"provisioningType\":\"DYNAMIC\",\"size\":\"16Gi\",\"storageClass\":\"arcgis-storage-default\"}]",
+      "name": "volumesConfig",
+      "description": "storageFieldDescToken",
+      "id": "volumesConfig",
+      "type": "Text",
+      "isTemplateRequired": true,
+      "value": "[{\"component\":\"BLOB\",\"labels\":{\"arcgis/tier\":\"storage\",\"arcgis/app\":\"minio\"},\"provisioningType\":\"DYNAMIC\",\"size\":\"32Gi\",\"storageClass\":\"arcgis-storage-default\"},{\"component\":\"SHARING\",\"labels\":{\"arcgis/tier\":\"api\",\"arcgis/app\":\"sharing\"},\"provisioningType\":\"DYNAMIC\",\"size\":\"16Gi\",\"storageClass\":\"arcgis-storage-default\"}]",
+      "required": true,
+      "newfield": ""
+    }
+  ]
+}
+```

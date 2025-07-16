@@ -1,0 +1,294 @@
+---
+title: "Refresh Service"
+description: "Refresh Service is used by the service publisher to refresh a GIS service to reflect back-end data changes."
+slug: "refreshservice"
+url: "/refreshservice"
+guid: "GUID-CD49B5DF-7E22-4B02-B13D-19F113286E19"
+migratedTopicMetadata:
+  FTITLE: "refreshService"
+  FDESCRIPTION: ""
+  FCHANGES: "https://devtopia.esri.com/WebGIS/arcgis-rest-api-documentation/issues/152"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.8.1 - *"
+  CREATED-ON: "28/02/2020 15:33:06"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "24/05/2020 18:11:50"
+  VERSION: "5"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-7B0D4675-E6A8-4A3E-81B2-0320960C824C"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /System/PublishingTools/GPServer/Refresh Service
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /System/PublishingTools/GPServer/Refresh Service
+  methods:
+    - get
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.3'
+---
+
+## Description
+
+The `Refresh Service` operation refreshes image services, or the snapshots of map image layers and feature layers, to reflect backend data changes.
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Image service</TabTitle>
+  <TabTitle>Snapshots</TabTitle>
+</TabNav>
+
+<Tab>
+
+  When new rasters are added to the backend mosaic dataset of an image service, the image service information may become outdated and need to be refreshed to reflect those changes. While this can be done by restarting the service, many applications require the service to run without downtime.
+
+  The `Refresh Service` operation refreshes a service to reflect data changes without restarting the service, and once the refresh is complete the new rasters in the mosaic dataset are immediately accessible to clients. Optionally, the service publisher can advertise the changes to in-use clients through other mechanisms, such as WebSocket.
+
+  A typical live image service involves the following configuration:
+  
+  * For the initial configuration, the service publisher prepares a mosaic dataset in SDE and publishes as an image service.
+  * The image service is configured with the `hasLiveData` property set as `true`.
+
+  For routine updates, a monitoring program can be used to recognize when new data is available. The program can either monitor the incoming data folder, or be notified by other data processing scripts when new data is added to the backend mosaic dataset.
+
+  <Note>
+
+  You may want to turn off geoprocessing history metadata updates if there are many routine updates, as it may increase the overhead of using the mosaic dataset.
+
+  </Note>
+
+</Tab>
+
+<Tab>
+
+  When publishing a map image or feature layer from ArcGIS Pro that references data from a cloud data warehouse, you can choose to create a snapshot of the data at the time of publishing. This makes a copy of the subset of data included in the query layer that accesses the cloud data warehouse, placing it in the ArcGIS Data Store relational data store for the web service to access. If you choose to take a snapshot at the time of publishing, one snapshot will be created for each layer that references data in the cloud data warehouse.
+
+  If the source data in the cloud data warehouse changes, you can refresh the snapshots using the `Refresh Service` operation. The amount of time it takes for a snapshot to refresh depends on how much data is in layer. The service will restart once every snapshot for that service has been refreshed. This will result in a short amount of downtime for the service.
+
+  You can verify that the snapshots have been refreshed by checking the timestamp of the **cdwSnapshotInfo.json** file, which can be found at the [Item Resources](DEVSITE/rest/users-groups-and-items/item-resources) endpoint in the Portal Directory API.
+
+  If source data is updated frequently, you can set snapshots to be [refreshed at specific intervals](https://enterprise.arcgis.com/en/portal/latest/use/refresh-snapshots.htm).
+
+</Tab>
+
+</Tabs>
+
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serviceName`
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The name of the service.
+
+      Example
+
+      ```other
+      serviceName=Test_Service
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serviceType` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The type of the service.
+
+      Values: `ImageServer` | `FeatureServer` | `MapServer` | `SceneServer`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serviceFolder` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The folder that contains the service.
+
+      Example
+
+      ```markdown
+      serviceFolder=Hosted
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `refreshOptions` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A set of additional options for the request. At this time, no options are available or supported.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `returnZ`
+      
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean that determines if z-values are included as part of the result. If `true`, z-values will be included in the results if the features have z-values. Otherwise, z-values will not be returned. The default is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `returnTrueCurves`
+      
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean that specifies whether true curves will be returned in the output geometries (`true`). When `false`, curves will be converted to densified polylines or polygons. The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `simplifyFeatures`
+      
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean that specifies whether geometries should be simplified (`true`). Simplifying can siginificantly reduce the size of the response while fulfiling the accuracy needs for most analysis, espeically for complex and large geometries. The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `context`
+      
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Additional settings that affect the result of the operation:
+
+      - `outSR` is the spatial reference of the output geometries.
+      - `processSR` is the spatial reference that the model will use to perform geometry operations.
+      - `extent` will only process features that overlap the specified extent. The output features will have an extent that is the same or larger than the `extent` value.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following are sample requests (GET and POST) for the `Refresh Service` operation:
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>GET Request</TabTitle>
+  <TabTitle>POST Request</TabTitle>
+</TabNav>
+
+<Tab>
+
+```other
+https://machine.domain.com/webadaptor/rest/services/System/PublishingTools/GPServer/Refresh%20Service/submitJob?serviceName=My_Service_Name&serviceType=ImageServer&serviceFolder=MY_Service_Folder&refreshOptions=&returnZ=false&returnM=false&returnTrueCurves=false&simplifyFeatures=true&context=&f=pjson
+
+```
+
+</Tab>
+
+<Tab>
+
+```other
+POST /webadaptor/rest/services/System/PublishingTools/GPServer/Refresh%20Service/submitJob HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+serviceName=My_Service_Name&serviceType=ImageServer&serviceFolder=MY_Service_Folder&refreshOptions=&returnZ=false&returnM=false&returnTrueCurves=false&simplifyFeatures=true&context=&f=pjson
+```
+
+</Tab>
+
+</Tabs>
+
+
+## JSON Response example
+
+When the `Refresh Service` job request is submitted, the following JSON response is returned:
+
+```other
+{
+  "jobId": "j5f3aa768e0a24dcfbdff45f379870553",
+  "jobStatus": "esriJobSubmitted"
+}
+
+```
+The value for `jobId` can be appended to a modified version of the request URL (shown below) to access the `job` resource:
+
+```other
+https://machine.domain.com/webadaptor/rest/services/System/PublishingTools/GPServer/Refresh%20Service/jobs/j5f3aa768e0a24dcfbdff45f379870553?f=pjson
+
+```
+
+The `job` resource can be polled to check the status of the `Refresh Service` job.

@@ -1,0 +1,73 @@
+---
+title: "Sync compatibility notes"
+description: ""
+slug: "sync-compatibility-notes"
+url: "/sync-compatibility-notes"
+guid: "GUID-763C08C0-0BE4-4393-BA5D-A1B6BE9D4245"
+migratedTopicMetadata:
+  FTITLE: "Sync compatibility notes"
+  FDESCRIPTION: ""
+  FCHANGES: "Corrected note on syncEnabled prop"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.2.1 - *"
+  CREATED-ON: "07/10/2013 13:56:41"
+  FAUTHOR: "hmccracken"
+  FSTATUS: "Released"
+  MODIFIED-ON: "23/10/2013 14:00:12"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-CF6D2B52-C50E-4D39-B6CA-CCEFBE20B282"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata: {}
+---
+
+## General
+
+New clients need to check the new [Sync capability](/sync-enabled-feature-services) to determine if a feature service has been configured to use sync. 
+
+<Note type={"note"}>
+
+There is also a `syncEnabled`  property, but it is recommended that new clients use the sync capability instead.
+
+</Note>
+
+Older clients have no knowledge of this property; however, properties used by older clients are still supported. Thus, a client written for an older server will continue to work when the server is upgraded to the newest release. 
+
+Older clients check the `supportsDisconnectedEditing`  property to determine if the service supports the API. If `true` , the clients then check properties of the layers to be used with [Create Replica](/create-replica) to ensure the following:
+
+-   All layers must have a GlobalID field.
+-   All layers must have the same value for the `syncCanReturnChanges`  property. Either all can return changes on sync (`true` ) or none can return changes on sync (`false` ). If all are `false` , replacement data is returned on sync.
+
+If `supportsDisconnectedEditing`  is `false` , the service cannot take part in sync at all.
+
+## LayerQueries without queryOption
+
+If a service does not have the `syncEnabled`  property or has a value of `false` , the older syntax of `layerQueries`  applies, as below. 
+
+### Description
+
+In addition to the `layers`  and `geometry`  parameters, the `layerQueries`  parameter can be used to further define what is replicated. This parameter allows you to set properties on a per-layer or per-table basis. Only the properties for the layers and tables that you want change from the default are required. The properties include the following:
+
+-   `where` —Defines an attribute query for a layer or table. The default is no where clause.
+-   `useGeometry` —Determines whether or not to apply the geometry for the layer. The default is `true` . If set to `false` , features from the layer that intersect the geometry are not added.
+-   `includeRelated` —Determines whether or not to add related rows. The default is `true` .
+
+### Syntax
+
+```javascript
+layerQueries={ "<Layer_or_tableID1>" : {"where":"attribute_query", "useGeometry": <true | false>, "includeRelated" : <true | false>}, "<Layer_or_tableID2>: {.}}
+```
+
+ 
+
+### Example
+
+-   `layerQueries={"1":{"useGeometry" : false}}` 
+-   `layerQueries={"0":{"where": "requires_inspection" = True}, "1":{"useGeometry " : false}}` 
+-   `layerQueries={"0":{"useGeometry" : false, "includeRelated" : false}}, "1":{"useGeometry" : false}}` 

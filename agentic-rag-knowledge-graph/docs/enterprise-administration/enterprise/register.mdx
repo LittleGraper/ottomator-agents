@@ -1,0 +1,567 @@
+---
+title: "Register (Backup Store)"
+description: "The register operation registers a backup store."
+slug: "register"
+url: "/register"
+guid: "GUID-D3B943C9-00FB-485A-B59C-702176059A7C"
+migratedTopicMetadata:
+  FTITLE: "Register"
+  FDESCRIPTION: ""
+  FCHANGES: "Adding note about empty rootDir string"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2-*"
+  CREATED-ON: "31/10/2023 16:05:40"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "09/11/2023 19:35:40"
+  VERSION: "5"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-E5075EC1-0E7F-4D96-BF37-274539D2C7EC"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /system/disasterrecovery/stores/register
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /system/disasterrecovery/stores/register
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed with the "Security and infrastructure" privilege
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `register` operation registers a backup store. The backup store is created and managed by the deployment.
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `storeName` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The backup store name.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `settings` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The JSON describing the storage configuration for the backup store. It can use either file-based storage or cloud storage. Support for cloud storage was added at ArcGIS Enterprise on Kubernetes 11.2. For more information, see the [Settings properties](/register#settings-properties) section below.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `isDefault` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies whether the store will be the default backup store (`true`). The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.0. This parameter specifies whether the operation will run synchronously or asynchronously. If `false`, the operation is run synchronously. If `true`, the operation is run asynchronously and the response returns a JSON object containing job information that can be used to track the job's status. The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Settings properties
+
+The following information pertains to the different storage options (file-based storage or cloud storage) available for a backup store.
+
+### File-based storage
+
+If the backup store uses file-based storage, the storage configuration will use persistent volumes that can either be statically provisioned and bound by label selectors or dynamically provisioned. The following table outlines the properties for file-based storage configuration:
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `provisioningType` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The provisioning type.
+
+      Values: `STATIC` | `DYNAMIC`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `storageClass` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The storage class.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `size` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The size for the persistent volume. The minimum size requirement is 16 GB.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `labels` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A `key:value` pair to identify and bind to a persistent volume.
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+#### STATIC JSON examples
+
+The following example demonstrates the `storageConfig` syntax when using a `STATIC` provisioning type:
+
+```other
+{
+  "provisioningType": "STATIC",
+  "storageClass": "backups",
+  "size": "64Gi",
+  "labels": {
+    "arcgis/purpose": "backups"
+  }
+}
+```
+
+The following example demonstrates the full JSON for the `settings` parameter using `STATIC` provisioning and label selectors:
+
+```other
+{
+  "type": "HOSTED",
+  "storageConfig": {
+    "provisioningType": "STATIC",
+    "storageClass": "backups",
+    "size": "64Gi",
+    "labels": {
+      "arcgis/purpose": "backups"
+    }
+  }
+}
+```
+
+#### DYNAMIC JSON examples
+
+The following example demonstrates the `storageConfig` syntax when using a `DYNAMIC` provisioning type:
+
+```other
+{
+  "size": "64Gi",
+  "provisioningType": "DYNAMIC",
+  "storageClass": "backups"
+}
+```
+
+The following example demonstrates the full JSON for the `settings` parameter using `DYNAMIC` provisioning:
+
+```other
+{
+  "type": "HOSTED",
+  "storageConfig": {
+    "size": "64Gi",
+    "provisioningType": "DYNAMIC",
+    "storageClass": "backups"
+  }
+}
+```
+
+### Cloud storage
+
+If the backup store uses native cloud storage, the JSON for the `settings` parameter must include relevant properties for the storage provider. Supported cloud storage locations are Amazon Simple Storage Service (S3), Azure Blob Storage, and Google Cloud Storage (GCS).
+
+The JSON for cloud storage configuration contains two main sections:
+
+- `provider`: Defines how to connect and the credentials to use.
+- `service`: Includes the bucket or container to use, as well as region information (if relevant).
+  <Note type={"caution"}>
+
+  If an empty string is provided for `rootDir` when a backup store is registered, the backup store's `rootFolderName` will, by default, become `arcgis`. However, if a root directory named `arcgis` already exists, administrators must specify a unique value for `rootDir`.
+
+  </Note>
+
+Starting at ArcGIS Enterprise 11.2 on Kubernetes, administrators can choose to register a backup store using provider-level credentials or using service-level credentials. Choosing to use service-level credentials allows for the cloud-native object store to be configured using one set of access keys and use a separate set of access keys for the backup store. Administrators choosing to use the provider-level credentials need to ensure that they are using the current credentials assigned to the cloud store.
+
+#### Amazon S3 (provider-level credentials)
+
+The following example shows the JSON properties needed for the `settings` parameter for Amazon S3 cloud storage using provider-level credentials:
+
+```other
+{
+  "type": "S3",
+  "provider": {
+    "name": "AWS",
+    "id": "<providerId>",
+    "cloudServices": [
+      {
+        "name": "AWS S3",
+        "type": "objectStore",
+        "usage": "BACKUP",
+        "connection": {
+          "bucketName": "<bucketName>",
+          "region": "<region>",
+          "rootDir": "<rootDirectory>"
+        },
+        "category": "storage"
+      }
+    ]
+  }
+}
+```
+
+#### Amazon S3 (service-level credentials)
+
+The following example shows the JSON properties needed for the `settings` parameter for Amazon S3 cloud storage using service-level credentials:
+
+```other
+{
+  "type": "S3",
+  "provider": {
+    "name": "AWS",
+    "cloudServices": [
+      {
+        "name": "AWS S3",
+        "type": "objectStore",
+        "usage": "BACKUP",
+        "connection": {
+          "bucketName": "<bucket>",
+          "region": "<region>",
+          "rootDir": "<rootDirectory>",
+          "credential": {
+            "type": "ACCESS-KEY",
+            "secret": {
+              "secretKey": "<secretAccessKey>",
+              "accessKey": "<accessKey>"
+            }
+          }
+        },
+        "category": "storage"
+      }
+    ]
+  }
+}
+```
+
+The JSON example below shows the properties needed for the `settings` parameter for Amazon S3 cloud storage configured with AWS Identity and Access Management (IAM) roles, also using service-level credentials:
+
+<Note type={"note"}>
+
+The cluster nodes should also be configured with an IAM role.
+
+</Note>
+
+```other
+{
+  "type": "S3",
+  "provider": {
+    "name": "AWS",
+    "cloudServices": [
+      {
+        "name": "AWS S3",
+        "type": "objectStore",
+        "usage": "BACKUP",
+        "connection": {
+          "bucketName": "<bucket>",
+          "region": "<region>",
+          "rootDir": "<rootDirectory>",
+          "credential": {
+            "type": "IAM-ROLE"
+          }
+        },
+        "category": "storage"
+      }
+    ]
+  }
+}
+```
+
+#### Azure Blob Storage (provider-level credentials)
+
+The following example shows the JSON properties needed for the `settings` parameter for Azure Blob Storage using provider-level credentials:
+
+```other
+{
+  "type": "AZURE_BLOBSTORE",
+  "provider": {
+    "name": "AZURE",
+    "id": "<providerId>",
+    "cloudServices": [
+      {
+        "name": "Azure Blob Store",
+        "type": "objectStore",
+        "usage": "BACKUP",
+        "connection": {
+          "containerName": "<containerName>",
+          "rootDir": "<rootDirectory>"
+        },
+        "category": "storage"
+      }
+    ]
+  }
+}
+```
+
+#### Azure Blob Storage (service-level credentials)
+
+The following example shows the JSON properties needed for the settings parameter for Azure Blob Storage with storage account keys using service-level credentials:
+
+```other
+{
+  "type": "AZURE_BLOBSTORE",
+  "provider": {
+    "name": "AZURE",
+    "cloudServices": [
+      {
+        "name": "Azure Blob Store",
+        "type": "objectStore",
+        "usage": "BACKUP",
+        "connection": {
+          "containerName": "<containerName>",
+          "rootDir": "<rootDirectory>",
+          "credential": {
+            "type": "STORAGE-ACCOUNT-KEY",
+            "secret": {
+              "storageAccountName": "<storageAccountName>",
+              "storageAccountKey": "<storageAccountKey>"
+            }
+          }
+        },
+        "category": "storage"
+      }
+    ]
+  }
+}
+```
+
+The JSON example below shows the properties needed for the `settings` parameter for Azure Blob Storage with system-assigned identities, also using service-level credentials:
+
+```other
+{
+  "type": "AZURE_BLOBSTORE",
+  "provider": {
+    "name": "AZURE",
+    "cloudServices": [
+      {
+        "name": "Azure Blob Store",
+        "type": "objectStore",
+        "usage": "BACKUP",
+        "connection": {
+          "containerName": "<containerName>",
+          "rootDir": "<rootDirectory>",
+          "credential": {
+            "type": "SYSTEM-ASSIGNED-IDENTITY",
+            "secret": {
+              "storageAccountName": "<storageAccountName>"
+            }
+          }
+        },
+        "category": "storage"
+      }
+    ]
+  }
+}
+```
+
+The JSON example below shows the properties needed for the `settings` parameter for Azure Blob Storage with user-assigned identities, also using service-level credentials:
+
+```other
+{
+  "type": "AZURE_BLOBSTORE",
+  "provider": {
+    "name": "AZURE",
+    "cloudServices": [
+      {
+        "name": "Azure Blob Store",
+        "type": "objectStore",
+        "usage": "BACKUP",
+        "connection": {
+          "containerName": "<containerName>",
+          "rootDir": "<rootDirectory>",
+          "credential": {
+            "type": "USER-ASSIGNED-IDENTITY",
+            "managedIdentityClientId": "<user_assigned_identity_client_id>",
+            "secret": {
+              "storageAccountName": "<storageAccountName>"
+            }
+          }
+        },
+        "category": "storage"
+      }
+    ]
+  }
+}
+```
+
+#### Google Cloud Storage (provider-level credentials)
+
+The following example shows the JSON properties needed for the `settings` parameter for Google Cloud Storage using provider-level credentials:
+
+```other
+{
+  "type": "GCS",
+  "provider": {
+    "name": "GCP",
+    "id": "<providerId>",
+    "cloudServices": [
+      {
+        "name": "Google Cloud Storage",
+        "connection": {
+          "bucketName": "<bucketName>",
+          "rootDir": "<rootDirectory>"
+        },
+        "usage": "BACKUP",
+        "type": "objectStore",
+        "category": "storage"
+      }
+    ]
+  }
+}
+```
+
+#### Google Cloud Storage (service-level credentials)
+
+The following example shows the JSON properties needed for the `settings` parameter for Google Cloud Storage with HMAC keys using service-level credentials:
+
+```other
+{
+  "type": "GCS",
+  "provider": {
+    "name": "GCP",
+    "cloudServices": [
+      {
+        "name": "Google Cloud Storage",
+        "type": "objectStore",
+        "usage": "BACKUP",
+        "connection": {
+          "bucketName": "<bucket>",
+          "rootDir": "<rootDirectory>",
+          "credential": {
+            "type": "HMAC-KEYS",
+            "secret": {
+              "secretKey": "<secretAccessKey>",
+              "accessKey": "<accessKey>"
+            }
+          }
+        },
+        "category": "storage"
+      }
+    ]
+  }
+}
+```
+
+## Example usage
+
+The following is a sample POST request for the `register` operation that demonstrates registering a backup store that uses dynamically provisioned file-based storage:
+
+```other
+POST /context/admin/system/disasterrecovery/stores/register HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+storeName=backupDefault&settings={"type": "HOSTED","storageConfig": {"size": "64Gi","provisioningType": "DYNAMIC","storageClass": "backups"}}&isDefault=true&async=false&f=pjson&token=Mb0ORrkLObNO2Q8FZoUCHHzSMzZi0CbhLHNRYMqqa6URG_ojQJF3rNsJAfRB23MyCrLwSmuaHPUo4AEIrUuoH1-4Ot5xh4565FtlQahXAhK2C7Sy0oydZhBwD8KdFSnVlnLr-
+
+```
+
+## JSON Response example
+
+If `async` is `false`, the following response is returned when a backup store has been registered successfully:
+
+```other
+{ 
+  "default": true,
+  "storageConfig": {"storageClassName": "backups"},
+  "identity": "uh1rxq3x6x2zk1cxwtli",
+  "name": "backups2",
+  "identityKey": "zNUgyzzhuA6L6rSuD1RQUth/PWeg87/RVaGjDFpv2Ic=",
+  "rootDir": "rootdir",
+  "type": "HOSTED",
+  "autoShutdown": true,
+  "status": "success"
+}
+```
+
+If `async` is `true`, the response returns a JSON object containing job information. The value returned for the `jobsUrl` property can be used to access the job resource, which can be polled to return updated job status information. For more information, see the [Job](/job) resource topic.
+
+```other
+{
+  "jobsUrl": "https://organization.domain.com/context/admin/jobs/j7c8820d0-ea2f-427a-ab6f-a8cc2c927fe4",
+  "jobid": "j7c8820d0-ea2f-427a-ab6f-a8cc2c927fe4",
+  "status": "SUBMITTED"
+}
+```

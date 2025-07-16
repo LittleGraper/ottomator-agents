@@ -1,0 +1,1210 @@
+---
+title: "/solve"
+uid: route-service-direct
+description: "Find directions using the global route service available with ArcGIS Location Services."
+context:
+    requestType: "direct"
+---
+import RouteServiceDesc from "../../shared/routing/snippets/_route-service.mdx"
+import RouteStops from "../../shared/routing/snippets/request-parameters/_Route-stops.mdx"
+import FindBestSequence from "../../shared/routing/snippets/request-parameters/_Route-BestSequence-JDR-OnE.mdx"
+import DirectionsDistanceUnits from "../../shared/routing/snippets/request-parameters/_DirectionsDistanceUnits-JDR-OnE.mdx"
+import DirectionsStyleName from "../../shared/routing/snippets/request-parameters/_DirectionsStyleName-JDR-OnE.mdx"
+import RestrictUTurns from "../../shared/routing/snippets/request-parameters/_UTurnAtJunctions.mdx"
+import UseHierarchy from "../../shared/routing/snippets/request-parameters/_UseHierarchy-JDR-OnE.mdx"
+import Restrictions from "../../shared/routing/snippets/request-parameters/_Restrictions-JDR-OnE.mdx"
+import UseTimeWindows from "../../shared/routing/snippets/request-parameters/_UseTimeWindows-JDR-OnE.mdx"
+import ImpedanceAttrName from "../../shared/routing/snippets/request-parameters/_Impedance-JDR-OnE.mdx"
+import AttributeParameterValues from "../../shared/routing/snippets/request-parameters/_AttributeParameterValues-JDR-OnE.mdx"
+import AccumulateAttrNames from "../../shared/routing/snippets/request-parameters/_AccumulateAttributeNames-DR-OnE.mdx"
+import RouteShape from "../../shared/routing/snippets/request-parameters/_RouteShape-JR-OnE.mdx"
+import IgnoreInvalidLocations from "../../shared/routing/snippets/request-parameters/_IgnoreInvalidLocations-JDR-OnE.mdx"
+import Overrides from "../../shared/routing/snippets/request-parameters/_Overrides-JDR-OnE.mdx"
+import PopulateDirectionsRoute from "../../shared/routing/snippets/request-parameters/_PopulateDirections-JDR-OnE.mdx"
+import DirectionsLanguage from "../../shared/routing/snippets/request-parameters/_DirectionsLanguage-JDR-OnE.mdx"
+import TravelModes from "../../shared/routing/snippets/request-parameters/_TravelMode.mdx"
+import StartTime from "../../shared/routing/snippets/request-parameters/_StartTime.mdx"
+import StartTimeIsUTC from "../../shared/routing/snippets/request-parameters/_startTimeIsUTC.mdx"
+import TimeWindowsIsUTC from "../../shared/routing/snippets/request-parameters/_timeWindowsAreUTC.mdx"
+import DirectionsTimeAttrName from "../../shared/routing/snippets/request-parameters/_DirectionsTimeAttrName.mdx"
+import ReturnBarriers from "../../shared/routing/snippets/request-parameters/_returnBarriers.mdx"
+import ReturnPolygonBarriers from "../../shared/routing/snippets/request-parameters/_returnPolygonBarriers.mdx"
+import ReturnPolylineBarriers from "../../shared/routing/snippets/request-parameters/_returnPolylineBarriers.mdx"
+import ReturnTraversedEdges from "../../shared/routing/snippets/request-parameters/_returnTraversedEdges.mdx"
+import ReturnTraversedJunctions from "../../shared/routing/snippets/request-parameters/_returnTraversedJunctions.mdx"
+import ReturnTraversedTurns from "../../shared/routing/snippets/request-parameters/_returnTraversedTurns.mdx"
+import Context from "../../shared/routing/snippets/request-parameters/_Context.mdx"
+import OutputGeometryPrecision from "../../shared/routing/snippets/request-parameters/_RouteLineSimplificationTolerance-JR-OnE.mdx"
+import OutputGeometryPrecisionUnits from "../../shared/routing/snippets/request-parameters/_OutputGeometryPrecisionUnits.mdx"
+import GeometryPrecision from "../../shared/routing/snippets/request-parameters/_GeometryPrecision.mdx"
+import GeometryPrecisionM from "../../shared/routing/snippets/request-parameters/_GeometryPrecisionM.mdx"
+import GeometryPrecisionZ from "../../shared/routing/snippets/request-parameters/_GeometryPrecisionZ.mdx"
+import PreserveObjectID from "../../shared/routing/snippets/request-parameters/_PreserveObjectID.mdx"
+import ReturnEmptyResults from "../../shared/routing/snippets/request-parameters/_ReturnEmptyResults.mdx"
+import LocateSettings from "../../shared/routing/snippets/request-parameters/_LocateSettings.mdx"
+import DirectionsOutputType from "../../shared/routing/snippets/request-parameters/_DirectionsOutputType.mdx"
+import LineBarrier from "../../shared/routing/snippets/request-parameters/_LineBarriers.mdx"
+import PolygonBarrier from "../../shared/routing/snippets/request-parameters/_PolygonBarriers.mdx"
+import PointBarrier from "../../shared/routing/snippets/request-parameters/_PointBarriers.mdx"
+import UsageLimit from "../../shared/routing/snippets/request-parameters/_Route-UsageLimits.mdx"
+
+import OutputRoutes from "../../shared/routing/snippets/output-parameters/_Route-outputRoutes.mdx"
+import OutputStops from "../../shared/routing/snippets/output-parameters/_Route-outputStops.mdx"
+
+import Directions from "../../shared/routing/snippets/output-parameters/_outputDirections.mdx"
+import ResultFile from "../../shared/routing/snippets/output-parameters/_resultFile.mdx"
+import OutputNetworkAnalysisLayer from "../../shared/routing/snippets/output-parameters/_outputNetworkAnalysisLayer.mdx"
+import OutputRouteData from "../../shared/routing/snippets/output-parameters/_outRouteData.mdx"
+import CostUsage from "../../shared/routing/snippets/output-parameters/_UsageCost.mdx"
+import DirectionLine from "../../shared/routing/snippets/output-parameters/_outputDirectionLines.mdx"
+import DirectionPoint from "../../shared/routing/snippets/output-parameters/_outputDirectionPoints.mdx"
+import OutputBarriers from "../../shared/routing/snippets/output-parameters/_barriers.mdx"
+import OutputPolylineBarriers from "../../shared/routing/snippets/output-parameters/_polylineBarriers.mdx"
+import OutputPolygonBarriers from "../../shared/routing/snippets/output-parameters/_polygonBarriers.mdx"
+import TraversedEdges from "../../shared/routing/snippets/output-parameters/_traversedEdges.mdx"
+import TraversedJunctions from "../../shared/routing/snippets/output-parameters/_traversedJunctions.mdx"
+import TraversedTurns from "../../shared/routing/snippets/output-parameters/_traversedTurns.mdx"
+import SolveSucceeded from "../../shared/routing/snippets/output-parameters/_SolveSucceeded.mdx"
+import UsageCost from "../../shared/routing/snippets/output-parameters/_UsageCost.mdx"
+
+import SharedContent from "../../shared/content/_required-params.mdx"
+
+import ParamMetadata from "../../shared/components/param-metatdata"
+
+<CodeSwitcher>
+<CodeBlock language="curl" label="GET">{`GET  https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World/solve`}</CodeBlock>
+<CodeBlock language="curl" label="POST">{`POST https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World/solve`}</CodeBlock>
+</CodeSwitcher>
+
+<RouteServiceDesc />
+
+## Parameters
+
+<StyledTable headers="Name, Required, Type, Default, Description">
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[f](#f)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown"></StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    The request response format, either `json` or `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[token](#token)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+    An access token with the [required privileges](#token).
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[stops](#stops)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">locations | feature</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+   Two or more locations between which the route is generated.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[travelMode](#travelmode)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">object</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The mode of transportation for the analysis provided as a JSON object.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[startTime](#starttime)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">datetime | "now"</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The time at which travel begins from the input stops.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[startTimeIsUTC](#starttimeisutc)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The time zone or zones of the `startTime` parameter.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[timeWindowsAreUTC](#timewindowsareutc)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The time, either coordinated universal time (UTC) or geographically local time, for the `TimeWindowStart` and `TimeWindowEnd` attributes.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[findBestSequence](#findbestsequence)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Reorders stops to find an optimized route.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[preserveFirstStop](#preservefirststop)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Preserves the first stop while reordering others. Used if `findBestSequence` is set to `true`.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[preserveLastStop](#preserveLastStop)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Preserves the last stop while reordering others. Used if `findBestSequence` is set to `true`.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[useTimeWindows](#usetimewindows)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Sets whether the service will consider time windows specified on stops.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[restrictUTurns](#restrictuturns)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `esriNFSBAtDeadEndsAndIntersections`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Restricts or allows a route to make U-turns at junctions.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[useHierarchy](#usehierarchy)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Specifies whether hierarchy will be used when finding the shortest path.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[impedanceAttributeName](#impedanceattributename)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `TravelTime`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The type of impedance, such as `Minutes` or `Miles`.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[accumulateAttributeNames](#accumulateattributenames)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `Miles,Kilometers`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Accumulates values other than the value set in the `impedanceAttributeName` parameter.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[restrictionAttributeNames](#restrictionattributenames)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The restrictions that should be honored by the service.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[attributeParameterValues](#attributeparametervalues)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">[object]</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Additional values required by an attribute or restriction.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[barriers](#barriers)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">locations | feature</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      One or more points that act as temporary restrictions, additional time, or distance.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[polylineBarriers](#polylinebarriers)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">feature</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      One ore more lines that prohibit travel anywhere the lines intersect the streets.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[polygonBarriers](#polygonbarriers)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">feature</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Polygons that either prohibit travel or proportionately scale the time or distance required to travel on the streets.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnDirections](#returndirections)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Generates the driving directions for each route.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[directionsLanguage](#directionslanguage)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `en`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The language used when generating driving directions.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[directionsOutputType](#directionsoutputtypes)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `esriDOTStandard`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The content and length of the driving directions. Used if`returnDirections=true`.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[directionsStyleName](#directionsstylename)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `NADesktop`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The formatting style for the directions. Used if`returnDirections=true`.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[directionsLengthUnits](#directionslengthunits)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `esriNAUMiles`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The units to display the travel distance in driving directions. Used if`returnDirections=true`.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnRoutes](#returnroutes)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Returns routes.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[directionsTimeAttributeName](#directionstimeattributename)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `TravelTime`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      A time-based impedance attribute to display the duration of a maneuver.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[outputLines](#outputlines)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `esriNAOutputLineTrueShape`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The type of route features that are returned.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnStops](#returnstops)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Returns stops.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnBarriers](#returnbarriers)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Returns barriers.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnPolylineBarriers](#returnpolylinebarriers)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Returns polyline barriers.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnPolygonBarriers](#returnpolygonbarriers)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Returns polygon barriers.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnTraversedEdges](#returntraversededges)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Returns traversed edges.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnTraversedJunctions](#returntraversedjunctions)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Returns traversed junctions.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnTraversedTurns](#returntraversedturns)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Returns traversed turns.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[ignoreInvalidLocations](#ignoreinvalidlocations)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `true`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Ignores invalid input locations.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[outSR](#outsr)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The spatial reference of output geometries.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[outputGeometryPrecision](#outputgeometryprecision)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">number</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `10`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Simplifies route geometry.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[outputGeometryPrecisionUnits](#outputgeometryprecisionunits)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `esriMeters`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The units for the value in the `outputGeometryPrecision` parameter.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[geometryPrecision](#geometryprecision)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">integer</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The number of decimal places in the response geometries. Applies to x and y values only.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[geometryPrecisionM](#geometryprecisionm)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">integer</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The number of decimal places in the response geometries. Applies to m-values only.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[overrides](#overrides)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">string</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      For internal use only.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[preserveObjectID](#preserveobjectid)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Preserves the object IDs from input locations when the input locations are returned as output.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[returnEmptyResults](#returnemptyresults)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">boolean</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      `false`
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Returns empty results instead of the error property when a request fails.
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="code">[locateSettings](#locatesettings)</StyledTableCell>
+    <StyledTableCell cellStyle="check" checked={false}></StyledTableCell>
+    <StyledTableCell cellStyle="code_italic">object</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Determines how input data are located.
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Required parameters
+
+<Box>
+
+### f
+
+<SharedContent f/>
+
+</Box>
+
+<Box>
+
+### token
+
+<SharedContent token alpPrivileges="premium:user:networkanalysis:routing or premium:user:networkanalysis:optimizedrouting" agoPrivileges="premium:user:networkanalysis"/>
+
+</Box>
+
+<Box>
+
+### stops
+
+<RouteStops />
+
+</Box>
+
+## Optional parameters
+
+<Box>
+
+### travelMode
+
+<TravelModes />
+
+</Box>
+
+<Box>
+
+### startTime
+
+<StartTime />
+
+</Box>
+
+<Box>
+
+### startTimeIsUTC
+
+<StartTimeIsUTC />
+
+</Box>
+
+<Box>
+
+### timeWindowsAreUTC
+
+<TimeWindowsIsUTC />
+
+</Box>
+
+<Box>
+
+### findBestSequence
+
+<FindBestSequence />
+
+</Box>
+
+<Box>
+
+### preserveFirstStop
+
+{/* <p class="space-x-2"><span class="font-sm text-color-3">type:bool</span><span class="font-bold text-[#6d29cc]">default:`true`</span></p> */}
+
+<ParamMetadata types={[{name:"boolean"}]} defaultValue="true" />
+
+Specify whether the service will keep the first stop fixed when reordering the stops.
+
+-   `true`—The service won't reorder the first stop. Choose this option if you are starting from a known location, such as your home, headquarters, or current location.
+-   `false`—The service will not preserve the first stop and reorder all the stops.
+
+This parameter is applicable only if the [`findBestSequence`](#findbestsequence) parameter value is `true` .
+
+</Box>
+
+<Box>
+
+### preserveLastStop
+
+{/* <p class="space-x-2"><span class="font-sm text-color-3">type:bool</span><span class="font-bold text-[#6d29cc]">default:`true`</span></p> */}
+
+<ParamMetadata types={[{name:"boolean"}]} defaultValue="true" />
+
+Specify whether the service will keep the last stop fixed when reordering the stops.
+
+-   `true`—The service won't reorder the last stop. The output routes may begin at any stop but must end at the predetermined last stop.
+-   `false`—The service will not preserve the last stop and reorder all the stops.
+
+This parameter is applicable only if the [`findBestSequence`](#findbestsequence) parameter value is `true` .
+
+</Box>
+
+<Box>
+
+### useTimeWindows
+
+<UseTimeWindows />
+
+</Box>
+
+<Box>
+
+### restrictUTurns
+
+<RestrictUTurns />
+
+</Box>
+
+<Box>
+
+### useHierarchy
+
+<UseHierarchy />
+
+</Box>
+
+<Box>
+
+### impedanceAttributeName
+
+<ImpedanceAttrName />
+
+</Box>
+
+<Box>
+
+### accumulateAttributeNames
+
+<AccumulateAttrNames />
+
+</Box>
+
+<Box>
+
+### restrictionAttributeNames
+
+<Restrictions />
+
+</Box>
+
+<Box>
+
+### attributeParameterValues
+
+<AttributeParameterValues />
+
+</Box>
+
+<Box>
+
+### barriers
+
+<PointBarrier />
+
+</Box>
+
+<Box>
+
+### polylineBarriers
+
+<LineBarrier />
+
+</Box>
+
+<Box>
+
+### polygonBarriers
+
+<PolygonBarrier />
+
+</Box>
+
+<Box>
+
+### returnDirections
+
+<PopulateDirectionsRoute route/>
+
+</Box>
+
+<Box>
+
+### directionsLanguage
+
+<DirectionsLanguage />
+
+</Box>
+
+<Box>
+
+### directionsOutputType
+
+<DirectionsOutputType />
+
+</Box>
+
+<Box>
+
+### directionsStyleName
+
+<DirectionsStyleName />
+
+</Box>
+
+<Box>
+
+### directionsLengthUnits
+
+<DirectionsDistanceUnits />
+
+</Box>
+
+<Box>
+
+### returnRoutes
+
+{/* <p class="space-x-2"><span class="font-sm text-color-3">type:enum</span><span class="font-bold text-[#6d29cc]">default:`true`</span></p> */}
+
+<ParamMetadata types={[{name:"boolean"}]} defaultValue="true" />
+
+Specify whether the service will return routes.
+
+-   `true`—Routes are returned. The routes are available in the `routes` property of the JSON response. The shape of the routes depends on the value for the [`outputLines`](#outputlines) parameter.
+-   `false`—Routes are not returned.
+
+<Note type={"tip"}>
+
+If you don't want to return routes because the application has to display only the driving directions between the stops, you can set the [`returnDirections`](#returndirections) parameter to `true` and the `returnRoutes` parameter to `false`. In this case, returning the routes will not provide any additional information and will increase the overall response size.
+
+</Note>
+
+</Box>
+
+<Box>
+
+### directionsTimeAttributeName
+
+<DirectionsTimeAttrName />
+
+</Box>
+
+<Box>
+
+### outputLines
+
+<RouteShape route/>
+
+</Box>
+
+<Box>
+
+### returnStops
+
+{/* <p class="space-x-2"><span class="font-sm text-color-3">type:enum</span><span class="font-bold text-[#6d29cc]">default:`false`</span></p> */}
+
+<ParamMetadata types={[{name:"boolean"}]} defaultValue="false" />
+
+Specify whether stops will be returned by the service.
+
+-   `true`—Stops used as input will be returned as part of the `stops` property in the JSON response.
+-   `false`—Stops are not returned.
+
+When finding optimized routes, the `returnStops`  property can be set to `true`  to determine the optimal sequence in which the route visits a particular stop by reviewing the `Sequence`  property in the JSON response. If you specified the `stops`  parameter value using a REST query request to any ArcGIS Server feature, map, or geoprocessing service that returns a JSON feature set, you can set the `returnStops`  parameter to `true`  so you can draw the stop locations in the application. You can also set the `returnStops`  property to `true`  to determine whether the stops were successfully located on the street network or had other errors by reviewing the `Status`  property in the JSON response.
+
+</Box>
+
+<Box>
+
+### returnBarriers
+
+<ReturnBarriers />
+
+</Box>
+
+<Box>
+
+### returnPolylineBarriers
+
+<ReturnPolylineBarriers />
+
+</Box>
+
+<Box>
+
+### returnPolygonBarriers
+
+<ReturnPolygonBarriers />
+
+</Box>
+
+<Box>
+
+### returnTraversedEdges
+
+<ReturnTraversedEdges />
+
+</Box>
+
+<Box>
+
+### returnTraversedJunctions
+
+<ReturnTraversedJunctions />
+
+</Box>
+
+<Box>
+
+### returnTraversedTurns
+
+<ReturnTraversedTurns />
+
+</Box>
+
+<Box>
+
+### ignoreInvalidLocations
+
+<IgnoreInvalidLocations />
+
+</Box>
+
+<Box>
+
+### context
+
+<Context />
+
+</Box>
+
+<Box>
+
+### outputGeometryPrecision
+
+<OutputGeometryPrecision />
+
+</Box>
+
+<Box>
+
+### outputGeometryPrecisionUnits
+
+<OutputGeometryPrecisionUnits />
+
+</Box>
+
+<Box>
+
+### geometryPrecision
+
+<GeometryPrecision />
+
+</Box>
+
+<Box>
+
+### geometryPrecisionM
+
+<GeometryPrecisionM />
+
+</Box>
+
+<Box>
+
+### overrides
+
+<Overrides />
+
+</Box>
+
+<Box>
+
+### preserveObjectID
+
+<PreserveObjectID route />
+
+</Box>
+
+<Box>
+
+### returnEmptyResults
+
+<ReturnEmptyResults />
+
+</Box>
+
+<Box>
+
+### locateSettings
+
+<LocateSettings Route/>
+
+</Box>
+
+{/* ## Response status
+
+For a list of error codes and details, go to [Direct request error codes](xref:///routing-error-codes) */}
+
+## Response details
+
+{/* Go to [Response types](xref:///routing-types/#routes-result) for an example of the JSON response object.  */}
+
+The JSON response from the route service is based on the following syntax. The actual properties returned in the response depend on the request parameters. For example, the `stops`  property is returned only if the `returnStops`  parameter is set to `true` . If a request fails, the JSON response only contains the `error`  property.
+
+For a list of error codes and details, go to [Direct request error codes](xref:///routing-error-codes)
+
+<CodeBlock language="json" source="../../shared/routing/code-samples/responseSyntax/direct/Route-JSON_response_direct.json" group="json" maxLines={20} expandable/>
+
+On successful completion, the service returns the best paths between the stops and the status indicating whether the analysis was successful using the output parameters described below.
+
+<Box>
+
+### stops
+
+<OutputStops />
+
+</Box>
+
+<Box>
+
+### routes
+
+<OutputRoutes />
+
+</Box>
+
+<Box>
+
+### barriers
+
+<OutputBarriers />
+
+</Box>
+
+<Box>
+
+### polylineBarriers
+
+<OutputPolylineBarriers />
+
+</Box>
+
+<Box>
+
+### polygonBarriers
+
+<OutputPolygonBarriers />
+
+</Box>
+
+<Box>
+
+### traversedEdges
+
+<TraversedEdges />
+
+</Box>
+
+<Box>
+
+### traversedJunctions
+
+<TraversedJunctions />
+
+</Box>
+
+<Box>
+
+### traversedTurns
+
+<TraversedTurns />
+
+</Box>
+
+<Box>
+
+### directionPoints
+
+<DirectionPoint />
+
+</Box>
+
+<Box>
+
+### directionLines
+
+<DirectionLine />
+
+</Box>
+
+## Examples
+
+<Note type={"mapping-guide"}>
+
+To build client application [see API reference examples](DEVSITE/documentation/mapping-and-location-services/routing-and-directions/route-and-directions/#direct-find-a-route-and-directions)
+
+</Note>
+
+Below are examples of the service on how to find best route and driving directions between two locations.
+
+<Note type={"caution"}>
+If you copy and paste the request URL from the examples into a web browser, you need to replace `<yourToken>`  with a valid token. See [Security and authentication](DEVSITE/documentation/security-and-authentication/) to learn more.
+</Note>
+
+<Box>
+
+### Find the best route and driving directions between two locations
+
+To find the best route between two stops, you can pass their locations, such as the longitude and latitude values, as the value for the `stops` parameter to the `/solve` service. The service will use default values for all other parameters and return a best route between the two stops.
+
+<Tabs>
+<TabNav slot="tab-nav">
+  <TabTitle is-active>Request</TabTitle>
+  <TabTitle>Response</TabTitle>
+</TabNav>
+
+<Tab is-active>
+
+<CodeBlock language="http" source="../../shared/routing/code-samples/responseExample/direct/Route_submit_job_online_direct1.http" group="HTTP" maxLines={20} expandable/>
+
+</Tab>
+
+<Tab>
+<CodeBlock language="json" source="../../shared/routing/code-samples/responseExample/direct/Route-JSONExample1.json" group="json" maxLines={20} expandable/>
+</Tab>
+
+</Tabs>
+
+</Box>
+
+<Box>
+
+### Find the optimized route and driving directions to visit a set of locations
+
+In some cases, you know the start and end location for your route but want to visit the intermediate stops in an optimal sequence such that the overall travel time or distance of the route is minimized. Such a route, called an optimized route, can be found by specifying a value of true for the findBestSequence parameter. In this example, since you also want to maintain the sequence of first and last stops, you also need to set a value of true for the preserveFirstStop and preserveLastStop parameters.
+
+<MoreInfo>
+In this example, you want to find an optimized route that minimizes travel time. You want the route to start and end at the same location and visit the intermediate five stops in the sequence that minimizes the overall travel time. You need to specify a name for each of the stops and an approximate time in minutes you expect to spend at each stop. Consequently, instead of using only the longitude and latitude values for the stops parameter, you'll use the JSON structure for features. The driving directions as well as the total travel time for the route will include the time you expect to spend at each location. The JSON structure for stops specifies the x and y properties for the geometry property as well as the Name and Attr_TravelTime properties for each stop. The returnStops parameter is also set to true to return the optimized sequence of the stops.
+</MoreInfo>
+
+<Tabs>
+<TabNav slot="tab-nav">
+  <TabTitle is-active>Request</TabTitle>
+  <TabTitle>Response</TabTitle>
+</TabNav>
+
+<Tab is-active>
+
+<CodeBlock language="http" source="../../shared/routing/code-samples/responseExample/direct/Route_submit_job_online_direct2.http" group="HTTP" maxLines={20} expandable/>
+
+</Tab>
+
+<Tab>
+<CodeBlock language="json" source="../../shared/routing/code-samples/responseExample/direct/Route-JSONExample2.json" group="json" maxLines={20} expandable/>
+</Tab>
+
+</Tabs>
+
+</Box>
+
+<Box>
+
+### Find the best route that avoids flooded area
+
+Some areas may be temporarily inaccessible due to flooding or other events. If you want to find a route that avoids these areas, you can pass in the areas as `polygonBarriers`. The service will determine the streets that intersect the specified area and restrict travel on those streets when finding the best route.
+
+<MoreInfo>
+In this example, the stops are specified using their longitude and latitude values. The geometry of the flooded area is in the default spatial reference, WGS84. Hence, the `spatialReference` property is not required within the `geometry` property. You want to completely avoid travel on any streets that are within the flooded area, so you'll use a restriction polygon barrier to represent the flooded area by specifying the `BarrierType` as 0. You want to draw the resulting route on a basemap that uses the Web Mercator (WKID 102100) spatial reference. So you'll request the output route geometries in Web Mercator spatial reference by specifying the `outSR` parameter.
+</MoreInfo>
+
+<Tabs>
+<TabNav slot="tab-nav">
+  <TabTitle is-active>Request</TabTitle>
+  <TabTitle>Response</TabTitle>
+</TabNav>
+
+<Tab is-active>
+
+<CodeBlock language="http" source="../../shared/routing/code-samples/responseExample/direct/Route_submit_job_online_direct3.http" group="HTTP" maxLines={20} expandable/>
+
+</Tab>
+
+<Tab>
+<CodeBlock language="json" source="../../shared/routing/code-samples/responseExample/direct/Route-JSONExample3.json" group="json" maxLines={20} expandable/>
+</Tab>
+
+</Tabs>
+
+</Box>
+
+<Box>
+
+### Find a route in countries not covered by the service
+
+If the first stop is in a country not supported by the service, the request fails with an error message.
+
+<Tabs>
+<TabNav slot="tab-nav">
+  <TabTitle is-active>Request</TabTitle>
+  <TabTitle>Response</TabTitle>
+</TabNav>
+
+<Tab is-active>
+<CodeBlock language="http" source="../../shared/routing/code-samples/responseExample/direct/Route_submit_job_online_direct4.http" group="HTTP" maxLines={20} expandable/>
+
+</Tab>
+
+<Tab>
+<CodeBlock language="json" source="../../shared/routing/code-samples/responseExample/direct/Route-JSONExample4.json" group="json" maxLines={20} expandable/>
+</Tab>
+
+</Tabs>
+
+</Box>
+
+## Service limits
+
+<If c="publication=='rest/online'">
+
+<Note type={"note"}>
+
+The service works in all the supported countries as listed in the [data coverage page](/network-coverage). One or more countries are grouped together to form an analysis region. The service can determine the best region to use based on the location of the inputs; otherwise, you can use a parameter to specify a region. The service does not support requests that span more than one region. Consequently, the service will only generate results for inputs that fall within one region.
+
+</Note>
+
+</If>
+
+<UsageLimit />
+
+

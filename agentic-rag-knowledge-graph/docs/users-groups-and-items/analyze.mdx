@@ -1,0 +1,362 @@
+---
+title: "/analyze: Analyze"
+description: "The Analyze call helps a client analyze a CSV or Excel file prior to publishing or generating features using the Publish and Generate operations, respectively."
+slug: "analyze"
+url: "/analyze"
+guid: "GUID-075A8267-4A16-4705-B32E-DE5C40DB72DE"
+migratedTopicMetadata:
+  FTITLE: "Analyze"
+  FDESCRIPTION: ""
+  FCHANGES: "9.4 changes"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "6.3 -*"
+  CREATED-ON: "29/11/2021 13:45:33"
+  FAUTHOR: "svennapoosa"
+  FSTATUS: "Released"
+  MODIFIED-ON: "02/03/2022 11:06:48"
+  VERSION: "10"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-F2F0F495-7E69-4AF4-B689-6AB0F8DA1805"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /content/features/analyze
+  urlSegments:
+    - name: '[root]'
+      url: /root
+    - name: /content/features/analyze
+  methods: []
+  sslOnly: 'no'
+---
+
+## Example usage
+
+```markdown
+https://www.arcgis.com/sharing/rest/content/features/analyze
+itemid=a48f99193139447ba64b721450fb00bd
+filetype=excel
+``` 
+
+## Description
+
+The Analyze call helps a client analyze a CSV, Excel file (`.xlsx`,`.xls`), Shapefile, or GeoPackage prior to publishing or generating features using the Publish or Generate operation, respectively.
+
+Analyze returns information about the file including the fields present as well as sample records. Analyze attempts to detect the presence of location fields that may be present as either x,y fields or address fields.
+
+Analyze packages its result so that `publishParameters` within the JSON response contains information that can be passed back to the server in a subsequent call to `Publish` or `Generate`. The `publishParameters` subobject contains properties that describe the resulting layer after publishing, including its fields, the desired renderer, and so on. Analyze will suggest defaults for the renderer.
+
+In a typical workflow, the client will present portions of the `Analyze` results to the user for editing before making the call to `Publish` or `Generate`.
+
+If the file to be analyzed currently exists in the portal as an item, callers can pass in its itemId. Callers can also directly post the file. In this case, the request must be a multipart post request pursuant to [IETF RFC1867](http://www.ietf.org/rfc/rfc1867.txt). The third option for text files is to pass the text in as the value of the text parameter.
+
+<Note type={"note"}>
+
+The `Analyze` call will fail if your portal does not have a hosting server registered with it.
+
+</Note>
+
+## Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+
+			`id` 
+
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+
+			The ID of the item to be analyzed. 
+
+			Example: 
+			
+			```markdown
+			id=345313e619df46f387f9ededbe15ac56
+			```
+
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+
+			`file` 
+
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+
+			The file to be analyzed.
+
+			Example: 
+			
+			```markdown
+			file=mystreets.csv
+			```
+
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+
+			`text` 
+
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+
+			The text in the file to be analyzed.
+
+			Example: 
+			
+			```markdown
+			text=<text_in_file>
+			```
+
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+
+			`filetype` 
+
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+
+			The type of input file.
+
+			Values: `shapefile` | `csv` | `excel` | `geoPackage` | `geojson` 
+
+			Example: 
+			
+			```markdown
+			filetype=csv
+			```
+
+			<Note type={"note"}>
+
+			Shapefile format is limited to a maximum of 4,000 records. The maximum upload size is 2MB for a shapefile and 10MB for all other supported file types.
+
+			</Note>
+
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+
+			`analyzeParameters` 
+
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+
+			A JSON object that provides geocoding information.
+
+			Example: 
+			
+			```markdown
+			analyzeParameters:{"sourceLocale":"en"}
+			```
+
+		</StyledTableCell>
+	</StyledTableRow>
+</StyledTable>
+
+## Analyze Parameters JSON object
+
+The `analyzeParameters` JSON object s used to analyze a CSV or Excel file are described below.
+
+<StyledTable headers={"Parameter,Details"}>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+
+			`sourcelocale`
+
+ 		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+
+			The locale used for the geocoding service source.
+
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+
+			`geocodeServiceUrl`
+
+ 		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+
+			The URL of the geocoding service that supports batch geocoding.
+
+			<Note type={"note"}>
+
+			Portal for ArcGIS 10.3 supports configuring multiple geocoding services. If the client application requires a specific locator, the URL of this service should be specified in this parameter.
+
+			</Note>
+
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+
+			`locationType`
+
+ 		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+
+			Indicates the type of spatial information stored in the dataset.
+
+			Values for CSV: `coordinates` \| `address` \| `lookup` \| `none`
+
+			Values for Excel: `coordinates` \| `address` \| `none`
+
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+
+			`sourcecountry`
+
+ 		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+
+			The two-character country code associated with the geocoding service. The default is "world".
+
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+
+			`sourcecountryhint`
+
+ 		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+
+			If the first time analyzing, the hint is used. If the source country is already specified,`sourcecountry` is used. 
+
+		</StyledTableCell>
+	</StyledTableRow>
+</StyledTable>
+
+A sample `analyzeParameters` JSON object for a CSV or Excel file is as follows:
+
+```markdown
+{
+   "enableGlobalGeocoding": true,
+   "sourceLocale":"en",
+   "geocodeServiceUrl": "https://<server>/sharing/rest/services/World/GeocodeServer",
+   "locationType": "address",
+   "sourceCountry":"",
+   "sourceCountryHint":"world"
+}
+``` 
+
+## Example usage for CSV
+
+```markdown
+https://www.arcgis.com/sharing/rest/content/features/analyze
+itemid=345313e619df46f387f9ededbe15ac56
+filetype=csv
+``` 
+
+## JSON Response example
+
+```other
+{
+   "fileSize": 921,
+   "fileUrl": "https://www.arcgis.com/sharing/rest/content/items/345313e619df46f387f9ededbe15ac56/data?token=",
+   "publishParameters":{
+		"type": "csv",
+		"name": "data",
+		"sourceUrl": "",
+		"locationType": "address",
+		"maxRecordCount": 1000,
+		"geocodeServiceUrl": "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer",
+		"sourceCountry": "us",
+		"sourceLocale": "en",
+		"addressFields": {
+			"Address": "Street",
+			"City": "City",
+			"Region": "State",
+			"Postal": "Zip"
+			},
+		"standardizedFieldNames": {
+			"Address": "Street",
+			"City": "City",
+			"Region": "State",
+			"Postal": "ZIP",
+			"PostalExt": "ZIP4",
+			"CountryCode": "Country"
+		},
+		"columnDelimiter": ",",
+      ....
+   },
+   "records":[
+      {
+        "attributes": {
+			"Name": "ESRI-California",
+			"Street": "380 New York Street",
+			"City": "Redlands",
+			"State": "CA",
+			"Zip": "92373-8100"
+		       }
+     	}, {
+		"attributes": {
+			"Name": "ESRI-Denver",
+			"Street": "One International Court",
+			"City": "Broomfield",
+			"State": "CO",
+			"Zip": "80021-3200"
+			}
+	    },
+     ...     
+    ]
+  }
+```
+
+## Example usage for Excel
+
+```markdown
+https://www.arcgis.com/sharing/rest/content/features/analyze
+itemid=a48f99193139447ba64b721450fb00bd
+filetype=excel
+```
+
+## JSON Response example
+
+```other
+{
+   "fileUrl": "https://www.arcgis.com/sharing/rest/content/items/a48f99193139447ba64b721450fb00bd/data?token=",
+   "publishParameters":{
+		"type": "excel",
+		"name": "data",
+		"sourceUrl": "",
+		"maxRecordCount": 2000,
+		"sourceSR": {
+			"wkid": 4326,
+			"latestWkid": 4326
+			},
+		"targetSR": {
+			"wkid": 102100,
+			"latestWkid": 3857
+			},
+		"editorTrackingInfo": {
+			"enableEditorTracking": false,
+			"enableOwnershipAccessControl": false,
+			"allowOthersToQuery": true,
+			"allowOthersToUpdate": true,
+			"allowOthersToDelete": false,
+			"allowAnonymousToUpdate": true,
+			"allowAnonymousToDelete": true
+			},
+		"hasAttachments": false,
+		"capabilities": "Create,Delete,Query,Update,Editing",
+      ....
+   },
+   "records": null,
+  }
+```
+
+For a complete description of `publishParameters`, see [Publish Item](/publish-item).

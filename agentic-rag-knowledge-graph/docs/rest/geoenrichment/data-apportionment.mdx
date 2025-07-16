@@ -1,0 +1,137 @@
+---
+title: "Data apportionment"
+description: "The GeoEnrichment service employs a sophisticated geographic retrieval methodology to aggregate data for rings and other polygons."
+slug: "data-apportionment"
+url: "/data-apportionment"
+guid: "GUID-C2913E8D-9DE5-4159-946B-278315FE5DF4"
+migratedTopicMetadata:
+  FTITLE: "Data apportionment"
+  FDESCRIPTION: ""
+  FCHANGES: "Reduced image size"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9.1 - *"
+  CREATED-ON: "18/01/2022 08:36:17"
+  FAUTHOR: "cdistefano"
+  FSTATUS: "Released"
+  MODIFIED-ON: "12/05/2023 11:56:38"
+  VERSION: "16"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-E924632A-36D9-482C-9D76-DDA32D3D989F"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+---
+
+The GeoEnrichment service employs a sophisticated geographic retrieval methodology to aggregate data for rings and other polygons. A geographic retrieval methodology determines how data is gathered and summarized or aggregated for input features. For standard geographic units, such as states, provinces, counties, or postal codes, the link between a designated area and its attribute data is a simple one-to-one relationship. For example, if an input study trade area contains a selection of ZIP Codes, the data retrieval is a simple process of gathering the data for those areas.
+
+## How data is summarized
+
+The geographic retrieval process for ring buffers, drive-time service areas, and other non-standard geography polygons is more complicated, because the input polygon may intersect geographic areas that contain data that needs to be aggregated. 
+
+The following diagram illustrates this case. The polygon in the center represents an input study area that is being enriched. For example, the GeoEnrichment service can calculate the total population for this area. The polygons labeled represent census geographies that contain total population values. In the United States, these can be block groups with enrichment data; in Canada, they can be Dissemination Areas.
+
+![ polygon](./images/GUID-45D8AED8-30A7-4E57-A67D-260B3474A17B-web.png)
+
+The GeoEnrichment service employs a Weighted Centroid geographic retrieval methodology to aggregate data for rings and other polygons. The Weighted Centroid retrieval approach uses census block data to better apportion block groups that are not exclusively contained within a ring. In the United States, Canada, and many other countries or areas, census blocks are the smallest unit of census geography. These small areas are used to create all other levels of census geography. For example, in the United States, one or many blocks are aggregated to create a block group.
+
+<Note type={"note"}>
+
+The GeoEnrichment service uses a dasymetric apportionment technique to aggregate census based demographic data for smaller areas. If areas are very small and do not intersect any census block data the service returns zero values. The GeoEnrichment service provides an estimate of population and does not count roof tops.
+
+</Note>
+
+The Weighted Centroid method is illustrated in the following figure:
+
+![Weighted Centroid method](./images/GUID-06339E6B-A657-4035-8373-9EB720D18FCE-web.png)
+
+In the previous figure, census blocks are illustrated as black points. Using area **P<sub>3</sub>** as an example, the population weight for this area is determined by summing the block weights within this polygon. The sum of these weights will provide a proportion of area **P<sub>3</sub>** that is within the study area. Summarizing a demography variable such as the Total Population, will use this proportion to aggregate and summarize data. For example, if 90 percent of the **P<sub>3</sub>** blocks' population are within the study area, and the Total Population of **P<sub>3</sub>** is 100 people, you can determine that 90 people in area **P<sub>3</sub>** are inside the study area.
+
+![Weighted blocks](./images/GUID-595D2572-D27A-4233-BFB6-21752A208F57-web.png)
+
+The weight **w**<sub>1</sub> of the site **P<sub>1</sub>** is calculated as a sum of weights of block points belonging to the intersection of the site **P<sub>1</sub>** and the target polygon **T**:
+
+<Box>
+
+![formula for weight of the site](./images/GUID-657D61F6-A862-4998-8C87-EAB5D30C6687-web.png)
+
+Here, **ß** is a block and **W<sub>1</sub>(ß)** is a weight of this block in the site **P<sub>1</sub>**.
+
+</Box>
+
+Summarizing a demography variable such as the Total Population, the weights need to be determined for all intersecting geographies. The GeoEnrichment service calculates the weight **W<sub>1</sub>(ß)** as a ratio of the total population associated with the block **(ß)** belonging to the site **P<sub>1</sub>** to the sum of total population values for all blocks belonging to the site **P<sub>1</sub>**:
+
+<Box>
+
+![formula](./images/GUID-6968AD41-93A2-4D6D-91A1-AA00D6E6D05F-web.png)
+
+</Box>
+
+##  How data apportionment works
+
+The[ Enrich Layer tools](/enrich) in ArcGIS Pro, ArcGIS Online, and the[ GeoEnrichment service](/geoenrichment-service-overview) use a data apportionment algorithm to redistribute demographic, business, economic, and landscape variables to input polygon features. The algorithm analyzes each polygon to be enriched relative to a point dataset and a detailed dataset of reporting unit polygons that contain attributes for the selected variables. Based on how each polygon being enriched overlays these datasets, the algorithm determines the appropriate amount of each variable to assign.
+
+Depending on which country the enrichment polygon is located in, the granular point dataset represents one of the following:
+
+-   **Census Block Points**—U.S. and Canada only. These points are initially produced as centroids from the most detailed census tabulation areas in these countries; census blocks in the U.S. and dissemination areas for Canada. In some cases, Esri has moved these points to be located within residential areas, rather than obviously industrial or other non-residential areas. Each point contains attributes for the count of people and households living in the corresponding tabulation area.
+-   **Settlement Points**—For most other countries, Esri produces settlement points based on a settlement likelihood model that uses Landsat8 imagery and road intersections. Road intersections particularly help in areas where dense forest canopy obscures dwellings. Settlement points are initially produced as a dasymetric raster surface, meaning places that people cannot live, or where people do not live have been removed. This raster surface is produced at a resolution of 75-meters, which is roughly the size of a city block. The model assigns each cell or point a settlement likelihood score, representing the likelihood of people living there. Esri published the methodology for modeling settlement scores in the [Data Science Journal](https://datascience.codata.org/articles/10.5334/dsj-2018-020/).
+-   **Address Based Settlement Points**—Switzerland and Netherlands only. Some countries track and make available the points representing residential addresses of their citizens. Esri aggregates the count of these address points in to a 75-meter resolution raster and converts that to a point dataset like settlement points.
+-   **Building Footprint Settlement Points**—Spain AIS Group Data only. The count of building footprint centroids of residential buildings is summed to a 75-meter resolution raster to produce a dataset of settlement points.
+
+The GeoEnrichment service uses the most detailed geographies with the most recent census data, or authoritative estimates, available for commercial use from each country. For instance in 2018, South Africa's dataset has 85,483 features, Hungary's has 3,177, and Japan's has 217,201.
+
+For most countries, data is updated every two years, and a few countries are updated annually because data are readily available. Esri spreads the updates throughout the year on a quarterly basis. The data for each country are the most recently available estimates. Generally, the data Esri releases reflects the demographic and economic conditions nine months prior to the release date. To learn more about the data for a specific country click [here](http://doc.arcgis.com/en/esri-demographics/data/global-intro.htm), then choose a continent to see the list of available countries.
+
+###  Apportionment methodology
+
+The illustration below shows how the purple ring-buffer polygon to be enriched, relates to the dark blue settlement points and detailed statistical polygons with gray outlines that will support enrichment. Here is how the process works to enrich the purple ring with total population:
+
+1.  Select the statistical polygons that are completely inside the ring polygon. These polygons are shown in white. Compute the sum of the total population variable for these polygons.
+2.  Select the statistical polygons that partially intersect the ring polygon. These are shown in light green. For each of these polygons do the following:
+
+    1.  Select all the dark blue settlement points that are inside. Using the total population variable from the statistical polygon and the sum of settlement likelihood scores determine the ratio of people per unit of settlement score.
+    2.  For only the points that are inside the purple ring, compute the sum of settlement likelihood, and from that derive the number of people represented by those points.
+
+        ![Settlement points ](./images/GUID-EC865BB3-CEB1-4A1A-9298-D1F02B7CCCA6-web.png)
+
+        The dark blue settlement points represent two types of information. First, a regularly spaced, 75-meter grid of points that is produced as described above. Second, because some reporting units are small enough to fall between the 75-meter grid of points, the centroids of these units are added to guarantee these areas are not omitted.
+
+###  Variations in apportionment method
+
+The above description applies to most countries, however, in the U.S. and Canada, the process is simpler because the points already have an attribute with the population living there. Thus, the sum of the population attribute for the points inside the enrichment polygon is all that is needed to determine the total population. The values for other variables are determined based on population or summaries pre-calculated means or rates.
+
+The above information describes the default apportionment method, which is called **BlockApportionment** in the ArcGIS REST API for the GeoEnrichment service. If the service detects a significantly large polygon a faster, less computationally intensive, method will be used. This method is called **CentroidsInPolygon**. The metadata for the results of an enrichment operation will supply the name of the method used.
+
+The Centroids in polygon method uses coarser geographies and their centroids as the basis for apportionment. For example, in the U.S., instead of using the U.S. Census Bureau's block group polygons, the U.S. Census Bureau's census tract boundaries will be used instead, and instead of using block points as the basis for apportionment, the tract centroids will be used instead. As the size of polygons increases, progressively coarser polygon geographies and their centroids will be used by the centroids in polygons method. These thresholds are based on the diameters of buffers:
+
+-   In the United States, the following diameters and polygon/point datasets are used:: 
+
+    -    0 to 504 miles use census block groups and block points.
+    -   505 to 786 miles use census tracts and block points based on generalization level 2.
+    -   787 to 866 miles use census tracts and block points based on generalization level 3.
+    -   867 to 954 miles use census tracts and block points based on generalization level 4.
+    -   Beyond 954 miles use census tracts and block points based on generalization level 5
+-   For a global list of all apportionment settings, see this [spreadsheet](https://links.esri.com/geoenrichment/data-apportionment/settings).
+
+Thus, it is important to segregate large polygons from smaller polygons when managing data as inputs for the Enrich Layer tool.
+
+While the differences in results between the methods are usually quite small, sometimes the coarser geographies produce less than optimal results. The GeoEnrichment service has a **detailedAggregationMethod** property, which can be set to override the default behavior described above. However, when the **detailedAggregationMethod** is set, only a single large polygon at a time may be enriched.
+
+<Note type={"note"}>
+
+Extremely large polygons, exceeding the sizes described above for the centroids in polygon method, will not be processed and return a warning. Refer to the GeoEnrichment [service limits](/service-limits) to learn more.
+
+Similarly, tiny polygons—that is, smaller than a city block in an urban area, or smaller than a square kilometer or mile in a rural area may not produce any results because they do not intersect or contain any settlement or census block points.
+
+</Note>
+
+### Additional considerations
+
+One of the most often asked questions about GeoEnrichment is: how reliable are the results? The answer is that it varies depending on the data available for each country. It also varies within most countries depending on whether the area to be enriched is heavily or sparsely populated.
+
+Each country has a two reliability scores. The potential range is 1.0 (best) to 5.0 (worst), though no countries are rated with these extreme scores. The most important score that affects the reliability of data apportionment is ratio of the population polygon's area to the number of people estimated to live there. When the polygon is large, and the number of people is small, the probability that the settlement points intersect where people live goes down. Most countries have a mix of circumstances. Saudi Arabia is a good example, where the cities have many polygons representing small areas, but the vast tracts of desert are represented with only a few polygons.
+
+A second reliability score represents the overall reliability. This includes the ratio of the polygon area to the population and a rating of the reliability of the census data for that country and the complexity of the footprint of settlement. The census reliability accounts for the age of the last official census, the collection method, and the completeness of that census and other estimates and surveys used to derive the current estimate. The complexity of the footprint is important because the creation of the settlement points starts with using raster model which is susceptible to lower settlement likelihood values at the edges of settlement due to the effects of [resampling](https://pro.arcgis.com/en/pro-app/help/analysis/spatial-analyst/performing-analysis/cell-size-and-resampling-in-analysis.htm).

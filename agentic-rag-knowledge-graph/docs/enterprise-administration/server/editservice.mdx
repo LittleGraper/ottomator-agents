@@ -1,0 +1,2058 @@
+---
+title: "Edit Service"
+description: "Editing a service causes the service to be restarted with updated properties."
+slug: "editservice"
+url: "/editservice"
+guid: "GUID-64A5AFAE-CDD4-433E-81B2-A14E20F93867"
+migratedTopicMetadata:
+  FTITLE: "editService"
+  FDESCRIPTION: ""
+  FCHANGES: "Adding privilege requirements"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.8.1 - *"
+  CREATED-ON: "09/06/2020 15:43:09"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "09/06/2020 16:28:25"
+  VERSION: "12"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-84802E05-C3DB-4BA8-96A6-057BE33F8E10"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /services/<serviceName>.<serviceType>/edit
+  urlSegments:
+    - name: <root>
+      url: /site
+    - name: /services/<serviceName>.<serviceType>/edit
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.1'
+  requiredCapabilities:
+    - name: Access allowed with any authorized privilege
+      url: /managing-access-to-the-server-administration-rest-api
+---
+
+## Description
+
+The `edit` operation modifies the properties of a created service. To edit a service, you need to submit the complete [JSON representation of the service](/createservice), which includes the updates to the service properties. Editing a service causes it to be restarted with updated properties.
+
+The JSON representation of a service contains the following four sections: 
+
+- [Service Description Properties](/editservice#service-description-properties)—Common properties that are shared by all service properties. Typically, they identify a specific service.
+- [Service Framework Properties](/editservice#service-framework-properties)—Properties targeted towards the framework that hosts the GIS service. They define the life cycle and load balancing of the service.
+- [Service Type Properties](/editservice#service-type-properties)—Properties targeted towards the core service type as seen by the server administrator. Since these properties are associated with a server object, they vary across the service types. The Service Types section in the Help describes that supported properties for each service.
+- [Extension Properties](/editservice#extension-properties)—Represent the extensions that are enabled on the service. The Extension Types section in the Help describes the supported out-of-the-box extensions for reach service type.
+- [Framework Properties](/editservice#framework-properties)—Specifies a heap size that will be applied to this specific service.
+
+<Note type={"note"}>
+
+You can leave out the `serviceName` and `type` parameters in the JSON. Any other properties that are left out of the JSON are not persisted by the server.
+
+</Note>
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `service` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The JSON representation of the service.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `runAsync` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Decides if the operation must run asynchronously.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`. 
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Service description properties
+
+The following table outlines the common properties shared by all service types that are used to identify a specific service.
+
+<StyledTable headers={"Property,Description"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serviceName` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The name of the service.
+
+      ```markdown label=Example
+      "serviceName": "Updated Name"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `type` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The type of service.
+
+      ```markdown label=Example
+      "type": "MapServer"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `description` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      An optional user-readable description for the service.
+
+      ```markdown label=Example
+      "description": "An updated description for the service"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `capabilities` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The capabilities of the service. The domains of these values are specific to each service type.
+
+      ```markdown label=Example
+      "capabilities": "Map,Query,Data"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Service framework properties
+
+The following table outlines the properties targeted toward the framework that hosts the GIS service, which define the life cycle and load balancing of the service.
+
+<StyledTable headers={"Property,Description"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `clusterName` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The name of the cluster to which this service will be deployed.
+
+      <Note type={"note"}>
+
+      Clusters have been deprecated. The use of clusters for new deployments is discouraged and existing deployments are advised to migrate away from use of clusters as part of ongoing maintenance and upgrades.
+
+      </Note>
+
+      ```markdown label=Example
+      "clusterName": "default"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `minInstancesPerNode` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The minimum number of instances of the service to create on each node in the cluster. The default is 1.
+
+      ```markdown label=Example
+      "minInstancesPerNode": 1
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `maxInstancesPerNode` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum number of instances of the service to create on each node in the cluster. The default is 2.
+
+      ```markdown label=Example
+      "maxInstancesPerNode": 2
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `maxWaitTime` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum amount of time (in seconds) the framework will wait to get a free instance of the service. The default is 60 seconds.
+
+      ```markdown label=Example
+      "maxWaitTime": 60
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `maxStartupTime` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum amount of time (in seconds) that can elapse on a startup attempt. When service instances are created in the GIS server, either as a result of the server starting or in response to a request of the server by a client, the time it takes to initialize the service instance is referred to as its creation time. When the maximum startup time has passed, it is assumed the startup has stopped responding and the GIS server cancels the creation of the service instance. The default is 300 seconds.
+
+      ```markdown label=Example
+      "maxStartupTime": 300
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `maxIdleTime` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum amount of time (in seconds) an idle instance of a service will remain idle before it is stopped. The default is 1800 seconds.
+
+      ```markdown label=Example
+      "maxIdleTime": 1800
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `maxUsageTime` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum amount of time (in seconds) an instance can service a request. The default is 600 seconds.
+
+      ```markdown label=Example
+      "maxUsageTime": 600
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `recycleInterval` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum amount of time (in hours) an instance of the service can run. The default is 24 hours.
+
+      ```markdown label=Example
+      "recycleInterval": 24
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `loadBalancing` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the load balancing algorithm the framework will use for instances of a service among all the nodes in a cluster. The default is `ROUND_ROBIN`. 
+
+      Values: `ROUND_ROBIN` | `FAIL_OVER`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `isolationLevel` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the isolation level under which an instance of a service will run. The default is `HIGH`.
+
+      Values: `LOW` | `HIGH`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Service type properties
+
+The following table outlines the property that targets the core service type as seen by the server administrator. Since this property is associated with a server object, it varies across the service types.
+
+<StyledTable headers={"Property,Description"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `properties` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object containing the properties for the targeted service type.
+
+      ```markdown label=Example
+      "properties": {
+        "maxBufferCount": "100",
+        "virtualCacheDir": "https://SERVER:6080/arcgis/server/arcgiscache",
+        "maxImageHeight": "2048",
+        "maxRecordCount": "1000",
+        "filePath": "\\\\machine\\data\\Corine\\CORINE6.msd",
+        "maxImageWidth": "2048",
+        "cacheOnDemand": "false",
+        "virtualOutputDir": "https://SERVER:6080/arcgis/server/arcgisoutput",
+        "outputDir": "C:\\arcgisserver\\arcgisoutput",
+        "supportedImageReturnTypes": "MIME+URL",
+        "isCached": "false",
+        "ignoreCache": "false",
+        "clientCachingAllowed": "false",
+        "cacheDir": "C:\\arcgisserver\\arcgiscache\\Corine"
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+Different properties are required for map, image, geoprocessing, and geocoding services.
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Map Service</TabTitle>
+  <TabTitle>Image Service</TabTitle>
+  <TabTitle>Geoprocessing Service</TabTitle>
+  <TabTitle>Geocode Service</TabTitle>
+</TabNav>
+
+<Tab>
+
+<StyledTable headers={"Property,Description"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `filePath` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The full path, including the file name, of the map document file.
+
+      ```other label=Example
+      "filePath": "\\\\machine\\data\\Corine\\CORINE6.msd",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `resampling` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies whether rendering will be used in Tile Package Clients such as ArcGIS Pro, Map Viewer, and JSAPI. When `true`, resampling will redraw images up to the `maxScale` value. In areas with no data, blurred images will be displayed. 
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `maxRecordCount` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum number of records that will be returned by query or data operations. The default value is 500.
+
+      ```markdown label=Example
+      "maxRecordCount": "500",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `dateFieldsTimezoneID` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The time zone that will be used by the service using the Windows ID for the time zone (for example, Pacific Standard Time or Eastern Standard Time).
+
+      Once set, it is assumed that all date field values will be stored in the specified time zone and data will be converted from UTC to the time zone specified before changes are written to the database. This property, if configured, only applies to date fields that are not used to time enable a layer and are not used in editor tracking date fields. When enabling this property, it must be placed immediately after `maxRecordCount`; otherwise, `dateFieldsTimezoneID` will be ignored.
+
+      <Note type={"tip"}>
+
+      When performing query operations on a map service when `dateFieldsTimezoneID` has been configured, the values for a where clause that references date field values must be in the same time zone specified in `dateFieldsTimezoneID`.
+
+      </Note>
+
+      Example
+
+      ```markdown label=Example
+      "dateFieldsRespectsDaylightSavingTime": "Pacific Standard Time",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `dateFieldsRespectsDaylightSavingTime` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      If `dateFieldsTimezoneID` is defined, this Boolean property specifies whether time will be adjusted for daylight saving time. If daylight saving time does not apply to the data's region, set the value to `false`. If date values will be stored using daylight saving time when it is in effect, set this value to `true`.
+
+      Once set, it is assumed that all date field values will be stored in the specified time zone and data will be converted from UTC to the time zone specified before changes are written to the database. This property, if configured, only applies to date fields that are not used to time enable a layer and are not used in editor tracking date fields. When enabling this property, it must be placed immediately after `maxRecordCount`; otherwise, `dateFieldsRespectsDaylightSavingTime` will be ignored.
+
+      <Note type={"tip"}>
+
+      When performing query operations on a map service when `dateFieldsRespectsDaylightSavingTime` has been configured, the values for a where clause that references date field values must be in the same time zone as the data.
+
+      </Note>
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `maxBufferCount` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum number of selected features that can be buffered for map operations. The default value is 100.
+
+      ```markdown label=Example
+      "maxBufferCount": "100",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `maxSampleSize` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum number of records that will be sampled when computing a class breaks renderer, which is used by the Generate Renderer operation.
+
+      ```markdown label=Example
+      "maxSampleSize": "100000",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `maxImageWidth` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum image width allowed for requests. The default is 2048.
+
+      ```markdown label=Example
+      "maxImageWidth": "2048",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `maxImageHeight` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum image height allowed for requests. The default is 2048.
+
+      ```markdown label=Example
+      "maxImageHeight": "2048",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `supportedImageReturnTypes` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The supported image return types. The default types are MIME+URL
+
+      ```markdown label=Example
+      "supportedImageReturnTypes": "MIME+URL",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `isCached` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean flag that specifies whether the map service will be cached (`true`) or dynamic (`false`).
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `ignoreCache` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean flag that specifies whether the map service will ignore the cache (`true`).
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `cacheOnDemand` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean flag that specifies whether cache tiles will be created on demand and added to the server cache directory as users navigate the map (`true`).
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `disableCaching` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean flag that specifies whether the REST handler will be disabled from caching all static resources, such as map service resource, layer resource, legends, and so on (`true`). 
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `clientCachingAllowed` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean flag that specifies whether clients will be allowed to cache tiles (`true`).
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `cacheDir` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The physical directory where the tiles will be stored.
+
+      ```markdown label=Example
+      "cacheDir": "C:\\arcgisserver\\arcgiscache\\Corine"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `virtualCacheDir` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The virtual directory where the tiles can be accessed.
+
+      ```markdown label=Example
+      "virtualCacheDir": "https://SERVER:6080/arcgis/server/arcgiscache",
+      ```
+ 
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `outputDir` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The physical directory where the temporary output files will be created.
+
+      ```markdown label=Example
+      "outputDir": "C:\\arcgisserver\\arcgisoutput",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `virtualOutputDir` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The virtual directory where the output files can be accessed.
+
+      ```markdown label=Example
+      "virtualOutputDir": "https://SERVER:6080/arcgis/server/arcgisoutput",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `connectionCheckInterval` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The number of seconds between validity checks or repairs on SDE data connections used in a map service.
+
+      ```markdown label=Example
+      "connectionCheckInterval": "300",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `schemaLockingEnabled` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean tag that specifies whether the map service will acquire schema locks for map layers from a geodatabase (`true`). If locks will impede your workflow, set this value to `false` to disable schema locking.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `maxDomainCodeCount` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum number of domain codes that can be returned from all fields, subtypes, layers, and tables in a map service. The default value is 25000.
+
+      ```markdown label=Example
+      "maxDomainCodeCount": "25000",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `useLocalCacheDir` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean that specifies whether the ArcGIS Server map caching mechanism will write bundle files to a local directory and copy them to a shared cache directory (`true`) or write the files directly to the shared cache directory (`false`). This option can improve performance, but it only applies to the compact cache storage format when multiple machines are working on the cache.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `antialiasingMode` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the antialiasing mode that will be used for drawing vectors in the map. The default is `NONE`.
+
+      Values: `FASTEST` | `FAST` | `NORMAL` | `BEST` | `NONE`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `textAntialiasingMode` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the antialiasing mode that will be used for drawing vectors in the map. The default is `FORCE`.
+
+      Values: `NORMAL` | `FORCE` | `NONE`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `disableIdentifyRelates` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean flag that specifies whether the processing of related records as a part of the identify results will be disabled. If there are too many related records, this may improve the performance of the `identify` operation. The default is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `enableDynamicLayers` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean flag that specifies whether the map service will allow dynamic layer functionality such as reordering layers, changing symbology per request, and so on (`true`). The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `dynamicDataWorkspaces` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The workspace connections that will be available for the web clients applications for adding dynamic layers per request. This is a string value representing the JSON array containing JSON objects describing the workspace connection.
+
+      ```other label=Example
+      "dynamicDataWorkspaces": [
+        {
+          "id": "<id>",
+          "WorkspaceFactory": "SDE",
+          "workspaceConnection": "<sde_connection_string>"
+        },
+        {
+          "id": "<id>",
+          "WorkspaceFactory":"FileGDB",
+          "workspaceConnection": "DATABASE=<path_to_fgdb>"
+        }
+      ],
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `hasStaticData` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies whether the performance of a map service that uses static, unchanging data will be optimized (`true`). This property is automatically set to `true` when a map service is published by copying data to the server.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `cacheControlMaxAge` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The value that will be returned for max-age as the cache-control response header by the [Export](DEVSITE/rest/services-reference/enterprise/export-map) operation and the [Tile](DEVSITE/rest/services-reference/enterprise/map-tile) resource. If no value is provided, the default value of 0 seconds for the `export` request, 86400 seconds for tiles that the client can cache, and 0 seconds for tiles that disallow client caching, will be returned as the max-age value.
+
+      However, if client caching is not allowed, the max-age value for tile responses will always be 0, and any value provided for `cacheControlMaxAge` will be ignored.
+
+      ```markdown label=Example
+      "cacheControlMaxAge": "43200",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `disableDownsamplingTilesForExportMap` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies whether the cached map service will render the image using the cache tiles. When set to `false`, if no cache tiles exist at a certain level, the image will use resampled cache data to render an image using CPU resources. When set to `true`, if no cache tiles exist for an [Export](DEVSITE/rest/services-reference/enterprise/export-map/) request, the service will return an error. This property is used to optimize `export` requests. The default is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `failOnStartWhenDataInaccessible` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Added at 10.8.1. Specifies whether starting a map service when a data source is inaccessible will fail. By default, when the data source of a layer or stand-alone table is inaccessible, a map service will start without listing broken layers or tables in its resources. However, when this property is set to `true` and the map service cannot access any of its layer or table sources, it will fail to start. The default is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+</Tab>
+
+<Tab>
+
+<StyledTable headers={"Property,Description"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `path` 
+
+      (Required; Optional if `connectionString` or `serviceURL` is specified)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The path to the published raster dataset or raster layer.
+
+      ```other label=Example
+      "C:\\arcgisserver\\directories\\arcgissystem\\arcgisinput\\...",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `connectionString` 
+
+      (Required; Optional if `path`  or `serviceURL`  is specified)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The connection properties of a geodatabase containing the published raster dataset.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `raster` 
+
+      (Required if `connectionString`  is specified)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The published raster dataset name in the geodatabase specified by `connectionString`.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serviceURL` 
+
+      (Required; Optional if `path`  or `connectionString`  is specified)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The published classic image server service URL
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `maxImageWidth` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum number of columns of the image returned by the [Export Image](DEVSITE/rest/services-reference/enterprise/export-image/) operation.
+
+      ```markdown label=Example
+      "maxImageWidth": "15000",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `maxImageHeight` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum number of rows of the image returned by the [Export Image](DEVSITE/rest/services-reference/enterprise/export-image/) operation.
+
+      ```markdown label=Example
+      "maxImageHeight": "4100",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `supportedImageReturnTypes` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The supported image return types. The default types are `MIME+URL` .
+
+      ```markdown label=Example
+      "supportedImageReturnTypes": "MIME+URL",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `maxMosaicImageCount` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum number of images that will be used for generating a mosaic image.
+
+      ```markdown label=Example
+      "maxMosaicImageCount": "20",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `maxRecordCount` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum number of records that can be fetched.
+
+      ```markdown label=Example
+      "maxRecordCount": "500",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `maxDownloadImageCount` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum number of images that can be downloaded.
+
+      ```markdown label=Example
+      "maxDownloadImageCount": "20",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `allowedCompressions` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The transmission compressions that can be used.
+
+      ```markdown label=Example
+      "allowedCompressions": "None,JPEG,LZ77,LERC",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `allowedItemMetadata` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the level of raster item metadata that can be used.
+
+      Values: `None` | `Basic` | `Full`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `allowedFields` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The visible fields for the image service.
+
+      ```markdown label=Example
+      "allowedFields": "Name,MinPS,MaxPS,LowPS,HighPS,Tag,GroupName,ProductName,CenterX,CenterY",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `allowedMosaicMethods` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The list of allowed mosaic methods.
+
+      ```markdown label=Example
+      "allowedMosaicMethods": "NorthWest,Center,LockRaster,ByAttribute,Nadir,Viewpoint,Seamline"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `allowedMensurationCapabilities` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the mensuration capabilities that can be used.
+
+      Values: `None` | `Basic` | `Height` | `Shadow` | `3D`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `defaultCompressionQuality` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The default compression quality.
+
+      ```markdown label=Example
+      "defaultCompressionQuality": "75",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `defaultResamplingMethod` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The default resampling method.
+
+      ```markdown label=Example
+      "defaultResamplingMethod": "1",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `outputDir` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The physical output directory.
+
+      ```markdown label=Example
+      "outputDir": "C:\\arcgisserver\\directories\\arcgisoutput",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `virtualOutputDir` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The virtual output directory.
+
+      ```markdown label=Example
+      "virtualOutputDir": "/rest/directories/arcgisoutput",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `connectionCheckInterval` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The number of seconds between validity checks or repairs on SDE data connections used in a map service.
+
+      ```markdown label=Example
+      "connectionCheckInterval": "300",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `downloadDir` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A list of physical directories for direct download. Each list entry must be separated by a semicolon (`;`).
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `virtualDownloadDir` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A list of virtual directories for direct download. Each list entry must be separated by a semicolon (`;`).
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `rasterFunctions` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A list of published raster function templates (`.rft`). Each list entry must be separated by a semicolon (`;`).
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `rasterTypes` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A list of published raster types (`.art`). Each list entry must be separated by a semicolon (`;`).
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `allowFunction` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean flag that specifies whether the performing of a raster function is allowed.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `colormapToRGB` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean flag that specifies whether pseudo-color images will be converted to RGB images.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `uploadDir` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A list of physical directories for storing uploaded images. Each list entry must be separated by a semicolon (`;`).
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serviceSourceType` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the published source data type.
+
+      Values: `esriImageServiceSourceTypeDataset` | `esriImageServiceSourceTypeLayer` | `esriImageServiceSourceTypeCatalog` | `esriImageServiceSourceTypeMosaicDataset`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `isCached` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean flag that specifies whether the map service will be cached (`true`) or dynamic (`false`).
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `ignoreCache` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean flag that specifies whether the map service will use the cache (`true`).
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `cacheOnDemand` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean tag that specifies whether cache tiles will be created on demand and added to the server cache directory as users navigate the map (`true`).
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `cacheDir` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The physical directory where the tiles will be stored.
+
+      ```markdown label=Example
+      "cacheDir": "C:\\arcgisserver\\directories\\arcgiscache"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `virtualCacheDir` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The virtual directory where the tiles can be accessed.
+
+      ```markdown label=Example
+      "virtualCacheDir": "/rest/directories/arcgiscache",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `useLocalCacheDir` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean that specifies whether the ArcGIS Server map caching mechanism will write bundle files to a local directory and copy them to a shared cache directory (`true`) or write the files directly to the shared cache directory (`false`). This option can improve performance, but it only applies to the compact cache storage format when multiple machines are working on the cache.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `clientCachingAllowed` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean flag that specifies whether clients can cache tiles locally (`true`).
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `cacheControlMaxAge` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The value returned for max-age as the cache-control response header by an [Export Image](DEVISTE/rest/services-reference/enterprise/export-image/) request and the [Tile](DEVISTE/rest/services-reference/enterprise/image-tile/) resource. If no value is provided, the default value of 43200 seconds for the `exportImage` operation for tiles that the client can cache, and 0 seconds for clients that disallow client caching will be used.
+
+      However, if client caching is not allowed, the max-age value for tile responses will always be 43200, and any value provided for `cacheControlMaxAge` will be ignored.
+
+      ```markdown label=Example
+      "cacheControlMaxAge": "43200",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+</Tab>
+
+<Tab>
+
+<StyledTable headers={"Parameters,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `toolbox` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The path to the toolbox that is the source of the geoprocessing service tasks.
+
+      ```markdown label=Example
+      "toolbox": "/arcgis/Resources/ArcToolBox/Services/FeatureServiceTools.tbx",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `executionType` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies whether the client will perform operations for this service synchronously or asynchronously. If performed synchronously, the client waits until the server has completed the current running operation. If performed asynchronously, the client can do other work while the server completes the current operation. The default is `Asynchronous`.
+
+      Values: `Asynchronous` | `Synchronous`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `resultMapServer` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean flag that specifies whether a map server will be used to draw the geoprocessing results. The default is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `maximumRecords` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum number of features the geoprocessing service will return. The default is 1000.
+
+      ```markdown label=Example
+      "maximumRecords": "1000",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `showMessages` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean flag that specifies whether tool processing messages will be included in geoprocessing service messages. The default is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `jobsDirectory` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The path to the jobs directory where the geoprocessing service output will be written.
+
+      ```markdown label=Example
+      "jobsDirectory": "/arcgisusr/directories/arcgisjobs",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `jobsVirtualDirectory` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The URL to the jobs directory.
+
+      ```markdown label=Example
+      "jobsVirtualDirectory": "/rest/directories/system/arcgisjobs",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `outputDir` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The path to the directory that will return the written files.
+
+      ```markdown label=Example
+      "outputDir": "/arcgisusr/directories/arcgisoutput",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `virtualOutputDir` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The URL to the output directory.
+
+      ```markdown label=Example
+      "virtualOutputDir": "/rest/directories/system/arcgisoutput",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `localJobsDir` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean flag that specifies whether the temp directory will be used for the jobs directory when running tasks. The default is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+</Tab>
+
+<Tab>
+
+<StyledTable headers={"Parameters,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `locatorWorkspaceConnectionString` 
+
+      (Required for locators in databases)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The parameters for a connection to the geodatabase storing the locator
+
+      ```markdown label=Example
+      "locatorWorkspaceConnectionString": "SERVER=machine;INSTANCE=5151;DATABASE=gdb;USER=gdb;PASSWORD=gdb;VERSION=sde.DEFAULT",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `locatorWorkspacePath` 
+
+      ( Required for file-based locators)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The path to the location on disk where the locator file is stored
+
+      ```markdown label=Example
+      "D:\\GeocodeService\\LocatorData\\World\\"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `locator` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The name of the address locator for the geocode service.
+
+      ```markdown label=Example
+      "locator": "World",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `suggestedBatchSize` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The suggested number of addresses that will be sent to a server in one batch geocoding request. The default is 1000.
+
+      ```markdown label=Example
+      "suggestedBatchSize": "150",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `maxBatchSize` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum number of result records that can be processed in one batch geocoding request. The default is 1000.
+
+      ```markdown label=Example
+      "maxBatchSize": "1000",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `maxResultSize` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The maximum number of result records that can be returned by the `FindAddressCandidates` operation. The default is 500.
+
+      ```markdown label=Example
+      "maxResultSize": "50",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+</Tab>
+
+</Tabs>
+
+## Extension properties
+
+The table below outlines the properties that represent the extensions that are enabled on a service.
+
+<StyledTable headers={"Property,Description"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `typeName` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The type of extension. See the list of supported [extension types](/extensiontypes).
+
+      ```markdown label=Example
+      "typeName": "KmlServer
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `capabilities` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The capabilities of the extension type.
+
+      ```markdown label=Example
+      "capabilities": "SingleImage,SeparateImages,Vectors"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `enabled` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean that specifies whether the extension will be enabled on the service. 
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `properties` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A bag of properties for the targeted extension type.
+
+      ```markdown label=Example
+      "properties": {
+        "minRefreshPeriod": "30",
+        "compatibilityMode": "GoogleEarth",
+        "imageSize": "1024",
+        "dpi": "96",
+        "endPointURL": "",
+        "featureLimit": "1000000",
+        "useDefaultSnippets": "false"
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Framework properties
+
+The table below defines the property used to determine the heap size that will be applied to a service.
+
+<StyledTable headers={"Property,Description"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `javaHeapSize` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The heap size for a particular service, which will override the default heap size properties you can set for all services using the [Edit](/editmachine) operation. 
+
+      Providing a value for `javaHeapSize` will only affect this service; all other services in the machine will remain unchanged.
+
+      ```markdown label=Example
+      "javaHeapSize": "64"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `edit` operation:
+
+```other
+POST /webadaptor/admin/services/Maps/TestMap.MapServer/edit HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+services={
+  "description": "My updated map service",
+  "capabilities": "map,query,data",
+  "clusterName": "default",
+  "minInstancesPerNode": 2,
+  "maxInstancesPerNode": 4,
+  "maxWaitTime": 60,
+  "maxIdleTime": 1800,
+  "maxUsageTime": 600,
+  "recycleInterval": 24,
+  "loadBalancing": "ROUND_ROBIN",
+  "isolationLevel": "HIGH",
+  "properties": {
+     "maxBufferCount": "100",
+     "virtualCacheDir": "https://SERVER:6443/arcgis/server/arcgiscache",
+     "maxImageHeight": "2048",
+     "maxRecordCount": "1000",
+     "filePath": "\\\\machine\\data\\Test\\TESTMAP.msd",
+     "maxImageWidth": "2048",
+     "cacheOnDemand": "false",
+     "virtualOutputDir": "https://SERVER:6443/arcgis/server/arcgisoutput",
+     "outputDir": "C:\\arcgisserver\\arcgisoutput",
+     "supportedImageReturnTypes": "MIME+URL",
+     "isCached": "false",
+     "ignoreCache": "false",
+     "clientCachingAllowed": "false",
+     "cacheDir": "C:\\arcgisserver\\arcgiscache\\Test"
+  },
+  "extensions": [
+     {
+       "typeName": "KmlServer",
+       "enabled": false,
+       "capabilities": "SingleImage,SeparateImages,Vectors",
+       "properties": {
+          "minRefreshPeriod": "30",
+          "compatibilityMode": "GoogleEarth",
+          "imageSize": "1024",
+          "dpi": "96",
+          "endpointURL": "null",
+          "featureLimit": "1000000",
+          "useDefaultSnippets": "false"
+       }
+     },
+     {
+       "typeName": "WFSServer",
+       "enabled": true,
+       "capabilities": "",
+       "properties": {
+          "appSchemaURI": "https://SERVER:6443/arcgis",
+          "appSchemaPrefix": "arcgis",
+          "enableTransactions": "false"
+       }
+     },
+     {
+       "typeName": "WCSServer",
+       "enabled": true,
+       "capabilities": "",
+       "properties": {}
+     }
+  ],
+  "frameworkProperties": {
+     "javaHeapSize": "64"
+  },
+  "datasets": []
+}&runAsync="true"&f=json
+```
+
+ 
+
+## JSON Response example
+
+```javascript
+{"status": "success"}
+```

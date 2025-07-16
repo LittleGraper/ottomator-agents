@@ -1,0 +1,55 @@
+import ParamMetadata from "../../../components/param-metatdata" 
+
+<ParamMetadata types={[{name:"feature",link:"../routing-data-types#feature"}]} />
+
+
+{/* <p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p> */}
+
+Use this parameter to pair pickup and delivery orders so they are serviced by the same route.
+
+Sometimes it is necessary for the pick up and delivery of orders to be paired. For example, a courier company may need to have a route pick up a high-priority package from one order and deliver it to another without returning to a depot, or sorting station, to minimize delivery time. These related orders can be assigned to the same route with the appropriate sequence using order pairs. Restrictions on how long the package can stay in the vehicle can also be assigned; for example, the package might be a blood sample that must be transported from the doctor's office to the lab within two hours. 
+
+Some situations may require two pairs of orders. For example, suppose you want to transport a senior citizen from her home to the doctor and then back home. The ride from her home to the doctor is one pair of orders with a desired arrival time at the doctor, while the ride from the doctor to her home is another pair with a desired pickup time. 
+
+<Note type={"caution"}>
+
+For the request to succeed, the first order in the pair must be a pickup order; that is, the value for its `DeliveryQuantities` attribute must be `null`. The second order in the pair must be a delivery order; that is, the value for its `PickupQuantities` attribute must be `null`. The quantity that is picked up at the first order must agree with the quantity that is delivered at the second order. As a special case, both orders may have zero quantities for scenarios where capacities are not used.
+
+</Note>
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for order pairs</span></summary>
+
+ #### Attributes for order pairs
+
+-   <p class="space-x-2"><span class="font-bold">FirstOrderName</span><span class="font-sm text-color-3">string (length: 500)</span></p>
+
+    The name of the first order of the pair. This attribute is a foreign key to the `Name` attribute in the `orders` parameter, so the values must match. The attribute cannot have a null value.
+
+-   <p class="space-x-2"><span class="font-bold">SecondOrderNameName</span><span class="font-sm text-color-3">string (length: 500)</span></p>
+
+    The name of the second order of the pair. This attribute is a foreign key to the `Name`  attribute in the `orders`  parameter, so the values must match. The attribute cannot have a null value.
+
+-   <p class="space-x-2"><span class="font-bold">MaxTransitTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:60</span></p>
+
+    The maximum transit time for the pair. The transit time is the duration from the departure time of the first order to the arrival time at the second order. This constraint limits the time-on-vehicle, or ride time, between the two orders. When a vehicle is carrying people or perishable goods, the ride time is typically shorter than that of a vehicle carrying packages or nonperishable goods.
+
+    Excess transit time (measured with respect to the direct travel time between order pairs) can be tracked and weighted by the service. Because of this, you can direct the service to take one of three approaches: minimize the overall excess transit time, regardless of the increase in travel cost for the fleet; find a solution that balances overall violation time and travel cost; or ignore the overall excess transit time and, instead, minimize the travel cost for the fleet. By assigning an importance level for the `excess_transit_factor`  parameter, you are in effect choosing one of these three approaches. Regardless of the importance level, the service will always return an error if the `MaxTransitTime`  attribute value is surpassed.
+
+    This attribute can contain null values; a null value indicates that there is no constraint on the ride time. The default value for this attribute is `null` .
+
+</details>
+
+**Example**
+
+In this example, a paratransit company needs to find the best routes for a fleet of vans to transport people who would otherwise not have access to transportation from their homes to different hospitals for medical appointments.
+
+The hospital and patient locations are specified as the `orders` parameter. The passengers have to be taken to a predetermined hospital. For each patient-to-hospital pair, add a feature to the `order_pairs` parameter using patient name as the value for the `FirstOrderName` attribute and hospital name as the value for the `SecondOrderName` attribute. The maximum time in minutes that the patients can sit in the van during a one-way trip is specified using the `MaxTransitTime` attribute.
+
+<Note type={"note"}>
+
+Unlike the `depots` and `orders` parameters, the `spatialReference` and `geometry` properties are not required when specifying the `order_pairs` parameter. 
+
+</Note>
+
+<CodeBlock language="json" source="../../code-samples/vrp/examples/inputs/orderPairs_ex.json" group="json" maxLines={20} expandable/>

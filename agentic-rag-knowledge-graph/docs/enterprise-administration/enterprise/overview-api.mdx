@@ -1,0 +1,473 @@
+---
+title: "Overview"
+description: "The overview resource returns the persisted cache or real-time information, such as health or status information, for the overview resource types."
+slug: "overview-api"
+url: "/overview-api"
+guid: "GUID-24E15A0D-4658-48A4-9D90-6922F9FBC6C0"
+migratedTopicMetadata:
+  FTITLE: "Overview API"
+  FDESCRIPTION: ""
+  FCHANGES: "New Product"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9-*"
+  CREATED-ON: "09/10/2020 12:46:58"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "17/11/2021 16:33:42"
+  VERSION: "1"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "13"
+  ED: "GUID-2AAB8C77-7077-48A8-B56E-9E4ED4FC1C51"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /overview
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /overview
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed with the "Security and infrastructure" privilege
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `overview` resource returns the persisted cache or real-time information, such as health or status information, for the overview resource types. This resource is called when the **Overview** page of the Enterprise Manager is updated. Whether the information is cached or returned in real time depends on the `updateIntervalMin` property returned by the [Config](/update-overview-config) resource, which specifies the interval (in minutes) at which information for each resource type is pulled and cached. Resource types that have an `updateIntervalMin` value of 0 will not have their information cached and, instead, will have real-time information returned when the resource is called. The update interval can me modified through the [Update](/update-overview-config) operation.
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `resource` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the resource type (`criticalLogs`, `dataStores`, `systemServices`, or `utilityServices`) that will have their information returned. Using `all` as the input value will return information for all resource types.
+
+      ```other label=Example
+      //Information (cached or real-time) returned for all resource types
+      resource=all
+
+      //Information for a single resource type returned
+      resource=dataStores
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format.
+
+      Values: `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usages
+
+The following is a sample request URL for the `overview` resource that returns the full list of overview resource types and their cached and real-time information:
+
+```markdown
+https://organization.domain.com/context/admin/overview?resource=all&f=pjson
+```
+
+Individual resources can be returned by appending the resource type to the URL:
+
+```markdown
+https://organization.domain.com/context/admin/overview?resource=dataStores&f=pjson
+```
+
+## JSON Response example
+
+The following response demonstrates the full list of cached and real-time information for all overview resource types:
+
+```other
+{
+  "success": true,
+  "resources": {
+    "dataStores": {
+      "lastUpdated": 1618456283032,
+      "overviewDataStoreInfos": [
+        {
+          "overallHealth": "Healthy",
+          "dataStoreId": "7e61dda8-4f3a-4d44-ab60-5dc2b9ece410",
+          "details": [
+            {
+              "role": "primary",
+              "totalMemory": 8192,
+              "totalDiskSpace": 402456,
+              "totalPods": 1,
+              "name": "arcgis-relational-store-sqe4i-primary",
+              "freeDiskSpace": 172574,
+              "freeMemory": 7411,
+              "isHealthy": true
+            },
+            {
+              "role": "standby",
+              "totalMemory": 8192,
+              "totalDiskSpace": 402456,
+              "totalPods": 1,
+              "name": "arcgis-relational-store-sqe4i-standby",
+              "freeDiskSpace": 172574,
+              "freeMemory": 7504,
+              "isHealthy": false
+            }
+          ],
+          "dataStoreType": "egdb"
+        },
+        {
+          "overallHealth": "Healthy",
+          "numOfPods": 2,
+          "dataStoreId": "074f0f27-a5e4-4491-b26c-560f8095081f",
+          "details": [
+            {
+              "name": "arcgis-object-store-ihjvd-0",
+              "storage": [
+                {
+                  "usedDiskSpace": 241048748032,
+                  "totalDiskSpace": 400545546240,
+                  "freeDiskSpace": 159496798208
+                },
+                {
+                  "usedDiskSpace": 241048748032,
+                  "totalDiskSpace": 400545546240,
+                  "freeDiskSpace": 159496798208
+                }
+              ]
+            },
+            {
+              "name": "arcgis-object-store-ihjvd-1",
+              "storage": [
+                {
+                  "usedDiskSpace": 241048748032,
+                  "totalDiskSpace": 400545546240,
+                  "freeDiskSpace": 159496798208
+                },
+                {
+                  "usedDiskSpace": 241048748032,
+                  "totalDiskSpace": 400545546240,
+                  "freeDiskSpace": 159496798208
+                }
+              ]
+            }
+          ],
+          "dataStoreType": "objectStore"
+        },
+        {
+          "overallHealth": "Healthy",
+          "numOfPods": 3,
+          "dataStoreId": "155c5885-8269-4e78-af98-34e17796c262",
+          "details": [
+            {
+              "totalMemory": 8192,
+              "totalDiskSpace": 402456,
+              "name": "arcgis-spatiotemporal-index-store-snn76-coordinator-0",
+              "freeDiskSpace": 172574,
+              "freeMemory": 4378
+            },
+            {
+              "totalMemory": 8192,
+              "totalDiskSpace": 402456,
+              "name": "arcgis-spatiotemporal-index-store-snn76-coordinator-2",
+              "freeDiskSpace": 172574,
+              "freeMemory": 4389
+            },
+            {
+              "totalMemory": 8192,
+              "totalDiskSpace": 402456,
+              "name": "arcgis-spatiotemporal-index-store-snn76-coordinator-1",
+              "freeDiskSpace": 172574,
+              "freeMemory": 4557
+            }
+          ],
+          "dataStoreType": "nosql"
+        }
+      ]
+    },
+    "criticalLogs": {
+      "lastUpdated": 1618456308259,
+      "details": [
+        {
+          "logLevel": "SEVERE",
+          "logMessage": "Error finding address candidates",
+          "logSource": "California.GeocodeServer",
+          "logTime": "2021-04-15T01:23:04,716"
+        },
+        {
+          "logLevel": "SEVERE",
+          "logMessage": "ArcSoc Construction failed 'California.GeocodeServer'.",
+          "logSource": "",
+          "logTime": "2021-04-15T01:21:27,077"
+        },
+        {
+          "logLevel": "SEVERE",
+          "logMessage": "California failed to initialize the server object 0x8007000e: You are not licensed for StreetMap Premium North America. .",
+          "logSource": "",
+          "logTime": "2021-04-15T01:21:27,039"
+        },
+        {
+          "logLevel": "SEVERE",
+          "logMessage": "URL 'https://basemaps.arcgis.com/arcgis/rest/services/World_Basemap_v2/VectorTileServer/tile/3/2/6.pbf' is not accessible: Error. java.io.IOException: Broken pipe.",
+          "logSource": "Sharing",
+          "logTime": "2021-04-14T23:54:41,037"
+        },
+        {
+          "logLevel": "SEVERE",
+          "logMessage": "URL 'https://basemaps.arcgis.com/arcgis/rest/services/World_Basemap_v2/VectorTileServer/tile/3/3/4.pbf' is not accessible: Error. java.io.IOException: Broken pipe.",
+          "logSource": "Sharing",
+          "logTime": "2021-04-14T23:54:40,836"
+        }
+      ]
+    },
+    "systemServices": {
+      "lastUpdated": 1618456308056,
+      "details": [
+        {
+          "healthStatus": "HEALTHY",
+          "activePods": 2,
+          "serviceStatus": "STARTED",
+          "totalPods": 2,
+          "name": "SpatialAnalysisTools",
+          "type": "GPServer"
+        },
+        {
+          "healthStatus": "HEALTHY",
+          "activePods": 1,
+          "serviceStatus": "STARTED",
+          "totalPods": 1,
+          "name": "SharedMapServiceHost",
+          "type": "MapServer"
+        },
+        {
+          "healthStatus": "HEALTHY",
+          "activePods": 2,
+          "serviceStatus": "STARTED",
+          "totalPods": 2,
+          "name": "SyncTools",
+          "type": "GPServer"
+        },
+        {
+          "healthStatus": "HEALTHY",
+          "activePods": 2,
+          "serviceStatus": "STARTED",
+          "totalPods": 2,
+          "name": "CachingTools",
+          "type": "GPServer"
+        },
+        {
+          "healthStatus": "HEALTHY",
+          "activePods": 2,
+          "serviceStatus": "STARTED",
+          "totalPods": 2,
+          "name": "ReportingTools",
+          "type": "GPServer"
+        },
+        {
+          "healthStatus": "HEALTHY",
+          "activePods": 4,
+          "serviceStatus": "STARTED",
+          "totalPods": 4,
+          "name": "PublishingTools",
+          "type": "GPServer"
+        },
+        {
+          "healthStatus": "HEALTHY",
+          "activePods": 2,
+          "serviceStatus": "STARTED",
+          "totalPods": 2,
+          "name": "CachingControllers",
+          "type": "GPServer"
+        },
+        {
+          "healthStatus": "HEALTHY",
+          "activePods": 2,
+          "serviceStatus": "STARTED",
+          "totalPods": 2,
+          "name": "FeatureServiceTools",
+          "type": "GPServer"
+        },
+        {
+          "healthStatus": "HEALTHY",
+          "serviceStatus": "STOPPED",
+          "name": "SceneCachingControllers",
+          "type": "GPServer"
+        },
+        {
+          "healthStatus": "HEALTHY",
+          "serviceStatus": "STOPPED",
+          "name": "SceneCachingTools",
+          "type": "GPServer"
+        }
+      ]
+    },
+    "utilityServices": {
+      "lastUpdated": 1618456261061,
+      "details": [
+        {
+          "healthStatus": "HEALTHY",
+          "activePods": 1,
+          "serviceStatus": "STARTED",
+          "totalPods": 1,
+          "name": "Geometry",
+          "type": "GeometryServer"
+        },
+        {
+          "healthStatus": "HEALTHY",
+          "activePods": 2,
+          "serviceStatus": "STARTED",
+          "totalPods": 2,
+          "name": "PrintingTools",
+          "type": "GPServer"
+        },
+        {
+          "healthStatus": "HEALTHY",
+          "activePods": 2,
+          "serviceStatus": "STARTED",
+          "totalPods": 2,
+          "name": "GeocodingTools",
+          "type": "GPServer"
+        },
+        {
+          "healthStatus": "HEALTHY",
+          "activePods": 2,
+          "serviceStatus": "STARTED",
+          "totalPods": 2,
+          "name": "OfflinePackaging",
+          "type": "GPServer"
+        }
+      ]
+    }
+  }
+}
+```
+
+The following response is returned when a single resource type (`dataStores`) is specified in the request URL:
+
+```javascript
+{
+  "success": true,
+  "resources": {
+    "dataStores": {
+      "lastUpdated": 1618458421739,
+      "overviewDataStoreInfos": [
+        {
+          "overallHealth": "Healthy",
+          "dataStoreId": "7e61dda8-4f3a-4d44-ab60-5dc2b9ece410",
+          "details": [
+            {
+              "role": "primary",
+              "totalMemory": 8192,
+              "totalDiskSpace": 402456,
+              "totalPods": 1,
+              "name": "arcgis-relational-store-sqe4i-primary",
+              "freeDiskSpace": 172539,
+              "freeMemory": 7426,
+              "isHealthy": true
+            },
+            {
+              "role": "standby",
+              "totalMemory": 8192,
+              "totalDiskSpace": 402456,
+              "totalPods": 1,
+              "name": "arcgis-relational-store-sqe4i-standby",
+              "freeDiskSpace": 172539,
+              "freeMemory": 7501,
+              "isHealthy": false
+            }
+          ],
+          "dataStoreType": "egdb"
+        },
+        {
+          "overallHealth": "Healthy",
+          "numOfPods": 2,
+          "dataStoreId": "074f0f27-a5e4-4491-b26c-560f8095081f",
+          "details": [
+            {
+              "name": "arcgis-object-store-ihjvd-0",
+              "storage": [
+                {
+                  "usedDiskSpace": 241085448192,
+                  "totalDiskSpace": 400544497664,
+                  "freeDiskSpace": 159459049472
+                },
+                {
+                  "usedDiskSpace": 241085448192,
+                  "totalDiskSpace": 400544497664,
+                  "freeDiskSpace": 159459049472
+                }
+              ]
+            },
+            {
+              "name": "arcgis-object-store-ihjvd-1",
+              "storage": [
+                {
+                  "usedDiskSpace": 241085448192,
+                  "totalDiskSpace": 400544497664,
+                  "freeDiskSpace": 159459049472
+                },
+                {
+                  "usedDiskSpace": 241085448192,
+                  "totalDiskSpace": 400544497664,
+                  "freeDiskSpace": 159459049472
+                }
+              ]
+            }
+          ],
+          "dataStoreType": "objectStore"
+        },
+        {
+          "overallHealth": "Healthy",
+          "numOfPods": 3,
+          "dataStoreId": "155c5885-8269-4e78-af98-34e17796c262",
+          "details": [
+            {
+              "totalMemory": 8192,
+              "totalDiskSpace": 402456,
+              "name": "arcgis-spatiotemporal-index-store-snn76-coordinator-0",
+              "freeDiskSpace": 172539,
+              "freeMemory": 4376
+            },
+            {
+              "totalMemory": 8192,
+              "totalDiskSpace": 402456,
+              "name": "arcgis-spatiotemporal-index-store-snn76-coordinator-2",
+              "freeDiskSpace": 172539,
+              "freeMemory": 4397
+            },
+            {
+              "totalMemory": 8192,
+              "totalDiskSpace": 402456,
+              "name": "arcgis-spatiotemporal-index-store-snn76-coordinator-1",
+              "freeDiskSpace": 172539,
+              "freeMemory": 4556
+            }
+          ],
+          "dataStoreType": "nosql"
+        }
+      ]
+    }
+  }
+}
+```

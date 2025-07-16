@@ -1,0 +1,292 @@
+---
+title: "Reassign Features To Record"
+uid: pf-reassign-to-record
+description: "The reassignFeaturesToRecord operation reassigns all parcel features in the specified source record to the specified target record."
+slug: "reassigntorecord-parcel-fabric-server"
+url: "/reassigntorecord-parcel-fabric-server"
+guid: "GUID-1D231C60-22A7-434B-9BE7-D91A9E1F80B5"
+migratedTopicMetadata:
+  FTITLE: "reassigntorecord-parcel-fabric-server"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2-*"
+  CREATED-ON: "14/08/2023 15:14:59"
+  FAUTHOR: "cleslie"
+  FSTATUS: "Released"
+  MODIFIED-ON: "29/09/2023 11:51:52"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-93008452-FBF7-4149-B51E-7E2F74A2DF6C"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/ParcelFabricServer/reassignFeaturesToRecord
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/ParcelFabricServer/reassignFeaturesToRecord
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9.1'
+  requiredCapability: ArcGIS Advanced Editing
+---
+
+## Description
+
+The `reassignFeaturesToRecord` operation reassigns all parcel features in the specified source record to the specified target record. The source record becomes empty and is not associated with any parcel features.
+
+The record polygon of the target record is updated to match the cumulative geometry of all the parcels associated with it.
+
+[Learn more about assigning parcel fabric records](https://pro.arcgis.com/en/pro-app/latest/help/data/parcel-editing/assignparcelrecords.htm)
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `gdbVersion` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.9.1.
+
+      The name of the geodatabase version (the default is the `DEFAULT` version).
+
+      Syntax
+
+      ```javascript
+      gdbVersion=<version>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sessionId` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.9.1.
+
+      The token (GUID) used to lock the version. If the calling client is editing a named version, the `sessionId` value is required. If the specified version is currently locked by another session, the request will fail if the `sessionId` value is not provided or does not match the `sessionId` value that holds the exclusive lock. If the client is editing the default version, the `sessionId` value is not required.
+
+      Syntax
+
+      ```javascript
+      sessionId=<guid>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sourceRecord` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.9.1.
+
+      The record containing the parcel features to be reassigned.
+
+      Syntax
+
+      ```javascript
+      sourceRecord=<guid>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `targetRecord` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.9.1.
+
+      The target record to which the parcel features will be reassigned.
+
+      Syntax
+
+      ```javascript
+      targetRecord=<guid>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      deleteSourceRecord
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      
+      Introduced at 10.9.1.
+
+      Specifies whether the original source record will be deleted.
+
+      Syntax
+
+      ```javascript
+      deleteSourceRecord=<boolean>
+      ```
+
+      Values: `true` | `false` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.1.
+      
+      Specifies whether the request will be processed as an asynchronous job and a URL that points to a location displaying the status of the job will be returned. See the topic regarding [asynchronous](HTTP://RESOURCES.ARCGIS.COM/EN/HELP/ARCGIS-REST-API/02R3/02R3000000RT000000.HTM) usage for more information. The default is `false`.
+
+      Values: `true` | `false` 
+
+      Syntax
+
+      ```javascript
+      async=true|false
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+This example shows the steps for reassigning parcel features to a different record using the `reassignFeaturesToRecord` operation.
+
+<Note type={"note"}>
+
+  The `sessionId` parameter value must be the same for starting the edit session, performing the edit operation, and stopping the edit session. The `sessionId` parameter value must be a unique GUID that has not been used in a previous session. The GUID can be randomly generated. 
+
+</Note>
+ 
+1.  [Start a service session](/start-reading) on the version.
+
+    Request URL and parameters.
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/VersionManagementServer/versions/E4DAED9D-C859-489B-9053-767A45F1D97C/startReading
+    f=json
+    sessionId={d5b2acda-fdfc-48bd-996c-16c95756f7a2}
+    ```
+     
+2.  [Start an edit session](/start-editing) on the version.
+
+    Request URL and parameters.
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/VersionManagementServer/versions/E4DAED9D-C859-489B-9053-767A45F1D97C/startEditing
+    f=json
+    sessionId={d5b2acda-fdfc-48bd-996c-16c95756f7a2}
+    ```
+     
+3.  Reassign parcel features from one record (source record) to another record (target record). Delete the original source record.
+
+    Request URL and parameters.
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/ParcelFabricServer/reassignFeaturesToRecord
+    f=json
+    gdbVersion=admin.Version1
+    sessionId={d5b2acda-fdfc-48bd-996c-16c95756f7a2}
+    sourceRecord={3FD726F6-69C1-4CDF-9EC5-38E3384CB38C}
+    targetRecord={18F944EA-50E9-4792-9814-FD419644934E}
+    deleteSourceRecord=true
+    async=false
+    ```
+     
+4.  When edits are complete, [stop the edit session](/stop-editing).
+
+5.  [Stop](/stop-reading) and release the service session. 
+
+## JSON Response syntax
+
+The following response is returned when `async` is `false`:
+
+```other
+{
+		"moment": <datetime>,  
+		"exceededTransferLimit: <true | false>,
+		"serviceEdits": [{  // only if transfer limit is not exceeded
+    "editedFeatures": {
+						"spatialReference": {}
+						"updates": [
+							[{ "attributes": {}
+										"geometry": {}
+								}]] 
+					...
+						"deletes": [
+						[{ "attributes": {}
+										"geometry": {}
+								}]] 
+
+				"success": <true | false>,
+    "error": {  // only if success is false
+      "extendedCode": <HRESULT>,
+      "message": <error message>,
+      "details": [<detail>]
+}
+```
+
+The following response is returned when `async` is `true`:
+
+```other
+{
+		"statusUrl": <url>
+}
+```
+
+
+
+ 

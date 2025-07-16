@@ -1,0 +1,146 @@
+---
+title: "Register Relational Data Store Type"
+description: "The register operation adds a new relational data store type to the server site and registers it for use with Insights."
+slug: "register-relational-data-store-type"
+url: "/register-relational-data-store-type"
+guid: "GUID-72B5594F-9F0C-4942-A43A-49B5A91E7659"
+migratedTopicMetadata:
+  FTITLE: "Register Relational Data Store Type"
+  FDESCRIPTION: ""
+  FCHANGES: "Remove obsolete content"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9.1- *"
+  CREATED-ON: "22/02/2022 04:11:17"
+  FAUTHOR: "vcove"
+  FSTATUS: "Released"
+  MODIFIED-ON: "18/07/2022 15:48:06"
+  VERSION: "8"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-29471554-7AB6-414E-A5C8-11A7BD89C990"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /data/relationalDatastoreTypes/register
+  urlSegments:
+    - name: <root>
+      url: /site
+    - name: /data/relationalDatastoreTypes/register
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.5'
+  requiredCapabilities:
+    - name: Access allowed with either the "Update", "Delete", "Security and Infrastructure", or "Servers" privileges
+      url: /managing-access-to-the-server-administration-rest-api
+---
+
+## Description
+
+<Note type={"note"}>
+
+The use of all relational data store operations in the ArcGIS Server Admin API has been deprecated. Starting at Insights 2021.1, the registration and management of relational data store types should be performed with ArcGIS Insights. For more information, see [Manage connector types](https://doc.arcgis.com/en/insights/2023.2/administer/manage-connector-types.htm).
+
+</Note>
+
+This operation registers a new relational data store type with the server. Once registered, a relational data store type enables Insights users to create Relational Database Connection portal items to browse and query data from relational databases.
+
+<Note type={"note"}>
+
+Relational data store types are only used with Insights and are not to be confused with ArcGIS Data Store relational data stores.
+
+</Note>
+
+This operation should only be called on an ArcGIS Server site that has been designated as a Portal for ArcGIS [hosting server](http://server.arcgis.com/en/portal/latest/administer/windows/configure-hosting-server-for-portal.htm). In order to register a relational data store type, you must obtain the correct Java Database Connectivity (JDBC) driver from your database vendor. These drivers are typically delivered as one or more Java Archive (.jar) files, which you must compress/package into a ZIP file. The name of the ZIP file does not matter, except that the file extension must be .zip. Before calling this Register operation, you must first [upload](/uploaditem) the ZIP file to your server. Be sure to make note of the Item ID property of the newly created [upload item](/uploadeditem). Repeat the upload step for each database platform your organization supports.
+
+<Note type={"note"}>
+
+This operation should be called once for each upload item you created (i.e. once for each database driver ZIP file you uploaded). Once all relational data store types have been registered, you must completely re-start ArcGIS Server on each machine in your site. To do this, you need to re-start the Windows Service or use the stopserver/startserver scripts on Linux.
+
+</Note>
+
+The ZIP file should only contain the driver files for a single platform. For example, if your organization supports the use of Microsoft SQL Server and SAP HANA, you would create two ZIP files. 
+
+<Note type={"note"}>
+
+ArcGIS Insights must be installed in order to register Relational Data Store Types and create Relational Catalog Services or Relational Database Connections. Please refer to ArcGIS Insights documentation for more information on [supported databases](https://doc.arcgis.com/en/insights/2023.2/administer/supported-databases.htm), [required vendor files](https://doc.arcgis.com/en/insights/2023.2/administer/vendor-files.htm), [supported data types](https://doc.arcgis.com/en/insights/2023.2/get-started/supported-types-from-databases.htm), and [required database privileges](https://doc.arcgis.com/en/insights/2023.2/administer/database-privileges.htm).
+
+</Note>
+
+Once all relational data store types have been registered, do not delete the upload items created for the zipped database drivers. They might be needed at a later date.
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `uploadedItemId` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Identifier of the uploaded ZIP file containing JDBC driver file(s).
+
+      ```markdown label=Example
+      uploadedItemId=ic600379e-be10-4fd2-ab7e-76d37989d3bf
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `typeId` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Identifier of the relational data store type you are registering.
+
+      ```markdown label=Example
+      typeId=esri.hana
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+  </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `register` operation:
+
+```markdown
+POST /webadaptor/admin/data/relationalDatastoreTypes/register HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+uploadedItemId=ic600379e-be10-4fd2-ab7e-76d37989d3bf&typeId=esri.hana&f=pjson
+```
+
+## JSON Response example
+
+```javascript
+{"status": "success"}
+```

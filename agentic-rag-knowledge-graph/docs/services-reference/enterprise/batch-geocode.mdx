@@ -1,0 +1,569 @@
+---
+title: "Batch Geocode"
+description: "API reference for the Batch Geocode service available in ArcGIS Enterprise."
+slug: "batch-geocode"
+url: "/batch-geocode"
+guid: "GUID-FDB2B593-CD59-4AD3-922A-2400512DBD2F"
+migratedTopicMetadata:
+  FTITLE: "Batch Geocode"
+  FDESCRIPTION: ""
+  FCHANGES: "update context to conref"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0 - *"
+  CREATED-ON: "28/02/2022 16:58:08"
+  FAUTHOR: "sambrose"
+  FSTATUS: "Released"
+  MODIFIED-ON: "06/06/2022 10:46:00"
+  VERSION: "7"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-63BA9417-2625-4304-BF73-BFAA82BDBDF4"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /batch-geocode
+  urlSegments:
+    - name: <geocodeservice-url>
+      url: /geocode-service
+    - name: /batch-geocode
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.5'
+---
+
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E836F966_C272_43B1_9BF9_55BA03755A13 from "./snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-E836F966-C272-43B1-9BF9-55BA03755A13";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E671F554_89D2_4CAD_B032_525E1CE90C18 from "./snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-E671F554-89D2-4CAD-B032-525E1CE90C18";
+
+![Batch Geocode](./images/GUID-A3CBEE3B-DF47-42DE-950C-6FC53C673059-web.png)
+
+The **Batch Geocode** task geocodes a table or file of addresses and returns the geocoded results. It supports `CSV` , `XLS`  or table input. The task geocodes the entire file regardless of size.
+
+<Note type={"note"}>
+
+This method only exists in ArcGIS Enterprise. This API is not supported for ArcGIS Online. 
+
+</Note>
+
+## Request URL
+
+```javascript
+https://<analysis url>/BatchGeocode/submitJob
+```
+
+ 
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geocodeParameters` 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This includes parameters that help parse the file, as well the field lengths and a field mapping. This JSON is the output from [AnalyzeGeocodeInput](/analyze-geocode-input) . It is important to inspect the field mapping closely and adjust it accordingly before submitting your job, otherwise your geocoding results may not be accurate. It is recommended to use the output from `AnalyzeGeocodeInput`  and modify the field mapping instead of constructing this JSON by hand and passing it in.
+
+Values
+
+-   `field_info` : A list of triples with the field names of your input file/table, its field type (usually `TEXT` ), and its allowed length (usually `255` ). 
+
+    Example
+
+    ```javascript
+    [('ObjectID', 'TEXT', 255),
+    ('Address', 'TEXT', 255), ('Region', 'TEXT', 255), ('Postal',
+    'TEXT', 255)]
+    ```
+
+     
+-   `column_names` : Submit the column names of your data if your data does not have a header row.
+-   `file_type` : Either `CSV` , `XLS` , or `table` 
+-   `column_delimiter` : "`;` ", "`\t` ", "`|` ", or "`,` "
+-   `text_qualifier` : Either "`\"` " or "`\'` " 
+-   `field_mapping` : Field mapping between each input field and candidate fields on the geocode service. 
+
+    Example
+
+    ```javascript
+    [['ObjectID', 'OBJECTID'], 
+    ['Address', 'Address'], ['Region', 'Region'], ['Postal', 'Postal']]
+    ```
+
+     
+-   `header_row_exists` : Enter `true`  or `false` . 
+
+Example
+
+```javascript
+{"field_info": "[('ObjectID', 'TEXT', 255), ('SingleLine', 'TEXT', 255), ('Address', 'TEXT', 255), ('Region', 'TEXT', 255), ('Postal', 'TEXT', 255), ('PostalExt', 'TEXT', 255), ('Country', 'TEXT', 255), ('Source', 'TEXT', 255)]", "column_names": "", "file_type": "csv", "column_delimiter": ",", "text_qualifier": "", "field_mapping": "[['ObjectID', 'OBJECTID'], ['SingleLine', 'SingleLine'], ['Address', 'Address'], ['Region', 'Region'], ['Postal', 'Postal'], ['PostalExt', 'PostalExt'], ['Country', ''], ['Source', '']]", "header_row_exists": true}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geocodeServiceURL` 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Enter the REST URL of the geocode service that you want to geocode your addresses against. The URL must end in `geocodeServer`  and allow batch requests. This could be a utility service, locator item on the portal, or a locator that is anonymously accessible. The geocode service must be configured to allow for batch geocoding. For more information, see: [Configuring batch geocoding](https://enterprise.arcgis.com/en/portal/latest/administer/windows/best-practices-for-portal-batch-geocoding.htm)
+
+Example
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/Locators/ESRI_Geocode_USA/GeocodeServer
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outputType` 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the output type format the expected geocode results are returned in.
+
+Values: `csv`  \| `xls`  \| `Feature Collection`  \| `Feature Service` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`inputTable` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The input table specification must include the following:
+
+-   A URL to an input table 
+-   A service token to access the table
+
+<Note type={"note"}>
+
+If the table is a hosted table on the same portal, `serviceToken`  is not required.
+
+</Note>
+
+Syntax
+
+```javascript
+{"url":"<table_url>","serviceToken":"<token>"}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`inputFileItem` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The input file with the addresses and places to geocode should be a portal item. Input the `itemid`  of the item in the portal. The format of the item in the portal can be one of the following:
+
+-   CSV 
+-   Microsoft Excel
+
+Syntax
+
+```javascript
+inputFileItem={"itemid":"<itemid_of_file>"}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sourceCountry` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This parameter will limit geocoding to the country or countries specified. Specifying the country where the addresses or places are from in the `inputFileItem`  or `inputTable`  will improve the accuracy of geocoding in most cases. If a field representing countries in the `inputFileItem`  or `inputTable`  is mapped to the input Country field from the geocode service in `field_mapping` , the country value from the `inputFileItem`  or `inputTable`  will override the `sourceCountry`  parameter.
+
+This is limited to the specified country or countries, and when no `sourceCountry`  is specified, geocoding is performed against all supported countries of the locator. You can specify the input value as either two-character or three-character country codes in a comma-separated list. See the [Supported Country Codes column](http://developers.arcgis.com/rest/geocode/api-reference/geocode-coverage.htm) for the input value to use.
+
+<Note type={"note"}>
+
+Not all geocode services support `sourceCountry` .
+
+</Note>
+
+Example
+
+```javascript
+sourceCountry=us
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`category` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Limits the types of places the geocode service searches, which eliminates false positive matches and potentially speeds up the search process. When no category is used, geocoding is performed against all supported categories. In general, you can use the parameter for the following:
+
+-   Limit matches to specific place types or address levels
+-   Avoid fallback matches to unwanted address levels
+-   Disambiguate coordinate searches
+
+<Note type={"note"}>
+
+Not all geocode services support `category` .
+
+</Note>
+
+See the ArcGIS REST API web help for details about [category filtering](http://developers.arcgis.com/rest/geocode/api-reference/geocoding-category-filtering.htm).
+
+Example
+
+```javascript
+category=POI
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outputFields` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Parameter options are the following:
+
+-   Create a comma separated list of the output fields you want returned.
+-   Enter an empty string, which is equivalent to `*` , to return all available output fields.
+-   Use the keyword `NONE`  to return the `Shape`  field if the `outputType`  is a `Feature Collection`  or `Feature Service` . The `Shape X`  and `Shape Y`  fields are returned if the `outputType`  is either a `.csv`  or `.xls`  file. The original field names from the `inputFileItem`  or `inputTable`  parameters are maintained with their original field names. 
+
+    <Note type={"note"}>
+
+    Rematching geocode results is not available with this option.
+
+    </Note>
+
+Example
+
+```javascript
+outputFields=score,match_addr,x,y
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`headerRowsToSkip` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Describes on which row your data begins in your file or table. The default is 1 (since the first row contains the headers). The default is `1` .
+
+Example
+
+```javascript
+headerRowsToSkip=1
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outputName` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E836F966_C272_43B1_9BF9_55BA03755A13 />
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`context` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E671F554_89D2_4CAD_B032_525E1CE90C18 />
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`locatorParameters` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This parameter takes a dictionary that can contain any or all of the following optional geocoding parameters: 
+
+-   `locationType` —Specifies the preferred output geometry for `PointAddress`  and `Subaddress`  matches. The options for this parameter are `rooftop` , which is the location that represents the rooftop, parcel centroid for the address, or front door and `street` , which is the side of street or street entrance location that can be used for routing. If the preferred location does not exist in the data, the default location of `street`  will be returned instead. For geocode results with `Addr_type=PointAddress` , the x,y attribute values describe the coordinates of the address along the street, while the DisplayX and DisplayY values describe the rooftop or building centroid coordinates. See the ArcGIS REST API web help for details about the [`locationType`  parameter for `geocodeAddresses` ](http://developers.arcgis.com/rest/geocode/api-reference/geocoding-geocode-addresses.htm#ESRI_SECTION3_1FE6B6D350714E45B2707845ADA22E1E).
+-   `sourceCountry` —Limits search to the specified country or countries. When no `sourceCountry`  is specified, geocoding is performed against all supported countries of the locator. Including this parameter in the dictionary will overwrite the `sourceCountry`  parameter if it was used already. Not all geocode services support `sourceCountry` .
+-   `category` —Limits the types of places the geocode service searches, which eliminates false positive matches and potentially speeds up the search process. When no category is used, geocoding is performed against all supported categories. Not all geocode services support `category` . Including this parameter in the dictionary will overwrite the `category`  parameter value if it was used already.
+
+Syntax
+
+```other
+{
+  "locationType": "rooftop",
+  "sourceCountry": "US",
+  "category": "POI"
+}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` .
+
+Values: `html`  \| `json` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Response
+
+When you submit a request, the service assigns a unique job ID for the transaction. 
+
+```other
+{
+  "jobId": "<unique job identifier>",
+  "jobStatus": "<job status>"
+}
+```
+
+ 
+
+After the initial request is submitted, you can use `jobId`  to periodically check the status of the job and messages as described in [Checking job status](/checking-job-status-1). Once the job has successfully completed, use `jobId`  to retrieve the results. To track the status, you can make a request in the following form:
+
+```other
+https://<analysis-url>/BatchGeocode/jobs/<jobId>
+```
+
+ 
+
+## Access results
+
+When the status of the job request is `esriJobSucceded` , you can access the results of the analysis by making a request in the following form:
+
+```javascript
+https://<analysis-url>/BatchGeocode/jobs/<jobId>/results/<output parameter name>?token=<your token>&f=json
+```
+
+ 
+
+<StyledTable headers={"Parameter,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geocodeResult` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+`geocodeResult`  can be a feature collection JSON, or it contains the `itemId`  of the geocoding job. `itemId`  is either a feature service or a file, depending on the desired `outputType` . 
+
+Example
+
+```other
+{"url": "https://<analysis url>/BatchGeocode/jobs/<jobId>/results/resultLayer"}
+```
+
+ 
+
+The result has properties for parameter name, data type, and value. The contents of value depend on the `outputName`  parameter provided in the initial request.
+
+If `outputName`  was provided, `value`  contains the URL to the feature service layer:
+
+```other
+{
+  "paramName": "geocodeResult",
+  "dataType": "GPString",
+  "value": {
+    "itemId": "3754b700a028480da874f6cd6e100e65",
+    "url": "https://machine.domain.com/portal/sharing/rest/content/items/3754b700a028480da874f6cd6e100e65"
+  }
+}
+```
+
+ 
+
+If `outputName`  was not provided, `value`  contains a feature collection:
+
+```other
+{
+  "value": {
+    "layerDefinition": {},
+    "featureSet": {}
+  }
+}		
+```
+
+ 
+
+See [Feature Output](/feature-output-1) for more information about how the result layer or collection is accessed.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geocodingStatistics` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+`geocodingStatistics`  output JSON includes statistics about the batch geocoding job. The result has properties for parameter name, data type, and value. The `value`  contains the JSON of percentages for matched, unmatched, and tied records in the batch geocoding job. It may also contain "Dropped Records", an additional list of ObjectIDs for the records that were unable to be processed.
+
+```other
+{
+  "paramName": "geocodingStatistics",
+  "dataType": "GPString",
+  "value": {
+    "Matched": "992 Matched (99.1%)",
+    "Unmatched": "0 Unmatched (0.0%)",
+    "Tied": "8 Tied (0.8%)"
+  }
+}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>

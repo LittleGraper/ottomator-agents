@@ -1,0 +1,347 @@
+---
+title: "Edit Usage Report"
+description: "The edit operation updates a usage report."
+slug: "editusagereport"
+url: "/editusagereport"
+guid: "GUID-8B42DD28-19B0-48C2-B40C-6680C87A5F6C"
+migratedTopicMetadata:
+  FTITLE: "editUsageReport"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1- *"
+  CREATED-ON: "10/11/2022 09:50:58"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "24/01/2023 15:15:05"
+  VERSION: "6"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-47DB5567-EE9E-487E-BEBA-1A4276F892E6"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /usagereports/<usageReport>/edit
+  urlSegments:
+    - name: <root>
+      url: /site
+    - name: /usagereports/<usageReport>/edit
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.3'
+  requiredCapabilities:
+    - name: Access allowed only with the default administrator role
+      url: /managing-access-to-the-server-administration-rest-api
+---
+
+## Description
+
+The `edit` operation modifies a usage report. To edit a usage report, you need to submit the complete JSON representation of the usage report, which includes updates to its properties. The name of the usage report cannot be changed when editing it.
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `reportname` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The unique name of the report.
+
+      ```markdown label=Example
+      "reportname": "Server Statistics"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `since` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The time duration for the report. `CUSTOM` represents a time range that is specified using the `from` and `to` parameters.
+
+      Values: `LAST_DAY` (previous 24 hours) | `LAST_WEEK` (previous 7 days) | `LAST_MONTH` (previous 30 days) | `CUSTOM`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `from` 
+
+      (Optional, used if `since` is set to `CUSTOM`)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The time stamp (milliseconds since UNIX epoch, namely January 1, 1970, 00:00:00 GMT) for the beginning period of the report.
+
+      ```markdown label=Example
+      "from": "1568230820504"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `to` 
+
+      (Optional, used if `since`  is set to `CUSTOM` )
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The time stamp (milliseconds since UNIX epoch, namely January 1, 1970, 00:00:00 GMT) for the ending period of the report.
+
+      ```markdown label=Example
+      "to": "1568185200000"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `aggregationInterval` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The time interval in minutes. Server metrics are summarized and returned for time slices using the specified interval. The time range for the report, specified using the `since` parameter (and the `from` and `to` parameters when `since` is `CUSTOM`) is split into multiple slices, each covering a time interval. Server metrics are then summarized for each time slice and returned as data points in the report data. When the `aggregationInterval` value is not specified, the following defaults are used:
+
+      - `LAST_DAY`—30 minutes
+      - `LAST_WEEK`—4 hours
+      - `LAST_MONTH`—24 hours
+      - `CUSTOM`—30 minutes up to 1 day, 4 hours up to 1 week, 1 day up to 30 days, and 1 week for longer periods.
+
+      <Note type={"note"}>
+
+      If the `samplingInterval` value specified in [Usage Reports Settings](/usagereportssettings) is more than the `aggregationInterval` value, the `samplingInterval` value is used instead.
+
+      </Note>
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `queries` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A list of queries used to generate the report. Specify the list as an array of JSON objects representing the queries. Each query specifies the list of metrics to be queries for a given set of `resourceURIs` values. For more information about query properties, [see the table below](/createusagereport#query-parameters).
+
+      ```other label=Example
+      "queries": [
+        {
+          "resourceURIs": ["services/Map_bv_999.MapServer"],
+          "metrics": ["RequestCount"]
+        }
+      ]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `metadata` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object. This is typically used for storing presentation tier data for the usage report, such as report title, colors, line styles, and so on. It's also used to denote visibility in ArcGIS Server Manager for reports created with the Administrator Directory. To make a report created in the Administrator Directory visible to ArcGIS Server Manager, include `managerReport` as `true` in the metadata JSON object. When this value is not set (default), reports are not visible in ArcGIS Server Manager. This behavior can be extended to any client that wants to interact with the Administrator Directory. Any user-created value must be processed by the client.
+
+      ```markdown label=Example
+      "metadata": "This could be any String or JSON Object."
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default value is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Query parameters
+
+<StyledTable headers={"Property,Description"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `resourceURIs` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A comma-separated list of resource URIs used to report metrics. This specifies services or folders that are used to gather metrics. The `resourceURI` is formatted as below:
+
+      - `services/`—The entire site.
+      - `services/Folder/`—A folder or subfolders in a site. Metrics that are aggregated across all services in that folder and subfolders are reported.
+      - `services/Folder/ServiceName.ServiceType`—A service in a specified folder, for example, `services/Map_bv_999.MapServer`.
+      - `services/ServiceName.ServiceType`—A service in the root folder, for example: `Map_bv_999.MapServer`.
+
+      ```markdown label=Example
+      "resourceURIs": ["services/SampleWorldCities.MapServer","services/System"]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `metrics` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A comma-separated list of metrics to be reported. The following are supported metrics:
+
+      - `RequestCount`—The number of requests received
+      - `RequestsFailed`—The number of failed requests
+      - `RequestsTimedOut`—The number of requests that timed out
+      - `RequestMaxResponseTime`—The maximum response time
+      - `RequestAvgResponseTime`—The average response time
+      - `ServiceRunningInstancesMax`—The maximum number of active (running) service instances, sampled at one-minute intervals for a specified service. For ArcGIS Enterprise deployments at 11.0 and below, if you include this metric, it must be the only metric included in the report.
+      - `RequestAvgWaitTime`— The average time that all requests waited for an available ArcSOC instance over a period (total wait time for all requests / number of requests).
+      - `RequestMaxWaitTime`— The maximum time that a service request waited for an available ArcSOC over the specified period. 
+      - `RequestMinWaitTime`— The minimum time that a service request waited for an available ArcSOC over the specified period.
+
+      <Note type={"note"}>
+
+      The `RequestsTimedOut` and `ServiceRunningInstancesMax` metrics are not applicable to hosted feature services.
+
+      </Note>
+
+      ```markdown label=Example
+      "metrics": ["RequestCount","RequestsFailed"]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+### Request JSON syntax
+
+```other
+{
+  "reportname": [unique name or id of the report],
+  "since": [" LAST_DAY | LAST_WEEK | LAST_MONTH | CUSTOM"],
+  "from": [timestamp],  //Optional, specified when "since" is CUSTOM
+  "to": [timestamp],  //Optional, specified when "since" is CUSTOM
+  "aggregationInterval": [minutes],  //Optional, aggregation interval in minutes
+  "queries": [
+    {
+      "resourceURIs": ["services/Map_bv_999.MapServer"], //Comma separated list of services and/or folders
+      "metrics": ["RequestCount"] // Comma separated list of metrics
+    }
+  ],
+  "metadata": "This could be any String or JSON Object."
+}
+```
+
+### Single query example
+
+A sample POST request for the `edit` operation that demonstrates a single query:
+
+```other
+POST /webadaptor/admin/usagereports/1394219221008/edit HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+usagereport={
+  "reportname": 1394219221008,
+  "since": "LAST_MONTH",
+  "queries": [
+    {
+      "resourceURIs": [
+        "services/Map_bv_999.MapServer"
+      ],
+      "metrics": [
+        "RequestCount"
+      ]
+    }
+  ],
+  "metadata": "This could be any String or JSON Object typically used for storing report metadata."
+}&f=pjson
+```
+
+ 
+
+### Multiple queries example
+
+A sample POST request for the `edit` operation that demonstrates multiple queries:
+
+```other
+POST /webadaptor/admin/usagereports/Server Statistics/edit HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+usagereport={
+  "reportname": "Server Statistics",
+  "since": "LAST_WEEK",
+  "aggregationInterval": 5,
+  "queries": [
+    {
+      "resourceURIs": [
+        "services/SampleWorldCities.MapServer", 
+        "services/System"
+      ],
+      "metrics": [
+        "RequestCount",
+        "RequestsFailed"
+      ]
+    },
+    {
+      "resourceURIs": [
+        "services/System/CachingTools.GPServer"
+      ],
+      "metrics": [
+        "RequestAvgResponseTime",
+        "RequestsTimedOut"
+      ]
+    }
+  ],
+  "metadata": "This is a random test String that could contain report metadata in any format"
+}&f=pjson
+```
+
+## JSON Response example
+
+```javascript
+{"status": "success"}
+```

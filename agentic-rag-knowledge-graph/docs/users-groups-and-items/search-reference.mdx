@@ -1,0 +1,880 @@
+---
+title: "Search reference"
+description: "The ArcGIS Portal Directory REST API has a full-featured text search engine that allows you to create your own queries."
+slug: "search-reference"
+url: "/search-reference"
+guid: "GUID-D307B11F-627B-4508-A0BB-A47D29BCA5D9"
+migratedTopicMetadata:
+  FTITLE: "Search reference"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "7.4 - *"
+  CREATED-ON: "07/06/2023 14:39:22"
+  FAUTHOR: "svennapoosa"
+  FSTATUS: "Released"
+  MODIFIED-ON: "27/09/2023 13:36:18"
+  VERSION: "15"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "6"
+  ED: "GUID-B533714A-5252-4C15-885F-3B64238BD38F"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata: {}
+---
+
+## Overview
+
+The ArcGIS Portal Directory REST API has a full-featured text search engine that allows you to create your own queries. 
+
+The portal uses a powerful search engine to index information and to allow full text searching. The search engine uses many different inputs to rank and display appropriate results. This makes search fuzzy, which is ideal for human interaction, but can cause issues when looking for specific records programmatically. For example, the order of results may vary each time a search is performed. Developers should exercise care when using search to locate specific items and groups as part of automated scripts. It is recommended to search for items and groups by their ID when possible.
+
+The following list specifies the ArcGIS REST API search operations that are used to find items, groups, and users:
+
+- [Search](/search)
+- [User search](/user-search)
+- [Group search](/group-search)
+- [Group content search](/group-content-search)
+
+## Search ranking
+
+Items are ranked on a variety of different factors including, but not limited to, the number of times search terms appear in item, view counts, and authoritative or deprecated labels.
+
+## Search terms
+
+A query is broken up into terms and operators. There are two kinds of terms: single term and phrase. A single term is a single word, such as `fire` or `California`. A phrase is a group of words. To create a phrase, surround multiple words with double quotation marks, such as `"fire maps"`. Single quotation marks are not supported for a multiple-word search. Multiple terms can be combined with Boolean operators to form a more complex query. 
+
+## Fields
+
+When performing a search for [items](/search-reference) or [groups](/search-reference), you can either specify a field or use the default fields. 
+
+For items, the default fields are as follows:
+
+- `title` 
+- `tags` 
+- `snippet` 
+- `description` 
+- `type` 
+- `typekeywords` 
+
+For groups, the default fields are as follows:
+
+- `id` 
+- `title` 
+- `description` 
+- `snippet` 
+- `tags` 
+- `owner` 
+
+The best match is always returned. For example, a search for `fires` will return records containing `fire`. You can search any field by typing the field name followed by a colon `":"` and the search term. If you don't use a field indicator, the default fields will be searched.
+
+As an example, to search for a layer package item that has San Francisco in the title, the query would be as follows:
+
+```markdown
+{
+  title:"San Francisco" AND type:"Layer Package"
+}
+```
+
+<Note type={"note"}>
+
+The field is only valid for the term that it directly precedes. Use double quotation marks to group a phrase that consists of multiple words to be the keywords for the field. Item type filter `type` is case sensitive and must be surrounded by double quotation marks for exact [item type](/items-and-item-types) matching; failure to do so can result in a nonexact match, thus returning incorrect results. For example, use `type:"Web Map"` if you are only interested in finding web map items; `type:"web map"` will return both web map and Web Mapping Application if both exist, `type:Web Map` will return non-web map items also, such as web scene, CityEngine web scene, and web mapping application, if any exist.
+
+</Note>
+
+The example below demonstrate advanced search query:
+
+```markdown
+https://org.arcgis.com/home/search.html?q=flood&q=flood&restrict=false&contentstatus=org_authoritative&focus=maps-webmaps&modified=last30Days&access=public
+
+```
+
+## Query Vs Filter
+
+As a general rule, filter (i.e. defined in `filter` parameter) should be used instead of query:
+
+- for binary yes/no searches.
+- for queries on exact values.
+
+Query (i.e. defined in `q` parameter) should be used instead of filter:
+
+- for full-text search.
+- for cases where the result depends on a relevance score.
+
+The following fields are supported for the `filter` parameter:
+
+For Users
+
+- `username` 
+- `firstname` 
+- `lastname` 
+- `fullname` 
+- `email`
+
+```markdown
+filter=username:"jsmith"
+```
+
+For Items
+
+- `title` 
+- `tags` 
+- `typeKeywords` 
+- `type` 
+- `owner` 
+
+Example:
+
+```markdown
+filter=tags:"public"
+``` 
+
+For Groups
+
+- `title` 
+- `typeKeywords` 
+- `owner` 
+
+Example:
+
+```markdown
+filter=owner:"jsmith"
+``` 
+
+## Term modifiers
+
+A number of term modifiers are supported to provide a wide range of searching options.
+
+### Range searches
+
+Range searches allow you to match a single field or multiple field values between the lower and upper bounds. Range queries can be inclusive or exclusive of the upper and lower bounds. Inclusive range queries are denoted by brackets (\[]). Exclusive range queries are denoted by braces ({'{'}{'}'}).
+
+For example, to find all items created between December 1, 2009, and December 9, 2009, the search expression is as follows:
+
+```markdown
+{
+  created: [1259692864000 TO 1260384065000]
+}
+``` 
+
+The `created` field contains the date and time an item is created in UNIX time. UNIX time is defined as the number of seconds that have elapsed since midnight on January 1, 1970. The portal stores time in milliseconds, so you need to add three zeros to the end of the UNIX time.
+
+Range searches are not reserved for date fields. You can also use range queries with nondate fields:
+
+```markdown
+{
+  owner:{arcgis_explorer TO esri}
+}
+``` 
+
+This will find all items from the owners between `arcgis_explorer` and `esri`, not including `arcgis_explorer` and `esri`.
+
+## Boolean operators
+
+Boolean operators allow terms to be combined through logic operators. The Portal API supports `AND`, `OR`, `NOT`, and `"-"` as Boolean operators. Boolean operators must be in all caps.
+
+### AND
+
+The `AND` operator is the default conjunction operator. This means that if there is no Boolean operator between two terms, the `AND` operator is used. The `AND` operator performs matching where both terms exist in either the given field or the default fields. This is equivalent to an intersection using sets. 
+
+To search for an item that contains the terms `recent` and `fires`, use the following query:
+
+```markdown
+{
+  recent fires
+}
+```
+
+or
+
+```markdown
+{
+  recent AND fires
+}
+```
+
+### OR
+
+The `OR` operator links two terms and finds a match if either term exists. This is equivalent to a union using sets. 
+
+To search for an item that contains the terms `"recent fires"` or `fires`, use the following query:
+
+```markdown
+{
+  "recent fires" OR fires
+}
+```
+
+### NOT
+
+The `NOT` operator excludes items that contain the term after `NOT`. This is equivalent to a difference using sets. 
+
+To search for documents that contain `California` but not `Imagery`, use the following query:
+
+```markdown
+{
+  California NOT Imagery
+}
+``` 
+
+The `NOT` operator cannot be used with only one term.
+
+###  -
+
+The `-`, or the prohibit operator, excludes items that contain the term after the `-` symbol.
+
+To search for documents that contain `California` but not `Imagery`, use the following query: 
+
+```markdown
+{
+  California -Imagery
+}
+```
+
+### Special character searches
+
+Search supports querying with special characters. These characters include: `+ - && || ! ( ) { } [ ] ^ " ~ * ? : \ /` 
+
+There are two ways to search using special characters:
+
+- Escape special characters using `\`. 
+  ```markdown
+  q=title:test\:abc
+  ``` 
+- Enclose query using double quotes `""`.
+  ```markdown
+  q=title:"test:abc"
+  ``` 
+
+### Grouping
+
+You can create subqueries using parentheses to group clauses. This can be useful to control the Boolean logic for a query.
+
+To search for either `California` or `recent` and `fires`, create the following expression:
+
+```markdown
+{
+  (California OR recent) AND fires
+}
+```
+
+### Field grouping
+
+You can group multiple clauses to a single field using parentheses. 
+
+To search for a title that contains the phrase `"population change"` and the word `recent`, use the following query:
+
+```markdown
+{
+  title:("population change" recent)
+}
+```
+
+### Search for imagery
+
+You can search for different types of imagery based on their image properties using `type`, `servicetags`, or `typeKeywords`.
+
+Examples:
+
+- Find all hosted multidimensional imagery:
+  ```markdown
+  type: "Image Service" AND servicetags: "hasMultidimensions"
+  ```
+- Find all hosted non-multidimensional imagery:
+  ```markdown
+  type: "Image Service" AND typekeywords: "Hosted Service" NOT servicetags: "hasMultidimensions"
+  ```
+- Find all imagery that have raster attribute table:
+  ```markdown
+  type: "Image Service" AND servicetags: "hasRasterAttributeTable"
+  ```
+- Find all hosted imagery that have no raster attribute table:
+  ```markdown
+  type: "Image Service" AND typekeywords: "Hosted Service" NOT servicetags: "hasRasterAttributeTable"
+  ```
+- Find all imagery that have colormap:
+  ```markdown
+  type: "Image Service" AND servicetags: "hasColormap"
+  ```
+- Find all imagery that allow analysis:
+  ```markdown
+  type: "Image Service" AND servicetags: "allowAnalysis"
+  ```
+- Find all imagery based on data type, e.g. all UV or MagDir data:
+  ```markdown
+  type: "Image Service" AND (servicetags: "DataTypeVector-MagDir" OR servicetags: "DataTypeVector-UV")
+  
+  // More image data type examples: DataTypeGeneric, DataTypeRGB, DataTypeElevation, DataTypeThematic, DataTypeProcessed, 
+  DataTypeScientific, DataTypeVector-MagDir, DataTypeVector-UV.
+  ```
+- Find all imagery based on source type:
+  ```markdown
+  type: "Image Service" AND servicetags: "SourceTypeMosaicDataset"
+  
+  // More image source type examples: SourceTypeRasterDataset
+  ```
+- Find all imagery based on pixel type:
+  ```markdown
+  type: "Image Service" AND servicetags: "PixelTypeF32"
+ 
+  // More image pixel type examples: PixelTypeU1, PixelTypeU2, PixelTypeU4, PixelTypeU8, PixelTypeU16, PixelTypeU32, 
+  PixelTypeS8, PixelTypeS16, PixelTypeS32, PixelTypeF32, PixelTypeF64
+  ```
+
+### Item fields
+
+You can refine your item searches by using specific fields in your search string. These fields include the following:
+
+<StyledTable headers={"Field,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `id`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      ID of the item.
+
+      ```markdown
+      id:4e770315ad9049e7950b552aa1e40869
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `owner`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Owner of the item. 
+
+      ```markdown
+      owner:esri
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `created`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The date, expressed in UNIX time, that items were created. 
+
+      ```markdown
+      created: [1249084800000 TO 1249548000000]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `modified`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The date, expressed in UNIX time, that items were last modified.
+
+      ```markdown
+      modified: [1249084800000 TO 1249548000000]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `title`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Item title.
+
+      ```markdown
+      title:"Southern California"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `type`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Returns the type of item and is a predefined field. See [Items and item types](/items-and-item-types) for a listing of the types.
+
+      ```markdown
+      type:map
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `typekeywords`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Type keywords for an item. See [Items and item types](/items-and-item-types) for a listing of the types.
+
+      ```markdown
+      typekeywords:tool
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `description`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The item description.
+
+      ```markdown
+      description:California
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `tags`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The tag field for an item.
+
+      ```markdown
+      tags:"San Francisco"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `snippet`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The snippet, or summary, of an item.
+
+      ```markdown
+      snippet:"natural resources"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `accessinformation`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The access information for an item.
+
+      ```markdown
+      accessinformation:esri
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `access`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The access field of an item. You will only see private or shared items that you can access.
+
+      Values: `public` | `private` | `org` | `shared`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `group`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The ID of the group. It returns the items within that group.
+
+      ```markdown
+      group:1652a410f59c4d8f98fb87b25e0a2669
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `numratings`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Number of ratings for an item.
+
+      ```markdown
+      numratings:6
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `numcomments`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Number of comments on an item.
+
+      ```markdown
+      numcomments:[1 TO 3]
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `avgrating`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Average rating for an item.
+
+      ```markdown
+      avgrating:3.5
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `culture`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Culture, or the locale, of an item. The search engine treats the two parts of the culture code as two terms, and searches for individual languages can be done. For example, `culture:en` returns all records that have an "en" in their culture code. There may be overlaps between the codes used for language and the codes used for country, for instance, `fr-FR`, but if the client needs to target a code with this problem, they can pass in the complete code.
+
+      ```markdown
+      culture:en-US
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `orgid`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The ID of the organization. It returns items within the given organization.
+
+      ```markdown
+      orgid:5uh3wwYLNzBuU0Ef
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `categories`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Organization content categories.
+
+      ```markdown
+      categories:"Historical Maps"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `contentStatus`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Item content status. Organization members, as well as public members for [verified organizations](https://enterprise.arcgis.com/en/portal/latest/use/faq.htm#GUID-9958A59F-8950-4460-B866-01225AC7B3C2), can search for items that have these badges using the `contentStatus` filter. Authoritative items are automatically protected to prevent accidental deletion and are boosted in search results to increase visibility and encourage use.
+
+      Values: `null` | `deprecated` | `org_authoritative` | `public_authoritative`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `classification`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at ArcGIS Enterprise 11.4 to support [item classification](/classification-reference). The classification value assigned to items.
+
+      Examples
+
+      ```markdown
+      classification:"Restricted;Proprietary"
+
+      classification:(Proprietary)
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+### Group fields
+
+You can filter your searches on groups by using specific fields in your search string. Only public groups or groups to which you have access will be searched. These fields include the following:
+
+<StyledTable headers={"Field,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `id`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The group ID.
+
+      ```markdown
+      id:1db70a32f5f84ea9a88f5f460f22557b
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `title`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The group title.
+
+      ```markdown
+      title:redlands
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `owner`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The group owner.
+
+      ```markdown
+      owner:esri
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `description`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The group description.
+
+      ```markdown
+      description:"street maps"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `typekeywords`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Type keywords for a group.
+
+      ```markdown
+      typekeywords:fire
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `snippet`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The snippet, or summary, of the group.
+
+      ```markdown
+      snippet:transportation
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `tags`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The tag field for the group.
+
+      ```markdown
+      tags:"bike lanes"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `phone`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The contact info for the group.
+
+      ```markdown
+      phone:jsmith33@esri.com
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `created`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The date, expressed in UNIX time, that groups were created.
+
+      ```markdown
+      created:1247085176000
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `modified`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The date, expressed in UNIX time, that groups were last modified.
+
+      ```markdown
+      modified:1247085176000
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `access`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The access field returns either public, organization, or private groups. For example, `access:org` returns groups shared with the organization.
+
+      Values: `private` | `org` | `public`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `isinvitationonly`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The `isinvitationonly` field returns groups that require an invitation to join.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `orgid`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The ID of the organization.
+
+      ```markdown
+      orgid:5uh3wwYLNzBuU0Ef
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>

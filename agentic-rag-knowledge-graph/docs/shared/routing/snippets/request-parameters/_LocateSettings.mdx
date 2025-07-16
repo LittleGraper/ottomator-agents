@@ -1,0 +1,164 @@
+{/*Shared snippet for locate_settings OR locateSettings */} 
+
+
+import ParamMetadata from "../../../components/param-metatdata" 
+
+
+<If c="requestType=='job'">
+{/* <p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#locate_settings_object">locate_settings_object</a></span></p> */}
+
+<ParamMetadata types={[{name:"locate_settings",link:"../routing-data-types#locate_settings_object"}]} />
+</If>
+
+<If c="requestType=='direct'">
+{/* <p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#locate_settings_object">locate_settings_object</a></span></p> */}
+
+<ParamMetadata types={[{name:"locateSettings",link:"../routing-data-types#locate_settings_object"}]} />
+</If>
+
+Specify settings that affect how inputs are located, such as the maximum search distance to use when locating the inputs on the network or the network sources being used for locating.
+
+<If c="publication=='services-reference/enterprise'">
+<Note type={"note"}>
+The default value for this parameter can be obtained from the service resource JSON. Append `?token=<yourToken>&f=pjson` to the service URL to access the service resource JSON.
+</Note>
+</If>
+
+<If c="publication=='rest/online'">
+
+The default value is as follows:
+
+<CodeBlock language="json" source="../../code-samples/shared/examples/input/locateSettings_defaultValue.json" group="json" maxLines={20} expandable/>
+
+<Note type={"note"}>
+Currently, you can't specify different source names for the `sources` array. Also, `allowAutoRelocate` is always set to `true` since the service does not support location fields.
+</Note>
+
+</If>
+
+<If c="requestType=='job'">
+
+<If c={props.Route}>
+You can specify locate settings and can override locate settings for individual features such as, stops, point_barriers, line_barriers, and polygon_barriers through locator JSON object.
+</If> 
+
+<If c={props.CF}>
+You can specify locate settings and can override locate settings for individual features such as, incidents, facilities, point_barriers, line_barriers, and polygon_barriers through locator JSON object.
+</If> 
+
+<If c={props.SA}>
+You can specify locate settings and can override locate settings for individual features such as, facilities, point_barriers, line_barriers, and polygon_barriers through locator JSON object.
+</If> 
+
+<If c={props.LA}>
+You can specify locate settings and can override locate settings for individual features such as, facilities, demand_points, point_barriers, line_barriers, and polygon_barriers through locator JSON object.
+</If> 
+
+<If c={props.OD}>
+You can specify locate settings and can override locate settings for individual features such as, origins, destinations, point_barriers, line_barriers, and polygon_barriers through locator JSON object.
+</If> 
+
+<If c={props.LMD}>
+You can specify locate settings and can override locate settings for individual features such as, orders, depots, point_barriers, line_barriers, and polygon_barriers through locator JSON object.
+</If> 
+
+<If c={props.VRP}>
+You can specify locate settings and can override locate settings for individual features such as, orders, depots, point_barriers, line_barriers, and polygon_barriers through locator JSON object.
+</If>
+
+</If>
+
+<If c="requestType=='direct'">
+
+<If c={props.Route}>
+You can specify locate settings and can override locate settings for individual features such as, stops, barriers, polylineBarriers, and polygonBarriers through locator JSON object.
+</If> 
+
+<If c={props.VRP}>
+You can specify locate settings and can override locate settings for individual features such as, orders, depots, point_barriers, line_barriers, and polygon_barriers through locator JSON object.
+</If>
+
+<If c={props.CF}>
+You can specify locate settings and can override locate settings for individual features such as, incidents, facilities, barriers, polylineBarriers, and polygonBarriers through locator JSON object.
+</If>
+
+<If c={props.SA}>
+You can specify locate settings and can override locate settings for individual features such as, facilities, barriers, polylineBarriers, and polygonBarriers through locator JSON object.
+</If>
+
+<If c={props.OD}>
+You can specify locate settings and can override locate settings for individual features such as, origins, destinations, barriers, polylineBarriers, and polygonBarriers through locator JSON object.
+</If>
+
+</If>
+
+
+
+<details>
+ <summary><span class="font-sm text-color-link">Show examples</span></summary>
+
+{/* Only show one example for online and show all three examples for enterprise in tab format */}
+
+<If c="publication=='rest/online'">
+
+ #### Example for locate_settings
+
+ **Example 1: Specify locate settings using a JSON structure**
+
+This example shows how to specify locate settings so inputs are only located within 500 meters of the specified location. A small search tolerance like this can be helpful if you are solving using a walking travel mode and don't want inputs to be located farther than 500 meters from the original point location.
+
+<CodeBlock language="json" source="../../code-samples/lmd/examples/inputs/locate_settings_ex1.json" group="json" maxLines={20} expandable/>
+
+</If>
+
+<If c="publication=='services-reference/enterprise'">
+
+#### Examples for locate settings
+
+<Tabs>
+<TabNav slot="tab-nav">
+  <TabTitle is-active>Example 1</TabTitle>
+  <TabTitle>Example 2</TabTitle>
+  <TabTitle>Example 3</TabTitle>
+</TabNav>
+
+<Tab is-active>
+
+**Specify locate settings using a JSON structure**
+
+This example shows how to specify locate settings so inputs are only located within 500 meters of the specified location. A small search tolerance like this can be helpful if you are solving using a walking travel mode and don't want inputs to be located farther than 500 meters from the original point location.
+
+<CodeSwitcher>
+  <CodeBlock language="json" source="../../code-samples/lmd/examples/inputs/locate_settings_ex1.json" group="json" maxLines={20} expandable/>
+</CodeSwitcher>
+
+</Tab>
+
+<Tab>
+
+**Specify locate settings and locate settings overrides for some inputs using a JSON structure**
+
+This example shows how to specify locate settings to prevent orders and depots from locating on highway ramps. The locate settings allow locating on the Routing_Streets source. For orders and depots, the `overrides` option is used to specify a where clause for the Routing_Streets source to prevent locating on highway ramps (a `ROAD_CLASS` attribute value of 3). With this `locate_settings` JSON, orders and depots cannot locate on highway ramps, but barriers can because they use the default locate settings, which do not include a where clause.
+
+<CodeSwitcher>
+  <CodeBlock language="json" source="../../code-samples/lmd/examples/inputs/locate_settings_ex2.json" group="json" maxLines={20} expandable/>
+</CodeSwitcher>
+
+</Tab>
+
+<Tab>
+
+**Specify locate settings and locate settings overrides using a JSON structure so different inputs are located using different sources**
+
+This example shows how to specify locate settings to locate inputs on the Routing_Streets source feature class while permitting point barriers to only locate on the system junctions feature class (Routing_ND_Junctions).
+
+<CodeSwitcher>
+  <CodeBlock language="json" source="../../code-samples/lmd/examples/inputs/locate_settings_ex3.json" group="json" maxLines={20} expandable/>
+</CodeSwitcher>
+
+</Tab>
+</Tabs>
+
+</If>
+
+</details>

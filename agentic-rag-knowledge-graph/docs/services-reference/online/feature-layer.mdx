@@ -1,0 +1,405 @@
+---
+title: "Feature Layer"
+description: "An individual layer resource represents a single feature layer or a non-spatial table in a feature service."
+slug: "feature-layer"
+url: "/feature-layer"
+guid: "GUID-E21CCCC9-F60D-44A4-882B-981D4BC243D7"
+migratedTopicMetadata:
+  FTITLE: "Feature Layer"
+  FDESCRIPTION: ""
+  FCHANGES: "Adding note about AGOL-specific limitation"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1 -*"
+  CREATED-ON: "24/04/2023 09:36:07"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "28/09/2023 12:29:54"
+  VERSION: "12"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-3D988287-B825-4154-9D02-36910779133F"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<layerId>
+  urlSegments:
+    - name: <adminfeatureservice-url>
+      url: /hosted-feature-service
+    - name: /<layerId>
+  methods: []
+  sslOnly: 'no'
+---
+
+## Description
+
+An individual layer resource represents a single feature layer or a non-spatial table in a feature service. A feature layer is a table or view with at least one spatial column. 
+
+For tables, it provides basic information about the table such as its ID, name, fields, types and templates. 
+
+For feature layers, in addition to the table information above, it provides information such as its geometry type, min and max scales, and spatial reference. 
+
+Each type includes information about the type such as the type ID, name, and definition expression. Sub-types also include a default symbol and a list of feature templates. 
+
+Each feature template includes a template name, description and a prototypical feature.
+
+The property [resultType](<TODO UNRESOLVED LINK: GUID-F17EB5CC-9880-4C2F-86E7-5433EF6103E9#GUID-F17EB5CC-9880-4C2F-86E7-5433EF6103E9/UL_C3A7F8D4E85942EC983931C13B059707>)  in the layer metadata object will determine the max record count. The `resultType`  can either be {'{'}none, standard, tile{'}'}.
+
+-   The [resultType](<TODO UNRESOLVED LINK: GUID-F17EB5CC-9880-4C2F-86E7-5433EF6103E9#GUID-F17EB5CC-9880-4C2F-86E7-5433EF6103E9/UL_C3A7F8D4E85942EC983931C13B059707>)  parameter is only supported if the layer metadata returns `supportQueryWithResultType`  is `true`  in the `advancedQueryCapabilitites`  metadata object.
+-   The property [maxRecordCount](<TODO UNRESOLVED LINK: GUID-F17EB5CC-9880-4C2F-86E7-5433EF6103E9#GUID-F17EB5CC-9880-4C2F-86E7-5433EF6103E9/UL_C3A7F8D4E85942EC983931C13B059707>)  is used if the `resultType`  value is `none` . This can be the default server assigned (1000, 2000) or a value that is overwritten by the service owner or admin.
+
+    <Note type={"note"}>
+
+    For ArcGIS Online hosted services, `maxRecordCount`  has an upper limit of 32000 for points, and an upper limit of 4000 for lines and polygons.
+
+    </Note>
+-   The property [standardMaxRecordCount](<TODO UNRESOLVED LINK: GUID-F17EB5CC-9880-4C2F-86E7-5433EF6103E9#GUID-F17EB5CC-9880-4C2F-86E7-5433EF6103E9/UL_C3A7F8D4E85942EC983931C13B059707>)  is used if the `resultType`  value is `standard` . Example: (`"standardMaxRecordCount": 32000` )
+-   The property [tileMaxRecordCount](<TODO UNRESOLVED LINK: GUID-F17EB5CC-9880-4C2F-86E7-5433EF6103E9#GUID-F17EB5CC-9880-4C2F-86E7-5433EF6103E9/UL_C3A7F8D4E85942EC983931C13B059707>)  is used if the `resultType`  value is `tile` . Example: (`"tileMaxRecordCount": 8000` ).
+-   The layer metadata will also include the [maxRecordCountFactor](<TODO UNRESOLVED LINK: GUID-F17EB5CC-9880-4C2F-86E7-5433EF6103E9#GUID-F17EB5CC-9880-4C2F-86E7-5433EF6103E9/UL_C3A7F8D4E85942EC983931C13B059707>)  property and can be configured from the admin API. The server `maxRecordCount`  for {'{'}standard, tile{'}'} will be the (base \* `maxRecordCountFactor` ). All `maxRecordCount`  will be adjusted with the `maxRecordCountFactor` . 
+
+The property `capabilities`  returns Query, Create, Delete, Update, and Editing capabilities. The Editing capability will be included if Create, Delete or Update is enabled for a Feature Service. 
+
+Note, query and edit operations are not available on a layer in the administrative view.
+
+<Note type={"note"}>
+
+Wait for the operation response and do not attempt concurrent administrative operations.
+
+</Note>
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`f`</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The response format. The default response format is `html` .
+
+      Values: `html`  \| `json` 
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+Get information about layer 0 in the "WorldService" Feature Service
+
+```javascript
+https://services.myserver.com/OrgID/arcgis/rest/admin/services/WorldService/FeatureServer/0
+```
+
+ 
+
+## JSON Response syntax
+
+```other
+{
+  "id": <layerId>,
+  "name": "<layerName>",
+  "type": "<layerType>",
+  "description": "<description>",
+  "copyrightText": "<copyrightText>",
+  "supportsRollbackOnFailures": <true | false>,
+  "geometryType": "<geometryType>",
+  "minScale": <minScale>,
+  "maxScale": <maxScale>,
+  "extent": <envelope>,
+  "drawingInfo": {
+    "renderer": <renderer>,
+    "transparency": <transparency>,
+    "labelingInfo": <labelingInfo>
+  },
+  },
+  "hasAttachments": <true|false>
+  "htmlPopupType": "<esriServerHTMLPopupTypeNone | esriServerHTMLPopupTypeAsURL | esriServerHTMLPopupTypeAsHTMLText>",
+  "objectIdField": "<objectIdFieldName>",
+  "globalIdField": "<globalIdFieldName>",
+  "displayField": "<displayField>",
+  "typeIdField": "<typeIFieldName>",
+  "fields": [
+    {
+      "name": "<fieldName1>",
+      "type": "<fieldType1>",
+      "alias": "<fieldAlias1>",
+      "length": "<length1>",
+      "editable": "<true | false>",
+      "nullable": "<true | false>",
+      "domain": <domain1>
+    },
+    {
+      "name": "<fieldName2>",
+      "type": "<fieldType2>",
+      "alias": "<fieldAlias1>",
+      "length": "<length2>",
+      "editable": "<true | false>",
+      "nullable": "<true | false>",
+      "domain": <domain2>
+    }
+  ],
+  "types": [
+    {
+      "id": <typeId1>,
+      "name": "<typeName1>",
+      "domains": {
+        "<domainField11>": <domain11>,
+        "<domainField12>": <domain12>
+      },
+      "templates": [
+        {
+          "name": "<templateName11>",
+          "description": "<templateDescription11>",
+          "prototype": <prototypicalFeature11>
+        },
+        {
+          "name": "<templateName12>",
+          "description": "<templateDescription12>",
+          "prototype": <prototypicalFeature12>
+        }
+      ]
+    },
+    {
+      "id": <typeId2>,
+      "name": "<typeName2>",
+      "domains": {
+        "<domainField11>": <domain21>,
+        "<domainField12>": <domain22>
+      },
+      "templates": [
+        {
+          "name": "<templateName21>",
+          "description": "<templateDescription21>",
+          "prototype": <prototypicalFeature21>,
+          "drawingTool": "esriFeatureEditToolNone | esriFeatureEditToolPoint | esriFeatureEditToolLine | esriFeatureEditToolPolygon | esriFeatureEditToolAutoCompletePolygon | 
+	esriFeatureEditToolCircle | esriFeatureEditToolEllipse | esriFeatureEditToolRectangle | esriFeatureEditToolFreehand"
+        },
+        {
+          "name": "<templateName22>",
+          "description": "<templateDescription22>",
+          "prototype": <prototypicalFeature22>,
+          "drawingTool": "esriFeatureEditToolNone | esriFeatureEditToolPoint | esriFeatureEditToolLine | esriFeatureEditToolPolygon | esriFeatureEditToolAutoCompletePolygon | 
+	esriFeatureEditToolCircle | esriFeatureEditToolEllipse | esriFeatureEditToolRectangle | esriFeatureEditToolFreehand"
+        }
+      ]
+    }
+  ],
+  "templates": [
+    {
+      "name": "<templateName1>",
+      "description": "<templateDescription1>",
+      "prototype": <prototypicalFeature1>
+    },
+    {
+      "name": "<templateName2>",
+      "description": "<templateDescription2>",
+      "prototype": "<prototypicalFeature2>"
+    }
+  ],
+  "supportedQueryFormats": "<supportedQueryFormats>",
+  "maxRecordCount": "<maxRecordCount>",
+  "standardMaxRecordCount": "<standardMaxRecordCount>",
+  "tileMaxRecordCount": "<tileMaxRecordCount>",
+  "maxRecordCountFactor": "<maxRecordCountFactor>",
+  "capabilities": "<capabilities>"
+}
+```
+
+ 
+
+## JSON Response example
+
+```other
+{
+  "currentVersion": 10.1, 
+  "id": 0, 
+  "name": "Demo.dbo.WORLDCITIES", 
+  "type": "Feature Layer", 
+  "displayField": "CITY_NAME", 
+  "description": "", 
+  "copyrightText": "", 
+  "supportsRollbackOnFailure": true, 
+  "geometryType": "esriGeometryPoint", 
+  "minScale": 0, 
+  "maxScale": 0, 
+  "extent": {
+    "xmin": -176.151563636, 
+    "ymin": -54.792, 
+    "xmax": 179.221887694, 
+    "ymax": 78.200001124, 
+    "spatialReference": {
+      "wkid": 4326
+    }
+  }, 
+  "drawingInfo": {
+    "renderer": {
+      "type": "simple", 
+      "symbol": {
+        "type": "esriSMS", 
+        "style": "esriSMSCircle", 
+        "color": [
+          0, 
+          166, 
+          116, 
+          255
+        ], 
+        "size": 4, 
+        "angle": 0, 
+        "xoffset": 0, 
+        "yoffset": 0, 
+        "outline": {
+          "color": [
+            0, 
+            0, 
+            0, 
+            255
+          ], 
+          "width": 1
+        }
+      }, 
+      "label": "", 
+      "description": ""
+    }, 
+    "transparency": 0, 
+    "labelingInfo": null
+  }, 
+  },
+  "hasAttachments": false, 
+  "htmlPopupType": "esriServerHTMLPopupTypeAsHTMLText", 
+  "objectIdField": "OBJECTID", 
+  "globalIdField": "", 
+  "typeIdField": "", 
+  "fields": [
+    {
+      "name": "OBJECTID", 
+      "type": "esriFieldTypeInteger", 
+      "alias": "OBJECTID", 
+      "sqlType": "sqlTypeInteger", 
+      "nullable": false, 
+      "editable": false, 
+      "domain": null
+    }, 
+    {
+      "name": "CITY_NAME", 
+      "type": "esriFieldTypeString", 
+      "alias": "CITY_NAME", 
+      "sqlType": "sqlTypeNVarchar", "length": 30, 
+      "nullable": true, 
+      "editable": true, 
+      "domain": null
+    }, 
+    {
+      "name": "GMI_ADMIN", 
+      "type": "esriFieldTypeString", 
+      "alias": "GMI_ADMIN", 
+      "sqlType": "sqlTypeNVarchar", "length": 7, 
+      "nullable": true, 
+      "editable": true, 
+      "domain": null
+    }, 
+    {
+      "name": "ADMIN_NAME", 
+      "type": "esriFieldTypeString", 
+      "alias": "ADMIN_NAME", 
+      "sqlType": "sqlTypeNVarchar", "length": 42, 
+      "nullable": true, 
+      "editable": true, 
+      "domain": null
+    }, 
+    {
+      "name": "FIPS_CNTRY", 
+      "type": "esriFieldTypeString", 
+      "alias": "FIPS_CNTRY", 
+      "sqlType": "sqlTypeNVarchar", "length": 2, 
+      "nullable": true, 
+      "editable": true, 
+      "domain": null
+    }, 
+    {
+      "name": "CNTRY_NAME", 
+      "type": "esriFieldTypeString", 
+      "alias": "CNTRY_NAME", 
+      "sqlType": "sqlTypeNVarchar", "length": 30, 
+      "nullable": true, 
+      "editable": true, 
+      "domain": null
+    }, 
+    {
+      "name": "STATUS", 
+      "type": "esriFieldTypeString", 
+      "alias": "STATUS", 
+      "sqlType": "sqlTypeNVarchar", "length": 50, 
+      "nullable": true, 
+      "editable": true, 
+      "domain": null
+    }, 
+    {
+      "name": "POP_RANK", 
+      "type": "esriFieldTypeInteger", 
+      "alias": "POP_RANK", 
+      "sqlType": "sqlTypeInteger", 
+      "nullable": true, 
+      "editable": true, 
+      "domain": null
+    }, 
+    {
+      "name": "POP_CLASS", 
+      "type": "esriFieldTypeString", 
+      "alias": "POP_CLASS", 
+      "sqlType": "sqlTypeNVarchar", "length": 22, 
+      "nullable": true, 
+      "editable": true, 
+      "domain": null
+    }, 
+    {
+      "name": "PORT_ID", 
+      "type": "esriFieldTypeInteger", 
+      "alias": "PORT_ID", 
+      "sqlType": "sqlTypeInteger", 
+      "nullable": true, 
+      "editable": true, 
+      "domain": null
+    }, 
+    {
+      "name": "LABEL_FLAG", 
+      "type": "esriFieldTypeInteger", 
+      "alias": "LABEL_FLAG", 
+      "sqlType": "sqlTypeInteger", 
+      "nullable": true, 
+      "editable": true, 
+      "domain": null
+    }
+  ], 
+  "types": [], 
+  "templates": [
+    {
+      "name": "Demo.dbo.WORLDCITIES", 
+      "description": "", 
+      "drawingTool": "esriFeatureEditToolPoint", 
+      "prototype": {
+        "attributes": {
+          "LABEL_FLAG": null, 
+          "CITY_NAME": null, 
+          "GMI_ADMIN": null, 
+          "ADMIN_NAME": null, 
+          "FIPS_CNTRY": null, 
+          "CNTRY_NAME": null, 
+          "STATUS": null, 
+          "POP_RANK": null, 
+          "POP_CLASS": null, 
+          "PORT_ID": null
+        }
+      }
+    }
+  ], 
+  "supportedQueryFormats": "JSON", 
+  "maxRecordCount": 1000,
+  "standardMaxRecordCount": 4000,
+  "tileMaxRecordCount": 4000,
+  "maxRecordCountFactor": 1, 
+  "capabilities": "Create,Delete,Query,Update,Editing"
+}
+```
+
+ 

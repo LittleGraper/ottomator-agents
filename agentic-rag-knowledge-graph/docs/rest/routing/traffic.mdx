@@ -1,0 +1,62 @@
+---
+title: Traffic
+uid: traffic-in-analysis
+---
+
+## What is traffic data?
+
+Traffic data provides information about how travel speeds on specific road segments change over time. It is important in network analysis because traffic affects travel times, which in turn affect results. If you're planning a route from one location to another and don't account for traffic, your expected travel and arrival times could be inaccurate. Moreover, you might miss routing opportunities that save time by avoiding the slower, more congested roads.
+
+## Predictive traffic
+
+Comprehensive street data with historical, live, and predictive traffic information is available when using predictive traffic in routing analysis. Viewing traffic or performing analyses in areas with predictive traffic data can take into account changing traffic conditions based on current, future, and past observations.
+
+    <Note type={"note"}>
+
+    Esri saves live traffic data for 1 hours and references predictive data extending 1 hours into the future.
+
+    </Note>
+
+## Live traffic
+
+The live traffic model fills in where the historical traffic model falls short: accounting for current traffic conditions. As shown in the previous section, historical traffic is based on average travel times. However, current travel times can deviate considerably from the norm. For instance, events that draw large crowds can cause traffic to slow, accidents can temporarily halt traffic, and holidays can slow traffic or change where traffic congestion occurs. When you solve a network analysis whose results will be implemented immediately or almost immediately, using live traffic will tend to improve results, even over those created with historical traffic.
+
+## Historical traffic
+
+The historical traffic model is based on the idea that travel speeds follow a weeklong pattern. Thus, at 8:00 a.m. on Monday of one week, the travel speeds of a given road segment are expected to be similar to those at 8:00 a.m. on Monday of another week. Since the duration of the pattern is one week, the speeds aren't necessarily expected to be similar among different days of the same week. That is, congestion and travel speeds may differ significantly for the same road segment, at the same time of day, but on different days of the week. For example, travel speeds on Main Street at 8:30 a.m., Sunday, could be much faster than at 8:30 a.m., Monday. The expected speeds are usually determined by averaging multiple observations over some time span, such as a year.
+
+As long as your data is reliable, performing a network analysis using the historical traffic model will tend to return more accurate results than those returned using a single travel cost, irrespective of time or day of the week.
+
+## Use traffic in routing service
+
+Specifying a time of day results in more accurate estimations of travel times because the travel times account for the traffic conditions that are applicable for that date and time. However, be careful with routes that might include gas, food, sleeping or other breaks. Gaps in travel are not considered when calculating times between locations. Solve the analysis without a start time in those cases. 
+
+To use traffic in the analysis, set the impedance value to `TravelTime`, and assign a start time value to the appropriate parameter in your request type. (`startTime`, `timeOfDay`, or `time_of_day`). 
+
+If the start time value specified is within 1 hour of the current time, live traffic will be used where available. Live traffic retrieves speeds based on phone probe records, sensors, and other data sources and reflects the current travel speeds and predicts speeds for the near future. If the start time value specified is earlier than 1 hour or later than 1 hour from the current time, or the road does not have live traffic, typical traffic speeds will be used. Typical speeds are based on historical traffic patterns. The travel time data is aggregated in 15 minute intervals per day of week based on multiple years worth of data. So a road may have a different travel time at Monday at 8 am, Monday at 8:15 am, or Tuesday at 8 am. Since the variance is just at the day of week and time of day, the travel time is the same on a road for any Monday at 8 am, regardless of the month or year.
+
+If your goal is to model typical travel conditions and avoid large variances from the average due to live traffic, it is recommended that you use a date from the past to ensure that it doesn't coincide with the 1-hour window from the current time. As an extreme example, you can even use dates from 1990.
+
+[ArcGIS Online Directions and Routing Services Coverage](http://links.esri.com/arcgis-online-data-coverage-map-for-directions-and-routes) shows the countries Esri currently provides traffic data for.
+
+When the service is using ArcGIS StreetMap Premium data, it can support two kinds of traffic: live and typical. 
+
+### Live traffic
+
+To use live traffic when and where it is available, choose a time and date and convert to UNIX time.
+
+Esri saves live traffic data for 1 hour and references predictive data extending 1 hour into the future. If the time and date you specify for this parameter is outside the 2-hour time window, or the travel time in the analysis continues past the predictive data window, the task returns to typical traffic speeds.
+
+### Typical traffic
+
+To ensure the task uses typical traffic in locations where it is available, choose a time and day of the week; then convert the day of the week to one of the following dates from 1990:
+
+-   Monday—1/1/1990
+-   Tuesday—1/2/1990
+-   Wednesday—1/3/1990
+-   Thursday—1/4/1990
+-   Friday—1/5/1990
+-   Saturday—1/6/1990
+-   Sunday—1/7/1990
+
+Set the time and date as UNIX time in milliseconds. For example, to solve for 1:03 p.m. on Thursdays, set the time and date to 1:03 p.m., January 4, 1990, and convert to milliseconds (`631458180000`). Although the dates representing days of the week are from 1990, typical traffic is calculated from recent traffic trends—usually over the last two years worth of data.

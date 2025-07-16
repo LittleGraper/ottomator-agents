@@ -1,0 +1,149 @@
+---
+title: "Reindex"
+description: "The reindex operation allows you to generate or update the indexes for content, such as users, groups, and items stored in the database store."
+slug: "reindex"
+url: "/reindex"
+guid: "GUID-2B8C3DC5-45C5-4934-B02E-2CFE549A625D"
+migratedTopicMetadata:
+  FTITLE: "Reindex"
+  FDESCRIPTION: ""
+  FCHANGES: "Changes for 10.9.1"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9.1-*"
+  CREATED-ON: "26/10/2021 17:34:05"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "16/11/2021 11:20:46"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "6"
+  ED: "GUID-1172B3D0-5E51-4D48-816D-0BF9E434C9AB"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /system/indexer/reindex
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /system/indexer/reindex
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed only with the default administrator role
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `reindex` operation allows you to generate or update the indexes for content, such as users, groups, and items stored in the database store.
+
+<Note type={"caution"}>
+
+Once performed, this operation may take a while to finish. During this time, the index service may not respond correctly to index queries. Portal content and search operations will be unavailable until the reindex is complete. Performing the reindex operation during system maintenance or downtime is recommended.
+
+</Note>
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `mode` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The mode in which the indexer should run.
+
+      Values: `USER_MODE` | `GROUP_MODE` | `SEARCH_MODE` | `FULL_MODE`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `includes` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A comma-separated list of elements to include in the index. This is useful if you want to only index certain items or user accounts.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.9.1. This parameter specifies whether the operation will run synchronously or asynchronously. If `false`, the operation is run synchronously. If `true`, the operation is run asynchronously and the operation will return a JSON object containing job information that can be used to track the job's status. The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default value is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `reindex` operation:
+
+```other
+POST /context/admin/system/indexer/reindex HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+mode=GROUP_MODE&includes=&async=true&f=pjson&&token=m7zGSezM7znt6ZuIwr827imJxOTSDsjYujVdd7SiAQLYG1HmesG8EbSnTwCbiekEh0QwRdmeyp1hP63M60TPrdZQ2NzIg5G7qFaQh40MdiOCfh60-6oPKC2MNoqwdVDZ3srzreVZb66QofWXws8GMrKWkgP45A-2an5crKvReUo-pwvkzm68W87Q0yPJFA2Kww39UnMYNw-5qd2-Bt04VmkrqKI-lCbA-jFZY_UGzeGzNqnBGrjKuVB_q17HogMw
+
+```
+
+## JSON Response example
+
+The following response is returned when reindexing is complete when async is `false`.
+
+```other
+{"status": "success"}
+```
+
+If `async` is `true`, the following response is returned. The value returned for `jobsUrl` can be used to access the job resource to track a job's status after it's been submitted. For more information, see the [Job resource topic](/job).
+
+```other
+{
+  "jobsUrl": "https://organization.domain.com/context/admin/jobs/ja2ca1a35-881c-400c-a49a-b26883002d6c",
+  "jobID": "ja2ca1a35-881c-400c-a49a-b26883002d6c",
+  "jobStatus": "SUBMITTED"
+}
+```

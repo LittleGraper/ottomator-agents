@@ -1,0 +1,160 @@
+---
+title: "GP Job"
+description: "The GP job resource returns basic information about a job."
+slug: "gp-job"
+url: "/gp-job"
+guid: "GUID-17F09A84-EA14-4B25-9972-DAFCCD789BA6"
+migratedTopicMetadata:
+  FTITLE: "GP Job"
+  FDESCRIPTION: ""
+  FCHANGES: "https://devtopia.esri.com/WebGIS/arcgis-enterprise-documentation/issues/4537"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1 - *"
+  CREATED-ON: "15/03/2023 13:15:24"
+  FAUTHOR: "bpolk"
+  FSTATUS: "Released"
+  MODIFIED-ON: "06/06/2023 14:05:32"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-2F473F08-69B9-42D1-80F5-C6B661691F60"
+  FUSERGROUP: "VUSERGROUPSERVERDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<catalog-url>/<serviceName>/GPServer/<taskname>/jobs/<job-id>
+  urlSegments:
+    - name: <catalog-url>/<serviceName>/GPServer/<taskname>/jobs/<job-id>
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: 10.9.1
+---
+
+## Description
+
+The GP `job`  resource represents a job submitted using the [`submitJob` ](/submit-gp-job) operation. It provides basic information about the job such as the job ID, status, and messages. Additionally, if the job has successfully completed, it provides information about the result parameters as well as the input parameters.
+
+-   Job ID, as `jobId` , is a system assigned ID for each job. Each job has a unique ID.
+-   Status, as `jobStatus` , is the current status of the job. It can be any one of the following values: `esriJobCancelled` , `esriJobCancelling` , `esriJobExecuting` , `esriJobFailed` , `esriJobNew` , `esriJobSucceeded` , `esriJobTimedOut` , `esriJobSubmitted` , `esriJobWaiting` , or `expectedFailure` .
+-   Progress, as `progress` , see the messages bullet.
+-   Messages, as `messages` , allow you to specify whether the messages will be returned to you using `returnMessages` . To configure the message level, see [Show Messages](https://desktop.arcgis.com/en/arcmap/latest/analyze/sharing-workflows/geoprocessing-service-settings-parameters.htm#GUID-39A6B08B-4A90-4556-B922-42DF00529BD7). 
+-   Output, as `results` , if any. All result values can be accessed using the [GP `results` ](/gp-result) resource. The JSON response specifies a relative URL to the result resource with a `paramUrl`  field.
+-   Input, as `inputs` , if any. All input parameter values are accessed using the [GP `inputs` ](/gp-input) resource. The JSON response specifies a relative URL to the input resource with a `paramUrl`  field.
+
+The `job`  resource supports a `cancel`  job operation. This operation can be used to cancel a job before it's completed. If your geoprocessing service is Python code with no ArcPy functions, the cancellation request will not be fulfilled.
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` .
+
+Values: `html`  \| `json`  \| `kmz` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## JSON Response syntax
+
+```other
+{
+  "jobId": "<jobId>",
+  "jobStatus": "<jobStatus>",
+  "results": {
+    "<param1>": {
+      "paramUrl": "<relativeUrlToParam1>"
+    },
+    "<param2>": {
+      "paramUrl": "<relativeUrlToParam2>"
+    }
+  },
+  "inputs": {
+    "<param1>": {
+      "paramUrl": "<relativeUrlToParam1>"
+    },
+    "<param2>": {
+      "paramUrl": "<relativeUrlToParam2>"
+    }
+  },
+  "messages": [
+    {
+      "type": "<type1>",
+      "description": "<description1>"
+    },
+    {
+      "type": "<type2>",
+      "description": "<description2>"
+    }
+  ]
+}
+```
+
+ 
+
+## JSON Response example
+
+```other
+{
+  "jobId": "j8f8783b5-1b5a-4faf-859c-851c9a837232",
+  "jobStatus": "esriJobSucceeded",
+  "inputs": {
+    "input_feature_layer": {
+      "paramUrl": "inputs/input_feature_layer"
+    }
+  },
+  "messages": [
+    {
+      "description": "Input Notebook Path:  C:\\arcgis\\home\\.tasks\\j8f8783b5-1b5a-4faf-859c-851c9a837232\\5061085ca6b44ab69aa3358a987b0513.ipynb\r",
+      "type": "esriJobMessageTypeInformative"
+    },
+    {
+      "description": "Output Notebook Path:  C:\\arcgis\\home\\.tasks\\j8f8783b5-1b5a-4faf-859c-851c9a837232\\output.ipynb\r",
+      "type": "esriJobMessageTypeInformative"
+    },
+    {
+      "description": "Start processing time: 2023-02-22 13:37:37.977559\r",
+      "type": "esriJobMessageTypeInformative"
+    },
+    {
+      "description": "Finish processing time: 2023-02-22 13:37:57.945772\r",
+      "type": "esriJobMessageTypeInformative"
+    },
+    {
+      "description": "Successfully completed.",
+      "type": "esriJobMessageTypeInformative"
+    }
+  ],
+  "startTime": 1677101838182,
+  "endTime": 1677101885841,
+  "type": "executeNotebookAsWebTool",
+  "results": {
+    "output_feature_layer": {
+      "paramUrl": "results/output_feature_layer"
+    }
+  },
+  "status": "COMPLETED",
+  "username": "user@DOMAIN",
+  "customAttributes": {
+    "isCancelled": false,
+    "webToolParameters": "[{\"parameterType\":\"esriGPParameterTypeRequired\",\"displayName\":\"Input Feature\",\"defaultValue\":{\"url\":\"https://sampleserver6.arcgisonline.com/arcgis/rest/services/Hurricanes/MapServer/0\"},\"dataType\":\"GPFeatureRecordSetLayer\",\"name\":\"input_feature_layer\",\"description\":\"Test input feature layer\",\"category\":\"\",\"direction\":\"esriGPParameterDirectionInput\"},{\"parameterType\":\"esriGPParameterTypeRequired\",\"displayName\":\"Output Feature\",\"defaultValue\":{\"url\":\"https://dev0015021.esri.com/server/rest/services/Hosted/ALS_Clinics_CA/FeatureServer/0\"},\"dataType\":\"GPFeatureRecordSetLayer\",\"name\":\"output_feature_layer\",\"description\":\"Output feature layer\",\"category\":\"\",\"direction\":\"esriGPParameterDirectionOutput\"}]"
+  }
+}
+```
+
+ 

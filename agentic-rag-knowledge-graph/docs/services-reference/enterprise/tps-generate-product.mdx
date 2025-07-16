@@ -1,0 +1,696 @@
+---
+title: "Generate Product"
+uid: tps-generate-product
+description: "The generateProduct operation automates the process of producing a layout or map based on an existing map product definition."
+slug: "tps-generate-product"
+url: "/tps-generate-product"
+guid: "GUID-8CA3C7D9-53A6-4098-8716-A662E33BE2A6"
+migratedTopicMetadata:
+  FTITLE: "TPS Generate Product"
+  FDESCRIPTION: ""
+  FCHANGES: "updating the productVersion parameter per 3111 (original: 2950)"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "21/11/2023 16:07:42"
+  FAUTHOR: "jaguirre"
+  FSTATUS: "Released"
+  MODIFIED-ON: "21/12/2023 13:34:37"
+  VERSION: "8"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "6"
+  ED: "GUID-0F9DAA5D-F428-41FA-84CC-6E84BFBFF252"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/TopographicProductionServer/generateProduct
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/TopographicProductionServer/generateProduct
+  methods: 
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  relatedResources:
+    - name: Add Product
+      url: /tps-add-product
+    - name: Remove Product
+      url: /tps-remove-product
+    - name: Update Product
+      url: /tps-update-product
+  requiredCapability: Requires an ArcGIS GIS Server Advanced license and a Production Mapping or Defense Mapping server extension license
+---
+import GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_2680DD44_F03A_444C_86E1_1624AF34BD55 from "./snippets/GUID-0388E43D-C641-4E66-97EE-5C4E932EE3BA/_GUID-2680DD44-F03A-444C-86E1-1624AF34BD55";
+import GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_BD0C4EE0_7864_4DD3_9692_AAED8631CB88 from "./snippets/GUID-0388E43D-C641-4E66-97EE-5C4E932EE3BA/_GUID-BD0C4EE0-7864-4DD3-9692-AAED8631CB88";
+import GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_4E2CCDCB_0BD8_4893_AEBD_116ED1495B86 from "./snippets/GUID-0388E43D-C641-4E66-97EE-5C4E932EE3BA/_GUID-4E2CCDCB-0BD8-4893-AEBD-116ED1495B86";
+import GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_65CB945B_3B13_4E4F_A845_64316D75C206 from "./snippets/GUID-0388E43D-C641-4E66-97EE-5C4E932EE3BA/_GUID-65CB945B-3B13-4E4F-A845-64316D75C206";
+import GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_A18FB935_347D_4950_9B14_B965925BD472 from "./snippets/GUID-0388E43D-C641-4E66-97EE-5C4E932EE3BA/_GUID-A18FB935-347D-4950-9B14-B965925BD472";
+import GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_6EC27F8A_F9F1_4939_ACF2_E02F31317C79 from "./snippets/GUID-0388E43D-C641-4E66-97EE-5C4E932EE3BA/_GUID-6EC27F8A-F9F1-4939-ACF2-E02F31317C79";
+
+## Description
+The `generateProduct` operation automates the process of producing a layout or map based on an existing map product definition.
+
+## Request parameters
+<StyledTable headers={"Parameter,Details"}>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`productName`
+			<GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_BD0C4EE0_7864_4DD3_9692_AAED8631CB88 />
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			<GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_4E2CCDCB_0BD8_4893_AEBD_116ED1495B86 />
+			This parameter's value must match one of the product names from `https://<topographicProductionServer-url>/products` .
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`productVersion`
+			<GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_BD0C4EE0_7864_4DD3_9692_AAED8631CB88 />
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			A string value of the product version name to generate.
+			The product version name must match a `name` value listed in the `products` endpoint.
+
+			Alternatively, a JSON object with the following properties can be included starting at ArcGIS Enterprise 11.2.
+			- `extractionDatabase`—Overrides the `extractionDatabase` value at the map product level.
+			- `operationOverrides`—Overrides an operation's parameter values with the value specified in the name-value pairs of `parameters`. The operation is specified by the `id` property and the parameter with the `name` property.
+			- `excludedOperations`—Excludes the specified operations. These operations will not be executed.
+
+			The following example shows how to use `operationOverrides` and `excludedOperations`. The `operationOVerrides` property changes the `contour_interval` parameter value for the contours operation and the `excludedOperations` property prevents an operation from running.
+
+			```json
+			{
+				"name": "TRD_4_5",
+				"operationOverrides": [
+					{
+						"id": "26C62049-A11F-4D5B-BC80-00CF3597555C",
+						"parameters":
+						{
+							"name": "contour_interval",
+							"value": "100"
+						}
+					},
+				]
+				"excludedOperations": [
+					"45B62049-A11F-4D5B-BC80-00CF3597555C"
+				]
+			}
+			```
+
+			<Note>
+			Passing a JSON object in for the version and changing parameter values applies to the export generated by the `generateProduct` REST operation. It does not modify the version defined in the map product definition.
+			</Note>
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`aoiLayer`
+			<GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_BD0C4EE0_7864_4DD3_9692_AAED8631CB88 />
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			The URL of the layerused to define the product's area of interest.
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`aoiFeatureId`
+			<GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_BD0C4EE0_7864_4DD3_9692_AAED8631CB88 />
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			The object ID of the area of interest feature in the `aoiLayer` .
+			<Note>
+			If you specify a custom AOI using the optional `customAoi` parameter, `aoiFeatureId` is overridden and cannot be used.
+			</Note>
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`customAoi`
+			<GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_65CB945B_3B13_4E4F_A845_64316D75C206 />
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			A featureSet used to define the product's area of interest (AOI). Only one feature is allowed.
+
+			```javascript
+			{
+				"geometryType": "esriGeometryPolygon",
+				"spatialReference":
+				{
+					"wkid": 102100,
+					"latestWkid": 3857
+				},
+				"fields":
+				[
+					{
+						"name": "OBJECTID",
+						"type": "esriFieldTypeOID",
+						"alias": "OBJECTID"
+					},
+					...
+				],
+				"features":
+				[
+					{
+						"attributes":
+						{
+							"OBJECTID": 1,
+							...
+						},
+						"geometry":
+						{
+							"rings": 
+							[
+								[-8043489.58459999971, 2124251.45230000094],
+								[-8043511.36969999969, 2153607.65269999951],
+								[-8014101.26469999924, 2153604.59160000086],
+								[-8014123.04659999907, 2124254.51069999859],
+								[-8043489.58459999971, 2124251.45230000094]
+							]
+						}
+					}
+				]
+			},
+			
+			```
+
+			<Note type="caution">
+			This optional parameter overrides the required `aoiFeatureId` parameter.
+			</Note>
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`layerExclusion`
+			<GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_65CB945B_3B13_4E4F_A845_64316D75C206 />
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			An array of layer names to exclude from the product.
+			Syntax:
+
+			```json
+			[
+			  "<URL of the layer>",
+			  "<URL of the layer>",
+			  "<URL of the layer>"
+			]
+			```
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`ancillaryLayers`
+			<GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_65CB945B_3B13_4E4F_A845_64316D75C206 />
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			An array of layer URLs to include in the final product.
+			Syntax:
+
+			```json
+			[
+			  {
+			    "layer": "<URL of the layer>",
+			    "map": "<name of the map in which the layer will be inserted>",
+			    "layerIndex": "<insertion index of the layer>"
+			  },
+			  ...
+			]
+			```
+			Ancillary layers are added as feature service layers of the final product and don't extract data to the local geodatabase.
+			<Note>
+			<GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_A18FB935_347D_4950_9B14_B965925BD472 />
+			</Note>
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`outputType`
+			<GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_BD0C4EE0_7864_4DD3_9692_AAED8631CB88 />
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			A string value that specifies the output type. Supported values include `aprx`, `ppkx`, `pagx`, `pdf`, and `tiff`.
+			Additional files can be formatted using the `outputFiles` parameter. Use JSON to customize the output type of a file. Supported `outputFiles` values include `Geodatabase`, `Raster`, `ProductTemplate`, and `Project` .
+			Syntax:
+
+			```json
+			{
+			  "outputType": "pdf",
+			  "outputFiles": [
+			    "Geodatabase",
+			    "Raster",
+			    "ProductTemplate",
+			    "Project"
+			  ]
+			}
+			```
+			<Note>
+			By default, the APRX and PAGX output types are exported as ZIP files that include a file geodatabase.
+			</Note>
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`outputName`
+			<GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_65CB945B_3B13_4E4F_A845_64316D75C206 />
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			The name to use for the exported file. If no name is provided, the sheet identifier value is used.
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`outputSettings`
+			<GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_65CB945B_3B13_4E4F_A845_64316D75C206 />
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			The predefined settings for a PDF or TIFF output type. Allowed inputs can either be the name of a preset file included with the [ArcGIS Production Mapping](https://enterprise.arcgis.com/en/production-mapping/latest/get-started/download-and-install-product-files.htm), the [ArcGIS Defense Mapping](https://enterprise.arcgis.com/en/defense-mapping/latest/get-started/download-and-install-defense-mapping-server-product-files.htm) Enterprise product files, or a JSON data structure that identifies the output settings in one of the formats detailed below.
+			This parameter was added at Enterprise 11.0.
+		</StyledTableCell>
+	</StyledTableRow>
+</StyledTable>
+
+## outputSettings JSON properties
+The following tables contain information about the `outputSettings` parameter. Each table corresponds to a different output:
+
+#### PDF properties JSON data structure
+<StyledTable headers={"Property,Details"}>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`formatClass`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specifies that the output file type is PDF.
+			Value: `PDFFormat`
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`DoCompressVectorGraphics`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specifies whether vector content streams are compressed. Set this value to `true` unless you need clear text for troubleshooting.
+			<GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_6EC27F8A_F9F1_4939_ACF2_E02F31317C79 />
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`ImageCompression`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			The compression scheme used to compress images and raster data in the output file.
+			Choose from the following:
+			- `0` —Compression is not applied.
+			- `1` —Run-length encoded compression, a lossless compression method that works well for images with large areas of the same color.
+			- `2` —Lossless compression method that works well for most images.
+			- `3` —Lossless compression method that uses a code table.
+			- `4` —Lossy compression method that works well for photographic-type images.
+			- `5` —Automatically chooses the best compression type for each image on the page.
+			Typically, `4` is used for large images with many unique colors, and `2` is used for all other images.
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`DoEmbedFonts`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specifies whether embeddable fonts should be included in the output file to maintain font consistency across different platforms. Fonts that do not support embedding are not included, regardless of the value set for this property.
+			<GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_6EC27F8A_F9F1_4939_ACF2_E02F31317C79 />
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`LayersAndAttributes`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specifies whether layers should be included in the output file that can be viewed and managed in supported PDF readers. You can also specify whether attribute data from the features should be included. The range of acceptable values is `0` through `2` .
+			- `0` —No layers are included
+			- `1` —Only `.pdf` layers are included
+			- `2` —Both `.pdf` layers and feature attributes are included
+			<Note>
+			Including attributes for a large number of layers can affect performance and increase the size of your output file.
+			</Note>
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`HasGeoRefInfo`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specifies whether geospatial information from the map frames is included in the output file. When geospatial information is included, you can extract x,y coordinate information from the map frames and perform geographic measurement directly on the map frame in supported PDF readers.
+			<GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_6EC27F8A_F9F1_4939_ACF2_E02F31317C79 />
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`ImageQuality`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specifies the amount of image resampling for raster imagery. This is a ratio that uses the value specified in the `Resolution` property to decide the effective resolution of raster content in the output file.
+			<br />
+			The value for this property specifies the ratio used to resample raster data. A value of `1` is a 1:1 ratio, where raster data is resampled at the same dots per inch (dpi) as the output vector data. A value of `3` is a 1:3 ratio, where raster data is stored at a third of the dpi of the vector dpi specified in the `Resolution` property, resulting in smaller file sizes. The range of acceptable values is `1` through `5` . In many cases, the output file size can be reduced without visibly affecting image quality by specifying a higher value for this parameter.
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`ImageCompressionQuality`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specifies the amount of compression applied to images in the output file. Lower values result in smaller file sizes and reduced image quality, while higher values result in larger file sizes and higher image quality. This property is only applied when the `ImageCompression` value is set to `4` or `5` . The range of acceptable values is `1` through `100` .
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`Password`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specify a password that must be provided before the output file can be viewed.
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`DoFullRasterization`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specifies whether all content should be output as an image. For maps or layouts containing vector layers with a high density of vertices, this can drastically reduce the size of the output file. Vector-specific properties are not supported if this property's value is `true` .
+			<br />
+			<GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_6EC27F8A_F9F1_4939_ACF2_E02F31317C79 />
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`MasterPassword`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specifies a password that must be provided before edits can be made to the output file or before changes can be made to the permissions on the output file.
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`DoSimulateOverprint`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specifies whether to include an overprint preview in the output file. When this property is set to `false`, the top colors knock out the colors below and only the topmost color prints. If this property is set to `true`, the output file shows a simulation of overprinting.
+			<GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_6EC27F8A_F9F1_4939_ACF2_E02F31317C79 />
+			<Note type={"caution"}>
+			When you simulate overprinting, vector features are converted to raster images and are not maintained as individual vector layers in the output file. This results in options specific to vector data, such as `LayersAndAttributes`, being unavailable.
+			</Note>
+			<br />
+			[Learn more about overprinting](https://pro.arcgis.com/en/pro-app/3.2/help/mapping/layer-properties/symbols.htm#ESRI_SECTION2_78757892567845C38D09AA1E8296C129)
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`DoConvertCharacterMarkerSymbolsToPolygon`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			If you cannot embed fonts due to licensing or file format restrictions, set this value to `true` to export the marker symbols as polygons, which allows them to be viewed on machines that do not have the fonts installed.
+			<GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_6EC27F8A_F9F1_4939_ACF2_E02F31317C79 />
+			<Note>
+			This does not apply to text; it only applies to font-based marker symbols.
+			</Note>
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`LanguageCode`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specifies the language of the text in the output layout so a screen reader can interpret it correctly. If multiple languages are included in the output layout, additional post-processing may be required to set the language appropriately for individual text elements.
+			The value should be in IETF BCP 47 format.
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`Title`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specifies the title of the output file. This is displayed when the document is opened.
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`Subject`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specifies a brief overview of what the output file is about.
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`Author`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specifies the author of the output file. Some accessibility guidelines suggest that this should be the office or group producing the document, not an individual person.
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`Keywords`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specifies keywords that help with document searches.
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`IncludeAccessibilityTags`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specifies whether the output is a tagged PDF document, which can be read by screen readers or other assistive technologies.
+			<GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_6EC27F8A_F9F1_4939_ACF2_E02F31317C79 />
+			<Note>
+			Alt text for layout elements is not included in the output file document unless this option is checked.
+			</Note>
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`Resolution`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specifies the dots per inch '(dpi)' of the vector data in the output layout.
+			If the `DoFullRasterization` property value is `true`, vectors are converted to rasters and stored at the resolution provided in this property.
+			If the `DoFullRasterization` property value is `false`, this value determines the resolution for vectors and impacts the ratio used in the `ImageQuality` property to resample raster data.
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`DoClipToGraphicExtent`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specifies whether the extent of the output layout is cropped to only include areas with layout elements to help eliminate empty space.
+			<GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_6EC27F8A_F9F1_4939_ACF2_E02F31317C79 />
+		</StyledTableCell>
+	</StyledTableRow>
+</StyledTable>
+
+The following JSON data structure is an example of the properties and values associated with the `outputSettings` parameter for a PDF output.
+```json
+{
+  "formatClass": "PDFFormat",
+  "properties": {
+    "DoCompressVectorGraphics": true,
+    "ImageCompression": 5,
+    "DoEmbedFonts": false,
+    "LayersAndAttributes": 1,
+    "HasGeoRefInfo": true,
+    "ImageQuality": 5,
+    "ImageCompressionQuality": 100,
+    "Password": "test",
+    "DoFullRasterization": true,
+    "MasterPassword": "testediting",
+    "DoSimulateOverprint": false,
+    "DoConvertCharacterMarkerSymbolsToPolygon": false,
+    "LanguageCode": "en-US",
+    "Title": "MyTitle",
+    "Subject": "MySubject",
+    "Author": "JohnDoe",
+    "Keywords": "Test GPL",
+    "IncludeAccessibilityTags": true,
+    "Resolution": 200,
+    "DoClipToGraphicExtent": true
+  }   
+}
+```
+
+#### TIFF properties JSON data structure
+<StyledTable headers={"Property,Details"}>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`formatClass`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specifies that the output file format is TIFF.
+			Value: `TIFFFormat`
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`ColorMode`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specifies how many bits are used to describe color in a pixel.
+			- `0` —8-bit Adaptive: 255 possible colors. This option uses an adaptive palette to maintain recognizable hues.
+			- `1` —8-bit Grayscale: 256 shades of gray. All colors are converted to grayscale.
+			- `2` —24-bit True Color: 16,777,216 possible colors. This option works well for maximum color fidelity.
+			- `3` —32-bit with Alpha: 16,777,216 possible colors and an alpha (transparency) channel of 255 values. This option is useful for maps or layouts with transparency.
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`TIFFImageCompression`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			The compression scheme used to compress images and raster data in the output file.
+			- `0` —Compression is not applied.
+			- `1` —Lossless compression method that works well for images with large areas of the same color.
+			- `2` —Lossy compression method that works well for photographic type images.
+			- `3` —Lossless compression method uses a code table.
+			- `4` —Lossless compression method that works well for most cases.
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`HasGeoTiffTags`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specifies if GeoTIFF information is added directly to the TIFF file header. This allows the output file to be used as raster data in ArcGIS Pro or other GIS applications.
+			<GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_6EC27F8A_F9F1_4939_ACF2_E02F31317C79 />
+			<Note>
+			This option is not available for 3D scenes. When exporting a 3D scene, set the `GeoReferenceMapFrameName` property to the 2D map frame on which you want the GeoTIFF information to be based. With GIS-capable software, you can choose to honor the GeoTIFF information in the export.
+			</Note>
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`ImageCompressionQuality`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specifies the amount of compression applied to images in the output layout. Lower values result in smaller file sizes and reduced image quality, while higher values result in larger file sizes and higher image quality. This property is only applied when the `ImageCompression` property's value is set to `2` or `4` . The range of acceptable values is `1` through `100` .
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`HasTransparentBackground`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specifies whether the output layout is on a transparent page instead of a white page.
+			<GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_6EC27F8A_F9F1_4939_ACF2_E02F31317C79 />
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`GeoReferenceMapFrameName`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specifies the map frame on which the GeoTIFF information is based.
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`Resolution`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specifies the dpi of the output layout file.
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`DoClipToGraphicExtent`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			Specifies whether the extent of the layout is cropped to include only areas with layout elements to help eliminate blank space.
+			<GUID_0388E43D_C641_4E66_97EE_5C4E932EE3BA_GUID_6EC27F8A_F9F1_4939_ACF2_E02F31317C79 />
+		</StyledTableCell>
+	</StyledTableRow>
+</StyledTable>
+
+The following JSON data structure is an example of the properties and values associated with the `outputSettings` parameter for a TIFF output.
+```json
+{
+  "formatClass": "TIFFFormat",
+  "properties": {
+    "ColorMode": 3,
+    "TIFFImageCompression": 3,
+    "HasGeoTiffTags": true,
+    "ImageCompressionQuality": 100,
+    "HasTransparentBackground": false,
+    "GeoReferenceMapFrameName": "Map Frame",
+    "Resolution": 400,
+    "DoClipToGraphicExtent": false
+  }
+}
+```
+
+## Response properties
+The following details are for the properties of a response:
+<StyledTable headers={"Property,Details"}>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`jobId`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			The job identifier.
+		</StyledTableCell>
+	</StyledTableRow>
+	<StyledTableRow>
+		<StyledTableCell cellStyle="markdown">
+			`statusUrl`
+		</StyledTableCell>
+		<StyledTableCell cellStyle="markdown">
+			The URL to query for the status of a running job.
+		</StyledTableCell>
+	</StyledTableRow>
+</StyledTable>
+
+## Example usage
+Generate a map product output using the `generateProduct` REST operation.
+
+Request URL and parameters:
+
+```markdown
+https://machine.domain.com/server/rest/services/SampleService/TopographicProductionServer/generateProduct
+```
+
+```javascript
+productName=MTM50
+productVersion=TRD_4_5
+aoiLayer=https://machine.domain.com/server/rest/services/AOIService/MapServer/0
+aoiFeatureId=120733
+layerExclusion=
+[
+	"https://servermachine.domain.com/server/rest/services/SampleWorldCities/MapServer/1",
+	"https://servermachine.domain.com/server/rest/services/SampleWorldCities/MapServer/2",
+	"https://servermachine.domain.com/server/rest/services/SampleWorldCities/MapServer/3"
+]
+outputType=pdf
+f=json
+
+```
+
+## JSON Response syntax
+The following is the syntax of a response:
+
+```json
+{
+  "jobId": "<jobID>",
+  "statusURL": "<statusURL>",
+  "success": <true | false>
+}
+
+```
+
+## JSON Response example
+The following is an example of a successful response:
+
+```json
+{
+  "jobId": "0AECA2CE-8690-4EEC-935B-CEA8E403765F",
+  "statusUrl": "https://machine.domain.com/server/rest/services/SampleMapService/MapServer/exts/TopographicProductionServer/jobs/job/0AECA2CE-8690-4EEC-935B-CEA8E403765F",
+  "success": true
+}
+
+```

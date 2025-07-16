@@ -1,0 +1,127 @@
+---
+title: "Index Status"
+description: "This resource allows you to view the status of the indexing service."
+slug: "index-status"
+url: "/index-status"
+guid: "GUID-0B473F2C-A1DA-4F59-A500-25242AE2A142"
+migratedTopicMetadata:
+  FTITLE: "Index Status"
+  FDESCRIPTION: ""
+  FCHANGES: "Changes for 10.9.1"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9.1-*"
+  CREATED-ON: "26/10/2021 17:09:23"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "16/11/2021 11:20:29"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "6"
+  ED: "GUID-512D99E9-593D-40BC-A281-6AA12162638B"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /system/indexer/status
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /system/indexer/status
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed only with the default administrator role
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `status` resource allows you to view the status of the indexing service. You can view the number of users, groups, and search items in both the database (store) and the index. If the database and index do not match, indexing is either in progress or there is a problem with the index. It is recommended that you reindex to correct any issues. If indexing is in progress, you can monitor the status by refreshing the page.
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample request URL used to access the `status` resource:
+
+```markdown
+https://organization.domain.com/context/admin/system/indexer/status?f=pjson
+```
+
+## JSON Response examples
+
+The following response is returned while indexing is in progress (when `reindexingInProgress` is `true`). When `reindexingInProgress` is `true`, any other attempts to run the reindex operation will be blocked and will result in a 500 error.
+
+```other
+{
+  "indexes": [
+    {
+      "databaseCount": 4,
+      "indexCount": 4,
+      "name": "users"
+    },
+    {
+      "databaseCount": 15,
+      "indexCount": 0,
+      "name": "groups"
+    },
+    {
+      "databaseCount": 650,
+      "indexCount": 650,
+      "name": "items"
+    }
+  ],
+  "reindexingInProgress": true,
+  "syncStatus": false
+}
+```
+
+The following sample response is returned when indexing is complete. If the values for all stores are matching after reindexing, the `syncStatus` property will return as `true`, otherwise it returns as `false`.
+
+```other
+{
+  "indexes": [
+    {
+      "databaseCount": 4,
+      "indexCount": 4,
+      "name": "users"
+    },
+    {
+      "databaseCount": 15,
+      "indexCount": 15,
+      "name": "groups"
+    },
+    {
+      "databaseCount": 650,
+      "indexCount": 650,
+      "name": "items"
+    }
+  ],
+  "reindexingInProgress": false,
+  "syncStatus": true
+}
+```

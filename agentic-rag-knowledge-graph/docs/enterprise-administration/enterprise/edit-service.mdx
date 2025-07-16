@@ -1,0 +1,201 @@
+---
+title: "Edit (Service)"
+description: "This operation edits the properties of a service."
+slug: "edit-service"
+url: "/edit-service"
+guid: "GUID-BE162CDA-2D07-4779-96A3-732AA71C8673"
+migratedTopicMetadata:
+  FTITLE: "Edit Service"
+  FDESCRIPTION: ""
+  FCHANGES: "Adding async parameter"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9.1-*"
+  CREATED-ON: "03/11/2021 09:04:18"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "16/11/2021 11:21:28"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "7"
+  ED: "GUID-C5589F62-3959-4003-ACC8-71193B9F6C5A"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /services/<ServiceName>.<ServiceType>/edit
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /services/<ServiceName>.<ServiceType>/edit
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed with either the "Update", "Delete", or "Security and infrastructure" privileges, or the Publisher role
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `edit` operation edits the properties of a service. To edit a service, you need to submit the complete JSON representation of the service, which includes the updates to the service properties. Editing a service can cause the service to be restarted with updated properties.
+
+The JSON representation of a service contains the following four sections:
+
+- Service description properties—Common properties that are shared by all services. These properties typically identify a specific service.
+- Service framework properties—Properties targeted toward the framework that hosts the GIS service. They define the life cycle and load balancing of the service.
+- Service type properties—Properties targeted toward the core service type as seen by the server administrator. Since these properties are associated with a server object, they vary across the service types.
+- Extension properties—Represent the extensions that are enabled on the service.
+
+<Note type={"note"}>
+
+The JSON is submitted to the operation URL as a value of the parameter service. You can leave out the `serviceName` and type parameters in the JSON representation. Any other properties that are left out are not persisted by the server.
+
+</Note>
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `service` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The JSON representation of the service and the properties that have been updated or added.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.9.1. This parameter specifies whether the operation will run synchronously or asynchronously. If `false`, the operation is run synchronously. If `true`, the operation is run asynchronously and the response returns a JSON object containing job information that can be used to track the job's status. The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `edit` operation, formatted for readability:
+
+```other
+POST /context/admin/services/SampleService.MapServer/edit HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+service={
+  "description": "My updated map service",
+  "serviceName": SampleServer
+  "capabilities": "Map,Query,Data",
+  "clusterName": "default",
+  "maxInstancesPerNode": 1,
+  "minInstancesPerNode": 1,
+  "maxWaitTime": 60,
+  "maxIdleTime": 180,
+  "maxUsageTime": 600,
+  "recycleInterval": 24,
+  "recycleStartTime": "00:00",
+  "loadBalancing": "ROUND_ROBIN",
+  "isolationLevel": "HIGH",
+  "keepAliveInterval": -1,
+  "properties": {},
+  "datasets": [],
+  "type": "MapServer",
+  "frameworkProperties": {},
+  "extensions": [
+    {
+      "typeName": "WMSServer",
+      "enabled": false,
+      "capabilities": "GetCapabilities,GetFeatureInfo,GetLegendGraphic,GetMap,GetSchemaExtension,GetStyles",
+      "properties": {
+        "minRefreshPeriod": "30",
+        "compatabilityMode": "GoogleEarth",
+        "imageSize": "1024",
+        "dpi": "96",
+        "endpointURL": "null",
+        "featureLimit": "1000000",
+        "useDefaultSnippets": "false"
+      }
+    },
+    {
+      "typeName": "WFSServer",
+      "enabled": true,
+      "capabilities": "SingleImage,SeparateImages,Vectors",
+      "properties": {}
+    },
+    {
+      "typeName": "WCSServer",
+      "enabled": true,
+      "capabilities": "Create,Query,Update,Delete,Uploads",
+      "properties": {}
+    }
+  ],
+  "properties": {
+    "maxBufferCount": "100",
+    "maxImageHeight": "2048",
+    "maxRecordCount": 1000,
+    "filePath": "/arcgis/framework/etc/data/SampleServer/SampleServer.msd",
+    "maxImageWidth": "2048",
+    "cacheOnDemand": "false",
+    "virtualOutputDir": "/rest/directories/arcgisoutput",
+    "supportedImageReturnTypes": "MIME+URL",
+    "isCached": "false",
+    "ignoreCache": "false",
+    "clientCachingAllowed": "false",
+    "cacheDir": "${arcgiscache}
+  }
+}&async=false&f=pjson&tpken=Mb0ORrkLObNO2Q8FZoUCHHzSMzZi0CbhLHNRYMqqa6URG_ojQJF3rNsJAfRB23MyCrLwSmuaHPUo4AEIrUuoH1-4Ot5xh4565FtlQahXAhK2C7Sy0oydZhBwD8KdFSnVlnLr-e9uI5ovSWZ2lGNn9SwoV2MPMzeAh_5r-q-wgwF8DTT_nhuCXJGkMRy-48jjGS2aN5FI18STHZ8RAuKxGasH90SI3C7njZzlGCUrY5m6BDhCMsdpZA14GwNX8Cis
+
+```
+
+## JSON Response examples
+
+If `async` is `false`, the following response is returned once a service is edited successfully:
+
+```other
+{"status": "success"}
+```
+
+If `async` is `true`, the following response is returned. The value returned for `jobsUrl` can be used to access the job resource to track a job's status after it's been submitted. For more information, see the [Job](/job) resource topic.
+
+```other
+{
+  "jobsUrl": "https://organization.domain.com/context/admin/jobs/ja2ca1a35-881c-400c-a49a-b26883002d6c",
+  "jobID": "ja2ca1a35-881c-400c-a49a-b26883002d6c",
+  "jobStatus": "SUBMITTED"
+}
+```

@@ -1,0 +1,281 @@
+---
+title: "Analyze by least squares adjustment"
+uid: pfs-analyze-by-lsa
+description: "The analyzeByLeastSquaresAdjustment operation analyzes parcel fabric line dimensions by running a least squares adjustment."
+slug: "analyzebylsa-parcel-fabric-service"
+url: "/analyzebylsa-parcel-fabric-service"
+guid: "GUID-45BE5AE8-E4FC-4E53-992E-130AEFC087E9"
+migratedTopicMetadata:
+  FTITLE: "AnalyzeByLSA-parcel-fabric-service"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "11/08/2023 15:42:44"
+  FAUTHOR: "cleslie"
+  FSTATUS: "Released"
+  MODIFIED-ON: "14/09/2023 11:30:12"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-B9FC2DDE-85EE-4B40-B9BB-B9D4B3C8F4B2"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+  restInfoMetadata:
+  apiPath: /<serviceName>/ParcelFabricServer/analyzeByLeastSquaresAdjustment
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/ParcelFabricServer/analyzeByLeastSquaresAdjustment
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.8.1'
+  requiredCapability: ArcGIS Advanced Editing
+---
+
+## Description
+
+The `analyzeByLeastSquaresAdjustment` operation analyzes the parcel fabric measurement network by running a least squares adjustment on the input parcels. A [least-squares adjustment](https://pro.arcgis.com/en/pro-app/latest/help/data/parcel-editing/what-is-a-least-squares-adjustment.htm) is a mathematical procedure that uses statistical analysis to estimate the most likely coordinates for connected points in a measurement network. 
+
+Different types of adjustments can be run on the parcel fabric depending on whether you are evaluating spatial accuracy or improving spatial accuracy. The following two least squares analysis types can be run on the parcel fabric:
+
+-   [Consistency check](https://pro.arcgis.com/en/pro-app/latest/help/data/parcel-editing/least-squares-parcel-fabric.htm#ESRI_SECTION2_19D747419F0547FBBB9F27B4883ACA72)—A free network adjustment is used to check measurements (dimensions) on input parcel lines for blunders and outliers. 
+-   [Weighted least squares](https://pro.arcgis.com/en/pro-app/latest/help/data/parcel-editing/least-squares-parcel-fabric.htm#ESRI_SECTION2_447F119841D34FD8BF1AFCCEF5F09CDB)—Two or more fixed or weighted control points are used to estimate updated coordinates for points on the input parcels. 
+
+Use [`applyLeastSquaresAdjustment`](/applylsa-parcel-fabric-service) to apply the results of a least squares adjustment to parcel fabric feature classes.
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `gdbVersion` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.1.
+
+      Specifies the name of the geodatabase version (the default is the `DEFAULT`  version).
+      
+      Syntax
+
+      ```javascript
+      gdbVersion=<version>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sessionId`
+
+      (Required)
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.1.
+
+      Specifies the token (GUID) used to lock the version. If the calling client is editing a named version, the session ID is required. If the specified version is currently locked by another session, the request will fail if the session ID is not provided or does not match the session ID that holds the exclusive lock. If the client is editing the default version, the session ID is not required.
+      
+      Syntax
+      
+      ```javascript
+      sessionId=<guid>
+      ``` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `analysisType` 
+
+      (Required)
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+      
+      Introduced at 10.8.1.
+
+      Specifies the type of least squares analysis that will be run on the input parcels.
+      
+      -   `CONSISTENCY_CHECK` —A free-network least-squares adjustment will be run to check dimensions on parcel lines for inconsistencies and mistakes. Fixed or weighted control points will not be used by the adjustment.
+      -   `WEIGHTED_LEAST_SQUARES` —A weighted least-squares adjustment will be run to compute updated coordinates for parcel points. The parcels being adjusted should connect to at least two fixed or weighted control points.
+      
+      Syntax
+      
+      ```javascript
+      analysisType=<string>
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `convergenceTolerance` 
+      
+      (Required)
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.1.
+
+      The maximum coordinate shift expected after iterating the least squares adjustment. A least squares adjustment is run repeatedly (in iterations) until the solution converges. The solution is considered converged when maximum coordinate shift encountered becomes less than the specified convergence tolerance. The default value is 0.05 meters or 0.164 feet.
+
+      Syntax
+      
+      ```javascript
+      convergenceTolerance=<long>
+      ```
+    </StyledTableCell>
+
+  </StyledTableRow>
+
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `parcelFeatures` 
+      
+      (Required)
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.1.
+
+      Specifies the input parcels that will be analyzed using a least squares adjustment.
+
+      Syntax
+      
+      ```javascript
+      parcelFeatures=[{"id":"<guid>","layerId":"<layerID>"},{...}]
+      ```
+      </StyledTableCell>
+  </StyledTableRow>
+
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async` 
+      
+      (Optional)
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.1.
+      
+      Specifies whether the request will be processed asynchronously. If `true`, the request will be processed as an asynchronous job and a URL is returned that points to a location displaying the status of the job. The default is `false`.
+
+      Values: `true` | `false` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response is `html`.
+      Values: `html` | `json` | `pjson` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+The following example is a sample POST request for `analyzeByLeastSquaresAdjustment`, which demonstrates the steps for performing a consistency check on the input parcels: 
+
+<Note type={"note"}>
+
+The `sessionId` parameter value must be the same for starting the edit session, performing the edit operation, and stopping the edit session.
+
+</Note>
+
+1.  [Start a service session](/start-reading) on the version.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/VersionManagementServer/versions/E4DAED9D-C859-489B-9053-767A45F1D97C/startReading
+    f=json
+    sessionId={24deea33-b826-42de-9cc3-7200093da4be}
+    ```
+     
+2.  [Start an edit session](/start-editing) on the version.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/VersionManagementServer/versions/E4DAED9D-C859-489B-9053-767A45F1D97C/startEditing
+    f=json
+    sessionId={24deea33-b826-42de-9cc3-7200093da4be}
+    ```
+     
+3.  Run a consistency check on the specified parcels using the `analyzeByLeastSquaresAdjustment` operation.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/ParcelFabricServer/analyzeByLeastSquaresAdjustment
+    f=json
+    gdbVersion=admin.Version1
+    sessionId={24deea33-b826-42de-9cc3-7200093da4be}
+    analysisType=CONSISTENCY_CHECK
+    convergenceTolerance=0.16404199475065617
+    parcelFeatures=[{"id":"{455428FC-63F9-4967-94E7-2A5C0D259B90}","layerId":"7"},{"id":"{D4A18A8A-7217-4FE9-853F-F28F155AB6EE}","layerId":"7"},{"id":"{1675EC35-7C8D-4A0E-8B1C-F51B7B989718}","layerId":"7"},{"id":"{13AF598B-1BB8-4ACB-A642-BDC1CA6E81F6}","layerId":"7"},{"id":"{71C444CF-34B1-47EA-86B5-4F543A58043B}","layerId":"13"},{"id":"{EA131013-1980-4A93-B7FD-DDD14291DC6A}","layerId":"13"},{"id":"{FCE266F4-757B-42FA-81E2-7030E341483B}","layerId":"13"}]
+    async=true
+    ```
+     
+4.  When edits are complete, [stop the edit session](/stop-editing).
+
+5.  [Stop](/stop-reading) and release the service session. 
+
+## JSON Response syntax
+
+The following is the response syntax when `async` is `true`:
+
+```other
+{
+  "statusUrl": <url>,
+  "success": <true | false>
+}
+```
+
+## JSON Response example
+
+The following is an example response when `async` is `true`: 
+
+```other
+{
+  "statusUrl": "https://machine.domain.com/server/rest/services/Parcel_Fabric/ParcelFabricServer/jobs/j7342ce4d28494f3aa2ba27dc88092c90",
+  "success": true
+}
+```
+
+ 

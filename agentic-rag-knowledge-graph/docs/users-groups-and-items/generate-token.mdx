@@ -1,0 +1,298 @@
+---
+title: "/generateToken: Generate Token"
+description: "This operation generates an access token in exchange for user credentials that can be used by clients when working with the Sharing API."
+slug: "generate-token"
+url: "/generate-token"
+guid: "GUID-110DFED5-3610-47E8-A570-3563D3335CDD"
+migratedTopicMetadata:
+  FTITLE: "Generate Token"
+  FDESCRIPTION: ""
+  FCHANGES: "Adding case sensitive information"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.7 -*"
+  CREATED-ON: "27/01/2022 12:54:16"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "24/05/2022 09:26:15"
+  VERSION: "10"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-E2C2E5D8-FBA3-4543-AED3-E281547D4F6F"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /generateToken
+  urlSegments:
+    - name: '[root]'
+      url: /root
+    - name: /generateToken
+  methods:
+    - post
+  sslOnly: 'yes'
+---
+
+## Example usage
+
+The following is a sample ArcGIS Enterprise POST request for the `generateToken` operation. For more examples, see the [Additional example usage](/generate-token#additional-example-usage) section below.
+
+```javascript
+POST /webadaptor/sharing/rest/generateToken HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+username=admin&password=test1234&client=referer&referer=https://myserver/mywebapp&expiration=60&f=pjson
+```
+
+## Description
+
+<Note type={"note"}>
+
+In ArcGIS Enterprise, this operation has been superceded by the OAuth [Token](/token) resource; `generateToken` is no longer the default.
+
+The `generateToken` operation generates an access token in exchange for user credentials that can be used by clients. The access token represents the authenticated user for a certain amount of time to all other API functionality. Developers using the API must take care to protect the token against malicious use just as they would the original credentials, and they must be prepared to renew the token. Expired tokens will be rejected by the server. This operation also supports generation of a server-token in exchange for a portal token. This server-token is required for clients to access resources from a federated server. The parameters `token` and `serverUrl` are required to generate a server-token.
+
+The default token length when using OAuth is two weeks. The `esri_auth` cookie containing that token is set as a session cookie by default, or set to two weeks if the **Keep me signed in** check box is checked.
+
+</Note>
+
+Organizations that choose to implement higher levels of security for their organizations can set the `allSSL` setting to true for their organization or portal. The effect of setting `allSSL` to true is that all non-HTTPS requests for resources belonging to the organization will be rejected. Setting `allSSL` to true guarantees that all transmissions of access tokens as well as data between clients and servers is over a secure encrypted channel and provides protection to tokens and data in transit. When `generateToken` is called for a user in such an organization, it returns a response property of `ssl` as `true`, and the token must always be passed back via HTTPS to the portal.
+
+The call is only allowed over HTTPS.
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+<StyledTableRow>
+  <StyledTableCell cellStyle="markdown">
+
+    `username` 
+
+  </StyledTableCell>
+  <StyledTableCell cellStyle="markdown">
+
+    The case-sensitive username of the user who wants to get a token.
+
+    Example
+
+    ```javascript
+    username=admin
+    ``` 
+
+  </StyledTableCell>
+</StyledTableRow>
+<StyledTableRow>
+  <StyledTableCell cellStyle="markdown">
+
+    `password` 
+
+  </StyledTableCell>
+  <StyledTableCell cellStyle="markdown">
+
+    The password of the user who wants to get a token.
+
+    Example
+
+    ```javascript
+    password=test1234
+    ``` 
+
+  </StyledTableCell>
+</StyledTableRow>
+<StyledTableRow>
+  <StyledTableCell cellStyle="markdown">
+
+    `client` 
+
+  </StyledTableCell>
+  <StyledTableCell cellStyle="markdown">
+
+    The client type that will be granted access to the token. Users may specify whether the token will be generated for a client application's base URL.
+
+    Values: `referer` 
+
+  </StyledTableCell>
+</StyledTableRow>
+<StyledTableRow>
+  <StyledTableCell cellStyle="markdown">
+
+    `referer` 
+
+  </StyledTableCell>
+  <StyledTableCell cellStyle="markdown">
+
+    The base URL of the client application that will use the token. On the **Generate Token** page, the referer URL is specified in the **Webapp URL** field. This is required when `client` has been set as `referer` .
+
+    Example
+
+    ```javascript
+    referer=https://myserver/mywebapp
+    ``` 
+
+  </StyledTableCell>
+</StyledTableRow>
+<StyledTableRow>
+  <StyledTableCell cellStyle="markdown">
+
+    `expiration` 
+
+  </StyledTableCell>
+  <StyledTableCell cellStyle="markdown">
+
+    The token expiration time in minutes. The default is 60 minutes (one hour). The maximum expiration period is 15 days. The maximum value of the expiration time is controlled by the server. Requests for tokens larger than this time will be rejected. Applications are responsible for renewing expired tokens; expired tokens will be rejected by the server on subsequent requests that use the token. 
+
+    Example
+
+    ```javascript
+    expiration=60
+    ``` 
+
+  </StyledTableCell>
+</StyledTableRow>
+<StyledTableRow>
+  <StyledTableCell cellStyle="markdown">
+
+    `token` 
+
+  </StyledTableCell>
+  <StyledTableCell cellStyle="markdown">
+
+    Portal token generated in exchange for user credentials for use by clients working with a federated server. This parameter is required only when generating a server-token. User name, password, client, referer, and expiration parameters are not required for generating a server-token. The referer of the portal token will be applied to the server-token.
+
+    ```javascript
+    token=G6943LMReKj_kqdAVrAiPbpRloAfE1fqp0eVAJ-IChQcV-kv3gW-gBAzWztBEdFY
+    ``` 
+
+  </StyledTableCell>
+</StyledTableRow>
+<StyledTableRow>
+  <StyledTableCell cellStyle="markdown">
+
+    `serverURL` 
+
+  </StyledTableCell>
+  <StyledTableCell cellStyle="markdown">
+
+    URL of a federated server for which a server-token needs to be generated. A server-token will be returned only if the `serverUrl` contains the URL of a server that is registered with the portal. A server-token will not be generated for a server that is not registered with the portal.
+
+    Example
+
+    ```javascript
+    serverUrl=<https://myserver.esri.com/arcgis>
+    ```
+
+  </StyledTableCell>
+</StyledTableRow>
+<StyledTableRow>
+  <StyledTableCell cellStyle="markdown">
+
+    `f` 
+
+  </StyledTableCell>
+  <StyledTableCell cellStyle="markdown">
+
+    The response format. The default response format is `html` .
+
+    Values: `html`  \| `json`  \| `pjson` 
+
+  </StyledTableCell>
+</StyledTableRow>
+</StyledTable>
+
+## Response properties
+
+<StyledTable headers={"Property,Details"}>
+<StyledTableRow>
+  <StyledTableCell cellStyle="markdown">
+
+    `token` 
+
+  </StyledTableCell>
+  <StyledTableCell cellStyle="markdown">
+
+    The generated token.
+
+    Example
+
+    ```javascript
+    "token": "6hrFDATxrG9w14QY9wwnmVhLE0Wg6LIvwOwUaxz761m1JfRp4rs8Mzozk5xhSkw0_MQz6bpcJnrFUDwp5lPPFC157dHxbkKlDiQ9XY3ZIP8zAGCsS8ruN2uKjIaIargX"
+    ```
+ 
+  </StyledTableCell>
+</StyledTableRow>
+<StyledTableRow>
+  <StyledTableCell cellStyle="markdown">
+
+    `expires` 
+
+  </StyledTableCell>
+  <StyledTableCell cellStyle="markdown">
+
+    The expiration time of the token in milliseconds since January 1, 1970 (UTC).
+
+    Example
+
+    ```javascript
+    "expires": "1582930261424"
+    ```
+
+  </StyledTableCell>
+</StyledTableRow>
+<StyledTableRow>
+  <StyledTableCell cellStyle="markdown">
+
+    `ssl` 
+
+  </StyledTableCell>
+  <StyledTableCell cellStyle="markdown">
+
+    This property will show as `true` if the token must always pass over ssl.
+
+    Values: `true`  \| `false` 
+
+  </StyledTableCell>
+</StyledTableRow>
+</StyledTable>
+
+## Additional example usage
+
+The example below illustrate how users can generate tokens with this operation.
+
+### Example: Referer
+
+The following example demonstrates how an ArcGIS Enterprise user can generate a token with a client application's base URL:
+
+```javascript
+POST /webadaptor/sharing/rest/generateToken HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+username=admin&password=test1234&client=referer&referer=https://myserver/mywebapp&expiration=60&f=json
+```
+
+## JSON Response syntax
+
+```javascript
+{
+  "token": "<token generated>",
+  "expires": <date shown in UNIX time>,
+  "ssl": false | true
+}
+``` 
+
+## JSON Response example
+
+```javascript
+{
+  "token": "6hrFDATxrG9w14QY9wwnmVhLE0Wg6LIvwOwUaxz761m1JfRp4rs8Mzozk5xhSkw0_MQz6bpcJnrFUDwp5lPPFC157dHxbkKlDiQ9XY3ZIP8zAGCsS8ruN2uKjIaIargX",
+  "expires": 1582930261424,
+  "ssl": true
+}
+```
+
+ 

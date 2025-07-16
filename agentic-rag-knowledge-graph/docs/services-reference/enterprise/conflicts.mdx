@@ -1,0 +1,428 @@
+---
+title: "Conflicts"
+description: "The conflicts operation allows you to view conflicts by layer and type (update-update, update-delete, and delete-update) that were identified during the previous reconcile operation."
+slug: "conflicts"
+url: "/conflicts"
+guid: "GUID-DE152053-B383-4932-B836-5C0036E636E9"
+migratedTopicMetadata:
+  FTITLE: "Conflicts"
+  FDESCRIPTION: ""
+  FCHANGES: "Conref for ArcGIS Advanced Editing UTE - GDB #12228
+Adding a conref from the version resource topic about the read/edit session requirements."
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "03/08/2023 15:45:14"
+  FAUTHOR: "mjarman"
+  FSTATUS: "Released"
+  MODIFIED-ON: "28/08/2023 05:16:21"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "8"
+  ED: "GUID-1950C657-6AEF-4E84-9609-DA296DAA83F4"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/VersionManagementServer/versions/<versionGuid>/conflicts
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/VersionManagementServer/versions/<versionGuid>/conflicts
+  methods:
+    - post
+  requiredCapability: ArcGIS Advanced Editing user type extension license
+  versionIntroduced: '10.6'
+---
+
+## Description
+
+The `conflicts` operation allows you to view conflicts by layer and type (update-update, update-delete, and delete-update) that were identified during the previous `reconcile` operation. The features that are in conflict will also be returned as they existed in the branch, ancestor, and default versions.
+
+Review the read and edit session requirements for [version resource operations](/version).
+
+<Note type={"note"}>
+
+Organization members must be assigned a license for the [ArcGIS Advanced Editing user type extension](https://enterprise.arcgis.com/en/portal/latest/administer/windows/license-user-type-extensions.htm#ESRI_SECTION1_B75DA80066744473AD5DD1312734654A) to use this operation for ArcGIS Enterprise 11.2 and later.
+
+</Note>
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the output format of the response. The default response format is `html`.
+<br />
+Values: `html` | `json` | `pjson` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sessionId`
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The client-generated session ID (GUID).
+
+Syntax : `sessionId = {3F2504E0-4F89-41D3-9A0C-0305E82C3301}` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outSR`
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The output spatial reference.
+
+Syntax: `{wkid=<wkid>}` 
+
+Example: `outSR = {wkid=4326}` 
+
+This parameter was introduced at ArcGIS Enterprise 11.1.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## JSON Response syntax
+
+```other
+{
+  "conflicts" : [
+    {
+      "layerId": long,
+      "updateUpdateConflicts": [
+        {
+          "branchVersion": {
+            "attributes": {
+              "OBJECTID": 581,
+              "SUBTYPE": 3,
+                . . .
+              "SHAPE.STLength()": 132.5
+            },
+            "geometry": {
+              "hasZ": true,
+              "hasM": true,
+              "paths": [
+                . . .
+              ]
+            }
+          },
+          "ancestorVersion": {
+            "attributes": {
+              "OBJECTID": 581,
+              "SUBTYPE": 3,
+                . . .
+              "SHAPE.STLength()": 132.5
+            },
+            "geometry": {
+              "hasZ": true,
+              "hasM": true,
+              "paths": [
+                . . .
+              ]
+            }
+          },
+          "defaultVersion": {
+            "attributes": {
+              "OBJECTID": 581,
+              "SUBTYPE": 3,
+                . . .
+              "SHAPE.STLength()": 132.5
+            },
+            "geometry": {
+              "hasZ": true,
+              "hasM": true,
+              "paths": [
+                . . .
+              ]
+            }
+          },
+          "note": "notes", 
+          "isInspected": <true | false> 
+        }
+      ],
+      "updateDeleteConflicts": [
+        {
+          "branchVersion": {
+              . . .
+          },
+          "ancestorVersion": {
+              . . .
+          },
+          "note": "notes", 
+          "isInspected": <true | false> 
+        }
+      ],
+	     "deleteUpdateConflicts": [{
+        {
+          "ancestorVersion": {
+              . . .
+          },
+          "defaultVersion": {
+              . . .
+          },
+          "note": "notes", 
+          "isInspected": <true | false> 
+        }
+      ]
+    }
+  ],
+  "success" : <true | false>,
+  "error" : { // only if success is false
+    "extendedCode" : <HRESULT>,
+    "message" : <error message>,
+    "details" : [ <detail> ]
+  }
+}
+
+```
+
+ 
+
+## Example usage
+
+The example below returns the conflicts for a named version using the `conflicts`  operation.
+
+Request URL and parameters:
+
+```javascript
+https://myserver.esri.com/server/rest/services/LandUse/VersionManagementServer/versions/<versionGuid>/conflicts
+```
+
+ 
+
+JSON response:
+
+```javascript
+{
+ "conflicts": [
+  {
+   "layerId": 0,
+   "updateUpdateConflicts": [
+    {
+     "branchVersion": {
+      "attributes": {
+       "objectid": 1,
+       "buildingid": "1",
+       "facilitykey": "Building M",
+       "shortname": "M",
+       "bldgarea": 1768.9923984,
+       "accesstype": "Employee",
+       "condition": "Excellent",
+       "ownedby": 1,
+       "maintby": 1,
+       "lastupdate": 1308068821000,
+       "lasteditor": "Esri",
+       "shortname1": null,
+       "bldgtype": null,
+       "globalid": "{126BE255-1E01-44B6-A957-1104EB11D9BF}",
+       "created_user": null,
+       "created_date": null,
+       "last_edited_user": "publisher1",
+       "last_edited_date": 1638822851000,
+       "st_area(shape)": 1768.98881048752605,
+       "st_length(shape)": 178.404835533569781
+      },
+      "geometry": {
+       "hasZ": true,
+       "rings": [
+        [
+         [
+          6801192.1862077713,
+          1839874.45668251812,
+          0
+         ],
+         [
+          6801251.53254577518,
+          1839874.88253468275,
+          0
+         ],
+         [
+          6801251.751377359,
+          1839845.12439210713,
+          0
+         ],
+         [
+          6801192.30431777239,
+          1839844.69722759724,
+          0
+         ],
+         [
+          6801192.09598486125,
+          1839874.45569826663,
+          0
+         ],
+         [
+          6801192.1862077713,
+          1839874.45668251812,
+          0
+         ]
+        ]
+       ]
+      }
+     },
+     "ancestorVersion": {
+      "attributes": {
+       "objectid": 1,
+       "buildingid": "1",
+       "facilitykey": "Building N",
+       "shortname": "N",
+       "bldgarea": 1768.9923984,
+       "accesstype": "Employee",
+       "condition": "Excellent",
+       "ownedby": 1,
+       "maintby": 1,
+       "lastupdate": 1308068821000,
+       "lasteditor": "Esri",
+       "shortname1": null,
+       "bldgtype": null,
+       "globalid": "{126BE255-1E01-44B6-A957-1104EB11D9BF}",
+       "created_user": null,
+       "created_date": null,
+       "last_edited_user": "publisher1",
+       "last_edited_date": 1633042076000,
+       "st_area(shape)": 1768.98881048752605,
+       "st_length(shape)": 178.404835533569781
+      },
+      "geometry": {
+       "hasZ": true,
+       "rings": [
+        [
+         [
+          6801192.1862077713,
+          1839874.45668251812,
+          0
+         ],
+         [
+          6801251.53254577518,
+          1839874.88253468275,
+          0
+         ],
+         [
+          6801251.751377359,
+          1839845.12439210713,
+          0
+         ],
+         [
+          6801192.30431777239,
+          1839844.69722759724,
+          0
+         ],
+         [
+          6801192.09598486125,
+          1839874.45569826663,
+          0
+         ],
+         [
+          6801192.1862077713,
+          1839874.45668251812,
+          0
+         ]
+        ]
+       ]
+      }
+     },
+     "defaultVersion": {
+      "attributes": {
+       "objectid": 1,
+       "buildingid": "1",
+       "facilitykey": "Building O",
+       "shortname": "O",
+       "bldgarea": 1768.9923984,
+       "accesstype": "Employee",
+       "condition": "Excellent",
+       "ownedby": 1,
+       "maintby": 1,
+       "lastupdate": 1308068821000,
+       "lasteditor": "Esri",
+       "shortname1": null,
+       "bldgtype": null,
+       "globalid": "{126BE255-1E01-44B6-A957-1104EB11D9BF}",
+       "created_user": null,
+       "created_date": null,
+       "last_edited_user": "publisher1",
+       "last_edited_date": 1638822829000,
+       "st_area(shape)": 1768.98881048752605,
+       "st_length(shape)": 178.404835533569781
+      },
+      "geometry": {
+       "hasZ": true,
+       "rings": [
+        [
+         [
+          6801192.1862077713,
+          1839874.45668251812,
+          0
+         ],
+         [
+          6801251.53254577518,
+          1839874.88253468275,
+          0
+         ],
+         [
+          6801251.751377359,
+          1839845.12439210713,
+          0
+         ],
+         [
+          6801192.30431777239,
+          1839844.69722759724,
+          0
+         ],
+         [
+          6801192.09598486125,
+          1839874.45569826663,
+          0
+         ],
+         [
+          6801192.1862077713,
+          1839874.45668251812,
+          0
+         ]
+        ]
+       ]
+      }
+     },
+     "note": "",
+     "isInspected": false
+    }
+   ]
+  }
+ ],
+ "success": true
+}
+```
+
+ 

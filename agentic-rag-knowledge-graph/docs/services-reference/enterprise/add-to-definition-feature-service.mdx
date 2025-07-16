@@ -1,0 +1,1290 @@
+---
+title: "Add to Definition (Feature Service)"
+description: "The addToDefinition operation supports adding a definition property to a hosted feature service."
+slug: "add-to-definition-feature-service"
+url: "/add-to-definition-feature-service"
+guid: "GUID-80BB1392-D87A-4270-AD54-48E0CF5E31BF"
+migratedTopicMetadata:
+  FTITLE: "Add To Definition (Feature Service)"
+  FDESCRIPTION: "Adding parameters and description"
+  FCHANGES: "Changes for 11.2"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2- *"
+  CREATED-ON: "25/09/2023 16:54:13"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "28/09/2023 12:29:55"
+  VERSION: "9"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-A56ABE43-DAC6-446A-8F23-5C9BEEDC4ABB"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /services/<serviceName>/FeatureServer/addToDefinition
+  urlSegments:
+    - name: <adminRoot>
+      url: DEVSITE/rest/services-reference/online/administering-arcgis-online-hosted-services
+    - name: /services/<serviceName>/FeatureServer/addToDefinition
+  methods: []
+  sslOnly: 'no'
+---
+
+## Description
+
+The `addToDefinition`  operation supports adding a definition property to a hosted feature service. The result of this operation is a response indicating success or failure with error code and description.
+
+## New at 11.4
+
+This operation now supports performing asynchronous requests for ArcGIS Enterprise hosted feature services.
+
+## New at 11.3
+
+Joined views can be created from source layers with editor tracking enabled and access control is turned on. Access control uses the left table of the join to enforce the settings. Views can't have access control enabled directly; they always inherit from the source layers.
+
+## New at 11.2
+
+Advanced views for join now include attachments from the left table in the join.
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`addToDefinition` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The `addToDefinition`  parameter supports adding a definition property in a feature service.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`async` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Support options for asynchronous processing. The default format is `false` .
+
+Values: `true`  \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is html.
+
+Values: `html`  \| `json`  \| `pjson` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Advanced views
+
+Views can be created in a way that allows the creator to transform the data of the underlying layers through joins, expressions, or both. Advanced views are powerful tools; however, using advanced views limits what other capabilities are permitted on the layer. Notably, advanced views are read-only and cannot be sync-enabled.
+
+<Note type={"note"}>
+
+To reference a service as a member of the advanced view you must be either the owner of that service or have administrator privilege.
+
+</Note>
+
+Views, whether advanced or not, are created using a call to the `addToDefinition`  operation on a service marked as a view (`isView: true` ). The difference between which type of view is created depends on how the table property is defined within a `viewLayerDefinition`  of that call. Creating a view using only the `sourceLayerFields`  of the joined layer, `sourceLayerId` of the joined layer, and `sourceServiceName`  of the joined service without a table property will create a view without advanced capabilities. The inclusion of these properties with a table property indicates a view with advanced capabilities.
+
+<Note type={"note"}>
+
+In ArcGIS Enterprise, for a table to indicate an advanced view it must also be named by providing the name property within it.
+
+</Note>
+
+An advanced view is created as a single primary table with additional related tables joined onto it using one or more common fields. 
+
+<Note type={"note"}>
+
+ArcGIS Online, and with ArcGIS Enterprise 10.9, the maximum number of related tables is restricted to one.
+
+</Note>
+
+For example, suppose you have two layers. Layer one has the fields `stateAbbreviation`  and `data1` . Layer two has fields `stateAbbreviation`  and `data2` . By joining layers one and two on `stateAbbreviation`  an advanced view can create a layer with fields `stateAbbreviation` , `data1` , and `data2` . These layers may also contain a geometry field, as shown later in this section.
+
+<Note type={"note"}>
+
+ArcGIS Online, and in ArcGIS Enterprise 10.9.1 or higher, there may be multiple geometry layers. However, they must all have the same spatial reference.
+
+</Note>
+
+### Primary table
+
+Below is the `table`  property in a `viewLayerDefinition`  that defines the primary table. Any other tables contained in the view are `relatedTables`  joined onto the primary table by one or more columns. Joined tables follow the same structure as SQL joins and users who are familiar with the concepts of one may apply those concepts to the other.
+
+```javascript
+"table": {
+  "name": "<table name>",
+  "sourceServiceName": "<source service name>",
+  "sourceLayerId": <source layer id>,
+  "filter": "<filter>",
+  "topFilter": "<top filter>",
+  "sourceLayerFields": [
+    {
+      "name": "<The new name for this field>",
+      "alias": "<The new alias for this field>",
+      "source": "<source layer field name>",
+      "statisticType": "<statistic type>",
+      "expression": "<standard sql expression using source field names>",
+      "type": "<The new ESRI field type>"
+    },
+    …
+  ],
+  "relatedTables" : [
+    {…},
+     …
+  ],
+  "groupBy": "<groupBy fields for statistics>",
+  "havingFilter": "<having filter for statistics>"
+}
+```
+
+ 
+
+The following table describes the properties listed above:
+
+<StyledTable headers={"Property,Type,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`table`
+
+ 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Object
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The primary table onto which any related tables are joined.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`name`
+
+ 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+String
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+An alias sometimes used to reference this table within the `viewLayerDefinition` .
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sourceServiceName`
+
+ 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+String
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The underlying source service name of the joined service.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sourceLayerId`
+
+ 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Integer
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The underlying source layer ID of the joined layer. Defaults to the first layer or table.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`filter`
+
+ 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Object
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Filters layer data based on non-aggregated fields. The filter needs to reference the source layer field names.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`topFilter`
+
+ 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Object
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A `topFilter`  on the table results.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sourceLayerFields`
+
+ 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Field Array
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The list of fields in the newly created view of the joined layer.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`relatedTables`
+
+ 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Object
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The definition of the related tables.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`havingFilter`
+
+ 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Object
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Filters data based on aggregated fields. The filter needs to reference field names defined in the view rather than the source field names.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`groupBy`
+
+ 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+String
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Fields for aggregation. Needs to reference field names defined in the view and not the source field names.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+### Related tables
+
+Related tables define the tables joined to the primary table. Related tables are the same in the way they define fields, but differ insofar as they contain join information. Related table objects should be listed in the `relatedTables`  property of the table.
+
+```javascript
+“relatedTables”: [
+  {
+    "name": "<table name>",
+    "sourceServiceName": "<source service name>",
+    "sourceLayerId": <source layer id>,
+    "filter": "<filter>",
+    "topFilter": "<top filter>",
+    "sourceLayerFields": [
+      {…},
+      …
+    ],
+    "type": "<INNER, LEFT, RIGHT, FULL>",
+    "parentKeyFields": ["Join parent key"],
+    "keyFields": ["Join related foreign key"],
+    "groupBy": "<groupBy fields for statistics>",
+    "havingFilter": "<having filter for statistics>"
+  }
+]
+```
+
+ 
+
+The following table describes the properties listed above:
+
+<StyledTable headers={"Property,Type,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`type`
+
+ 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+String
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The manner in which this table is joined to the primary table.
+
+Values: `INNER`  \| `LEFT`  \| `RIGHT`  \| `FULL` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`parentKeyFields`
+
+ 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+String array
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The primary table's key field used to join with this table's key field. Note that the array lengths of the `parentKeyFields`  and `keyFields`  must match. The joins assume an ordered listing (i.e., field 1 of parent keys joins to field 1 of the related keys).
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`keyFields`
+
+ 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+String array
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The related table's key fields used to join with the primary table's key field. Note that the array lengths of the `parentKeyFields`  and `keyFields`  must match. The joins assume an ordered listing (i.e., field 1 or parent keys joins to field 1 of the related keys).
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+### SourceLayerFields
+
+The `sourceLayerFields`  property defines how view fields reference fields from the source layer. It can reference a source field directly, create a statistic from it, or can be defined as an expression that uses the source layer fields.
+
+Example one
+
+```javascript
+"sourceLayerFields": [
+  {
+    "name": "zipcode",
+    "source": "zipcode"
+  },
+  {
+    "name": "salesavg",
+    "alias": "SaleAveragePerCustomer",
+    "expression": "(Total_Sales_FY13 + Total_Sales_FY14) / Customers",
+    "type": "esriFieldTypeDouble"
+  }
+]
+```
+
+ 
+
+Example two
+
+```javascript
+"table": {
+  …,
+  "sourceLayerFields": [
+    {
+      "name": "storename",
+      "alias": "StoreName",
+      "source": "storename"
+    },
+    {
+      "name": "mycount",
+      "alias": "StoreNumber",
+      "source": "objectid",
+      "statisticType": "count"
+    },
+    {
+      "name": "data1sum",
+      "alias": "Total",
+      "source": "data1",
+      "statisticType": "sum"
+    }
+  ],
+  "groupBy": "storeName"
+}
+```
+
+ 
+
+The properties listed below are each a field in a JSON object inside the `sourceLayerFields`  array. Although each of these options are listed as optional in the table below, one of them must be included.
+
+<StyledTable headers={"Property,Type,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`name`
+
+ 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+String
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The field name in the new view. The name of the field can be different from the source field name.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`alias`
+
+ 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+String
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The field alias in the new view.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`source`
+
+ 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+String
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The source layer field name that is referenced directly or utilized inside the statistic operation.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`statistcType`
+
+ 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+String
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The statistic/aggregation function to be applied on the field. 
+
+Values: `SUM`  \| `AVG`  \| `MIN`  \| `MAX`  \| `STDDEV` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+### Geometry field
+
+The geometry field defines the geometry of the resulting view. It is located in the root of the `adminLayerInfo`  object.
+
+```javascript
+"adminLayerInfo": { 
+	 …, 
+	 "geometryFieldName": "myTableName.shape" 
+}
+```
+
+ 
+
+The following table describes the `geometryFieldName`  property:
+
+<StyledTable headers={"Property,Type,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geometryFieldName`
+
+ 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+String
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The geometry field name in the new view. It is specified as the name of the table (either primary or related) and geometry field name.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+### Advanced view addToDefinition example
+
+Below is a sample JSON object for the `addToDefinition`  parameter that demonstrates how to create an advanced view:
+
+```javascript
+{
+  "layers": [
+    {
+      "name": "TEST_JOIN",
+      "description": "AttributeJoin",
+      "adminLayerInfo": {
+        "viewLayerDefinition": {
+          "table": {
+            "name": "target",
+            "sourceServiceName": "MyService",
+            "sourceLayerId": 0,
+            "sourceLayerFields": [
+              {
+                "name": "key1",
+                "alias": "key1",
+                "source": "key1"
+              },
+              {
+                "name": "date1",
+                "alias": "date1",
+                "source": "date1"
+              }
+            ],
+            "relatedTables": [
+              {
+                "name": "joined",
+                "sourceServiceName": "MyService",
+                "sourceLayerId": 3,
+                "sourceLayerFields": [
+                  {
+                    "name": "key1related",
+                    "alias": "key1related",
+                    "source": "key1related"
+                  },
+                  {
+                    "name": "name",
+                    "alias": "name",
+                    "source": "name"
+                  },
+                  {
+                    "name": "relatedExpression",
+                    "alias": "NicelyDisplayedExpressionName",
+                    "expression": "data1 + data2",
+                    "type": "esriFieldTypeDouble"
+                  }
+                ],
+                "type": "INNER",
+                "parentKeyFields": [
+                  "key1",
+                  "key2"
+                ],
+                "keyFields": [
+                  "key1related",
+                  "key2related"
+                ]
+              }
+            ]
+          }
+        },
+        "geometryField": {
+          "name": "target.shape"
+        }
+      }
+    }
+  ]
+}
+```
+
+ 
+
+## Example usage
+
+```javascript
+https://services.myserver.com/OrgID/ArcGIS/rest/admin/services/example/FeatureServer/addToDefinition
+```
+
+ 
+
+Below is a sample JSON object for the `addToDefinition`  parameter that demonstrates how to add a layer to an existing feature service:
+
+```javascript
+{
+  "layers": [
+    {
+      "adminLayerInfo": {
+        "tableName": "db_10.user_10.LOADTESTSOIL_LOADTESTSOIL", 
+        "geometryField": {"name": "Shape"}, 
+        "xssTrustedFields": ""
+      }, 
+      "id": 0, 
+      "name": "LoadTestSoil", 
+      "type": "Feature Layer", 
+      "displayField": "", 
+      "description": "", 
+      "copyrightText": "", 
+      "defaultVisibility": true, 
+      "ownershipBasedAccessControlForFeatures": {
+        "allowOthersToQuery": false, 
+        "allowOthersToDelete": false, 
+        "allowOthersToUpdate": false
+      }, 
+      "editFieldsInfo": {
+        "creationDateField": "CreationDate", 
+        "creatorField": "Creator", 
+        "editDateField": "EditDate", 
+        "editorField": "Editor"
+      }, 
+      "editingInfo": {
+        "lastEditDate": 1455126059440
+      }, 
+      "relationships": [], 
+      "isDataVersioned": false, 
+      "supportsCalculate": true, 
+      "supportsAttachmentsByUploadId": true, 
+      "supportsRollbackOnFailureParameter": true, 
+      "supportsStatistics": true, 
+      "supportsAdvancedQueries": true, 
+      "supportsValidateSql": true, 
+      "supportsCoordinatesQuantization": true, 
+      "supportsApplyEditsWithGlobalIds": true, 
+      "advancedQueryCapabilities": {
+        "supportsPagination": true, 
+        "supportsQueryWithDistance": true, 
+        "supportsReturningQueryExtent": true, 
+        "supportsStatistics": true, 
+        "supportsOrderBy": true, 
+        "supportsDistinct": true, 
+        "supportsQueryWithResultType": true, 
+        "supportsSqlExpression": true, 
+        "supportsReturningGeometryCentroid": true
+      }, 
+      "useStandardizedQueries": false, 
+      "geometryType": "esriGeometryPolygon", 
+      "minScale": 2311163, 
+      "maxScale": 1128, 
+      "extent": {
+        "xmin": -13090714.767112788, 
+        "ymin": 3841739.0914657288, 
+        "xmax": -12922032.654624918, 
+        "ymax": 3962581.2727843975, 
+        "spatialReference": {
+          "wkid": 102100, 
+          "latestWkid": 3857
+        }
+      }, 
+      "drawingInfo":{"renderer":{"type":"simple","symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[76,129,205,191],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.75}}},"transparency":0,"labelingInfo":null}, 
+      "allowGeometryUpdates": true, 
+      "hasAttachments": false, 
+      "htmlPopupType": "esriServerHTMLPopupTypeNone", 
+      "hasM": false, 
+      "hasZ": false, 
+      "objectIdField": "FID", 
+      "globalIdField": "GlobalID", 
+      "typeIdField": "", 
+      "fields": [
+        {
+          "name": "FID", 
+          "type": "esriFieldTypeInteger", 
+          "actualType": "int", 
+          "alias": "FID", 
+          "sqlType": "sqlTypeInteger", 
+          "length": 4, 
+          "nullable": false, 
+          "editable": false, 
+          "domain": null, 
+          "defaultValue": null
+        }, 
+        {
+          "name": "AREA", 
+          "type": "esriFieldTypeDouble", 
+          "actualType": "float", 
+          "alias": "AREA", 
+          "sqlType": "sqlTypeFloat", 
+          "nullable": true, 
+          "editable": true, 
+          "domain": null, 
+          "defaultValue": null
+        }, 
+        {
+          "name": "PERIMETER", 
+          "type": "esriFieldTypeDouble", 
+          "actualType": "float", 
+          "alias": "PERIMETER", 
+          "sqlType": "sqlTypeFloat", 
+          "nullable": true, 
+          "editable": true, 
+          "domain": null, 
+          "defaultValue": null
+        }, 
+        {
+          "name": "MUSYM", 
+          "type": "esriFieldTypeString", 
+          "actualType": "nvarchar", 
+          "alias": "MUSYM", 
+          "sqlType": "sqlTypeNVarchar", 
+          "length": 8, 
+          "nullable": true, 
+          "editable": true, 
+          "domain": null, 
+          "defaultValue": null
+        }, 
+        {
+          "name": "MUKEY", 
+          "type": "esriFieldTypeString", 
+          "actualType": "nvarchar", 
+          "alias": "MUKEY", 
+          "sqlType": "sqlTypeNVarchar", 
+          "length": 30, 
+          "nullable": true, 
+          "editable": true, 
+          "domain": null, 
+          "defaultValue": null
+        }, 
+        {
+          "name": "DESCRIPTIO", 
+          "type": "esriFieldTypeString", 
+          "actualType": "nvarchar", 
+          "alias": "DESCRIPTIO", 
+          "sqlType": "sqlTypeNVarchar", 
+          "length": 100, 
+          "nullable": true, 
+          "editable": true, 
+          "domain": null, 
+          "defaultValue": null
+        }, 
+        {
+          "name": "CATEGORY", 
+          "type": "esriFieldTypeString", 
+          "actualType": "nvarchar", 
+          "alias": "CATEGORY", 
+          "sqlType": "sqlTypeNVarchar", 
+          "length": 40, 
+          "nullable": true, 
+          "editable": true, 
+          "domain": null, 
+          "defaultValue": null
+        }, 
+        {
+          "name": "OBJECTID_1", 
+          "type": "esriFieldTypeInteger", 
+          "actualType": "int", 
+          "alias": "OBJECTID_1", 
+          "sqlType": "sqlTypeInteger", 
+          "nullable": true, 
+          "editable": true, 
+          "domain": null, 
+          "defaultValue": null
+        }, 
+        {
+          "name": "SHP_ID_ARE", 
+          "type": "esriFieldTypeDouble", 
+          "actualType": "float", 
+          "alias": "SHP_ID_ARE", 
+          "sqlType": "sqlTypeFloat", 
+          "nullable": true, 
+          "editable": true, 
+          "domain": null, 
+          "defaultValue": null
+        }, 
+        {
+          "name": "SHP_ID_LEN", 
+          "type": "esriFieldTypeDouble", 
+          "actualType": "float", 
+          "alias": "SHP_ID_LEN", 
+          "sqlType": "sqlTypeFloat", 
+          "nullable": true, 
+          "editable": true, 
+          "domain": null, 
+          "defaultValue": null
+        }, 
+        {
+          "name": "GlobalID", 
+          "type": "esriFieldTypeGlobalID", 
+          "alias": "GlobalID", 
+          "sqlType": "sqlTypeOther", 
+          "length": 38, 
+          "nullable": false, 
+          "editable": false, 
+          "domain": null, 
+          "defaultValue": "NEWID() WITH VALUES"
+        }, 
+        {
+          "name": "CreationDate", 
+          "type": "esriFieldTypeDate", 
+          "alias": "CreationDate", 
+          "sqlType": "sqlTypeOther", 
+          "length": 8, 
+          "nullable": true, 
+          "editable": false, 
+          "domain": null, 
+          "defaultValue": null
+        }, 
+        {
+          "name": "Creator", 
+          "type": "esriFieldTypeString", 
+          "alias": "Creator", 
+          "sqlType": "sqlTypeOther", 
+          "length": 50, 
+          "nullable": true, 
+          "editable": false, 
+          "domain": null, 
+          "defaultValue": null
+        }, 
+        {
+          "name": "EditDate", 
+          "type": "esriFieldTypeDate", 
+          "alias": "EditDate", 
+          "sqlType": "sqlTypeOther", 
+          "length": 8, 
+          "nullable": true, 
+          "editable": false, 
+          "domain": null, 
+          "defaultValue": null
+        }, 
+        {
+          "name": "Editor", 
+          "type": "esriFieldTypeString", 
+          "alias": "Editor", 
+          "sqlType": "sqlTypeOther", 
+          "length": 50, 
+          "nullable": true, 
+          "editable": false, 
+          "domain": null, 
+          "defaultValue": null
+        }
+      ], 
+      "indexes": [
+        {
+          "name": "PK__LOADTEST__C1BEA5A20995BF60", 
+          "fields": "FID", 
+          "isAscending": true, 
+          "isUnique": true, 
+          "description": "clustered, unique, primary key"
+        }, 
+        {
+          "name": "user_10.LOADTESTSOIL_LOADTESTSOIL_Shape_sidx", 
+          "fields": "Shape", 
+          "isAscending": false, 
+          "isUnique": false, 
+          "description": "Shape Index"
+        }, 
+        {
+          "name": "GlobalID_Index", 
+          "fields": "GlobalID", 
+          "isAscending": false, 
+          "isUnique": true, 
+          "description": ""
+        }, 
+        {
+          "name": "CreationDateIndex", 
+          "fields": "CreationDate", 
+          "isAscending": true, 
+          "isUnique": false, 
+          "description": "CreationDate Field index"
+        }, 
+        {
+          "name": "CreatorIndex", 
+          "fields": "Creator", 
+          "isAscending": false, 
+          "isUnique": false, 
+          "description": "Creator Field index"
+        }, 
+        {
+          "name": "EditDateIndex", 
+          "fields": "EditDate", 
+          "isAscending": true, 
+          "isUnique": false, 
+          "description": "EditDate Field index"
+        }, 
+        {
+          "name": "EditorIndex", 
+          "fields": "Editor", 
+          "isAscending": false, 
+          "isUnique": false, 
+          "description": "Editor Field index"
+        }
+      ], 
+      "types": [], 
+      "templates": [
+        {
+          "name": "New Feature", 
+          "description": "", 
+          "drawingTool": "esriFeatureEditToolPolygon", 
+          "prototype": {
+            "attributes": {
+              "AREA": null, 
+              "PERIMETER": null, 
+              "MUSYM": null, 
+              "MUKEY": null, 
+              "DESCRIPTIO": null, 
+              "CATEGORY": null, 
+              "OBJECTID_1": null, 
+              "SHP_ID_ARE": null, 
+              "SHP_ID_LEN": null
+            }
+          }
+        }
+      ], 
+      "supportedQueryFormats": "JSON", 
+      "hasStaticData": false, 
+      "maxRecordCount": 1000, 
+      "standardMaxRecordCount": 4000, 
+      "tileMaxRecordCount": 4000, 
+      "maxRecordCountFactor": 1, 
+      "capabilities": "Create,Delete,Query,Update,Editing,Extract,Sync", 
+      "exceedsLimitFactor": 1
+    }
+  ]
+}
+```
+
+ 
+
+## JSON Response syntax
+
+The example below reflects the syntax of a synchronous response:
+
+```other
+{
+  "success": <true|false>,
+  "error": {
+    "code": <code>,
+    "message": "<description>",
+    "details": [
+      "<message>"
+    ]
+  }
+}
+```
+
+The example below reflects the syntax of an asynchronous response:
+
+<Note>
+
+Asynchronous responses may return `statusURL` as `statusUrl`.
+
+</Note>
+
+```other
+{"statusURL": “<response status URL>”}
+
+```
+
+ 
+
+## JSON Response examples
+
+### Synchronous responses
+
+When `addToDefinition` succeeds as a synchronous response:
+
+```other
+{
+  "success": true
+}
+```
+
+
+When `addToDefinition` fails synchronous response:
+
+```other
+{
+  "error": {
+    "code": 400, 
+    "message": "", 
+    "details": [
+      "Unable to add feature service definition."
+    ]
+  }
+}
+```
+
+### Asynchronous responses
+
+When an `addToDefinition` request is submitted asynchronously, the response will include a `statusURL`, the value of which is a URL that can be accessed to check the `status` of the request:
+
+```other
+{
+  "statusURL": "https://machine.domain.com/ArcGIS/rest/admin/services/myhostedservice/FeatureServer/addToDefinition/5f4f34c6-2bcf-41c7-8bd1-ea777570ad23"
+}
+
+```
+The URL can be used to periodically check the progress of the request, which is returned as the `status` property. When the job completes, the response retrieved from the status URL will indicate whether the request completed successfully.
+
+<Note>
+
+The casing for success or failure messages may vary from what is shown below:
+
+- When jobs are completed successfully, the status in the response will either return as `Completed` or `COMPLETED`.
+- When jobs are completed  with errors, the status in the response will either return as `Failed` or `FAILED`.
+- If a job fails, the resposne will include error details in either an `error` or `errorMessage` JSON object.
+
+Other status values may be returned while the operation is processing. For example, `Pending` may be returned as a status. Additional, optional properties may also be included in the response, such as `submissionTime` and `lastUpdatedTime`.
+
+</Note>
+
+```other
+//success
+
+{
+  "submissionTime":1726444564500,
+  "lastUpdatedTime":1726444568893,
+  "status":"Completed"
+}
+
+//failure
+
+{
+  "submissionTime": 1726520769240,
+  "lastUpdatedTime": 1726520769773,
+  "status": "Failed",
+  "error": {
+    "code": 500,
+    "description": "Editing definition error - RCPerfTestOneWayAllRowsParent.DBO.Volcano_Roop "
+  }
+}
+
+
+```

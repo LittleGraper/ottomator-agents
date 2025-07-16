@@ -1,0 +1,567 @@
+---
+title: Why choose last mile delivery
+uid: why-choose-last-mile-delivery
+description: The Last Mile Delivery analysis is a use case-specific Vehicle Routing Problem (VRP) algorithm designed for a fleet of vehicles that are delivering packages to the final customers. 
+---
+
+## Description
+
+The Network Analyst [Route service](/route-async-services) finds the best route for a single vehicle to visit many stops, whereas the [Last Mile Delivery service](/last-mile-delivery-service) and the [Vehicle Routing Problem service](/vehicle-routing-problem-service) both find the best routes for a fleet of vehicles to service many orders. The Vehicle Routing Problem service has lots of flexibility and can model many different constraints, but the algorithm is also limited by this flexibility. The Last Mile Delivery service supports a subset of the constraints, but for the ones it does support is able to provide a better quality and performant algorithm.
+
+## Last mile delivery capabilities
+
+The Last Mile Delivery analysis is a use case-specific Vehicle Routing Problem (VRP) algorithm designed for a fleet of vehicles that are delivering packages to the final customers. For example, this can be used for a single distribution center or store delivering to the final customer location and can be quite dense delivering to a few customers on most streets, but is not intended to visit every house on every street.
+
+Delivery companies need to determine which orders (package delivery location) should be serviced by each route (delivery vehicle and driver) and in what sequence the orders should be visited. The primary goal is to best service the orders by producing geographically clustered routes so the drivers can easily deliver to everyone and minimize the overall operating cost for the fleet of vehicles. The features below are supported to run the analysis:
+
+- Orders —Supports larger order counts with a single time window and either pickup or delivery quantities in the analysis but not both.
+- Depots —All routes must have the same starting depot and the same ending depot. The starting depot and the ending depot can be different. The starting depot, ending depot, or both can also be virtual, meaning the route starts or ends at the order instead of a centralized location.
+- Routes —Supports heterogeneous routes for all fields except start depot, end depot, and arrive depart delay. It can model things such as costs, capacities, and constraints based on time or distance. This is recommended for routes of fewer than 300 orders.
+- Zones —Designates an area where a route should be servicing orders. These zones can be either hard zones or soft zones. One zone can be used by multiple routes.
+- Specialties —Indicates the qualifications required by orders and supported by routes. These are designated using both Order Specialties and Route Specialties. Both orders and routes can support multiple specialties.
+- Barriers —Support point, line, and polygon.
+
+## What does last mile delivery not support
+
+The last mile delivery does not support the following features:
+
+- Breaks
+- Seed points
+- Route renewals
+- Order pairs
+- Time windows on depots
+- Second time window on orders
+- Pickup and delivery quantities in the analysis
+- Revenue on orders
+- Different start depots for each route
+- Different end depots for each route
+- Different arrive-depart delays for each route
+
+## Convert from vehicle routing problem to last mile delivery
+
+The attributes and capabilities between the Vehicle Routing Problem service and the Last Mile Delivery service are very similar. Therefore, it is relatively straightforward to use old vehicle routing problem input for a last mile delivery problem. Below are the areas of the attributes that would need to be converted.
+
+Barriers have the same schema as in the Vehicle Routing Problem. The below tables list the differences between the attributes of the Vehicle Routing Problem service and the Last Mile Delivery service.
+
+### Orders
+
+<StyledTable headers={"Vehicle routing problem attributes,Last mile delivery attributes"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+TimeWindowStart2, TimeWindowEnd2, MaxViolationTime2 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A second time window is not supported
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Revenue
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Not supported
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+AssignmentRule: Exclude (0)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Order—AssignmentRule: Null
+
+Route—AssignmentRule: Exclude (2)
+
+<Note type={"note"}>
+
+Route's AssignmentRule should already be excluded in the VRP Schema as well.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+AssignmentRule: PreserveRouteAndRelativeSequence (1)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+AssignmentRule: PreserveRouteAndRelativeSequence (1)
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+AssignmentRule: PreserveRoute (2) 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+AssignmentRule: PreserveRoute (2)
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+AssignmentRule: Override (3) 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+AssignmentRule: Null
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+AssignmentRule: AnchorFirst (4)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+AnchorRule: First (1) and AssignmentRule: Null
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+AssignmentRule: AnchorLast (5)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+AnchorRule: Last (2) and AssignmentRule: Null
+
+</StyledTableCell>
+
+</StyledTableRow>
+  
+</StyledTable>
+
+### Depots
+
+<StyledTable headers={"Vehicle routing problem attributes,Last mile delivery attributes"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+TimeWindowStart, TimeWindowEnd, TimeWindowStart2, TimeWindowEnd2
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Time windows are not supported for Depots.
+
+</StyledTableCell>
+
+</StyledTableRow>
+  
+</StyledTable>
+
+### Routes
+
+<StyledTable headers={"Vehicle routing problem attributes,Last mile delivery attributes"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+EarliestStartTime
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+EarliestStartDate and EarliestStartTime
+
+<Note type={"note"}>
+
+These are date-only and time-only fields, so the date and time used for EarliestStartTime needs to be split between these two fields.
+
+</Note>
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+LatestStartTime
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+StartTimeFlexibility = (VRP's LatestStartTime - VRP's EarliestStartTime)
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+AssignmentRule: Include (1) 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+AssignmentRule: Null
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+AssignmentRule: Exclude (2)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+AssignmentRule: Exclude (2)
+
+</StyledTableCell>
+
+</StyledTableRow>
+  
+</StyledTable>
+
+### Zones
+
+For Last Mile Delivery, route zones are specified in the Zones class and given a name. Those names are then used in the Routes with the ZoneName and IsHardZone fields. This allows one zone to be used by multiple routes.
+
+<StyledTable headers={"Vehicle routing problem attributes,Last mile delivery attributes"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Route Zones: RouteName 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Zones: Name and Routes: ZoneName
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Route Zone: IsHardZone
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Routes: IsHardZone
+
+</StyledTableCell>
+
+</StyledTableRow>
+  
+</StyledTable>
+
+### Route Specialties and Order Specialties
+
+<StyledTable headers={"Vehicle routing problem attributes,Last mile delivery attributes"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Orders: SpecialtyName
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+OrderSpecialties: OrderName
+
+OrderSpecialties: SpecialtyName
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+Routes: SpecialtyName
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+RouteSpecialties: RouteName
+
+RouteSpecialties: SpecialtyName
+
+</StyledTableCell>
+
+</StyledTableRow>
+  
+</StyledTable>
+
+## Parameters
+
+The table below lists the difference between the parameters available for the Vehicle Routing Problem and the Last Mile Delivery solvers
+
+<StyledTable headers={"Vehicle routing problem,Last mile delivery"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+default_date 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+earliest_route_start_date
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+impedance, uturn_policy, use_hierarchy_in_analysis, restrictions, attribute_parameter_values, 
+time_impedance, distance_impedance, route_line_simplification_tolerance
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+travel_mode
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+time_window_factor
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+N/A
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+spatially_cluster_routes
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+N/A
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+excess_transit_factor
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+N/A
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+populate_route_lines 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+route_shape
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+directions_style_name 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+N/A
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+save_output_layer
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+save_output_network_analysis_layer
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+populate_stop_shapes
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+output_orders, output_depots and output_depot_visits are always populated with shapes in the output when the request is successful
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+N/A 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+max_route_total_time
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+N/A
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+sequence_gap
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+N/A 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+earliest_route_start_time
+
+</StyledTableCell>
+
+</StyledTableRow>
+  
+</StyledTable>

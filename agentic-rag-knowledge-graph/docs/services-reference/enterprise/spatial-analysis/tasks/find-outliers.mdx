@@ -1,0 +1,349 @@
+---
+title: "Find Outliers"
+description: "This is an API reference for the Find Outliers task on ArcGIS Online."
+slug: "find-outliers"
+url: "/spatial-analysis/tasks/find-outliers"
+redirectFrom:
+  - /find-outliers
+guid: "GUID-E2CF3AA8-ED0F-4738-B3DF-D12C50FFF1D2"
+migratedTopicMetadata:
+  FTITLE: "Find Outliers"
+  FDESCRIPTION: ""
+  FCHANGES: "changing availability statement of the random number seed parameter"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "agol2023.R03-*: 11.2-*"
+  CREATED-ON: "20/09/2023 14:52:44"
+  FAUTHOR: "hasefaw"
+  FSTATUS: "Released"
+  MODIFIED-ON: "27/09/2023 04:57:14"
+  VERSION: "9"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-4E4E6D87-9110-41A7-9EC6-8A8D48879F52"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata: {}
+---
+
+import GUID_62BD26E4_CB46_46AB_BBE7_CB696CA383FC_GUID_1C348DD9_6CF5_4614_9090_50D37FFF5B1C from "../../snippets/GUID-62BD26E4-CB46-46AB-BBE7-CB696CA383FC/_GUID-1C348DD9-6CF5-4614-9090-50D37FFF5B1C";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E0E9FDE9_9A98_4EA4_9164_0E878BADF591 from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-E0E9FDE9-9A98-4EA4-9164-0E878BADF591";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_D95DEC58_7F27_491A_AF3D_6E6A3C0A6F2D from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-D95DEC58-7F27-491A-AF3D-6E6A3C0A6F2D";
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_928AC1BC_8FA0_441D_A17F_FEC4323A459C from "../../snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-928AC1BC-8FA0-441D-A17F-FEC4323A459C";
+
+![Find Outliers](../../images/GUID-2FD18406-6333-45B9-8220-E930C1E154B2-web.png)
+
+The `FindOutliers` task analyzes point data (such as crime incidents, traffic accidents, or trees) or field values associated with points or area features (such as the number of people in each census tract or the total sales for retail stores). It finds statistically significant spatial clusters of high values and low values and statistically significant high or low spatial outliers within those clusters. 
+
+The result map layer shows high outliers in red and low outliers in dark blue. Clusters of high values appear pink and clusters of low values appear light blue. Features that are beige are not a statistically significant outlier and not part of a statistically significant cluster; the spatial pattern associated with these features may be the result of random processes and random chance.
+
+## Request URL
+
+```javascript
+http://<analysis url>/FindOutliers/submitJob
+```
+
+## Limits
+
+<GUID_62BD26E4_CB46_46AB_BBE7_CB696CA383FC_GUID_1C348DD9_6CF5_4614_9090_50D37FFF5B1C />
+
+## Request parameters
+<StyledTable headers={"Parameter,Description"}>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `analysisLayer`
+
+         (Required)
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The point or polygon feature layer for which outliers will be calculated.
+
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E0E9FDE9_9A98_4EA4_9164_0E878BADF591 />
+
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_D95DEC58_7F27_491A_AF3D_6E6A3C0A6F2D />
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `analysisField`
+
+         (Required if `analysisLayer` contains polygons)
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The numeric field that will be analyzed. This field can represent the following:
+         -   Counts (such as the number of traffic accidents)
+         -   Rates (such as the number of crimes per square mile)
+         -   Averages (such as the mean math test score)
+         -   Indices (such as a customer satisfaction score)
+
+         If an `analysisField` value is not provided, hot spot results will be based on point densities only.
+
+         Syntax: `"analysisField": "Average_Score"`
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `dividedByField`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The numeric field in the `analysisLayer` value that will be used to normalize the data. For example, if points represent crimes, dividing by total population will result in an analysis of crimes per capita rather than raw crime counts.
+
+         You can use `esriPopulation` to enrich each area feature with the most recent population values, which will then be used as the attribute to divide by. This option uses credits.
+
+         Syntax: `"dividedByField": "esriPopulation"`
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `boundingPolygonLayer`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         When the analysis layer is points and no `analysisField` value is provided, you can provide polygon features that define where incidents could have occurred. For example, if you are analyzing boating accidents in a harbor, the outline of the harbor can provide a boundary for where accidents could occur. When no bounding areas are provided, only locations with at least one point will be included in the analysis.
+
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E0E9FDE9_9A98_4EA4_9164_0E878BADF591 />
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `aggregationPolygonLayer`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         When the `analysisLayer` value contains points and no `analysisField` value is specified, you can provide polygon features into which the points will be aggregated and analyzed, such as administrative units. The number of points that fall within each polygon are counted, and the point count in each polygon is analyzed.
+
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E0E9FDE9_9A98_4EA4_9164_0E878BADF591 />
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `permutations`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         Specifies the type of permutations that will be used. Permutations are used to determine how likely it would be to find the actual spatial distribution of the values you are analyzing. Deciding on the number of permutations is a balance between precision and increased processing time. A lower number of permutations can be used when first exploring a problem, but it is a best practice to increase the permutations to the highest number feasible for final results.
+         -   `Speed`—Implements 199 permutations and results in p-values with a precision of 0.005
+         -   `Balance`—Implements 499 permutations and results in p-values with a precision of 0.002
+         -   `Precision`—Implements 999 permutations and results in p-values with a precision of 0.001
+
+         Values: `Speed` \| `Balance` \| `Precision`
+
+         Example: `"permutations": "Precision"`
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `shapeType`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         Specifies the shape of the polygon mesh the input features will be aggregated into.
+         -   `Fishnet`—The input features will be aggregated into a grid of square (fishnet) cells.
+         -   `Hexagon`—The input features will be aggregated into a grid of hexagonal cells.
+
+         Example: `"shapeType": "Hexagon"`
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `cellSize`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The size of the grid cells that will be used to aggregate the features. When aggregating into a hexagon grid, this distance is used as the height to construct the hexagon polygons.
+
+         Example: `"cellSize": 500`
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `cellSizeUnits`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         Specifies the units of the `cellSize` value. You must specify a value if a value for `cellSize` has been set.
+
+         Values: `Miles` \| `Feet` \| `Kilometers` \| `Meters`
+
+         Example: `"cellSizeUnits": "Meters"`
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `distanceBand`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The spatial extent of the analysis neighborhood. This value determines which features will be analyzed together to assess local clustering.
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `distanceBandUnits`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         Specifies the units of the `distanceBand` value. You must specify a value if a value for `distanceBand` has been set.
+
+         Values: `Miles` \| `Feet` \| `Kilometers` \| `Meters`
+
+         Example: `"distanceBandUnits": "Meters"`
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `outputName`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         <GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_928AC1BC_8FA0_441D_A17F_FEC4323A459C />
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `context`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The [`context`](../../reference/spatial-reference) parameter contains the following additional settings that affect task operation:
+         -   [Extent](../../reference/spatial-reference#extent) (`extent`)—A bounding box that defines the analysis area. Only input features that intersect the bounding box will be analyzed.
+         -   [Output spatial reference](../../reference/spatial-reference#output-spatial-reference) (`outSR`)—The output features will be projected into the output spatial reference.
+         -   Random number seed (`randomGenerator`)—A string representing the integer and seed type that will initiate a random number generator. The seed type is always `MERSENNE_TWISTER`, for example, `13 MERSENNE_TWISTER`. This parameter is available in ArcGIS Enterprise 11.2 or later.
+
+         Syntax:
+         ```javascript
+         {
+        "extent" : {extent},
+        "outSR" : {"wkid": 4326},
+        "randomGenerator" : "13 MERSENNE_TWISTER"
+        }
+         ```
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `f`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The response format. The default response format is `html`.
+
+         Values: `html` \| `json`
+      </StyledTableCell>
+   </StyledTableRow>
+</StyledTable>
+## Response
+When you submit a request, the service assigns a unique job ID for the transaction.
+Syntax:
+```javascript
+{
+"jobId": "<unique job identifier>",
+"jobStatus": "<job status>"
+}
+```
+After the initial request is submitted, you can use the job ID to check the status of the job and messages as described in [Check job status](/checking-job-status-1) . Once the job has successfully completed, use the job ID to retrieve the results. To track the status, you can make a request of the following form:
+```javascript
+http://<analysis url>/FindOutliers/jobs/<jobId>
+```
+## Analysis results
+When the status of the job request is `esriJobSucceded`, you can access the results of the analysis by making a request of the following form:
+```javascript
+http://<analysis url>/FindOutliers/jobs/<jobId>/results/outlierResultLayer?token=<your token>&f=json
+```
+<StyledTable headers={"Parameter,Description"}>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `outlierResultLayer`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         The result of the `FindOutliers` task is a feature layer that provides information about statistically significant outlier features.
+
+         If the input analysis layer (`analysisLayer`) contains points and an `analysisField` value is provided, the result will be points. For all other scenarios (polygons or points when no `analysisField` value is provided) the output will be polygons.
+
+         The result layer has the following attributes:
+         -   ID field (`FID`)—An integer field with a unique value for every feature.
+         -   `AnalysisField` or `Join_Count`—When an `analysisField` value is provided, it will be copied to the result with the same name and properties. When no `analysisField` value is provided, an integer field is created with values reflecting the number of points in each aggregation polygon. If an `aggregationPolygonLayer` value is provided, the polygons are used for aggregation. Otherwise, a fishnet or hexagon polygon mesh is created to overlay the points, and the squares in the fishnet mesh are used as aggregation polygons.
+         -   `Hot/Cold Intensity`—A numeric (double) field with standard deviations representing the intensity of spatial clustering.
+         -   `Confidence Bin`—A field for symbolizing the results. Values range from -3 to +3 and reflect statistical significance. Use blue to draw values less than zero and red to draw values greater than zero. Use the darkest blue for features equal to -3, medium blue for -2, and light blue for -1. Use the darkest red for features equal to 3, medium red for 2, and the lightest red or pink for 1. A confidence bin value of zero means no statistically significant clustering, and the features should be drawn in white or beige (the color should be neutral to not draw attention).
+
+         Example:
+         ```javascript
+         {"url":"http://<analysis url>/FindOutliers/jobs/<jobId>/results/outlierResultLayer"}
+         ```
+         The result has properties for parameter name, data type, and value. The contents of `value` depend on the `outputName` parameter value provided in the initial request.
+         -   If an `outputName` value was provided, `value` contains the URL to the feature service layer.
+         ```javascript
+         {
+        "paramName":"outlierResultLayer",
+        "dataType":"GPString",
+        "value":{"url":"<hosted featureservice layer url>"}
+        }
+         ```
+         -   If no `outputName` value was provided, `value` contains a feature collection.
+         ```javascript
+         {
+         "paramName": "outlierResultLayer",
+         "dataType": "GPString",
+         "value":{"layerDefinition": {}, "featureSet": {} }
+         }
+         ```
+         See [Feature output ](/feature-output-1) for more information about how the result layer or collection is accessed.
+      </StyledTableCell>
+   </StyledTableRow>
+   <StyledTableRow>
+      <StyledTableCell cellStyle="markdown">
+         `processInfo`
+      </StyledTableCell>
+      <StyledTableCell cellStyle="markdown">
+         Contains strings that describe the workflow used by `FindOutliers` when calculating the result. These strings are used for reporting by the Find Outliers tool in Map Viewer in ArcGIS Online. You can create custom reports for your application using these strings. There are four parts in the returned JSON:
+         -   `messageCode`—The serial number for each unique message
+         -   `message`—Text that may contain parameters (in `${paramsName}` format) that must be replaced by values
+         -   `params`—A dictionary of the keys and values to be inserted into `${paramsName}` in the message
+         -   `style`—The style used to format the report produced by the Find Outliers tool in Map Viewer.
+
+         Example:
+         ```javascript
+         {
+        "messageCode" : "SS_84464",
+        "message" : "The optimal fixed distance band is based on the average distance to ${NumNeighs} nearest neighbors: ${DistanceInfo}",
+        "params" : { "NumNeighs" : "20" , "DistanceInfo" : "446.8956 Meters" },
+        "style" : "<ul><li></li></ul><br></br>",
+        }
+         ```
+      </StyledTableCell>
+   </StyledTableRow>
+</StyledTable>
+
+## Cluster and outlier analysis
+The `FindOutliers` task calculates the Anselin Local Moran's I statistic for each feature in a feature layer. The service examines each feature in the context of all features, as well as each feature in the context of its neighboring features. To be a statistically significant outlier, a feature must have a high value or incident count and be surrounded by features with low values or incident counts. To be a statistically significant cluster, a feature must have a high value or incident count and be surrounded by other features with high values or incident counts. The local sum for a feature's neighbors is compared proportionally to the sum of all features, and the feature is also compared to its neighbors. When the local sum is very different from the expected local sum, or the feature's value is very different from the expected value, and when that difference is too large to be the result of random chance, a statistically significant [z-score](https://pro.arcgis.com/en/pro-app/latest/tool-reference/spatial-statistics/what-is-a-z-score-what-is-a-p-value.htm) results.
+
+### Potential applications
+Applications include crime analysis, epidemiology, voting pattern analysis, economic geography, retail analysis, traffic incident analysis, and demographics. Examples include the following:
+
+-    Where are anomalous spending patterns in Los Angeles? 
+-    Where are the sharpest boundaries between affluence and poverty in the study area?
+-    Where are there unexpectedly high rates of diabetes across the study area?
+-    Are stores struggling or low performing despite being surrounded by high performing stores?
+-    Where are there unexpectedly high rates of insurance claims in the greater Phoenix area?
+-    Are there counties in the United States with unusually low life expectancy?
+
+### Outlier analysis considerations
+
+Consider the following when undertaking an outlier analysis:
+
+-   What is the analysis field? 
+
+    The Find Outliers analysis tool assesses whether high or low values (the number of crimes, accident severity, or dollars spent on sporting goods, for example) cluster spatially. The field containing those values is the analysis field. When the analysis layer represents incident points and you are only interested in locating high and low incident densities, choose NO ANALYSIS FIELD. When you choose NO ANALYSIS FIELD, the `FindOutliers` task will overlay the incident points with a fishnet or hexagon and count the number of incidents within each fishnet or hexagon cell. The incident count values will then be used as the analysis field.
+-   What is the question?
+
+    How you construct the analysis field determines the types of questions that can be answered. Are you most interested in determining where there are lots of incidents or where high and low values for a particular attribute cluster spatially? If so, run the `FindOutliers` task on the raw values or raw incident counts. This type of analysis is particularly helpful for resource allocation types of problems. Alternatively (or in addition), you can locate areas with unexpectedly high values in relation to some other variable. If you are analyzing foreclosures, for example, you may expect more foreclosures in locations with more homes (that is, at some level, you expect the number of foreclosures to be a function of the number of houses). For each analysis layer area, divide the number of foreclosures by the number of homes, and run the `FindOutliers` task on this ratio. For this analysis, you are no longer asking Where are there unusually low foreclosures? You are asking Where are there unexpectedly low numbers of foreclosures, given the number of homes? By creating a rate or ratio prior to analysis, you can control for certain expected relationships (for example, the number of foreclosures is a function of housing stock) and will then be identifying unexpected outlier areas.
+-   Does the analysis layer contain at least 30 features? 
+
+    Results aren't reliable with fewer than 30 features.
+
+### Calculations
+
+The Anselin Local Moran's I statistic is calculated for each feature.
+
+![Mathematics for the Local Moran's I statistic](../../images/GUID-0A79E744-B0CD-48BF-A7E5-E08CB0755301-web.png)
+
+### Additional resources
+
+For more information, see the following:
+
+-   Anselin, Luc. "Local Indicators of Spatial Association-LISA," _Geographical Analysis_ 27(2): 93-115, 1995.
+-   Mitchell, Andy. _The ESRI Guide to GIS Analysis_, Volume 2. ESRI Press, 2005.
+-   Scott, L. and N. Warmerdam. [Extend Crime Analysis with ArcGIS Spatial Statistics Tools](http://www.esri.com/news/arcuser/0405/ss_crimestats1of2.html) in ArcUser Online, April–June 2005.
+-   [Spatial Statistics Resources page](https://blogs.esri.com/esri/arcgis/2010/07/13/spatial-statistics-resources/)

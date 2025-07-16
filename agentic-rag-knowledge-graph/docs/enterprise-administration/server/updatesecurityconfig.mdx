@@ -1,0 +1,398 @@
+---
+title: "Update Security Configuration"
+description: "The update operation updates the security configuration of your server site."
+slug: "updatesecurityconfig"
+url: "/updatesecurityconfig"
+guid: "GUID-5D645383-BFFB-469D-BE48-0E15FAE84869"
+migratedTopicMetadata:
+  FTITLE: "updateSecurityConfig"
+  FDESCRIPTION: ""
+  FCHANGES: "Updates for 10.9.1"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9.1 -*"
+  CREATED-ON: "30/08/2021 14:14:19"
+  FAUTHOR: "tohara"
+  FSTATUS: "Draft"
+  MODIFIED-ON: "16/08/2022 10:10:46"
+  VERSION: "11"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-D2DA94B1-2315-427E-8B65-DBC5D4BF47B4"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /security/config/update
+  urlSegments:
+    - name: <root>
+      url: /site
+    - name: /security/config/update
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.1'
+  requiredCapabilities:
+    - name: Access allowed with either the "Security and Infrastructure" or "Servers" privileges
+      url: /managing-access-to-the-server-administration-rest-api
+---
+
+## Description
+
+The `update` operation updates the [security configuration](/securityconfig), including TLS protocols and cipher suites, for your ArcGIS Server site. 
+
+This operation causes the SOAP and REST service endpoints to be redeployed (with the new configuration) on every server machine in the site. If the authentication tier is `GIS_SERVER`, the ArcGIS token service is started on all server machines. 
+
+When the authentication occurs at the [Web Adaptor](/webadaptor), the server does not participate in authenticating the user.
+
+If you updated the communication protocol as part of this operation, it takes the ArcGIS Web Adaptor 1 minute to recognize changes to the communication protocol of your site. If you want the ArcGIS Web Adaptor to immediately recognize the changes, you can reconfigure it by following the instructions in [Configure ArcGIS Web Adaptor after installation](https://enterprise.arcgis.com/en/server/latest/install/windows/arcgis-web-adaptor-link.htm).
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `Protocol` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the HTTP protocol to be used for communication to and from the ArcGIS Server site. If set to `HTTP`, all communication to and from the site will be over HTTP, with HTTPS communication will be unavailable. If set to `HTTP_AND_HTTPS`, users and clients can use either HTTP or HTTPS to connect to the site. If set to `HTTPS`, all communication to and from the site will be over HTTPS. Calls made using HTTP will be redirected to use HTTPS.
+
+      When an ArcGIS Server site is created, all communication to and from the site is sent over HTTP, which is not secure. This means that your credentials sent over an internal network or the Internet are not encrypted and can be intercepted. To prevent the interception of communication, it's recommended that you configure ArcGIS Server and ArcGIS Server Manager (if installed) to enforce Secure Sockets Layer (SSL). When you create a site, a warning-level message in the logs recommends that you update the communication protocol of the site to use SSL.
+
+      Values: `HTTP` | `HTTP_AND_HTTPS` | `HTTPS`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `httpsProtocols` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The TLS protocols ArcGIS Server will use. `TLSv1.2` and `TLSv1.3` (support for `TLSv1.3` was added at 10.9) is enabled by default. You can also enable `TLSv1` and `TLSv1.1`. Values must be separated by commas.
+
+      <Note type={"note"}>
+
+      Ensure that the web server hosting your ArcGIS Web Adaptor can fully communicate over the protocols you're enabling. If you're using a Java Web Adaptor, the web server hosting the ArcGIS Web Adaptor must be using Java 8 or later.
+
+      </Note>
+
+      ```markdown label=Example
+      httpsProtocols=TLSv1.2,TLSv1.3
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `cipherSuites` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The cipher suites ArcGIS Server will use. The [Valid cipher suites](/updatesecurityconfig#valid-cipher-suites) section below outlines the ciphers enabled by default, as well as valid ciphers that can be enabled.
+
+      ```other label=Example
+      cipherSuites=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `HSTSEnabled` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean that indicates whether HTTP Strict Transport Security (HSTS) is being used by the site. To enable this property, the `Protocol` property must be set to `HTTPS`.
+
+      Values: `true` | `false` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `virtualDirsSecurityEnabled` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean that indicates whether the server's virtual directories are secure and require authentication. When this property is set to `true`, accessing the content of secured services in the arcgisoutput, arcgisjobs, and arcgisinput directories over HTTP will require user authentication. These same permissions are applied to the server directories associated with the service. If the service is publicly available, the directories are also publicly available. The default value is `false`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `allowInternetCORSAccess` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.9.1. A Boolean that controls the value of the Access-Control-Allow-Private-Network response header in a CORS preflight request to a REST service URL. This property supports the Private Network Access web specification (previously CORS-RFC1918), which aims to restrict websites accessed over a private network from making internal cross-origin requests.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `authenticationTier` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the tier at which requests to access GIS services will be authenticated. It is recommended that you do not modify these values using the Administrator Directory. Instead, use ArcGIS Server Manager to configure web tier authentication or use the Enterprise portal to federate an ArcGIS Server with your organization.
+
+      Values: `WEB_ADAPTOR` | `GIS_SERVER` | `ARCGIS_PORTAL`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `allowDirectAccess`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A Boolean that indicates whether a user with administrator privileges can access the server through port 6080. If `true`, all users with administrative access can access the Administrator Directory and ArcGIS Server Manager through port 6080. If `false`, users in the identity store cannot access the server through port 6080; users must access the site through ArcGIS Web Adaptor. The default value is `true`.
+
+      Before disabling administrative access on port 6080, ArcGIS Server must be configured to use web tier authentication (`WEB_ADAPTOR`) and at least one user in the identity store must have administrator privileges to the site. The primary site administrator account can administer the site through port 6080.
+
+      To fully disable access on port 6080, you can optionally disable the primary site administrator account. If ArcGIS Server Manager becomes unavailable or the web server cannot authenticate users who have administrator privileges, you cannot administer the site. To recover this site, re-enable the primary site administrator account and connect to the site through port 6080 with this account.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `portalProperties` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The properties used when federating ArcGIS Server with Portal for ArcGIS. See [Portal properties](/updatesecurityconfig#portal-properties) for more information.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `allowedAdminAccessIPs` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A comma separated list of client machine IP addresses that are allowed access to ArcGIS Server. This can be used as an additional security measure to prevent unauthorized access to the site.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`. 
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+### Portal properties
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `portalMode`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The portal mode. This must be `ARCGIS_PORTAL_FEDERATION`.
+
+      ```other label=Example
+      "portalMode": "ARCGIS_PORTAL_FEDERATION"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `portalSecretKey`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The key obtained after federating ArcGIS Server with Portal for ArcGIS.
+
+      ```markdown label=Example
+      "portalSecretKey": "12a34b56c78d90ef09e87d65c43b21a"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `portalUrl`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The URL of Portal for ArcGIS in the following format:
+
+      ```markdown label=Example
+      "portalUrl": "https://machine.domain.com/webadaptor"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `privatePortalUrl`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The internal URL of Portal for ArcGIS is in the following format:
+
+      ```markdown label=Example
+      "privatePortalUrl": "https://machine.domain.com:7443/arcgis"
+      ```
+
+      <Note>
+
+      For highly available envrionments, the URL would point to an internal load balancer, rather than to an individual machine:
+
+      ```markdown label=Example
+      "privatePortalUrl": "https://lbprivate.domain.com:7443/arcgis"
+      ```
+
+      </Note>
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serverId`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The ID of the server federated with the portal.
+
+      ```markdown label=Example
+      "serverId": "pn04lWxDPEh1vLR6"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serverURL`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The external URL of the server federated with the portal in the following format:
+
+      ```markdown label=Example
+      "serverUrl": "https://machine.domain.com/webadaptor"
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+### Valid cipher suites
+
+The following cipher suites are enabled by default:
+
+```javascript
+TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
+TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+TLS_RSA_WITH_AES_256_GCM_SHA384,
+TLS_RSA_WITH_AES_256_CBC_SHA256,
+TLS_RSA_WITH_AES_256_CBC_SHA,
+TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
+TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+TLS_RSA_WITH_AES_128_GCM_SHA256,
+TLS_RSA_WITH_AES_128_CBC_SHA256,
+TLS_RSA_WITH_AES_128_CBC_SHA,
+TLS_AES_256_GCM_SHA384,
+TLS_AES_128_GCM_SHA256,
+TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
+TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
+TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
+TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA
+```
+
+The following cipher suites are not enabled by default, but are valid and can be added using this operation:
+
+```javascript
+TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256, 
+TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256, 
+TLS_CHACHA20_POLY1305_SHA256,
+TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
+TLS_DHE_RSA_WITH_AES_256_CBC_SHA256,
+TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
+TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
+TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,
+TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
+TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA,
+TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA,
+SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA,
+SSL_RSA_WITH_3DES_EDE_CBC_SHA
+```
+
+
+## Example usage
+
+The following is a sample POST request for the `update` operation:
+
+```other
+POST /webadaptor/admin/security/config/update HTTP/1.1
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+Protocol=HTTPS&httpsProtocols=TLSv1.2,TLSv1.3&cipherSuites=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_AES_256_GCM_SHA384,TLS_AES_128_GCM_SHA256&HSTSEnabled=false&virtualDirsSecurityEnabled=false&allowInternetCORSAccess=true&authenticationTier=GIS_SERVER&allowDirectAccess=true&allowedAdminAccessIPs=&f=pjson
+```
+
+## JSON Response example
+
+```javascript
+{"status": "success"}
+```

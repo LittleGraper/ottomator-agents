@@ -1,0 +1,230 @@
+import BearingAttributes from "../../snippets/shared-attributes/_BearingBrTolNavLat.mdx"
+import NetworkLocationFields from "../../snippets/shared-attributes/_NetworkLocationFields.mdx"
+
+import ParamMetadata from "../../../components/param-metatdata" 
+
+{/* <p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span><span class="font-bold text-[#a82b1e]">Required</span></p> */}
+
+<ParamMetadata required types={[{name:"feature",link:"../routing-data-types#feature"}]} />
+
+
+Specify one or more demand points. The service identifies the best facilities based in large part on how the facilities serve the demand points specified.
+
+When specifying the demand points, you can set attributes for each as follows:
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for demand points</span></summary>
+
+ #### Attributes for demand points
+
+-   <p class="space-x-2"><span class="font-bold">Name</span><span class="font-sm text-color-3">string (length: 500)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The name of the demand point. The name is included in the name of an output allocation line or lines if the demand point is part of the solution.
+
+-   <p class="space-x-2"><span class="font-bold">GroupName</span><span class="font-sm text-color-3">string (length: 500)</span></p>
+
+    The name of the group to which the demand point belongs. This field is ignored for the Maximize Capacitated Coverage, Target Market Share, and Maximize Market Share problem types.
+
+    If demand points share a group name, the solver allocates all members of the group to the same facility. (If constraints, such as a cutoff distance, prevent any of the demand points in the group from reaching the same facility, none of the demand points are allocated.)  
+
+    ![Minimizing distance without group names](../../images/GroupNameswithoutGroups.png)
+
+    _Minimize distance without grouped demand points._
+
+    ![Minimizing distance with group names](../../images/GroupNameswithGroups.png)
+
+    _Minimize distance with grouped demand points. In this example, the yellow demand points have the same GroupName value, so they are allocated to the same facility._ 
+
+-   <p class="space-x-2"><span class="font-bold">Weight</span><span class="font-sm text-color-3">number (non-negative)</span></p>
+
+    The relative weighting of the demand point. A value of 2.0 means the demand point is twice as important as one with a weight of 1.0. If demand points represent households, for example, weight could indicate the number of people in each household.
+
+-   <p class="space-x-2"><span class="font-bold">Cutoff</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+    The impedance value at which to stop searching for demand points from a given facility. The demand point can't be allocated to a facility that is beyond the value indicated here. 
+
+    This attribute allows you to specify a cutoff value for each demand point. For example, you may find that people in rural areas are willing to travel up to 10 miles to reach a facility, while those in urban areas are only willing to travel up to 2 miles. You can model this behavior by setting the `Cutoff`  value for all demand points that are in rural areas to 10 and setting the `Cutoff`  value of the demand points in urban areas to 2. 
+
+    The units for this attribute value are specified by the [`measurement_units`](#measurement_units) parameter. 
+
+    A value for this attribute overrides the default set for the analysis using the [`default_measurement_cutoff`](#default_measurement_cutoff) parameter. The default value is `Null`, which results in the default value set by the `default_measurement_cutoff` parameter being used for all the demand points.
+
+-   <p class="space-x-2"><span class="font-bold">ImpedanceTransformation</span><span class="font-sm text-color-3">integer</span></p>
+
+    Override the default value set for the analysis by the [`measurement_transformation_model`](#measurement_transformation_model) parameter.
+
+-   <p class="space-x-2"><span class="font-bold">ImpedanceParameter</span><span class="font-sm text-color-3">number (non-negative)</span></p>
+
+    Override the default value set for the analysis by the [`measurement_transformation_model`](#measurement_transformation_model) parameter.
+
+-   <p class="space-x-2"><span class="font-bold">CurbApproach</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+    Allowed values: `0`, `1`, `2`, `3`
+
+    Specifies the direction a vehicle may arrive at or depart from the demand point. The field value is specified as one of the following integers:
+
+    - `0`: Either side of vehicle. The vehicle can approach and depart the demand point in either direction. U-turns are allowed. You should choose this setting if your vehicle can make a U-turn at the order or if it can pull into a driveway or parking lot and turn around.
+    - `1`: Right side of vehicle. When the vehicle approaches and departs the demand point, the curb must be on the right side of the vehicle. A U-turn is prohibited.
+    - `2`: Left side of vehicle. When the vehicle approaches and departs the demand point, the curb must be on the left side of the vehicle. A U-turn is prohibited.
+    - `3`: No U-turn. When the vehicle approaches the demand point, the curb can be on either side of the vehicle; however, the vehicle must depart without turning around. [Learn more about U-turn policies](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/u-turn-policies.htm)
+
+    <details>
+     <summary><span class="font-sm text-color-link">Show illustration</span></summary>
+
+    <StyledTable headers={"Setting,Coded value,Description"}>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Either side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    0
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    The vehicle can approach and depart the demand point in either direction. 
+
+    ![Either side of vehicle ](../../images/CurbApproach_EitherSide.png)
+
+    _All arrival and departure combinations are allowed with the Either side of vehicle curb approach._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Right side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    1
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches or departs the demand point, the demand point must be on the right side of the vehicle. This is typically used for vehicles such as buses that must arrive with the bus stop on the right side.
+
+    ![Right side of vehicle ](../../images/CurbApproach_RightSide.png)
+
+    _The allowed arrival and departure combination for the Right side of vehicle curb approach is shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Left side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    2
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches or departs the demand point, the demand point must be on the left side of the vehicle. This is typically used for vehicles such as buses that must arrive with the bus stop on the left side.
+
+    ![Left side of vehicle ](../../images/CurbApproach_LeftSide.png)
+
+    _The allowed arrival and departure combination for the Left side of vehicle curb approach is shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    No U-Turn
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    3
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches the demand point, the demand point can be on either side of the vehicle; however, when it departs, the vehicle must continue in the same direction it arrived in. A U-turn is prohibited.
+
+    ![No U-turns ](../../images/CurbApproach_NoU-Turns.png)
+
+    _The allowed arrival and departure combinations for the No U-Turn curb approach are shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    </StyledTable>
+
+    The `CurbApproach`  property is designed to work with both types of national driving standards: right-hand traffic (United States) and left-hand traffic (United Kingdom). First, consider a demand point on the left side of a vehicle. It is always on the left side regardless of whether the vehicle travels on the left or right half of the road. What may change with national driving standards is your decision to approach a demand point from one of two directions, that is, so it ends up on the right or left side of the vehicle. For example, if you want to arrive at a demand point and not have a lane of traffic between the vehicle and the demand point, you would choose 1 (Right side of vehicle) in the United States and 2 (Left side of vehicle) in the United Kingdom.
+
+    <ColumnLayout layout={2}>
+
+    <Column>
+
+    <Figure>
+
+    ![ Right side of vehicle with right-hand traffic](../../images/CurbApproach_RightSide.png)
+
+    <Caption>
+
+    _With right-hand traffic, the curb approach that leaves the vehicle closest to the demand point is Right side of vehicle._
+
+    </Caption>
+
+    </Figure>
+
+    </Column>
+
+    <Column>
+
+    <Figure>
+
+    ![ Left side of vehicle with left-hand traffic ](../../images/CurbApproach_LeftSideDriving.png)
+
+    <Caption>
+
+    _With left-hand traffic, the curb approach that leaves the vehicle closest to the demand point is Left side of vehicle._
+
+    </Caption>
+
+    </Figure>
+
+    </Column>
+
+    </ColumnLayout>
+
+    </details>
+
+<BearingAttributes />
+
+</details>
+
+**Example**
+
+The example shows how to specify some attributes for the `demand_points`.
+
+<CodeBlock language="json" source="../../code-samples/locationAllocation/examples/inputs/demandPoints_ex.json" group="json" maxLines={20} expandable/>

@@ -1,0 +1,145 @@
+---
+title: "/downloadAndInstallUpdates: Download and Install Package"
+description: "The Download and Install Package operation schedules, or immediately starts, a job to update an organization's ArcGIS Living Atlas content."
+slug: "download-and-install"
+url: "/download-and-install"
+restInfoMetadata:
+  apiPath: /portals/[portalID]/livingatlascatalog/downloadAndInstallUpdates
+  urlSegments:
+    - name: '[root]'
+      url: /root
+    - name: /portals/[portalID]/livingatlascatalog/downloadAndInstallUpdates
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '11.3'
+  requiredCapability: Administrator
+---
+
+## Example usage
+
+The following is a sample ArcGIS Enterprise POST request for the `downloadAndInstallUpdates` operation:
+
+```markdown
+POST /webadaptor/sharing/rest/portals/0123456789SBCEDF/livingatlascatalog/downloadAndInstallUpdates
+Host: machine.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+packageId=&startTime=1712172786601&async=true&f=pjson
+```
+
+## Description
+
+The `downloadAndInstallUpdates` operation schedules, or immediately starts, a job to update an organization's ArcGIS Living Atlas content. When the update begins, the available content package is downloaded and installed.
+
+If you choose to schedule an update, it's important to note that only one update can be scheduled at a time. If a new scheduled update is made using this operation while one already exists, the original scheduled job will be repalced with the new one. If a new scheduled job does need to be made, use the [Cancel Scheduled Download and Install Package](cancelled-scheduled-install) operation to cancel the original job before using the `downloadAndInstallUpdates` operation to schedule a new one.
+
+If you choose to start the content update immediately, you can use the `jobId` returned as part of the response for this operation to check the status of the installation by making a request of the following form:
+
+```markdown
+https://machine.domain.com/webadaptor/sharing/rest/portals/<portalID>/jobs/<jobId>
+
+```
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `packageId`
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies a specific ID of an avaiable ArcGIS Living Atlas content package. This value can be retrieved from either the [Export Package Directory](/package-directory) or [Check for Updates](/check-for-updates) resources. If a value is not provided for this parameter, the update will use the first available package on the server that's hosting the ArcGIS Living Atlas content packages.
+
+      Example
+
+      ```markdown
+      packageId=1897ca6b39284c4db098f439da5a92e0
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `startTime`
+      
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Schedules a time (in Unix format) for the download and installation of the new content package to occur. If no value is provided for this parameter, the update will begin immediately after the request is submitted.
+
+      Example
+
+      ```markdown
+      startTime=1712172786601
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async`
+      
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Determines if the job will be performed asynchronously. The default value is `true`.
+
+      Values: `true` | `false`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+
+## JSON Response example
+
+The following response is returned when a value for `startTime` has been provided:
+
+```other
+{
+  "scheduleId": "3f0790c95488464d8d5ebcc36630447d",
+  "startTime": 1705050000000,
+  "packageId": "3dd3ed5e-ef71-4b90-aaf4-a689a834e596",
+  "success": true,
+  "status": "scheduled"
+}
+```
+
+The following response is returned when a value for `startTime` is not provided:
+
+```other
+{
+
+  "jobId": "077cb3784bc74c95be25c9df545af3de",
+  "success": true,
+  "status": "submitted"
+}
+```

@@ -1,0 +1,157 @@
+{/*Shared snippet for polygon_barriers OR polygonBarriers */} 
+
+import ParamMetadata from "../../../components/param-metatdata" 
+
+<ParamMetadata types={[{name:"feature",link:"../routing-data-types#feature"}]} />
+
+{/* <If c="requestType == 'job'">
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+</If>
+
+<If c="requestType == 'direct'">
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+</If> */}
+
+Specify polygons that either completely restrict travel or proportionately scale the time or distance required to travel on the streets intersected by the polygons.
+
+When specifying polygon barriers, you can set properties for each, such as its name or barrier type, using the following attributes:
+
+<details>
+ <If c="requestType == 'job'">
+ <summary><span class="font-sm text-color-link">Show attributes for `polygon_barriers`</span></summary>
+
+ #### Attributes for polygon_barriers
+ </If>
+
+ <If c="requestType == 'direct'">
+ <summary><span class="font-sm text-color-link">Show attributes for `polygonBarriers`</span></summary>
+
+ #### Attributes for polygonBarriers
+ </If>
+
+- <p class="space-x-2"><span class="font-bold">Name</span><span class="font-sm text-color-3">string</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The name of the barrier.
+
+<If c="requestType == 'direct'">
+- <p class="space-x-2"><span class="font-bold">ObjectID</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The object ID of the polygon barrier. `ObjectID` is a unique identifier for the polygon barrier. If you want to maintain a relationship between the input and output, set `preserveObjectID` to `true`. The `ObjectID` value of the input polygon barrier is included in the output polygon barrier (as the `ObjectID` field) and can be used to join additional information from analysis outputs to the attribute of the polygon barriers. If the `ObjectID` value is not specified, a unique ID is automatically generated in the output.
+</If>
+
+<If c="publication=='services-reference/enterprise && requestType== direct'">
+<Note type="{Note}">
+
+  You can specify a network location using `SourceID`, `SourceOID`, `PosAlong`, and `SideOfEdge` described below. If the network location is not provided, the solver will derive it from the input geometry
+  
+  </Note>
+
+- <p class="space-x-2"><span class="font-bold">SourceID</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The numeric identifier of the network dataset source feature class on which the input point is located.
+
+- <p class="space-x-2"><span class="font-bold">SourceOID</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The object ID of the feature in the source on which the input point is located. 
+
+- <p class="space-x-2"><span class="font-bold">PosAlong</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The position along the digitized direction of the source line feature. This value is stored as a ratio. This attribute is null if the network location references a junction.
+
+- <p class="space-x-2"><span class="font-bold">SideOfEdge</span><span class="font-sm text-color-3">int enum</span></p>
+
+   Allowed values: `1`, `2`
+
+   The side of the edge in relation to the digitized direction of the line feature.
+
+   This attribute is limited to a domain of two values:
+
+   - `1`: Right Side
+   - `2`: Left Side
+
+- <p class="space-x-2"><span class="font-bold">Attr_[Cost]</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+  This attribute is specific to scaled-cost barriers. It is the factor by which the cost of edges underlying the barrier are multiplied.
+  
+</If>
+
+- <p class="space-x-2"><span class="font-bold">BarrierType</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+  Allowed values: `0`, `1`
+
+  Specify polygons that either completely restrict travel or proportionately scale the time or distance required to travel on the streets intersected by the polygons.
+
+  The value for this attribute can be specified as one of the following integers:
+
+  - `0`: Restriction. Prohibits traveling through any part of the barrier. The barrier is referred to as a restriction polygon barrier since it prohibits traveling on streets intersected by the barrier. One use of this type of barrier is to model floods covering areas of the street that make traveling on those streets impossible.
+
+    ![Two maps demonstrate how a restriction polygon barrier affects finding a route between two stops.](../../images/Polygon_Barriers.png)
+
+    _The first map depicts the shortest path between two stops. The second map shows a polygon barrier blocking flooded streets, so the shortest path between the same two stops is different._
+
+  <If c="requestType == 'job'">
+  - `1`: Scaled Cost. Scales the cost (such as travel time or distance) required to travel the underlying streets by a factor specified using the `ScaledTimeFactor` or `ScaledDistanceFactor` attribute. 
+  
+    If the streets are partially covered by the barrier, the travel time or distance is apportioned and then scaled. For example, a factor of 0.25 means that travel on underlying streets is expected to be four times faster than normal. A factor of 3.0 means it is expected to take three times longer than normal to travel on underlying streets. This barrier type is referred to as a scaled-cost polygon barrier. It can be used to model storms that reduce travel speeds in specific regions, for example.
+  </If>
+
+  <If c="requestType == 'direct'">
+  - `1`: Scaled Cost. Scales the cost (such as travel time or distance) required to travel the underlying streets by a factor specified using the `Attr_[Cost]` attributes. 
+  
+    If the streets are partially covered by the barrier, the travel time or distance is apportioned and then scaled. For example, a factor of 0.25 means that travel on underlying streets is expected to be four times faster than normal. A factor of 3.0 means it is expected to take three times longer than normal to travel on underlying streets. This barrier type is referred to as a scaled-cost polygon barrier. It can be used to model storms that reduce travel speeds in specific regions, for example.
+  </If>
+
+    ![Two maps demonstrate how a scaled cost polygon barrier affects finding a route between two stops.](../../images/nac_barriers_spolygon.png)
+
+    _The first map shows a route that goes through inclement weather without regard for the effect that poor road conditions have on travel time. The second map shows a scaled polygon barrier that doubles the travel time of the roads covered by the storm. The route still passes through the southern tip of the storm since it is quicker to spend more time driving slowly through a small part of the storm rather than driving completely around it. The service uses the modified travel time in calculating the best route, and the modified travel time is reported as the total travel time in the response._
+
+
+<If c="requestType == 'job'">
+
+- <p class="space-x-2"><span class="font-bold">ScaledTimeFactor</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:1</span></p>
+
+  This is the factor by which the travel time of the streets intersected by the barrier is multiplied. The field value must be greater than zero.
+
+  <If c={props.lmd}>
+  This attribute is applicable only for scaled-cost barriers. The attribute value must be greater than or equal to zero, and its units are the same as those specified in the [`time_units`](#time_units) parameter.
+  </If>
+
+  This field is applicable only for scaled-cost barriers and when the `measurement_units` parameter is time-based.
+
+- <p class="space-x-2"><span class="font-bold">ScaledDistanceFactor</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:1</span></p>
+
+  This is the factor by which the distance of the streets intersected by the barrier is multiplied. The field value must be greater than zero.
+
+  <If c={props.lmd}>
+  This attribute is applicable only for scaled-cost barriers. The attribute value must be greater than or equal to zero, and its units are the same as those specified in the [`distance_units`](#distance_units) parameter.
+  </If>
+
+  This field is applicable only for scaled-cost barriers and when the `measurement_units` parameter is distance-based.
+
+- <p class="space-x-2"><span class="font-bold">ScaledCostFactor</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:1</span></p>
+
+  The scaled cost when the barrier is traversed. This attribute is applicable only for scaled-cost barriers. The attribute value must be greater than or equal to zero.
+
+  This field is applicable only for scaled-cost barriers when the impedance is neither time-based nor distance-based.
+
+</If>
+
+<If c="requestType == 'direct'">
+
+- <p class="space-x-2"><span class="font-bold">Attr_[Cost]</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+  This is the factor by which the cost of the streets intersected by the barrier is multiplied. This attribute is applicable only for scaled cost barriers. The attribute value must be greater than zero.
+
+</If>
+
+</details>
+
+<details>
+
+    <summary><span class="font-sm text-color-link">Show example</span></summary>
+
+This example shows how to add two polygons as barriers. The first polygon, Flood zone, is a restriction polygon barrier that prohibits travel on the underlying streets. The polygon is a single-part polygon feature composed of four points. The second polygon, Severe weather zone, is a scaled-cost polygon barrier that reduces the travel time on underlying streets to one-third of the original value. The polygon is a two-part polygon feature. Both parts are composed of four points.
+
+<CodeBlock language="json" source="../../code-samples/shared/examples/input/polygon_barriers.json" maxLines={20} expandable/>
+
+</details>

@@ -1,0 +1,200 @@
+---
+title: "Localized input field names"
+description: "Service info page contains suggested address field names for supported locales."
+slug: "localized-input-field-names"
+url: "/localized-input-field-names"
+guid: "GUID-FA976123-EC83-4610-9CBA-85A06957B627"
+migratedTopicMetadata:
+  FTITLE: "geocoding-localized-input-field-names"
+  FDESCRIPTION: ""
+  FCHANGES: "December 2023 geocoding update"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "agol 23.R03"
+  CREATED-ON: "08/12/2023 09:05:49"
+  FAUTHOR: "mchaffin"
+  FSTATUS: "Draft"
+  MODIFIED-ON: "08/12/2023 09:05:49"
+  VERSION: "24"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "1"
+  ED: "GUID-5537F579-3285-499A-B45E-3F61BF239386"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+---
+
+Both batch geocoding and multifield geocoding use the same input address component fields: Address, Neighborhood, City, Subregion, Region, CountryCode, Postal, and PostalExt. These fields are described in the [`findAddressCandidates`  topic](/find-address-candidates#address). They are used as a generic way to represent the components of a street address in any country. However, different terms may be used to refer to the same address components in different countries, and the terms may have various translations as well, depending on the locale. For instance, in the United States, the `Address`  input field is aliased as _Address or Place_. In France, this is translated as _Adresse ou lieu_; in Italy, it is _Indirizzo o località_.
+
+Developers integrating the ArcGIS Geocoding service into their application need to know the appropriate input field names to use for the language and country of their users. This information can be obtained from the service info page: [ https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer?f=pjson](https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer?f=pjson). The info page contains the localized versions of the input field names for all of the countries and languages supported by the service.
+
+The `addressFields`  object in the info page contains descriptions for each of the input fields for multifield addresses. Each input field is specified by its name, followed by a list of primary localized names for the field (the `localizedNames`  object), and a list of valid alternate localized names for the field (the `recognizedNames`  object). The `localizedNames`  and `recognizedNames`  are sorted by locale; each locale is represented by either a two-letter language code, or a two-letter language code and two-letter country code pair. 
+
+<Note type={"note"}>
+
+The localization information provided in the service info is only intended to be used for localization of field names in a user interface context. Localized input field names cannot be passed to the service in a request; only the input fields described in [findAddressCandidates](/find-address-candidates#address)  are valid when sending a batch geocoding request or multiple input field request to the service.
+
+</Note>
+
+See the following abbreviated snippet from the service info, which shows the `Address`  field with a portion of its `localizedNames`  and `recognizedNames` : 
+
+```javascript
+"addressFields": [
+  {
+   "name": "Address",
+   "alias": "Address or Place",
+   "localizedNames": {
+    "de": "Adresse oder Ort",
+    "de-at": "Adresse oder Ort"
+    "de-de": "Adresse oder Ort",
+    "en": "Address or Place",
+    "en-ar": "Address or Place",
+
+   "recognizedNames": {
+    "de": [
+     "Adresse",
+     "Anschrift",
+     "Hausanschrift",
+     "Strasse",
+     "Straße"
+    ],
+    "de-at": [
+     "Anschrift",
+     "Hausanschrift",
+     "Strasse",
+     "Straße"
+    ],
+    "de-de": [
+     "Adresse"
+    ],
+    "en": [
+     "Address",
+     "Street",
+     "Street Address"
+    ],
+    "en-ar": [
+     "Address",
+     "Street",
+     "Street Address"
+    ],
+
+```
+
+ 
+
+## `localizedNames`
+
+Refer to the `localizedNames`  object in the snippet above. The rows representing the localized field names are in the format &lt;language - optional country>: &lt;localized name>. See the row `"de": "Adresse oder Ort"` . In this row, `"de"`  is the language code for German. Since there is no corresponding country code, in this case `"Adresse oder Ort"`  is the global, non-country-specific German version of the `Address`  input field name. In the row `"de-at": "Adresse oder Ort"` , `"de"`  is the language code for German and `"at"`  is the country code for Austria, so `"Adresse oder Ort"`  is the German language version of the `Address`  input field name specific to Austria.
+
+The `localizedNames`  values represent the most appropriate translations for the input field names by language and country. They can be used to provide the input field name labels in an application that supports multifield geocoding in various locales. For example, the terms `"Address"` , `"City"` , `"Region"` , and `"Postal"`  will have no meaning for a user in Austria who speaks German. For such a scenario, a developer can query the service info for the Austrian German (de-at) versions of these fields and use them as the input field labels in the user interface (UI) for their application. 
+
+The `localizedNames`  values can similarly be used in an application that supports batch geocoding. Typically, in batch geocoding applications, there is a UI for mapping the fields in the input address table to the standardized input fields expected by the application. For users in Austria, the expected name for the `Address`  input field in such a UI would be `"Adresse oder Ort"` . For example, imagine a user has a table of addresses in which the street address component is contained in a field named `"Street Address"` . When the user specifies this table as the input for batch geocoding, they would need to map their `"Street Address"`  field to the `"Adresse oder Ort"`  expected field in the UI. A developer can query the `localizedNames`  object in the service info for the localized names in the appropriate locale and set them as the expected address field names in this type of application.
+
+## `recognizedNames`
+
+Refer to the `recognizedNames`  object in the snippet above. The rows representing the alternate localized field names are in the format &lt;language - optional country>: &lt;\[alternate names]>. See the row beginning with `"de-at"`  in the `recognizedNames`  section. 
+
+```javascript
+"de-at": [
+     "Anschrift",
+     "Hausanschrift",
+     "Strasse",
+     "Straße"
+    	]
+
+```
+
+  Since `"de"`  is the language code for German and `"at"`  is the country code for Austria, the values in the array that follows are the German language alternate names for `"Address"`  that are specific to residents of Austria.
+
+The values in the `recognizedNames`  object can be used by a developer of a batch geocoding application for automatic field mapping. As explained in the `localizedNames`  section above, batch geocoding applications generally include a UI for mapping the fields in the input address table to the address fields expected by the ArcGIS Geocoding service. To simplify the user experience, the developer may specify certain input table field names to automatically map to the corresponding expected address fields in the UI. Consider the `"de-at"`  scenario. The developer has already determined that the German-Austria translation of the field alias `"Address or Place"`  is `"Adresse oder Ort"`  and has set this as the expected address field name in their batch geocoding UI. By querying the `recognizedNames`  object in the `Address`  field name section of the service info for `"de-at"` , they can obtain all the valid German-Austria names for the `"Adresse oder Ort"` . Now when the user specifies their address table for batch geocoding, the application can analyze the field names in the table; if either `"Anschrift"` , `"Hausanschrift"` , `"Strasse"` , or `"Straße"`  is detected as a field name, the application can automatically map it to the `"Adresse oder Ort"`  (`Address or Place` ) field in the UI.
+
+## Single-line batch geocoding input
+
+Tables including addresses in a single field can be batch geocoded as well. The service info contains `localizedNames`  and `recognizedNames`  values for the `SingleLine`  input field within the `singleLineAddressField`  object of the service info. A developer can query this object to obtain the valid translations for `"SingleLine"`  in various languages or language and country locales. 
+
+## Candidate fields
+
+Similar to input field names, the service info provides all available candidate field names and translated values for them. Candidate fields are the attributes included in a JSON response from the ArcGIS Geocoding service. The `candidateFields`  object in the service info contains an array of `name`  and `localizedNames`  values. The `name`  attribute provides the output field names returned by the service. For each `name`  value, there is a corresponding `localizedNames`  object that includes translations of the `name`  value in different languages. It can be used to display output fields in the expected language for applications that support multiple locales. See the abbreviated sample below, which shows the structure of the `candidateFields`  object.
+
+```javascript
+"candidateFields": [
+  {
+   "name": "Status",
+   "localizedNames": {
+    "ar": "الحالة",
+    "en": "Status",
+    "fr": "Statut",
+    "ja": "ステータス",
+    "ru": "Состояние",
+    "vi": "Trạng thái"
+   }
+  },
+  {
+   "name": "Match_addr",
+   "localizedNames": {
+    "ar": "عنوان مطابق",
+    "en": "Match Address",
+    "fr": "Apparier l'adresse",
+    "ja": "住所の照合",
+    "ru": "Сопоставление адресов",
+    "vi": "Khớp với Địa chỉ"
+   }
+  }
+
+```
+
+ 
+
+## Supported countries
+
+The service info provides a list of all the countries supported by the ArcGIS Geocoding service. The `countries`  object in the service info contains an array of two-letter country codes representing the supported countries. A developer can query this object to verify whether a particular country is supported before querying the service info for the localized and recognized names of address fields in that country. 
+
+## Detailed countries
+
+The service info also provides localized names for the countries supported by the ArcGIS Geocoding service. The `detailedCountries`  object in the service info contains an array of `name`  and `localizedNames`  values.
+
+The `name`  attribute provides the two-letter country code for each country supported by the ArcGIS Geocoding service. 
+
+For each `name`  value, there is a corresponding `localizedNames`  object that provides the full name of the country in different languages. It can be used to display country names in the expected language for applications that support multiple locales. See the abbreviated sample below, which shows the structure of the `countries`  object.
+
+```javascript
+"countries": [
+  {
+   "localizedNames": {
+    "ar": "أندورا",
+    "es": "Andorra",
+    "jp": "アンドラ",
+    "ru": "Андорра",
+    "zh-cn": "安道尔",
+    "zh-tw": "安道爾"
+   },
+   "name": "AD"
+  },
+  {
+   "localizedNames": {
+    "ar": "بتسوانا",
+    "en": "Botswana",
+    "jp": "ボツワナ",
+    "ru": "Ботсвана",
+    "zh-cn": "博茨瓦那",
+    "zh-tw": "波札那"
+   },
+   "name": "BW"
+  },
+  {
+   "localizedNames": {
+    "ar": "الولايات المتحدة",
+    "en": "United States",
+    "jp": "米国",
+    "ru": "США",
+    "zh-cn": "美国",
+    "zh-tw": "美國"
+   },
+   "name": "US"
+  }
+
+```
+
+ 

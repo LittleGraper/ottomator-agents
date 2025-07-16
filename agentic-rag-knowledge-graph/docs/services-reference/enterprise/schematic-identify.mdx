@@ -1,0 +1,378 @@
+---
+title: "Schematic Identify"
+description: "The identify operation returns an identified results resource."
+slug: "schematic-identify"
+url: "/schematic-identify"
+guid: "GUID-353267E2-317C-41BC-9EE3-4F2A98931986"
+migratedTopicMetadata:
+  FTITLE: "Schematic Identify"
+  FDESCRIPTION: ""
+  FCHANGES: "Broken links"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.7 -*"
+  CREATED-ON: "21/03/2019 13:24:57"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "15/04/2019 11:22:52"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-9F9C6C60-3ADD-40F9-B164-843FD46375FD"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/MapServer/exts/SchematicServer/diagrams/<diagID>/map/identify
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/MapServer/exts/SchematicServer/diagrams/<diagID>/map/identify
+  methods: 
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.1'
+---
+
+## Description
+
+The `identify` operation returns an identified results resource. It is performed on a [Schematic Diagram Map](/schematic-diagram-map) resource. The result of this operation is an identify results resource.
+
+Each identified result includes its name, layer ID, layer name, geometry and geometry type, and other attributes of that result as name-value pairs.
+
+You can provide arguments to the `identify` operation as query parameters defined in the parameters table below.
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` .
+
+Values: `html`  \| `json` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geometry` 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Description: The geometry to identify on. The type of the geometry is specified by the `geometryType`  parameter. The structure of the geometries is same as the structure of the [JSON geometry objects](/geometry-objects) returned by the ArcGIS REST API. In addition to the JSON structures, for points and envelopes, you can specify the geometries with a simpler comma-separated syntax.
+
+Syntax:
+
+JSON structures: `geometryType=<geometryType>&geometry={`[geometry](/geometry-objects)`}` 
+
+Point simple syntax: `geometryType=esriGeometryPoint&geometry=<x>,<y>` 
+
+Envelope simple syntax: `geometryType=esriGeometryEnvelope&geometry=<xmin>,<ymin>,<xmax>,<ymax>` 
+
+The coordinates must always use a period as the decimal separater even in countries where a comma is traditionally used.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geometryType` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The type of geometry specified by the geometry parameter. The geometry type could be a point, a line, a polygon or an envelope. The default geometry type is a point (`esriGeometryPoint` ).
+
+Values: `esriGeometryPoint | esriGeometryMultipoint | esriGeometryPolyline | esriGeometryPolygon | esriGeometryEnvelope` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sr` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The well-known ID of the spatial reference of the input and output geometries as well as the `mapExtent` . If `sr`  is not specified, the `geometry`  and the `mapExtent`  are assumed to be in the spatial reference of the map, and the output geometries are also in the spatial reference of the map. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`layerDefs` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Parameter kept for compatibility reason with the standard [identify](/identify-map-service) operation, but this parameter is always ignored when the identify is performed on a schematic diagram map.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`time` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The time instant or the time extent of the features to be identified. 
+
+Time instant
+
+Syntax: `time=<timeInstant>` 
+
+Example: `time=1199145600000`  (1 Jan 2008 00:00:00 GMT) 
+
+Time extent 
+
+Syntax: `time=<startTime>, <endTime>` 
+
+Example: `time=1199145600000, 1230768000000`  (1 Jan 2008 00:00:00 GMT to 1 Jan 2009 00:00:00 GMT) 
+
+A null value specified for start time or end time will represent infinity for start or end time respectively. 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`layerTimeOptions` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The time options per layer. Users can indicate whether or not the layer should use the time extent specified by the time parameter or not, whether to draw the layer features cumulatively or not and the time offsets for the layer. 
+
+Syntax:
+
+```javascript
+layerTimeOptions=
+{
+  "<layerId1>" : {
+    //If true, use the time extent specified by the time parameter
+    "useTime" : < true | false >,
+    //If true, draw all the features from the beginning of time for that data
+    "timeDataCumulative" : < true | false >,
+    //Time offset for this layer so that it can be overlaid on the top of a previous or future time period
+    "timeOffset" : <timeOffset1>,
+    "timeOffsetUnits" : "<esriTimeUnitsCenturies | esriTimeUnitsDays | esriTimeUnitsDecades | 
+                             esriTimeUnitsHours | esriTimeUnitsMilliseconds | esriTimeUnitsMinutes | 
+                             esriTimeUnitsMonths | esriTimeUnitsSeconds | esriTimeUnitsWeeks | esriTimeUnitsYears |
+                             esriTimeUnitsUnknown>"
+  },
+  "<layerId2>" : {
+    "useTime" : < true | false >,
+    "timeDataCumulative" : < true | false >,
+    "timeOffsetOffset" : <timeOffset2>,
+    "timeOffsetUnits" : "<timeOffsetUnits2>"
+  }
+}
+
+
+```
+
+ 
+
+Example:
+
+```javascript
+layerTimeOptions=
+{
+  "0" : {
+    "useTime" : true,
+    "timeDataCumulative" : false,
+    "timeOffset" : 1,
+    "timeOffsetUnits" : "esriTimeUnitsYears"
+  },
+  "3" : {
+    "useTime" : false
+  }
+}
+
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`layers` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Parameter kept for compatibility reason with the standard [identify](/identify-map-service) operation, but this parameter is always ignored when the identify is performed on a schematic diagram map.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`tolerance` 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The distance in screen pixels from the specified `geometry`  within which the identify should be performed. The value for the tolerance is an integer. 
+
+Example: `tolerance=2` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`mapExtent` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The extent or bounding box of the map currently being viewed. Unless the `sr`  parameter has been specified, the `mapExtent`  is assumed to be in the spatial reference of the map. 
+
+The `mapExtent`  and the `imageDisplay`  parameters are used by the server to determine the layers visible in the current extent. They are also used to calculate the distance on the map to search based on the `tolerance`  in screen pixels.
+
+<Note type={"note"}>
+
+When the `mapExtent`  parameter is not specified, the extent of the diagram is the one used by default for the identify operation.
+
+</Note>
+
+Syntax:`mapExtent=<xmin>, <ymin>, <xmax>, <ymax>` 
+
+Example: `mapExtent=-104,35.6,-94.32,41` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`imageDisplay` 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Description: The screen image display parameters (width, height and DPI) of the map being currently viewed.
+
+The `mapExtent`  and the `imageDisplay`  parameters are used by the server to determine the layers visible in the current extent. They are also used to calculate the distance on the map to search based on the `tolerance`  in screen pixels. 
+
+Syntax: `imageDisplay=<width>, <height>, <dpi>` 
+
+Example: `imageDisplay=600,550,96` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnGeometry` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+If `true` , the resultset will include the geometries associated with each result. The default is `true` . 
+
+Values: `true | false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`maxAllowableOffset` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+This option can be used to specify the `maximum allowable offset`  to be used for generalizing geometries returned by the `identify`  operation. The `maxAllowableOffset`  is in the units of the `sr` . If `sr`  is not specified then `maxAllowableOffset`  is assumed to be in the unit of the spatial reference of the map. 
+
+Example: `maxAllowableOffset=2` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+The Schematic Identify operation on the schematic diagram which id is '1-1' under the S1_Schematics public sample Schematics service with `geometry={"x":124978.301169419, "y":4077158.52904231, "spatialReference":{"wkid":102118}}` , `tolerance=2`  and `imageDisplay=451,968,96`  returns one node schematic feature and its two connected link schematic features:
+
+```javascript
+https://myserver.esri.com/arcgis/rest/services/S1_Schematics/MapServer/exts/SchematicsServer/diagrams/1-1/map/identify?geometry=%7B%22x%22%3A124978.301169419%2C+%22y%22%3A4077158.52904231%2C+%22spatialReference%22%3A%7B%22wkid%22%3A102118%7D%7D&geometryType=&sr=&time=&layerTimeOptions=&tolerance=2&imageDisplay=451%2C968%2C96&returnGeometry=&maxAllowableOffset=&layerDefs=&layers=&mapExtent=&f=pjson
+```
+
+ 

@@ -1,0 +1,165 @@
+---
+title: "Upload Assets (Feature Service/Layer)"
+description: "The uploadAssets operation uploads assets to a service either by referencing the upload ID of an asset or having the asset embedded in the request."
+slug: "fs-upload-assets"
+url: "/fs-upload-assets"
+guid: "GUID-67C9F2E4-1EBB-41BA-B154-DF66D1421347"
+migratedTopicMetadata:
+  FTITLE: "FS Upload Assets"
+  FDESCRIPTION: ""
+  FCHANGES: "Fixing copy editing mistake"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1-*"
+  CREATED-ON: "08/06/2023 11:41:22"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "08/06/2023 12:23:28"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-B118981F-6DCA-48C1-8AC8-D18B753E2BDB"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/FeatureServer/<layerId>/uploadAssets
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/FeatureServer/<layerId>/uploadAssets
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '11.1'
+  requiredCapability: Editing, Uploads
+---
+
+## Description
+
+The `uploadAssets`  operation uploads assets to a service either by referencing the upload ID of an asset or having the asset embedded in the request. Assets must be uploaded to a service before they can be referenced in `applyEdits`  or `convert3D`  requests.
+
+If the operation is successful, the response will include the `uploadResults`  property, which will have a result object for each asset included in the request. If an asset is uploaded successfully, the result object will return `success`  as `true`  and the computed hash for the asset. If an asset was not uploaded successfully, the result object will return `success`  as `false`  and an error object that includes an error code and description of the error. If the operation is not successful, the response will return an error.
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`assets` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+An array of asset objects. Each asset object contains the `assetType`  property and either the `assetData`  or `assetUploadId`  properties, which specify the asset data to be uploaded. For the `assetData`  property, the value is base64 encoded asset data. For the `assetUploadId`  property, the value references an upload ID that's returned after using the [`upload` ](/upload) operation to upload an asset to the server. The list of possible `assetType`  values is configured per feature service and can be obtained from a [feature layer resource's JSON format](/layer-feature-service#json-response-syntax), in the `"infoFor3D": {"editFormats":[]}`  JSON object.
+
+Syntax
+
+```javascript
+//General syntax example
+assets=[<asset1>, <asset2>]
+
+//assetData syntax example
+assets=[{"assetType": "<assetType>","assetData": "<base64EncodedAssetBytes>"}]
+
+//assetUploadId syntax example
+assets=[{"assetType": "<assetType>","assetUploadId": "<uploadId>"}]
+
+```
+
+ 
+
+Example
+
+```javascript
+assets=[{"assetType": "3D_gltf","assetData": "Z2xURgIAAACoiRAAsFcAAEpTT057ImFjY2Vzc29ycyI6W3siYnVmZmVyVmlldyI6MSwiY29tcG9uZ..."},{"assetType": "IM_png","assetUploadId": "i0bcaf83a-85e2-40a3-b1e7-f80c7b63b832"}]
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` .
+
+Values: `html`  \| `json`  \| `pjson` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+The following is a sample request for the `uploadAssets`  operation:
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/City_Park_Assets/FeatureServer/0/uploadAssets?assets=[{"assetType": "3D_gltf","assetData": "Z2xURgIAAACoiRAAsFcAAEpTT057ImFjY2Vzc29ycyI6W3siYnVmZmVyVmlldyI6MSwiY29tcG9uZ..."},{"assetType": "IM_png","assetUploadId": "i0bcaf83a-85e2-40a3-b1e7-f80c7b63b832"}]&f=pjson
+```
+
+ 
+
+## JSON Response syntax
+
+```other
+{
+  "uploadResults": [
+    {
+      "success": true,
+      "assetHash": "<assetHash1>"
+    },
+    {
+      "success": true,
+      "assetHash": "<assetHash2>"
+    },
+    {
+      "success": false,
+      "error": {
+        "code": "<error code>",
+        "description": "<error description>"
+      }
+    }
+  ]
+}
+```
+
+ 
+
+## JSON Response example
+
+```other
+{
+  "uploadResults": [
+    {
+      "success": "true",
+      "assetHash": "045ef29d382f1c8227bde3a25d37f7a62fe0d2259a3a14dd6486ee53c8faba18"
+    },
+    {
+      "success": "false",
+      "error": {
+        "code": 2017,
+        "description": "Invalid upload item id"
+      }
+    }
+  ]
+}
+```
+
+ 

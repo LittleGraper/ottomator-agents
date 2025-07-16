@@ -1,0 +1,238 @@
+---
+title: "Import Entitlements"
+description: "Imports entitlements for ArcGIS Pro into Portal for ArcGIS."
+slug: "import-entitlements"
+url: "/import-entitlements"
+guid: "GUID-CBF7CBB2-904E-4EE0-941C-CAFA253AC9C0"
+migratedTopicMetadata:
+  FTITLE: "Import Entitlements"
+  FDESCRIPTION: ""
+  FCHANGES: "Implementing REST API style changes"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.8 - *"
+  CREATED-ON: "09/08/2019 15:59:30"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "05/11/2019 20:48:02"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "9"
+  ED: "GUID-4522206E-D152-4901-A20D-1B95AC05CA20"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /importEntitlements
+  urlSegments:
+    - name: <licenses-url>
+      url: /licenses
+    - name: /importEntitlements
+  methods:
+    - post
+  sslOnly: 'yes'
+  versionIntroduced: 10.3.0
+  requiredCapability: Administrator
+---
+
+## Description
+
+<Note type={"note"}>
+
+This operation is only applicable to ArcGIS Enterprise 10.6.1 or before.
+
+</Note>
+
+This operation allows you to import entitlements for ArcGIS Pro and additional products such as ArcGIS Navigator into your licensing portal. Once the entitlements have been imported, you can assign licenses to users within your portal. The operation requires an entitlements file that has been exported out of your ArcGIS License Server Administrator or out of My Esri, depending on the product.
+
+A typical entitlements file will have multiple parts, each representing a set of entitlements that are effective at a specific date. The parts that are effective immediately will be configured to be the current entitlements. Other parts will be added to a queue. The portal framework will automatically apply the parts when they become effective. You can use the [Get Entitlements](/get-entitlements) operation to see the parts that are in the queue.
+
+Each time this operation is invoked, it overwrites all existing entitlements, even the ones that are in the queue.
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`file` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The multipart post parameter representing the entitlements file that has been exported out of the license manager.
+
+Example
+
+```javascript
+file=entitlements.json
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`appId` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The identifier for the application for which the entitlements are being imported
+
+Example
+
+```javascript
+appId=arcgisprodesktop
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` .
+
+Values: `html`  \| `json`  \| `pjson` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## JSON Response syntax
+
+```javascript
+{
+   "itemId": "<itemId>",
+   "appId": "<appId>",
+   "current": {
+     "orgEntitlements": {
+        "maxUsers": <maxUsers>,
+        "startDate": <startDate>,
+        "startDateStr": "<startDateStr>",
+        "entitlements": {
+          "<feature1>": {
+            "num": <number>,
+            "license": "<license_string>"
+          },
+          "<feature2>": {
+            "num": <number>,
+            "license": "<license_string>"
+          },
+        }
+     }
+     "signature": "<signature>",
+     "licenseManagerInfo": {
+        "hostname": "<hostname>",
+        "port": <port>
+     }
+   },
+   "queue": [
+     {
+        "orgEntitlements": {
+           "maxUsers": <maxUsers>,
+           "startDate": <startDate>,
+           "startDateStr": "<startDateStr>",
+           "entitlements": {
+              "<feature1>": {
+                 "num": <number>,
+                 "license": "<license_string>"
+              },
+              "<feature2>": {
+                 "num": <number>,
+                 "license": "<license_string>"
+              },
+           }
+        },
+        "signature": "<signature>",
+        "licenseManagerInfo": {
+           "hostname": <hostname>,
+           "port": <port>
+        }
+     }
+   ]
+}  
+```
+
+ 
+
+## JSON Response example
+
+```javascript
+{
+  "itemId": "12345",
+  "appId": "arcgisprodesktop",
+  "current": {
+    "orgEntitlements": {
+      "maxUsers": 10,
+      "startDate": 0,
+      "startDateStr": "10-Sep-2014",
+      "entitlements": {
+        "desktopAdvN": {
+           "num": 10,
+           "license": "***"
+        },
+        "networkAnalystN": {
+           "num": 5,
+           "license": "***"
+        }
+      }
+    },
+    "signature": "***",
+    "licenseManagerInfo": {
+       "hostname": "licensemanager.domain.com",
+       "port": 27000
+    }
+  },
+  "queue": [
+    {
+      "orgEntitlements": {
+         "maxUsers": 0,
+         "startDate": 21432374576,
+         "startDateStr": "10-Sep-2015",
+         "entitlements": {
+            "desktopAdvN": {
+               "num": 0,
+               "license": "***"
+            },
+            "networkAnalystN": {
+               "num": 0,
+               "license": "***"
+            },
+         }
+      },
+      "signature": "***",
+      "licenseManagerInfo": {
+         "hostname": "licensemanager.domain.com",
+         "port": 27000
+      }
+    }
+  ]
+}
+```
+
+ 

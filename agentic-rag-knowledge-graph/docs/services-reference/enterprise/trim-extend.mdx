@@ -1,0 +1,208 @@
+---
+title: "Trim/Extend"
+description: "This operation trims or extends each polyline specified in the input array, using the user-specified guide polylines."
+slug: "trim-extend"
+url: "/trim-extend"
+guid: "GUID-9ADB6517-3205-4DA9-BCE0-65C780249530"
+migratedTopicMetadata:
+  FTITLE: "Trim-Extend"
+  FDESCRIPTION: ""
+  FCHANGES: "Fixing broken links"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9.1- *"
+  CREATED-ON: "07/09/2021 13:47:10"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "04/10/2021 10:03:16"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-04C2D59F-4A5C-446E-9FF1-1527E2F74AD5"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /Utilities/Geometry/GeometryServer/trimExtend
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /Utilities/Geometry/GeometryServer/trimExtend
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.0'
+---
+
+import GUID_12D33E07_319F_493E_A7BD_EA5AEEE8F739_GUID_BCF91CA2_BF74_438B_B28C_AB7DE8D30617 from "./snippets/GUID-12D33E07-319F-493E-A7BD-EA5AEEE8F739/_GUID-BCF91CA2-BF74-438B-B28C-AB7DE8D30617";
+
+## Description
+
+The `trimExtend` operation is performed on a [geometry service resource](/geometry-service). This operation trims or extends each polyline specified in the input array using the user-specified guide polylines. When trimming features, the part to the left of the oriented cutting line is preserved in the output, and the other part is discarded. An empty polyline is added to the output array if the corresponding input polyline is neither cut nor extended.
+
+You can provide arguments to the `trimExtend` operation as query parameters defined in the following parameters table.
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`polylines` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies an array of polylines to be trimmed or extended. The spatial reference of the polylines is specified by `sr`. The structure of each polyline in the array is the same as the structure of the [JSON polyline objects](/geometry-objects#spatial-reference) returned by the ArcGIS REST API.
+
+Syntax
+
+```other
+[<polyline1>, <polyline2>, ..., <polylineN>]
+```
+
+Example:
+
+<GUID_12D33E07_319F_493E_A7BD_EA5AEEE8F739_GUID_BCF91CA2_BF74_438B_B28C_AB7DE8D30617 />
+
+</StyledTableCell>
+</StyledTableRow>
+
+<StyledTableRow>
+<StyledTableCell cellStyle="markdown">
+
+`trimExtendTo` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies a polyline that is used as a guide for trimming or extending input `polylines`. The spatial reference of the polylines is specified by `sr`. The structure of each polyline is the same as the structure of the [JSON polyline objects](/geometry-objects) returned by the ArcGIS REST API.
+
+Syntax
+
+```other
+{
+  "paths": [
+    [[x11,y11],...,[x1N,y1N]],
+    ...,
+    [[xM1,yM2],...,[xMP,yMP]]
+  ]
+}
+```
+
+Example
+
+```json
+{
+  "paths": [
+    [[-117,34],[-116,34],[-117,33]],
+    [[-115,44],[-114,43],[-115,43]]
+  ]
+}
+```
+
+</StyledTableCell>
+</StyledTableRow>
+
+<StyledTableRow>
+<StyledTableCell cellStyle="markdown">
+
+`sr` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the well-known ID of the spatial reference or a [spatial reference JSON object](/geometry-objects#spatial-reference) for the input `polylines` . For a list of valid WKID values, see [Using a spatial reference](/using-spatial-references).
+
+</StyledTableCell>
+</StyledTableRow>
+
+<StyledTableRow>
+<StyledTableCell cellStyle="markdown">
+
+`extendHow (optional)` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Sets a flag that is used along with the `trimExtend` operation. 
+
+- `0` — By default, an extension considers both ends of a path. The old ends remain, and new points are added to the extended ends. The new points have attributes that are extrapolated from adjacent existing segments. 
+- `1` — If an extension is performed at an end, relocate the endpoint to the new position instead of leaving the old point and adding a new point at the new position.
+- `2` — If an extension is performed at an end, do not extrapolate the end segment's attributes for the new point. Instead, make its attributes the same as the current end. It is incompatible with `esriNoAttributes`.
+- `4` — If an extension is performed at an end, do not extrapolate the end segment's attributes for the new point. Instead, make its attributes empty. It is incompatible with `esriKeepAttributes`.
+- `8` — Do not extend the "from" end of any path.
+- `16` — Do not extend the "to" end of any path.
+
+</StyledTableCell>
+</StyledTableRow>
+
+<StyledTableRow>
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default format is `html`.
+
+Values: `html`  \| `json`  \| `pjson` 
+
+</StyledTableCell>
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+The following is a decoded sample request URL for `trimExtend` that demonstrates how two input polyline segments can be trimmed or extended. The actual URL must be encoded.
+
+[`https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer/trimExtend?sr=2229&polylines=[{"paths":[[[6805512,1843725],[6805496,1844963]]]},{"paths":[[[6805532,1842246],[6805523,1842901]]]}]&trimExtendTo={"paths":[[[6804206,1843554],[6805395,1843570],[6805514,1843607],[6805740,1843619]]]}&extendHow=1`](https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer/trimExtend?sr=2229&polylines=%5B%7B%22paths%22%3A%5B%5B%5B6805512%2C1843725%5D%2C%5B6805496%2C1844963%5D%5D%5D%7D%2C%7B%22paths%22%3A%5B%5B%5B6805532%2C1842246%5D%2C%5B6805523%2C1842901%5D%5D%5D%7D%5D&trimExtendTo=%7B%22paths%22%3A%5B%5B%5B6804206%2C1843554%5D%2C%5B6805395%2C1843570%5D%2C%5B6805514%2C1843607%5D%2C%5B6805740%2C1843619%5D%5D%5D%7D&extendHow=1&f=html)
+
+## JSON Response syntax
+
+```other
+{
+  "geometryType": "<esriGeometryPolyline>",
+  "geometries": [<geometry1>, <geometry2>, ..., <polylineN>]
+}
+```
+
+## JSON Response example
+
+```json
+{
+ "geometryType": "esriGeometryPolyline",
+ "geometries": [
+  {"paths": [[
+   [
+    6805513.527014314,
+    1843606.8529860612
+   ],
+   [
+    6805496.000106633,
+    1844962.9999830574
+   ]
+  ]]},
+  {"paths": [[
+   [
+    6805532.00003463,
+    1842245.9998396486
+   ],
+   [
+    6805513.302286658,
+    1843606.7831129492
+   ]
+  ]]}
+ ]
+}
+```

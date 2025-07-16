@@ -1,0 +1,173 @@
+---
+title: "Federate"
+description: "This operation federates either a GIS Server or ArcGIS Image Server with an organization."
+slug: "federate-server"
+url: "/federate-server"
+guid: "GUID-201E8A30-966C-4A33-90DF-876CBA4E4B8F"
+migratedTopicMetadata:
+  FTITLE: "Federate Server"
+  FDESCRIPTION: ""
+  FCHANGES: "Support for workflow manager"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2-*"
+  CREATED-ON: "09/11/2023 08:13:42"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "09/11/2023 19:34:17"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-C0C230F1-410A-4DB8-B064-8C0A74D46D97"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /orgs/<orgID>/federation/servers/federate
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /orgs/<orgID>/federation/servers/federate
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed with the "Servers" privilege
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `federate` operation federates either a GIS Server, ArcGIS Image Server, or a Workflow Manager Server with an organization.
+
+<Note type={"note"}>
+
+Support for federating a Workflow Manager Server was added at ArcGIS Enterprise 11.2 on Kubernetes.
+
+</Note>
+
+The `federate` operation performs a validation check to determine whether the provided service and administrative URLs are accessible. If the resulting validation check fails, a warning is returned. A `SEVERE` log type is also returned in the organization's logs. After federation, administrators will be unable to set a server role for the federated server.
+
+<Note type={"note"}>
+
+Before federation, servers should be updated to use either CA or domain certificates. Currently, federating a server that uses a self-signed certificate is not supported.
+
+</Note>
+
+Once a server has been federated with an organization, services that exist on the ArcGIS Server site at the time of federation are automatically added to the portal as items. The administrator who performs this operation will be assigned as the imported service's owner and, once the operation is complete, can reassign ownership to other members in the organization. Any subsequent items published to the federated server are automatically added as items on the portal and are owned by the user who publishes them.
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `url` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The URL of the GIS, Image, or Workflow Manager Server used by external users when accessing the server site. If you've added the server to your organization's reverse proxy server, the URL is the reverse proxy server address.
+
+      ```markdown label=Example
+      url=https://organization.domain.com/context
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `adminUrl` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The URL used to access the server when performing administrative operations on the internal network. The URL must be able to be used by the organization to communicate with all servers in the site, even when one of them is unavailable.
+
+      ```markdown label=Example
+      adminUrl=https://gisserver.domain.com:6443/arcgis
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `username` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The username of the primary administrator account for the server. If this account is disabled, you'll need to reenable it.
+
+      ```markdown label=Example
+      username=KBadmin
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `password` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The password of the primary administrator account for the server.
+
+      ```markdown label=Example
+      password=adminPass1234
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `federate` operation:
+
+```other
+POST /context/admin/orgs/0123456789ABCDEF/federation/servers/federate HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+url=https://organization.domain.com/context&adminUrl=https://gisserver.domain.com:6443/arcgis&username=KBadmin&password=adminPass1234&f=pjson&token=IBFvYfLQOcbpWWtoYlb-_MR27SwCyYicph8dBh9eVD-CAv2yXXoBQHp0t05ZV2yd9uUlx-uP2NAIf-ivlFguuDV8DYX_b-Tf_f-3U9qUN3sG4dhumlt44w2JFGMKGLar7J1nsAmtocoeqN7qXgdKxGOQFyUb7xACcet2yXjrqhyfwm-JyFOfnFc0T7sqb_WNLE_WCaSMczWV3yLOQ5mEgb74zE947HTtgxcexBPneApQoXplLri5V8ZJ4KzOvBrkCWbRckzh67vUIUo0qIMPLA..
+```
+
+## JSON Response example
+
+```other
+{"status": "success"}
+```

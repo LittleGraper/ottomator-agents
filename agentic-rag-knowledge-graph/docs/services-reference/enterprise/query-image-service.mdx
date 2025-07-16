@@ -1,0 +1,964 @@
+---
+title: "Query (Image Service)"
+description: "The query  operation is performed on an image service resource and queries the resource by applying a filter specified by the user through the request."
+slug: "query-image-service"
+url: "/query-image-service"
+guid: "GUID-B5F7F6AF-5DD5-4B95-B6FC-2D94EC02B0FC"
+migratedTopicMetadata:
+  FTITLE: "Query (Image Service)"
+  FDESCRIPTION: ""
+  FCHANGES: "Per issue 13490, made edits to fix parameters and content"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "15/08/2023 11:33:36"
+  FAUTHOR: "jswain"
+  FSTATUS: "Released"
+  MODIFIED-ON: "27/09/2023 08:42:43"
+  VERSION: "9"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-C5FA4BE1-0AF2-422B-8866-33B2D105D4A6"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /query
+  urlSegments:
+    - name: <imageservice-url>
+      url: /image-service
+    - name: /query
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.0'
+  requiredCapability: Catalog
+---
+
+import GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_9B5D5783_E386_45F7_8EA8_88843A1BB484 from "./snippets/GUID-512E1710-163F-43F9-8ABC-FA35AE6DD5DF/_GUID-9B5D5783-E386-45F7-8EA8-88843A1BB484";
+import GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_436C390A_1809_43BA_9CC9_9F19A8E0C32A from "./snippets/GUID-512E1710-163F-43F9-8ABC-FA35AE6DD5DF/_GUID-436C390A-1809-43BA-9CC9-9F19A8E0C32A";
+import GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_B4E198FE_1612_4699_90DA_2782538F1A11 from "./snippets/GUID-512E1710-163F-43F9-8ABC-FA35AE6DD5DF/_GUID-B4E198FE-1612-4699-90DA-2782538F1A11";
+
+## Description
+
+<Note type={"note"}>
+
+As of 10.5, you must license your ArcGIS Server as an ArcGIS Image Server to use this operation.
+
+</Note>
+
+The `query`  operation is performed on an [image service resource](/image-service) and queries the resource by applying a filter specified by the user through the request. The result of this operation is a set of features or an array of raster IDs (if `returnIdsOnly` is set to `true`), a count (if `returnCountOnly` is set to `true`), or a set of field statistics (if `outStatistics` is used).
+
+While there is a limit (`maxRecordCount`) to the number of features included in the feature set response, there is no limit to the number of object IDs returned in the ID array response. Clients can use this to get all the query-conforming object IDs by specifying `returnIdsOnly=true`  and subsequently requesting feature sets for subsets of object IDs. 
+
+At 10.8.1, the `query` operation supports `rasterQuery` if the image service uses `ArcObjects11` or `ArcObjectsRasterRendering` as the service provider.
+
+You can provide arguments to the `query`  operation as query parameters defined in the parameters table below.
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_9B5D5783_E386_45F7_8EA8_88843A1BB484 />
+
+Values: `html` \| `json` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`objectIds` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The object IDs of the raster catalog to be queried.
+
+Syntax
+
+```javascript
+objectIds=<objectId1>, <objectId2>
+```
+
+ 
+
+Example
+
+```javascript
+objectIds=37, 462
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`where` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A where clause for the query filter. Any legal SQL where clause operating on the fields in the raster catalog is allowed.
+
+Example
+
+```javascript
+where=POP2000 > 350000
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`time` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The time instant or the time extent to query.
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_436C390A_1809_43BA_9CC9_9F19A8E0C32A />
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geometry` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The geometry that will be applied as the spatial filter. The structure of the geometry is the same as the structure of the [ JSON geometry objects](/geometry-objects) returned by the ArcGIS REST API. In addition to the JSON structures, for envelopes and points, you can specify the geometry with a comma-separated syntax.
+
+Syntax
+
+```json
+//JSON structures
+geometryType=<geometryType>&geometry={geometry}
+
+//Envelope simple syntax
+geometryType=esriGeometryEnvelope&geometry=<xmin>,<ymin>,<xmax>,<ymax>
+
+//Point simple syntax
+geometryType=esriGeometryPoint&geometry=<x>,<y>
+
+```
+
+ 
+
+Examples
+
+```json
+//Envelope example 1
+geometryType=esriGeometryEnvelope&geometry={xmin: -104, ymin: 35.6, xmax: -94.32, ymax: 41}
+
+//Envelope example 2
+geometryType=esriGeometryEnvelope&geometry=-104,35.6,-94.32,41
+
+//Point example
+geometryType=esriGeometryPoint&geometry=-104,35.6
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geometryPrecision` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The number of decimal places in the response geometries returned by the query operation. This applies to x and y values only (not m- or z-values).
+
+Example
+
+```json
+geometryPrecision=3
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geometryType` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the type of geometry provided in the `geometry`  parameter. The geometry type can be envelope, point, line, or polygon. The default geometry type is envelope (`esriGeometryEnvelope` ).
+
+Values: `esriGeometryPoint` \| `esriGeometryMultipoint` \| `esriGeometryPolyline` \| `esriGeometryPolygon` \| `esriGeometryEnvelope` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`inSR` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The spatial reference of the input `geometry`  value. The spatial reference can be specified as either a well-known ID or as a [spatial reference JSON object](/geometry-objects). If no value is provided, the `geometry` value is assumed to be in the spatial reference of the service.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`spatialRel` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the spatial relationship that will be applied to the input geometry while performing the query. The supported spatial relationships include intersects, contains, envelope intersects, within, and so on. The default spatial relationship is intersects (`esriSpatialRelIntersects`).
+
+Values: `esriSpatialRelIntersects` \| `esriSpatialRelContains` \| `esriSpatialRelCrosses` \| `esriSpatialRelEnvelopeIntersects` \| `esriSpatialRelIndexIntersects` \| `esriSpatialRelOverlaps` \| `esriSpatialRelTouches` \| `esriSpatialRelWithin` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outFields` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The list of fields that will be included in the returned result set. This list is a comma-delimited list of field names. To request geometry, set `returnGeometry` to `true`. You can also specify the wildcard "\*" as the value of this parameter. In this case, the query results will include all the field values. The wildcard also implies `returnGeometry` is `true`, so setting `returnGeometry` to `false` will have no effect.
+
+Example
+
+```json
+//Comma-delimited list example
+outFields=AREANAME,ST,POP2000
+
+//Wildcard example
+outFields=*
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnGeometry` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether the result set will include the geometry associated with each result (`true` ). The default is `true`. If the `outFields`  parameter is set to the wildcard "\*", it implies `returnGeometry` is `true`, so setting `returnGeometry` to `false` will have no effect.
+
+Values: `true` \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outSR` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<GUID_512E1710_163F_43F9_8ABC_FA35AE6DD5DF_GUID_B4E198FE_1612_4699_90DA_2782538F1A11 />
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`datumTransformation` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+A WKID or a JSON object specifying the geographic datum transformation. Use it to apply a single datum transformation or a composite datum transformation chain to the exported image when the geographic datum of imageSR is different than the geographic datum of image service's spatial reference. When not specified, a default datum transformation will be applied if needed.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnIdsOnly` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether the response will only include an array of raster IDs (`true`). When `false`, the response will be a raster set. The default is `false`. 
+
+While there is a limit to the number of rasters included in the raster set response, there is no limit to the number of raster IDs returned in the ID array response. Clients can use this to get all the query conforming raster IDs by specifying `returnIdsOnly` as `true` and subsequently requesting raster sets for subsets of raster IDs. 
+
+Values: `true` \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnCountOnly` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether the response will only include the `count`  value (number of features) that would be returned by a query (`true`). When `false` , the response will be a feature set. The default is `false` . 
+
+This parameter supersedes the `returnIdsOnly` parameter.
+
+Values: `true` \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`pixelSize` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The pixel size that will be used to query visible rasters. If no value is provided, rasters at all resolutions can be queried.
+
+The structure of the `pixelSize` parameter is the same as the structure of the [point object](/geometry-objects) returned by the ArcGIS REST API. In addition to the JSON structure, you can specify the pixel size with a comma-separated syntax.
+
+Syntax
+
+```json
+//JSON structure
+pixelSize={point}
+
+//Point simple syntax
+pixelSize=<x>,<y>
+
+```
+
+ 
+
+Examples
+
+```json
+//Example one
+pixelSize={"x": 0.18, "y": 0.18}
+
+//Example two
+pixelSize=0.18,0.18
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`orderByFields` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Order results by one or more field names. This parameter uses `ASC`  or `DESC`  for ascending or descending order, respectively. The parameter defaults to `ASC`  if no order is provided. This parameter is only supported if the `supportsAdvancedQueries`  property of the image service is `true` . 
+
+Syntax
+
+```json
+orderByFields=field1 <ORDER>, field2 <ORDER>, field3
+<ORDER>
+```
+
+ 
+
+Example
+
+```json
+orderByFields=SensorName ASC, ProductName DESC
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnDistinctValues` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether distinct values based on the fields specified in the `outFields` parameter will be returned (`true`). This parameter applies only if the `supportsAdvancedQueries` property of the image service is `true`.
+
+Values: `true` \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`outStatistics` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+An array of statistic definitions for one or more field-based statistics to be calculated. The definitions specify the type of statistic, the field on which it is to be calculated, and the resulting output field name. This parameter is only supported if the `supportsStatistics`  property on the image service is `true` . This parameter takes precedence over the `returnCountOnly`, `returnIdsOnly`, and `returnGeometry`  parameters. If `outStatistics` is used, the only other parameters that will be used are `groupByFieldsForStatistics`, `orderByFields`, `pixelSize`, `time`, `geometry`, and `where`.
+
+<Note type={"note"}>
+
+If `outStatisticFieldName` is empty or missing, the image server assigns a field name to the returned statistic field. A valid field name can only contain alphanumeric characters and an underscore.
+
+</Note>
+
+Syntax
+
+```json
+[
+  {
+    "statisticType": "<count | sum | min | max | avg | stddev | var>",
+    "onStatisticField": "Field1",
+    "outStatisticFieldName": "Out_Field_Name1"
+  },
+  {
+    "statisticType": "<count | sum | min | max | avg | stddev | var>",
+    "onStatisticField": "Field2",
+    "outStatisticFieldName": "Out_Field_Name2"
+  }
+]
+```
+
+ 
+
+Example
+
+```json
+[
+  {
+    "statisticType": "max",
+    "onStatisticField": "acquisitionDate",
+    "outStatisticFieldName": "LatestImageDate"
+  },
+  {
+    "statisticType": "min",
+    "onStatisticField": "LowPS",
+    "outStatisticFieldName": "BestSpatialResolution"
+  }
+]
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`groupByFieldsForStatistics` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+One or more field names using the values that need to be grouped for calculating the statistics. This parameter is only valid when the `outStatistics`  parameter is used.
+
+Syntax
+
+```json
+groupByFieldsForStatistics=field1, field2
+```
+
+ 
+
+Example
+
+```json
+groupByFieldsForStatistics=SensorName, ProductName
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`multidimensionalDefinition` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The filters defined by multiple dimensional definitions. See [Dimensional Definition objects](/multidimensional-definition) for more information.
+
+Syntax
+
+```json
+multidimensionalDefinition=[dimensionalDefinition1, dimensionalDefinition2, ...]
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`resultOffset` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The number of records that will be skipped when fetching query results. The query results start from the next record (for example, `resultOffset` + 1). The default value is 0. This parameter only applies when `supportsPagination` is `true`. 
+
+You can use this parameter to fetch records that are beyond the `maxRecordCount` value. For example, if `maxRecordCount` is `1000`, you can get the next 100 records by setting `resultOffset` to `1000` and `resultRecordCount` to `100`. Query results can return the results in the range of 1001 to 1100.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`resultRecordCount` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The number of query results that will be fetched. When the `resultOffset` value is provided and this parameter value is not, the image service defaults to the `maxRecordCount` value. The maximum value for this parameter is the value of the layer's `maxRecordCount` property.
+
+This parameter only applies when `supportsPagination` is `true`.
+
+Example
+
+```json
+//Fetches up to 10 records
+resultRecordCount=10
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`maxAllowableOffset` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The maximum offset that will be used for generalizing geometries returned by the query operation. This parameter value will be in the units of the `outSR` value. If no `outSR` value is provided, the `maxAllowableOffset` value is assumed to be in the unit of the spatial reference of the service.
+
+Example
+
+```json
+maxAllowableOffset=2
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnTrueCurves` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether true curves will be returned in the output geometries (`true`). When `false`, curves will be converted to densified polylines or polygons.
+
+Values: `true` \| `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`rasterQuery` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Introduced at 10.8.1. A query based on key properties of each raster catalog item. Any legal SQL where clause operating on the key properties of raster catalog items is allowed.
+
+Example
+
+```json
+rasterQuery=LANDSAT_WRS_PATH >= 150 AND LANDSAT_WRS_PATH<= 165
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+#### Datum transformation information
+
+While specifying transformation, you need to think about which datum transformation is most applicable to project the image service to the `imageSR`. The spatialReference property of the image service resource reports which spatial reference is used by the service.
+For a list of valid datum transformation ID values (WKID) and well-known text (WKT) strings, see Using spatial references. For more information on datum transformation, see the transformation parameter in the Project operation.
+
+Syntax
+```json
+//Syntax of a single datum transformation number with WKID (Well-Known ID)
+datumTransformation=<wkid>
+
+//Syntax of a single datum transformation json element with WKID
+datumTransformation={"wkid": <wkid>}
+
+//Syntax of a single datum transformation json element with geoTransforms
+datumTransformation={"geoTransforms":[{"wkid": <wkid>,"transformForward": <boolean>}]}
+
+//Syntax of a single datum transformation json element with WKT (Well-Known Text)
+datumTransformation={"wkt": "<wkt>"}
+
+//Syntax of a composite datum transformation chain json element with geoTransforms of WKIDs
+datumTransformation={"geoTransforms":[{"wkid": <wkid1>,"transformForward": <boolean>}, {"wkid": <wkid2>,"transformForward": <boolean>}]}
+
+//Syntax of a composite datum transformation chain json element with geoTransforms of WKTs
+datumTransformation={"geoTransforms":[{"wkt": <wkt1>,"transformForward": <boolean>}, {"wkt": <wkt2>,"transformForward": <boolean>}]}
+
+```
+
+Example
+```json
+//a single datum transformation number with WKID (Well-Known ID)
+datumtransformation=1196
+
+//a single datum transformation json element with WKID
+datumtransformation={"wkid":1196}
+
+//a single datum transformation json element with geoTransforms
+datumtransformation={"geoTransforms":[{"wkid":1196,"transformForward":true}]}
+
+//a single datum transformation json element with WKT (Well-Known Text)
+datumTransformation={"wkt":"GEOGTRAN[\"OSGB_1936_To_WGS_1984_2\",GEOGCS[\"GCS_OSGB_1936\",DATUM[\"D_OSGB_1936\",SPHEROID[\"Airy_1830\",6377563.396,299.3249646]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],METHOD[\"Geocentric_Translation\"],PARAMETER[\"X_Axis_Translation\",371.0],PARAMETER[\"Y_Axis_Translation\",-112.0],PARAMETER[\"Z_Axis_Translation\",434.0],OPERATIONACCURACY[10.0]]"}
+
+//a composite datum transformation chain json element with geoTransforms of WKIDs
+datumTransformation={"geoTransforms":[{"wkid":1315,"transformForward":true},{"wkid":1138,"transformForward":true}]}
+
+//a composite datum transformation chain json element with geoTransforms of WKTs
+datumTransformation={"geoTransforms":[{"wkt":"GEOGTRAN[\"OSGB_1936_To_ED_1950_UKOOA\",GEOGCS[\"GCS_OSGB_1936\",DATUM[\"D_OSGB_1936\",SPHEROID[\"Airy_1830\",6377563.396,299.3249646]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],GEOGCS[\"GCS_European_1950\",DATUM[\"D_European_1950\",SPHEROID[\"International_1924\",6378388.0,297.0]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],METHOD[\"Position_Vector\"],PARAMETER[\"X_Axis_Translation\",535.948],PARAMETER[\"Y_Axis_Translation\",-31.357],PARAMETER[\"Z_Axis_Translation\",665.16],PARAMETER[\"X_Axis_Rotation\",0.15],PARAMETER[\"Y_Axis_Rotation\",0.247],PARAMETER[\"Z_Axis_Rotation\",0.998],PARAMETER[\"Scale_Difference\",-21.689],OPERATIONACCURACY[2.0]]","transformForward":true},{"wkt":"GEOGTRAN[\"ED_1950_To_WGS_1984_6\",GEOGCS[\"GCS_European_1950\",DATUM[\"D_European_1950\",SPHEROID[\"International_1924\",6378388.0,297.0]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],METHOD[\"Geocentric_Translation\"],PARAMETER[\"X_Axis_Translation\",-86.0],PARAMETER[\"Y_Axis_Translation\",-96.0],PARAMETER[\"Z_Axis_Translation\",-120.0],OPERATIONACCURACY[6.0]]","transformForward":true}]}
+
+```
+
+
+## Example usage
+
+### Example 1
+
+The following is a sample request URL for the `query`  operation that demonstrates a query that uses a where clauses and requests to return specific outfields:
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/Portland/CascadeLandsat/ImageServer/query?where=Name LIKE 'p045r028%' AND Name NOT LIKE 'Ovr%'&outFields=Name,MinPS,MaxPS,LowPS,HighPS&returnGeometry=true&returnIdsOnly=false&f=html
+```
+
+ 
+
+### Example 2
+
+The following is a sample request URL for the `query` operation that demonstrates a query that uses point geometry and where clauses and requests to return only object IDs:
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/Portland/CascadeLandsat/ImageServer/query?where=NAME NOT LIKE 'Ov_%'&geometry={"x":-122.895114,"y":45.558214,"spatialReference":{"wkid":4269}}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=false&returnIdsOnly=true&f=html
+```
+
+ 
+
+### Example 3
+
+The following is a sample request URL for the `query` operation that demonstrates querying distinct sensors and products in an image service:
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/myImageService/ImageServer/query?where=1=1&outFields=SensorName,ProductName&returnDistinctValuesOnly=true&orderByFields=SensorName ASC, ProductName DESC&f=pjson
+```
+
+ 
+
+### Example 4
+
+The following is a sample request URL for the `query` operation that demonstrates querying for the latest image acquisition date for each sensor:
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/myImageService/ImageServer/query?outStatistics=[{"statisticType": "max","onStatisticField": "acquisitionDate","outStatisticFieldName": "LatestImageDate"}]&groupByFieldsForStatistics=SensorName&f=pjson
+```
+
+ 
+
+## JSON Response syntax examples
+
+### Example 1
+
+The following JSON syntax example demonstrates the response returned when the request includes `returnIdsOnly` as `false` and `returnCountOnly` as `false`:
+
+```json
+{
+  "objectIdFieldName": "<objectIdFieldName>",
+  "spatialReference": <spatialReference>,
+  "fields": [
+    {
+      "name": "<fieldName1>",
+      "type": "<fieldType1>",
+      "alias": "<fieldAlias1>",
+      "length": "<length1>"
+    },
+    {
+      "name": "<fieldName2>",
+      "type": "<fieldType2>",
+      "alias": "<fieldAlias2>",
+      "length": "<length2>"
+    }
+  ],
+  "features": [
+    <feature1>,
+    <feature2>
+  ]
+}
+```
+
+ 
+
+### Example 2
+
+The following JSON syntax example demonstrates the response returned when the request includes `returnCountOnly` as `true`:
+
+```json
+{
+  "count": <count>
+}
+```
+
+ 
+
+### Example 3
+
+The following JSON syntax example demonstrates the response returned when the request includes `returnIdsOnly` as `true`:
+
+```json
+{
+  "objectIdFieldName": "<objectIdFieldName>",
+  "objectIds": [
+    <objectId1>,
+    <objectId2>
+  ]
+}
+```
+
+ 
+
+## JSON Response examples
+
+### Example 1
+
+The following is a sample response example for the `query` operation:
+
+```json
+{
+  "objectIdFieldName": "IMAGEID",
+  "spatialReference": {
+    "wkid": 4326
+  },
+  "fields": [
+    {
+      "name": "ST",
+      "alias": "ST",
+      "type": "esriFieldTypeString",
+      "length": 2
+    },
+    {
+      "name": "OBJECTID",
+      "alias": "OBJECTID",
+      "type": "esriFieldTypeOID"
+    },
+    {
+      "name": "AREANAME",
+      "alias": "City Name",
+      "type": "esriFieldTypeString",
+      "length": 255
+    }
+  ],
+  "geometryType": "esriGeometryPolygon",
+  "features": [
+    {
+      "geometry": {
+        "rings": [ 
+          [
+            [-97.06138,32.837],
+            [-97.06133,32.836],
+            [-97.06124,32.834],
+            [-97.06127,32.832],
+            [-97.06138,32.837]
+          ]
+        ]
+      },
+      "attributes": {
+        "IMAGEID": 37,
+        "OWNER": "Joe Smith",
+        "VALUE": 94820.37,
+        "APPROVED": true,
+        "LASTUPDATE": 1227663551096
+      }
+    },
+    {
+      "geometry": {
+        "rings": [ 
+          [
+            [-97.06326,32.759],
+            [-97.06298,32.755],
+            [-97.06153,32.749],
+            [-97.06326,32.759]
+          ]
+        ]
+      },
+      "attributes": {
+        "IMAGEID": 462,
+        "OWNER": "John Doe",
+        "VALUE": 17325.90,
+        "APPROVED": false,
+        "LASTUPDATE": 1227628579430
+      }
+    }
+  ]
+}
+```
+
+ 
+
+## Example 2
+
+The following is a sample response example for the `query` operation when `returnCountOnly` is `true`:
+
+```json
+{
+  "count":48
+}
+```
+
+ 

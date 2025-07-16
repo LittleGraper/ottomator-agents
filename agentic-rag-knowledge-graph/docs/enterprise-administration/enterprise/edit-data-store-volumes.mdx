@@ -1,0 +1,282 @@
+---
+title: "Edit (Data Store Volumes)"
+description: "This operation updates the storage requests for the deployments of a system-managed object, spatiotemporal, or relational data store by allowing administrators to edit the storage value for the data store deployment’s PersistentVolumeClaim."
+slug: "edit-data-store-volumes"
+url: "/edit-data-store-volumes"
+restInfoMetadata:
+  apiPath: /data/<datastoreID>/config/volumes/edit
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /data/<datastoreID>/config/volumes/edit
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '11.3'
+  requiredCapabilities:
+    - name: Access allowed only with the Publisher role
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `edit` operation updates the storage requests for the deployments of a system-managed object, spatiotemporal, or relational data store. It allows administrators to increase the storage value for the data store deployment’s PersistentVolumeClaim, which then expands the underlying volume for that data store.
+
+<Note>
+
+This operation performs [online volume expansion](https://kubernetes.io/blog/2022/05/05/volume-expansion-ga/#online-expansion-compared-to-offline-expansion), meaning that it can be performed while the pods using the volume are running, with space becoming immediately available upon completion.
+
+</Note>
+
+This operation allows administrators to expand volumes before storage space has run out, which would result in the system freezing. Prior to 11.3, when the system was frozen, administrators would need to create a backup of their organization, undeploy ArcGIS Enterprise on Kubernetes, increase the storage request value in the PVC, and then redeploy ArcGIS Enterprise on Kubernetes, the process of which would result in downtime for organization members, collaborators, and users.
+
+To be eligible for volume expansion, the PersistentVolume must be dynamically provisioned, and the underlying storage class must allow for volume expansion.
+
+Once the operation is performed, it can take several minutes for volume optimization to complete. Administrators can perform another volume expansion once optimization for the previous expansion is finished. Limitations to how frequently administrators can perform volume expansions vary depending on the deployment’s cloud provider. For example, those using EKS as a cloud provider will only be able to perform volume expansion three times every six hours.
+
+This operation can only be performed asynchronously. The [job](/job) created once the request is submitted can be used to monitor the volume expansion in real-time.
+
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `datastoreDeploymentsJson`
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object contianing the new `storage` value, or multiple `storage` values depending on the data store type or the organization's [architecture profile](https://enterprise-k8s.arcgis.com/en/latest/deploy/architecture-profiles.htm). The modified value must be higher than the original value (for example, increasing the storage request from 16Gi to 33Gi). Attempting to set a lower value for `storage` will cause the operation to fail. All values must be in gibibytes (Gi).
+
+      The following is a list of `storage` value requirements:
+      
+        * When expanding the volumes for a relational data store, the values for both the `Primary` and `Standby` volumes must be the same.
+        * When expanding the volumes for a spatiotemporal data store, and the organization is using an [Enhanced Availability](/enhanced-availability) architecture profile, the values for the `Coordinator` and `Data` volumes must be the same.
+        * When expanding the volumes for an object store, and the organization is using either a [Standard Availability](/standard-availability) or [Development](/development-profile) architecture profile, only one storage value (for the `Mixed` volume) is available to update. For organizations using an Enhanced Availability architecture profile, there are two storage values (`Metadata` and `Data` volumes) that can be updated. The values for the `Metadata` and `Data` volumes do not need to match (for example, the the storage request for `Metadata` could remain the same and the storage request for `Data` could increase).
+      
+      ```markdown label=Example
+      {
+        "datastoreId": "870648cb-b66a-46da-87f3-ccb4ddbfae97",
+        "datastoreType": "objectStore",
+        "deployments": [
+          {
+            "type": "ObjectStore",
+            "name": "arcgis-object-store-xxxx-xxxx",
+            "mode": "Metadata",
+            "volumes": [
+              {
+                "spec": {
+                  "accessModes": ["ReadWriteOnce"],
+                  "resources": {
+                    "limits": {},
+                    "requests": {
+                      "storage": "33Gi"
+                    }
+                  },
+                  "storageClassName": "gp3"
+                },
+                "kind": "PersistentVolumeClaim",
+                "purpose": "data-volume"
+              }
+            ]
+          },
+          {
+            "type": "ObjectStore",
+            "name": "arcgis-object-store-xxxx-xxxx",
+            "mode": "Data",
+            "volumes": [
+              {
+                "spec": {
+                  "accessModes": ["ReadWriteOnce"],
+                  "resources": {
+                    "limits": {},
+                    "requests": {
+                      "storage": "32Gi"
+                    }
+                  },
+                  "storageClassName": "gp3"
+                },
+                "kind": "PersistentVolumeClaim",
+                "purpose": "data-volume"
+              }
+            ]
+          }
+        ]
+      }
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async`
+      
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies whether the operation will be performed asynchronously. The only accepted value is `true`.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Example usage
+
+The following is a sample POST request for the `edit` operation, demonstraitng expanding the volumes for an object store in an organization using the Enhanced Availability architecture profile:
+
+```other
+POST /context/admin/data/2eca8ba5-ad4e-4798-bbe5-ea27db7e04e84/config/volumes/edit HTTP/1.1
+Host: organization.domain.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: []
+
+{
+  "datastoreId": "2eca8ba5-ad4e-4798-bbe5-ea27db7e04e84",
+  "datastoreType": "objectStore",
+  "deployments": [
+    {
+      "type": "ObjectStore",
+      "name": "arcgis-object-store-xxxx-xxxx",
+      "mode": "Metadata",
+      "volumes": [
+        {
+          "spec": {
+            "accessModes": ["ReadWriteOnce"],
+            "resources"  {
+              "limits": {},
+              "requests": {
+                "storage": "33Gi"
+              }
+            },
+            "storageClassName": "gp3"
+          },
+          "kind": "PersistentVolumeClaim",
+          "purpose": "data-volume"
+        }
+      ]
+    },
+    {
+      "type": "ObjectStore",
+      "name": "arcgis-object-store-xxxx-xxxx",
+      "mode": "Data",
+      "volumes": [
+        {
+          "spec": {
+            "accessModes": ["ReadWriteOnce"],
+            "resources": {
+              "limits": {},
+              "requests": {
+                "storage": "32Gi"
+              }
+            },
+            "storageClassName": "gp3"
+          },
+          "kind": "PersistentVolumeClaim",
+          "purpose": "data-volume"
+        }
+      ]
+    }
+  ]
+}&async=true&f=pjson&token=ShyoW_1p9PjJNuVfR0D3a4qpLSAOJKVPoFWS6cEC6J3rXVkEWKEbD82VjAB0VQ_hWImd9pd-1h7AsHTt0m45N1_mzyzR-66Rqhu2Ydl7zc1Yk7JVRneVmQORFy2efBnc1ZndpXfuoKe41XRFGz3wl9LI8kG35lqAPGjM5F7v_hQMkhC1Ky37BDLizZCR4-xtq3h0Nb4VfYNtJRjwoKUUkgaaJSEUtilXj936p1yNBnPYQWb7dDjVuSVr502EzjvB
+
+```
+
+## JSON Response example
+
+When the volume expansion request is submitted, the response will include a URL that can be used to access the [job](/job) for this operation and check the status of the operation:
+
+```other
+{
+  "jobsUrl" : "https://devent.esri.com/gis/admin/jobs/j6a7c23bd-797d-4f65-9139-aa3ea7bfe0df",
+  "jobid" : "j6a7c23bd-797d-4f65-9139-aa3ea7bfe0df",
+  "status" : "SUBMITTED"
+}
+
+```
+
+When completed, the [job](/job) will either have a completed or failed status:
+
+<Note>
+
+For volume expansions where multiple values can be changed (such as relational data stores, or object stores in an organization with an Enhanced Availability architecture profile), if either expansion fails, the entire operation is considered to have failed. The `status` resource will only return a completed or failed status for the operation once both expansions have been completed.
+
+</Note>
+
+```other
+{
+  "result": {
+    "deployments": [
+      {
+        "mode": "Mixed",
+        "name": "arcgis-object-store-xxxx-xxxx",
+        "volumes": [
+          {
+            "purpose": "data-volume",
+            "kind": "PersistentVolumeClaim",
+            "persistentVolumeClaims": [
+              {
+                "actualCapacity": "32Gi",
+                "requestedCapacity": "32Gi",
+                "name": "data-volume-arcgis-object-store-xxxx-xxxx"
+              },
+              {
+                "actualCapacity": "32Gi",
+                "requestedCapacity": "32Gi",
+                "name": "data-volume-arcgis-object-store-xxxx-xxxx"
+              },
+              {
+                "actualCapacity": "32Gi",
+                "requestedCapacity": "32Gi",
+                "name": "data-volume-arcgis-object-store-xxxx-xxxx"
+              }
+            ],
+            "spec": {
+              "storageClassName": "arcgis-storage-default",
+              "resources": {
+                "requests": {"storage": "33Gi"},
+                "limits": {}
+              },
+              "accessModes": ["ReadWriteOnce"],
+              "volumeMode": "Filesystem"
+            }
+          }
+        ],
+        "type": "ObjectStore"
+      }
+    ],
+    "datastoreId": "2eca8ba5-ad4e-4798-bbe5-ea27db7e04e84",
+    "datastoreType": "objectStore"
+  },
+  "updatedtime": 1715983746073,
+  "jobid": "j6a7c23bd-797d-4f65-9139-aa3ea7bfe0df",
+  "requestID": "726eb51c-5ed6-479a-b0a3-eb2d11f0b2fe",
+  "name": "expandDataStoreVolume",
+  "endtime": 1715983746078,
+  "starttime": 1715983745573,
+  "status": "COMPLETED"
+}
+
+```

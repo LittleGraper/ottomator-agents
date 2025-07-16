@@ -1,0 +1,120 @@
+---
+title: "Asynchronous operations"
+description: "Sync supports options for asynchronous processing with the createReplica  and synchronizeReplica  operations."
+slug: "asynchronous-operations"
+url: "/asynchronous-operations"
+guid: "GUID-4B87B174-E395-4283-8EE0-9A6C1E89F404"
+migratedTopicMetadata:
+  FTITLE: "Asynchronous operations"
+  FDESCRIPTION: ""
+  FCHANGES: "Fixing JSON examples"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.8 - *"
+  CREATED-ON: "15/10/2019 11:51:57"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "05/11/2019 19:17:51"
+  VERSION: "5"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-119576B8-4826-41B6-A277-B890156969BB"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata: {}
+---
+
+Sync supports options for asynchronous processing with the [createReplica](/create-replica) and [synchronizeReplica](/synchronize-replica) operations. The following example illustrates the usage of an asynchronous operation.
+
+## Asynchronous processing with `synchronizeReplica` 
+
+Synchronizing a replica with the `async`  parameter set to `true`  returns a location to a status resource in the `statusUrl` .
+
+### JSON Response syntax
+
+```other
+{
+  "statusURL": "<url>"
+}
+```
+
+ 
+
+### JSON Response example
+
+```other
+{
+  "statusUrl": "https://services.myserver.com/ERmEceOGq5cHrItq/ArcGIS/rest/services/USA/FeatureServer/jobs/jf90d6386f7494cd59c024f749773fe7b"
+}
+```
+
+ 
+
+## Status responses
+
+The status resource includes the current status of the process as well as the replica name, the process start time, and the last time a status update was provided. If the status is anything other than `Completed` , `CompletedWithErrors` , or `Failed` , the client can call `Get`  on the resource for a status update. 
+
+When the status is `Completed` , the resource includes the results in a `resultUrl` . A `resultUrl`  is provided even if the operation was called with the `transportType`  parameter set to `esriTransportTypeEmbedded` .
+
+The following shows JSON request and response examples and syntax for the status resource.
+
+### JSON Request example
+
+```other
+https://services.myserver.com/ERmEceOGq5cHrItq/ArcGIS/rest/services/USA/FeatureServer/createReplica/26bba818-15f7-47b5-9ae3-f6f9a7b781ed?statusId=26bba818-15f7-47b5-9ae3-f6f9a7b781ed
+```
+
+ 
+
+### JSON Response syntax
+
+```other
+{
+  "transportType": "esriTransportTypeURL",
+  "responseType": "<esriReplicaResponseTypeData | esriReplicaResponseTypeInfo>",
+  "replicaName": "<Name>",
+  "resultUrl": "<result Uri>",
+  "submissionTime": <T1>,   //Time since epoch in milliseconds
+  "lastUpdatedTime" : <T2>, //Time since epoch in milliseconds
+  "status": "<Pending | InProgress | Completed | Failed ImportChanges | ExportChanges | ExportingData | ExportingSnapshot | ExportAttachments | ImportAttachments | ProvisioningReplica | UnRegisteringReplica | CompletedWithErrors>"
+}
+```
+
+ 
+
+### JSON Response examples
+
+The following is a sample response where `status`  is returned as `InProgress` :
+
+```other
+{  
+  "transportType": "esriTransportTypeURL",
+  "responseType": "esriReplicaResponseTypeData",
+  "replicaName": "MyReplica",
+  "resultUrl": "", 
+  "submissionTime": 1379366893000,
+  "lastUpdatedTime": 1379366896000,
+  "status": "InProgress"
+}
+```
+
+ 
+
+The following is a sample response where `status`  is returned as `Completed` :
+
+```other
+{  
+  "transportType": "esriTransportTypeURL",
+  "responseType": "esriReplicaResponseTypeData",
+  "replicaName": "MyReplica", 
+  "resultUrl": "https://services.myserver.com/ERmEceOGq5cHrItq/ArcGIS/rest/services/USA/replicafiles/e75aaca03a6d46a98c9b3986bc625b78.json",
+  "submissionTime": "1335205911000",
+  "lastUpdatedTime": "1335206031000",
+  "status": "Completed"
+}
+```
+
+ 

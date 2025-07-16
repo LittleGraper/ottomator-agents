@@ -1,0 +1,172 @@
+---
+title: "Service Statistics"
+description: "The statistics resource returns information on the life cycle of all instances of the service across all server machines."
+slug: "servicestatistics"
+url: "/servicestatistics"
+guid: "GUID-FD7BA426-8ACA-4DE1-9AB8-909A3AFF3DD5"
+migratedTopicMetadata:
+  FTITLE: "serviceStatistics"
+  FDESCRIPTION: ""
+  FCHANGES: "Adding privilege requirements"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.8.1 -*"
+  CREATED-ON: "09/06/2020 15:49:42"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "09/06/2020 16:25:04"
+  VERSION: "6"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-2613A255-2E1A-4206-8FB0-33EAD7A8D762"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /services/<serviceName>.<serviceType>/statistics
+  urlSegments:
+    - name: <root>
+      url: /site
+    - name: /services/<serviceName>.<serviceType>/statistics
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: '10.1'
+  requiredCapabilities:
+    - name: Access allowed with any authorized privilege
+      url: /managing-access-to-the-server-administration-rest-api
+---
+
+## Description
+
+The `statistics` resource provides a view into the life cycle of all instances of the service on all server machines in the site.
+
+Initially, all instances are in the `notCreated` state, but they move into the `initializing` state as they are constructed. The instances are not usable in any of these states. A fully constructed instance remains in the pool (in other words, the free state) before it's called into service. Instances are marked as `busy`  when they're servicing requests. Once request processing is complete, instances are returned to the pool; they are free to service any other requests.
+
+The `transactions` metric indicates the total number of invocations that have occurred on the service. Similarly, `totalBusyTime` indicates the total amount of time the service is in use servicing requests.
+
+You can view the statistics for a machine or use the `summary` property, which consolidates the metrics from all server machines into one for the entire site.
+
+<Note type={"note"}>
+
+Sometimes a service is not deployed on a server machine (if the machine could not be reached when the service was started), or the server machine may be stopped. In this case, the `isStatisticsAvailable` flag is set to `false`.
+
+</Note>
+
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Description"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+The following is a sample request URL used to access the `statistics` resource:
+
+```markdown
+https://machine.domain.com/webadaptor/admin/services/Maps/Seattle.MapServer/statistics?f=pjson
+```
+
+## JSON Response syntax
+
+```other
+{ 
+  "summary": { 
+    "folderName": "<folder>", 
+    "serviceName": "<serviceName>", 
+    "type": "<serviceType>", 
+    "startTime": "", 
+    "max": <number>, 
+    "busy": <number>, 
+    "free": <number>, 
+    "initializing": <number>, 
+    "notCreated": <number>, 
+    "transactions": <number>, 
+    "totalBusyTime": <number>, 
+    "isStatisticsAvailable": <true|false> 
+  }, 
+  "perMachine": [
+    { 
+      "folderName": "<folder>", 
+      "serviceName": "<serviceName>", 
+      "type": "<serviceType>", 
+      "machineName": "<server>", 
+      "max": <number>, 
+      "busy": <number>, 
+      "free": <number>, 
+      "initializing": <number>, 
+      "notCreated": <number>, 
+      "transactions": <number>, 
+      "totalBusyTime": <number>, 
+      "isStatisticsAvailable": <true|false> 
+    }
+  ] 
+}
+```
+
+## JSON Response example
+
+```other
+{ 
+  "summary": { 
+    "folderName": "Maps", 
+    "serviceName": "Seattle", 
+    "type": "MapServer", 
+    "startTime": "", 
+    "max": 4, 
+    "busy": 2, 
+    "free": 2, 
+    "initializing": 0, 
+    "notCreated": 0, 
+    "transactions": 130, 
+    "totalBusyTime": 12400, 
+    "isStatisticsAvailable": true 
+  }, 
+  "perMachine": [ 
+    { 
+      "folderName": "Maps", 
+      "serviceName": "Seattle", 
+      "type": "MapServer", 
+      "machineName": "MACHINE1.DOMAIN.COM", 
+      "max": 2, 
+      "busy": 1, 
+      "free": 1, 
+      "initializing": 0, 
+      "notCreated": 0, 
+      "transactions": 65, 
+      "totalBusyTime": 6200, 
+      "isStatisticsAvailable": true 
+    }, 
+    { 
+      "folderName": "Maps;", 
+      "serviceName": "Seattle", 
+      "type": "MapServer", 
+      "machineName": "MACHINE2.DOMAIN.COM", 
+      "max": 2, 
+      "busy": 1, 
+      "free": 1, 
+      "initializing": 0, 
+      "notCreated": 0, 
+      "transactions": 65, 
+      "totalBusyTime": 6200, 
+      "isStatisticsAvailable": true 
+    }, 
+  ] 
+}
+```

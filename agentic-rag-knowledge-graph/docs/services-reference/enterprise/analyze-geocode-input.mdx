@@ -1,0 +1,314 @@
+---
+title: "Analyze Geocode Input"
+description: "Learn about the API reference for the Analyze Geocode Input service available in Portal for ArcGIS."
+slug: "analyze-geocode-input"
+url: "/analyze-geocode-input"
+guid: "GUID-752C6DC3-D365-492B-8BA2-39546ECCB8A7"
+migratedTopicMetadata:
+  FTITLE: "Analyze Geocode Input"
+  FDESCRIPTION: ""
+  FCHANGES: "context conref"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0 - *"
+  CREATED-ON: "28/02/2022 17:00:54"
+  FAUTHOR: "sambrose"
+  FSTATUS: "Released"
+  MODIFIED-ON: "06/06/2022 10:42:25"
+  VERSION: "5"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-8DFFFF38-06FC-423E-B18A-89FD4578E1FD"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata: 
+  apiPath: /analyze-geocode-input
+  urlSegments:
+    - name: <geocodeservice-url>
+      url: /geocode-service
+    - name: /analyze-geocode-input
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.5'
+---
+
+import GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E671F554_89D2_4CAD_B032_525E1CE90C18 from "./snippets/GUID-98478E86-0753-4C4D-A2EB-7DC84675B2DC/_GUID-E671F554-89D2-4CAD-B032-525E1CE90C18";
+
+The `AnalyzeGeocodeInput`  task takes in a geocode input (either a table or file of addresses) and returns an output JSON that includes a suggested field mapping. It supports CSV, XLS, or table input. The table can be from a big data file share or from a feature service. The task generates a suggested field mapping based on the input fields and the geocode service candidate fields and returns it in a `geocodeParameters`  JSON. This `geocodeParameters`  JSON output is the first input to the [Batch Geocode](/batch-geocode) tool. The output `geocodeParameters`  JSON also includes field info (`name` , `length` , and `type` ) as well as additional information that helps the BatchGeocode tool parse the input file or table.
+
+<Note type={"note"}>
+
+This method only exists in ArcGIS Enterprise. This API is not supported for ArcGIS Online. 
+
+</Note>
+
+## Request URL
+
+```javascript
+https://<analysis url>/AnalyzeGeocodeInput/submitJob
+```
+
+ 
+
+## Request parameters
+
+<StyledTable headers={"Parameter,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geocodeServiceURL` 
+
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The REST URL of the geocode service that you want to geocode your addresses and places against. The URL must end in `geocodeServer` . This can be a utility service or a locator that is anonymously accessible. The geocode service must be configured to allow batch geocoding. For more information, see [Configure the portal to geocode addresses](https://enterprise.arcgis.com/en/portal/latest/administer/windows/configure-portal-to-geocode-addresses.htm). 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`inputTable` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Syntax: The input table specification must include the following:
+
+-   A URL to an input table
+-   A service token to access the table
+
+Note that if the table is a hosted table on the same portal, `serviceToken`  is not required.
+
+Example
+
+```javascript
+inputTable={"url":"<table url>","serviceToken":"<token>"}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`inputFileItem` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Syntax: The input file should be a portal item. Input the `itemid`  of the item in the portal. The format of the item in the portal can be in one of the following formats:
+
+-   Comma-separated values file (`.csv` )
+-   Microsoft Excel worksheets (`.xls`  and `.xlsx`  files)
+
+Example
+
+```javascript
+inputFileItem={"itemid":"<itemid of file>"}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`columnNames` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Instead of providing `inputTable`  or `inputFileItem` , you can provide `columnNames` . `columnNames`  is required if there is no header row in the `inputTable`  or `inputFileItem` . `columnNames`  should be separated by commas.
+
+Example
+
+```javascript
+columnNames=address,city,state,zip
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`inputFileParameters` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Enter a JSON that contains information about how to parse the file. If you are using `inputTable`  instead of `inputFileItem`  as input, you can leave this parameter blank. You can leave any of the values in the JSON blank ("") if they do not apply to the file.
+
+Values can be the following:
+
+-   `fileType` —Enter CSV or XLS for the file format of `inputFileItem` .
+-   `headerRowExists` —Enter `true`  if your file has a header row, `false`  if it does not. 
+-   `columnDelimiter` —Enter `SPACE` , `TAB` , `COMMA` , `PIPE` , or `SEMICOLON` .
+-   `textQualifier` —Enter either `SINGLE_QUOTE`  or `DOUBLE_QUOTE` .
+
+Example
+
+```javascript
+inputFileParameters={"fileType":"xlsx","headerRowExists":"true","columnDelimiter":"","textQualifier":""}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`locale` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Enter the two-letter `en`  or four-letter `ar-il`  specific locale if `geocodeInput`  is in a language other than English. For more information about localization and specific language codes, see [localization](DEVSITE/javascript/3/jshelp/localization.html)
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`context` 
+
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+<GUID_98478E86_0753_4C4D_A2EB_7DC84675B2DC_GUID_E671F554_89D2_4CAD_B032_525E1CE90C18 />
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Response
+
+When you submit a request, the service assigns a unique job ID for the transaction. 
+
+Syntax
+
+```other
+{
+  "jobId": "<unique job identifier>",
+  "jobStatus": "<job status>"
+}
+```
+
+ 
+
+After the initial request is submitted, you can use `jobId`  to periodically check the status of the job and messages as described in [Checking job status](/checking-job-status-1). Once the job has successfully completed, use `jobId`  to retrieve the results. To track the status, you can make a request in the following form:
+
+```other
+https://<analysis url>/AnalyzeGeocodeInput/jobs/<jobId>
+```
+
+ 
+
+## Access results
+
+When the status of the job request is `esriJobSucceded` , you can access the results of the analysis by making a request in the following form:
+
+```other
+https://<analysis url>/AnalyzeGeocodeInput/jobs/<jobId>/results/<output parameter name>?token=<your token>&f=json
+```
+
+ 
+
+<StyledTable headers={"Parameter,Description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`geocodeParameters` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+`geocodeParameters`  is a JSON that contains information about the file, field info, and a suggested field mapping.
+
+Example
+
+```other
+{"url": "https://<analysis url>/AnalyzeGeocodeInput/jobs/<jobId>/results/geocodeParameters"}
+```
+
+ 
+
+The result contains the `geocodeParameters`  JSON, which is the first input into the [BatchGeocode](/batch-geocode) tool.
+
+```other
+{
+  "paramName": "geocodeParameters",
+  "dataType": "GPString",
+  "value": {
+    "field_info": "[('ObjectID', 'TEXT', 255), ('Address', 'TEXT', 255)]",
+    "column_names": "",
+    "file_type": "xlsx",
+    "column_delimiter": "",
+    "text_qualifier": "",
+    "field_mapping": "[['ObjectID', 'OBJECTID'], ['Address', 'Address']]",
+    "header_row_exists": true
+  }
+}
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>

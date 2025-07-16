@@ -1,0 +1,273 @@
+---
+title: "Query"
+description: "The query  operation on the associations resource allows you to query the associations table and return association information for network features in a utility network."
+slug: "query-associations-utility-network-server"
+url: "/query-associations-utility-network-server"
+guid: "GUID-D389DA7E-125D-4D03-A24C-C1817A392FDE"
+migratedTopicMetadata:
+  FTITLE: "query (Associations - Utility Network Server)"
+  FDESCRIPTION: ""
+  FCHANGES: "Updated the value for connecivity associations for Types parameter.  This incorrectly displayed 'connectivity' and should read 'junctionJunctionConnectivity, see #10476"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.9 -*"
+  CREATED-ON: "26/09/2023 08:26:25"
+  FAUTHOR: "jderose"
+  FSTATUS: "Released"
+  MODIFIED-ON: "26/09/2023 08:39:47"
+  VERSION: "3"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "3"
+  ED: "GUID-5C78AD6C-AFC4-46FF-8103-4CD9FB7E8C61"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/UtilityNetworkServer/associations/query
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/UtilityNetworkServer/associations/query
+  methods:
+    - get
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+---
+
+## Description
+
+The `query` operation allows you to query the associations table and return association information for features in a utility network.
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html`.
+
+```
+f=html | json | pjson
+``` 
+
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`gdbVersion` 
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the name of the geodatabase version. The default is `sde.DEFAULT`.
+
+Syntax: `gdbVersion=<version>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`moment` 
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the session moment. The default is the version's current moment. This should only be specified when you do not want to use the current moment.
+
+Syntax: `moment=<Epoch time in milliseconds>` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`types` 
+
+(Optional)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies an array of association types to be queried; this is provided as an array of strings. The default is all association types. 
+
+```
+types=attachment | containment | junctionJunctionConnectivity | junctionEdgeFromConnectivity | junctionMidspanConnectivity | junctionEdgeToConnectivity
+``` 
+
+Example: `types=["attachment", "containment"]` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`elements` 
+
+(Required)  
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The feature or object elements for which the association is queried.
+
+Syntax: 
+
+```json
+[ 
+  {
+    “networkSourceId” : <long>,
+    “globalId” : <guid>,
+    “terminalId” : <long>   // optional
+  }
+]
+
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`returnDeletes`
+
+(Optional)   
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Boolean parameter specifying whether to return logically deleted associations. The default is `false`.
+
+```
+returnDeletes= true | false 
+```
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## JSON Response syntax
+
+```json
+{
+  “associations” : [
+    {
+      “globalId” : <guid>,
+      “fromNetworkSourceId” : <long>,
+      “fromGlobalId” : <guid>,
+      “fromTerminalId” : <long>,
+      “toNetworkSourceId” : <long>,
+      “toGlobalId” : <guid>,
+      “toTerminalId”: <long>,
+      “percentAlong”: <double>,
+      “associationType” : “attachment” | “containment” | “junctionJunctionConnectivity” |“junctionEdgeFromConnectivity” |“junctionMidspanConnectivity” | “junctionEdgeToConnectivity”,
+      “status” : <long>,
+      “errorCode” : <long>,
+      “errorMessage” : <string>,
+      “isContentVisible” : <boolean>
+    }
+  ],
+  “success” : <boolean>,
+  “error” : {                   // only if success is false
+    “extendedCode” : <HRESULT>,
+    “message” : <string>,
+    “details” : [ <string> ]
+  }
+}
+
+```
+
+ 
+
+## Example usage
+
+Request URL and parameters:
+
+https://myserver.esri.com/server/rest/services/LandUse/UtilityNetworkServer/associations/query
+
+```json
+types=["containment"]
+elements=[{"networkSourceId":19,"globalId":"{AE323515-8E6F-4CC2-B9A8-1DB963E769AB}"}]
+```
+
+ 
+
+```json
+{
+   "associations":[
+      {
+         "globalId":"{ABD4CB00-2D54-4DAD-B70D-F8A2EDBB7302}",
+         "fromNetworkSourceId":19,
+         "fromGlobalId":"{AE323515-8E6F-4CC2-B9A8-1DB963E769AB}",
+         "fromTerminalId":-1,
+         "toNetworkSourceId":21,
+         "toGlobalId":"{24FAB600-E235-4A63-A4EC-037A9493D7F2}",
+         "toTerminalId":-1,
+         "associationType":"containment",
+         "status":0,
+         "errorCode":0,
+         "errorMessage":"",
+         "isContentVisible":true
+      },
+      {
+         "globalId":"{00E51A4E-9AD3-45B4-86DF-DAFF0E8CCB96}",
+         "fromNetworkSourceId":4,
+         "fromGlobalId":"{B7E78E04-0E67-4287-88AE-08A4D135FA67}",
+         "fromTerminalId":-1,
+         "toNetworkSourceId":19,
+         "toGlobalId":"{AE323515-8E6F-4CC2-B9A8-1DB963E769AB}",
+         "toTerminalId":-1,
+         "associationType":"containment",
+         "status":0,
+         "errorCode":0,
+         "errorMessage":"",
+         "isContentVisible":true
+      }
+   ],
+   "success":true
+}
+	
+```
+
+  enterprise11-4

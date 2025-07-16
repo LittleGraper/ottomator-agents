@@ -1,0 +1,310 @@
+---
+title: "Create (Feature Service)"
+description: "The create operation allows administrators to create and configure webhooks."
+slug: "web-hooks-create-feature-service"
+url: "/web-hooks-create-feature-service"
+guid: "GUID-660BFD2D-E581-403F-86F0-0E32FC947359"
+migratedTopicMetadata:
+  FTITLE: "Web Hooks - Create (Feature Service)"
+  FDESCRIPTION: "Create a web hook"
+  FCHANGES: "Changing interval value to from 20 to 30."
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "agol8.2 : 10.8 - *"
+  CREATED-ON: "15/06/2023 17:52:02"
+  FAUTHOR: "eidolyantes"
+  FSTATUS: "Draft"
+  MODIFIED-ON: "15/06/2023 17:54:46"
+  VERSION: "5"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "1"
+  ED: "GUID-09ED3226-1515-4677-91AA-6A8F361BC84B"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /create
+  urlSegments:
+    - name: <WebHooks-url>
+      url: /web-hooks-feature-service
+    - name: /create
+  methods:
+    - post
+  sslOnly: 'yes'
+  versionIntroduced: June, 2020
+---
+
+## Description
+
+The `create`  operation allows administrators to create a webhook. Administrators specify the trigger events for the new webhook and the URL to which payloads are delivered when the webhook is invoked. For additional security, the `signatureKey`  parameter can be used to send a specific string that can be verified by the application listening on the payload URL. During the operation, the payload URL will be queried to confirm that a connection to the webhook is successful. A feature service can have multiple web hooks. Multiple webhooks can share the same callback URL.
+
+<Note type={"note"}>
+
+The same callback URL with overlapping events is not supported.
+
+</Note>
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`name` (Required)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The name of the webhook.
+
+      Syntax: String
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`changeTypes ("Events")`</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Specifies the events that will trigger the webhook. The default is `["*"]`  if no value is specified. For more information about the following values, see the [Trigger event values](/web-hooks-create-feature-service#trigger-event-values) section below.
+
+      Syntax: Array
+
+      Values: `*`  \| `FeaturesCreated`  \| `FeaturesUpdated`  \| `FeaturesDeleted`  \| `FeaturesEdited`  \| `AttachmentsCreated`  \| `AttachmentsUpdated`  \| `AttachmentsDeleted`  \| `LayerSchemaChanged`  \| `LayerDefinitionChanged`  \| `FeatureServiceDefinitionChanged` 
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`signatureKey` (Optional)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The secret key that will be used to generate the HMAC hex digest of value using the sha256 hash function and is returned in the `x-esriHook-Signature`  header.
+
+      Syntax: String
+
+      Example
+
+      ```javascript
+      x-esriHook-Signature="sha256=x0mYd8goestNaiaMleQQseoJJelseim9BRse2lgisekvis"
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`hookUrl` (Required)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The payload URL.
+
+      Syntax: String
+
+      Example
+
+      ```javascript
+      "https://webhookURL"
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`active` (Optional)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Enables or disables call backs when the webhook is triggered. The default value is `false` .
+
+      Values: `true`  \| `false` 
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`contentType`</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The media type of the resource. The media type is a string sent along with the file indicating the format of the file.
+
+      <Note type={"note"}>
+
+      Microsoft Power Automate supports `application/json` .
+
+      </Note>
+
+      Values: `application/json`  \| `application/x-www-form-urlencoded` 
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`scheduleInfo` (Optional)</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      Sets the schedule properties of a webhook.
+
+      <Note type={"note"}>
+
+      The `interval`  value minimum is 30 seconds.
+
+      </Note>
+
+      Syntax
+
+      ```javascript
+      {
+        "name":"<webhook name>",
+        "startAt":"<integer, Unix epoch time>",
+        "state":"<enabled | disabled>",
+        "recurrenceInfo": {
+          "frequency":"<"second","minute","hour","day","week","month","year">
+          "interval":<integer>
+        }
+      }
+      ```
+
+      
+
+      Example
+
+      ```javascript
+      {
+        "name":"Every-30seconds",
+        "startAt":"1478280677536", //Integer
+        "state":"enabled",
+        "recurrenceInfo": {
+          "frequency":"second",
+          "interval":30
+        }
+      }
+      ```
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`payloadFormat`</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The response payload format. The default format is `json` .
+
+      Values: `json`  \| `pjson` 
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`f`</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+      The response format. The default format is `html` .
+
+      Values: `html`  \| `json`  \| `pjson` 
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Trigger event values
+
+The accepted values and their descriptions for the `changeTypes`  parameter are listed below.
+
+<StyledTable headers={"Values,Description"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`*`</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">A wildcard event. Any event will trigger the webhook.</StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`FeaturesCreated`</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">A new feature is created.</StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`FeaturesUpdated`</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">A feature is updated.</StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`FeaturesDeleted`</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">A feature is deleted.</StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`FeaturesEdited`</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">A feature is edited (insert, update, or delete)</StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`AttachmentsCreated`</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">A new attachment is added to a feature.</StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`AttachmentsUpdated`</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">A feature attachment is updated.</StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`AttachmentsDeleted`</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">A feature attachment is deleted.</StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`LayerSchemaChanged`</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">A schema is changed in a layer.</StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`LayerDefinitionChanged`</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">A layer definition is changed.</StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">`FeatureServiceDefinitionChanged`</StyledTableCell>
+    <StyledTableCell cellStyle="markdown">A feature service is changed.</StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+The following is a sample request URL for the `create`  operation:
+
+```javascript
+https://myserver.domain.com/myTenant/ArcGIS/rest/admin/services/states/FeatureServer/WebHooks/create
+```
+
+ 
+
+Example 1: Create a webhook that posts payloads in JSON format:
+
+```javascript
+{
+  "name": "WebHooks",
+  "active": true,
+  "changeTypes": [
+    "FeaturesCreated",
+    "LayerSchemaChanged"
+  ],
+  "hookUrl": "https://example.com/webhook"
+}
+```
+
+ 
+
+## JSON Response examples
+
+```other
+{
+  "id": 1,
+  "url": "https://myserver.domain.com/myTenant/ArcGIS/rest/admin/services/states/FeatureServer/WebHooks/1",
+  "name": "WebHooks",
+  "changeTypes": [
+    "FeaturesCreated",
+    "LayerSchemaChanged"
+  ],
+  "active": true,
+  "hookUrl": "https://callBackServerUrl/webhook",
+  "createdTime": "1526405454399",
+  "lastUpdatedTime": "1526405454399"
+}
+
+```
+
+ 
+
+```other
+[
+  {
+    "name": "WebHooks", 
+    "owner": "webhook", 
+    "id": 9, 
+    "globalId": "c740ae24-92a1-4fd2-9a3b-8sdf4332239", 
+    "tenantId": 01, 
+    "serviceId": 5602321, 
+    "active": true, 
+    "hookUrl": "https://webhookURL", 
+    "serviceUrl": "https://myserver.domain.com/myTenant/ArcGIS/rest/services/WebHooks/FeatureServer", 
+    "signatureKey": "", 
+    "format": "json", 
+    "serverGen": 8108706, 
+    "createdTime": 1589773034742, 
+    "lastUpdatedTime": 1589773034742, 
+    "changeTypes": [
+      "All"
+    ], 
+    "scheduleInfo": {
+      "name": "", 
+      "state": "enabled", 
+      "recurrenceInfo": {
+        "frequency": "second", 
+        "interval": 30
+      }
+    }
+  }
+]
+```
+
+ 

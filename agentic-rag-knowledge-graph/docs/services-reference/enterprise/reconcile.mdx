@@ -1,0 +1,252 @@
+---
+title: "Reconcile"
+description: "The reconcile operation allows you to reconcile a branch version with the default version."
+slug: "reconcile"
+url: "/reconcile"
+guid: "GUID-1D856E91-B601-4CB8-932F-372246808F0B"
+migratedTopicMetadata:
+  FTITLE: "Reconcile"
+  FDESCRIPTION: ""
+  FCHANGES: "Conref for ArcGIS Advanced Editing UTE - GDB #12228
+Adding a conref from the version resource topic about the read/edit session requirements."
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "03/08/2023 15:42:08"
+  FAUTHOR: "mjarman"
+  FSTATUS: "Released"
+  MODIFIED-ON: "06/09/2023 06:03:56"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "10"
+  ED: "GUID-EC3D1611-390C-42BA-9AB5-3250C7B437DF"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/VersionManagementServer/versions/<versionGuid>/reconcile
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/VersionManagementServer/versions/<versionGuid>/reconcile
+  methods:
+    - post
+  requiredCapability: ArcGIS Advanced Editing user type extension license
+  versionIntroduced: '10.6'
+---
+
+## Description
+
+Use the `reconcile` operation to reconcile a branch version with the default version. This operation detects differences between the branch version and the default version and flags them as conflicts. The `reconcile` operation requires that you are the only user currently editing the version and remain so throughout the reconcile process until you save or post your edits. You must have full permissions to all the feature classes that have been modified in the version being edited. 
+
+The `reconcile` operation is supported both synchronously and asynchronously.
+
+Review the read and edit session requirements for [version resource operations](/version).
+
+<Note type={"note"}>
+
+Organization members must be assigned a license for the [ArcGIS Advanced Editing user type extension](https://enterprise.arcgis.com/en/portal/latest/administer/windows/license-user-type-extensions.htm#ESRI_SECTION1_B75DA80066744473AD5DD1312734654A) to use this operation for ArcGIS Enterprise 11.2 and later.
+
+</Note>
+
+##  Request parameters 
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies the output format of the response. The default response format is `html`.
+
+Values: `html` | `json` | `pjson`
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`sessionId`
+(Required)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The client-generated sessionId (GUID).
+
+Syntax : `sessionId = {3F2504E0-4F89-41D3-9A0C-0305E82C3301}` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`abortIfConflicts`
+ (Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether the reconcile will be aborted if conflicts are detected (`true`). The default boolean value is `false`.
+
+Values: `true` | `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`conflictDetection`
+(Optional) 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether the conditions required for conflicts to occur will be defined by object (row) or attribute (column). The default is `byObject`.
+
+This parameter was introduced at ArcGIS Enterprise 10.8.1.
+
+Values: `byObject` | `byAttribute` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`withPost`
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether a post of the current version will be included following the reconcile (`true` ). The default boolean value is `false`.
+
+Values: `true` | `false` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`async`
+(Optional)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Specifies whether the request will be processed asynchronously. If `true` , the request will be processed as an asynchronous job, and a URL will be returned that a client can visit to review the status of the job. The default boolean value is `false` .
+
+Values: `true` | `false` 
+
+This parameter was introduced at ArcGIS Enterprise 10.9.1.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## JSON Response syntax
+
+JSON response (when async = false):
+
+```other
+{
+  "hasConflicts" : <true | false>,
+  "moment" : <datetime>,
+  "didPost" : <true | false>,
+  "success" : <true | false>,
+  "error" : { // only if success is false
+    "extendedCode" : <HRESULT>,
+    "message" : <error message>,
+    "details" : [ <detail> ]
+  }
+}
+
+```
+
+ 
+
+JSON response (when async = true):
+
+```json
+{
+  "statusUrl" : <url>
+}
+
+```
+
+ 
+
+JSON response to the status URL (when pending or in progress):
+
+```json
+{
+  "status" : "<Pending | InProgress>",
+  "submissionTime" : <datetime>,
+  "lastUpdatedTime" : <datetime>
+ }
+
+```
+
+ 
+
+## Example usage
+
+Reconcile a named version with the default version using the `reconcile`  operation. Conflicts are defined by setting the `conflictDetection`  parameter to `byAttribute` . The optional parameters `abortIfConflicts`  and `withPost`  are both set to `true` .
+
+Request URL and parameters:
+
+`https://myserver.esri.com/server/rest/services/LandUse/VersionManagementServer/versions/24417758-0DBD-4EC3-95B0-467CAA47FC43/reconcile` 
+
+```javascript
+f=json
+sessionId={638ed440-b81f-406c-bd5d-757c91dbfd70}
+abortIfConflicts=true
+conflictDetection=byAttribute
+withPost=true
+async=false
+```
+
+ 
+
+JSON response:
+
+```javascript
+{
+ "hasConflicts": false,
+ "moment": 1582135929926,
+ "didPost": true,
+ "success": true
+}
+```
+
+ 

@@ -1,0 +1,503 @@
+---
+title: "Task"
+uid: "gp-task"
+description: "A geoprocessing task resource represents a single task in a geoprocessing service published to ArcGIS Server."
+slug: "gp-task"
+url: "/gp-task"
+guid: "GUID-1908B157-A9DA-4A16-9282-76A1CF8EEC06"
+migratedTopicMetadata:
+  FTITLE: "GP Task"
+  FDESCRIPTION: "The task page of a GP service."
+  FCHANGES: "new schema for gpcomposite"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2- *"
+  CREATED-ON: "01/09/2023 16:38:27"
+  FAUTHOR: "ssuo"
+  FSTATUS: "Released"
+  MODIFIED-ON: "02/10/2023 12:43:23"
+  VERSION: "9"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "8"
+  ED: "GUID-3B5ACAC5-8C9E-4F1C-9ADB-2591C6D0979A"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<taskName>
+  urlSegments:
+    - name: <gpservice-url>
+      url: /gp-service
+    - name: /<taskName>
+  methods: 
+    - get
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '9.3'
+---
+
+## Description
+
+A geoprocessing `task` resource represents a single task in a geoprocessing service published to ArcGIS Server. It provides the task name, display name, and detailed information about various input and output parameters.
+
+A geoprocessing `task` resource supports the following operations:
+
+-   [`submitJob`](/submit-gp-job)—For tasks with an asynchronous operation type. An asynchronous type means that the application does not wait for the task to complete, and the end user can continue using the application. A client must actively check the status of the job to learn its progress and results when finished.
+-   [`execute`](/execute-gp-task)—For tasks with a synchronous operation type. A synchronous type means that the application waits while the tool runs on the server. Because the end user must wait, determine whether the wait time is acceptable for the type of application. Fast running analysis is a common use case for synchronous type. However, an output feature service is not available.
+
+## Child resources
+
+At 10.9.1, the new `metadata` child resource is available. It shows the metadata for a geoprocessing `task` resource in XML format only. No request parameter is needed. An example usage is to access the metadata using the following URL:
+
+Getting the metadata for the `MyTaskName` task.
+
+```markdown
+https://machine.domain.com/webadaptor/rest/services/myServiceName/GPServer/MyTaskName/metadata
+```
+
+ .
+
+##  Request parameter
+
+<StyledTable headers={"Parameter,Details"}>
+<StyledTableRow>
+<StyledTableCell cellStyle="markdown">
+
+`f`
+
+(Optional)
+
+</StyledTableCell>
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html`.
+
+Values: `html` | `json` |`pjson`
+
+</StyledTableCell>
+</StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+Example 1: Request URL for the `CreateDriveTimePolygons` task for `ESRI_DriveTime_US`.
+
+This request will return the HTML page of the GPTask.
+
+```markdown
+https://machine.domain.com/webadaptor/rest/services/Network/ESRI_DriveTime_US/GPServer/CreateDriveTimePolygons
+```
+
+ 
+
+Example 2: Request URL for the 911 call hot spot analysis with a JSON return format:
+
+This request will return the GPTask with JSON.
+
+```markdown
+https://machine.domain.com/webadaptor/rest/services/911CallsHotspot/GPServer/911%20Calls%20Hotspot?f=json
+```
+
+ 
+
+## JSON Response schema
+
+The JSON schema shown below is for a geoprocessing `task` response when queried with JSON. The `filter` property is available starting at ArcGIS Server 10.7. The `parameterInfos` property is available starting at ArcGIS Server 11.0. The [GPValueTable](/gp-data-types#gpvaluetable), [GPMultiValue](/gp-data-types#gpmultivalue), and [GPComposite](/gp-data-types#gpcomposite) data types are subject to the availability of that data type in your ArcGIS Server version.
+
+JSON Schema for a GPTask
+
+```json
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "JSON Schema for GP Task endpoint",
+    "description": "This schema describes the JSON return of a GP Task endpoint. Depending on the version of ArcGIS Server and the original tool, optional keys may not be present.",
+    "type": "object",
+    "required": [
+        "name",
+        "displayName",
+        "description",
+        "category",
+        "helpUrl",
+        "executionType",
+        "parameters"
+    ],
+    
+            "items": {
+                "description": "Individual parameter",
+                "type": "object",
+                "required": [
+                    "name",
+                    "dataType",
+                    "displayName",
+                    "description",
+                    "direction",
+                    "defaultValue",
+                    "parameterType",
+                    "category"
+                ],
+                "properties": {
+                    "name": {
+                        "description": "The name of the parameter",
+                        "type": "string"
+                    },
+                    "dataType": {
+                        "description": "The data type of the parameter",
+                        "type": "string"
+                    },
+                    "displayName": {
+                        "description": "The display name of the parameter",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "The description of the parameter",
+                        "type": "string"
+                    },
+                    "direction": {
+                        "description": "Whether it is an input or an output parameter",
+                        "type": "string",
+                        "enum": [
+                            "esriGPParameterDirectionInput",
+                            "esriGPParameterDirectionOutput"
+                        ]
+                    },
+                    "dependency": {
+                        "description": "The parameter this one depends on",
+                        "type": "string"
+                    },
+                    "defaultValue": {
+                        "description": "The default value of the parameter. The type depends on the possible values of the parameter. It can be null."
+                    },
+                    "parameterType": {
+                        "description": "Whether it is a required or an optional parameter",
+                        "type": "string",
+                        "enum": [
+                            "esriGPParameterTypeRequired",
+                            "esriGPParameterTypeOptional",
+                            "esriGPParameterTypeDerived"
+                        ]
+                    },
+                    "category": {
+                        "description": "The category of the parameter",
+                        "type": "string"
+                    },
+                    "choiceList": {
+                        "$ref": "#/definitions/choiceList"
+                    },
+                    "filter": {
+                        "$ref": "#/definitions/filter"
+                    },
+                    "parameterInfos": {
+                        "description": "Information for GPMultiValue, GPValueTable, and GPComposite",
+                        "type": "array",
+                        "items": {
+                            "description": "An individual element of the data type",
+                            "type": "object",
+                            "required": [
+                                "dataType"
+                            ],
+                            "properties": {
+                                "name": {
+                                    "description": "The name of a column for GPValueTable, empty value for GPMultivalue and GPComposite",
+                                    "type": "string"
+                                },
+                                "dataType": {
+                                    "description": "The data type of the element",
+                                    "type": "string"
+                                },
+                                "parameterInfos":{
+                                    "description": "This parameter info is only possible for a GPMultiValue:GPComposite",
+                                    "type":"array",
+                                    "items": {
+                                        "description": "possible types for a GPComposite",
+                                        "type":"object",
+                                        "required": [
+                                            "dataType"
+                                        ],
+                                        "properties": {
+                                            "name": {
+                                                "description": "This will be an empty string",
+                                                "type": "string"
+                                            },
+                                            "dataType": {
+                                                "description": "The data type of an allowed value",
+                                                "type": "string"
+                                            },
+                                            "displayName": {
+                                                "description": "This will be an empty string.",
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                },
+                                "displayName": {
+                                    "description": "The name of a column for GPValueTable, empty value for GPMultivalue and GPComposite",
+                                    "type": "string"
+                                },
+                                "filter": {
+                                    "$ref": "#/definitions/filter"
+                                },
+                                "choiceList": {
+                                    "$ref": "#/definitions/choiceList"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "uniqueItems": true
+        }
+    },
+    "definitions": {
+        "filter": {
+            "description": "For an input with a filter",
+            "type": "object",
+            "required": [
+                "type"
+            ],
+            "properties": {
+                "type": {
+                    "description": "The type of filter",
+                    "type": "string",
+                    "enum": [
+                        "range",
+                        "featureClass",
+                        "file",
+                        "field"
+                    ]
+                },
+                "minimum": {
+                    "description": "The lower end of a range filter",
+                    "type": "number"
+                },
+                "maximum": {
+                    "description": "The upper end of a range filter",
+                    "type": "number"
+                },
+                "list": {
+                    "description": "Allowed types of feature classes for a feature class filter, file extension for a file, or field type of a field.",
+                    "type": "array",
+                    "items": {
+                        "description": "Type of a feature class, a file extension, or a field type",
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "choiceList": {
+            "description": "For input with a choice list, or a ValueList filter",
+            "type": "array",
+            "items": {
+                "description": "Individual choice on the list",
+                "type": "string",
+                "uniqueItems": true
+            }
+        }
+    }
+}
+```
+
+ 
+
+## JSON Response example 1
+
+A sample asynchronous geoprocessing task with an input feature parameter with a filter, an output feature parameter, and an automatically added optional input parameter.
+
+```json
+{
+ "name": "FeatureFiltersLinePolygon",
+ "displayName": "Feature filters with line and polygon",
+ "description": "This is a feature analysis with input polyline and polygon only. Points are not supported.",
+ "category": "",
+ "helpUrl": "https://domain/webadaptor/rest/directories/arcgisoutput/Level2_Features_Async_GPServer/Level2_Features_Async/FeatureFiltersLinePolygon.htm",
+ "executionType": "esriExecutionTypeAsynchronous",
+ "parameters": [
+  {
+   "name": "Input_Features",
+   "dataType": "GPFeatureRecordSetLayer",
+   "displayName": "Input Features",
+   "description": "line and polygon only",
+   "direction": "esriGPParameterDirectionInput",
+   "filter": {
+    "type": "featureClass",
+    "list": [
+     "esriGeometryPolygon",
+     "esriGeometryPolyline"
+    ]
+   },
+   "defaultValue": {
+    "displayFieldName": "",
+    "hasZ": true,
+    "geometryType": "esriGeometryPolygon",
+    "spatialReference": {
+     "wkid": 102100,
+     "latestWkid": 3857
+    },
+    "fields": [
+     {
+      "name": "OBJECTID",
+      "type": "esriFieldTypeOID",
+      "alias": "OBJECTID"
+     },
+     {
+      "name": "countshort",
+      "type": "esriFieldTypeSmallInteger",
+      "alias": "countshort"
+     },
+     {
+      "name": "geom",
+      "type": "esriFieldTypeSingle",
+      "alias": "geom"
+     },
+     {
+      "name": "Shape_Length",
+      "type": "esriFieldTypeDouble",
+      "alias": "Shape_Length"
+     },
+     {
+      "name": "Shape_Area",
+      "type": "esriFieldTypeDouble",
+      "alias": "Shape_Area"
+     }
+    ],
+    "features": [],
+    "exceededTransferLimit": false
+   },
+   "parameterType": "esriGPParameterTypeRequired",
+   "category": ""
+  },
+  {
+   "name": "Output_Feature_Class",
+   "dataType": "GPFeatureRecordSetLayer",
+   "displayName": "Output Feature Class",
+   "description": "ofc",
+   "direction": "esriGPParameterDirectionOutput",
+   "defaultValue": {
+    "displayFieldName": "",
+    "hasZ": true,
+    "geometryType": "esriGeometryPoint",
+    "spatialReference": {
+     "wkid": 102100,
+     "latestWkid": 3857
+    },
+    "fields": [
+     {
+      "name": "OBJECTID",
+      "type": "esriFieldTypeOID",
+      "alias": "OBJECTID"
+     },
+     {
+      "name": "countshort",
+      "type": "esriFieldTypeSmallInteger",
+      "alias": "countshort"
+     },
+     {
+      "name": "geom",
+      "type": "esriFieldTypeSingle",
+      "alias": "geom"
+     },
+     {
+      "name": "ORIG_FID",
+      "type": "esriFieldTypeInteger",
+      "alias": "ORIG_FID"
+     }
+    ],
+    "features": [],
+    "exceededTransferLimit": false
+   },
+   "parameterType": "esriGPParameterTypeRequired",
+   "category": ""
+  },
+  {
+   "name": "esri_out_feature_service_name",
+   "dataType": "GPString",
+   "displayName": "Output Feature Service Name",
+   "description": "The name of the optional feature service to create on the federated server containing the result of this tool. If no name is specified, an output feature service will not be created.",
+   "direction": "esriGPParameterDirectionInput",
+   "defaultValue": "",
+   "parameterType": "esriGPParameterTypeOptional",
+   "category": ""
+  }
+ ]
+}
+```
+
+ 
+
+## JSON Response example 2
+
+A sample synchronous geoprocessing task with the `GPValueTable` parameter, including columns with filters and a GPMultiValue:GPRasterDataLayer output parameter.
+
+```json
+{
+    "name": "filters",
+    "displayName": "Input value table with range filters",
+    "description": "This analysis will take a GPValueTable with two columns as an input and generate a multivalue of raster layers as an output",
+    "category": "",
+    "helpUrl": "https://domain/webadaptor/rest/directories/arcgisoutput/Level2_ValueTable_Sync_GPServer/Level2_ValueTable_Sync/filters.htm",
+    "executionType": "esriExecutionTypeSynchronous",
+    "parameters": [
+        {
+            "name": "Input_range_filters",
+            "dataType": "GPValueTable",
+            "displayName": "Input range filters",
+            "description": "long and double are the columnsfirst column long has a range of -99,999 to 99,999 second column double has a range of -12345678.9 to 98765.4321",
+            "direction": "esriGPParameterDirectionInput",
+            "defaultValue": [
+                [
+                    567,
+                    -56756.567
+                ],
+                [
+                    -6567,
+                    67886.678
+                ]
+            ],
+            "parameterType": "esriGPParameterTypeRequired",
+            "category": "",
+            "parameterInfos": [
+                {
+                    "name": "input long column",
+                    "dataType": "GPLong",
+                    "displayName": "input long column",
+                    "filter": {
+                        "type": "range",
+                        "minimum": -99999,
+                        "maximum": 99999
+                    }
+                },
+                {
+                    "name": "input double column",
+                    "dataType": "GPDouble",
+                    "displayName": "input double column",
+                    "filter": {
+                        "type": "range",
+                        "minimum": -1.23456789E7,
+                        "maximum": 98765.4321
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Output_raster_layers",
+            "dataType": "GPMultiValue:GPRasterDataLayer",
+            "displayName": "Output raster layers",
+            "description": "",
+            "direction": "esriGPParameterDirectionOutput",
+            "defaultValue": [],
+            "parameterType": "esriGPParameterTypeDerived",
+            "category": "",
+            "parameterInfos": [
+                {
+                    "name": "",
+                    "dataType": "GPRasterDataLayer",
+                    "displayName": ""
+                }
+            ]
+        }
+    ]
+}
+```
+
+ 

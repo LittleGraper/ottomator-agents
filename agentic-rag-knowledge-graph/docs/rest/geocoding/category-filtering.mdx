@@ -1,0 +1,1357 @@
+---
+title: "Category filtering"
+description: "Use the ArcGIS Geocoding service to filter the results of geocodes and geosearches by category."
+slug: "category-filtering"
+url: "/category-filtering"
+guid: "GUID-7DFEE2EC-51CA-4740-821F-AF9A8AF2843E"
+migratedTopicMetadata:
+  FTITLE: "geocoding-category-filtering"
+  FDESCRIPTION: ""
+  FCHANGES: "December 2024 geocoding update"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "agol 24.R02"
+  CREATED-ON: "10/09/2024 14:01:04"
+  FAUTHOR: "mchaffin"
+  FSTATUS: "Draft"
+  MODIFIED-ON: "10/09/2024 15:49:37"
+  VERSION: "32"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-7E3F3308-C5E1-4909-86E9-AB48F54A9ACA"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+---
+
+The ArcGIS Geocoding service allows users to search for and geocode many types of addresses and places around the world through a single REST endpoint. This simplifies the application building process, as developers don't need to know what types of places their users are searching for, because the service can decipher that. However, due to this flexibility, it is possible for ambiguous searches to match to many different places, and users may sometimes receive unexpected results. For example, a search for a city may match to a street name, or a search for an airport code may match to a country abbreviation. 
+
+For such cases, the service provides the ability to filter out unwanted geocode results with the `category`  parameter. The `category`  parameter limits the types of places for which the service searches, thus eliminating false positive matches and potentially speeding up the search process.
+
+## Supported operations
+
+The `category`  parameter can be used with the following ArcGIS Geocoding service operations:
+
+-   [findAddressCandidates](/find-address-candidates)
+-   [geocodeAddresses](/geocode-addresses)
+-   [suggest](/suggest)
+
+## When to use categories
+
+Category filtering can be an effective way to improve geocoding and geosearch results. In general, the `category`  parameter can be used for the following:
+
+-   Limit matches to specific place types or address levels
+-   Avoid fallback matches to unwanted address levels
+-   Disambiguate coordinate searches
+
+The following scenarios illustrate how category filtering can be used in an application.
+
+#### Only match to specific place types or address levels
+
+-   Batch geocode cities—An organization may have a list of world cities that they want to batch geocode. Streets are sometimes named after cities (such as New York Street), and because street name matches are granted priority over city name matches by the ArcGIS Geocoding service, occasionally city name input will match to a street name. Such false positive matches can be avoided by allowing the user to specify `category=City`  in their batch geocode request. In this case, only city name records are searched, while street names and all other address and place types are ignored, ensuring that only city name matches are returned.
+-   Batch geocode airport codes—Similar to the cities case, an organization may want to batch geocode a list of three-letter airport codes. There are many other places, such as businesses and cities, that may have the same name as an airport code. Because of this, some of the airport codes in the list may unexpectedly match to other places. To ensure that only airport matches are returned, the user can specify `category=Airport`  in the request. 
+-   Search for multiple restaurant types—The ArcGIS Geocoding service supports keyword searches for restaurant and other business types, such as "pizza in Redlands" or "Italian food". However, keyword search is limited such that it doesn't allow searches for both types in one request, and also may return places of a different type named "Pizza" or "Italian Food". However, with the `category`  parameter, it's possible to search for multiple restaurant types in a single request. By passing `category=Pizza,Italian Food`  in a request, along with a location and distance, both restaurant types will be returned if matches exist in the area of interest.
+
+#### Avoid fallback matches to unwanted address levels
+
+The ArcGIS Geocoding service supports fallback matches, meaning that it automatically geocodes to a lower match level if there is no address match for a request. For instance, if a full street address match cannot be found for a request, the service tries to find the street name. If it cannot be found, the service tries to find the postal code, then the city, and so on. If a user batch geocodes a table of addresses or stores the results of a geosearch operation and a fallback match occurs, they will be charged for the transaction even if they are not satisfied with the match.
+
+Category filtering is the solution for this case. If `category=Street Address`  is included in the request, only full street address matches will be returned. If one cannot be found for a particular input address, no match will be returned and the user is not charged.
+
+#### Disambiguate coordinate searches
+
+Different types of coordinates can be found by the ArcGIS Geocoding service, including MGRS (Military Grid Reference System), USNG (US National Grid), and x,y coordinates. Searching for x,y coordinates can be ambiguous, because some users may place the longitude (x) coordinate first, while others may place the latitude (y) coordinate first. For instance, searching for x,y coordinates `80,50`  produces very different results when longitude is first than when latitude is first. Because of this ambiguity, the service returns candidates in both `<latitude>,<longitude>`  and `<longitude>,<latitude>`  formats. However, users may want coordinates returned in a consistent format, and the `category`  parameter can be used for this. The relevant coordinate system categories are `LatLong` , `XY` , and `YX` . 
+
+-   If `category=YX`  is included in a request, the service assumes that the coordinates are in the form `<latitude>,<longitude>`  and returns a match in `<latitude>,<longitude>`  format with `Addr_type=YX` .
+-   If `category=XY`  is included in a request, the service assumes that the coordinates are in the form `<longitude>,<latitude>`  and returns a match in `<longitude>,<latitude>`  format with `Addr_type=XY` .
+-   If `category=LatLong`  is included in a request, the input coordinates can either be in the form `<latitude>,<longitude>`  or `<longitude>,<latitude>` . The service determines the format based on the values. For example, if the coordinate pair passed in the request is `-120,30` , the service assumes that the coordinates are in `<longitude>,<latitude>`  order because the value `-120`  is only valid as a longitude value; it returns coordinates in the same format. If an ambiguous coordinate pair is included in the request, in which both values are valid as either latitude or longitude (such as `10,10` ), the service also assumes that longitude is first and returns a match in `<longitude>,<latitude>`  format, in each case, `Addr_type=LatLong` . 
+-   If none of these category values are included in a coordinate search request, or if `category=Coordinate System` , all relevant matches are returned.
+
+## How to use categories
+
+When the `category`  parameter is passed in a request along with search text, the ArcGIS Geocoding service performs a prefiltering process based on the category value. This means that instead of searching through the entire stack of places and addresses for the input text, only the records that match the category value are searched, ensuring that if a matching place is found by the service, it will be the correct type of place. 
+
+### Accessing category values
+
+The `category`  parameter works with a [list](/category-filtering#supported-category-values) of specific category values. The acceptable values for the parameter can be obtained from the ArcGIS Geocoding service description page: [ https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer?f=pjson](https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer?f=pjson).
+
+### Category list structure
+
+The category list is hierarchical, meaning that there are collections of categories nested within higher-level categories. The hierarchical structure simplifies the category search workflow by grouping similar categories to allow for broad searches with input of a single category value. When a high-level category value is passed in a request, it is equivalent to passing all of the category's child categories. For example, there is a top-level category named POI, which contains several child categories, such as Food and Arts and Entertainment. Each child category in turn contains many additional categories, such as African Food and Chinese Food. When `category=POI`  is passed in a request, all of the child category values within Food and Arts and Entertainment are passed as well.
+
+The list consists of nested JSON arrays representing child categories belonging to higher-level categories, beginning with the `categories`  object. The abbreviated snippet below from the service description shows the `categories`  object along with the Address category and its child categories.
+
+```javascript
+"categories": [
+  {
+   "name": "Address",
+   "localizedNames": {},
+   "categories": [
+    {
+     "name": "Subaddress",
+     "localizedNames": {}
+    },
+    {
+     "name": "Point Address",
+     "localizedNames": {}
+    },
+    {
+     "name": "Street Address",
+     "localizedNames": {}
+    },
+    {
+     "name": "Distance Marker",
+     "localizedNames": {}
+    },
+    {
+     "name": "Intersection",
+     "localizedNames": {}
+    },
+    {
+     "name": "Street Name",
+     "localizedNames": {}
+    }
+   ]
+  },
+```
+
+ 
+
+The top-level `categories`  object contains an array of objects representing the high-level categories; each high-level category also contains an array of child categories. Each category can include the following properties: 
+
+-   name—The category name in English. The `name`  values are the only valid input values for the `category`  parameter.
+-   localizedNames—Reserved for a future release. The `localizedNames`  object will contain the translated names of the category, listed by language code. The localizedNames values will only be provided as a reference for developers to create a localized user interface in their application. They will not be accepted as input for the `category`  parameter. 
+-   categories—The collection of child categories associated with a particular category is stored in the `categories`  array. If a category does not include a `categories`  array, the category will contain no child categories.
+
+Category filtering can be implemented in an application by incorporating the acceptable `category`  parameter values in a user interface, allowing a user to select the desired category or categories, then passing the values in a request. 
+
+### Example implementation
+
+The best implementation for category filtering in an application depends on the application's functionality. For most cases, the entire category hierarchy, or a portion of it, can be read from the [service description](https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer?f=pjson) and added to a list of selectable categories in a user interface. Then the categories that the user selects from the list can be passed as values for the `category`  parameter in a request.
+
+An example is shown below. This illustration represents a simple geosearch application in which a user can enter a search string and optionally select one or more categories from a drop-down list. The categories in the drop-down list are organized in a way that mirrors the hierarchy of categories from the list on the service description page.
+
+![Sample category UI](./images/GUID-CBD450B8-5770-41CF-BAC1-57421372F64A-web.png)
+
+In this particular case, a user is searching for amusement parks and aquariums whose names begin with "Sea". Based on the input, the application would construct the following request URL:
+
+#### Request URL
+
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Prettified</TabTitle>
+
+<TabTitle>URL Encoded</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=sea&category=Amusement Park,Aquarium&outFields=PlaceName,Type,Place_Addr,City,Region,Country&maxLocations=10&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+
+```
+
+ 
+
+</Tab>
+
+<Tab>
+
+```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=sea&category=Amusement%20Park%2CAquarium&outFields=PlaceName%2CType%2CPlace_Addr%2CCity%2CRegion%2CCountry&maxLocations=10&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+
+```
+
+ 
+
+</Tab>
+
+</Tabs>
+
+#### JSON response
+
+```javascript
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Sea",
+   "location": {
+    "x": -118.0816755,
+    "y": 33.7275116
+   },
+   "score": 100,
+   "attributes": {
+    "Type": "Aquarium",
+    "PlaceName": "Sea",
+    "Place_Addr": "16182 Pacific Coast Hwy, Huntington Beach, California, 92649",
+    "City": "Huntington Beach",
+    "Region": "California",
+    "Country": "USA"
+   },
+   "extent": {
+    "xmin": -118.0866755,
+    "ymin": 33.7225116,
+    "xmax": -118.0766755,
+    "ymax": 33.7325116
+   }
+  },
+  {
+   "address": "Sea Aquarium",
+   "location": {
+    "x": -103.4668967,
+    "y": 20.5503469
+   },
+   "score": 99.95,
+   "attributes": {
+    "Type": "Aquarium",
+    "PlaceName": "Sea Aquarium",
+    "Place_Addr": "calle Emiliano Zapata, San Agustín, Tlajomulco de Zúñiga, Jalisco, 45645",
+    "City": "San Agustín",
+    "Region": "Jalisco",
+    "Country": "MEX"
+   },
+   "extent": {
+    "xmin": -103.4718967,
+    "ymin": 20.5453469,
+    "xmax": -103.4618967,
+    "ymax": 20.5553469
+   }
+  }
+
+```
+
+ 
+
+### Category request details
+
+Either a single category value or multiple comma-delimited values can be included as input in a request. When multiple values are included, the service treats the commas as OR operators and searches for all of the categories. Examples:
+
+-   Single category: `category=Sushi` 
+-   Multiple categories: `category=Sushi,Japanese Food,Mexican Food` 
+
+When a high-level category is passed in a request, it is logically the same as passing all of its child categories. For instance, `category=Populated Place`  is equivalent to `category=Neighborhood,City,Subregion,Region,Country,Zone` .
+
+A request can include a value for the `category`  parameter without a corresponding `SingleLine`  value. In this case, the highest priority or closest places that match the category will be returned.
+
+#### Example
+
+Find gas stations near Disneyland (location=-117.92712,33.81563)
+
+#### Request URL
+
+<Tabs>
+
+<TabNav>
+
+<TabTitle>Prettified</TabTitle>
+
+<TabTitle>URL Encoded</TabTitle>
+
+</TabNav>
+
+<Tab>
+
+```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=&category=Gas Station&outFields=PlaceName,Place_Addr,City,Region&maxLocations=2&location=-117.92712,33.81563&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+
+```
+
+ 
+
+</Tab>
+
+<Tab>
+
+```javascript
+https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=&category=Gas%20Station&outFields=PlaceName%2CPlace_Addr%2CCity%2CRegion&maxLocations=2&location=-117.92712%2C33.81563&forStorage=false&f=pjson&token=<ACCESS_TOKEN>
+
+```
+
+ 
+
+</Tab>
+
+</Tabs>
+
+#### JSON response
+
+```javascript
+{
+ "spatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326
+ },
+ "candidates": [
+  {
+   "address": "Shell Oil",
+   "location": {
+    "x": -117.928025,
+    "y": 33.817672
+   },
+   "score": 100,
+   "attributes": {
+    "PlaceName": "Shell Oil",
+    "Place_Addr": "1198 W Ball Rd, Anaheim, California, 92802",
+    "City": "Anaheim",
+    "Region": "California"
+   },
+   "extent": {
+    "xmin": -117.929025,
+    "ymin": 33.816672,
+    "xmax": -117.927025,
+    "ymax": 33.818672
+   }
+  },
+  {
+   "address": "Shell Oil",
+   "location": {
+    "x": -117.915775,
+    "y": 33.818483
+   },
+   "score": 100,
+   "attributes": {
+    "PlaceName": "Shell Oil",
+    "Place_Addr": "601 W Ball Rd, Anaheim, California, 92805",
+    "City": "Anaheim",
+    "Region": "California"
+   },
+   "extent": {
+    "xmin": -117.916775,
+    "ymin": 33.817483,
+    "xmax": -117.914775,
+    "ymax": 33.819483
+   }
+  }
+ ]
+}
+
+```
+
+## Supported category values
+
+The following table lists the entire hierarchy of supported category values. The values can be obtained from the [service description page](https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer?f=pjson) as well, in the "categories" section. It is recommended to get the currently supported category values from the service description page. Category values should not be hard-coded in custom applications because supported values may change without notice. 
+
+<Note type={"note"}>
+
+Not all category values are supported for all locations and countries. Efforts are being made to expand the category coverage where records for certain categories are absent.
+
+</Note>
+
+<StyledTable headers={"Category level 1,Category level 2,Category level 3"}>
+
+<StyledTableRow anchor="GUID-195E9EC1-3505-4100-BB47-5FDBACC9D1CF">
+
+<StyledTableCell cellStyle="markdown">
+
+Address
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Subaddress
+
+Point Address
+
+Street Address
+
+Distance Marker
+
+Intersection
+
+Street Midblock
+
+Street Between
+
+Street Name
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow anchor="GUID-6BA936DA-1662-4597-A273-FBF8478363BF">
+
+<StyledTableCell cellStyle="markdown">
+
+Postal
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Primary Postal	
+
+Postal Locality	
+
+Postal Extension	
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow anchor="GUID-1D82C7CA-885A-4E8B-941D-8D6911F44CA7">
+
+<StyledTableCell cellStyle="markdown">
+
+Coordinate System
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+LatLong	
+
+MGRS	
+
+XY
+
+YX
+
+USNG
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow anchor="GUID-0D448389-631A-4BB8-BC85-26EA87709BA0">
+
+<StyledTableCell cellStyle="markdown">
+
+Populated Place
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Block
+
+Sector
+
+Neighborhood
+
+District
+
+City
+
+Metro Area
+
+Subregion
+
+Region
+
+Territory
+
+Country
+
+Zone
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow anchor="GUID-20D9858C-C27C-4C9C-BE4C-1EDB36E04D62">
+
+<StyledTableCell cellStyle="markdown">
+
+POI
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Arts and Entertainment
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Amusement Park
+
+Aquarium
+
+Art Gallery
+
+Art Museum
+
+Billiards
+
+Bowling Alley
+
+Casino
+
+Cinema
+
+Historical Monument
+
+History Museum
+
+Indoor Sports
+
+Jazz Club
+
+Landmark
+
+Library
+
+Live Music
+
+Museum
+
+Other Arts and Entertainment
+
+Performing Arts
+
+Ruin
+
+Tourist Attraction
+
+Wild Animal Park
+
+Zoo
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Education
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+College
+
+Fine Arts School
+
+Other Education
+
+School
+
+Vocational School
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Food
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+African Food
+
+American Food
+
+Australian Food
+
+Austrian Food
+
+Bakery
+
+BBQ and Southern Food
+
+Belgian Food
+
+Bistro
+
+Brazilian Food
+
+Brewpub
+
+British Isles Food
+
+Burgers
+
+Cajun and Creole Food
+
+Caribbean Food
+
+Chicken Restaurant
+
+Chilean Food
+
+Chinese Food
+
+Coffee Shop
+
+Continental Food
+
+Creperie
+
+East European Food
+
+Fast Food
+
+Filipino Food
+
+Fondue
+
+French Food
+
+Fusion Food
+
+German Food
+
+Greek Food
+
+Grill
+
+Hawaiian Food
+
+Ice Cream Shop
+
+Indian Food
+
+Indonesian Food
+
+International Food
+
+Irish Food
+
+Italian Food
+
+Japanese Food
+
+Korean Food
+
+Kosher Food
+
+Latin American Food
+
+Mexican Food
+
+Middle Eastern Food
+
+Moroccan Food
+
+Other Restaurant
+
+Pastries
+
+Pizza
+
+Polish Food
+
+Portuguese Food
+
+Restaurant
+
+Russian Food
+
+Sandwich Shop
+
+Scandinavian Food
+
+Seafood
+
+Snacks
+
+South American Food
+
+Southeast Asian Food
+
+Southwestern Food
+
+Spanish Food
+
+Steak House
+
+Sushi
+
+Swiss Food
+
+Tapas
+
+Thai Food
+
+Turkish Food
+
+Vegetarian Food
+
+Vietnamese Food
+
+Winery
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Land Features
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Atoll
+
+Basin
+
+Butte
+
+Canyon
+
+Cape
+
+Cave
+
+Cliff
+
+Continent
+
+Desert
+
+Dune
+
+Flat
+
+Forest
+
+Glacier
+
+Grassland
+
+Hill
+
+Island
+
+Isthmus
+
+Lava
+
+Marsh
+
+Meadow
+
+Mesa
+
+Mountain
+
+Mountain Range
+
+Oasis
+
+Other Land Feature
+
+Peninsula
+
+Plain
+
+Plateau
+
+Point
+
+Ravine
+
+Ridge
+
+Rock
+
+Scrubland
+
+Swamp
+
+Valley
+
+Volcano
+
+Wetland
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Nightlife Spot
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Bar or Pub
+
+Karaoke
+
+Night Club
+
+Nightlife
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Parks and Outdoors
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Basketball
+
+Beach
+
+Campground
+
+Fishing
+
+Garden
+
+Golf Course
+
+Golf Driving Range
+
+Hockey
+
+Ice Skating Rink
+
+Nature Reserve
+
+Other Parks and Outdoors
+
+Park
+
+Racetrack
+
+Scenic Overlook
+
+Shooting Range
+
+Ski Resort
+
+Soccer
+
+Sports Center
+
+Sports Field
+
+Swimming Pool
+
+Tennis Court
+
+Trail
+
+Wildlife Reserve
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Professional and Other Places
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Ashram
+
+Banquet Hall
+
+Border Crossing
+
+Building
+
+Business Facility
+
+Cemetery
+
+Church
+
+City Hall
+
+Civic Center
+
+Convention Center
+
+Court House
+
+Dentist
+
+Doctor
+
+Embassy
+
+Factory
+
+Farm
+
+Fire Station
+
+Government Office
+
+Gurdwara
+
+Hospital
+
+Industrial Zone
+
+Insurance
+
+Livestock
+
+Medical Clinic
+
+Military Base
+
+Mine
+
+Mosque
+
+Observatory
+
+Oil Facility
+
+Orchard
+
+Other Professional Place
+
+Other Religious Place
+
+Pagoda
+
+Place of Worship
+
+Police Station
+
+Post Office
+
+Power Station
+
+Prison
+
+Radio Station
+
+Ranch
+
+Recreation Facility
+
+Religious Center
+
+Scientific Research
+
+Shrine
+
+Storage
+
+Synagogue
+
+Telecom
+
+Temple
+
+Tower
+
+Veterinarian
+
+Vineyard
+
+Warehouse
+
+Water Tank
+
+Water Treatment
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Residence
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Estate
+
+House
+
+Nursing Home
+
+Residential Area
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Shops and Service
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+ATM
+
+Auto Dealership
+
+Auto Maintenance
+
+Auto Parts
+
+Bank
+
+Beauty Salon
+
+Beauty Supplies
+
+Bookstore
+
+Butcher
+
+Candy Store
+
+Car Wash
+
+Childrens Apparel
+
+Clothing Store
+
+Consumer Electronics Store
+
+Convenience Store
+
+Delivery Service
+
+Department Store
+
+Fitness Center
+
+Flea Market
+
+Food and Beverage Shop
+
+Footwear
+
+Furniture Store
+
+Gas Station
+
+Grocery
+
+Home Improvement Store
+
+Jewelry
+
+Laundry
+
+Market
+
+Mens Apparel
+
+Mobile Phone Shop
+
+Motorcycle Shop
+
+Office Supplies Store
+
+Optical
+
+Other Shops and Service
+
+Pet Store
+
+Pharmacy
+
+Plumbing
+
+Repair Services
+
+Shopping Center
+
+Spa
+
+Specialty Store
+
+Sporting Goods Store
+
+Tire Store
+
+Toy Store
+
+Used Car Dealership
+
+Wholesale Warehouse
+
+Wine and Liquor
+
+Womens Apparel
+
+Yoga Studio
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Travel and Transport
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Airport
+
+Bed and Breakfast
+
+Bridge
+
+Bus Station
+
+Dock
+
+EV Charging Station
+
+Ferry
+
+Heliport
+
+Hostel
+
+Hotel
+
+Marina
+
+Metro Station
+
+Motel
+
+Other Travel
+
+Parking
+
+Pier
+
+Port
+
+Rental Cars
+
+Resort
+
+Rest Area
+
+Taxi
+
+Tollbooth
+
+Tourist Information
+
+Train Station
+
+Transportation Service
+
+Travel Agency
+
+Truck Stop
+
+Tunnel
+
+Weigh Station
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Water Features
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Abyssal Plain
+
+Bay
+
+Canal
+
+Channel
+
+Continental Rise
+
+Continental Shelf
+
+Continental Slope
+
+Cove
+
+Dam
+
+Delta
+
+Estuary
+
+Fjord
+
+Fracture Zone
+
+Gulf
+
+Harbor
+
+Hot Spring
+
+Irrigation
+
+Jetty
+
+Lagoon
+
+Lake
+
+Ocean
+
+Ocean Bank
+
+Oceanic Basin
+
+Oceanic Plateau
+
+Oceanic Ridge
+
+Other Water Feature
+
+Reef
+
+Reservoir
+
+Sea
+
+Seamount
+
+Shoal
+
+Sound
+
+Spring
+
+Strait
+
+Stream
+
+Submarine Canyon
+
+Submarine Cliff
+
+Submarine Fan
+
+Submarine Hill
+
+Submarine Terrace
+
+Submarine Valley
+
+Trench
+
+Undersea Feature
+
+Waterfall
+
+Well
+
+Wharf
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>

@@ -1,0 +1,1538 @@
+---
+title: "Configure"
+description: "The configure operation creates the ArcGIS Enterprise Administrator organization once ArcGIS Enterprise on Kubernetes has been installed."
+slug: "configure"
+url: "/configure"
+guid: "GUID-0DE62E24-9432-41C8-A934-677B1F32169F"
+migratedTopicMetadata:
+  FTITLE: "Configure"
+  FDESCRIPTION: ""
+  FCHANGES: "Updating cloud JSON information"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2-*"
+  CREATED-ON: "01/11/2023 09:50:36"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "09/11/2023 19:35:06"
+  VERSION: "6"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "7"
+  ED: "GUID-B6557CAC-A366-493C-94F7-86E1865E1AA8"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /configure
+  urlSegments:
+    - name: <root>
+      url: /enterprise-admin-root
+    - name: /configure
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.9'
+  requiredCapabilities:
+    - name: Access allowed only with the default administrator role
+      url: /managing-access-to-the-enterprise-admin-api
+---
+
+## Description
+
+The `configure` operation is the first operation that must be invoked when ArcGIS Enterprise on Kubernetes is installed for the first time. During configuration, a number of tasks are performed, including the following:
+
+- EsriDocker images are downloaded for ArcGIS Enterprise on Kubernetes.
+- ArcGIS Enterprise containers are deployed to your Kubernetes cluster.
+- An organization is created.
+
+Due to the number of tasks and processes performed during organization creation, the `configure` operation can be time consuming. Once the organization is created, you can publish GIS services and begin administering and configuring your organization.
+
+## Request parameters
+
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `username`
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The initial administrator account username. Valid usernames must be at least six characters in length, using alphanumeric values with only the following symbols allowed:
+
+      - `@`
+      - `_`
+      - `,`
+      - `-`
+
+      ```markdown label=Example
+      jsmithadmin
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `password` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The password for the initial administrator account. Valid passwords must be at least eight characters in length and contain at least one letter (A-Z, a-z) and one number (0-9). All special characters are supported.
+
+      ```markdown label=Example
+      test.pass1
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `email` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The email address associated with the initial administrator account.
+
+      ```markdown label=Example
+      jsmith@domain.com
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `fullName` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The full name of the user being designated as the initial administrator.
+
+      ```markdown label=Example
+      John Smith
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `firstName` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The first name of the user being designated as the initial administrator.
+
+      ```markdown label=Example
+      John
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `lastName` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The last name of the user being designated as the initial administrator.
+
+      ```markdown label=Example
+      Smith
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `description` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A description of the account.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `securityQuestionIdx` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The index of the secret question used to retrieve a forgotten password. The [list of possible secret question indexes](/configure#secret-questions-and-indexes) is below.
+
+      ```markdownn label=Example
+      1
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `securityQuestionAns` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The answer to the secret question specified in the `securityQuestionIdx` parameter.
+
+      ```markdown label=Example
+      Redlands
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `userLicenseTypeId`
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The user type for the initial administrator account. The values listed below are the user types that are compatible with the Administrator role. For more information about roles and user types, see [User types, roles, and privileges](https://enterprise-k8s.arcgis.com/en/latest/administer/roles.htm).
+
+      <Note type="legacy">
+
+      At ArcGIS Enterprise 11.4, the `GISProfessionalBasicUT` user type has been merged with the `creatorUT` user type; this change provides users assigned the `creatorUT` user type access to the applications previously included with `GISProfessionalBasicUT`.
+
+      </Note>
+
+      Values: `creatorUT` | `GISProfessionalStdUT` | `GISProfessionalAdvUT`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `licenseFile` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The ArcGIS Enterprise on Kubernetes license file (`.json`). This license file—which contains information regarding your user types, apps, and capabilities—is obtained from [My Esri](https://my.esri.com/). For more information, see [Obtain a license file](https://enterprise-k8s.arcgis.com/en/latest/deploy/obtaining-an-authorization-file.htm).
+
+      <Note type={"note"}>
+
+      For ArcGIS Enterprise on Kubernetes 10.9.1 and earlier, this parameter accepts the ArcGIS Enterprise portal license file as input.
+
+      </Note>
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `serverLicenseFile` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      <Note type={"note"}>
+
+      Support for this parameter has been deprecated at ArcGIS Enterprise 11.0.
+
+      </Note>
+
+      A valid ArcGIS Server license file (either `.ecp` or `.prvc`).
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `volumesConfig` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object containing the default storage configurations for the eight persistent volumes that are required for the deployment.
+
+      By default, the storage provisioning type for each persistent volume is `DYNAMIC`, though it can be manually changed to `STATIC` to support static provisioning types.
+
+      <Note type={"note"}>
+
+      When using static provisioning, the label selectors (`labels`) and `size` value for each persistent volume must be defined, as both properties are required . The `labels` and `size` properties can be manually updated to reflect custom label selectors and sizes for each persistent volume. Storage class names are required for dynamic provisioning types; if custom storage class names are used, update the `storageClass` property to reflect the user-specified names.
+
+      </Note>
+
+      ```other label=Example
+      {
+        "volumesConfig": [
+          {
+            "provisioningType": "DYNAMIC",
+            "component": "RELATIONAL_PRIMARY",
+            "size": "16Gi",
+            "storageClass": "arcgis-storage-default",
+            "labels": {
+              "arcgis/tier": "storage",
+              "arcgis/app": "postgres"
+            }
+          },
+          {
+            "provisioningType": "DYNAMIC",
+            "component": "RELATIONAL_SECONDARY",
+            "size": "16Gi",
+            "storageClass": "arcgis-storage-default",
+            "labels": {
+              "arcgis/tier": "storage",
+              "arcgis/app": "postgres"
+            }
+          },
+          {
+            "provisioningType": "DYNAMIC",
+            "component": "BLOB",
+            "size": "16Gi",
+            "storageClass": "arcgis-storage-default",
+            "labels": {
+              "arcgis/tier": "storage",
+              "arcgis/app": "ozone"
+            }
+          },
+          {
+            "provisioningType": "DYNAMIC",
+            "component": "IN_MEM_CACHE",
+            "size": "16Gi",
+            "storageClass": "arcgis-storage-default",
+            "labels": {
+              "arcgis/tier": "storage",
+              "arcgis/app": "ignite"
+            }
+          },
+          {
+            "provisioningType": "DYNAMIC",
+            "component": "QUEUE",
+            "size": "16Gi",
+            "storageClass": "arcgis-storage-default",
+            "labels": {
+              "arcgis/tier": "queue",
+              "arcgis/app": "rabbitmq"
+            }
+          },
+          {
+            "provisioningType": "DYNAMIC",
+            "component": "INDEXER",
+            "size": "16Gi",
+            "storageClass": "arcgis-storage-default",
+            "labels": {
+              "arcgis/tier": "storage",
+              "arcgis/app": "elasticsearch"
+            }
+          },
+          {
+            "provisioningType": "DYNAMIC",
+            "component": "SHARING",
+            "size": "16Gi",
+            "storageClass": "arcgis-storage-default",
+            "labels": {
+              "arcgis/tier": "api",
+              "arcgis/app": "sharing"
+            }
+          },
+          {
+            "provisioningType": "DYNAMIC",
+            "component": "REST_METRICS_API",
+            "size": "30Gi",
+            "storageClass": "arcgis-storage-default",
+            "labels": {
+              "arcgis/tier": "storage",
+              "arcgis/app": "prometheus"
+            }
+          }
+        ]
+      }
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `cloudConfig` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.2. A JSON array containing the deployment's cloud storage configuration for cloud-native object stores and cloud-native relational data stores (added at ArcGIS Enterprise 11.4 on Kubernetes). For more information, see the [Cloud configuration properties](/configure#cloud-configuration-properties) section below.
+
+      <CodeBlock
+        source="./code/configure/amazon_s3_object_postgressql_relational.json"
+        language="javascript"
+        label="Example"
+        lines="1-10"
+        expandable
+      />
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `logSettings` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the level that can be used to override some log settings for your organization. Currently, you can update the level at which logs will be recorded during configuration. The default log level is `VERBOSE` during configuration. Once the organization is configured, the log level will switch to `WARNING`. The log level can be changed after configuration using the [Edit](/edit-log-settings) operation.
+
+      Values: `SEVERE` | `WARNING` | `INFO` | `FINE` | `VERBOSE` | `DEBUG`
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `systemProperties` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      A JSON object that can be used to set up the system properties for the organization before it is configured. System properties can be set, updated, or removed after the organization has been configured using the [Update](/update-system-properties) operation.
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `systemArchitectureProfile` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The architecture profile set for the organization. Architecture profiles are predefined deployment profiles that correlate to varying levels of redundancy across pods. A brief summary of each of the three profiles is provided in the [System architecture profiles](/configure#system-architecture-profiles) section below. For more information about the available architecture profiles, see [Architecture Profiles](/architecture-profiles). The default profile is `standard-availability`.
+
+      ```markdown label=Example
+      {"name": "standard-availability"}
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `folderPathsToRegister` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      <Note type={"note"}>
+
+      With the release of ArcGIS Enterprise on Kubernetes 10.9.1, this parameter is no longer recommended for registering folder paths during organization configuration. While `folderPathsToRegister` is still supported, it is recommended that you use the `userManagedStores` parameter below to register folder paths.
+
+      </Note>
+
+      Registers the root folder paths for data stores. Registering folder paths during site creation allows you to avoid disruptions, such as the stopping of multiple services, that typically occur when registering folder paths after the organization has been configured.
+
+      ```markdown label=Example
+      {"paths": ["/path/to/register", "/additional/folder/path"]}
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `userManagedStores` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.9.1. A JSON array that provides information to register the root folder paths for data stores using Network File Sharing (NFS). To register the root folder path, the following user-defined information must be provided:
+
+      - `clientPath`—Either a drive or shared location where source data can be accessed and published by clients, such as ArcGIS Pro. If the `clientPath`  value uses a drive location, an additional property (`hostName`) must be included as well.
+      - `fileServerHost`—The name of the machine where shared data is stored and can be accessed through a NFS path.
+      - `filerServerPath`—A NFS path on the host machine where shared data can be accessed across the organization.
+
+      <Note type={"tip"}>
+
+      It is recommended that you register folder paths during site creation to avoid disruptions, such as the restarting of multiple services, which typically occur when registering folder paths after the organization has been configured.
+
+      </Note>
+
+      ```other label=Example
+      //Shared location
+      [
+        {
+          "clientPath": "\\\\sample_server\\SharedPath\Data",
+          "type": "folder",
+          "info": {
+            "fileServerHost": "nfsHost.domain.com",
+            "fileServerType": "nfs",
+            "fileServerPath": "/SharedPath/Data"
+          }
+        }
+      ]
+
+      //Drive location
+      {
+        "clientPath": "C:\\data",
+        "type": "folder",
+        "info": {
+          "fileServerHost": "nfsHost.domain.com",
+          "fileServerType": "nfs",
+          "fileServerPath": "/data",
+          "hostName": "youclienthost.domain.com"
+        }
+      }
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The response format. The default response format is `html`.
+
+      Values: `html` | `json` | `pjson`
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+
+## Additional parameter information
+
+### Secret questions and indexes
+
+The `securityQuestionIdx` parameter defines a security question that is used when retrieving forgotten passwords. The security questions and their associated index numbers are as follows:
+
+1. What city were you born in?
+2. What was your high school mascot?
+3. What is your mother's maiden name?
+4. What was the make of your first car?
+5. What high school did you go to?
+6. What is the last name of your best friend?
+7. What is the middle name of your youngest sibling?
+8. What is the name of the street on which you grew up?
+9. What is the name of your favorite fictional character?
+10. What is the name of your favorite pet?
+11. What is the name of your favorite restaurant?
+12. What is the title of your favorite book?
+13. What is your dream job?
+14. Where did you go on your first date?
+
+
+## System architecture profiles
+
+The predefined architecture profiles are described below. Both [enhanced-availability](/enhanced-availability) and [standard-availability](/standard-availability) are for high availability, and [development](/development-profile) is for development and nonproduction use. For more information, see [Architecture Profiles](/architecture-profiles).
+
+### enhanced-availability
+
+The `enhanced-availability` profile is used in business or mission-critical production environments and is designed for the highest level of availability. Replicated pods are provided for publishing tools, storage, APIs, and ingress controllers with increased redundancy to support uninterrupted use in the event of unexpected failure or downtime. Of the three available profiles, `enhanced-availability` has the most hardware requirements and predefined redundancy across pods.
+
+### standard-availability
+
+The `standard-availability` profile is the default profile when configuring an organization and is designed for use in production environments and those wanting to minimize unplanned downtime with redundancy across many pods. Replicated pods are provided for publishing tools and other essential pods such as storage, APIs, and ingress controllers to support continued use in the event of unexpected failure or downtime. The `standard-availability` profile has a moderate level of hardware requirements and predefined redundancy across pods.
+
+### development
+
+The `development` profile is used in nonproduction environments, including those for testing and evaluation, and is not supported for production environments. Publishing tools are replicated to support multiple publishers in an organization. The `development` profile has minimal hardware requirements and predefined redundancy across pods.
+
+
+## Cloud configuration properties
+
+Starting at 11.2, ArcGIS Enterprise on Kubernetes supports cloud-native storage for object stores and, starting at 11.4, cloud-native storage for relational data stores. The configurations for cloud-native object stores and relational data stores are comprised of two main components: one that outlines the cloud service provider information, and one that outlines the specific services used in the deployment. The properties included in each component are described below:
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Provider information</TabTitle>
+  <TabTitle>Service information</TabTitle>
+</TabNav>
+
+<Tab>
+
+The **provider** portion of a cloud storage configuration JSON array may consist of two properties:
+
+* `name`: Specifies the name of the cloud provider. This property is required.
+* `credential`: Outlines the credentials needed to access the cloud service provider. This property is only needed if a cloud-native object store is being configured for the deployment.
+  <Note>
+  
+  Connection information for object stores and relational data stores are specified in the **service** portion of a cloud storage configuration, along with the credential information for relational data stores.
+
+  </Note>
+
+The examples below show how these properties are used in an object store configuration, a relational data store configuration, and a configuration that includes both an object and relational data store:
+
+<CodeSwitcher>
+  <CodeBlock 
+    source="./code/configure/amazon_iam_roles.json"
+    language="javascript"
+    group="Object store example"
+    lines="1-9"
+    expandable
+  />
+  <CodeBlock 
+    source="./code/configure/amazon_aurora_postgressql.json"
+    language="javascript"
+    group="Relational data store example"
+    lines="1-3"
+    expandable
+  />
+  <CodeBlock 
+    source="./code/configure/amazon_s3_object_postgressql_relational.json"
+    language="javascript"
+    group="Object store and relational data store example"
+  />
+</CodeSwitcher>
+
+</Tab>
+
+<Tab>
+
+The **service** portion of a cloud storage configuration contains information on the cloud services used in your deployment. Each service is defined in its own JSON object within the `cloudServices` JSON array. While the properties included in the configuration for each service may vary depending on the service type (either object store or relational data store) and the cloud service provider, there are a number of properties that each configuration must include. These properties are outlined in the table below.
+
+<Note>
+
+The table below is not a comprehensive list of all configuration properties for either object stores or relationl data stores. For full syntax examples, see the cloud provider sections below.
+
+</Note>
+
+<StyledTable headers={"Property,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `name`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      For object stores, this specifies the name of the object storage service provider. For relational data stores, this specifies the name of the cloud database service provider.
+
+      ```markdown label=Example
+      //Object Store
+      "name": "Azure Blob Store",
+
+      //Relational data store
+      "name": "Azure PostgreSQL",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `category`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The category of the service. For object stores, the value is `storage`. For relational data stores, the value is `databases`.
+
+      ```markdown label=Example
+      //Object store
+      "category": "storage"
+
+      //Relational data store
+      "category": "databases",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `type`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The service type, either `objectStore` or `relationalStore`.
+
+      ```markdown label=Example
+      //Object store
+      "type": "objectStore",
+
+      //Relational data store
+      "type": "relationalStore",
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `connection`
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      The connection information for the service. For object stores, `connection` includes properties that specify the bucket or container to use, the root prefix, and any applicable region information:
+
+      <Note type={"caution"}>
+
+      If an empty string is provided for `rootDir`, the default root directory of `arcgis` will be used. However, if a root directory named `arcgis` already exists, administrators must specify a unique value for `rootDir`.
+
+      </Note>
+      
+      ```other label=Example
+      "connection": {
+        "bucket_name": "<bucket_name>",
+        "region": "<region>",
+        "regionEndpointUrl": "<region_endpoint_url>",
+        "rootDir": "<rootDir>"
+      },
+          
+      ```
+      
+      For relational data stores, `connection` includes properties that specify the region, database URI, port information, and credentials:
+
+      ```other label=Example
+      "connection": {
+        "dbUri": "<primary_relational_database_endpoint_url>",
+        "dbReadonlyUri": "<primary_relational_database_endpoint_url>",
+        "dbPort": <database_port>,
+        "credential": {
+          "type": "databaseUser", //Only supported value
+          "databaseUsers": {
+            "adminUser": {
+              "authType": "PASSWORD", //Only supported authentication type
+              "name": "<db name>", //Case-sensitive, must be lowercase
+              "password": "<password>"
+            }
+          }
+        }
+      }
+
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+</Tab>
+
+</Tabs>
+
+ArcGIS Enterprise on Kubernetes supports Amazon Elastic Kubernetes Service (EKS), Azure Kubernetes Service (AKS), and Google Kubernetes Engine (GKE) as cloud service providers.  When configuring your organization, it is recommended to use cloud-native services that correspond to your environment's cloud provider. For example:
+
+<StyledTable headers="Cloud provider, Cloud-native object store, Cloud-native relational store">
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Amazon Elastic Kubernetes Service (EKS)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Amazon S3
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Amazon Relational Database Service (RDS) for PostgreSQL, Amazon Aurora for PostgreSQL
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Azure Kubernetes Service (AKS)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Azure Blob Storage
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Azure Database for PostgreSQL flexible server
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      Google Kubernetes Engine (GKE)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Google Cloud Store
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Cloud SQL, AlloyDB for PostgreSQL
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+<br />
+
+The following sections provide JSON examples for the `cloudConfig` parameter for each supported cloud provider.
+
+### Amazon Elastic Kubernetes Service (EKS)
+
+The tabs below provide sample JSON arrays for the `cloudConfig` parameter for EKS provided cloud services.
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Object store</TabTitle>
+  <TabTitle>Relational data store</TabTitle>
+</TabNav>
+
+<Tab>
+
+The following is a sample JSON array that demonstrates the configuration for the following:
+
+* Amazon S3 using AWS Identity and Access Management (IAM) roles
+* Amazon S3 using an access key
+
+<CodeSwitcher>
+  <CodeBlock 
+    source="./code/configure/amazon_iam_roles.json"
+    language="javascript"
+    group="Amazon S3 using AWS Identity and Access Management (IAM) roles"
+    lines="1-10"
+    expandable
+  />
+  <CodeBlock 
+    source="./code/configure/amazon_access_key.json"
+    language="javascript"
+    group="Amazon S3 using an access key"
+    lines="1-10"
+    expandable
+  />
+</CodeSwitcher>
+
+</Tab>
+
+<Tab>
+
+The following is a sample JSON array that demonstrates the configuration for the following:
+
+* Amazon RDS for PostgreSQL
+* Amazon Aurora for PostgreSQL
+
+<CodeSwitcher>
+  <CodeBlock 
+    source="./code/configure/amazon_rds_postgressql.json"
+    language="javascript"
+    group="Amazon RDS for PostgreSQL"
+    lines="1-10"
+    expandable
+  />
+  <CodeBlock 
+    source="./code/configure/amazon_aurora_postgressql.json"
+    language="javascript"
+    group="Amazon Aurora for PostgreSQL"
+    lines="1-10"
+    expandable
+  />
+</CodeSwitcher>
+
+</Tab>
+
+</Tabs>
+
+### Azure Kubernetes Service (AKS)
+
+The tabs below provide sample JSON arrays for the `cloudConfig` parameter for AKS provided cloud services.
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Object store</TabTitle>
+  <TabTitle>Relational data store</TabTitle>
+</TabNav>
+
+<Tab>
+
+The following is a sample JSON array that demonstrates the configuration for the following:
+
+* Azure Blob Storage using system-assigned managed identities
+* Azure Blob Storage using user-assigned managed identities
+* Azure Blob Storage using Azure storage account key
+
+<CodeSwitcher>
+  <CodeBlock 
+    source="./code/configure/azure_system_assigned_identities.json"
+    language="javascript"
+    group="Azure Blob Storage using system-assigned managed identities"
+    lines="1-10"
+    expandable
+  />
+  <CodeBlock 
+    source="./code/configure/azure_user_assigned_identities.json"
+    language="javascript"
+    group="Azure Blob Storage using user-assigned managed identities"
+    lines="1-10"
+    expandable
+  />
+  <CodeBlock 
+    source="./code/configure/azure_storage_account_key.json"
+    language="javascript"
+    group="Azure Blob Storage using Azure storage account key"
+    lines="1-10"
+    expandable
+  />
+</CodeSwitcher>
+
+</Tab>
+
+<Tab>
+
+  The following is a sample JSON array that demonstrates the configuration for Azure Database for PostgreSQL relational flexible server:
+
+  <CodeBlock 
+    source="./code/configure/azure_postgressql_flex.json"
+    language="javascript"
+    label="Example"
+    lines="1-10"
+    expandable
+  />
+
+
+</Tab>
+
+</Tabs>
+
+### Google Kubernetes Engine (GKE)
+
+The tabs below provide sample JSON arrays for the `cloudConfig` parameter for GKE provided cloud services.
+
+<Tabs>
+
+<TabNav>
+  <TabTitle>Object store</TabTitle>
+  <TabTitle>Relational data store</TabTitle>
+</TabNav>
+
+<Tab>
+
+  The following is a sample JSON array that demonstrates the configuration for Google Cloud Storage using Hash-Based Authentication Codes (HMAC) keys:
+
+  <CodeBlock 
+    source="./code/configure/google_hmac.json"
+    language="javascript"
+    label="Example"
+    lines="1-10"
+    expandable
+  />
+
+</Tab>
+
+<Tab>
+
+The following is a sample JSON array that demonstrates the configuration for the following:
+
+* Cloud SQL for PostgreSQL
+* AlloyDB for PostgreSQL
+
+<CodeSwitcher>
+  <CodeBlock 
+    source="./code/configure/google_cloud_postgressql.json"
+    language="javascript"
+    group="Cloud SQL for PostgreSQL"
+    lines="1-10"
+    expandable
+  />
+  <CodeBlock 
+    source="./code/configure/google_alloydb_postgressql.json"
+    language="javascript"
+    group="AlloyDB for PostgreSQL"
+    lines="1-10"
+    expandable
+  />
+</CodeSwitcher>
+
+</Tab>
+
+</Tabs>
+
+
+## Example usage
+
+The following is a sample multipart POST request for the `configure` operation:
+
+```other
+POST /context/admin/configure HTTP/1.1
+Host: organization.domain.com
+Content-Type: multipart/form-data; boundary=------boundary
+
+------boundary
+Content-Disposition: form-data; name="username"
+
+jsmithadmin
+------boundary
+Content-Disposition: form-data; name="password"
+
+test.pass1
+------boundary
+Content-Disposition: form-data; name="email"
+
+jsmith@domain.com
+------boundary
+Content-Disposition: form-data; name="fullName"
+
+John Smith
+------boundary
+Content-Disposition: form-data; name="firstName"
+
+
+------boundary
+Content-Disposition: form-data; name="lastName"
+
+
+------boundary
+Content-Disposition: form-data; name="description"
+
+Initial Administrator Account
+------boundary
+Content-Disposition: form-data; name="securityQuestionIdx"
+
+1
+------boundary
+Content-Disposition: form-data; name="securityQuestionAns"
+
+Redlands
+------boundary
+Content-Disposition: form-data; name="userLicenseTypeId"
+
+creatorUT
+------boundary
+Content-Disposition: form-data; name="licenseFile"; filename="kubernetesLicenseExample.json"
+Content-Type: application/octet-stream
+
+kubernetesLicenseExample.json
+------boundary
+Content-Disposition: form-data; name="logSettings"
+
+{"logLevel": "VERBOSE"}
+------boundary
+Content-Disposition: form-data; name="systemProperties"
+
+{}
+------boundary
+Content-Disposition: form-data; name="systemArchitectureProfile"
+
+{"name": "standard-availability"}
+------boundary
+Content-Disposition: form-data; name=folderPathsToRegister
+
+
+------boundary
+Content-Disposition: form-data; name=userManagedStores
+
+[
+  {
+    "clientPath": "\\\\sample_server\\SharedPath\Data",
+    "type": "folder",
+    "info": {
+      "fileServerHost": "host.domain.com",
+      "fileServerType": "nfs",
+      "fileServerPath": "/SharedPath/Data"
+    }
+  }
+]
+------boundary
+Content-Disposition: form-data; name="volumesConfig"
+
+{
+  "volumesConfig": [
+    {
+      "provisioningType": "DYNAMIC",
+      "component": "RELATIONAL_PRIMARY",
+      "size": "16Gi",
+      "storageClass": "arcgis-storage-default",
+      "labels": {
+        "arcgis/tier": "storage",
+        "arcgis/app": "postgres"
+      }
+    },
+    {
+      "provisioningType": "DYNAMIC",
+      "component": "RELATIONAL_SECONDARY",
+      "size": "16Gi",
+      "storageClass": "arcgis-storage-default",
+      "labels": {
+        "arcgis/tier": "storage",
+        "arcgis/app": "postgres"
+      }
+    },
+    {
+      "provisioningType": "DYNAMIC",
+      "component": "BLOB",
+      "size": "16Gi",
+      "storageClass": "arcgis-storage-default",
+      "labels": {
+        "arcgis/tier": "storage",
+        "arcgis/app": "ozone"
+      }
+    },
+    {
+      "provisioningType": "DYNAMIC",
+      "component": "IN_MEM_CACHE",
+      "size": "16Gi",
+      "storageClass": "arcgis-storage-default",
+      "labels": {
+        "arcgis/tier": "storage",
+        "arcgis/app": "ignite"
+      }
+    },
+    {
+      "provisioningType": "DYNAMIC",
+      "component": "QUEUE",
+      "size": "16Gi",
+      "storageClass": "arcgis-storage-default",
+      "labels": {
+        "arcgis/tier": "queue",
+        "arcgis/app": "rabbitmq"
+      }
+    },
+    {
+      "provisioningType": "DYNAMIC",
+      "component": "INDEXER",
+      "size": "16Gi",
+      "storageClass": "arcgis-storage-default",
+      "labels": {
+        "arcgis/tier": "storage",
+        "arcgis/app": "elasticsearch"
+      }
+    },
+    {
+      "provisioningType": "DYNAMIC",
+      "component": "SHARING",
+      "size": "16Gi",
+      "storageClass": "arcgis-storage-default",
+      "labels": {
+        "arcgis/tier": "api",
+        "arcgis/app": "sharing"
+      }
+    },
+    {
+      "provisioningType": "DYNAMIC",
+      "component": "REST_METRICS_API",
+      "size": "30Gi",
+      "storageClass": "arcgis-storage-default",
+      "labels": {
+        "arcgis/tier": "storage",
+        "arcgis/app": "prometheus"
+      }
+    }
+  ]
+}
+------boundary
+Content-Disposition: form-data; name="cloudConfig"
+
+[
+  {
+    "name": "AWS",
+    "credential": {
+      "type": "IAM-ROLE"
+    },
+    "cloudServices": [
+      {
+        "name": "AWS RDS for PostgreSQL",
+        "category": "databases",
+        "type": "relationalStore",
+        "instanceProvided": true,
+        "usage": "DEFAULT",
+        "connection": {
+          "dbUri": "XXXXXXXXX",
+          "dbReadonlyUri": "XXXXXXXXX",
+          "dbPort": 5432,
+          "credential": {
+            "type": "databaseUser",
+            "databaseUsers": {
+              "adminUser": {
+                "authType": "PASSWORD",
+                "name": "XXXXXXXXX",
+                "password": "XXXXXXXXX"
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "AWS S3",
+        "type": "objectStore",
+        "usage": "DEFAULT",
+        "connection": {
+          "bucketName": "XXXXXXXXX",
+          "region": "XXXXXXXXX",
+          "regionEndpointUrl": "XXXXXXXXX",
+          "rootDir": "XXXXXXXXX"
+        },
+        "category": "storage"
+      }
+    ]
+  }
+]
+------boundary
+Content-Disposition: form-data; name="f"
+
+pjson
+------boundary--
+```
+
+
+## JSON Response example
+
+The following response is returned immediately once the `configure` operation has been submitted:
+
+```other
+{
+  "fullVersion": "11.2.0",
+  "resources": [
+    "orgs",
+    "logs",
+    "system",
+    "datastores",
+    "uploads",
+    "services"
+  ],
+  "currentVersion": 11.2,
+  "status": {
+    "stages": [
+      {
+        "lastUpdated": 1687990855948,
+        "name": "License validation",
+        "state": "not_started"
+      },
+      {
+        "lastUpdated": 1687990855948,
+        "name": "Configuration store",
+        "state": "not_started"
+      },
+      {
+        "lastUpdated": 1687990855948,
+        "name": "Relational store",
+        "state": "not_started"
+      },
+      {
+        "lastUpdated": 1687990973648,
+        "name": "Cloud Native Storage",
+        "state": "not_applicable"
+      },
+      {
+        "lastUpdated": 1687990855948,
+        "name": "Queue store",
+        "state": "not_started"
+      },
+      {
+        "lastUpdated": 1687990855948,
+        "name": "In-memory store",
+        "state": "not_started"
+      },
+      {
+        "lastUpdated": 1687990855948,
+        "name": "Object store",
+        "state": "not_started"
+      },
+      {
+        "lastUpdated": 1687990855948,
+        "name": "Spatiotemporal and index store",
+        "state": "not_started"
+      },
+      {
+        "lastUpdated": 1687990855948,
+        "name": "Portal REST API",
+        "state": "not_started"
+      },
+      {
+        "lastUpdated": 1687990855948,
+        "name": "Services REST API",
+        "state": "not_started"
+      },
+      {
+        "lastUpdated": 1687990855948,
+        "name": "Service lifecycle manager",
+        "state": "not_started"
+      },
+      {
+        "lastUpdated": 1687990855948,
+        "name": "Usage Statistics",
+        "state": "not_started"
+      },
+      {
+        "lastUpdated": 1687990855948,
+        "name": "System and utility services",
+        "state": "not_started"
+      },
+      {
+        "lastUpdated": 1687990855948,
+        "name": "Pod replicas",
+        "state": "not_started"
+      }
+    ],
+    "state": "in_progress",
+    "message": "Creating a new organization."
+  },
+  "info": {"build": "4938"}
+}
+```
+
+The following response example illustrates the messages returned during configuration:
+
+```other
+{
+  "fullVersion": "11.2.0",
+  "resources": [
+    "orgs",
+    "logs",
+    "system",
+    "datastores",
+    "uploads",
+    "services"
+  ],
+  "currentVersion": 11.2,
+  "status": {
+    "warnings": [],
+    "stages": [
+      {
+        "lastUpdated": 1687990973551,
+        "name": "License validation",
+        "startTime": 1687990973435,
+        "state": "completed"
+      },
+      {
+        "lastUpdated": 1687990951001,
+        "name": "Configuration store",
+        "startTime": 1687990944565,
+        "state": "completed"
+      },
+      {
+        "lastUpdated": 1687990974847,
+        "name": "Relational store",
+        "startTime": 1687990974847,
+        "state": "in_progress"
+      },
+      {
+        "lastUpdated": 1687990973648,
+        "name": "Cloud Native Storage",
+        "startTime": 0,
+        "state": "not_applicable"
+      },
+      {
+        "lastUpdated": 1687991103134,
+        "name": "Queue store",
+        "startTime": 1687990975235,
+        "state": "completed"
+      },
+      {
+        "lastUpdated": 1687991043732,
+        "name": "In-memory store",
+        "startTime": 1687990974125,
+        "state": "completed"
+      },
+      {
+        "lastUpdated": 1687991149750,
+        "name": "Object store",
+        "startTime": 1687990973839,
+        "state": "completed"
+      },
+      {
+        "lastUpdated": 1687991113527,
+        "name": "Spatiotemporal and index store",
+        "startTime": 1687990974441,
+        "state": "completed"
+      },
+      {
+        "lastUpdated": 1687990855948,
+        "name": "Portal REST API",
+        "startTime": 0,
+        "state": "not_started"
+      },
+      {
+        "lastUpdated": 1687990855948,
+        "name": "Services REST API",
+        "startTime": 0,
+        "state": "not_started"
+      },
+      {
+        "lastUpdated": 1687990855948,
+        "name": "Service lifecycle manager",
+        "startTime": 0,
+        "state": "not_started"
+      },
+      {
+        "lastUpdated": 1687990976324,
+        "name": "Usage statistics",
+        "startTime": 1687990974642,
+        "state": "completed"
+      },
+      {
+        "lastUpdated": 1687990855948,
+        "name": "System and utility services",
+        "startTime": 0,
+        "state": "not_started"
+      },
+      {
+        "lastUpdated": 1687990855948,
+        "name": "Pod replicas",
+        "startTime": 0,
+        "state": "not_started"
+      }
+    ],
+    "state": "in_progress",
+    "message": "Creating a new organization."
+  },
+  "info": {"build": "4938"}
+}
+```
+
+The following response is returned by the [`root`](/enterprise-admin-root) resource when configuration is complete:
+
+```other
+{
+  "fullVersion": "11.2.0",
+  "resources": [
+    "orgs",
+    "logs",
+    "system",
+    "datastores",
+    "uploads",
+    "services"
+  ],
+  "currentVersion": 11.2,
+  "status": {
+    "warnings": [],
+    "stages": [
+      {
+        "lastUpdated": 1687948742412,
+        "name": "License validation",
+        "startTime": 1687948742290,
+        "state": "completed"
+      },
+      {
+        "lastUpdated": 1687948729565,
+        "name": "Configuration store",
+        "startTime": 1687948725322,
+        "state": "completed"
+      },
+      {
+        "lastUpdated": 1687948963682,
+        "name": "Relational store",
+        "startTime": 1687948743564,
+        "state": "completed"
+      },
+      {
+        "lastUpdated": 1687948742513,
+        "name": "Cloud Native Storage",
+        "startTime": 0,
+        "state": "not_applicable"
+      },
+      {
+        "lastUpdated": 1687948872082,
+        "name": "Queue store",
+        "startTime": 1687948743965,
+        "state": "completed"
+      },
+      {
+        "lastUpdated": 1687948804496,
+        "name": "In-memory store",
+        "startTime": 1687948744562,
+        "state": "completed"
+      },
+      {
+        "lastUpdated": 1687948879736,
+        "name": "Object store",
+        "startTime": 1687948743106,
+        "state": "completed"
+      },
+      {
+        "lastUpdated": 1687948888802,
+        "name": "Spatiotemporal and index store",
+        "startTime": 1687948744274,
+        "state": "completed"
+      },
+      {
+        "lastUpdated": 1687949385630,
+        "name": "Portal REST API",
+        "startTime": 1687948967043,
+        "state": "completed"
+      },
+      {
+        "lastUpdated": 1687949777879,
+        "name": "Services REST API",
+        "startTime": 1687949416130,
+        "state": "completed"
+      },
+      {
+        "lastUpdated": 1687949748757,
+        "name": "Service lifecycle manager",
+        "startTime": 1687949416334,
+        "state": "completed"
+      },
+      {
+        "lastUpdated": 1687948745274,
+        "name": "Usage statistics",
+        "startTime": 1687948742864,
+        "state": "completed"
+      },
+      {
+        "lastUpdated": 1687950918528,
+        "name": "System and utility services",
+        "startTime": 1687949778875,
+        "state": "completed"
+      },
+      {
+        "lastUpdated": 1687949470153,
+        "name": "Pod replicas",
+        "startTime": 1687949416536,
+        "state": "completed"
+      }
+    ],
+    "state": "ready",
+    "message": "The process to create a new organization has completed successfully."
+  },
+  "info": {"build": "4938"}
+}
+```

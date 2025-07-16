@@ -1,0 +1,154 @@
+---
+title: "Version Management Service"
+description: "The Version Management Server service exposes the management capabilities necessary to support feature services that work with branch versioned datasets."
+slug: "version-management-service"
+url: "/version-management-service"
+guid: "GUID-42BF8B2B-0561-45BD-81AC-788FA8857A18"
+migratedTopicMetadata:
+  FTITLE: "Version Management Service"
+  FDESCRIPTION: ""
+  FCHANGES: "General license note about Advanced Editing UTE - geodatabase/issues/12228"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "01/09/2023 11:40:22"
+  FAUTHOR: "mjarman"
+  FSTATUS: "Released"
+  MODIFIED-ON: "22/09/2023 10:48:08"
+  VERSION: "11"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-F95BE56E-786F-47AA-854D-1D649A20240B"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName>/VersionManagementServer
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/VersionManagementServer
+  methods:
+    - get
+  sslOnly: 'no'
+  versionIntroduced: ' 10.6'
+---
+
+## Description
+
+The `VersionManagementServer` service exposes the management capabilities necessary to support feature services that work with [branch versioned datasets](https://pro.arcgis.com/en/pro-app/latest/help/data/geodatabases/overview/versioning-types.htm#ESRI_SECTION1_6FA2CFB5F9484FF096740D653C674B5D). This service is available when sharing to ArcGIS Enterprise by enabling the `Version management` capability. To learn more, see [Additional layers and capabilities](https://pro.arcgis.com/en/pro-app/latest/help/sharing/overview/additional-layers-and-capabilities.htm).
+
+The following are supported operations for the `VersionManagementServer` service:
+
+-   [`create`](/create)
+-   [`delete`](/delete)
+-   [`purgeLock`](/purge-lock)
+-   [`versionInfos`](/version-infos)
+
+The [`version`](/version) resource returns information about a single version and supports many operations for that version.
+
+![VersionManagementServer resources and operations](./images/GUID-A46AE86F-689E-4B99-A2F7-4C834BCA8CBB-web.png)
+The version management server shares service instance settings and is tied to the published feature service as a [server object extension (SOE)](https://enterprise.arcgis.com/en/server/latest/develop/linux/about-extending-services.htm#ESRI_SECTION1_10A299337E3C4F3197F02F5C142B9BA8).
+
+[Learn how to configure service instance settings](https://enterprise.arcgis.com/en/server/latest/administer/windows/configure-service-instance-settings.htm)
+
+
+## Usage requirements
+
+When using the `VersionManagementServer` resources and operations, keep the following in mind:
+
+-   The portal account is used to access resources and operations of the version management server. This account determines whether the operation is allowed by the portal user as well as the results that are returned. For example, the [`versions`](/versions) resource only lists versions the current portal account has access to.
+-   A read or edit session must be started before running certain operations. Read and edit sessions are started by calling the `startReading` and `startEditing` operations, respectively. 
+-   Locks must be obtained on a version when running certain operations. Each operation will try to place the necessary lock on the version before processing and will fail if it cannot acquire the appropriate lock. The following lock modes are available in a geodatabase:
+
+    -   Shared lock—Operations that allow more than one user to access a version require a shared lock.
+    -   Exclusive lock—Operations that must be performed in isolation require an exclusive lock on the version.
+
+<Note type={"license"}>
+
+Organization members must be assigned a license for the [ArcGIS Advanced Editing user type extension](https://enterprise.arcgis.com/en/portal/latest/administer/windows/license-user-type-extensions.htm#ESRI_SECTION1_B75DA80066744473AD5DD1312734654A) to use most of the Version Management Server operations. Review the specific operation topic for requirements.
+
+</Note>
+{/*
+
+-   [Create](/create)
+-   [Delete](/delete)
+-   [Alter](/alter)
+-   [Purge Lock](/purge-lock)
+-   [Conflicts](/conflicts)
+-   [Differences](/differences)
+-   [Inspect Conflicts](/inspect-conflicts)
+-   [Reconcile](/reconcile)
+-   [Post](/post)
+-   [Restore Rows](/restore-rows)
+
+*/}
+
+
+## Capabilities
+
+The `capabilities` property was introduced at ArcGIS Enterprise 10.8.1. This property returns the capabilities the service supports. Refer to the JSON Response syntax section below for the ArcGIS Enterprise version when each capability was first introduced:
+
+-   `supportsConflictDetectionByAttribute`—The reconcile operation supports the `conflictDetection` parameter to allow conflicts to be defined by attribute. Services that don't support this capability define all conflicts by object.
+-   `supportsPartialPost`—The post operation supports using the `rows`  parameter to support posting a portion of the edits (differences) in the version to default.
+-   `supportsDifferencesWithMoment`—The `differences` operation supports using the `fromMoment`  parameter to allow a user to obtain differences between two moments.
+-   `supportsDifferencesWithLayers`—The `differences` operation supports using the `layers`  parameter to allow users to filter the differences returned by layer instead of getting differences for all layers.
+-   `supportsAsyncReconcile —The `reconcile` operation supports asynchronous processing using the `async` parameter.
+-   `supportsAsyncPost`—The `post`  operation supports asynchronous processing using the `async` parameter.
+-   `supportsAsyncDifferences`—The `differences` operation supports asynchronous processing using the `async` parameter.
+-   `supportsOutSR`—The `differences` and `conflicts` operations support the `outSR` parameter.
+
+## JSON Response syntax
+
+```other
+{
+  "name": "Version Management Server",
+  "type": "Map Server Extension",
+  "defaultVersionName": "<versionName>"
+  "defaultVersionGuid": <guid>, 
+  "capabilities": {
+   "supportsConflictDetectionByAttribute": <true | false>, //Introduced at  10.8.1
+   “supportsPartialPost” : <true | false>, //Introduced at  10.9
+   "supportsDifferencesFromMoment" : <true | false>, //Introduced at  10.9
+   "supportsDifferencesWithLayers" : <true | false>, //Introduced at  10.9.1
+   "supportsAsyncReconcile" : <true | false>, //Introduced at  10.9.1
+   "supportsAsyncPost" : <true | false>, //Introduced at  10.9.1
+   "supportsAsyncDifferences" : <true | false>, //Introduced at  10.9.1
+   "supportsOutSR" : <true | false>, //Introduced at  11.1
+  }
+}
+
+```
+
+ 
+
+## Example usage
+
+The following is a request URL example:
+
+`https://myserver.esri.com/server/rest/services/LandUse/VersionManagementServer` 
+
+JSON response:
+
+```javascript
+{
+ "name": "Version Management Server",
+ "type": "Map Server Extension",
+ "defaultVersionName": "SDE.DEFAULT",
+ "defaultVersionGuid": "{BD3F4817-9A00-41AC-B0CC-58F78DBAE0A1}", 
+ "capabilities": {
+  "supportsConflictDetectionByAttribute": true,
+  “supportsPartialPost”: true, 
+  "supportsDifferencesFromMoment": true,
+  "supportsDifferencesWithLayers": true,
+  "supportsAsyncReconcile": true,
+  "supportsAsyncPost": true,
+  "supportsAsyncDifferences": true,
+  "supportsOutSR": true
+  } 
+}
+```
+
+ 

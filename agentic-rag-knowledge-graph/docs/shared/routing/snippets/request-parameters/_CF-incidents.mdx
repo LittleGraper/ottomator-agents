@@ -1,0 +1,330 @@
+import NetworkLocationFields from "../shared-attributes/_NetworkLocationFields.mdx"
+import BearingAttributes from "../shared-attributes/_BearingBrTolNavLat.mdx"
+
+import ParamMetadata from "../../../components/param-metatdata" 
+
+<If c="requestType=='job'">
+{/* <p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span><span class="font-bold text-[#a82b1e]">Required</span></p> */}
+
+<ParamMetadata required types={[{name:"feature",link:"../routing-data-types#feature"}]} />
+</If>
+
+<If c="requestType=='direct'">
+{/* <p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span><span class="font-bold text-[#a82b1e]">Required</span></p> */}
+
+<ParamMetadata required types={[{name:"locations",link:"../routing-data-types#locations"},{name:"feature",link:"../routing-data-types#feature"}]} />
+</If>
+
+Specify one or more locations from which the service searches for the nearby locations. These locations are referred to as incidents.
+
+When specifying the stops, you can set attributes for each as follows:
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for incidents</span></summary>
+
+ #### Attributes for incidents
+
+-   <p class="space-x-2"><span class="font-bold">Name</span><span class="font-sm text-color-3">string (length: 500)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The name of the incident. The name is used in the driving directions. If the name is not specified, a unique name prefixed with Location is automatically generated in the output routes and directions.
+
+<If c="requestType=='direct'">
+-   <p class="space-x-2"><span class="font-bold">ObjectID</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p> 
+
+    The object ID of the incident. `ObjectID` is a unique identifier for the incident. If you want to maintain a relationship between input and output, set `preserveObjectID` to `true` , and the `ObjectID` value of the input incident is included in the output routes (as the IncidentID field). The `ObjectID` value is also included in the output incidents (as the `ObjectID` field) and can be used to join additional information from the analysis outputs to the attribute of the incidents. If the `ObjectID` value is not specified, a unique `ID` is automatically generated in the output.
+</If>
+
+<If c="requestType=='direct' && publication =='services-reference/enterprise'">
+
+<Note type="{Note}">
+
+  You can specify a network location using `SourceID`, `SourceOID`, `PosAlong`, and `SideOfEdge` described below. If the network location is not provided, the solver will derive it from the input geometry
+  
+  </Note>
+
+<NetworkLocationFields />
+
+</If>
+
+<If c="requestType=='job'">
+
+-   <p class="space-x-2"><span class="font-bold">ID</span><span class="font-sm text-color-3">number (non-negative)</span></p>
+
+    A unique identifier for the incident. The identifier is included in the output routes (as the `IncidentID` field) and can help join additional information from the output routes, such as the total travel time or total distance, to attributes from your incidents or vice versa. If the `ID` isn't specified, the service automatically generates a unique identifier for each incident.
+
+-   <p class="space-x-2"><span class="font-bold">AdditionalTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+    The amount of time spent at the incident, which is added to the total time of the route. 
+
+    The units for this attribute value are specified by the `measurement_units` parameter. The attribute value is included in the analysis only when the measurement units are time-based.
+
+    If you are finding the closest fire stations to fire incidents to estimate response times, for example, the `AdditionalTime` attribute can store the amount of time it takes firefighters to hook up their equipment at the location of the incident before they can begin fighting the fire.
+
+-   <p class="space-x-2"><span class="font-bold">AdditionalDistance</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+    The extra distance traveled at the incident, which is added to the total distance of the route. 
+
+    The units for this attribute value are specified by the `measurement_units` parameter. The attribute value is included in the analysis only when the measurement units are distance-based.
+
+    Generally, the location of an incident, such as a home, isn't exactly on the street; it is set back somewhat from the road. This attribute value can be used to model the distance between the incident location and its location on the street if it is important to include that distance in the total travel distance.
+
+-   <p class="space-x-2"><span class="font-bold">AdditionalCost</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+    The extra cost spent at the incident, which is added to the total cost of the route. 
+
+    This attribute value should be used when the travel mode for the analysis uses an impedance attribute that is neither time-based nor distance-based The units for the attribute values are interpreted to be in unknown units.
+
+-   <p class="space-x-2"><span class="font-bold">Cutoff</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+    The impedance value at which to stop searching for facilities from a given incident. This attribute allows you to specify a different cutoff value for each incident. For example, using this attribute you can search for facilities within five minutes travel time from one incident and search for facilities within eight minutes travel time from another incident.
+
+</If>
+
+-   <p class="space-x-2"><span class="font-bold">TargetFacilityCount</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#6d29cc]">default:null</span></p> 
+
+    Specify the number of facilities that need to be found for the given incident. 
+
+    <If c="requestType=='job'">
+    This field allows you to specify a different number of facilities to find for each incident. For example, using this field you can find the three closest facilities from one incident and the two closest facilities from another incident.
+    </If>
+
+    <If c="requestType=='direct'">
+    If `TargetFacilityCount` is not set for an incident, the service will use the value specified as the `defaultTargetFacilityCount` parameter. The value for the `TargetFacilityCount` attribute allows the ability to overwrite the `defaultTargetFacilityCount` value on a per incident basis. The default value for this attribute is null , which causes the service to use the value set for the `defaultTargetFacilityCount` parameter. If the `TargetFacilityCount` attribute is set to a value other than null , the `defaultTargetFacilityCount` value is overwritten.
+    </If>
+
+<If c="requestType=='direct'">
+
+-   <p class="space-x-2"><span class="font-bold">Attr_[Cost]</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:0</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The name of the attribute can be: `Attr_TravelTime`, `Attr_TruckTravelTime`, `Attr_Minutes`, `Attr_TruckMinutes`, `Attr_WalkTime`, `Attr_Miles`, `Attr_Kilometers`
+
+    <If c="publication=='services-reference/enterprise'">
+        <Note type="attention">
+        These value are specific to the services published with the ArcGIS StreetMap Premium data. The values will be different if you are using other data for the analysis.
+        </Note>
+    </If>
+
+    This attribute specifies how much additional time spent or distance traveled can occur at the incident. The value for this attribute is included in the total travel time or distance for the output [routes](#routes) and is also displayed in output [directionPoints](#directionpoints) as service time. 
+
+    The value for this attribute is specified in the units of the cost attribute. For instance, `Attr_TravelTime` is in minutes.
+
+    <Note>
+    Multiple `Attr_[Cost]` attributes can be included for the incidents. The attribute values are only referenced if the cost attribute referred to in the attribute name is used in the analysis, as [impedanceAttributeName](#impedanceattributename) or [accumulateAttributeNames](#accumulateattributenames).
+    </Note>
+
+    <details>
+        <summary><span class="font-sm text-color-link">Use case</span></summary>
+
+    You can add time to an incident to represent how long it takes to make a delivery, install equipment, or perform some other task at the incident. Similarly, adding extra distance may be useful to account for a long driveway or other road that isn't represented by the network dataset. When a time-based cost attribute `TravelTime` is used, it will specify the travel time for cars, in minutes, that will be added to the total travel time of the route between the incident and the closest facility. The attribute value can be used to model the time spent at the incident. 
+    
+    For example, if you are finding the three closest fire stations from a fire incident, the attribute can store the amount of time spent at the fire incident. This could be the time it takes for firefighters to hook up their equipment and begin fighting the fire. The value for this attribute is included in the total travel time for the route and is also displayed in driving directions as service time. `Attr_TravelTime` is only referenced if `TravelTime` is used in the analysis as impedance or accumulate attribute. A zero or null value indicates that the incident requires no service time.
+
+    However, when a distance-based cost attribute like `Miles` is used, it specifies the distance in miles that will be added to the total distance of the route between the incident and the closest facility. Generally the locations of the incidents are not exactly on the streets but are set back somewhat from the road. The `Attr_Miles` attribute can be used to model the distance between the actual incident location and its location on the street if it is important to include that distance in the total travel distance. `Attr_Miles` is only referenced if `Miles` is used in the analysis as impedance or accumulate attribute.
+    </details>
+</If>
+
+<If c="requestType == 'direct' && publication == 'rest/online'">
+-   <p class="space-x-2"><span class="font-bold">Cutoff_[Impedance]</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:null</span></p>
+
+    Specify the travel time or distance at which to stop searching for facilities for a given incident.
+
+    If `Cutoff_[Impedance]` is not set for an incident, the service will use the value specified as the `defaultCutoff` parameter. The default value for this attribute is null, which causes the service to use the value set for the `defaultCutoff` parameter. If the `Cutoff_[Impedance]` attribute is set to a value other than null, the `defaultCutoff` value is overridden.
+
+    <Note>
+    Multiple `Cutoff_[Impedance]` attributes can be included. Consequently, you may have more than one time-based or distance-based `Cutoff_[Impedance]` field. The attribute values are only referenced if the cost attribute referred to in the attribute name is used in the analysis, as [impedanceAttributeName](#impedanceattributename) or [accumulateAttributeNames](#accumulateattributenames).
+    </Note>
+
+    <details>
+        <summary><span class="font-sm text-color-link">Use case</span></summary>
+
+    For example, when a time-based cutoff impedance `TravelTime` is used, it will specify the travel time for cars, in minutes, at which to stop searching for facilities for a given incident. Any incident beyond the cutoff value will not be searched. If `Cutoff_TravelTime` is not set for an incident, the service will use the value specified as the `defaultCutoff` parameter. The value for the `Cutoff_TravelTime` attribute allows the ability to overwrite the `defaultCutoff` value on a per facility basis. The default value for this attribute is `null`, which indicates not to use any cutoff.
+
+    However, when a distance-based cutoff impedance like `Miles` is used, it will specify the travel distance in miles at which to stop searching for facilities for a given incident. Any incident beyond the cutoff value will not be searched. If `Cutoff_Miles` is not set for a facility, the service will use the value specified as the `defaultCutoff` parameter. The value for the `Cutoff_Miles` attribute allows the ability to overwrite the `defaultCutoff`value on a per facility basis. The default value for this attribute is `null`, which indicates not to use any cutoff.
+    </details>
+</If>
+
+<If c="requestType == 'job' && publication == 'services-reference/enterprise'">
+-   <p class="space-x-2"><span class="font-bold">Cutoff_[Cost]</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:null</span></p>
+
+    Specify the travel time or distance at which to stop searching for facilities for a given incident.
+
+    If `Cutoff_[Cost]` is not set for an incident, the service will use the value specified as the `defaultCutoff` parameter. The default value for this attribute is null, which causes the service to use the value set for the `defaultCutoff` parameter. If the `Cutoff_[Cost]` attribute is set to a value other than `null`, the `defaultCutoff` value is overridden.
+
+    <Note>
+    Multiple `Cutoff_[Cost]` attributes can be included for the facilities. Consequently, you may have more than one time-based or distance-based `Cutoff_[Cost]` field. The attribute values are only referenced if the cost attribute referred to in the attribute name is used in the analysis, as [impedanceAttributeName](#impedanceattributename) or [accumulateAttributeNames](#accumulateattributenames).
+    </Note>
+</If>
+
+-   <p class="space-x-2"><span class="font-bold">CurbApproach</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+    Allowed values: `0`, `1`, `2`, `3`
+
+    Specifies the direction a vehicle may arrive at and depart from the incident. The field value is specified as one of the following integers:
+
+    - `0`: Either side of vehicle. The vehicle can approach and depart the incident in either direction. U-turns are allowed. You should choose this setting if your vehicle can make a U-turn at the order or if it can pull into a driveway or parking lot and turn around.
+    - `1`: Right side of vehicle. When the vehicle approaches and departs the incident, the curb must be on the right side of the vehicle. A U-turn is prohibited.
+    - `2`: Left side of vehicle. When the vehicle approaches and departs the incident, the curb must be on the left side of the vehicle. A U-turn is prohibited.
+    - `3`: No U-turn. When the vehicle approaches the incident, the curb can be on either side of the vehicle; however, the vehicle must depart without turning around. [Learn more about U-turn policies](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/u-turn-policies.htm)
+
+    <details>
+     <summary><span class="font-sm text-color-link">Show illustration</span></summary>
+
+    <StyledTable headers={"Setting,Coded value,Description"}>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Either side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    0
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    The vehicle can approach and depart the incident in either direction, so a U-turn is allowed at the incident. This setting can be chosen if it is possible and desirable for a vehicle to turn around at the incident. This decision may depend on the width of the road and the amount of traffic or whether the location has a parking lot where vehicles can pull in and turn around.
+
+    ![Either side of vehicle ](../images/CurbApproach_EitherSide.png)
+
+    _All arrival and departure combinations are allowed with the Either side of vehicle curb approach._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Right side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    1
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches and departs the incident, the incident must be on the right side of the vehicle. A U-turn is prohibited. This is typically used for vehicles such as buses that must arrive with the bus stop on the right side.
+     
+    ![Right side of vehicle ](../images/CurbApproach_RightSide.png)
+
+    _The allowed arrival and departure combination for the Right side of vehicle curb approach is shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Left side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    2
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches and departs the incident, the incident must be on the left side of the vehicle. A U-turn is prohibited. This is typically used for vehicles such as buses that must arrive with the bus stop on the left side.
+
+    ![Left side of vehicle ](../images/CurbApproach_LeftSide.png)
+
+    _The allowed arrival and departure combination for the Left side of vehicle curb approach is shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    No U-Turn
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    3
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches the incident, the incident can be on either side of the vehicle; however, when it departs, the vehicle must continue in the same direction it arrived. A U-turn is prohibited.
+
+    ![No U-turns ](../images/CurbApproach_NoU-Turns.png)
+
+    _The allowed arrival and departure combinations for the No U-Turn curb approach are shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    </StyledTable>
+
+    The `CurbApproach`  attribute is designed to work with both types of national driving standards: right-hand traffic (United States) and left-hand traffic (United Kingdom). First, consider an incident on the left side of a vehicle. It is always on the left side regardless of whether the vehicle travels on the left or right half of the road. What may change with national driving standards is your decision to approach an incident from one of two directions, that is, so it ends up on the right or left side of the vehicle. For example, if you want to arrive at an incident and not have a lane of traffic between the vehicle and the incident, choose 1 (Right side of vehicle) in the United States and 2 (Left side of vehicle) in the United Kingdom.
+
+    <ColumnLayout layout={2}>
+
+    <Column>
+
+    <Figure>
+
+    ![ Right side of vehicle with right-hand traffic](../images/CurbApproach_RightSide.png)
+
+    <Caption>
+
+    _With right-hand traffic, the curb approach that leaves the vehicle closest to the incident is Right side of vehicle._
+
+    </Caption>
+
+    </Figure>
+
+    </Column>
+
+    <Column>
+
+    <Figure>
+
+    ![ Left side of vehicle with left-hand traffic ](../images/CurbApproach_LeftSideDriving.png)
+
+    <Caption>
+
+    _With left-hand traffic, the curb approach that leaves the vehicle closest to the incident is Left side of vehicle._
+
+    </Caption>
+
+    </Figure>
+
+    </Column>
+
+    </ColumnLayout>
+
+    </details>
+  
+<BearingAttributes />
+
+</details>
+
+<If c="publication=='rest/online'">
+**Example**
+
+The example shows how to specify some attributes for the `incidents`.
+
+<CodeBlock language="json" source="../../code-samples/closestFacility/examples/inputs/incidents_ex.json" group="json" maxLines={20} expandable/>
+</If>

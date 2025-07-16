@@ -1,0 +1,369 @@
+import BearingAttributes from "../../snippets/shared-attributes/_BearingBrTolNavLat.mdx"
+import NetworkLocationFields from "../../snippets/shared-attributes/_NetworkLocationFields.mdx"
+import Stats from "../../snippets/shared-attributes/_Status.mdx"
+import SnapXYZ from "../../snippets/shared-attributes/_SnapXYZ-DistToNet.mdx"
+
+import ParamMetadata from "../../../components/param-metatdata" 
+
+<If c="requestType=='job'">
+{/* <p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span><span class="font-bold text-[#a82b1e]">Required</span></p> */}
+<ParamMetadata required types={[{name:"feature",link:"../routing-data-types#feature"}]} />
+
+The locations the output route or routes will visit.
+</If>
+
+<If c="requestType=='direct'">
+{/* <p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span><span class="font-bold text-[#a82b1e]">Required</span></p> */}
+<ParamMetadata required types={[{name:"locations",link:"../routing-data-types#locations"},{name:"feature",link:"../routing-data-types#feature"}]} />
+
+The `locations` or `feature` used to create the route or routes.
+</If>
+
+When specifying the stops, you can set attributes for each as follows:
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for stops</span></summary>
+
+ #### Attributes for stops
+
+-   <p class="space-x-2"><span class="font-bold">Name</span><span class="font-sm text-color-3">string (length: 500)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The name of the stop. The name is used in the driving directions. If the name is not specified, a unique name prefixed with Location is automatically generated in the output stops, routes, and directions.
+
+<If c="requestType=='job'">
+-   <p class="space-x-2"><span class="font-bold">ID</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    A unique identifier for the stop. 
+    The identifier is included in the output routes (as the `StopID`  field) and can help join additional information from the output routes, such as the total travel time or total distance, to attributes from your incidents or vice versa. If the `ID`  isn't specified, the service automatically generates a unique identifier for each stop.
+</If>
+
+<If c="requestType=='direct'">
+-   <p class="space-x-2"><span class="font-bold">ObjectID</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p> 
+
+    The object ID of the stop. `ObjectID` is a unique identifier for the stop. If you want to maintain a relationship between input and output, set `preserveObjectID`  to `true` , and the `ObjectID`  value of the input stop is included in the output routes (as the `StopID` field). The `ObjectID` value is also included in the output stops (as the `ObjectID` field) and can be used to join additional information from the analysis outputs to the attribute of the stops. If the `ObjectID` value is not specified, a unique ID is automatically generated in the output.
+</If>
+
+<If c="publication=='services-reference/enterprise'">
+<Note type="{Note}">
+
+  You can specify a network location using `SourceID`, `SourceOID`, `PosAlong`, and `SideOfEdge` described below. If the network location is not provided, the solver will derive it from the input geometry
+  
+  </Note>
+  
+<NetworkLocationFields />
+</If>
+
+-   <p class="space-x-2"><span class="font-bold">RouteName</span><span class="font-sm text-color-3">string (length: 1024)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The name of the route to which the stop is assigned. Assigning the same route name to different stops causes those stops to be grouped together and visited by the same route. You can generate many routes in a single solve by assigning unique route names to different groups of stops. 
+
+    For example, to find two distinct routes—a route with four stops and another with six stops—set `RouteName`  to `Route1` for each of the four stops and `Route2` for each of the six stops. The service will produce two distinct routes and driving directions for each group of stops in a single request.
+
+    If `RouteName` is not specified for any stops, all stops belong to the same route. If `RouteName` is not specified for some stops, those stops are treated as unassigned and are not included in any route.
+
+    <Note type={"note"}>
+
+    The grouping is based entirely on the provided input and no attempt is made by the service to group stops in any optimal manner. To determine the optimal grouping of stops into routes, use the [vehicle routing problem service](/vehicle-routing-problem-service) instead.
+
+    </Note>
+
+-   <p class="space-x-2"><span class="font-bold">Sequence</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p> 
+    
+    <If c="requestType == 'job'">
+
+    If the [`reorder_stops_to_find_optimal_routes`](#reorder_stops_to_find_optimal_routes) parameter is set to `false`, the output routes will visit the stops in the order you specify with this attribute. In a group of stops that have the same `RouteName`  value, the sequence number should be greater than 0 but not greater than the total number of stops. Also, the sequence number should not be duplicated. 
+    
+    </If>
+
+    <If c="requestType == 'direct'"> 
+
+    If the [`findBestSequence`](#findbestsequence) parameter is set to `false`, the output routes will visit the stops in the order you specify with this attribute. In a group of stops that have the same `RouteName`  value, the sequence number should be greater than 0 but not greater than the total number of stops. Also, the sequence number should not be duplicated. 
+
+    </If>
+
+<If c="requestType == 'job'">
+-   <p class="space-x-2"><span class="font-bold">AdditionalTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+    The amount of time spent at the stop, which is added to the total time of the route.
+
+    The units for this attribute value are specified by the [`measurement_units`](#measurement_units) parameter. The attribute value is included in the analysis only when the measurement units are time based. 
+
+    You can account for the extra time it takes at the stop to complete a task, such as to repair an appliance, deliver a package, or inspect the premises.
+
+-   <p class="space-x-2"><span class="font-bold">AdditionalDistance</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:0</span></p> 
+
+    The extra distance traveled at the stops, which is added to the total distance of the route. 
+
+    The units for this attribute value are specified by the [`measurement_units`](#measurement_units) parameter. The attribute value is included in the analysis only when the measurement units are distance based. 
+
+    Generally, the location of a stop, such as a home, isn't exactly on the street; it is set back somewhat from the road. This attribute value can be used to model the distance between the actual stop location and its location on the street if it is important to include that distance in the total travel distance.
+
+-   <p class="space-x-2"><span class="font-bold">AdditionalCost</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:0</span></p>    
+
+    The extra cost spent at the stop, which is added to the total cost of the route. 
+
+    This attribute value should be used when the travel mode for the analysis uses an impedance attribute that is neither time based nor distance based. The units for the attribute values are interpreted to be in unknown units. 
+
+-   <p class="space-x-2"><span class="font-bold">TimeWindowStart</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The earliest time the stop can be visited. By specifying a start and end time for a stop's time window, you are defining when a route should visit the stop. When the impedance attribute of this analysis, either specified by [`impedance`](#impedance)  parameter or the `impedance`  of the travel mode, is time based, by specifying time-window values the analysis will find a solution that minimizes overall travel and reaches the stop within the prescribed time window. 
+
+    The value is specified as an integer that represents the number of milliseconds since epoch (January 1, 1970).
+
+    This value can be specified either in UTC or local time, depending on the value given for the `use_time_windows`  parameter.
+
+    If you specify this attribute, you also need to specify the `TimeWindowEnd`  attribute.
+</If>
+
+<If c="requestType == 'direct'">
+-   <p class="space-x-2"><span class="font-bold">TimeWindowStart</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The earliest time the stop can be visited. By specifying a start and end time for a stop's time window, you are defining when a route should visit the stop. When the impedance attribute is either specified by the [`impedanceAttributeName`](#impedanceattributename) parameter value or the `impedanceAttributeName` parameter value of the travel mode is time-based, the analysis will find a solution that minimizes overall travel and reaches the stop within the prescribed time window. 
+
+    The value is specified as an integer that represents the number of milliseconds since epoch (January 1, 1970).
+
+    This value can be specified either in UTC or local time, depending on the value given for the `timeWindowsAreUTC` parameter.
+
+    If you specify this attribute, you also need to specify the `TimeWindowEnd`  attribute.
+
+</If>
+   
+<If c="requestType == 'job'">
+
+-   <p class="space-x-2"><span class="font-bold">TimeWindowEnd</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The latest time the stop can be visited. By specifying a start and end time for a stop's time window, you are defining when a route will visit the stop. When the impedance attribute of this analysis, either specified by `impedance` parameter or the `impedance` of the travel mode, is time based, specifying time-window values will cause the analysis to find a solution that minimizes overall travel and reaches the stop within the prescribed time window. 
+
+    Together, the `TimeWindowStart` and `TimeWindowEnd` attributes make up the time window within which a route can visit the stop. As with `TimeWindowStart`, the `TimeWindowEnd` value is specified as an integer that represents the number of milliseconds since epoch (January 1, 1970) and is interpreted as UTC or local time, depending on the value specified for the `use_time_windows`  parameter.
+
+    The time window specified using the `TimeWindowStart` and `TimeWindowEnd` attributes is not considered a hard constraint by the service. That is, the service doesn't fail if the stop cannot be visited during the time window; instead, the service tries to find a route that visits the stop during its time window, but if time-window violations are inevitable, the service tries to find a solution that minimizes the time-window violation time for all stops in the problem. 
+
+    If a route has to arrive early at the stop, a wait time is added to the total travel time of the route. Similarly, if the route arrives late at the stop, a violation time is added to the total travel time of the route. For example, If the time window on the stop is set as 10:00 AM to 11:00 AM and the earliest a route can reach the stop is 11:25 AM, a violation of 25 minutes is added to the total travel time.
+
+</If>
+
+<If c="requestType == 'direct'">
+-   <p class="space-x-2"><span class="font-bold">TimeWindowEnd</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The latest time the stop can be visited. By specifying a start and end time for a stop's time window, you are defining when a route will visit the stop. When the travel mode for the analysis uses an impedance attribute that is time based, specifying time-window values will cause the analysis to find a solution that minimizes overall travel and reaches the stop within the prescribed time window. 
+
+    Together, the `TimeWindowStart` and `TimeWindowEnd` attributes make up the time window within which a route can visit the stop. As with `TimeWindowStart`, the `TimeWindowEnd` value is specified as an integer that represents the number of milliseconds since epoch (January 1, 1970) and is interpreted as UTC or local time, depending on the value specified for the `timeWindowsAreUTC`  parameter.
+
+    The time window specified using the `TimeWindowStart` and `TimeWindowEnd` attributes is not considered a hard constraint by the service. That is, the service doesn't fail if the stop cannot be visited during the time window; instead, the service tries to find a route that visits the stop during its time window, but if time-window violations are inevitable, the service tries to find a solution that minimizes the time-window violation time for all stops in the problem. 
+
+    If a route has to arrive early at the stop, a wait time is added to the total travel time of the route. Similarly, if the route arrives late at the stop, a violation time is added to the total travel time of the route. For example, If the time window on the stop is set as 10:00 AM to 11:00 AM and the earliest a route can reach the stop is 11:25 AM, a violation of 25 minutes is added to the total travel time.
+
+</If>
+        
+-   <p class="space-x-2"><span class="font-bold">CurbApproach</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+    Allowed values: `0`, `1`, `2`, `3`
+
+    Specify the direction a vehicle can arrive at and depart from the stop. The options are as following:
+
+    - `0`: Either side of vehicle. The vehicle can approach and depart the stop in either direction. U-turns are allowed. You should choose this setting if your vehicle can make a U-turn at the order or if it can pull into a driveway or parking lot and turn around.
+    - `1`: Right side of vehicle. When the vehicle approaches and departs the stop, the curb must be on the right side of the vehicle. A U-turn is prohibited.
+    - `2`: Left side of vehicle. When the vehicle approaches and departs the stop, the curb must be on the left side of the vehicle. A U-turn is prohibited.
+    - `3`: No U-turn. When the vehicle approaches the stop, the curb can be on either side of the vehicle; however, the vehicle must depart without turning around. [Learn more about U-turn policies](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/u-turn-policies.htm)
+
+    <details>
+     <summary><span class="font-sm text-color-link">Show illustration</span></summary>
+        <StyledTable headers={"Setting,Coded value,Description"}>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Either side of vehicle
+
+    </StyledTableCell> 
+
+    <StyledTableCell cellStyle="markdown">
+
+    0
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    The vehicle can approach and depart the stop in either direction, so a U-turn is allowed at the stop. This is the default value. This setting can be chosen if it is possible and desirable for a vehicle to turn around at the stop. This decision may depend on the width of the road and the amount of traffic or whether the stop has a parking lot where vehicles can pull in and turn around.
+
+    ![Either side of vehicle ](../../images/CurbApproach_EitherSide.png)
+
+    _All arrival and departure combinations are allowed with the Either side of vehicle curb approach._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Right side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    1
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches and departs the stop, the stop must be on the right side of the vehicle. A U-turn is prohibited. This is typically used for vehicles such as buses that must arrive with the bus stop on the right side.
+
+    ![Right side of vehicle ](../../images/CurbApproach_RightSide.png)
+
+    _The allowed arrival and departure combination for the Right side of vehicle curb approach is shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Left side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    2
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches and departs the stop, the stop must be on the left side of the vehicle. A U-turn is prohibited. This is typically used for vehicles such as buses that must arrive with the bus stop on the left side.
+
+    ![Left side of vehicle ](../../images/CurbApproach_LeftSide.png)
+
+    _The allowed arrival and departure combination for the Left side of vehicle curb approach is shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    No U-Turn
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    3
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches the stop, the stop can be on either side of the vehicle; however, when it departs, the vehicle must continue in the same direction it arrived. A U-turn is prohibited.
+
+    ![No U-turns ](../../images/CurbApproach_NoU-Turns.png)
+
+    _The allowed arrival and departure combinations for the No U-Turn curb approach are shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    </StyledTable>
+
+    The `CurbApproach`  attribute is designed to work with both types of national driving standards: right-hand traffic (United States) and left-hand traffic (United Kingdom). First, consider an incident on the left side of a vehicle. It is always on the left side regardless of whether the vehicle travels on the left or right half of the road. What may change with national driving standards is your decision to approach an incident from one of two directions, that is, so it ends up on the right or left side of the vehicle. For example, if you want to arrive at an incident and not have a lane of traffic between the vehicle and the incident, choose 1 (Right side of vehicle) in the United States and 2 (Left side of vehicle) in the United Kingdom.
+
+    <ColumnLayout layout={2}>
+
+    <Column>
+
+    <Figure>
+
+    ![Right side of vehicle with right-hand traffic](../../images/CurbApproach_RightSide.png)
+
+    <Caption>
+
+    _With right-hand traffic, the curb approach that leaves the vehicle closest to the stop is Right side of vehicle._
+
+    </Caption>
+
+    </Figure>
+
+    </Column>
+
+    <Column>
+
+    <Figure>
+
+    ![Left side of vehicle with left-hand traffic ](../../images/CurbApproach_LeftSideDriving.png)
+
+    <Caption>
+
+    _With left-hand traffic, the curb approach that leaves the vehicle closest to the stop is Left side of vehicle._
+
+    </Caption>
+
+    </Figure>
+
+    </Column>
+
+    </ColumnLayout>
+
+    </details>
+
+<If c="requestType == 'direct'">
+
+-   <p class="space-x-2"><span class="font-bold">Attr_[Cost]</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:0</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The name of the attribute can be: `Attr_TravelTime`, `Attr_TruckTravelTime`, `Attr_Minutes`, `Attr_TruckMinutes`, `Attr_WalkTime`, `Attr_Miles`, `Attr_Kilometers`
+
+    <If c="publication=='services-reference/enterprise'">
+        <Note type="attention">
+        These value are specific to the services published with the ArcGIS StreetMap Premium data. The values will be different if you are using other data for the analysis.
+        </Note>
+    </If>
+
+    This attribute specifies how much additional time spent or distance traveled can occur at the stop. The value for this attribute is included in the total travel time or distance for the output [routes](#routes) and is also displayed in output [directions](#directions) or [directionPoints](#directionpoints) as service time.
+
+    The value for this attribute is specified in the units of the cost attribute. For instance, `Attr_TravelTime` is in minutes.
+
+    <Note>
+    Multiple `Attr_[Cost]` attributes can be included for the stop. The attribute values are only referenced if the cost attribute referred to in the attribute name is used in the analysis, as [impedanceAttributeName](#impedanceattributename) or [accumulateAttributeNames](#accumulateattributenames).
+    </Note>
+
+    <details>
+        <summary><span class="font-sm text-color-link">Use cases:</span></summary>
+
+    You can add time to a stop to represent how long it takes to make a delivery, install equipment, or perform another task at the stop. Or the time required to reach the actual destination location from the location the stop [locates](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/locating-analysis-inputs.htm) on the streets. Similarly, adding extra distance may be useful to account for a long driveway or other road that isn't represented by the network dataset.
+
+    For example, suppose you are finding the best route through three stops. Suppose it requires 2 minutes to walk to the street location from where the route starts, you need to spend 10 minutes at Stop 2, and it takes 5 minutes to walk from the street location to the destination. The `Attr_TravelTime` attribute should be given values of 2, 10, and 5 for Stop 1, Stop 2, and Stop 3, respectively. If it takes 10 minutes to travel from Stop 1 to Stop 2 and 10 minutes to travel from Stop 2 to Stop 3, the total travel time to reach Stop 3 is displayed as 37 minutes (2 + 10 + 10 + 10 + 5), even though there is only 20 minutes of traveling to reach Stop 3.
+
+    However, when a distance-based cost attribute like `Miles`  is used, it specifies the distance in miles that will be added when calculating total distance of the route. Generally the locations of the stops are not exactly on the streets but are set back somewhat from the road. The `Attr_Miles` attribute can be used to model the distance between the actual stop location and its location on the street if it is important to include that distance in the total travel distance. `Attr_Miles` is only referenced if `Miles`  is used in the analysis as impedance or accumulate attribute.
+    </details>
+
+-   <p class="space-x-2"><span class="font-bold">LocationType</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+    Allowed values: `0`, `1`, `2`
+
+    Specifies the stop type. The field value is specified as one of the following integers (use the numeric code, not the name in the parentheses): 
+
+    -   0: Stop—A location that the route will visit. 
+    -   1: Waypoint—A location that the route will travel through without making a stop. Waypoints can be used to force the route to take a specific path (to go through the waypoint) without being considered an actual stop. Waypoints do not appear in directions.
+    -   2: Break—A location where the route stops for the driver to take a break. 
+
+</If>
+
+<BearingAttributes />
+
+</details>
+
+**Example**
+
+The example also shows how to specify the `Name` attribute for each stop and group four stops into two routes, Route A and Route B, using the `RouteName` attribute.
+
+<CodeBlock language="json" source="../../code-samples/route/examples/inputs/stops_ex.json" group="json" maxLines={20} expandable/>

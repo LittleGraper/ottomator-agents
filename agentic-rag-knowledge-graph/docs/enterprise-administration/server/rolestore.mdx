@@ -1,0 +1,333 @@
+---
+title: "Role Store"
+description: ""
+slug: "rolestore"
+url: "/rolestore"
+guid: "GUID-B89C44DA-CC36-4F45-8DC5-3BD45BA18E30"
+migratedTopicMetadata:
+  FTITLE: "roleStore"
+  FDESCRIPTION: ""
+  FCHANGES: "Implementing REST API style changes"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "10.8-*"
+  CREATED-ON: "02/08/2019 11:50:46"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "05/11/2019 21:12:11"
+  VERSION: "2"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "5"
+  ED: "GUID-EC5D6AFC-273E-4EE2-96A1-A8448449D077"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata: {}
+---
+
+## Description
+
+The role store is a repository of roles (groups) and a mapping of users and roles. ArcGIS Server uses the roles and the mapping during authorization of a request. The authorization module fetches all the roles that have been assigned to a user and then computes the privileges as the sum total of all the privileges assigned to individual roles.
+
+In addition to connecting to your enterprise role store such as Windows Domain or any other directory service that supports an LDAP interface, ArcGIS Server also ships with a built-in storage mechanism where you can create your roles and define a user-to-role mapping.
+
+ArcGIS Server requires you to configure a role store while setting up [ security](/security) on your site.
+
+##  Request parameters 
+
+<StyledTable headers={"LDAP Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`ldapURLForRoles` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The LDAP URL pointing to the roles if roles are stored within the LDAP. 
+
+Example
+
+```javascript
+"ldap://server:389/dc=mydomain,dc=com???(&(objectClass=group))?
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`memberAttributeInRoles` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The attribute of the role entry that contains user membership information.
+
+Example
+
+```javascript
+member
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`usernameAttribute` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The attribute of the user entry that is to be treated as the username.
+
+Example
+
+```javascript
+name
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`rolenameAttribute` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The attribute of the role entry that is to be treated as the rolename.
+
+Example
+
+```javascript
+name
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`adminUser` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The administrative account to the LDAP that has at least read access. 
+
+Example
+
+```javascript
+cn=admin,cn=users,dc=mydomain,dc=com
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`adminUserPassword` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The credentials for the administrative account.
+
+Example
+
+```javascript
+secret
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+<br />
+<StyledTable headers={"WINDOWS Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`adminUser` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The administrative account to the LDAP that has at least read access.
+
+Example
+
+```javascript
+cn=admin,cn=users,dc=mydomain,dc=com
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`adminUserPassword` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The credentials for the administrative account.
+
+Example
+
+```javascript
+secret
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+<br />
+<StyledTable headers={"CUSTOM Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`class` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The fully qualified name of the Java class that implements custom access to the role store.
+
+Example
+
+```javascript
+com.myorg.userstore.DBUserStore
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`...` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+Any custom properties that are required by your class.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+
+## JSON Response syntax
+
+```javascript
+{
+		"type": "<BUILTIN | WINDOWS | LDAP | CUSTOM>",
+		"properties": <properties>
+	}
+
+```
+
+ 
+
+## JSON Response example
+
+The JSON representation of a connection to LDAP: 
+
+```javascript
+{
+	 "type": "LDAP",
+	 "properties": {
+		  "ldapURLForRoles": "ldap://server:389/dc=mydomain,dc=com???(&(objectClass=group))?",
+		  "memberAttributeInRoles": "member",
+		  "usernameAttribute": "name",
+		  "rolenameAttribute": "name",
+		  "adminUser": "cn=admin,cn=users,dc=mydomain,dc=com",
+		  "adminUserPassword": "secret"
+	 }
+}		
+
+```
+
+ 
+
+The JSON representation of a connection to Windows Domain roles:
+
+```javascript
+{
+	 "type": "WINDOWS",
+	 "properties": {
+		  "adminUser": "ourdomain\\myreadonlyaccount",
+		  "adminUserPassword": "secret"
+	 }
+}
+
+```
+
+ 

@@ -1,0 +1,314 @@
+---
+title: "Job"
+description: "A job represents an asynchronous operation in ArcGIS Notebook Server. You can acquire progress information by querying the job."
+slug: "job-notebook-server"
+url: "/job-notebook-server"
+guid: "GUID-EA1E687E-89DD-4768-AED4-C915843FF2CA"
+migratedTopicMetadata:
+  FTITLE: "Job (Notebook Server)"
+  FDESCRIPTION: ""
+  FCHANGES: "https://devtopia.esri.com/WebGIS/arcgis-enterprise-documentation/issues/5143"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "28/08/2023 14:34:14"
+  FAUTHOR: "bpolk"
+  FSTATUS: "Released"
+  MODIFIED-ON: "27/09/2023 08:38:32"
+  VERSION: "5"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "6"
+  ED: "GUID-10EF7459-18EC-4ED0-8F22-2B92F5626362"
+  FUSERGROUP: "VUSERGROUPSERVERDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /system/jobs/<jobID>
+  urlSegments:
+    - name: <notebookserveradmin>
+      url: /notebook-server-administration-root
+    - name: /system/jobs/<jobID>
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '10.7'
+  requiredCapability: Administrator or Create and Edit ArcGIS Notebooks
+---
+
+## Description
+
+A job represents an asynchronous operation in ArcGIS Notebook Server. You can acquire progress information by querying the `jobs`  resource.
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`f` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The response format. The default response format is `html` .
+
+Values: `html`  \| `json`  \| `pjson` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+```javascript
+https://gisserver.domain.com:11443/arcgis/admin/system/jobs/jf9322f05-6b31-4bdd-8d42-be471fe904eb7?f=pjson
+```
+
+ 
+
+## JSON Response syntax
+
+### Example 1
+
+The following is a job response for the `openNotebook`  operation:
+
+```json
+{
+  "jobId": "<jobId>",
+  "inputs": {
+    "itemId": "<itemId>"
+  },
+  "startTime": <start time in epoch milliseconds>,
+  "endTime": <end time in epoch milliseconds>,
+  // "results" is available when the job status is "COMPLETED" or "FAILED"
+  "results": {
+    "notebookUrl": "<notebookUrl>",
+    "notebookId": "<notebookId>",
+    "webToolVersion": <web tool version if exists>
+  },
+  "type": "openNotebook",
+  "status": "SUBMITTED|PROCESSING|FAILED|COMPLETED",
+  "username": "<username>",
+  "customAttributes": {
+    "openNotebook": "<notebookRuntimeId>",
+    "isCancelled": true|false,
+    // "openNotebookProgress" is available when the job status is "PROCESSING"
+    "openNotebookProgress": {
+      "message": "<message>",
+      "percent": <progressValuePercentage>
+    }
+  }
+}
+```
+
+ 
+
+### Example 2
+
+The following is a job response for the `executeNotebook`  operation:
+
+```other
+{
+  "jobId": "<jobId>",
+  "inputs": {
+    "itemId": "<itemId>",
+    "updatePortalItem": true|false,
+    "saveInjectedParameters": true|false,
+    "notebookParameters": "{\"parameter name 1\":\"parameter value 1\",\"parameter name 2\":\"parameter value2\"}",
+    "executeJobUpdated": true|false
+  },
+  "startTime": <start time in epoch milliseconds>,
+  "endTime": <end time in epoch milliseconds>,
+  "results": {
+    "containerConfigStoreId": "<containerConfigStoreId>"
+  },
+  "messages": [
+    "<message1>",
+    "<message2>",
+    "<message3>",
+    "<message4>",
+    "<message5>"
+  ],
+  "type": "executeNotebook",
+  "status": "SUBMITTED|PROCESSING|FAILED|COMPLETED",
+  "username": "<username>",
+  "customAttributes": {
+    "isCancelled": true|false
+  }
+}
+```
+
+ 
+
+## JSON Response examples
+
+### Job responses for the openNotebook operation
+
+#### Example 1
+
+The following is a job status response for an `openNotebook`  request in the `SUBMITTED`  state:
+
+```other
+{
+  "jobId": "jf9322f05-6b31-4bdd-8d42-be471fe904eb",
+  "startTime": 1600418685508,
+  "type": "openNotebook",
+  "status": "SUBMITTED",
+  "username": "admin",
+  "customAttributes": {
+    "isCancelled": false
+  }
+}
+```
+
+ 
+
+#### Example 2
+
+The following is a job status response for an `openNotebook`  request in the `PROCESSING`  state:
+
+```other
+{
+  "jobId": "j52c9f6a4-2a7c-418f-a360-0ce757077342",
+  "inputs": {
+    "itemId": "c21213a381804c85935f50a1349a390f"
+  },
+  "startTime": 1600419767280,
+  "type": "openNotebook",
+  "results": {},
+  "status": "PROCESSING",
+  "username": "admin",
+  "customAttributes": {
+    "openNotebook": "994368e4-bfdc-49e4-abea-b1cddd80f952",
+    "isCancelled": false,
+    "openNotebookProgress": {
+      "message": "Creating New Docker Container.",
+      "percent": 50
+    }
+  }
+}
+```
+
+ 
+
+#### Example 3
+
+The following is a job status response for an `openNotebook`  request in the `COMPLETED`  state:
+
+```other
+{
+  "jobId": "j52c9f6a4-2a7c-418f-a360-0ce757077342",
+  "inputs": {
+    "itemId": "c21213a381804c85935f50a1349a390f"
+  },
+  "startTime": 1600419767280,
+  "endTime": 1600419770042,
+  "type": "openNotebook",
+  "results": {
+    "notebookUrl": "https://machine.domain.com/notebookserver/notebooks/4a491bea47864f91b4aee7ae2c4739e3/notebooks/c21213a381804c85935f50a1349a390f.ipynb",
+    "notebookId": "0a465abc08ed4fe8ac087f204222fb02",
+    "webToolVersion": "11.2"
+  },
+  "status": "COMPLETED",
+  "username": "admin",
+  "customAttributes": {
+    "openNotebook": "994368e4-bfdc-49e4-abea-b1cddd80f952",
+    "isCancelled": false
+  }
+}
+```
+
+ 
+
+### Job response for the executeNotebook operation
+
+#### Example 1
+
+The following is a job status response for an `executeNotebook`  request in the `SUBMITTED`  state:
+
+```other
+{
+  "jobId": "j252e2b9a-4f35-4737-ad98-33465b3db57a",
+  "startTime": 1600420355086,
+  "type": "executeNotebook",
+  "status": "SUBMITTED",
+  "username": "admin",
+  "customAttributes": {
+    "isCancelled": false
+  }
+}
+```
+
+ 
+
+#### Example 2
+
+The following is a job status response for an `executeNotebook`  request in the `PROCESSING`  state:
+
+```other
+{
+  "jobId": "j6185135c-92a8-4402-b8de-90a66dc61fcc",
+  "inputs": {
+    "itemId": "c21213a381804c85935f50a1349a390f",
+    "updatePortalItem": true,
+    "saveInjectedParameters": true,
+    "notebookParameters": "{\"Abbr\":\"CA\",\"Name\":\"California\"}",
+    "executeJobUpdated": false
+  },
+  "startTime": 1600419894050,
+  "type": "executeNotebook",
+  "results": {
+    "containerConfigStoreId": "408119d098564c1c9c0448c31d1db32b"
+  },
+  "status": "PROCESSING",
+  "username": "admin",
+  "customAttributes": {
+    "isCancelled": false
+  }
+}
+```
+
+ 
+
+#### Example 3
+
+The following is a job status response for an `executeNotebook`  request in the `COMPLETED`  state:
+
+```other
+{
+  "jobId": "j6185135c-92a8-4402-b8de-90a66dc61fcc",
+  "inputs": {
+    "itemId": "c21213a381804c85935f50a1349a390f",
+    "updatePortalItem": true,
+    "saveInjectedParameters": true,
+    "notebookParameters": "{\"Abbr\":\"CA\",\"Name\":\"California\"}",
+    "executeJobUpdated": false
+  },
+  "messages": [
+    "Input Notebook Path:  /arcgis/home/.tasks/j6185135c-92a8-4402-b8de-90a66dc61fcc/c21213a381804c85935f50a1349a390f.ipynb",
+    "Output Notebook Path:  /arcgis/home/.tasks/j6185135c-92a8-4402-b8de-90a66dc61fcc/output.ipynb",
+    "Start processing time: 2020-09-18 09:05:04.315161",
+    "Finish processing time: 2020-09-18 09:05:35.189362",
+    "Successfully completed."
+  ],
+  "startTime": 1600419894050,
+  "endTime": 1600419939146,
+  "type": "executeNotebook",
+  "results": {
+    "containerConfigStoreId": "408119d098564c1c9c0448c31d1db32b"
+  },
+  "status": "COMPLETED",
+  "username": "admin",
+  "customAttributes": {
+    "isCancelled": false
+  }
+}
+```
+
+ 

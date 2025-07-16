@@ -1,0 +1,342 @@
+---
+title: Direct request
+uid: snap-to-roads
+description: The Snap to Roads service is designed to snap GPS points to the correct road that was traversed.
+---
+
+## Description
+
+The Snap to Roads service can be used to snap a series of GPS track points to the underlying roads. You can return just the snapped points, or lines representing the roads that were traversed. In addition to the geometry, you can have the service return attributes of the roads like the posted speed limit and length in case you need this to perform route adherence.
+
+For example, the following image shows a series of GPS points that were collected while driving a vehicle. The result shows the points snapped to the underlying roads and the roads that were traversed.
+
+<Tabs>
+<TabNav slot="tab-nav">
+  <TabTitle is-active>GPS Track</TabTitle>
+  <TabTitle>Snap to roads result</TabTitle>
+</TabNav>
+
+<Tab is-active>
+    <Figure>
+
+        ![ Snap to roads GPS Track ](../../shared/routing/images/STR_GPSTrack.png)
+
+    </Figure>
+</Tab>
+
+<Tab>
+<Figure>
+
+    ![ Snap to roads result ](../../shared/routing/images/STR_Result.png)
+
+</Figure>
+</Tab>
+
+</Tabs>
+
+<Note type={"best-practices"}>
+
+The direction of the GPS point shows the compass direction of the vehicle at the time the point was collected. Include this information, along with the speed and accuracy of the point, to improve the quality of the snapping.
+
+</Note>
+
+## How to use the service
+
+To use the snap to roads service, you need to pass in a set of point features to which you want to snap to roads. In addition to the point geometry, you can include additional GPS-related data to better guide the snapping. You can also specify if you want to return attributes from the underlying roads and if you want to add them on the output points or lines returned.
+
+Below is an example of a request to the Snap to Roads service and a few sample responses:
+
+<CodeSwitcher displayMode="tabs">
+    <CodeBlock language="http" source="../../shared/routing/code-samples/str/examples/execute_job_ent.http" group="http request" maxLines={20} expandable/>
+    <CodeBlock language="json" source="../../shared/routing/code-samples/str/examples/result_full.json" group="successful response" maxLines={20} expandable/>
+    <CodeBlock language="json" source="../../shared/routing/code-samples/str/examples/result_partial_solution.json" group="successful response (partial solution)" maxLines={20} expandable/>
+    <CodeBlock language="json" source="../../shared/routing/code-samples/str/examples/error_response.json" group="error response" maxLines={20} expandable/>
+</CodeSwitcher>
+
+## Required parameters
+
+### points
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span><span class="font-bold text-[#a82b1e]">Required</span></p>
+
+Specify the points that you want to snap to the road the vehicle is most likely traveling along. The points can be the GPS points from a navigation device, the tracks captured using [ArcGIS Field Maps](https://doc.arcgis.com/en/field-maps/ios/use-maps/track.htm), or some other set of points that were collected while driving the vehicle.
+
+The distance between the points will affect the performance and final quality of the output. If the points are close together, the algorithm will have a better chance of deducing the probable roads at the expense of processing time. Fewer points will process faster, but may result in the route that was deduced potentially taking different roads.
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for points</span></summary>
+
+ #### Attributes for points
+
+- <p class="space-x-2"><span class="font-bold">ObjectID</span><span class="font-sm text-color-3">Integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The ID of the feature. This field is used to link the [`output_snapped_points`](#output_snapped_points) with the input points.
+
+  This field will be used to sequence the points if the location_timestamp field is not present.
+
+- <p class="space-x-2"><span class="font-bold">location_timestamp</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The date and time at which the point was collected. This is the same as the Time field in a GPX file.
+
+  This field will be used to sequence the points if it is available.
+
+- <p class="space-x-2"><span class="font-bold">horizonal_accuracy</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The horizontal accuracy of the point measured in meters. This is the same as the HDOP field in a GPX file.
+
+- <p class="space-x-2"><span class="font-bold">speed</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The speed of the point in meters per second.
+
+- <p class="space-x-2"><span class="font-bold">course</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The compass direction of the point in units of 0 to 360 degrees. 0 is due North, 90 is due East and so on.
+
+</details>
+
+**Example:**
+
+<CodeBlock language="json" source="../../shared/routing/code-samples/str/examples/inputs/points.json" group="json" maxLines={20} expandable/>
+
+### token
+
+<p class="space-x-2"><span class="font-sm text-color-3">type:string</span><span class="font-bold text-[#a82b1e]">Required</span></p>
+
+Specify a token that provides the identity of a user that has the permissions to access the service. The [security and authentication](DEVSITE/documentation/mapping-apis-and-services/security) page provides more information about how an access token can be obtained.
+
+### f
+
+<p class="space-x-2"><span class="font-sm text-color-3">type:enum</span><span class="font-bold text-[#a82b1e]">Required</span></p>
+
+**Allowed values:** `json`, `pjson`
+
+Specify the response format.
+
+The `pjson`  value is used for printing the JSON response in a prettified format.
+
+## Optional parameters
+
+### travel_mode
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#travel_mode_object">travel_mode_object</a></span></p>
+
+Choose the mode of transportation for the analysis. This is the mode of transportation that matches the track data you are analyzing. The algorithms will use the travel_mode to determine the most likely roads that were traveled.
+
+To learn more about travel modes, see [Configure travel modes](https://doc.arcgis.com/en/arcgis-online/reference/travel-modes.htm).
+
+### return_lines
+
+<p class="space-x-2"><span class="font-sm text-color-3">type:bool</span><span class="font-bold text-[#6d29cc]">default:false</span></p>
+
+Specify whether or not the service will return [`output_lines`](#output_lines) representing the roads traversed.
+
+- `true`—The output_lines will be returned.
+- `false`—The output_lines will not be returned.
+
+### road_properties_on_snapped_points
+
+<p class="space-x-2"><span class="font-sm text-color-3">type:array of enum</span></p>
+
+**Allowed values:**
+
+  - `length_kilometers`: The length of the road segment the snapped points locate on in kilometers.
+  - `length_miles`: The length of the road segment the snapped points locate on in miles.
+  - `posted_speed_limit_kph`: The posted speed limit of the road segment the snapped points locate on in kilometers per hour.
+  - `posted_speed_limit_mph`: The posted speed limit of the road segment the snapped points locate on in miles per hour.
+  - `posted_speed_limit_mps`: The posted speed limit of the road segment the snapped points locate on in meters per second.
+  - `posted_truck_speed_limit_kph`: The posted truck speed limit of the road segment the snapped points locate on in kilometers per hour.
+  - `posted_truck_speed_limit_mph`: The posted truck speed limit of the road segment the snapped points locate on in miles per hour.
+  - `posted_truck_speed_limit_mps`: The posted truck speed limit of the road segment the snapped points locate on in meters per second.
+
+Specify the road properties that the service should return on the [`output_snapped_points`](#output_snapped_points) output.
+
+For example: `road_properties_on_snapped_points=["posted_speed_limit_kph", "posted_truck_speed_limit_kph"]`
+
+### road_properties_on_lines
+
+<p class="space-x-2"><span class="font-sm text-color-3">type:array of enum</span></p>
+
+**Allowed values:**
+
+  - `length_kilometers`: The length of the road segment in kilometers.
+  - `length_miles`: The length of the road segment the in miles.
+  - `posted_speed_limit_kph`: The posted speed limit of the road segment in kilometers per hour.
+  - `posted_speed_limit_mph`: The posted speed limit of the road segment in miles per hour.
+  - `posted_speed_limit_mps`: The posted speed limit of the road segment in meters per second.
+  - `posted_truck_speed_limit_kph`: The posted truck speed limit of the road segment in kilometers per hour.
+  - `posted_truck_speed_limit_mph`: The posted truck speed limit of the road segment in miles per hour.
+  - `posted_truck_speed_limit_mps`: The posted truck speed limit of the road segment in meters per second.
+
+Specify the road properties that the service should return on the [`output_lines`](#output_lines) output.
+
+For example: `road_properties_on_lines=["length_miles", "length_kilometers"]`
+
+<Note>
+An error will be returned if you specify road properties in this parameter but do not specify `return_lines=true`.
+</Note>
+
+
+<If c="publication=='services-reference/enterprise'">
+### return_location_fields
+
+<p class="space-x-2"><span class="font-sm text-color-3">type:bool</span><span class="font-bold text-[#6d29cc]">default:false</span></p>
+
+Specify whether the service will return fields on the [`output_snapped_points`](#output_snapped_points) and [`output_lines`](#output_lines) defining the snapped point's location with respect to the road.
+
+- `true`—The output points and lines will contain these additional location fields and they will be populated.
+- `false`—The location fields will not be included in the outputs.
+</If>
+
+### context
+
+<p class="space-x-2"><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#context_object">context_object</a></p>
+
+This parameter contains additional settings that affect task operation, for example, the spatial reference of the output features.
+
+### overrides
+
+<Note>
+
+This parameter is for internal use only.
+
+</Note>
+
+## Response objects
+
+### output_snapped_points
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+
+This output is always returned. It includes all of the fields from the input specified in the [`points`](#points) parameter plus any fields for the properties specified in the [`road_properties_on_snapped_points`](#road_properties_on_snapped_points) parameter. The output also contains attributes that are generated by the service.
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for output snapped points</span></summary>
+
+- <p class="space-x-2"><span class="font-bold">ObjectID</span><span class="font-sm text-color-3">integer</span></p>
+
+  The ID of the feature. This field has the same values as the input [`points`](#points) if the ObjectID field was passed in. Otherwise, they are sequential numbers starting with 1 and going up through the number of features returned.
+
+- <p class="space-x-2"><span class="font-bold">Confidence</span><span class="font-sm text-color-3">integer</span></p>
+
+  This field defines the confidence level of the computed solution - how likely it is that the computed snapped location is accurate. Its value is between 0 and 1 where 0 means it didn't snap to a road at all and 1 is very confident that the snapping is correct.
+
+- <p class="space-x-2"><span class="font-bold">LineID</span><span class="font-sm text-color-3">integer</span></p>
+
+  The ObjectID of the line feature in the [`output_lines`](#output_lines). This field is only present if [`return_lines`](#return_lines) is specified as `true` in the input. This field is used to link the output snapped points with the output lines.
+
+<If c="publication=='services-reference/enterprise'">
+
+- <p class="space-x-2"><span class="font-bold">SourceID</span><span class="font-sm text-color-3">integer (non-negative)</span></p>
+
+  The numeric identifier of the network dataset source feature class on which the input point is located.
+
+- <p class="space-x-2"><span class="font-bold">SourceOID</span><span class="font-sm text-color-3">integer (non-negative)</span></p>
+
+  The object ID of the feature in the source on which the input point is located.
+
+- <p class="space-x-2"><span class="font-bold">PosAlong</span><span class="font-sm text-color-3">number (non-negative)</span></p>
+
+  The position along the digitized direction of the source line feature. This value is stored as a ratio.
+
+- <p class="space-x-2"><span class="font-bold">SideOfEdge</span><span class="font-sm text-color-3">int enum</span></p>
+
+  The side of the edge in relation to the digitized direction of the line feature. The possible values are as following:
+
+  - `1`: Right Side
+  - `2`: Left Side
+
+<Note type={"note"}>
+`SourceID`, `SourceOID`, `PosAlong` and `SideOfEdge` are location fields, and are only returned if the [`return_location_fields`](#return_location_fields) parameter is set to `true`.
+</Note>
+
+</If>
+
+</details>
+
+### output_lines
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+
+This output is returned if [`return_lines`](#return_lines) is specified as `true` in the input. It includes fields for the properties specified in the [`road_properties_on_lines`](#road_properties_on_lines) parameter. The output also contains attributes that are generated by the service.
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for output lines</span></summary>
+
+- <p class="space-x-2"><span class="font-bold">ObjectID</span><span class="font-sm text-color-3">integer</span></p>
+
+  The ID of the feature.
+
+<If c="publication=='services-reference/enterprise'">
+
+- <p class="space-x-2"><span class="font-bold">FromPosition</span><span class="font-sm text-color-3">number</span></p>
+
+  Indicates where the output line begins in reference to the digitized direction of the road. The value is between 0 and 1 where 0 is the beginning of the road and 1 is the end of the road.
+
+- <p class="space-x-2"><span class="font-bold">ToPosition</span><span class="font-sm text-color-3">number</span></p>
+
+  Indicates where the output line ends in reference to the digitized direction of the road. The value is between 0 and 1 where 0 is the beginning of the road and 1 is the end of the road.
+
+<Note type={"note"}>
+`FromPosition` and `ToPosition` are location fields, and are only returned if the [`return_location_fields`](#return_location_fields) parameter is set to `true`.
+</Note>
+
+</If>
+
+</details>
+
+### usage_cost
+
+<p class="space-x-2"><span class="font-sm text-color-3">type:</span><span><a class="font-sm text-color-3" href="../routing-data-types#usage_cost_object">usage_cost_object</a></span></p>
+
+This parameter returns the [credits](https://doc.arcgis.com/en/arcgis-online/administer/credits.htm) used by the analysis.
+
+## Usage limits
+
+The table below lists the default limits that apply to this service.
+
+<StyledTable headers={"Limit value,Limit description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+100,000
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The maximum number of point or line features that can be returned.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+10 minutes
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The maximum time a client can use the Snap to Roads service.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+The limits can be configured by following the steps below:
+
+1.  Open Server Manager for the ArcGIS Server site that contains the snap to roads service and sign in. If you need help with this step, see [Log in to Manager](https://enterprise.arcgis.com/en/server/latest/administer/windows/log-in-to-manager.htm).
+2.  Click **Services** > **Manage Services**.
+3.  In the **Manage Services** module, locate **NetworkAnalysisSync geoprocessing service** and click **Edit Service**.
+
+    If you don't see the service under the **Routing** folder, it may be located within another folder under the **Site (root) >**.
+4.  Click the **Parameters** option and change the limit for the number of records returned by the service by editing the value in **Maximum Number of Records Returned by Server** text box.
+5.  Click the **Pooling** option and change the maximum time the service can be used by editing the value in the **The maximum time a client can use a service** text box.
+6.  Click **Save and Restart** to apply your edits and restart the service.

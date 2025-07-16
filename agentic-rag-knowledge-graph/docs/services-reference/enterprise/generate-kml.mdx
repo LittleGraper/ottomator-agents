@@ -1,0 +1,171 @@
+---
+title: "Generate KML"
+description: "The generateKml  operation is performed on a map service resource and returns a KML document wrapped in a KMZ file."
+slug: "generate-kml"
+url: "/generate-kml"
+guid: "GUID-857283DF-9667-4502-897B-B1D62BB858A6"
+migratedTopicMetadata:
+  FTITLE: "Generate KML"
+  FDESCRIPTION: ""
+  FCHANGES: "Fixing broken links"
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.0- *"
+  CREATED-ON: "14/08/2022 18:27:01"
+  FAUTHOR: "tohara"
+  FSTATUS: "Released"
+  MODIFIED-ON: "15/08/2022 08:51:12"
+  VERSION: "4"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "2"
+  ED: "GUID-4DDC6F94-3381-461C-88EE-425F77CB1D08"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /generateKml
+  urlSegments:
+    - name: <mapservice-url>
+      url: /map-service
+    - name: /generateKml
+  methods: []
+  sslOnly: 'no'
+  versionIntroduced: '9.3'
+  requiredCapability: Map
+---
+
+## Description
+
+The `generateKml`  operation is performed on a [map service resource](/map-service) and returns a KML document wrapped in a KMZ file. The document contains a network link to the KML Service endpoint with properties and parameters you specify.
+
+<Note type={"note"}>
+
+The `viewRefreshMode`  tag of the resulting network link will be set to `onStop`  for raster data and to `onRequest`  if it contains vector data. You can provide arguments to the `generateKML`  operation as query parameters defined in the parameters table below.
+
+</Note>
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`docName` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The name of the resulting KML document. This is the name that appears in the **Places** panel of Google Earth.
+
+Example
+
+```javascript
+docName=Test Name
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`layers` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The layers to perform the `generateKML`  operation on. The layers are specified as a comma-separated list of layer IDs.
+
+Syntax
+
+```javascript
+//where layerId1 and layerId2 are the layer IDs returned by the map service resource
+layers=<layerId1>,<layerId2>
+
+```
+
+ 
+
+Example
+
+```javascript
+layers=2,4,7
+```
+
+ 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+`layerOptions` 
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The layer drawing options. Based on the option chosen, the layers are drawn as one composite image, as separate images, or as vectors. When the KML capability is enabled, the ArcGIS Server administrator has the option of setting the layer operations that are allowed. If vectors are not allowed, the caller will not be able to get vectors. Instead, the caller receives a single composite image. The following options are supported values for the `layerOptions`  parameter: 
+
+-   `composite` : (Default) All layers as a single composite image. Layers cannot be turned on and off in the client.
+-   `separateImage` : Each layer as a separate image.
+-   `nonComposite` : Vector layers as vectors and raster layers as images.
+
+Values: `composite`  \| `separateImage`  \| `nonComposite` 
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+## Example usage
+
+The following is a sample request URL used for the `generateKml`  operation:
+
+```javascript
+https://machine.domain.com/webadaptor/rest/services/Specialty/ESRI_StatesCitiesRivers_USA/MapServer/generateKml?docName=Test+Name&layers=1,2&layerOptions=separateImage
+```
+
+ 
+
+## KML Response example
+
+Below is a typical KML document wrapped in an example KMZ response:
+
+```javascript
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="https://earth.google.com/kml/2.1">  
+<NetworkLink>
+  <open>1</open>
+  <name>Test Name</name>
+  <Snippet>Test Map Service Description</Snippet>  
+  <Url>
+    <viewRefreshMode>onStop</viewRefreshMode>
+    <viewRefreshTime>2</viewRefreshTime>
+    <href>https://myhost:8399/arcgis/services/Maps/USGeo/MapServer/KmlServer</href>
+    <viewFormat>
+    <![CDATA[
+    Composite=true&LayerIDs=0,1&BBOX=[bboxWest],[bboxSouth],[bboxEast],[bboxNorth]&ImageSize=[horizPixels],[vertPixels]
+    ]]>
+    </viewFormat>
+  </Url>
+</NetworkLink>
+</kml>
+
+```
+
+ 

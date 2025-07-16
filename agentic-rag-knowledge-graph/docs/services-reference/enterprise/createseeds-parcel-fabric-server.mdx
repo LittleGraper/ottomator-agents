@@ -1,0 +1,269 @@
+---
+title: "Create seeds"
+description: "The createSeeds operation creates parcel seeds for closed loops of lines that are associated with the specified record."
+slug: "createseeds-parcel-fabric-server"
+url: "/createseeds-parcel-fabric-server"
+guid: "GUID-0DDD1994-D98E-4292-9075-49361BEA8C0E"
+migratedTopicMetadata:
+  FTITLE: "CreateSeeds-parcel-fabric-server"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.2 - *"
+  CREATED-ON: "14/08/2023 11:26:29"
+  FAUTHOR: "cleslie"
+  FSTATUS: "Released"
+  MODIFIED-ON: "29/09/2023 11:51:50"
+  VERSION: "6"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "4"
+  ED: "GUID-7F6BC09B-52AB-40AE-839D-9F2CAFB5C764"
+  FUSERGROUP: ""
+  READ-ACCESS: ""
+restInfoMetadata:
+  apiPath: /<serviceName/ParcelFabricServer/createSeeds
+  urlSegments:
+    - name: <root>
+      url: /catalog
+    - name: /<serviceName>/ParcelFabricServer/createSeeds
+  methods:
+    - post
+  sslOnly: 'no'
+  versionIntroduced: '10.8'
+  requiredCapability: ArcGIS Advanced Editing
+---
+
+## Description
+
+The `createSeeds` operation creates parcel seeds for closed loops of lines that are associated with the specified record.
+
+Parcel seeds are used when building parcels from lines. A parcel seed is the initial state or seed state of a parcel. A parcel seed indicates to the build process that a parcel can be built from the lines enclosing the seed.
+
+A parcel seed is a minimized polygon feature and is stored in the parcel type polygon feature class.
+
+[Learn more about building parcels from lines and seeds](https://pro.arcgis.com/en/pro-app/latest/help/data/parcel-editing/buildparcelsfromlines.htm)
+
+##  Request parameters
+
+<StyledTable headers={"Parameter,Details"}>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `gdbVersion` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The name of the geodatabase version (the default is the `DEFAULT` version).
+
+      Syntax
+
+      ```javascript
+      gdbVersion=<version>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `sessionId` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The token (GUID) used to lock the version. If the calling client is editing a named version, the `sessionId` value is required. If the specified version is currently locked by another session, the request will fail if the `sessionId` value is not provided or does not match the `sessionId` value that holds the exclusive lock. If the client is editing the default version, the `sessionId` value is not required.
+
+      Syntax
+
+      ```javascript
+      sessionId=<guid>
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `extent` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+
+      The envelope of the extent where the seeds will be created. If no map extent is provided, seeds will be created for all closed loops of lines that are associated with the specified record.
+
+      Syntax
+
+      ```javascript
+      {"xmin":<X min>,"ymin":<y min>, "xmax": <x max>, "ymax": <y max>, "spatialReference": <wkt of spatial reference>}
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `record` 
+
+      (Required)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 10.8.
+      The unique identifier (GUID) of the record. Seeds will be created for closed loops of lines that are associated with this record. If an extent is specified, seeds will be created for closed loops of lines that are associated with the record in the specified extent.
+
+      Syntax
+
+      ```javascript
+      record=<guid>
+      ```
+  
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `async` 
+
+      (Optional)
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Introduced at 11.1.
+
+      Specifies whether the request will be processed as an asynchronous job and a URL that points to a location displaying the status of the job will be returned. See the topic regarding [asynchronous](HTTP://RESOURCES.ARCGIS.COM/EN/HELP/ARCGIS-REST-API/02R3/02R3000000RT000000.HTM) usage for more information. The default is `false`.
+
+      Values: `true` | `false` 
+
+      Syntax
+
+      ```javascript
+      async=true|false
+      ```
+
+    </StyledTableCell>
+  </StyledTableRow>
+  <StyledTableRow>
+    <StyledTableCell cellStyle="markdown">
+
+      `f` 
+
+    </StyledTableCell>
+    <StyledTableCell cellStyle="markdown">
+
+      Specifies the output format of the response. The default response format is `html`.
+
+      Values: `html` | `json` 
+
+    </StyledTableCell>
+  </StyledTableRow>
+</StyledTable>
+
+## Example usage
+
+This example shows the steps for creating seeds for closed loops of lines using the `createSeeds`  operation. 
+
+<Note type={"note"}>
+
+  The `sessionId` parameter value must be the same for starting the edit session, performing the edit operation, and stopping the edit session.
+
+</Note>
+
+1.  [Start a service session](/start-reading) on the version.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/VersionManagementServer/versions/E4DAED9D-C859-489B-9053-767A45F1D97C/startReading
+    f=json
+    sessionId={bba242fc-e671-4aa2-83d4-1c013347fa4f}
+    ```
+     
+2.  [Start an edit session](/start-editing) on the version.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/VersionManagementServer/versions/E4DAED9D-C859-489B-9053-767A45F1D97C/startEditing
+    f=json
+    sessionId={bba242fc-e671-4aa2-83d4-1c013347fa4f}
+    ```
+     
+3.  Create seeds for all closed loops of lines that are associated with the specified record.
+
+    Request URL and parameters:
+
+    ```javascript
+    https://machine.domain.com/webadaptor/rest/services/CountyFabric/ParcelFabricServer/createSeeds
+    f=json
+    gdbVersion=admin.Version1
+    sessionId={bba242fc-e671-4aa2-83d4-1c013347fa4f}
+    record={988F2526-D5A0-473E-BD90-363E6E345524}
+    async=false
+    ```
+     
+4.  If edits are complete, [stop the edit session](/stop-editing).
+
+5.  [Stop](/stop-reading) and release the service session. 
+
+## JSON Response syntax
+
+The following response is returned when `async` is `false`:
+
+```other
+{
+  "exceededTransferLimit: <true | false>,
+  "moment": <datetime>,
+  "error": {  // only if success is false
+    "extendedCode": <HRESULT>,
+    "message": <error message>,
+    "details": [<detail>]
+  },
+  "serviceEdits": {  // only if transfer limit is not exceeded
+    "editedFeatures": {
+      "updates": {
+        "attributes": {},
+        "geometry": {}
+      },
+      "adds": {
+        "attributes": {},
+        "geometry": {}
+      },
+      "deletes": {}
+    },
+    {
+      "spatialReference": {<spatial reference>}
+    },
+    "id" : <layerID>
+  },
+  "success": <true | false>
+}
+```
+
+The following response is returned when `async` is `true`:
+
+```other
+{
+		"statusUrl": <url>
+}
+```
+
+

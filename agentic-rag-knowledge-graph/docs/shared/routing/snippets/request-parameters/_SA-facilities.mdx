@@ -1,0 +1,313 @@
+import Token from "../../snippets/request-parameters/_Token.mdx"
+import ResponseFormat from "../../snippets/request-parameters/_ResponseFormat.mdx"
+import BearingAttributes from "../../snippets/shared-attributes/_BearingBrTolNavLat.mdx"
+import NetworkLocationFields from "../../snippets/shared-attributes/_NetworkLocationFields.mdx"
+
+import ParamMetadata from "../../../components/param-metatdata" 
+
+<If c="requestType=='job'">
+{/* <p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span><span class="font-bold text-[#a82b1e]">Required</span></p> */}
+
+<ParamMetadata required types={[{name:"feature",link:"../routing-data-types#feature"}]} />
+
+</If>
+
+<If c="requestType=='direct'">
+{/* <p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span><span class="font-bold text-[#a82b1e]">Required</span></p> */}
+
+<ParamMetadata required types={[{name:"locations",link:"../routing-data-types#locations"},{name:"feature",link:"../routing-data-types#feature"}]} />
+
+</If>
+
+{/* <p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span><span class="font-bold text-[#a82b1e]">Required</span></p> */}
+
+Specify the input locations around which service areas are generated. 
+
+When specifying the facilities, you can set attributes for each as follows:
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for facilities</span></summary>
+
+ #### Attributes for facilities
+
+-   <p class="space-x-2"><span class="font-bold">Name</span><span class="font-sm text-color-3">string (length: 500)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The name of the facility. If the name is not specified, a name is automatically generated at solve time.
+
+    <If c="requestType == 'job'">
+    All fields from the input facilities are included in the output polygons when the [`polygons_for_multiple_facilities`](#polygons_for_multiple_facilities) parameter is set to `Overlapping` or `Not Overlapping`. The `ObjectID` field on the input facilities is transferred to the `FacilityOID` field on the output polygons. 
+    </If>
+
+<If c="requestType=='direct'">
+-   <p class="space-x-2"><span class="font-bold">ObjectID</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p> 
+
+    The object ID of the facility. `ObjectID` is a unique identifier for the facility. If you want to maintain a relationship between input and output, set `preserveObjectID` to `true` , and the `ObjectID` value of the input facility is included in the output routes (as the FacilityID field). The `ObjectID` value is also included in the output facilities (as the `ObjectID` field) and can be used to join additional information from the analysis outputs to the attribute of the facilities. If the `ObjectID` value is not specified, a unique `ID` is automatically generated in the output.
+</If>
+
+<If c="requestType=='direct' && publication == 'services-reference/enterprise'">
+<NetworkLocationFields/>
+</If>
+
+<If c="requestType=='job'">
+-   <p class="space-x-2"><span class="font-bold">Breaks</span><span class="font-sm text-color-3">string (length: 128)</span></p>
+
+    Specify the extent of the service area to be calculated on a per facility basis. 
+
+    This attribute allows you to specify a different service area break value for each facility. For example, with two facilities, you can generate 5- and 10-minute service area polygons for one facility and 6-, 9-, and 12-minute polygons for the other facility.
+
+    Separate multiple break values with a space, and specify the numeric values using the dot character as your decimal separator, even if the locale of your computer defines a different decimal separator. For example, the value `5.5 10 15.5`  specifies three break values around a facility. 
+
+-   <p class="space-x-2"><span class="font-bold">AdditionalTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+    The amount of time spent at the facility, which reduces the extent of the service area calculated for the given facility. 
+
+    For example, when calculating service areas that represent fire station response times, `AdditionalTime`  can store the turnout time, which is the time it takes a crew to put on the appropriate protective equipment and exit the fire station, for each fire station. Assume Fire Station 1 has a turnout time of 1 minute and Fire Station 2 has a turnout time of 3 minutes. If a 5-minute service area is calculated for both fire stations, the actual service area for Fire Station 1 is 4 minutes (since 1 of the 5 minutes is required as turnout time). Similarly, Fire Station 2 has a service area of only 2 minutes from the fire station. 
+
+-   <p class="space-x-2"><span class="font-bold">AdditionalDistance</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+    The extra distance traveled to reach the facility before the service is calculated. This attribute reduces the extent of the service area calculated for the given facility.
+
+    Generally, the location of a facility, such as a store location, isn't exactly on the street; it is set back somewhat from the road. This attribute value can be used to model the distance between the actual facility location and its location on the street if it is important to include that distance when calculating the service areas for the facility. 
+
+-   <p class="space-x-2"><span class="font-bold">AdditionalCost</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+    The extra cost spent at the facility, which reduces the extent of the service area calculated for the given facility. The default value is 0. 
+
+    Use this attribute value when the travel mode for the analysis uses an impedance attribute that is neither time based nor distance based The units for the attribute values are interpreted to be in unknown units. 
+
+</If>
+
+-   <p class="space-x-2"><span class="font-bold">CurbApproach</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+    Allowed values: `0`, `1`, `2`, `3`
+
+    Specifies the direction a vehicle may arrive at and depart from the facility. The field value is specified as one of the following integers:
+
+    - `0`: Either side of vehicle. The vehicle can approach and depart the facility in either direction. U-turns are allowed. You should choose this setting if your vehicle can make a U-turn at the order or if it can pull into a driveway or parking lot and turn around.
+    - `1`: Right side of vehicle. When the vehicle approaches and departs the facility, the curb must be on the right side of the vehicle. A U-turn is prohibited.
+    - `2`: Left side of vehicle. When the vehicle approaches and departs the facility, the curb must be on the left side of the vehicle. A U-turn is prohibited.
+    - `3`: No U-turn. When the vehicle approaches the facility, the curb can be on either side of the vehicle; however, the vehicle must depart without turning around. [Learn more about U-turn policies](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/u-turn-policies.htm)
+
+    <details>
+     <summary><span class="font-sm text-color-link">Show illustration</span></summary>
+
+    <StyledTable headers={"Setting,Coded value,Description"}>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Either side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    0
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    The vehicle can approach and depart the facility in either direction, so a U-turn is allowed at the facility. This setting can be chosen if it is possible and desirable for a vehicle to turn around at the facility. This decision may depend on the width of the road and the amount of traffic or whether the location has a parking lot where vehicles can pull in and turn around.
+
+    ![Either side of vehicle ](../../images/CurbApproach_EitherSide.png)
+
+    _All arrival and departure combinations are allowed with the Either side of vehicle curb approach._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Right side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    1
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches and departs the facility, the facility must be on the right side of the vehicle. A U-turn is prohibited. This is typically used for vehicles such as buses that must arrive with the bus stop on the right side.
+     
+    ![Right side of vehicle ](../../images/CurbApproach_RightSide.png)
+
+    _The allowed arrival and departure combination for the Right side of vehicle curb approach is shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Left side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    2
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches and departs the facility, the facility must be on the left side of the vehicle. A U-turn is prohibited. This is typically used for vehicles such as buses that must arrive with the bus stop on the left side.
+
+    ![Left side of vehicle ](../../images/CurbApproach_LeftSide.png)
+
+    _The allowed arrival and departure combination for the Left side of vehicle curb approach is shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    No U-Turn
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    3
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches the facility, the facility can be on either side of the vehicle; however, when it departs, the vehicle must continue in the same direction it arrived. A U-turn is prohibited.
+
+    ![No U-turns ](../../images/CurbApproach_NoU-Turns.png)
+
+    _The allowed arrival and departure combinations for the No U-Turn curb approach are shown._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    </StyledTable>
+
+    The `CurbApproach`  attribute is designed to work with both types of national driving standards: right-hand traffic (United States) and left-hand traffic (United Kingdom). First, consider an facility on the left side of a vehicle. It is always on the left side regardless of whether the vehicle travels on the left or right half of the road. What may change with national driving standards is your decision to approach an facility from one of two directions, that is, so it ends up on the right or left side of the vehicle. For example, if you want to arrive at an facility and not have a lane of traffic between the vehicle and the facility, choose 1 (Right side of vehicle) in the United States and 2 (Left side of vehicle) in the United Kingdom.
+
+    <ColumnLayout layout={2}>
+
+    <Column>
+
+    <Figure>
+
+    ![ Right side of vehicle with right-hand traffic](../../images/CurbApproach_RightSide.png)
+
+    <Caption>
+
+    _With right-hand traffic, the curb approach that leaves the vehicle closest to the facility is Right side of vehicle._
+
+    </Caption>
+
+    </Figure>
+
+    </Column>
+
+    <Column>
+
+    <Figure>
+
+    ![ Left side of vehicle with left-hand traffic ](../../images/CurbApproach_LeftSideDriving.png)
+
+    <Caption>
+
+    _With left-hand traffic, the curb approach that leaves the vehicle closest to the facility is Left side of vehicle._
+
+    </Caption>
+
+    </Figure>
+
+    </Column>
+
+    </ColumnLayout>
+
+    </details>
+
+
+<If c="requestType == 'direct'">
+
+-   <p class="space-x-2"><span class="font-bold">Attr_[Cost] (*NEW)</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:0</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    The name of the attribute can be: `Attr_TravelTime`, `Attr_TruckTravelTime`, `Attr_Minutes`, `Attr_TruckMinutes`, `Attr_WalkTime`, `Attr_Miles`, `Attr_Kilometers`
+
+    <If c="publication=='services-reference/enterprise'">
+        <Note type="attention">
+        These value are specific to the services published with the ArcGIS StreetMap Premium data. The values will be different if you are using other data for the analysis.
+        </Note>
+    </If>
+
+    This attribute specifies how much additional time spent or distance traveled can occur at the facility.
+
+    The value for this attribute is specified in the units of the cost attribute. For instance, `Attr_TravelTime` is in minutes.
+
+    <details>
+        <summary><span class="font-sm text-color-link">Use case</span></summary>
+
+    You can add time to a facility to represent how long it takes to perform another task at the facility. Similarly, adding extra distance may be useful to account for a long driveway or other road that isn't represented by the network dataset.
+
+    `Attr_[Cost]` is only referenced if cost is used in the analysis as impedance or accumulate attribute.
+
+    For example, when a time-based cost attribute `TravelTime` is used, it specifies the amount of time for cars, in minutes, that will be considered as delay impedance for the facility. Adding a value to this attribute reduces the reach of the service area. The attribute value can be used to store the amount of time spent at the facility. For example, when calculating service areas that represent fire station response times, `Attr_TravelTime` can store the turnout time for each fire station, which is the time it takes a crew to don the appropriate protective equipment and exit the fire station. Assume `Fire Station 1` has a turnout time of two minutes and `Fire Station 2` has a turnout time of three minutes. If a 5-minute service area is calculated for both fire stations, the actual service area for Fire Station 1 would be three minutes (since two of the five minutes would be required as turnout time). Similarly, Fire Station 2 would have an actual service area of only two minutes.
+
+    However, when a distance-based cost attribute like `Miles`  is used, it specifies the distance in miles that will be considered as delay impedance for the facility. Adding a value to this attribute reduces the reach of the service area. Generally the locations of the facilities are not exactly on the streets but are set back somewhat from the road. This attribute value can be used to model the distance between the actual facility location and its location on the street if it is important to include that distance when generating service areas.
+    </details>
+
+</If>
+
+<If c="requestType == 'direct' && publication == 'rest/online'">
+
+-   <p class="space-x-2"><span class="font-bold">Breaks_[Impedance]</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:null</span></p>
+
+    Specify different break values for each facility. 
+    
+    Given two facilities, this means that you can generate 5- and 10-minute or kilometer service areas for one facility and 6-, 9-, and 12-minute or kilometer service areas for another facility.
+
+    If `Breaks_[Impedance]` is not set for a facility or is `null`, the service will use the value specified as the `defaultBreaks` parameter. The value for the `Breaks_[Impedance]` attribute allows the ability to override the `defaultBreaks` parameter value on a per facility basis. The field values you provide are only referenced if the cost attribute referred to in the field name is used in the analysis as impedance attribute, it is not used if the attribute is used in the analysis as accumulate attribute. 
+
+    <details>
+        <summary><span class="font-sm text-color-link">Use case</span></summary>
+
+    For example, when a time-based cost attribute `TravelTime` is used, it specifies different break values for each facility. Given two facilities, this means you can generate 5- and 10- minute service areas for one facility and 6-, 9-, and 12-minute service areas for another facility. If `Breaks_TravelTime` is not set for a facility, the service will use the value specified as the `defaultBreaks` parameter. The value for the `Breaks_TravelTime` attribute allows the ability to overwrite the `defaultBreaks` parameter value on a per facility basis. 
+
+    However, when a distance-based cost attribute like `Miles` is used, it specifies different area break values for each facility. Given two facilities, this means you can generate 5- and 10- mile service areas for one facility and 6-, 9-, and 12- mile service areas for another facility. If `Breaks_Miles` is not set for a facility, the service will use the value specified as the `defaultBreaks` parameter. The value for the `Breaks_Miles` attribute allows the ability to overwrite the `defaultBreaks` parameter value on a per facility basis.
+    </details>
+
+</If>
+
+<If c="requestType == 'direct' && publication == 'services-reference/enterprise'">
+
+-   <p class="space-x-2"><span class="font-bold">Breaks_[Cost]</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:null</span></p>
+
+    Specify different break values for each facility. 
+    
+    Given two facilities, this means that you can generate 5- and 10-minute or kilometer service areas for one facility and 6-, 9-, and 12-minute or kilometer service areas for another facility.
+
+    If `Breaks_[Cost]` is not set for a facility or is `null`, the service will use the value specified for the `defaultBreaks` parameter. The value for the `Breaks_[Cost]` attribute allows you to override the `defaultBreaks` parameter value on a per-facility basis. The field values you provide are only referenced if the cost attribute referred to in the field name is used in the analysis as an impedance attribute; it is not used if the attribute is used in the analysis as an accumulate attribute.
+
+</If>
+
+<BearingAttributes />
+
+</details>
+
+**Example**
+
+The example shows how to specify some attributes for the `facilities`.
+
+<CodeBlock language="json" source="../../code-samples/serviceArea/examples/inputs/facilities_ex.json" group="json" maxLines={20} expandable/>

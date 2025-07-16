@@ -1,0 +1,2315 @@
+---
+title: Job request
+uid: last-mile-delivery-service
+description: The Last Mile Delivery service is designed for a fleet of vehicles that are delivering packages to the final customers.
+keywords: # to be updated
+  - routing
+  - vrp
+migratedTopicMetadata:
+  FTITLE: "Vehicle Routing Problem service"
+  FDESCRIPTION: ""
+  FCHANGES: ""
+  FISHRELEASELABEL: ""
+  FESRISOFTWARERELEASE: ""
+  FESRITAGCLOUD: ""
+  FESRIRECREATIONPROCEDURE: ""
+  FESRIPRODUCTLIFECYCLE: "11.1 - *"
+  CREATED-ON: "11/01/2023 09:13:00"
+  FAUTHOR: "pchopra"
+  FSTATUS: "Released"
+  MODIFIED-ON: "08/02/2023 16:23:07"
+  VERSION: "7"
+  FRESOLUTION: ""
+  DOC-LANGUAGE: "en"
+  FISHREVCOUNTER: "7"
+  ED: "GUID-4427336B-F6F7-48AF-82FA-E22AD7442362"
+  FUSERGROUP: "VUSERGROUPARCGISONLINEDOC"
+  READ-ACCESS: ""
+---
+
+## Description
+
+The Last Mile Delivery service is a use case specific Vehicle Routing Problem (VRP) algorithm designed for a fleet of vehicles that are delivering packages to the final customers. For example, this can be used for a single distribution center or store delivering to the final customer location and can be quite dense delivering to a few customers on most streets but is not intended to visit every house on every street.
+
+Delivery companies need to determine which orders (package delivery location) should be serviced by each route (delivery vehicle and driver) and in what sequence the orders should be visited. The primary goal is to best service the orders by producing geographically clustered routes so the drivers can easily deliver to everyone and minimize the overall operating cost for the fleet of vehicles.
+
+The Network Analyst Route service finds the best route for a single vehicle to visit many stops whereas the Last Mile Delivery service and the Vehicle Routing Problem service both find the best routes for a fleet of vehicles to service many orders. The Vehicle Routing Problem service has lots of flexibility and can model many different constraints, but the algorithm is also limited by this flexibility. The Last Mile Delivery service supports a subset of the constraints but for the ones it does support is able to provide a better quality and performant algorithm.
+
+<Note type={"note"}>
+
+[Learn more about the capabilities of the last mile delivery and why choose it over the vehicle routing problem analysis](/why-choose-LMD)
+
+</Note>
+
+## How to use the service
+To use last mile delivery service, you need to follow a three step workflow:
+1. Make the `submitJob` request with the appropriate request parameters to get a job id.
+2. Using the job id, make periodical request to check the job status. If `jobStatus` is `esriJobExecuting`, continue to make request. If job failed, the response contains the error messages. If job succeeded, proceed to next step. If job has been executing for a while and you want to cancel it, you can append `/cancel` to the request url to cancel the job.
+3. Use the job id to get one or more results.
+
+<Tabs>
+<TabNav slot="tab-nav">
+  <TabTitle is-active>1. Submit job</TabTitle>
+  <TabTitle>2. Check job status</TabTitle>
+  <TabTitle>3. Get all results</TabTitle>
+  <TabTitle>3. Get one result (output_routes)</TabTitle>
+</TabNav>
+
+<Tab is-active>
+
+**Request**
+
+<CodeSwitcher>
+  <CodeBlock language="http" source="./code/routing/lmd/submit_job.http" group="HTTP" maxLines={20} expandable/>
+</CodeSwitcher>
+
+**Response (JSON)**
+
+<CodeBlock language="json" source="./code/routing/lmd/submit_job_response.json" maxLines={20} expandable/>
+
+</Tab>
+
+<Tab>
+
+**Request**
+
+<CodeSwitcher>
+  <CodeBlock language="http" source="./code/routing/lmd/get_job_status.http" group="HTTP" maxLines={10} expandable/>
+</CodeSwitcher>
+
+**Response (JSON)**
+
+<CodeSwitcher displayMode="tabs">
+    <CodeBlock language="json" source="./code/routing/lmd/job_status_executing_response.json" group="Job Executing" maxLines={20} expandable/>
+    <CodeBlock language="json" source="./code/routing/lmd/job_status_failed_response.json" group="Job Failed" maxLines={20} expandable/>
+    <CodeBlock language="json" source="./code/routing/lmd/job_status_succeeded_response.json" group="Job Succeeded" maxLines={20} expandable/>
+    <CodeBlock language="json" source="./code/routing/lmd/job_status_succeeded_partial_response.json" group="Job Succeeded Partial Solution" maxLines={20} expandable/>
+</CodeSwitcher>
+
+</Tab>
+
+<Tab>
+
+**Request**
+
+<CodeSwitcher>
+  <CodeBlock language="http" source="./code/routing/lmd/get_results.http" group="HTTP" maxLines={10} expandable/>
+</CodeSwitcher>
+
+**Response (JSON)**
+
+<CodeBlock language="json" source="./code/routing/lmd/result_full.json" maxLines={20} expandable/>
+
+</Tab>
+
+<Tab>
+
+**Request**
+
+<CodeSwitcher>
+  <CodeBlock language="http" source="./code/routing/lmd/get_result_route.http" group="HTTP" maxLines={10} expandable/>
+</CodeSwitcher>
+
+
+**Response (JSON)**
+
+{/* <CodeSwitcher>
+  <CodeBlock
+      language="js"
+      source="./code/fleet-routing/examples/job/ex1-response-3b-abbv.json"
+      group="Abbreviated Response"
+      highlightLines="15, 17, 27, 37, 47, 67, 69, 78, 80"
+      links={[{ url: "examples/routing-and-directions/fleet-routing/job/ex1-response-3b-full.json", label: "See full response"}]}
+      expandable />
+</CodeSwitcher> */}
+
+<CodeSwitcher>
+  <CodeBlock language="json" source="./code/routing/lmd/result_output_routes.json" group="HTTP" maxLines={20} expandable/>
+</CodeSwitcher>
+
+</Tab>
+</Tabs>
+
+
+## Required parameters
+
+### orders
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span><span class="font-bold text-[#a82b1e]">Required</span></p>
+
+Specifies one or more locations that the routes of the last mile delivery analysis will visit. These are the final customer locations where the routes deliver the packages, or the initial customer location where they are picking up packages for shipment.
+
+When specifying the orders, you can set attributes for each as follows:
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for orders</span></summary>
+
+ #### Attributes for orders
+- <p class="space-x-2"><span class="font-bold">Name</span><span class="font-sm text-color-3">string (length: 500)</span></p>
+
+  The name of the order.
+
+  The name must be unique. Order names are case sensitive and cannot be empty, even if the order is excluded from the solve operation. This attribute acts as a primary key and is used as a foreign key to refer to orders in the Orders Specialties table.
+
+- <p class="space-x-2"><span class="font-bold">ServiceTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The amount of time that will be spent at the order when the route visits it; that is, it stores the impedance value for the order location.
+
+  A zero or null value indicates that the order requires no service time. The unit for this attribute value is specified by the [`time_units`](#time_units) parameter.
+
+- <p class="space-x-2"><span class="font-bold">TimeWindowStart</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The beginning time of the time window for the order.
+
+  This attribute can contain a null value; a null value indicates no beginning time. A time window only states when a vehicle can arrive at an order; it doesn't state when the service time must be completed. To account for service time and departure before the time window ends, subtract the `ServiceTime` attribute value from the `TimeWindowEnd` attribute value.
+
+- <p class="space-x-2"><span class="font-bold">TimeWindowEnd</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The ending time of the time window for the order.
+
+  This attribute can contain a null value, which indicates no ending time.
+
+- <p class="space-x-2"><span class="font-bold">MaxViolationTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The maximum allowable violation time for the time window of the order.
+
+    A time window is considered violated if the arrival time occurs after the time window has ended. It can contain a zero value but can't contain negative values.
+    - A zero value indicates that a time window violation is unacceptable; that is, the time window is hard.
+    - A null value indicates that there is no limit on the allowable violation time.
+    - A non-zero value specifies the maximum amount of lateness; for example, a route can arrive at an order up to 30 minutes beyond the end of the time window.
+
+  The unit for this attribute value is specified by the [`time_units`](#time_units) parameter.
+
+- <p class="space-x-2"><span class="font-bold">InboundArriveTime</span><a class="font-sm text-color-3" href="/..routing-data-types#datetime">datetime</a><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The time when the item to be delivered to the order will be ready at the starting depot.
+
+  The order can be assigned to a route only if the inbound arrive time precedes the route's start time, as the route could not leave the depot before the item is ready to be loaded onto it. The assignment is invalid even if the route has a start-depot service time that lasts until after the inbound arrive time. 
+  
+  This attribute can help model scenarios involving inbound-wave transshipments. For example, a parcel or package being delivered is on an inbound flight that is scheduled to arrive and be sorted by 9:30 a.m. To ensure a route that leaves before the shipment arrives is not assigned this order, the order's inbound arrive time is set to 9:30 a.m.
+
+  <Note type={"note"}>
+
+   The solver honors `InboundArriveTime` attribute value regardless of the `DeliveryQuantity_#` attribute value.
+  
+  </Note>
+
+- <p class="space-x-2"><span class="font-bold">OutboundDepartTime</span><a class="font-sm text-color-3" href="../routing-data-types#datetime">datetime</a><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The time when the item to be picked up at the order must arrive at the ending depot.
+
+  The order can be assigned to a route only if the route can visit the order and reach its end depot before the specified outbound depart time. If a route reaches a depot but doesn't complete its end-depot service time before the order's outbound depart time, the order cannot be assigned to the route.
+  
+  This attribute can help model scenarios involving outbound-wave transshipments. For instance, a shipping company sends out delivery trucks to pick up packages from orders and bring them into a depot where they are forwarded on to other facilities, en route to their final destination. At 3:00 p.m. every day, a semitrailer stops at the depot to pick up the high-priority packages and take them directly to a central processing station. To avoid delaying the high-priority packages until the next day's 3:00 p.m. trip, the shipping company plans to have delivery trucks pick up the high-priority packages from orders and bring them to the depot before 3:00 p.m.. This is done by setting the outbound depart time to 3:00 p.m.
+
+  <Note type={"note"}>
+
+   The solver honors `OutboundDepartTime` attribute value regardless of the `PickupQuantity_#` attribute value.
+
+  </Note>
+
+- <p class="space-x-2"><span class="font-bold">DeliveryQuantity_1 -- DeliveryQuantity_9</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The size of the delivery.
+
+  You can specify size in any dimension such as weight, volume, or quantity. If there are multiple delivery quantities, specify them using the `DeliveryQuantity_1` through `DeliveryQuantity_9` fields as needed.
+
+    <Note>
+
+    If `DeliveryQuanity_#` fields are used then the `PickupQuantity_#` fields cannot be used. The solver supports either all delivery or all pick up orders but not both.
+
+    </Note>
+
+- <p class="space-x-2"><span class="font-bold">PickupQuantity_1 -- PickupQuantity_9</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The size of the pickup.
+
+  You can specify size in any dimension such as weight, volume, or quantity. If there are multiple pickup quantities, specify them using the `PickupQuantity_1` through `PickupQuantity_9` fields as needed.
+
+  <Note>
+
+    If `DeliveryQuanity_#` fields are used then the `PickupQuantity_#` fields cannot be used. The solver supports either all delivery or all pick up orders but not both.
+
+    </Note>
+
+- <p class="space-x-2"><span class="font-bold">AnchorRule</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#00619b]">nullable</span><span class="font-bold text-[#6d29cc]">default:null</span></p>
+
+  Allowed values: `null`, `1`, `2`
+
+  The anchor rule for the order, which specifies whether it must be the first or last order on a route.
+
+    If it is additionally constrained to a specific route, use the `AssignmentRule` attribute. The values are listed below:
+    - `null`: The order does not have an anchor constraint and can be sequenced first, last, or anywhere in between. 
+    - `1`: First. The order must be the first order on the route.
+    - `2`: Last. The order must be the last order on the route.
+
+- <p class="space-x-2"><span class="font-bold">AssignmentRule</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#00619b]">nullable</span><span class="font-bold text-[#6d29cc]">default:null</span></p>
+
+  Allowed values: `null`, `1`, `2`, `3`
+
+  This attribute specifies the rule for the order's route assignment options. 
+  
+  It is constrained by a domain of values, that are listed below:
+
+    - `null`: The solver ignores the route pre-assignment (if any) for the order during the solve operation. It assigns a route to the order so as to minimize the overall value of the objective function. 
+    - `1`: Preserve Route and Relative Sequence. The solver must always assign the order to the preassigned route and relative sequence during the solve operation. If this assignment rule cannot be followed, it results in an order violation. With this setting, only the relative sequence is maintained, not the absolute sequence.
+    - `2`: Preserve Route. The solver must always assign the order to the preassigned route during the solve operation. If a sequence value is given it will be used for the initial construction of the route. If the order cannot be assigned to the specified route, it results in an order violation.
+    - `3`: Unassign. The order will be removed from the assigned route.
+
+- <p class="space-x-2"><span class="font-bold">RouteName</span><span class="font-sm text-color-3">string (length: 500)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The name of the route to which the order is assigned.
+
+  As an input attribute, it is used to preassign an order to a specific route. It can contain a null value, indicating that the order is not preassigned to any route, and the solver determines the best possible route assignment for the order. If this is set to null, the `Sequence` attribute must also be null. The `RouteName` attribute is a foreign key to the `Name` attribute in the Routes class. After a solve operation, if the order is routed, the `RouteName` attribute contains the name of the route that the order is assigned to.
+
+- <p class="space-x-2"><span class="font-bold">Sequence</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The sequence of the order on its assigned route.
+
+  As an input attribute, it is used to specify the relative sequence for an order on the route. This attribute can contain a null value indicating that the order can be placed anywhere along the route. The input sequence values must not be negative and must be unique for each route shared across depot visits and orders but do not need to start from 0 or be contiguous. After a solve operation, the Sequence attribute contains the sequence value of the order on its assigned route. Output sequence values for a route are shared across depot visits and orders. The sequences starts from 0 (at the starting depot) and are consecutive, except when sequence gaps are used. The smallest possible output sequence value for a routed order is 1, since a route always begins at a depot even if it is virtual depot.
+
+- <p class="space-x-2"><span class="font-bold">CurbApproach</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+    Allowed values: `0`, `1`, `2`, `3`
+
+    Specifies the direction a vehicle may arrive at and depart from the order. The options are as following:
+
+    - `0`: Either side of vehicle. The vehicle can approach and depart the order in either direction. U-turns are allowed. You should choose this setting if your vehicle can make a U-turn at the order or if it can pull into a driveway or parking lot and turn around.
+    - `1`: Right side of vehicle. When the vehicle approaches and departs the order, the curb must be on the right side of the vehicle. A U-turn is prohibited.
+    - `2`: Left side of vehicle. When the vehicle approaches and departs the order, the curb must be on the left side of the vehicle. A U-turn is prohibited.
+    - `3`: No U-turn. When the vehicle approaches the order, the curb can be on either side of the vehicle; however, the vehicle must depart without turning around. [Learn more about U-turn policies](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/u-turn-policies.htm)
+
+    <details>
+     <summary><span class="font-sm text-color-link">Show illustration</span></summary>
+
+    <StyledTable headers={"Setting,Coded value,Description"}>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Either side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    0
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    The vehicle can approach and depart the order in either direction, so a U-turn is allowed at the order. This setting can be chosen if it is possible and desirable for a vehicle to turn around at the order. This decision may depend on the width of the road and the amount of traffic or whether the order has a parking lot where vehicles can pull in and turn around.
+
+    ![Either side of vehicle ](./images/GUID-35599FF5-3279-4662-9254-3872968A2FDB-web.png)
+
+    _All arrival and departure combinations are allowed with the Either side of vehicle curb approach._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Right side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    1
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches and departs the order, the order must be on the right side of the vehicle. A U-turn is prohibited. 
+
+    ![Right side of vehicle ](./images/GUID-483527D1-724C-44D2-A55D-C1DB52624A91-web.png)
+
+    _The allowed arrival and departure combination is shown for the Right side of vehicle curb approach._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Left side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    2
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches and departs the order, the order must be on the left side of the vehicle. A U-turn is prohibited. 
+
+    ![Left side of vehicle ](./images/GUID-CAC54FFE-9BA2-4892-A829-3803EF3CBA68-web.png)
+
+    _The allowed arrival and departure combination is shown for the Left side of vehicle curb approach._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    No U-Turn
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    3
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches the order, the order can be on either side of the vehicle; however, when it departs, the vehicle must continue in the same direction it arrived. A U-turn is prohibited.
+
+    ![No U-turns ](./images/GUID-135EFE4E-7AF1-48D6-8311-3DC8942B5DF2-web.png)
+
+    _The allowed arrival and departure combinations are shown for the No U-Turn curb approach._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    </StyledTable>
+
+    The `CurbApproach`  attribute is designed to work with both kinds of national driving standards: right-hand traffic (United States) and left-hand traffic (United Kingdom). First, consider an order on the left side of a vehicle. It is always on the left side regardless of whether the vehicle travels on the left or right half of the road. What may change with national driving standards is your decision to approach an order from one of two directions, that is, so it ends up on the right or left side of the vehicle. For example, if you want to arrive at an order and not have a lane of traffic between the vehicle and the order, choose 1 (Right side of vehicle) in the United States and 2 (Left side of vehicle) in the United Kingdom.
+
+    <ColumnLayout layout={2}>
+
+    <Column>
+
+    <Figure>
+
+    ![Right side of vehicle with right-hand traffic](./images/GUID-483527D1-724C-44D2-A55D-C1DB52624A91-web.png)
+
+    <Caption>
+
+    _With right-hand traffic, the curb approach that leaves the vehicle closest to the stop is Right side of vehicle._
+
+    </Caption>
+
+    </Figure>
+
+    </Column>
+
+    <Column>
+
+    <Figure>
+
+    ![Left side of vehicle with left-hand traffic ](./images/GUID-E345B7D0-D33C-4F64-A844-377F0C328A2A-web.png)
+
+    <Caption>
+
+    _With left-hand traffic, the curb approach that leaves the vehicle closest to the stop is Left side of vehicle._
+
+    </Caption>
+
+    </Figure>
+
+    </Column>
+
+    </ColumnLayout>
+
+    </details>
+
+  <Note type="{Note}">
+
+  You can specify a network location using `SourceID`, `SourceOID`, `PosAlong`, and `SideOfEdge` described below. If the network location is not provided, the solver will derive it from the input geometry
+
+  </Note>
+
+- <p class="space-x-2"><span class="font-bold">SourceID</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The numeric identifier of the network dataset source feature class on which the input point is located.
+
+- <p class="space-x-2"><span class="font-bold">SourceOID</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The object ID of the feature in the source on which the input point is located. 
+
+- <p class="space-x-2"><span class="font-bold">PosAlong</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The position along the digitized direction of the source line feature. This value is stored as a ratio. This attribute is null if the network location references a junction.
+
+- <p class="space-x-2"><span class="font-bold">SideOfEdge</span><span class="font-sm text-color-3">int enum</span></p>
+
+  Allowed values: `1`, `2`
+
+  The side of the edge in relation to the digitized direction of the line feature.
+
+  This attribute is limited to a domain of two values:
+
+  - `1`: Right Side
+  - `2`: Left Side
+
+- <p class="space-x-2"><span class="font-bold">Bearing</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The direction in which a point is moving. The units are degrees and are measured clockwise from true north.
+
+  This attribute is used in conjunction with the `BearingTol` attribute. Bearing data is usually sent automatically from a mobile device equipped with a GPS receiver. Try to include bearing data if you are loading an input location that is moving, such as a pedestrian or a vehicle. Using this attribute tends to prevent adding locations to the wrong edges, which can occur when a vehicle is near an intersection or an overpass, for example. Bearing also helps the solver determine the side of the street that the point is on.
+
+  [Learn more about bearing and bearing tolerance](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/bearing-and-bearing-tolerance.htm)
+
+- <p class="space-x-2"><span class="font-bold">BearingTol</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#6d29cc]">default:30</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The bearing tolerance value creates a range of acceptable bearing values when locating moving points on an edge using the `Bearing` attribute.
+
+  If the `Bearing` attribute value is within the range of acceptable values that are generated from the bearing tolerance on an edge, the point can be added as a network location there; otherwise, the closest point on the next-nearest edge is evaluated. The units are in degrees, and the default value is 30. Values must be greater than 0 and less than 180. A value of 30 means that when Network Analyst attempts to add a network location on an edge, a range of acceptable bearing values is generated 15 degrees to either side of the edge (left and right) and in both digitized directions of the edge.
+
+  [Learn more about bearing and bearing tolerance](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/bearing-and-bearing-tolerance.htm)
+
+- <p class="space-x-2"><span class="font-bold">NavLatency</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  Indicates how much cost is expected to elapse from the moment GPS information is sent from a moving vehicle to a server and the moment the processed route is received by the vehicle's navigation device.
+
+  This attribute is only used in the solve process if the `Bearing` and `BearingTol` fields also have values; however, providing a `NavLatency` attribute value is optional, even when values are present in the `Bearing` and `BearingTol`.
+
+</details>
+
+**Example:**
+
+<CodeBlock language="json" source="./code/routing/lmd/examples/inputs/orders.json" group="json" maxLines={20} expandable/>
+
+### depots
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span><span class="font-bold text-[#a82b1e]">Required</span></p>
+
+The `depots` parameter stores the depots that are part of a given last mile delivery analysis layer. A depot is a location that a vehicle departs from at the beginning of its workday and returns to at the end of the workday. Depots are locations where the vehicles are loaded (for deliveries) or unloaded (for pickups). For the Last Mile Delivery solver, the routes must all start at the same depot location and must all end at the same depot location. However, the start and end depot locations can be different or can be modeled as virtual depot locations not explicitly specified in the problem.
+
+When specifying the depots, you can set attributes as follows:
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for depots</span></summary>
+  
+ #### Attributes for depots
+
+- <p class="space-x-2"><span class="font-bold">Name</span><span class="font-sm text-color-3">string (length: 500)</span></p>
+
+  The name of the depot.
+
+  This attribute is a primary key and is used as a foreign key in the Routes feature layer and Depot Visits feature layer to refer to depots. Depot names are case sensitive and must be nonempty and unique.
+
+<Note type="{Note}">
+
+  You can specify a network location using `SourceID`, `SourceOID`, `PosAlong`, and `SideOfEdge` described below. If the network location is not provided, the solver will derive it from the input geometry
+  
+  </Note>
+
+- <p class="space-x-2"><span class="font-bold">SourceID</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The numeric identifier of the network dataset source feature class on which the input point is located.
+
+- <p class="space-x-2"><span class="font-bold">SourceOID</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The object ID of the feature in the source on which the input point is located. 
+
+- <p class="space-x-2"><span class="font-bold">PosAlong</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The position along the digitized direction of the source line feature. This value is stored as a ratio. This attribute is null if the network location references a junction.
+
+- <p class="space-x-2"><span class="font-bold">SideOfEdge</span><span class="font-sm text-color-3">int enum</span></p>
+
+  Allowed values: `1`, `2`
+
+  The side of the edge in relation to the digitized direction of the line feature.
+
+  This attribute is limited to a domain of two values:
+
+  - `1`: Right Side
+  - `2`: Left Side
+
+- <p class="space-x-2"><span class="font-bold">CurbApproach</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+    Allowed values: `0`, `1`, `2`, `3`
+
+    Specifies the direction a vehicle may arrive at and depart from the depot. The options are as following:
+
+    - `0`: Either side of vehicle. The vehicle can approach and depart the depot in either direction. U-turns are allowed. You should choose this setting if your vehicle can make a U-turn at the depot or if it can pull into a driveway or parking lot and turn around.
+    - `1`: Right side of vehicle. When the vehicle approaches and departs the depot, the curb must be on the right side of the vehicle. A U-turn is prohibited.
+    - `2`: Left side of vehicle. When the vehicle approaches and departs the depot, the curb must be on the left side of the vehicle. A U-turn is prohibited.
+
+    <details>
+     <summary><span class="font-sm text-color-link">Show illustration</span></summary>
+
+    <StyledTable headers={"Setting,Coded value,Description"}>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Either side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    0
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    The vehicle can approach and depart the depot in either direction, so a U-turn is allowed at the depot. This setting can be chosen if it is possible and desirable for a vehicle to turn around at the depot. This decision may depend on the width of the road and the amount of traffic or whether the order has a parking lot where vehicles can pull in and turn around.
+
+    ![Either side of vehicle ](./images/GUID-35599FF5-3279-4662-9254-3872968A2FDB-web.png)
+
+    _All arrival and departure combinations are allowed with the Either side of vehicle curb approach._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Right side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    1
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches and departs the depot, the depot must be on the right side of the vehicle. A U-turn is prohibited. 
+
+    ![Right side of vehicle ](./images/GUID-483527D1-724C-44D2-A55D-C1DB52624A91-web.png)
+
+    _The allowed arrival and departure combination is shown for the Right side of vehicle curb approach._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Left side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    2
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches and departs the depot, the depot must be on the left side of the vehicle. A U-turn is prohibited. 
+    ![Left side of vehicle ](./images/GUID-CAC54FFE-9BA2-4892-A829-3803EF3CBA68-web.png)
+
+    _The allowed arrival and departure combination is shown for the Left side of vehicle curb approach._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    </StyledTable>
+
+    The `CurbApproach` attribute is designed to work with both kinds of national driving standards: right-hand traffic (United States) and left-hand traffic (United Kingdom). First, consider an order on the left side of a vehicle. It is always on the left side regardless of whether the vehicle travels on the left or right half of the road. What may change with national driving standards is your decision to approach an order from one of two directions, that is, so it ends up on the right or left side of the vehicle. For example, if you want to arrive at an order and not have a lane of traffic between the vehicle and the order, choose 1 (Right side of vehicle) in the United States and 2 (Left side of vehicle) in the United Kingdom.
+
+    <ColumnLayout layout={2}>
+
+    <Column>
+
+    <Figure>
+
+    ![Right side of vehicle with right-hand traffic](./images/GUID-483527D1-724C-44D2-A55D-C1DB52624A91-web.png)
+
+    <Caption>
+
+    _With right-hand traffic, the curb approach that leaves the vehicle closest to the stop is Right side of vehicle._
+
+    </Caption>
+
+    </Figure>
+
+    </Column>
+
+    <Column>
+
+    <Figure>
+
+    ![Left side of vehicle with left-hand traffic ](./images/GUID-E345B7D0-D33C-4F64-A844-377F0C328A2A-web.png)
+
+    <Caption>
+
+    _With left-hand traffic, the curb approach that leaves the vehicle closest to the stop is Left side of vehicle._
+
+    </Caption>
+
+    </Figure>
+
+    </Column>
+
+    </ColumnLayout>
+
+    </details>
+
+- <p class="space-x-2"><span class="font-bold">Bearing</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The direction in which a point is moving. The units are degrees and are measured clockwise from true north.
+
+  This attribute is used in conjunction with the `BearingTol` attribute. Bearing data is usually sent automatically from a mobile device equipped with a GPS receiver. Try to include bearing data if you are loading an input location that is moving, such as a pedestrian or a vehicle. Using this attribute tends to prevent adding locations to the wrong edges, which can occur when a vehicle is near an intersection or an overpass, for example. Bearing also helps the solver determine the side of the street that the point is on.
+
+  [Learn more about bearing and bearing tolerance](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/bearing-and-bearing-tolerance.htm)
+
+- <p class="space-x-2"><span class="font-bold">BearingTol</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#6d29cc]">default:30</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The bearing tolerance value creates a range of acceptable bearing values when locating moving points on an edge using the `Bearing` attribute.
+
+  If the `Bearing` attribute value is within the range of acceptable values that are generated from the bearing tolerance on an edge, the point can be added as a network location there; otherwise, the closest point on the next-nearest edge is evaluated. The units are in degrees, and the default value is 30. Values must be greater than 0 and less than 180. A value of 30 means that when Network Analyst attempts to add a network location on an edge, a range of acceptable bearing values is generated 15 degrees to either side of the edge (left and right) and in both digitized directions of the edge.
+
+  [Learn more about bearing and bearing tolerance](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/bearing-and-bearing-tolerance.htm)
+
+- <p class="space-x-2"><span class="font-bold">NavLatency</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  Indicates how much cost is expected to elapse from the moment GPS information is sent from a moving vehicle to a server and the moment the processed route is received by the vehicle's navigation device.
+
+  This attribute is only used in the solve process if the `Bearing` and `BearingTol` fields also have values; however, providing a `NavLatency` attribute value is optional, even when values are present in the `Bearing` and `BearingTol`.
+
+</details>
+
+**Example:**
+
+<CodeBlock language="json" source="./code/routing/lmd/examples/inputs/depots.json" group="json" maxLines={20} expandable/>
+
+### routes
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#table">table</a></span><span class="font-bold text-[#a82b1e]">Required</span></p>
+
+The `routes` parameter identifies one or more routes that describe vehicle and driver characteristics. A route can have start and end depot service times, a fixed or flexible starting time, time-based operating costs, distance-based operating costs, multiple capacities, various constraints on a driver's workday, and so on.
+
+When specifying the routes, you can set attributes for each as follows:
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for routes</span></summary>
+
+ #### Attributes for routes
+
+- <p class="space-x-2"><span class="font-bold">Name</span><span class="font-sm text-color-3">string</span></p>
+
+  The name of the route.
+
+  This attribute is the primary key and is used as a foreign key in the Orders, Depot Visits feature layers; and RouteSpecialties tables. Route names are case sensitive and cannot be empty, even if the route is not part of the solve operation. The name must be unique.
+
+- <p class="space-x-2"><span class="font-bold">StartDepotName</span><span class="font-sm text-color-3">string</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The name of the starting depot for the route.
+
+  This attribute is a foreign key to the `Name` attribute in the [`depots`](#depots) parameter. All routes must have the same starting depot. They can all be the same location specified in the `depots` parameter or all left null. The starting depot and the ending depot can be different. Omitting the start depot is useful when the vehicle's starting location is unknown or irrelevant to the problem. Virtual start depots are not allowed if orders or depots are in multiple time zones. If the route is making deliveries and `StartDepotName` is null, it is assumed that the cargo is loaded on the vehicle at a virtual depot before the route begins.
+
+- <p class="space-x-2"><span class="font-bold">EndDepotName</span><span class="font-sm text-color-3">string</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The name of the ending depot for the route.
+
+  This attribute is a foreign key to the `Name` attribute in the [`depots`](#depots) parameter. All routes must have the same ending depot. They can all be the same location specified in the `depots` parameter or all left null. The starting depot and the ending depot can be different.
+
+- <p class="space-x-2"><span class="font-bold">StartDepotServiceTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The service time at the starting depot.
+
+  This can be used to model the time spent loading the vehicle. This attribute can contain a null value, which indicates zero service time. The unit for this attribute value is specified by the [`time_units`](#time_units) parameter.
+
+  <Note type={"note"}>
+
+    The service times at the start and end depots are fixed values (the `StartDepotServiceTime` and `EndDepotServiceTime` attribute values) and do not take into account the actual load for a route. For example, the time taken to load a vehicle at the starting depot may depend on the size of the orders. Consequently, the depot service times can be values corresponding to a full truckload or an average truckload, or you can make your own time estimate.
+
+   </Note>
+
+- <p class="space-x-2"><span class="font-bold">EndDepotServiceTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The service time at the ending depot.
+
+  This can be used to model the time spent unloading the vehicle. This attribute can contain a null value, which indicates zero service time. The unit for this attribute value is specified by the [`time_units`](#time_units) parameter.
+
+  <Note type={"note"}>
+
+    The service times at the start and end depots are fixed values (the `StartDepotServiceTime` and `EndDepotServiceTime` attribute values) and do not take into account the actual load for a route. For example, the time taken to load a vehicle at the starting depot may depend on the size of the orders. Consequently, the depot service times can be values corresponding to a full truckload or an average truckload, or you can make your own time estimate.
+
+  </Note>
+
+- <p class="space-x-2"><span class="font-bold">EarliestStartDate</span><span class="font-sm text-color-3">date</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The earliest allowable starting date for the route.
+
+  This is used by the solver in conjunction with the [`earliest_route_start_date`](#earliest_route_start_date) parameter value to indicate the earliest date the route should start. Either this attribute or the `earliest_route_start_date` parameter must be populated. If this attribute is left null, the `earliest_route_start_date` value will be used for the route.
+
+- <p class="space-x-2"><span class="font-bold">EarliestStartTime</span><span class="font-sm text-color-3">time</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The earliest allowable starting time for the route.
+
+  This is used by the solver in conjunction with the [`earliest_route_start_time`](#earliest_route_start_time) parameter value to indicate the earliest time the route should start. Either this attribute or the `earliest_route_start_time` parameter must be populated. If this attribute is left null, the `earliest_route_start_time` will be used for the route.
+
+- <p class="space-x-2"><span class="font-bold">StartFlexibility</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  Indicates how long after the earliest allowed route start time the route can start.
+
+  The value can be null or zero, which means that there is no flexibility in the starting time, or a positive number. The unit for this attribute value is specified by the [`time_units`](#time_units) parameter of the analysis object.
+
+- <p class="space-x-2"><span class="font-bold">ArriveDepartDelay</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The amount of travel time needed to accelerate the vehicle to normal travel speeds, decelerate it to a stop, and move it off and on the network (for example, in and out of parking).
+
+  The unit for this attribute value is specified by the [`time_units`](#time_units) parameter. By including an `ArriveDepartDelay` value, the solver is deterred from sending many routes to service physically coincident orders. The cost for this attribute is incurred between visits to non-coincident orders and depots. For example, when a route starts from a depot and visits the first order, the total arrive/depart delay is added to the travel time. The same is true when traveling from the first order to the second order. If the second and third orders are coincident, the `ArriveDepartDelay` value is not added between them, since the vehicle doesn't need to move.
+
+  For example, there are five coincident orders in a high-rise building, and they are serviced by three different routes. This means three arrive/depart delays will be incurred; that is, three drivers will need to find parking places and enter the same building. However, if the orders can be serviced by one route instead, only one driver will need to park and enter the building, and only one arrive/depart delay will be incurred. Since the solver tries to minimize cost, it will attempt to limit the arrive/depart delays by specifying the single-route option. (Multiple routes may need to be sent when other constraints—such as specialties, time windows, or capacities—require it.)
+
+- <p class="space-x-2"><span class="font-bold">Capacity_1 -- Capacity_9</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The maximum amount (for example, volume, weight, or quantity) that can be carried by the vehicle. If there are multiple capacities, specify them using the Capacity_1 through Capacity_9 fields as needed.
+
+  <Note type={"note"}>
+
+   A null value is equivalent to infinity. Capacity values cannot be negative.
+
+  </Note>
+
+- <p class="space-x-2"><span class="font-bold">FixedCost</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  A fixed monetary cost that is incurred when the route is used in a solution (that is, it has orders assigned to it).
+
+  This attribute can contain null values, which indicates zero fixed cost. This cost is part of the total route operating cost.
+
+- <p class="space-x-2"><span class="font-bold">CostPerUnitTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:1.0</span></p>
+
+  The monetary cost incurred per unit of work time for the total route duration, including travel times as well as service times and wait times at orders and depots.
+
+  This attribute cannot contain a null value and has a default value of 1.0. The unit for this attribute value is specified by the [`time_units`](#time_units) parameter.
+
+- <p class="space-x-2"><span class="font-bold">CostPerUnitDistance</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The monetary cost incurred per unit of distance traveled for the route length (total travel distance). This attribute can contain null values, which indicates zero cost. The distance unit is specified by the [`distance_units`](#distance_units) parameter.
+
+- <p class="space-x-2"><span class="font-bold">OvertimeStartTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The duration of regular work time before overtime computation begins.
+
+  This attribute can contain null values, which indicates that overtime does not apply. If including an `OvertimeStartTime` value, it should be greater than zero and less than the `MaxTotalTime` value. The unit for this attribute value is specified by the [`time_units`](#time_units) parameter.
+
+  For example, if the driver is to be paid overtime pay when the total route duration extends beyond eight hours, `OvertimeStartTime` is specified as 8 if the [`time_units`](#time_units) property of the analysis layer is set to Hours.
+
+- <p class="space-x-2"><span class="font-bold">CostPerUnitOverTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The monetary cost incurred per time unit of overtime work. This can only contain a null value if `OvertimeStartTime` is also null. Otherwise, it must be a positive value greater than the `CostPerUnitTime` value.
+
+- <p class="space-x-2"><span class="font-bold">MaxOrderCount</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The maximum allowable number of orders on the route.
+
+  This attribute can contain null values, which indicates that there is no constraint on the number of orders a route can visit.
+
+- <p class="space-x-2"><span class="font-bold">MaxTotalTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The maximum allowable route duration.
+
+  The route duration includes travel times as well as service and wait times at orders and depots. Either this attribute or the [`max_route_total_time`](#max_route_total_time) parameter must be populated. If this attribute is left null, the `max_route_total_time` value will be used for the route.
+
+- <p class="space-x-2"><span class="font-bold">MaxTotalTravelTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The maximum allowable travel time for the route.
+
+  The travel time includes only the time spent driving on the network and does not include service or wait times. The unit for this attribute value is specified by the [`time_units`](#time_units) parameter. This attribute can contain null values, which indicates there is no constraint on the maximum allowable travel time. This attribute value can't be larger than the `MaxTotalTime` attribute value.
+
+- <p class="space-x-2"><span class="font-bold">MaxTotalDistance</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The maximum allowable travel distance for the route.
+
+  The unit for the total distance is specified by the [`distance_units`](#distance_units) parameter of the analysis layer. This attribute can contain null values, which indicates that there is no constraint on the maximum allowable travel distance.
+
+- <p class="space-x-2"><span class="font-bold">ZoneName</span><span class="font-sm text-color-3">string</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The name of the zone that will be used for this route.
+
+  These are zones that specify a work territory for this route. `ZoneName` is a foreign key to the `Name` attribute in the [`zones`](#zones) parameter. This attribute can contain null values, which indicates that there is no route zone for this route.
+
+- <p class="space-x-2"><span class="font-bold">IsHardZone</span><span class="font-sm text-color-3">bool</span><span class="font-bold text-[#00619b]">nullable</span><span class="font-bold text-[#6d29cc]">default:null</span></p>
+
+  A Boolean value indicating a hard or soft route zone.
+
+  - A value of `True` (1) indicates that the route zone is hard; that is, an order that falls outside the route zone polygon can't be assigned to the route.
+  - A value of `False` (0) indicates that the order can still be assigned, but the cost of servicing the order is weighted by a function that is based on the Euclidean distance from the route zone. This means that as the straight-line distance from the soft zone to the order increases, the likelihood of the order being assigned to the route decreases.
+
+  <Note>
+   If a route has a `ZoneName`, then `IsHardZone` cannot be null. If a route does not have a `ZoneName`, then `IsHardZone` must be null.
+  </Note>
+
+- <p class="space-x-2"><span class="font-bold">AssignmentRule</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#00619b]">nullable</span><span class="font-bold text-[#6d29cc]">default:null</span></p>
+
+  This specifies whether the route can be used when solving the problem.
+
+  This attribute is constrained by a domain of values. The possible values are as following:
+  - `Null`: The route is open to new orders. 
+  - `1`: Closed. The route will not accept new orders but it can be re-sequenced or have the outputs updated.
+  - `2`: Exclude. The route is excluded from the solve operation. The output for this route will not be updated. The orders with the corresponding route will also be excluded from the route, and the output from those orders will not be updated.
+
+</details>
+
+**Example:**
+
+<CodeBlock language="json" source="./code/routing/lmd/examples/inputs/routes.json" group="json" maxLines={20} expandable/>
+
+### token
+
+<p class="space-x-2"><span class="font-sm text-color-3">type:string</span><span class="font-bold text-[#a82b1e]">Required</span></p>
+
+Use this parameter to specify a token that provides the identity of a user that has the permissions to access the service. The [security and authentication](/generate-token) page provides more information about how an access token can be obtained.
+
+### f
+
+<p class="space-x-2"><span class="font-sm text-color-3">type:enum</span><span class="font-bold text-[#a82b1e]">Required</span></p>
+
+**Allowed values:** `json`, `pjson`
+
+Use this parameter to specify the response format.
+
+The `pjson`  value is used for printing the JSON response in a prettified format.
+
+
+## Optional parameters
+
+### order_specialties
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+
+The `order_specialties` parameter lists the specialties that can be required by orders and supported by routes. A route can service an order only if it supports all the specialties required for that order.
+
+When specifying the order specialties, you can set properties using the following attributes:
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for order_specialties</span></summary>
+
+ #### Attributes for order_specialties
+
+- <p class="space-x-2"><span class="font-bold">OrderName</span><span class="font-sm text-color-3">string</span></p>
+
+  The name of the order. This attribute is a foreign key to the name attribute in the [`orders`](#orders) parameter.
+
+- <p class="space-x-2"><span class="font-bold">SpecialtyName</span><span class="font-sm text-color-3">string</span></p>
+
+  The name of the specialty.
+
+  This indicates the required specialty for the order. Only a single specialty is listed per line. If an order requires more than one specialty, create a new entry. Specialty names cannot contain spaces. For example, a senior technician specialty should be entered as SeniorTechnician. Specialty names are case sensitive and cannot be empty.
+
+</details>
+
+**Example:**
+
+<CodeBlock language="json" source="./code/routing/lmd/examples/inputs/order_specialties.json" group="json" maxLines={20} expandable/>
+
+### route_specialties
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+
+The route_specialties parameter lists the specialties that can be required by orders and supported by routes. A route can service an order only if it supports all the specialties required for that order.
+
+When specifying the route specialties, you can set properties using the following attributes:
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for route_specialties</span></summary>
+
+ #### Attributes for route_specialties
+
+- <p class="space-x-2"><span class="font-bold">RouteName</span><span class="font-sm text-color-3">string</span></p>
+
+  The name of the route. This attribute is a foreign key to the `Name` attribute in the [`routes`](#routes) parameter.
+
+- <p class="space-x-2"><span class="font-bold">SpecialtyName</span><span class="font-sm text-color-3">string</span></p>
+
+  The name of the specialty.
+
+  This indicates the specialty that the route supports. Only a single specialty is listed per line. If a route supports more than one specially, create a new entry. Specialty names cannot contain spaces. For example, a senior technician specialty should be entered as SeniorTechnician. Specialty names are case sensitive and cannot be empty.
+
+</details>
+
+**Example:**
+
+<CodeBlock language="json" source="./code/routing/lmd/examples/inputs/route_specialties.json" group="json" maxLines={20} expandable/>
+
+### zones
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+
+Zones specify a work territory. It is a polygon feature and is used to constrain servicing only those orders that fall within or near an area.
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for zones</span></summary>
+
+ #### Attributes for zones
+
+- <p class="space-x-2"><span class="font-bold">Name</span><span class="font-sm text-color-3">string</span></p>
+
+  The name of the zone.
+
+  The name attribute is useful for describing the zone since it can be used for multiple routes. The name must be unique. Names are case sensitive and cannot be empty. This attribute is the primary key and is used as a foreign key in the [`routes`](#routes) parameter.
+
+</details>
+
+**Example:**
+
+<CodeBlock language="json" source="./code/routing/lmd/examples/inputs/zones.json" group="json" maxLines={20} expandable/>
+
+### point_barriers
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+
+Use this parameter to specify one or more points that will act as temporary restrictions or represent additional time or distance that may be required to travel on the underlying streets. For example, a point barrier can be used to represent a fallen tree along a street or a time delay spent at a railroad crossing. The tool imposes a limit of 250 points that can be added as barriers.
+
+When specifying point barriers, you can set properties for each, such as its name or barrier type.
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for point_barriers</span></summary>
+
+ #### Attributes for point_barriers
+
+- <p class="space-x-2"><span class="font-bold">Name</span><span class="font-sm text-color-3">string</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The name of the barrier.
+
+<Note type="{Note}">
+
+  You can specify a network location using `SourceID`, `SourceOID`, `PosAlong`, and `SideOfEdge` described below. If the network location is not provided, the solver will derive it from the input geometry
+  
+  </Note>
+
+- <p class="space-x-2"><span class="font-bold">SourceID</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The numeric identifier of the network dataset source feature class on which the input point is located.
+
+- <p class="space-x-2"><span class="font-bold">SourceOID</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The object ID of the feature in the source on which the input point is located. 
+
+- <p class="space-x-2"><span class="font-bold">PosAlong</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The position along the digitized direction of the source line feature. This value is stored as a ratio. This attribute is null if the network location references a junction.
+
+- <p class="space-x-2"><span class="font-bold">SideOfEdge</span><span class="font-sm text-color-3">int enum</span></p>
+
+   Allowed values: `1`, `2`
+
+   The side of the edge in relation to the digitized direction of the line feature.
+
+   This attribute is limited to a domain of two values:
+
+   - `1`: Right Side
+   - `2`: Left Side
+   
+- <p class="space-x-2"><span class="font-bold">CurbApproach</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+    Allowed values: `0`, `1`, `2`, `3`
+
+    Specifies the direction a vehicle may arrive at and depart from the network location. The options are as following:
+
+    - `0`: Either side of vehicle. The vehicle can approach and depart the network location in either direction. U-turns are allowed. You should choose this setting if your vehicle can make a U-turn at the stop or if it can pull into a driveway or parking lot and turn around.
+    - `1`: Right side of vehicle. When the vehicle approaches and departs the network location, the curb must be on the right side of the vehicle. A U-turn is prohibited.
+    - `2`: Left side of vehicle. When the vehicle approaches and departs the network location, the curb must be on the left side of the vehicle. A U-turn is prohibited.
+  
+    <details>
+     <summary><span class="font-sm text-color-link">Show illustration</span></summary>
+
+    <StyledTable headers={"Setting,Coded value,Description"}>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Either side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    0
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    The vehicle can approach and depart the network location in either direction, so a U-turn is allowed at the order. This setting can be chosen if it is possible and desirable for a vehicle to turn around at the network location. This decision may depend on the width of the road and the amount of traffic or whether the order has a parking lot where vehicles can pull in and turn around.
+
+    ![Either side of vehicle ](./images/GUID-35599FF5-3279-4662-9254-3872968A2FDB-web.png)
+
+    _All arrival and departure combinations are allowed with the Either side of vehicle curb approach._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Right side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    1
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches and departs the network location, the order must be on the right side of the vehicle. A U-turn is prohibited. 
+
+    ![Right side of vehicle ](./images/GUID-483527D1-724C-44D2-A55D-C1DB52624A91-web.png)
+
+    _The allowed arrival and departure combination is shown for the Right side of vehicle curb approach._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    <StyledTableRow>
+
+    <StyledTableCell cellStyle="markdown">
+
+    Left side of vehicle
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    2
+
+    </StyledTableCell>
+
+    <StyledTableCell cellStyle="markdown">
+
+    When the vehicle approaches and departs the network location, the order must be on the left side of the vehicle. A U-turn is prohibited. 
+
+    ![Left side of vehicle ](./images/GUID-CAC54FFE-9BA2-4892-A829-3803EF3CBA68-web.png)
+
+    _The allowed arrival and departure combination is shown for the Left side of vehicle curb approach._
+
+    </StyledTableCell>
+
+    </StyledTableRow>
+
+    </StyledTable>
+
+    The `CurbApproach`  attribute is designed to work with both kinds of national driving standards: right-hand traffic (United States) and left-hand traffic (United Kingdom). First, consider an order on the left side of a vehicle. It is always on the left side regardless of whether the vehicle travels on the left or right half of the road. What may change with national driving standards is your decision to approach an order from one of two directions, that is, so it ends up on the right or left side of the vehicle. For example, if you want to arrive at an order and not have a lane of traffic between the vehicle and the order, choose 1 (Right side of vehicle) in the United States and 2 (Left side of vehicle) in the United Kingdom.
+
+    <ColumnLayout layout={2}>
+
+    <Column>
+
+    <Figure>
+
+    ![Right side of vehicle with right-hand traffic](./images/GUID-483527D1-724C-44D2-A55D-C1DB52624A91-web.png)
+
+    <Caption>
+
+    _With right-hand traffic, the curb approach that leaves the vehicle closest to the stop is Right side of vehicle._
+
+    </Caption>
+
+    </Figure>
+
+    </Column>
+
+    <Column>
+
+    <Figure>
+
+    ![Left side of vehicle with left-hand traffic ](./images/GUID-E345B7D0-D33C-4F64-A844-377F0C328A2A-web.png)
+
+    <Caption>
+
+    _With left-hand traffic, the curb approach that leaves the vehicle closest to the stop is Left side of vehicle._
+
+    </Caption>
+
+    </Figure>
+
+    </Column>
+
+    </ColumnLayout>
+
+    </details>
+
+- <p class="space-x-2"><span class="font-bold">FullEdge</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#6d29cc]">default:False</span></p>
+
+  This attribute is specific to restriction point barriers on edge elements.
+
+  - `False`: Permits travel on the edge up to the barrier but not through it.
+  - `True`: Restricts travel anywhere on the associated edge.
+
+- <p class="space-x-2"><span class="font-bold">BarrierType</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+  Allowed values: `0`, `2`,
+
+  Specifies whether the point barrier restricts travel completely or adds time or distance when it is crossed.
+
+  The value for this attribute is specified as one of the following options:
+
+  - `0`:Restriction. Prohibits travel through the barrier. 
+  - `2`:Added Cost. Traveling through the barrier increases the travel time or distance by the amount specified in the `Additional_Time`, `Additional_Distance`, or `AdditionalCost` attribute. This barrier type is referred to as an added cost point barrier.
+
+- <p class="space-x-2"><span class="font-bold">Additional_Time</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+  The added travel time when the barrier is traversed. This attribute is applicable only for added-cost barriers. The attribute value must be greater than or equal to zero, and its units are the same as those specified in the [`time_units`](#time_units) parameter.
+
+- <p class="space-x-2"><span class="font-bold">Additional_Distance</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+  The added distance when the barrier is traversed. This attribute is applicable only for added-cost barriers. The attribute value must be greater than or equal to zero, and its units are the same as those specified in the [`distance_units`](#distance_units) parameter.
+
+- <p class="space-x-2"><span class="font-bold">AdditionalCost</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+  The added cost when the barrier is traversed. This attribute is applicable only for added-cost barriers. The attribute value must be greater than or equal to zero.
+
+- <p class="space-x-2"><span class="font-bold">Bearing</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The direction in which a point is moving. The units are degrees and are measured clockwise from true north.
+
+  This attribute is used in conjunction with the BearingTol attribute. Bearing data is usually sent automatically from a mobile device equipped with a GPS receiver. Try to include bearing data if you are loading an input location that is moving, such as a pedestrian or a vehicle. Using this attribute tends to prevent adding locations to the wrong edges, which can occur when a vehicle is near an intersection or an overpass, for example. Bearing also helps the solver determine the side of the street that the point is on.
+
+  [Learn more about bearing and bearing tolerance](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/bearing-and-bearing-tolerance.htm)
+
+- <p class="space-x-2"><span class="font-bold">BearingTol</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#6d29cc]">default:30</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The bearing tolerance value creates a range of acceptable bearing values when locating moving points on an edge using the `Bearing` attribute.
+
+  If the `Bearing` attribute value is within the range of acceptable values that are generated from the bearing tolerance on an edge, the point can be added as a network location there; otherwise, the closest point on the next-nearest edge is evaluated. The units are in degrees, and the default value is 30. Values must be greater than 0 and less than 180. A value of 30 means that when Network Analyst attempts to add a network location on an edge, a range of acceptable bearing values is generated 15 degrees to either side of the edge (left and right) and in both digitized directions of the edge.
+
+  [Learn more about bearing and bearing tolerance](https://pro.arcgis.com/en/pro-app/latest/help/analysis/networks/bearing-and-bearing-tolerance.htm)
+
+- <p class="space-x-2"><span class="font-bold">NavLatency</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  Indicates how much cost is expected to elapse from the moment GPS information is sent from a moving vehicle to a server and the moment the processed route is received by the vehicle's navigation device.
+
+  This attribute is only used in the solve process if the `Bearing` and `BearingTol` attribute also have values; however, providing a `NavLatency` attribute value is optional, even when values are present in the `Bearing` and `BearingTol`.
+
+</details>
+
+**Example:**
+
+<CodeBlock language="json" source="./code/routing/shared/examples/inputs/point_barriers.json" group="json" maxLines={20} expandable/>
+
+### line_barriers
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+
+Use this parameter to specify one or more lines that prohibit travel anywhere the lines intersect the streets. For example, a parade or protest that blocks traffic across several street segments can be modeled with a line barrier. A line barrier can also quickly fence off several roads from being traversed, thereby channeling possible routes away from undesirable parts of the street network.
+
+When specifying line barriers, you can set the name of each barrier using the following attribute:
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for line_barriers</span></summary>
+
+ #### Attributes for line_barriers
+
+- <p class="space-x-2"><span class="font-bold">Name</span><span class="font-sm text-color-3">string (length: 500)</span></p>
+
+    The name of the barrier.
+
+</details>
+
+**Example:**
+
+<CodeBlock language="json" source="./code/routing/shared/examples/inputs/line_barriers.json" group="json" maxLines={20} expandable/>
+
+### polygon_barriers
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+
+Use this parameter to specify polygons that either completely restrict travel or proportionately scale the time or distance required to travel on the streets intersected by the polygons.
+
+When specifying polygon barriers, you can set properties for each, such as its name or barrier type, using the following attributes:
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for polygon_barriers</span></summary>
+
+ #### Attributes for line_barriers
+
+- <p class="space-x-2"><span class="font-bold">Name</span><span class="font-sm text-color-3">string</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The name of the barrier.
+
+- <p class="space-x-2"><span class="font-bold">BarrierType</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#6d29cc]">default:0</span></p>
+
+  Allowed values: `0`, `1`
+
+  Specifies whether the barrier restricts travel completely or scales the cost of traveling through it.
+
+  The value for this attribute can be specified as one of the following options:
+
+  - `0`: Restriction. Prohibits traversing through any part of the barrier. .
+  - `1`: Scaled Cost. Scales the cost (such as travel time or distance) required to travel the underlying streets by a factor specified using the `ScaledTimeFactor` or `ScaledDistanceFactor` attribute. If the streets are partially covered by the barrier, the travel time or distance is apportioned and then scaled.
+  For example, a factor of 0.25 means that travel on underlying streets is expected to be four times faster than normal. A factor of 3.0 means it is expected to take three times longer than normal to travel on underlying streets. This barrier type is referred to as a scaled-cost polygon barrier. It can be used to model storms that reduce travel speeds in specific regions, for example.
+
+- <p class="space-x-2"><span class="font-bold">ScaledTimeFactor</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:1</span></p>
+
+  The scaled travel time when the barrier is traversed.
+
+  This attribute is applicable only for scaled-cost barriers. The attribute value must be greater than or equal to zero, and its units are the same as those specified in the [`time_units`](#time_units) parameter.
+
+- <p class="space-x-2"><span class="font-bold">ScaledDistanceFactor</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:1</span></p>
+
+  The scaled distance when the barrier is traversed.
+
+  This attribute is applicable only for scaled-cost barriers. The attribute value must be greater than or equal to zero, and its units are the same as those specified in the [`distance_units`](#distance_units) parameter.
+
+- <p class="space-x-2"><span class="font-bold">ScaledCostFactor</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#6d29cc]">default:1</span></p>
+
+  The scaled cost when the barrier is traversed. This attribute is applicable only for scaled-cost barriers. The attribute value must be greater than or equal to zero.
+
+</details>
+
+**Example:**
+
+<CodeBlock language="json" source="./code/routing/shared/examples/inputs/polygon_barriers.json" group="json" maxLines={20} expandable/>
+
+### travel_mode
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#travel_mode_object">travel_mode_object</a></span></p>
+
+Choose the mode of transportation for the analysis.
+
+To learn more about travel modes, see [Configure travel modes](https://enterprise.arcgis.com/en/portal/latest/administer/windows/travel-modes.htm).
+
+In the example below, the following is a string representing the Walking Time travel mode as returned by the `GetTravelModes` tool:
+
+<CodeBlock language="json" source="./code/routing/data-type/job-request/travel_mode_walking_time_string.json" group="json" maxLines={1}/>
+
+The value above should be converted to a valid JSON object and passed as the value for the `travel_mode` parameter as shown below.
+
+<CodeBlock language="json" source="./code/routing/data-type/job-request/travel_mode_walking_time_json.json" group="json" maxLines={20} expandable/>
+
+### locate_settings
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#locate_settings_object">locate_settings_object</a></span></p>
+
+Use this parameter to specify settings that affect how inputs are located, such as the maximum search distance to use when locating the inputs on the network or the network sources being used for locating.
+
+<Note type={"note"}>
+
+The default value for this parameter can be obtained from the service resource JSON. Append `?token=<yourToken>&f=pjson` to the service URL to access the service resource JSON.
+
+</Note>
+
+You can specify default locate settings and can override locate settings for individual features such as, orders, depots, point_barriers, line_barriers, and polygon_barriers through locator JSON object. 
+
+<details>
+ <summary><span class="font-sm text-color-link">Show examples</span></summary>
+
+ #### Examples for locate_settings
+
+**Example 1: Specify default locate settings using a JSON structure**
+
+This example shows how to specify locate settings so inputs are only located within 500 meters of the specified location. A small search tolerance like this can be helpful if you are solving using a walking travel mode and don't want inputs to be located farther than 500 meters from the original point location.
+
+<CodeBlock language="json" source="./code/routing/lmd/examples/inputs/locate_settings_ex1.json" group="json" maxLines={20} expandable/>
+
+**Example 2: Specify default locate settings and locate settings overrides for some inputs using a JSON structure**
+
+This example shows how to specify locate settings to prevent orders and depots from locating on highway ramps. The default locate settings allow locating on the Routing_Streets source. For orders and depots, the `overrides` option is used to specify a where clause for the Routing_Streets source to prevent locating on highway ramps (a `ROAD_CLASS` attribute value of 3). With this `locate_settings` JSON, orders and depots cannot locate on highway ramps, but barriers can because they use the default locate settings, which do not include a where clause.
+
+<CodeBlock language="json" source="./code/routing/lmd/examples/inputs/locate_settings_ex2.json" group="json" maxLines={20} expandable/>
+
+**Example 3: Specify default locate settings and locate settings overrides using a JSON structure so different inputs are located using different sources**
+
+This example shows how to specify default locate settings to locate inputs on the Routing_Streets source feature class while permitting point barriers to only locate on the system junctions feature class (Routing_ND_Junctions).
+
+<CodeBlock language="json" source="./code/routing/lmd/examples/inputs/locate_settings_ex3.json" group="json" maxLines={20} expandable/>
+
+</details>
+
+### ignore_invalid_order_locations
+
+<p class="space-x-2"><span class="font-sm text-color-3">type:bool</span><span class="font-bold text-[#6d29cc]">default:false</span></p>
+
+Use this parameter to specify whether invalid orders will be ignored when solving the last mile delivery problem.
+
+- true—The solve operation will ignore any invalid orders and return a solution, given it didn't encounter any other errors. To generate routes and deliver them to drivers immediately, you may be able to ignore invalid orders, solve, and distribute the routes to your drivers. Then, resolve any invalid orders from the last solve and include them in the fleet routing analysis for the next workday or work shift.
+
+- false—The solve operation will fail when any invalid orders are encountered. An invalid order is an order that the fleet routing solver can't reach. An order may be unreachable for a variety of reasons, including when the order is located on a prohibited network element, isn't located on the network at all, or is located on a disconnected portion of the network.
+
+### earliest_route_start_date
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:string</span></span></p>
+
+Use this parameter to specify the default earliest start date for routes. This date is used for all routes for which the `EarliestStartDate` attribute in the [`routes`](#routes) parameter is null. When this property is not specified, all rows in the `routes` parameter must specify a value in the `EarliestStartDate` attribute.
+
+The format to provide the start date is YYYY-MM-DD, for example, 2023-03-15.
+
+### earliest_route_start_time
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:string</span></span></p>
+
+Use this parameter to specify the default earliest start time for routes. This time of day is used for all routes for which the `EarliestStartTime` attribute in the [`routes`](#routes) parameter is null. When this property is not specified, all rows in the `routes` parameter must specify a value in the `EarliestStartTime` attribute.
+
+The format to provide the start date is hh:mm:ss, for example, 14:30:30.
+
+### time_zone_usage_for_time_fields
+
+<p class="space-x-2"><span class="font-sm text-color-3">type:enum</span><span class="font-bold text-[#6d29cc]">default:GEO_LOCAL</span></p>
+
+**Allowed values:** `GEO_LOCAL`, `UTC`
+
+Use this parameter to specify the time zone for the input date-time fields.
+
+- `GEO_LOCAL`: The date-time values associated with the orders or depots are in the time zone in which the orders and depots are located. For routes, the date-time values are based on the time zone in which the starting depot for the route is located. If a route does not have a starting depot, all orders and depots across all the routes must be in a single time zone. For example, if a depot is located in an area that follows eastern standard time and has the first time window values (specified as `TimeWindowStart` and `TimeWindowEnd`) of 8 AM and 5 PM, the time window values will be treated as 8:00 a.m. and 5:00 p.m. in eastern standard time.
+- `UTC`: The date-time values associated with the orders or depots are in coordinated universal time (UTC) and are not based on the time zone in which the orders or depots are located. For example, if a depot is located in an area that follows eastern standard time and has the first time window values (specified as `TimeWindowStart` and `TimeWindowEnd`) of 8 AM and 5 PM, the time window values will be treated as 3:00 a.m. and 12:00 p.m. in eastern standard time.
+
+This parameter specifies the time zone for the following fields:
+- `TimeWindowStart`, `TimeWindowEnd`, `InboundArriveTime`, and `OutboundDepartTime` on orders.
+- `EarliestStartDate` and `EarliestStartTime` on routes.
+
+### max_route_total_time
+
+<p class="space-x-2"><span class="font-sm text-color-3">type:double (positive)</span></p>
+
+Use this parameter to specify the maximum allowed total time for each route. The value can be any positive number.
+
+The value is used for all routes when the `MaxTotalTime` attribute in the [`routes`](#routes) parameter is null. When no value is specified for `max_route_total_time`, all rows in the `routes` parameter must specify a value in the `MaxTotalTime` attribute.
+
+The value is interpreted in the units specified in the [`time_units`](#time_units) parameter.
+
+### sequence_gap
+
+<p class="space-x-2"><span class="font-sm text-color-3">type:int (positive)</span><span class="font-bold text-[#6d29cc]">default:1</span></p>
+
+Use this parameter to specify the gap in numerical values to leave in the `Sequence` attribute in the [`orders`](#orders) parameter between adjacent orders when the analysis is solved. The value acts as a multiplier for the actual sequence of orders on each route. For instance, if the gap is 5, the first order on the route would have a Sequence attribute value of 5, the second order on the route would have a Sequence attribute value of 10, the third 15, and so on. This parameter helps support inserting orders after the initial route plan has been created because the new orders can be inserted into the sequence gaps.
+
+The first time the analysis is solved, the Sequence attribute values will be populated with sequential values using the designated sequence gap. On subsequent solves of the same analysis, the Sequence attribute values of existing orders with a `PreserveRouteAndRelativeSequence` assignment rule will be maintained, and new orders will be inserted into the gaps using available integer values for the Sequence attribute that are not in use by other orders. If the sequence gap is set to 1, the sequence values will always be updated to contiguous values for every solve.
+
+### time_units
+
+<p class="space-x-2"><span class="font-sm text-color-3">type:enum</span><span class="font-bold text-[#6d29cc]">default:Minutes</span></p>
+
+**Allowed values:** `Seconds`, `Minutes`, `Hours`, `Days`
+
+Use this parameter to specify the time units for all time-based attribute values specified with different parameters.
+
+The parameter is specified using one of the following values:
+
+- `Seconds`
+- `Minutes`
+- `Hours`
+- `Days`
+
+Many parameters in a last mile delivery problem analysis have attributes for storing time values, such as `ServiceTime` for the [`orders`](#orders) parameter and `CostPerUnitTime` for the [`routes`](#routes) parameter. To minimize data entry requirements, these attribute values don't include units. Instead, all time-based attribute values must be entered in the same units, and this parameter is used to specify the units of those values.
+
+<Note type={"note"}>
+
+   The time-based attributes in the output parameters also use the same units specified by this parameter.
+
+</Note>
+
+
+### distance_units
+
+<p class="space-x-2"><span class="font-sm text-color-3">type:enum</span><span class="font-bold text-[#6d29cc]">default:Miles</span></p>
+
+**Allowed values:** `Miles`, `Kilometers`, `Meters`, `Feet`, `Yards`, `NauticalMiles`
+
+Use this parameter to specify the distance units for all distance-based attribute values specified with different parameters.
+
+The parameter is specified using one of the following values:
+
+- `Miles`
+- `Kilometers`
+- `Feet`
+- `Yards`
+- `Meters`
+- `NauticalMiles`
+
+Many parameters in a last mile delivery problem analysis have attributes for storing distance values, such as `MaxTotalDistance` for the [`routes`](#routes) parameter. To minimize data entry requirements, these attribute values don't include units. Instead, all distance-based attribute values must be entered in the same units, and this parameter is used to specify the units of those values.
+
+<Note type={"note"}>
+
+ The distance-based attributes in the output parameters also use the same units specified by this parameter.
+
+</Note>
+
+### route_shape
+
+<p class="space-x-2"><span class="font-sm text-color-3">type:enum</span><span class="font-bold text-[#6d29cc]">default:Straight Line</span></p>
+
+**Allowed values:** `True Shape with Measures`, `Straight Line`, `None`
+
+Use this parameter to specify the type of route features that are output by the service.
+
+The parameter can be specified using one of the following values:
+
+- `True Shape with Measures`—The exact shape of the resulting route that is based on the underlying streets will be returned. Additionally, construct measures will be used so the shape can be used in linear referencing. The measurements increase from the first stop and record the cumulative travel time in the units specified by the [`time_units`](#time_units) parameter. To get M value on the output features, request output with returnM set to `True`.
+
+- `Straight Line`—A straight line between the depots and orders will be returned.
+
+- `None`—No shape for any route will be returned. This value can be useful when you want to optimize performance and are only interested in determining the route's total travel time or travel distance, not the route paths.
+
+### populate_directions
+
+<p class="space-x-2"><span class="font-sm text-color-3">type:bool</span><span class="font-bold text-[#6d29cc]">default:false</span></p>
+
+Use this parameter to specify whether the service will generate driving directions for each route.
+
+- `true`—Directions will be generated and configured based on the value of the [`directions_language`](#directions_language) parameter.
+- `false`—Directions will not be generated, and the service returns an empty value for the [`output_direction_points`](#output_direction_points) and [`output_direction_lines`](#output_direction_lines) output parameter.
+
+### directions_language
+
+<p class="space-x-2"><span class="font-sm text-color-3">type:enum</span><span class="font-bold text-[#6d29cc]">default:en</span></p>
+
+Use this parameter to specify the language that will be used when generating travel directions.
+
+This parameter applies only when the [`populate_directions`](#populate_directions) parameter is set to true. The service supports generating directions in the following languages:
+
+<details>
+ <summary><span class="font-sm text-color-link">Show all supported languages</span></summary>
+
+- `ar`: Arabic
+- `bg`: Bulgarian
+- `bs`: Bosnian
+- `ca`: Catalan
+- `cs`: Czech
+- `da`: Danish
+- `de`: German
+- `el`: Greek
+- `en`: English
+- `es`: Spanish
+- `et`: Estonian
+- `fi`: Finnish
+- `fr`: French
+- `he`: Hebrew
+- `hr`: Croatian
+- `hu`: Hungarian
+- `id`: Indonesian
+- `it`: Italian
+- `ja`: Japanese
+- `ko`: Korean
+- `lt`: Lithuanian
+- `lv`: Latvian
+- `nb`: Norwegian
+- `nl`: Dutch
+- `pl`: Polish
+- `pt-BR`: Portuguese (Brazil)
+- `pt-PT`: Portuguese (Portugal)
+- `ro`: Romanian
+- `ru`: Russian
+- `sk`: Slovak
+- `sl`: Slovenian
+- `sr`: Serbian
+- `sv`: Swedish
+- `th`: Thai
+- `tr`: Turkish
+- `uk`: Ukrainian
+- `vi`: Vietnamese
+- `zh-CN`: Chinese (China)
+- `zh-HK`: Chinese (Hong Kong)
+- `zh-TW`: Chinese (Taiwan)
+
+</details>
+
+The service searches for an exact match for the specified language including any language localization. If no exact match is found, it tries to match the language family. If a match is still not found, the service returns the directions using the default language of the server's operating system. For example, if the directions language is specified as `es-MX` (Mexican Spanish), the service will return the directions in Spanish, as it supports the es language code, not `es-MX`.
+
+
+<Note type={"caution"}>
+
+   If a language supports localization, such as Brazilian Portuguese (pt-BR) and European Portuguese (pt-PT), specify the language family and the localization. If you only specify the language family, the service will not match the language family and will return directions in the default language of the server's operating system. For example, if the directions language is specified as `pt`, the service will return the directions in the default language of the server's operating system since it cannot determine whether the directions should be returned in `pt-BR` or `pt-PT`.
+
+  </Note>
+
+### save_route_data
+
+<p class="space-x-2"><span class="font-sm text-color-3">type:bool</span><span class="font-bold text-[#6d29cc]">default:false</span></p>
+
+Use this parameter to specify whether the service will create a .zip file that contains a file geodatabase with the inputs and outputs of the analysis in a format that can be used to share route layers with your portal.
+
+- `true`—The route data will be saved as a .zip file. This file can be downloaded from the URL provided as part of the [`output_route_data`](#output_route_data) parameter.
+
+- `false`—The route data will not be saved.
+
+### save_output_network_analysis_layer
+
+<p class="space-x-2"><span class="font-sm text-color-3">type:bool</span><span class="font-bold text-[#6d29cc]">default:false</span></p>
+
+Use this parameter to specify whether the service will save the analysis settings as a network analysis layer file.
+
+You cannot work directly with this file even when you open the file in an ArcGIS Desktop application such as ArcGIS Pro. It is meant to be sent to Esri Technical Support to diagnose the quality of results returned from the service.
+
+- true—The network analysis layer file will be saved. The file can be downloaded from the URL provided as part of the [`output_network_analysis_layer_package`](#output_network_analysis_layer_package) parameter.
+- false—The network analysis layer file will not be saved.
+
+### output_format
+
+<p class="space-x-2"><span class="font-sm text-color-3">type:enum</span><span class="font-bold text-[#6d29cc]">default:Feature Set</span></p>
+
+**Allowed values:** `Feature Set`,`JSON File`,`GeoJSON File`
+
+Use this parameter to specify the format in which the output features will be returned.
+
+- `Feature Set`—The output features will be returned as feature classes and tables. This is the default.
+
+- `JSON File`—The output features will be returned as a compressed file containing the JSON representation of the outputs. When this option is specified, the output is a single file (with a .zip extension) that contains one or more JSON files (with a .json extension) for each of the outputs created by the service.
+
+- `GeoJSON File`—The output features will be returned as a compressed file containing the GeoJSON representation of the outputs. When this option is specified, the output is a single file (with a .zip extension) that contains one or more GeoJSON files (with a .geojson extension) for each of the outputs created by the service.
+
+<Note type="Tip">
+
+ Specifying file based output format, such as a JSON File, is useful when you are calling the service using the REST endpoint of the service. In such cases, returning all the outputs as a single file allows you to download large results that can be generated by the service. For example, if you are working with the GenerateOriginDestinationCostMatrix service and you generate a travel matrix with 1,000,000 records, returning such a large output as a Feature Set can cause the service to fail since the service will try to send the entire output in a single attempt. With a file-based output, the service sends the output in multiple chunks, reducing the possibility of timeouts.
+
+</Note>
+
+### context
+
+<p class="space-x-2"><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#context_object">context_object</a></p>
+
+This parameter contains additional settings that affect task operation, for example, the spatial reference of the output features.
+
+### overrides
+
+<Note>
+
+This parameter is for internal use only.
+
+</Note>
+
+## Response objects
+
+### output_orders
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+
+Output orders contains all the attributes from input [`orders`](#orders) parameter, this includes the attributes defined on the service, and also attributes that are pass-through (you can pass additional attributes on input orders and those attributes will be carried over to the output). The output also contains following attributes that are either generated or altered by the service.
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for output orders</span></summary>
+
+- <p class="space-x-2"><span class="font-bold">ObjectID</span><span class="font-sm text-color-3">integer</span></p>
+
+  The object ID of the feature.
+
+- <p class="space-x-2"><span class="font-bold">RouteName</span><span class="font-sm text-color-3">string (length: 500)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The name of the route to which the order is assigned.
+
+  The `RouteName` attribute is a foreign key to the `Name` attribute in the [`routes`](#routes) parameter. After a solve operation, if the order is routed, the `RouteName` attribute contains the name of the route that the order is assigned to.
+
+- <p class="space-x-2"><span class="font-bold">Sequence</span><span class="font-sm text-color-3">integer (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The sequence of the order on its assigned route.
+
+  Output sequence values for a route are shared across depot visits and orders. The sequences starts from 0 (at the starting depot) and are consecutive except when sequence gaps are used. The smallest possible output sequence value for a routed order is 1, since a route always begins at a depot even if it is virtual depot.
+
+- <p class="space-x-2"><span class="font-bold">ViolatedConstraint_1 -- ViolatedConstraint_4</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    These attributes contain a summary of violated constraints and are set after a solve operation. Each attribute will contain one violation. If an order has more than one violation the next `ViolatedConstraint_#` attribute will be used.
+
+    The following are the possible values for the `ViolatedConstraint_#` attributes:
+    - `null`: The order does not have any violated constraints.
+    - `0`: MaxOrderCount exceeded. The preassigned orders cannot be assigned to the route since assigning the orders would exceed the maximum number of orders that can be assigned to the route as specified by the route's `MaxOrderCount` attribute value.
+    - `1`: Capacities exceeded. The preassigned orders cannot be assigned to the route since assigning the orders would exceed the total route capacity as specified by the route's `Capacities_#` attribute value.
+    - `2`: MaxTotalTime exceeded. The travel time from the start depot to the end depot plus the service and wait times at the depot exceeds the total time for the route as specified by the route's `MaxTotalTime` attribute value.
+    - `3`: MaxTotalTravelTime exceeded. The travel time from the start depot to the end depot exceeds the total travel time for the route as specified by the route's `MaxTotalTravelTime` attribute value.
+    - `4`: MaxTotalDistance exceeded. The travel distance from the start depot to the end depot exceeds the total travel distance for the route as specified by the route's `MaxTotalDistance` attribute value.
+    - `5`: Hard time window. There is a hard time window violation on the start depot or end depot associated with the route.
+    - `6`: Unmatched specialty. The specialties required by an order are not found on the target route.
+    - `7`: Hard route zone. An order that was preassigned to the route does not fall within a hard route zone.
+    - `9`: Unreachable. A preassigned order is located on a network element that cannot be reached by the route.
+    - `14`: InboundArriveTime or OutboundDepartTime order violation . The order couldn't be serviced within the inbound arrive time or outbound depart time constraints. This violation occurs when all the routes must depart the starting depot before the `InboundArriveTime` value or none of the routes can reach a depot before the order's `OutboundDepartTime` value.
+    - `15`: Cannot anchor first/last. The order has an Anchor first or Anchor last assignment rule, but the solver was not able to honor this constraint. This violation occurs when the number of anchor First orders or the number of anchor Last orders is greater than the number of available routes.
+
+- <p class="space-x-2"><span class="font-bold">FromPrevTravelTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The travel time from the preceding visit on the route to the depot. The unit for this attribute value is specified by the [`time_units`](#time_units) parameter.
+
+- <p class="space-x-2"><span class="font-bold">FromPrevDistance</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The travel distance from the preceding visit on the route to the depot. The unit for this attribute value is specified by the [`distance_units`](#distance_units) parameter of the analysis layer.
+
+- <p class="space-x-2"><span class="font-bold">ArriveCurbApproach</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The side of the vehicle the curb is on when the vehicle approaches the network location. If the network location's `CurbApproach` value is set to Right side of vehicle, the `ArriveCurbApproach` value after solving is Right side of vehicle. However, if the `CurbApproach value` is set to Either side of vehicle or No U-Turn, the `ArriveCurbApproach` value can be the right or left side depending on which produces the overall shortest path.
+
+- <p class="space-x-2"><span class="font-bold">DepartCurbApproach</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The side of the vehicle the curb is on when the vehicle departs the network location. If the network location's `CurbApproach` value is set to Right side of vehicle, the `DepartCurbApproach` value after solving is Right side of vehicle. However, if the `CurbApproach` value is set to Either side of vehicle or No U-Turn, the `DepartCurbApproach` value can be the right or left side depending on which produces the overall shortest path.
+
+- <p class="space-x-2"><span class="font-bold">ArriveTime</span><span class="font-sm text-color-3">timestamp offset</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The date and time value indicating the arrival time at the order. The route may arrive at the order before the beginning of one of the order's time windows, in which case there is a wait time at the order. For an order with soft time windows, the route may also arrive at the order after the end of the time window, in which case there is a violation time at the order. This arrival time reflects the travel times that were used during the optimization by the solver. If the network includes traffic data, it will use an average travel times across the whole day. When using traffic data that covers multiple time zones, the time zone for this time-of-day value is taken from the network element on which the order is located.
+
+- <p class="space-x-2"><span class="font-bold">DepartTime</span><span class="font-sm text-color-3">timestamp offset</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The date and time value indicating the departure time for the order. The route departs from the order upon completion of service. This departure time reflects the travel times that were used during the optimization by the solver. If the network includes traffic data, it will use an average travel times across the whole day. When using traffic data that covers multiple time zones, the time zone for this time-of day value is taken from the network element on which the order is located.
+
+- <p class="space-x-2"><span class="font-bold">WaitTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The wait time or layover at the order. For example, a wait time occurs when a route must wait at the order for a time window to open. The unit for this attribute value is specified by the [`time_units`](#time_units) parameter.
+
+- <p class="space-x-2"><span class="font-bold">ViolationTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The amount of time elapsed between the end of the order's time window and the arrival of the route vehicle. The unit for this attribute value is specified by the [`time_units`](#time_units) parameter.
+
+- <p class="space-x-2"><span class="font-bold">Status</span><span class="font-sm text-color-3">int enum</span></p>
+
+  Specifies the status of the point with respect to its location on the network and the outcome of the analysis. The possible values are as following:
+
+   - `0`: OK.The point was located on the network.
+   - `1`: Not Located. The point was not located on the network and was not included in the analysis.
+   - `2`:  Network element not located. The network element identified by the point's network location fields cannot be found. This can occur when a network element where the point should be was deleted, and the network location was not recalculated.
+   - `3`: Element not traversable. The network element that the point is located on is not traversable. This can occur when the element is restricted by a restriction attribute.
+   - `4`: Invalid Field Values. Field values fall outside a range or coded-value domain. For example, a negative number exists where positive numbers are required.
+   - `5`: Not reached. The point cannot be reached by the solver. The point may be on a separate, disconnected area of the network from the other inputs, or barriers or restrictions prevent travel to or from the point.
+   - `6`: Time window violation. The point could not be reached within the designated time windows. This status only applies to network analysis types that support time windows.
+   - `7`: Not located on closest. The closest network location to the point is not traversable because of a restriction or barrier, so the point has been located on the closest traversable network feature instead. If time windows are used and the route arrives early or late, the value changes to 6 (Time window violation)
+
+- <p class="space-x-2"><span class="font-bold">SourceID</span><span class="font-sm text-color-3">integer (non-negative)</span></p>
+
+  The numeric identifier of the network dataset source feature class on which the input point is located.
+
+- <p class="space-x-2"><span class="font-bold">SourceOID</span><span class="font-sm text-color-3">integer (non-negative)</span></p>
+
+  The object ID of the feature in the source on which the input point is located. 
+
+- <p class="space-x-2"><span class="font-bold">PosAlong</span><span class="font-sm text-color-3">number (non-negative)</span></p>
+
+  The position along the digitized direction of the source line feature. This value is stored as a ratio. This attribute is null if the network location references a junction.
+
+- <p class="space-x-2"><span class="font-bold">SideOfEdge</span><span class="font-sm text-color-3">int enum</span></p>
+
+  Allowed values: `1`, `2`
+
+  The side of the edge in relation to the digitized direction of the line feature.
+
+  This attribute is limited to a domain of two values:
+
+  - `1`: Right Side
+  - `2`: Left Side
+
+- <p class="space-x-2"><span class="font-bold">SnapX</span><span class="font-sm text-color-3">number (non-negative)</span></p>
+
+  The x-coordinate of the position on the network dataset where the point was located, in the coordinate system of the network dataset.
+
+- <p class="space-x-2"><span class="font-bold">SnapY</span><span class="font-sm text-color-3">number (non-negative)</span></p>
+
+  The y-coordinate of the position on the network dataset where the point was located, in the coordinate system of the network dataset.
+
+- <p class="space-x-2"><span class="font-bold">SnapZ</span><span class="font-sm text-color-3">number (non-negative)</span></p>
+
+  The z-coordinate of the position on the network dataset where the point was located, in the coordinate system of the network dataset. The `SnapZ` attribute is 0 if the network is two-dimensional.
+
+- <p class="space-x-2"><span class="font-bold">DistanceToNetworkInMeters</span><span class="font-sm text-color-3">number (non-negative)</span></p>
+
+  The distance in meters between the point's geographic location and the position where it was located on the network.
+
+</details>
+
+**Example:**
+
+The following shows an example of the `output_orders` parameter.
+
+<CodeBlock language="json" source="./code/routing/lmd/examples/outputs/output_orders.json" group="json" maxLines={20} expandable/>
+
+
+### output_routes
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+
+This parameter contains all the fields from the input [`routes`](#routes) parameter, as well as the following fields that are either generated or altered by the service:
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for output routes</span></summary>
+
+- <p class="space-x-2"><span class="font-bold">ObjectID</span><span class="font-sm text-color-3">integer</span></p>
+
+  The object ID of the feature.
+
+- <p class="space-x-2"><span class="font-bold">Name</span><span class="font-sm text-color-3">string</span></p>
+
+  The name of the route. The values for this attribute are copied from the `Name` attribute on the input routes.
+
+- <p class="space-x-2"><span class="font-bold">Shape</span><span class="font-sm text-color-3">geometry</span></p>
+
+  The line shape of the route. 
+  
+  If the Output Shape Type property of the analysis layer is set to None, no shape is returned. Setting the Output Shape Type property to Straight Line returns straight route lines that connect each pair of consecutive visits. Along Network returns lines that trace their corresponding routes on the network.
+
+- <p class="space-x-2"><span class="font-bold">ViolatedConstraint_1 -- ViolatedConstraint_4</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+    These attributes contain a summary of violated constraints and are set after a solve operation. Each attribute will contain one violation. If an order has more than one violation the next `ViolatedConstraint_#` attribute will be used.
+
+    The following are the possible values for the `ViolatedConstraint_#` attributes:
+
+    - `null`: The order does not have any violated constraints.
+    - `0`: MaxOrderCount exceeded. The preassigned orders cannot be assigned to the route since assigning the orders would exceed the maximum number of orders that can be assigned to the route as specified by the route's `MaxOrderCount` attribute value.
+    - `1`: Capacities exceeded. The preassigned orders cannot be assigned to the route since assigning the orders would exceed the total route capacity as specified by the route's `Capacities_#` attribute value.
+    - `2`: MaxTotalTime exceeded. The travel time from the start depot to the end depot plus the service and wait times at the depot exceeds the total time for the route as specified by the route's `MaxTotalTime` attribute value.
+    - `3`: MaxTotalTravelTime exceeded. The travel time from the start depot to the end depot exceeds the total travel time for the route as specified by the route's `MaxTotalTravelTime` attribute value.
+    - `4`: MaxTotalDistance exceeded. The travel distance from the start depot to the end depot exceeds the total travel distance for the route as specified by the route's `MaxTotalDistance` attribute value.
+    - `5`: Hard time window. There is a hard time window violation on the start depot or end depot associated with the route.
+    - `6`: Unmatched specialty. The specialties required by an order are not found on the target route.
+    - `7`: Hard route zone. An order that was preassigned to the route does not fall within a hard route zone.
+    - `9`: Unreachable. A preassigned order is located on a network element that cannot be reached by the route.
+    - `14`: InboundArriveTime or OutboundDepartTime order violation . The order couldn't be serviced within the inbound arrive time or outbound depart time constraints. This violation occurs when all the routes must depart the starting depot before the `InboundArriveTime` value or none of the routes can reach a depot before the order's `OutboundDepartTime` value.
+    - `15`: Cannot anchor first/last. The order has an Anchor first or Anchor last assignment rule, but the solver was not able to honor this constraint. This violation occurs when the number of Anchor first orders or the number of Anchor last orders is greater than the number of available routes.
+
+
+- <p class="space-x-2"><span class="font-bold">OrderCount</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The number of orders assigned to the route.
+
+- <p class="space-x-2"><span class="font-bold">TotalCost</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The total operating cost of the route, which is the sum of the following attribute values: `FixedCost`, `RegularTimeCost`, `OvertimeCost`, and `DistanceCost`.
+
+- <p class="space-x-2"><span class="font-bold">RegularTimeCost</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The cost of regular work time.
+
+- <p class="space-x-2"><span class="font-bold">OvertimeCost</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The cost of overtime work.
+
+- <p class="space-x-2"><span class="font-bold">DistanceCost</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The distance cost component obtained by multiplying the `TotalDistance` and `CostPerUnitDistance` attribute values.
+
+- <p class="space-x-2"><span class="font-bold">TotalTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The total route duration.
+
+  This includes travel times as well as service and wait times at orders and depots. The TotalTime value is the sum of the following attribute values: `StartDepotServiceTime`, `EndDepotServiceTime`, `TotalOrderServiceTime`, `TotalWaitTime`, and `TotalTravelTime`. The unit for this attribute value is specified by the [`time_units`](#time_units) parameter.
+
+
+- <p class="space-x-2"><span class="font-bold">TotalOrderServicetime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The total service time spent at all orders on the route.
+
+  The unit for this attribute value is specified by the [`time_units`](#time_units) parameter.
+
+- <p class="space-x-2"><span class="font-bold">TotalTravelTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The total travel time for the route.
+
+  The unit for this attribute value is specified by the [`time_units`](#time_units) parameter.
+
+- <p class="space-x-2"><span class="font-bold">TotalDistance</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The total travel distance for the route.
+
+  The unit for this attribute value is specified by the [`distance_units`](#distance_units) parameter.
+
+- <p class="space-x-2"><span class="font-bold">StartTime</span><span class="font-sm text-color-3">timestamp offset</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The starting time of the route, where the time zone is taken from the network element that the starting depot is located on.
+
+- <p class="space-x-2"><span class="font-bold">EndTime</span><span class="font-sm text-color-3">timestamp offset</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The ending time of the route, where the time zone is taken from the network element that the ending depot is located on. 
+  
+  The route ends upon completion of service at the ending depot. This end time reflects the travel times that were used during the optimization by the solver. If the network includes traffic data, it will use average travel times across the whole day.
+
+- <p class="space-x-2"><span class="font-bold">TotalWaitTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The total wait time at all orders on the route. The unit for this attribute value is specified by the [`time_units`](#time_units) parameter.
+
+- <p class="space-x-2"><span class="font-bold">TotalViolationTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The total violation time at all orders on the route. The unit for this attribute value is specified by the [`time_units`](#time_units) parameter.
+
+</details>
+
+**Example:**
+
+The following shows an example of the `output_routes` parameter.
+
+<CodeBlock language="json" source="./code/routing/lmd/examples/outputs/output_routes.json" group="json" maxLines={20} expandable/>
+
+### output_depots
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+
+This parameter contains all the fields from the input [`depots`](#depots) parameter, as well as the following fields that are either generated or altered by the service:
+
+<details>
+ <summary><span class="font-sm text-color-link"> Show attributes for output depots</span></summary>
+
+- <p class="space-x-2"><span class="font-bold">ObjectID</span><span class="font-sm text-color-3">integer</span></p>
+
+  The object ID of the feature.
+
+- <p class="space-x-2"><span class="font-bold">Status</span><span class="font-sm text-color-3">int enum</span></p>
+
+  Specifies the status of the point with respect to its location on the network and the outcome of the analysis. The possible values are as following:
+
+   - `0`: OK.The point was located on the network.
+   - `1`: Not Located. The point was not located on the network and was not included in the analysis.
+   - `2`:  Network element not located. The network element identified by the point's network location fields cannot be found. This can occur when a network element where the point should be was deleted, and the network location was not recalculated.
+   - `3`: Element not traversable. The network element that the point is located on is not traversable. This can occur when the element is restricted by a restriction attribute.
+   - `4`: Invalid Field Values. Field values fall outside a range or coded-value domain. For example, a negative number exists where positive numbers are required.
+   - `5`: Not reached. The point cannot be reached by the solver. The point may be on a separate, disconnected area of the network from the other inputs, or barriers or restrictions prevent travel to or from the point.
+   - `6`: Time window violation. The point could not be reached within the designated time windows. This status only applies to network analysis types that support time windows.
+   - `7`: Not located on closest. The closest network location to the point is not traversable because of a restriction or barrier, so the point has been located on the closest traversable network feature instead. If time windows are used and the route arrives early or late, the value changes to 6 (Time window violation)
+
+- <p class="space-x-2"><span class="font-bold">SourceID</span><span class="font-sm text-color-3">integer (non-negative)</span></p>
+
+  The numeric identifier of the network dataset source feature class on which the input point is located.
+
+- <p class="space-x-2"><span class="font-bold">SourceOID</span><span class="font-sm text-color-3">integer (non-negative)</span></p>
+
+  The object ID of the feature in the source on which the input point is located. 
+
+- <p class="space-x-2"><span class="font-bold">PosAlong</span><span class="font-sm text-color-3">number (non-negative)</span></p>
+
+  The position along the digitized direction of the source line feature. This value is stored as a ratio. This attribute is null if the network location references a junction.
+
+- <p class="space-x-2"><span class="font-bold">SideOfEdge</span><span class="font-sm text-color-3">int enum</span></p>
+
+  Allowed values: `1`, `2`
+
+  The side of the edge in relation to the digitized direction of the line feature.
+
+  This attribute is limited to a domain of two values:
+
+  - `1`: Right Side
+  - `2`: Left Side
+
+- <p class="space-x-2"><span class="font-bold">SnapX</span><span class="font-sm text-color-3">number (non-negative)</span></p>
+
+  The x-coordinate of the position on the network dataset where the point was located, in the coordinate system of the network dataset.
+
+- <p class="space-x-2"><span class="font-bold">SnapY</span><span class="font-sm text-color-3">number (non-negative)</span></p>
+
+  The y-coordinate of the position on the network dataset where the point was located, in the coordinate system of the network dataset.
+
+- <p class="space-x-2"><span class="font-bold">SnapZ</span><span class="font-sm text-color-3">number (non-negative)</span></p>
+
+  The z-coordinate of the position on the network dataset where the point was located, in the coordinate system of the network dataset. The `SnapZ` attribute is 0 if the network is two-dimensional.
+
+- <p class="space-x-2"><span class="font-bold">DistanceToNetworkInMeters</span><span class="font-sm text-color-3">number (non-negative)</span></p>
+
+  The distance in meters between the point's geographic location and the position where it was located on the network.
+
+</details>
+
+**Example:**
+
+The following shows an example of the `output_depots` parameter.
+
+<CodeBlock language="json" source="./code/routing/lmd/examples/outputs/output_depots.json" group="json" maxLines={20} expandable/>
+
+### output_depot_visits
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+
+This output parameter provides information regarding why a route visited a depot and what happened there. The following fields are supported:
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for output depot visits</span></summary>
+
+- <p class="space-x-2"><span class="font-bold">ObjectID</span><span class="font-sm text-color-3">integer</span></p>
+
+  The object ID of the feature.
+
+- <p class="space-x-2"><span class="font-bold">DepotName</span><span class="font-sm text-color-3">string</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The name of the visited depot. This attribute is a foreign key to the `Name` attribute in the Depots network analysis parameter.
+
+  If the route uses a virtual depot, which means the route starts or ends at an order instead of a depot, `DepotName` is null.
+
+- <p class="space-x-2"><span class="font-bold">VisitType</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The reason the depot was visited.
+
+  This attribute is constrained by a domain of values:
+
+  `1—Start depot`
+  `2—End depot`
+
+- <p class="space-x-2"><span class="font-bold">RouteName</span><span class="font-sm text-color-3">string</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The name of the route containing this visit. This attribute is a foreign key to the `Name` attribute in the Routes feature layer.
+
+- <p class="space-x-2"><span class="font-bold">Sequence</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The sequence of the visited depot on the route.
+
+  The output sequence values for a route are shared across depot visits or orders, start from 0 (at the starting depot), and are consecutive except when sequence gaps are used.
+
+- <p class="space-x-2"><span class="font-bold">ServiceTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The service time (such as loading or unloading) at the depot.
+
+  The unit for this attribute value is specified by the [`time_units`](#time_units) parameter.
+
+- <p class="space-x-2"><span class="font-bold">FromPrevTravelTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The travel time from the preceding visit on the route to the depot.
+
+  The unit for this attribute value is specified by the [`time_units`](#time_units) parameter.
+
+- <p class="space-x-2"><span class="font-bold">FromPrevDistance</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The travel distance from the preceding visit on the route to the depot.
+
+  The unit for this attribute value is specified by the [`distance_units`](#distance_units) parameter.
+
+- <p class="space-x-2"><span class="font-bold">ArriveTime</span><span class="font-sm text-color-3">timestamp offset</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The arrival time at the depot, where the time zone is taken from the network element on which the depot is located. 
+  
+  The arrival time reflects the travel times that were used during the optimization by the solver. If the network includes traffic data, it will use average travel times across the whole day."
+
+- <p class="space-x-2"><span class="font-bold">DepartTime</span><span class="font-sm text-color-3">timestamp offset</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The departure time at the depot, where the time zone is taken from the network element on which the depot is located.
+
+- <p class="space-x-2"><span class="font-bold">LoadedQuantity_1 -- LoadedQuantity_9</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The amount (for example, volume, weight, or quantity) being loaded at the depot.
+
+  If there are multiple capacities, the amount in the `LoadedQuantity_1` through `LoadedQuantity_9` fields correspond to the matching `Capacity_1` through `Capacity_9` fields in the `Routes` input table.
+
+- <p class="space-x-2"><span class="font-bold">UnloadedQuantity_1 -- UnloadedQuantity_9</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The amount (for example, volume, weight, or quantity) being unloaded at the depot.
+
+  If there are multiple capacities, the amounts in the `UnloadedQuantity_1` through `UnloadedQuantity_9` fields correspond to the matching `Capacity_1` through `Capacity_9` fields in the Routes input table.
+
+</details>
+
+**Example:**
+
+The following shows an example of the `output_depot_visits` parameter.
+
+<CodeBlock language="json" source="./code/routing/lmd/examples/outputs/output_depot_visits.json" group="json" maxLines={20} expandable/>
+
+### output_direction_points
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+
+This output parameter specifies the output turn-by-turn directions for the routes calculated in the analysis, represented as point locations along the routes where specific direction events or maneuvers occur.
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for output direction points</span></summary>
+
+- <p class="space-x-2"><span class="font-bold">ObjectID</span><span class="font-sm text-color-3">integer</span></p>
+
+  The object ID of the feature.
+
+- <p class="space-x-2"><span class="font-bold">RouteID</span><span class="font-sm text-color-3">integer</span></p>
+
+  The route ID from the `ID` attribute that is associated with this direction information.
+
+- <p class="space-x-2"><span class="font-bold">Sequence</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The sequence of the direction items, starting at 1.
+
+- <p class="space-x-2"><span class="font-bold">DirectionPointType</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The type of direction event or maneuver described by the point, designated by one of the following values:
+  <details>
+   <summary><span class="font-sm text-color-link">Show values</span></summary>
+
+   -  `0`: Unknown
+   -  `1`: Header
+   -  `50`: Arrival
+   -  `51`: Departure
+   -  `52`: Straight
+   -  `100`: On Ferry
+   -  `101`: Off Ferry
+   -  `102`: Central Fork
+   -  `103`: Roundabout
+   -  `104`: U-Turn
+   -  `150`: Door
+   -  `151`: Stairs 
+   -  `152`: Elevator
+   -  `153`: Escalator
+   -  `154`: Pedestrian Ramp
+   -  `200`: Left Fork
+   -  `201`: Left Ramp
+   -  `202`: Clockwise Roundabout
+   -  `203`: Left-handed U-turn
+   -  `204`: Bear left
+   -  `205`: Left Turn 
+   -  `206`: Sharp Left
+   -  `207`: Left Turn and immediate Left Turn
+   -  `208`: Left Turn and immediate Right Turn
+   -  `300`: Right Fork
+   -  `301`: Right Ramp
+   -  `302`: Counter-Clockwise Roundabout
+   -  `303`: Right-handed U-turn 
+   -  `304`: Bear right 
+   -  `305`: Right Turn 
+   -  `306`: Sharp Right 
+   -  `307`: Right Turn and immediate Left Turn 
+   - `308`: Right Turn and immediate Right Turn 
+   - `400`: Up Elevator 
+   - `401`: Up Escalator
+   - `402`: Up Stairs 
+   - `500`: Down Elevator 
+   - `501`: Down Escalator
+   - `502`: Down stairs
+   - `1000`: General Event
+   - `1001`: Landmark
+   - `1002`: Time Zone change
+   - `1003`: Traffic Event 
+   - `1004`: Scaled Cost Barrier Event 
+   - `1005`: Boundary Crossing
+   - `1006`: Restriction Violation
+   </details>
+
+- <p class="space-x-2"><span class="font-bold">OrderID</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  If this direction information is associated with an order, its ID attribute is indicated here
+
+- <p class="space-x-2"><span class="font-bold">DepotVisitID</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  If this direction information is associated with a depot, the associated depot visit ID attribute is indicated here.
+
+- <p class="space-x-2"><span class="font-bold">BreakID</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  If this direction information is associated with a break, its ID attribute is indicated here.
+
+- <p class="space-x-2"><span class="font-bold">DisplayText</span><span class="font-sm text-color-3">string</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The directions text that will be displayed.
+
+- <p class="space-x-2"><span class="font-bold">ArrivalTime</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The time the route arrives at this point in the directions. This is always in UTC.
+
+- <p class="space-x-2"><span class="font-bold">ArrivalUTCOffset</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The difference in minutes between the local time at the maneuver location and UTC time.
+
+  This is positive for the eastern hemisphere, negative for the western hemisphere.
+
+- <p class="space-x-2"><span class="font-bold">PrimaryName</span><span class="font-sm text-color-3">string</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The primary name for a direction.
+
+  This can come from many sources, for example, order name, depot name, break name if it is a depart or arrive instruction, source names for turn instructions, or landmark names for event instructions.
+
+- <p class="space-x-2"><span class="font-bold">HighwayExitName</span><span class="font-sm text-color-3">string</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The highway exit name that appears in the direction instructions.
+
+- <p class="space-x-2"><span class="font-bold">AlternateName</span><span class="font-sm text-color-3">string</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The alternative name for the directions text instructions, such as street names or road names.
+
+- <p class="space-x-2"><span class="font-bold">IntersectingName</span><span class="font-sm text-color-3">string</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The intersection or cross street names that appear in the direction instructions.
+
+- <p class="space-x-2"><span class="font-bold">SignpostBranchName</span><span class="font-sm text-color-3">string</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The signpost branch names that appear in the direction instructions.
+
+- <p class="space-x-2"><span class="font-bold">SignpostTowardName</span><span class="font-sm text-color-3">string</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The signpost toward names that appear in the direction instructions.
+
+- <p class="space-x-2"><span class="font-bold">Level</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The logical level of a directions item occurrence. This is relevant for 3D routing.
+
+- <p class="space-x-2"><span class="font-bold">ShortVoiceInstruction</span><span class="font-sm text-color-3">string</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The shortened direction information that will be used for voice instructions. It provides turn actions or alerts.
+
+- <p class="space-x-2"><span class="font-bold">VoiceInstruction</span><span class="font-sm text-color-3">string</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The direction information that will be used for voice instructions. It provides the expanded abbreviations or plurals along with turn actions or alerts.
+
+- <p class="space-x-2"><span class="font-bold">Azimuth</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The bearing in degrees of the vehicle departing this point. Zero indicates north. Null indicates that it is not applicable to this feature.
+
+</details>
+
+**Example:**
+
+The following shows an example of the `output_direction_points` parameter.
+
+<CodeBlock language="json" source="./code/routing/lmd/examples/outputs/output_directions_points.json" group="json" maxLines={20} expandable/>
+
+### output_direction_lines
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#feature">feature</a></span></p>
+
+These are the output route lines calculated in the analysis sliced to represent each route segment between `DirectionPoints` events or maneuver locations. The following fields are supported:
+
+<details>
+ <summary><span class="font-sm text-color-link">Show attributes for output direction lines</span></summary>
+
+- <p class="space-x-2"><span class="font-bold">ObjectID</span><span class="font-sm text-color-3">integer</span></p>
+
+  The object ID of the feature.
+
+- <p class="space-x-2"><span class="font-bold">DirectionPointID</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The object ID of the output_routes feature with which this direction line is associated.
+
+- <p class="space-x-2"><span class="font-bold">RouteID</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The object ID of the output_routes feature with which this direction line is associated.
+
+- <p class="space-x-2"><span class="font-bold">DirectionLineType</span><span class="font-sm text-color-3">int enum</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The type of direction of this line, designated by one of the following values:
+
+   - `0`: Unknown
+   - `1`: Segment
+   - `2`: Maneuver Segment
+   - `3`: Restriction Violation
+   - `4`: Scaled Cost Barrier Event
+   - `5`: Heavy Traffic
+   - `6`: Slow Traffic
+   - `7`: Moderate Traffic
+
+- <p class="space-x-2"><span class="font-bold">Meters</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The length of the line measured in meters.
+
+- <p class="space-x-2"><span class="font-bold">Minutes</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The travel time along the line measured in minutes.
+
+- <p class="space-x-2"><span class="font-bold">FromLevel</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The level of the line at the beginning of the line. This is relevant for 3D routing.
+
+- <p class="space-x-2"><span class="font-bold">ToLevel</span><span class="font-sm text-color-3">integer</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The level of the line at the end of the line. This is relevant for 3D routing.
+
+- <p class="space-x-2"><span class="font-bold">ShapeLength</span><span class="font-sm text-color-3">number (non-negative)</span><span class="font-bold text-[#00619b]">nullable</span></p>
+
+  The geometric length of the shape.
+
+</details>
+
+**Example:**
+
+The following shows an example of the `output_direction_lines` parameter.
+
+<CodeBlock language="json" source="./code/routing/lmd/examples/outputs/output_directions_lines.json" group="json" maxLines={20} expandable/>
+
+### output_route_data
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#file">file</a></span></p>
+
+Use this parameter to access a `.zip` file that contains a file geodatabase containing the inputs and outputs of the analysis in a format that can be used to share route layers with ArcGIS Online or Portal for ArcGIS.
+
+This parameter is populated only when the [`save_route_data`](#save_route_data) parameter is set to `true`.
+
+### output_result_file
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#file">file</a></span></p>
+
+Use this parameter to access the results from the analysis as a `.zip` file containing one or more files for each output.
+
+The format of the individual file is specified by the [`output_format`](#output_format) parameter. This parameter is not populated when the `output_format` parameter is set to `Feature Set`.
+
+### output_network_analysis_layer_package
+
+<p class="space-x-2"><span><span class="font-sm text-color-3">type:</span><a class="font-sm text-color-3" href="../routing-data-types#file">file</a></span></p>
+
+Use this parameter to access the network analysis layer file that stores the analysis settings and the inputs and outputs used for the analysis.
+
+This parameter is populated only when the [`save_output_network_analysis_layer`](#save_output_network_analysis_layer) parameter is set to `true`.
+
+### usage_cost
+
+<p class="space-x-2"><span class="font-sm text-color-3">type:</span><span><a class="font-sm text-color-3" href="../routing-data-types#usage_cost_object">usage_cost_object</a></span></p>
+
+This parameter returns the [credits](https://doc.arcgis.com/en/arcgis-online/administer/credits.htm) used by the analysis.
+
+## Usage limits
+
+The table below lists the limits that apply to this service. Some limits vary by request mode, and they are noted accordingly.
+
+<StyledTable headers={"Limit value,Limit description"}>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+12.42 miles (20 kilometers)
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The maximum snap tolerance.
+
+If the distance between an input point and its nearest traversable street is greater than the distance specified here, the point is excluded from the analysis.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+10,000,000
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The maximum number of direction features that can be returned when using the job request type.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+<StyledTableRow>
+
+<StyledTableCell cellStyle="markdown">
+
+4 hours for job request type
+
+</StyledTableCell>
+
+<StyledTableCell cellStyle="markdown">
+
+The maximum time a client can use the Last mile delivery service.
+
+</StyledTableCell>
+
+</StyledTableRow>
+
+</StyledTable>
+
+The limit for snap tolerance cannot be changed, however you can configure other limits by following the steps below:
+
+1.  Open Server Manager for the ArcGIS Server site that contains the NetworkAnalysis geoprocessing service and sign in. If you need help with this step, see [Log in to Manager](https://enterprise.arcgis.com/en/server/latest/administer/windows/log-in-to-manager.htm).
+2.  Click **Services** > **Manage Services**.
+3.  In the **Manage Services** module, locate **NetworkAnalysis geoprocessing service** and click **Edit Service**.
+
+    If you don't see the service under the **Routing** folder, it may be located within another folder under the **Site (root) >**.
+4.  Click the **Parameters** option and change the limit for the number of records returned by the service by editing the value in **Maximum Number of Records Returned by Server** text box.
+5.  Click the **Pooling** option and change the maximum time the service can be used by editing the value in the **The maximum time a client can use a service** text box.
+6.  Click **Save and Restart** to apply your edits and restart the service.
